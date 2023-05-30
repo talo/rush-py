@@ -91,10 +91,10 @@ module_instance_query = gql(
     + module_instance_fragment
     + """
     stdout {
-      nodes { content id createdAt }
+      nodes { content id created_at }
     }
     stderr {
-      nodes { content id createdAt }
+      nodes { content id created_at }
     }
   } }"""
 )
