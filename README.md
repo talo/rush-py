@@ -29,7 +29,18 @@ protein_pdb = Path("./examples/4w9f_prepared_protein.pdb")
 
 file_arg = provider.upload_arg(protein_pdb)
 
-client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#convert", [ 
+res = client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#convert", [ 
 { "value": "PDB" }, file_arg
 ])
+
+// res contains "id" - the instance id; and "outs" - the ids of the return values 
+
+// we can pass arguments by "id" reference or by value literal
+
+client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#pick_conformer", [ 
+{ "id": res["outs"][0]["id"] }, { "value": 1 }
+])
+
+client.poll_module_instance(id) 
+// status, progress, logs, outs - out values will be null until module_instance is done
 ```
