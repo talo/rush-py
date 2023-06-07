@@ -2,7 +2,7 @@ import base64
 from dataclasses import dataclass
 import time
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Generic, Literal, TypeVar
 
 import dataclasses_json
 from gql import Client, gql
@@ -121,10 +121,36 @@ class DataClassJsonMixin(dataclasses_json.DataClassJsonMixin):
     )["dataclasses_json"]
 
 
+T1 = TypeVar("T1")
+
+
 @dataclass
-class Arg(DataClassJsonMixin):
+class Arg(Generic[T1], DataClassJsonMixin):
     id: str | None
-    value: Any | None
+    value: T1 | None
+
+
+frag_keywords = {
+    "dimer_cutoff": 10,
+    "dimer_mp2_cutoff": 10,
+    "fragmentation_level": 2,
+    "method": "MBE",
+    "monomer_cutoff": 20,
+    "monomer_mp2_cutoff": 20,
+    "ngpus_per_node": 1,
+    "reference_fragment": 293,
+    "trimer_cutoff": 10,
+    "trimer_mp2_cutoff": 10,
+    "lattice_energy_calc": True,
+}
+
+scf_keywords = {
+    "convergence_metric": "diis",
+    "dynamic_screening_threshold_exp": 10,
+    "ndiis": 8,
+    "niter": 40,
+    "scf_conv": 0.000001,
+}
 
 
 class Provider:
@@ -203,65 +229,52 @@ class Provider:
         else:
             raise RuntimeError(response)
 
-    def qp_run(self, args: list[Arg], target: Literal["GADI", "NIX"] | None = None):
+    def qp_run(
+        self,
+        qp_gen_inputs_path: str,
+        hermes_energy_path: str,
+        qp_collate_path: str,
+        pdb: Arg[Path],
+        gro: Arg[Path],
+        lig: Arg[Path],
+        lig_type: Arg[Literal["sdf", "mol2"]],
+        lig_res_id: Arg[str],
+        model: Arg[dict[str, Any]],
+        keywords: Arg[dict[str, Any]],
+        amino_acids_of_interest: Arg[list[tuple[str, int]]],
+        target: Literal["GADI", "NIX"] | None = None,
+        resources: dict[str, Any] | None = None,
+    ):
         """
         Construct the input and output module instance calls for QP run.
         """
 
-        frag_keywords = {
-            "dimer_cutoff": 10,
-            "dimer_mp2_cutoff": 10,
-            "fragmentation_level": 2,
-            "method": "MBE",
-            "monomer_cutoff": 20,
-            "monomer_mp2_cutoff": 20,
-            "ngpus_per_node": 1,
-            "reference_fragment": 293,
-            "trimer_cutoff": 10,
-            "trimer_mp2_cutoff": 10,
-            "lattice_energy_calc": True,
-        }
-
-        scf_keywords = {
-            "convergence_metric": "diis",
-            "dynamic_screening_threshold_exp": 10,
-            "ndiis": 8,
-            "niter": 40,
-            "scf_conv": 0.000001,
-        }
-
         qp_prep_instance = self.run(
-            "github:talo/tengu-prelude/91e75238fb80e6fb92c9d678d84fd2778ff8e958#qp_gen_inputs",
-            [
-                self.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_md1_12ns.pdb")),
-                self.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_GMX.gro")),
-                self.upload_arg(Path("/home/ryanswart/Downloads/jak2_lig22.sdf")),
-                Arg(None, "sdf"),
-                Arg(None, "MOL"),
-                Arg(
-                    None,
-                    None,
-                ),  # {"model": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True}),
-                Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
-                Arg(None, None),
-            ],
+            qp_gen_inputs_path,
+            [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
         )
-
         print(qp_prep_instance)
-        done = self.poll_module_instance(qp_prep_instance["id"])
-        print(done)
 
         hermes_instance = self.run(
-            "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy",
+            hermes_energy_path,
             [
                 Arg(qp_prep_instance["outs"][0]["id"], None),
                 Arg(qp_prep_instance["outs"][1]["id"], None),
                 Arg(qp_prep_instance["outs"][2]["id"], None),
             ],
-            "GADI",
-            {"walltime": 120},
+            target,
+            resources,
         )
-        # qp_collate = self.run("", [])
+        print(hermes_instance)
+        qp_collate = self.run(
+            qp_collate_path,
+            [
+                Arg(hermes_instance["outs"][0]["id"], None),
+                Arg(qp_prep_instance["outs"][4]["id"], None),
+            ],
+        )
+        print(hermes_instance)
+        return qp_collate
 
     def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -366,3 +379,24 @@ class Provider:
                 return module_instances
 
         return []
+
+
+def test_qp_run(provider: Provider):
+    provider.qp_run(
+        "github:talo/tengu-prelude/91e75238fb80e6fb92c9d678d84fd2778ff8e958#qp_gen_inputs",
+        "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy",
+        "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy",
+        provider.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_md1_12ns.pdb")),
+        provider.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_GMX.gro")),
+        provider.upload_arg(Path("/home/ryanswart/Downloads/jak2_lig22.sdf")),
+        Arg(None, "sdf"),
+        Arg(None, "MOL"),
+        Arg(
+            None,
+            None,
+        ),  # {"model": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True}),
+        Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+        Arg(None, None),
+        "GADI",
+        {"walltime": 120},
+    )
