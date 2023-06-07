@@ -1,4 +1,5 @@
 import base64
+from dataclasses import dataclass
 import time
 from pathlib import Path
 from typing import Any, Literal
@@ -120,6 +121,12 @@ class DataClassJsonMixin(dataclasses_json.DataClassJsonMixin):
     )["dataclasses_json"]
 
 
+@dataclass
+class Arg(DataClassJsonMixin):
+    id: str | None
+    value: Any | None
+
+
 class Provider:
     """
     A class representing a provider for the Tengu quantum chemistry workflow platform.
@@ -169,18 +176,92 @@ class Provider:
         )
         return response.get("modules")
 
-    def run(self, path: str, args: dict[str, Any], target: Literal["GADI", "NIX"] | None = None):
+    def run(
+        self,
+        path: str,
+        args: list[Arg],
+        target: Literal["GADI", "NIX"] | None = None,
+        resources: dict[str, Any] | None = None,
+    ):
         """
         Run a module with the given inputs and outputs.
         """
         response = self.client.execute(
-            run_mutation, variable_values={"instance": {"path": path, "args": args, "target": target}}
+            run_mutation,
+            variable_values={
+                "instance": {
+                    "path": path,
+                    "args": [arg.to_dict() for arg in args],
+                    "target": target,
+                    "resources": resources,
+                }
+            },
         )
         module_instance = response.get("run")
         if module_instance:
             return module_instance
         else:
             raise RuntimeError(response)
+
+    def qp_run(self, args: list[Arg], target: Literal["GADI", "NIX"] | None = None):
+        """
+        Construct the input and output module instance calls for QP run.
+        """
+
+        frag_keywords = {
+            "dimer_cutoff": 10,
+            "dimer_mp2_cutoff": 10,
+            "fragmentation_level": 2,
+            "method": "MBE",
+            "monomer_cutoff": 20,
+            "monomer_mp2_cutoff": 20,
+            "ngpus_per_node": 1,
+            "reference_fragment": 293,
+            "trimer_cutoff": 10,
+            "trimer_mp2_cutoff": 10,
+            "lattice_energy_calc": True,
+        }
+
+        scf_keywords = {
+            "convergence_metric": "diis",
+            "dynamic_screening_threshold_exp": 10,
+            "ndiis": 8,
+            "niter": 40,
+            "scf_conv": 0.000001,
+        }
+
+        qp_prep_instance = self.run(
+            "github:talo/tengu-prelude/91e75238fb80e6fb92c9d678d84fd2778ff8e958#qp_gen_inputs",
+            [
+                self.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_md1_12ns.pdb")),
+                self.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_GMX.gro")),
+                self.upload_arg(Path("/home/ryanswart/Downloads/jak2_lig22.sdf")),
+                Arg(None, "sdf"),
+                Arg(None, "MOL"),
+                Arg(
+                    None,
+                    None,
+                ),  # {"model": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True}),
+                Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+                Arg(None, None),
+            ],
+        )
+
+        print(qp_prep_instance)
+        done = self.poll_module_instance(qp_prep_instance["id"])
+        print(done)
+
+        hermes_instance = self.run(
+            "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy",
+            [
+                Arg(qp_prep_instance["outs"][0]["id"], None),
+                Arg(qp_prep_instance["outs"][1]["id"], None),
+                Arg(qp_prep_instance["outs"][2]["id"], None),
+            ],
+            "GADI",
+            {"walltime": 120},
+        )
+        # qp_collate = self.run("", [])
 
     def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -236,7 +317,7 @@ class Provider:
 
         raise Exception("Failed to find task")
 
-    def upload_arg(self, file: Path) -> dict[str, str]:
+    def upload_arg(self, file: Path) -> Arg:
         """
         Converts a file to bas64 and formats it for use as an argument
 
@@ -244,7 +325,7 @@ class Provider:
         :return: The formatted file.
         """
         with open(file, "rb") as f:
-            return {"value": base64.b64encode(f.read()).decode("utf-8")}
+            return Arg(None, value=base64.b64encode(f.read()).decode("utf-8"))
 
     def module_instances(
         self,
