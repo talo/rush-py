@@ -270,10 +270,10 @@ class Provider:
             qp_collate_path,
             [
                 Arg(hermes_instance["outs"][0]["id"], None),
-                Arg(qp_prep_instance["outs"][4]["id"], None),
+                Arg(qp_prep_instance["outs"][3]["id"], None),
             ],
         )
-        print(hermes_instance)
+        print(qp_collate)
         return qp_collate
 
     def delete_module_instance(self, id: ModuleInstanceId):
@@ -383,9 +383,11 @@ class Provider:
 
 def test_qp_run(provider: Provider):
     provider.qp_run(
-        "github:talo/tengu-prelude/91e75238fb80e6fb92c9d678d84fd2778ff8e958#qp_gen_inputs",
-        "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy",
-        "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy",
+        "github:talo/tengu-prelude/c404e6727cc8712cc0b5209519136fbbe1caf6d5#qp_gen_inputs",  # local
+        # "github:talo/tengu-prelude/91e75238fb80e6fb92c9d678d84fd2778ff8e958#qp_gen_inputs", # remote
+        "github:talo/tengu-prelude/c404e6727cc8712cc0b5209519136fbbe1caf6d5#hermes_energy",  # local
+        # "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy", # remote
+        "github:talo/tengu-prelude/c404e6727cc8712cc0b5209519136fbbe1caf6d5#qp_collate",  # local
         provider.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_md1_12ns.pdb")),
         provider.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_GMX.gro")),
         provider.upload_arg(Path("/home/ryanswart/Downloads/jak2_lig22.sdf")),
@@ -393,10 +395,35 @@ def test_qp_run(provider: Provider):
         Arg(None, "MOL"),
         Arg(
             None,
-            None,
+            {"method": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True},
+            # None,
         ),  # {"model": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True}),
         Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
-        Arg(None, None),
-        "GADI",
+        Arg(
+            None,
+            [
+                ("GLY", 993),
+                ("ASP", 994),
+                ("VAL", 863),
+                ("LYS", 882),
+                ("TYR", 931),
+                ("GLY", 935),
+                ("VAL", 911),
+                ("GLU", 930),
+                ("ALA", 880),
+                ("LEU", 983),
+                ("PRO", 933),
+                ("LEU", 855),
+                ("MET", 929),
+                ("SER", 936),
+                ("LEU", 932),
+            ],
+        ),
+        # "GADI",
+        "NIX",
         {"walltime": 120},
     )
+
+
+def new():
+    print("hi")
