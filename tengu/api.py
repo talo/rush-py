@@ -131,12 +131,12 @@ class Arg(Generic[T1], DataClassJsonMixin):
 
 
 frag_keywords = {
-    "dimer_cutoff": 10,
-    "dimer_mp2_cutoff": 10,
+    "dimer_cutoff": 25,
+    "dimer_mp2_cutoff": 25,
     "fragmentation_level": 2,
     "method": "MBE",
-    "monomer_cutoff": 20,
-    "monomer_mp2_cutoff": 20,
+    "monomer_cutoff": 30,
+    "monomer_mp2_cutoff": 30,
     "ngpus_per_node": 1,
     "reference_fragment": 293,
     "trimer_cutoff": 10,
@@ -151,6 +151,8 @@ scf_keywords = {
     "niter": 40,
     "scf_conv": 0.000001,
 }
+
+default_model = {"method": "RIMP2", "basis": "cc-pVDZ", "aux_basis": "cc-pVDZ-RIFIT", "frag_enabled": True}
 
 
 class Provider:
@@ -239,9 +241,9 @@ class Provider:
         lig: Arg[Path],
         lig_type: Arg[Literal["sdf", "mol2"]],
         lig_res_id: Arg[str],
-        model: Arg[dict[str, Any]],
-        keywords: Arg[dict[str, Any]],
-        amino_acids_of_interest: Arg[list[tuple[str, int]]],
+        model: Arg[dict[str, Any]] = Arg(None, default_model),
+        keywords: Arg[dict[str, Any]] = Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+        amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
     ):
@@ -383,21 +385,18 @@ class Provider:
 
 def test_qp_run(provider: Provider):
     provider.qp_run(
-        "github:talo/tengu-prelude/c404e6727cc8712cc0b5209519136fbbe1caf6d5#qp_gen_inputs",  # local
-        # "github:talo/tengu-prelude/91e75238fb80e6fb92c9d678d84fd2778ff8e958#qp_gen_inputs", # remote
-        "github:talo/tengu-prelude/c404e6727cc8712cc0b5209519136fbbe1caf6d5#hermes_energy",  # local
-        # "github:talo/tengu-prelude/0be073990adcee68020f6851f90c9404c12c8fc6#hermes_energy", # remote
-        "github:talo/tengu-prelude/c404e6727cc8712cc0b5209519136fbbe1caf6d5#qp_collate",  # local
-        provider.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_md1_12ns.pdb")),
-        provider.upload_arg(Path("/home/ryanswart/Downloads/JAK2_3E64_lig22_GMX.gro")),
-        provider.upload_arg(Path("/home/ryanswart/Downloads/jak2_lig22.sdf")),
+        "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_gen_inputs",
+        "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#hermes_energy",
+        "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_collate",
+        provider.upload_arg(Path("/home/ryanswart/Downloads/some.pdb")),
+        provider.upload_arg(Path("/home/ryanswart/Downloads/some.gro")),
+        provider.upload_arg(Path("/home/ryanswart/Downloads/some.sdf")),
         Arg(None, "sdf"),
         Arg(None, "MOL"),
         Arg(
             None,
-            {"method": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True},
-            # None,
-        ),  # {"model": "RHF", "basis": "6-31G*", "aux_basis": "6-31G*", "frag_enabled": True}),
+            default_model,
+        ),
         Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
         Arg(
             None,
@@ -419,9 +418,8 @@ def test_qp_run(provider: Provider):
                 ("LEU", 932),
             ],
         ),
-        # "GADI",
-        "NIX",
-        {"walltime": 120},
+        "GADI",  # "NIX",
+        {"walltime": 420},
     )
 
 
