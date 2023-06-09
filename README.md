@@ -114,5 +114,8 @@ qp_instances = client.qp_run(
 
 # if you set autpoll, you will get the results of the qp_collate instance,
 # otherwise you will get an array with all the spawned instances, and have to poll manually
-client.poll_module_instance(qp_collate_instance[2]["id"]) 
+completed_instance = client.poll_module_instance(qp_collate_instance[2]["id"]) 
+
+# the result will be an object, so fetch from object store
+client.object(completed_instance["outs"][0]["id"]) # will return the json qp results
 ```
