@@ -48,7 +48,31 @@ client.poll_module_instance(id)
 ## Sample QP Run
 
 ``` python
-provider.qp_run(
+frag_keywords = {
+    "dimer_cutoff": 25,
+    "dimer_mp2_cutoff": 25,
+    "fragmentation_level": 2,
+    "method": "MBE",
+    "monomer_cutoff": 30,
+    "monomer_mp2_cutoff": 30,
+    "ngpus_per_node": 4,
+    "reference_fragment": 293,
+    "trimer_cutoff": 10,
+    "trimer_mp2_cutoff": 10,
+    "lattice_energy_calc": True,
+}
+
+scf_keywords = {
+    "convergence_metric": "diis",
+    "dynamic_screening_threshold_exp": 10,
+    "ndiis": 8,
+    "niter": 40,
+    "scf_conv": 0.000001,
+}
+
+default_model = {"method": "RIMP2", "basis": "cc-pVDZ", "aux_basis": "cc-pVDZ-RIFIT", "frag_enabled": True}
+
+qp_collate_instance = client.qp_run(
     "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_gen_inputs",
     "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#hermes_energy",
     "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_collate",
@@ -82,7 +106,9 @@ provider.qp_run(
             ("LEU", 932),
         ],
     ),
-    "GADI",  # "NIX",
+    "GADI",
     {"walltime": 420},
 )
+
+client.poll_module_instance(qp_collate_instance["id"]) 
 ```
