@@ -111,6 +111,13 @@ module_instances_query = gql(
   } } } } }"""
 )
 
+object_query = gql(
+    """query($id: ArgumentId!) {
+        object(id: $id)
+    }
+    """
+)
+
 
 class DataClassJsonMixin(dataclasses_json.DataClassJsonMixin):
     """Override dataclass mixin so that we don't have `"property": null,`s in our output"""
@@ -170,6 +177,16 @@ class Provider:
         transport = RequestsHTTPTransport(url=url, headers={"authorization": f"bearer {access_token}"})
 
         self.client = Client(transport=transport)
+
+    def object(self, id):
+        """
+        Retrieve an object from the database.
+
+        :param id: The ID of the object.
+        :return: The object.
+        """
+        response = self.client.execute(object_query, variable_values={"id": id})
+        return response.get("object")
 
     def modules(
         self,
