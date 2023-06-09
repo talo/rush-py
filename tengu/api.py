@@ -137,7 +137,7 @@ frag_keywords = {
     "method": "MBE",
     "monomer_cutoff": 30,
     "monomer_mp2_cutoff": 30,
-    "ngpus_per_node": 1,
+    "ngpus_per_node": 4,
     "reference_fragment": 293,
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
@@ -246,6 +246,7 @@ class Provider:
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
+        autopoll: tuple[int, int] | None = None,
     ):
         """
         Construct the input and output module instance calls for QP run.
@@ -255,28 +256,51 @@ class Provider:
             qp_gen_inputs_path,
             [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
         )
-        print(qp_prep_instance)
+        try:
+            hermes_instance = self.run(
+                hermes_energy_path,
+                [
+                    Arg(qp_prep_instance["outs"][0]["id"], None),
+                    Arg(qp_prep_instance["outs"][1]["id"], None),
+                    Arg(qp_prep_instance["outs"][2]["id"], None),
+                ],
+                target,
+                resources,
+            )
+        except:
+            self.delete_module_instance(qp_prep_instance["id"])
+            raise
 
-        hermes_instance = self.run(
-            hermes_energy_path,
-            [
-                Arg(qp_prep_instance["outs"][0]["id"], None),
-                Arg(qp_prep_instance["outs"][1]["id"], None),
-                Arg(qp_prep_instance["outs"][2]["id"], None),
-            ],
-            target,
-            resources,
-        )
-        print(hermes_instance)
-        qp_collate = self.run(
-            qp_collate_path,
-            [
-                Arg(hermes_instance["outs"][0]["id"], None),
-                Arg(qp_prep_instance["outs"][3]["id"], None),
-            ],
-        )
-        print(qp_collate)
-        return qp_collate
+        try:
+            qp_collate_instance = self.run(
+                qp_collate_path,
+                [
+                    Arg(hermes_instance["outs"][0]["id"], None),
+                    Arg(qp_prep_instance["outs"][3]["id"], None),
+                ],
+            )
+        except:
+            self.delete_module_instance(qp_prep_instance["id"])
+            self.delete_module_instance(hermes_instance["id"])
+            raise
+
+        if autopoll:
+            prep = self.poll_module_instance(qp_prep_instance["id"], *autopoll)
+            if prep["status"] == "FAILED":
+                self.delete_module_instance(hermes_instance["id"])
+                self.delete_module_instance(qp_collate_instance["id"])
+                raise RuntimeError(prep["error"])
+
+            hermes = self.poll_module_instance(hermes_instance["id"], *autopoll)
+            if hermes["status"] == "FAILED":
+                self.delete_module_instance(qp_collate_instance["id"])
+                raise RuntimeError(hermes["error"])
+
+            collate = self.poll_module_instance(qp_collate_instance["id"], *autopoll)
+
+            return collate
+
+        return [qp_prep_instance, hermes_instance, qp_collate_instance]
 
     def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -381,47 +405,3 @@ class Provider:
                 return module_instances
 
         return []
-
-
-def test_qp_run(provider: Provider):
-    provider.qp_run(
-        "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_gen_inputs",
-        "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#hermes_energy",
-        "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_collate",
-        provider.upload_arg(Path("/home/ryanswart/Downloads/some.pdb")),
-        provider.upload_arg(Path("/home/ryanswart/Downloads/some.gro")),
-        provider.upload_arg(Path("/home/ryanswart/Downloads/some.sdf")),
-        Arg(None, "sdf"),
-        Arg(None, "MOL"),
-        Arg(
-            None,
-            default_model,
-        ),
-        Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
-        Arg(
-            None,
-            [
-                ("GLY", 993),
-                ("ASP", 994),
-                ("VAL", 863),
-                ("LYS", 882),
-                ("TYR", 931),
-                ("GLY", 935),
-                ("VAL", 911),
-                ("GLU", 930),
-                ("ALA", 880),
-                ("LEU", 983),
-                ("PRO", 933),
-                ("LEU", 855),
-                ("MET", 929),
-                ("SER", 936),
-                ("LEU", 932),
-            ],
-        ),
-        "GADI",  # "NIX",
-        {"walltime": 420},
-    )
-
-
-def new():
-    print("hi")

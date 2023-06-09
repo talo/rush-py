@@ -72,7 +72,7 @@ scf_keywords = {
 
 default_model = {"method": "RIMP2", "basis": "cc-pVDZ", "aux_basis": "cc-pVDZ-RIFIT", "frag_enabled": True}
 
-qp_collate_instance = client.qp_run(
+qp_instances = client.qp_run(
     "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_gen_inputs",
     "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#hermes_energy",
     "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_collate",
@@ -108,7 +108,11 @@ qp_collate_instance = client.qp_run(
     ),
     "GADI",
     {"walltime": 420},
+    autopoll = (10, 100) # optionally configure polling to wait on the final instance, 
+                         # and clean up if any of the prior instances fails
 )
 
-client.poll_module_instance(qp_collate_instance["id"]) 
+# if you set autpoll, you will get the results of the qp_collate instance,
+# otherwise you will get an array with all the spawned instances, and have to poll manually
+client.poll_module_instance(qp_collate_instance[2]["id"]) 
 ```
