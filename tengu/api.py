@@ -27,6 +27,23 @@ query ($first: Int, $after: String, $last: Int, $before: String, $path: String) 
 """
 )
 
+latest_modules = gql(
+    """
+query ($first: Int, $after: String, $last: Int, $before: String) {
+    latest_modules(first: $first, last: $last, after: $after, before: $before) {
+        nodes {
+            id
+            path
+            created_at
+            deleted_at
+            ins
+            outs
+        }
+    }
+}
+"""
+)
+
 run_mutation = gql(
     """
     mutation run($instance: ModuleInstanceInput) {
@@ -101,9 +118,9 @@ module_instance_query = gql(
 )
 
 module_instances_query = gql(
-    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $status: ModuleInstanceStatus) {
+    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus) {
     me { account {
-    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status) {
+    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name) {
     nodes {
     """
     + module_instance_fragment
@@ -187,6 +204,35 @@ class Provider:
         """
         response = self.client.execute(object_query, variable_values={"id": id})
         return response.get("object")
+
+    def latest_modules(
+        self,
+        first: int | None = None,
+        after: str | None = None,
+        last: int | None = None,
+        before: str | None = None,
+    ):
+        """
+        Retrieve a list of modules.
+
+        :param path: The path of the module.
+        :param name: The name of the module.
+        :param first: The maximum number of modules to retrieve.
+        :param after: The cursor to start retrieving modules from.
+        :param last: The maximum number of modules to retrieve.
+        :param before: The cursor to start retrieving modules from.
+        :return: A list of modules.
+        """
+        response = self.client.execute(
+            latest_modules,
+            variable_values={
+                "first": first,
+                "after": after,
+                "last": last,
+                "before": before,
+            },
+        )
+        return response.get("latest_modules")
 
     def modules(
         self,
@@ -390,6 +436,7 @@ class Provider:
         first: int | None = None,
         last: int | None = None,
         path: str | None = None,
+        name: str | None = None,
         status: Literal["CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED"] | None = None,
     ) -> list[Any]:
         """
@@ -411,6 +458,7 @@ class Provider:
                 "before": before,
                 "after": after,
                 "path": path,
+                "name": name,
                 "status": status,
             },
         )
