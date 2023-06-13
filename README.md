@@ -89,21 +89,7 @@ qp_instances = client.qp_run(
     Arg(
         None,
         [
-            ("GLY", 993),
-            ("ASP", 994),
-            ("VAL", 863),
-            ("LYS", 882),
-            ("TYR", 931),
-            ("GLY", 935),
-            ("VAL", 911),
-            ("GLU", 930),
-            ("ALA", 880),
-            ("LEU", 983),
-            ("PRO", 933),
-            ("LEU", 855),
-            ("MET", 929),
-            ("SER", 936),
-            ("LEU", 932),
+            ("GLY", 100), # map of amino acids of interest
         ],
     ),
     "GADI",
