@@ -44,3 +44,64 @@ client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#p
 client.poll_module_instance(id) 
 // status, progress, logs, outs - out values will be null until module_instance is done
 ```
+
+## Sample QP Run
+
+``` python
+frag_keywords = {
+    "dimer_cutoff": 25,
+    "dimer_mp2_cutoff": 25,
+    "fragmentation_level": 2,
+    "method": "MBE",
+    "monomer_cutoff": 30,
+    "monomer_mp2_cutoff": 30,
+    "ngpus_per_node": 4,
+    "reference_fragment": 293,
+    "trimer_cutoff": 10,
+    "trimer_mp2_cutoff": 10,
+    "lattice_energy_calc": True,
+}
+
+scf_keywords = {
+    "convergence_metric": "diis",
+    "dynamic_screening_threshold_exp": 10,
+    "ndiis": 8,
+    "niter": 40,
+    "scf_conv": 0.000001,
+}
+
+default_model = {"method": "RIMP2", "basis": "cc-pVDZ", "aux_basis": "cc-pVDZ-RIFIT", "frag_enabled": True}
+
+qp_instances = client.qp_run(
+    "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_gen_inputs",
+    "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#hermes_energy",
+    "github:talo/tengu-prelude/0986e4b23780d5e976e7938dc02a949185090fa1#qp_collate",
+    provider.upload_arg(Path("some.pdb")),
+    provider.upload_arg(Path("some.gro")),
+    provider.upload_arg(Path("some.sdf")),
+    Arg(None, "sdf"),
+    Arg(None, "MOL"),
+    Arg(
+        None,
+        default_model,
+    ),
+    Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+    Arg(
+        None,
+        [
+            ("GLY", 100), # map of amino acids of interest
+        ],
+    ),
+    "GADI",
+    {"walltime": 420},
+    autopoll = (10, 100) # optionally configure polling to wait on the final instance, 
+                         # and clean up if any of the prior instances fails
+)
+
+# if you set autpoll, you will get the results of the qp_collate instance,
+# otherwise you will get an array with all the spawned instances, and have to poll manually
+completed_instance = client.poll_module_instance(qp_collate_instance[2]["id"]) 
+
+# the result will be an object, so fetch from object store
+client.object(completed_instance["outs"][0]["id"]) # will return the json qp results
+```

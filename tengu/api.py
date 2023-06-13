@@ -1,7 +1,8 @@
 import base64
+from dataclasses import dataclass
 import time
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Generic, Literal, TypeVar
 
 import dataclasses_json
 from gql import Client, gql
@@ -13,6 +14,23 @@ modules = gql(
     """
 query ($first: Int, $after: String, $last: Int, $before: String, $path: String) {
     modules(first: $first, last: $last, after: $after, before: $before, path: $path) {
+        nodes {
+            id
+            path
+            created_at
+            deleted_at
+            ins
+            outs
+        }
+    }
+}
+"""
+)
+
+latest_modules = gql(
+    """
+query ($first: Int, $after: String, $last: Int, $before: String) {
+    latest_modules(first: $first, last: $last, after: $after, before: $before) {
         nodes {
             id
             path
@@ -100,14 +118,21 @@ module_instance_query = gql(
 )
 
 module_instances_query = gql(
-    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $status: ModuleInstanceStatus) {
+    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus) {
     me { account {
-    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status) {
+    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name) {
     nodes {
     """
     + module_instance_fragment
     + """
   } } } } }"""
+)
+
+object_query = gql(
+    """query($id: ArgumentId!) {
+        object(id: $id)
+    }
+    """
 )
 
 
@@ -118,6 +143,40 @@ class DataClassJsonMixin(dataclasses_json.DataClassJsonMixin):
         undefined=dataclasses_json.Undefined.EXCLUDE,
         exclude=lambda f: f is None,  # type: ignore
     )["dataclasses_json"]
+
+
+T1 = TypeVar("T1")
+
+
+@dataclass
+class Arg(Generic[T1], DataClassJsonMixin):
+    id: str | None
+    value: T1 | None
+
+
+frag_keywords = {
+    "dimer_cutoff": 25,
+    "dimer_mp2_cutoff": 25,
+    "fragmentation_level": 2,
+    "method": "MBE",
+    "monomer_cutoff": 30,
+    "monomer_mp2_cutoff": 30,
+    "ngpus_per_node": 4,
+    "reference_fragment": 293,
+    "trimer_cutoff": 10,
+    "trimer_mp2_cutoff": 10,
+    "lattice_energy_calc": True,
+}
+
+scf_keywords = {
+    "convergence_metric": "diis",
+    "dynamic_screening_threshold_exp": 10,
+    "ndiis": 8,
+    "niter": 40,
+    "scf_conv": 0.000001,
+}
+
+default_model = {"method": "RIMP2", "basis": "cc-pVDZ", "aux_basis": "cc-pVDZ-RIFIT", "frag_enabled": True}
 
 
 class Provider:
@@ -135,6 +194,45 @@ class Provider:
         transport = RequestsHTTPTransport(url=url, headers={"authorization": f"bearer {access_token}"})
 
         self.client = Client(transport=transport)
+
+    def object(self, id):
+        """
+        Retrieve an object from the database.
+
+        :param id: The ID of the object.
+        :return: The object.
+        """
+        response = self.client.execute(object_query, variable_values={"id": id})
+        return response.get("object")
+
+    def latest_modules(
+        self,
+        first: int | None = None,
+        after: str | None = None,
+        last: int | None = None,
+        before: str | None = None,
+    ):
+        """
+        Retrieve a list of modules.
+
+        :param path: The path of the module.
+        :param name: The name of the module.
+        :param first: The maximum number of modules to retrieve.
+        :param after: The cursor to start retrieving modules from.
+        :param last: The maximum number of modules to retrieve.
+        :param before: The cursor to start retrieving modules from.
+        :return: A list of modules.
+        """
+        response = self.client.execute(
+            latest_modules,
+            variable_values={
+                "first": first,
+                "after": after,
+                "last": last,
+                "before": before,
+            },
+        )
+        return response.get("latest_modules")
 
     def modules(
         self,
@@ -169,18 +267,103 @@ class Provider:
         )
         return response.get("modules")
 
-    def run(self, path: str, args: dict[str, Any], target: Literal["GADI", "NIX"] | None = None):
+    def run(
+        self,
+        path: str,
+        args: list[Arg],
+        target: Literal["GADI", "NIX"] | None = None,
+        resources: dict[str, Any] | None = None,
+    ):
         """
         Run a module with the given inputs and outputs.
         """
         response = self.client.execute(
-            run_mutation, variable_values={"instance": {"path": path, "args": args, "target": target}}
+            run_mutation,
+            variable_values={
+                "instance": {
+                    "path": path,
+                    "args": [arg.to_dict() for arg in args],
+                    "target": target,
+                    "resources": resources,
+                }
+            },
         )
         module_instance = response.get("run")
         if module_instance:
             return module_instance
         else:
             raise RuntimeError(response)
+
+    def qp_run(
+        self,
+        qp_gen_inputs_path: str,
+        hermes_energy_path: str,
+        qp_collate_path: str,
+        pdb: Arg[Path],
+        gro: Arg[Path],
+        lig: Arg[Path],
+        lig_type: Arg[Literal["sdf", "mol2"]],
+        lig_res_id: Arg[str],
+        model: Arg[dict[str, Any]] = Arg(None, default_model),
+        keywords: Arg[dict[str, Any]] = Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+        amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
+        target: Literal["GADI", "NIX"] | None = None,
+        resources: dict[str, Any] | None = None,
+        autopoll: tuple[int, int] | None = None,
+    ):
+        """
+        Construct the input and output module instance calls for QP run.
+        """
+
+        qp_prep_instance = self.run(
+            qp_gen_inputs_path,
+            [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
+        )
+        try:
+            hermes_instance = self.run(
+                hermes_energy_path,
+                [
+                    Arg(qp_prep_instance["outs"][0]["id"], None),
+                    Arg(qp_prep_instance["outs"][1]["id"], None),
+                    Arg(qp_prep_instance["outs"][2]["id"], None),
+                ],
+                target,
+                resources,
+            )
+        except:
+            self.delete_module_instance(qp_prep_instance["id"])
+            raise
+
+        try:
+            qp_collate_instance = self.run(
+                qp_collate_path,
+                [
+                    Arg(hermes_instance["outs"][0]["id"], None),
+                    Arg(qp_prep_instance["outs"][3]["id"], None),
+                ],
+            )
+        except:
+            self.delete_module_instance(qp_prep_instance["id"])
+            self.delete_module_instance(hermes_instance["id"])
+            raise
+
+        if autopoll:
+            prep = self.poll_module_instance(qp_prep_instance["id"], *autopoll)
+            if prep["status"] == "FAILED":
+                self.delete_module_instance(hermes_instance["id"])
+                self.delete_module_instance(qp_collate_instance["id"])
+                raise RuntimeError(prep["error"])
+
+            hermes = self.poll_module_instance(hermes_instance["id"], *autopoll)
+            if hermes["status"] == "FAILED":
+                self.delete_module_instance(qp_collate_instance["id"])
+                raise RuntimeError(hermes["error"])
+
+            collate = self.poll_module_instance(qp_collate_instance["id"], *autopoll)
+
+            return collate
+
+        return [qp_prep_instance, hermes_instance, qp_collate_instance]
 
     def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -236,7 +419,7 @@ class Provider:
 
         raise Exception("Failed to find task")
 
-    def upload_arg(self, file: Path) -> dict[str, str]:
+    def upload_arg(self, file: Path) -> Arg:
         """
         Converts a file to bas64 and formats it for use as an argument
 
@@ -244,7 +427,7 @@ class Provider:
         :return: The formatted file.
         """
         with open(file, "rb") as f:
-            return {"value": base64.b64encode(f.read()).decode("utf-8")}
+            return Arg(None, value=base64.b64encode(f.read()).decode("utf-8"))
 
     def module_instances(
         self,
@@ -253,6 +436,7 @@ class Provider:
         first: int | None = None,
         last: int | None = None,
         path: str | None = None,
+        name: str | None = None,
         status: Literal["CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED"] | None = None,
     ) -> list[Any]:
         """
@@ -274,6 +458,7 @@ class Provider:
                 "before": before,
                 "after": after,
                 "path": path,
+                "name": name,
                 "status": status,
             },
         )
