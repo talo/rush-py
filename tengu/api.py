@@ -27,6 +27,38 @@ mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $mo
 """
 )
 
+argument = gql(
+    """
+query ($id: ArgumentId!) {
+    argument(id: $id) {
+        id
+        typeinfo
+        value
+        created_at
+        tags
+    }
+    }
+    """
+)
+
+arguments_query = gql(
+    """
+query ($first: Int, $after: String, $last: Int, $before: String, $typeinfo: JSON, $tags: [String!]) {
+    me { account {
+        arguments(first: $first, last: $last, after: $after, before: $before, typeinfo: $typeinfo, tags: $tags) {
+            nodes {
+                id
+                typeinfo
+                value
+                created_at
+                tags
+            }
+        }
+    } }
+}
+"""
+)
+
 
 modules = gql(
     """
@@ -214,6 +246,46 @@ class Provider:
         transport = RequestsHTTPTransport(url=url, headers={"authorization": f"bearer {access_token}"})
 
         self.client = Client(transport=transport)
+
+    def argument(self, id: str) -> Any:
+        """
+        Retrieve an argument from the database.
+
+        :param id: The ID of the argument.
+        :return: The argument.
+        """
+        response = self.client.execute(argument, variable_values={"id": id})
+        return response.get("argument")
+
+    def arguments(
+        self,
+        first: int | None = None,
+        after: str | None = None,
+        last: int | None = None,
+        before: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[Any]:
+        """
+        Retrieve a list of arguments.
+        """
+        response = self.client.execute(
+            arguments_query,
+            variable_values={
+                "first": first,
+                "after": after,
+                "last": last,
+                "before": before,
+                "tags": tags,
+            },
+        )
+
+        arguments = response["me"]["account"]["arguments"]
+
+        if arguments:
+            arguments = arguments.get("nodes")
+            if arguments:
+                return arguments
+        return []
 
     def object(self, id):
         """
