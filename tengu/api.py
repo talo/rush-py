@@ -10,10 +10,28 @@ from gql.transport.requests import RequestsHTTPTransport
 
 ModuleInstanceId = str
 
+
+tag = gql(
+    """
+mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
+    tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+}
+"""
+)
+
+untag = gql(
+    """
+mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
+    untag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+}
+"""
+)
+
+
 modules = gql(
     """
-query ($first: Int, $after: String, $last: Int, $before: String, $path: String) {
-    modules(first: $first, last: $last, after: $after, before: $before, path: $path) {
+query ($first: Int, $after: String, $last: Int, $before: String, $path: String, $tags: [String!]) {
+    modules(first: $first, last: $last, after: $after, before: $before, path: $path, tags: $tags) {
         nodes {
             id
             path
@@ -21,6 +39,7 @@ query ($first: Int, $after: String, $last: Int, $before: String, $path: String) 
             deleted_at
             ins
             outs
+            tags
         }
     }
 }
@@ -66,6 +85,7 @@ delete_module_instance = gql(
 # module instance fragment
 module_instance_fragment = """
     id
+    tags
     created_at
     deleted_at
     account_id
@@ -118,9 +138,9 @@ module_instance_query = gql(
 )
 
 module_instances_query = gql(
-    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus) {
+    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus, $tags: [String!]) {
     me { account {
-    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name) {
+    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name, tags: $tags) {
     nodes {
     """
     + module_instance_fragment
@@ -242,6 +262,7 @@ class Provider:
         after: str | None = None,
         last: int | None = None,
         before: str | None = None,
+        tags: list[str] | None = None,
     ):
         """
         Retrieve a list of modules.
@@ -263,6 +284,7 @@ class Provider:
                 "after": after,
                 "last": last,
                 "before": before,
+                "tags": tags,
             },
         )
         return response.get("modules")
@@ -273,9 +295,18 @@ class Provider:
         args: list[Arg],
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        out_tags: list[list[str] | None] | None = None,
     ):
         """
         Run a module with the given inputs and outputs.
+        :param path: The path of the module.
+        :param args: The arguments to the module.
+        :param target: The target to run the module on.
+        :param resources: The resources to run the module with.
+        :param tags: The tags to apply to the module.
+        :param out_tags: The tags to apply to the outputs of the module.
+                         If provided, must be the same length as the number of outputs.
         """
         response = self.client.execute(
             run_mutation,
@@ -285,6 +316,8 @@ class Provider:
                     "args": [arg.to_dict() for arg in args],
                     "target": target,
                     "resources": resources,
+                    "tags": tags,
+                    "out_tags": out_tags,
                 }
             },
         )
@@ -310,14 +343,32 @@ class Provider:
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
+        tags: list[str] | None = None,
     ):
         """
         Construct the input and output module instance calls for QP run.
+        :param qp_gen_inputs_path: The path of the QP gen inputs module.
+        :param hermes_energy_path: The path of the Hermes energy module.
+        :param qp_collate_path: The path of the QP collate module.
+        :param pdb: The PDB file containing both the protein and ligand.
+        :param gro: The GRO file containing ligand.
+        :param lig: The ligand file.
+        :param lig_type: The type of ligand file.
+        :param lig_res_id: The residue ID of the ligand.
+        :param model: The model to use for the QP Hermes run.
+        :param keywords: The keywords to use for the QP Hermes run.
+        :param amino_acids_of_interest: The amino acids of interest to restrict the run to.
+        :param target: The target to run the module on.
+        :param resources: The resources to run the module with.
+        :param autopoll: The autopoll interval and timeout.
+        :param tag: The tags to apply to all module instances, arguements and outs.
         """
 
         qp_prep_instance = self.run(
             qp_gen_inputs_path,
             [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
+            tags=tags,
+            out_tags=([tags, tags, tags, tags] if tags else None),
         )
         try:
             hermes_instance = self.run(
@@ -329,6 +380,8 @@ class Provider:
                 ],
                 target,
                 resources,
+                tags=tags,
+                out_tags=([tags] if tags else None),
             )
         except:
             self.delete_module_instance(qp_prep_instance["id"])
@@ -341,6 +394,8 @@ class Provider:
                     Arg(hermes_instance["outs"][0]["id"], None),
                     Arg(qp_prep_instance["outs"][3]["id"], None),
                 ],
+                tags=tags,
+                out_tags=([tags] if tags else None),
             )
         except:
             self.delete_module_instance(qp_prep_instance["id"])
@@ -429,6 +484,60 @@ class Provider:
         with open(file, "rb") as f:
             return Arg(None, value=base64.b64encode(f.read()).decode("utf-8"))
 
+    def tag(
+        self,
+        tags: list[str],
+        module_id: str | None = None,
+        module_instance_id: str | None = None,
+        argument_id: str | None = None,
+    ) -> list[str]:
+        """
+        Add a list of tags to a module, module instance, or argument.
+
+        :param tags: The list of tags to be added.
+        :param module_id: The ID of the module to be tagged.
+        :param module_instance_id: The ID of the module instance to be tagged.
+        :param argument_id: The ID of the argument to be tagged.
+        :return: The resulting full list of tags on the entity.
+        """
+        response = self.client.execute(
+            tag,
+            variable_values={
+                "tags": tags,
+                "moduleId": module_id,
+                "moduleInstanceId": module_instance_id,
+                "argumentId": argument_id,
+            },
+        )
+        return response["tag"]
+
+    def untag(
+        self,
+        tags: list[str],
+        module_id: str | None = None,
+        module_instance_id: str | None = None,
+        argument_id: str | None = None,
+    ) -> list[str]:
+        """
+        Remove a list of tags from a module, module instance, or argument.
+
+        :param tags: The list of tags to be removed.
+        :param module_id: The ID of the module to be untagged.
+        :param module_instance_id: The ID of the module instance to be untagged.
+        :param argument_id: The ID of the argument to be untagged.
+        :return: The list of remaining tags.
+        """
+        response = self.client.execute(
+            untag,
+            variable_values={
+                "tags": tags,
+                "moduleId": module_id,
+                "moduleInstanceId": module_instance_id,
+                "argumentId": argument_id,
+            },
+        )
+        return response["untag"]
+
     def module_instances(
         self,
         before: str | None = None,
@@ -438,6 +547,7 @@ class Provider:
         path: str | None = None,
         name: str | None = None,
         status: Literal["CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED"] | None = None,
+        tags: list[str] | None = None,
     ) -> list[Any]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
@@ -460,6 +570,7 @@ class Provider:
                 "path": path,
                 "name": name,
                 "status": status,
+                "tags": tags,
             },
         )
         module_instances = response["me"]["account"]["module_instances"]
