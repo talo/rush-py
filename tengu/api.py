@@ -10,6 +10,24 @@ from gql.transport.requests import RequestsHTTPTransport
 
 ModuleInstanceId = str
 
+
+tag = gql(
+    """
+mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
+    tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+}
+"""
+)
+
+untag = gql(
+    """
+mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
+    untag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+}
+"""
+)
+
+
 modules = gql(
     """
 query ($first: Int, $after: String, $last: Int, $before: String, $path: String, $tags: [String!]) {
@@ -325,17 +343,32 @@ class Provider:
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
-        tag: str | None = None,
+        tags: list[str] | None = None,
     ):
         """
         Construct the input and output module instance calls for QP run.
+        :param qp_gen_inputs_path: The path of the QP gen inputs module.
+        :param hermes_energy_path: The path of the Hermes energy module.
+        :param qp_collate_path: The path of the QP collate module.
+        :param pdb: The PDB file containing both the protein and ligand.
+        :param gro: The GRO file containing ligand.
+        :param lig: The ligand file.
+        :param lig_type: The type of ligand file.
+        :param lig_res_id: The residue ID of the ligand.
+        :param model: The model to use for the QP Hermes run.
+        :param keywords: The keywords to use for the QP Hermes run.
+        :param amino_acids_of_interest: The amino acids of interest to restrict the run to.
+        :param target: The target to run the module on.
+        :param resources: The resources to run the module with.
+        :param autopoll: The autopoll interval and timeout.
+        :param tag: The tags to apply to all module instances, arguements and outs.
         """
 
         qp_prep_instance = self.run(
             qp_gen_inputs_path,
             [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
-            tags=([tag] if tag else None),
-            out_tags=([[tag], [tag], [tag], [tag]] if tag else None),
+            tags=tags,
+            out_tags=([tags, tags, tags, tags] if tags else None),
         )
         try:
             hermes_instance = self.run(
@@ -347,8 +380,8 @@ class Provider:
                 ],
                 target,
                 resources,
-                tags=([tag] if tag else None),
-                out_tags=([[tag]] if tag else None),
+                tags=tags,
+                out_tags=([tags] if tags else None),
             )
         except:
             self.delete_module_instance(qp_prep_instance["id"])
@@ -361,8 +394,8 @@ class Provider:
                     Arg(hermes_instance["outs"][0]["id"], None),
                     Arg(qp_prep_instance["outs"][3]["id"], None),
                 ],
-                tags=([tag] if tag else None),
-                out_tags=([[tag]] if tag else None),
+                tags=tags,
+                out_tags=([tags] if tags else None),
             )
         except:
             self.delete_module_instance(qp_prep_instance["id"])
@@ -450,6 +483,60 @@ class Provider:
         """
         with open(file, "rb") as f:
             return Arg(None, value=base64.b64encode(f.read()).decode("utf-8"))
+
+    def tag(
+        self,
+        tags: list[str],
+        module_id: str | None = None,
+        module_instance_id: str | None = None,
+        argument_id: str | None = None,
+    ) -> list[str]:
+        """
+        Add a list of tags to a module, module instance, or argument.
+
+        :param tags: The list of tags to be added.
+        :param module_id: The ID of the module to be tagged.
+        :param module_instance_id: The ID of the module instance to be tagged.
+        :param argument_id: The ID of the argument to be tagged.
+        :return: The resulting full list of tags on the entity.
+        """
+        response = self.client.execute(
+            tag,
+            variable_values={
+                "tags": tags,
+                "moduleId": module_id,
+                "moduleInstanceId": module_instance_id,
+                "argumentId": argument_id,
+            },
+        )
+        return response["tag"]
+
+    def untag(
+        self,
+        tags: list[str],
+        module_id: str | None = None,
+        module_instance_id: str | None = None,
+        argument_id: str | None = None,
+    ) -> list[str]:
+        """
+        Remove a list of tags from a module, module instance, or argument.
+
+        :param tags: The list of tags to be removed.
+        :param module_id: The ID of the module to be untagged.
+        :param module_instance_id: The ID of the module instance to be untagged.
+        :param argument_id: The ID of the argument to be untagged.
+        :return: The list of remaining tags.
+        """
+        response = self.client.execute(
+            untag,
+            variable_values={
+                "tags": tags,
+                "moduleId": module_id,
+                "moduleInstanceId": module_instance_id,
+                "argumentId": argument_id,
+            },
+        )
+        return response["untag"]
 
     def module_instances(
         self,
