@@ -2,6 +2,7 @@
 import base64
 import json
 import os
+from time import time
 import uuid
 import pathlib
 from subprocess import run
@@ -24,6 +25,16 @@ class LocalProvider:
         if not config_file.exists():
             raise ValueError("Could not find tengu config file -- please run tengu-runtime install")
         self.config = json.loads(config_file.read_text())
+
+    def upload_arg(self, file: pathlib.Path) -> Arg:
+        """
+        Converts a file to bas64 and formats it for use as an argument
+
+        :param file: The file to be uploaded.
+        :return: The formatted file.
+        """
+        with open(file, "rb") as f:
+            return Arg(None, value=base64.b64encode(f.read()).decode("utf-8"))
 
     def resolve_arg(self, arg: Arg, retries: int = 0) -> Any:
         """
@@ -131,8 +142,10 @@ class LocalProvider:
         path: str = STATUS_PATH,
     ):
         cache = self.instances.get(id)
-        if cache is not None and cache.get("status") is "Done":
+        if cache is not None and cache.get("status") == "Done":
             return cache
+        if cache is None:
+            cache = {"outs": []}
 
         res = json.loads(
             run(
@@ -142,8 +155,11 @@ class LocalProvider:
             ).stdout.decode("utf-8")
         )
         self.instances[id]["status"] = res["status"]
-        self.instances[id]["values"] = res["values"]
-        return res
+        if res["status"] == "Done":
+            self.instances[id]["outs"] = [
+                {"value": value, "id": out["id"]} for (out, value) in zip(cache["outs"] or [], res["values"])
+            ]
+        return self.instances[id]
 
     def object(
         self,
@@ -152,3 +168,25 @@ class LocalProvider:
         store_dir = pathlib.Path(self.config.get("cache_dir")).joinpath("store")
         if store_dir.exists():
             return store_dir.joinpath(id).read_text()
+
+    def poll_module_instance(self, id: str, n_retries: int = 10, poll_rate: int = 30) -> Any:
+        """
+        Poll a module instance until it is completed, with a specified number of retries and poll rate.
+
+        :param id: The ID of the module instance to be polled.
+        :param n_retries: The maximum number of retries. Default is 10.
+        :param poll_rate: The poll rate in seconds. Default is 30.
+        :return: The completed module instance.
+        :raise Exception: If the module instance fails or polling times out.
+        """
+        n_try = 0
+
+        while n_try < n_retries:
+            n_try += 1
+            response = self.module_instance(id)
+            if response and response["status"] in ["COMPLETED", "FAILED"]:
+                return response
+
+            time.sleep(poll_rate)
+
+        raise Exception("Module polling timed out")

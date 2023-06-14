@@ -29,8 +29,8 @@ protein_pdb = Path("./examples/4w9f_prepared_protein.pdb")
 
 file_arg = provider.upload_arg(protein_pdb)
 
-res = client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#convert", [ 
-{ "value": "PDB" }, file_arg
+res = client.run("github:talo/tengu-prelude/77e44748f1d1e20c463ef34cc40178d4f656ef0a#convert", [ 
+Arg(value = PDB), file_arg
 ])
 
 // res contains "id" - the instance id; and "outs" - the ids of the return values 
@@ -38,11 +38,29 @@ res = client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa59
 // we can pass arguments by "id" reference or by value literal
 
 client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#pick_conformer", [ 
-{ "id": res["outs"][0]["id"] }, { "value": 1 }
+Arg( id =  res["outs"][0]["id"] ), Arg( value = 1 ) }
 ])
 
 client.poll_module_instance(id) 
 // status, progress, logs, outs - out values will be null until module_instance is done
+```
+
+## Local runner
+
+We also provide a local executor, that will run modules locally, without making remote calls
+
+First, you must have nix installed and configured with an access token for qdx projects.
+
+Then you must install the tengu-runtime with `nix run github:talo/tengu#tengu-runtime -- install`
+
+Finally, you can run locally with
+
+``` python
+from tengu import LocalProvider
+
+client = LocalProvider()
+
+## you should be able to use client.run / client.object / client.module_instance / client.poll_module instance as normal
 ```
 
 ## Sample QP Run

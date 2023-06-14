@@ -202,8 +202,8 @@ T1 = TypeVar("T1")
 
 @dataclass
 class Arg(Generic[T1], DataClassJsonMixin):
-    id: str | None
-    value: T1 | None
+    id: str | None = None
+    value: T1 | None = None
 
 
 frag_keywords = {
