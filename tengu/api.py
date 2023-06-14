@@ -12,8 +12,8 @@ ModuleInstanceId = str
 
 modules = gql(
     """
-query ($first: Int, $after: String, $last: Int, $before: String, $path: String) {
-    modules(first: $first, last: $last, after: $after, before: $before, path: $path) {
+query ($first: Int, $after: String, $last: Int, $before: String, $path: String, $tags: [String!]) {
+    modules(first: $first, last: $last, after: $after, before: $before, path: $path, tags: $tags) {
         nodes {
             id
             path
@@ -21,6 +21,7 @@ query ($first: Int, $after: String, $last: Int, $before: String, $path: String) 
             deleted_at
             ins
             outs
+            tags
         }
     }
 }
@@ -66,6 +67,7 @@ delete_module_instance = gql(
 # module instance fragment
 module_instance_fragment = """
     id
+    tags
     created_at
     deleted_at
     account_id
@@ -118,9 +120,9 @@ module_instance_query = gql(
 )
 
 module_instances_query = gql(
-    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus) {
+    """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus, $tags: [String!]) {
     me { account {
-    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name) {
+    module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name, tags: $tags) {
     nodes {
     """
     + module_instance_fragment
@@ -242,6 +244,7 @@ class Provider:
         after: str | None = None,
         last: int | None = None,
         before: str | None = None,
+        tags: list[str] | None = None,
     ):
         """
         Retrieve a list of modules.
@@ -263,6 +266,7 @@ class Provider:
                 "after": after,
                 "last": last,
                 "before": before,
+                "tags": tags,
             },
         )
         return response.get("modules")
@@ -273,9 +277,18 @@ class Provider:
         args: list[Arg],
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        out_tags: list[list[str] | None] | None = None,
     ):
         """
         Run a module with the given inputs and outputs.
+        :param path: The path of the module.
+        :param args: The arguments to the module.
+        :param target: The target to run the module on.
+        :param resources: The resources to run the module with.
+        :param tags: The tags to apply to the module.
+        :param out_tags: The tags to apply to the outputs of the module.
+                         If provided, must be the same length as the number of outputs.
         """
         response = self.client.execute(
             run_mutation,
@@ -285,6 +298,8 @@ class Provider:
                     "args": [arg.to_dict() for arg in args],
                     "target": target,
                     "resources": resources,
+                    "tags": tags,
+                    "out_tags": out_tags,
                 }
             },
         )
@@ -310,6 +325,7 @@ class Provider:
         target: Literal["GADI", "NIX"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
+        tag: str | None = None,
     ):
         """
         Construct the input and output module instance calls for QP run.
@@ -318,6 +334,8 @@ class Provider:
         qp_prep_instance = self.run(
             qp_gen_inputs_path,
             [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
+            tags=([tag] if tag else None),
+            out_tags=([[tag], [tag], [tag], [tag]] if tag else None),
         )
         try:
             hermes_instance = self.run(
@@ -329,6 +347,8 @@ class Provider:
                 ],
                 target,
                 resources,
+                tags=([tag] if tag else None),
+                out_tags=([[tag]] if tag else None),
             )
         except:
             self.delete_module_instance(qp_prep_instance["id"])
@@ -341,6 +361,8 @@ class Provider:
                     Arg(hermes_instance["outs"][0]["id"], None),
                     Arg(qp_prep_instance["outs"][3]["id"], None),
                 ],
+                tags=([tag] if tag else None),
+                out_tags=([[tag]] if tag else None),
             )
         except:
             self.delete_module_instance(qp_prep_instance["id"])
@@ -438,6 +460,7 @@ class Provider:
         path: str | None = None,
         name: str | None = None,
         status: Literal["CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED"] | None = None,
+        tags: list[str] | None = None,
     ) -> list[Any]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
@@ -460,6 +483,7 @@ class Provider:
                 "path": path,
                 "name": name,
                 "status": status,
+                "tags": tags,
             },
         )
         module_instances = response["me"]["account"]["module_instances"]
