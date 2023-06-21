@@ -30,7 +30,7 @@ protein_pdb = Path("./examples/4w9f_prepared_protein.pdb")
 file_arg = provider.upload_arg(protein_pdb)
 
 res = client.run("github:talo/tengu-prelude/77e44748f1d1e20c463ef34cc40178d4f656ef0a#convert", [ 
-Arg(value = PDB), file_arg
+Arg(value = "PDB"), file_arg
 ])
 
 // res contains "id" - the instance id; and "outs" - the ids of the return values 
