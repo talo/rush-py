@@ -80,8 +80,8 @@ query ($first: Int, $after: String, $last: Int, $before: String, $path: String, 
 
 latest_modules = gql(
     """
-query ($first: Int, $after: String, $last: Int, $before: String) {
-    latest_modules(first: $first, last: $last, after: $after, before: $before) {
+query ($first: Int, $after: String, $last: Int, $before: String, $names: [String!]) {
+    latest_modules(first: $first, last: $last, after: $after, before: $before, names: $names) {
         nodes {
             id
             path
@@ -303,6 +303,7 @@ class Provider:
         after: str | None = None,
         last: int | None = None,
         before: str | None = None,
+        names: list[str] | None = None,
     ):
         """
         Retrieve a list of modules.
@@ -322,6 +323,7 @@ class Provider:
                 "after": after,
                 "last": last,
                 "before": before,
+                "names": names,
             },
         )
         return response.get("latest_modules")
