@@ -17,8 +17,13 @@ TOKEN = "your qdx access token"
 # get our client to talk with the API
 client = tengu.Provider(access_token=TOKEN)
 
-# get modules that can be run
-client.modules()
+# get newest versions modules that can be run
+modules = client.latest_modules()
+# or for all modules
+modules = client.modules()
+
+# get input arguments that need to be provided for module
+print(modules[0]["ins"])
 
 ## running convert
 
