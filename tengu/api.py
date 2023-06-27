@@ -217,7 +217,7 @@ frag_keywords = {
     "reference_fragment": 293,
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
-    "lattice_energy_calc": "InteractivityEnergy",
+    "fragmented_energy_type": "InteractivityEnergy",
 }
 
 scf_keywords = {
