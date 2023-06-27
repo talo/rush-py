@@ -109,7 +109,7 @@ run_mutation = gql(
 delete_module_instance = gql(
     """
     mutation delete_module_instance($moduleInstanceId: ModuleInstanceId) {
-        deleteModuleInstance(module: $moduleInstanceId) { id }
+        delete_module_instance(module: $moduleInstanceId) { id }
     }
     """
 )
@@ -416,7 +416,7 @@ class Provider:
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         dry_run: Arg[bool] = Arg(None, False),
         export_density: Arg[bool] = Arg(None, False),
-        target: Literal["GADI", "NIX"] | None = None,
+        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
         tags: list[str] | None = None,
