@@ -630,9 +630,10 @@ class Provider:
         file: Path | str,
         typeinfo: dict[str, Any],
     ):
-        response = self.client.execute(
-            upload, variable_values={"file": file, "typeinfo": typeinfo}, upload_files=True
-        )
+        with open(file, "rb") as f:
+            response = self.client.execute(
+                upload, variable_values={"file": f, "typeinfo": typeinfo}, upload_files=True
+            )
         return response["upload"]
 
     def module_instances(
