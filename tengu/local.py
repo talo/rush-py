@@ -82,7 +82,7 @@ class LocalProvider:
                             decoded = base64.b64decode(arg.value)
                             f.write(decoded.decode("utf-8"))
                         else:
-                            f.write(json.dumps(arg))
+                            f.write(json.dumps(arg.value))
                 return json.dumps(id)
             if in_a["k"] == "option":
                 if in_a["t"]["k"] == "object":

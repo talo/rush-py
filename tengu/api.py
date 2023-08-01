@@ -80,8 +80,8 @@ query ($first: Int, $after: String, $last: Int, $before: String, $path: String, 
 
 latest_modules = gql(
     """
-query ($first: Int, $after: String, $last: Int, $before: String) {
-    latest_modules(first: $first, last: $last, after: $after, before: $before) {
+query ($first: Int, $after: String, $last: Int, $before: String, $names: [String!]) {
+    latest_modules(first: $first, last: $last, after: $after, before: $before, names: $names) {
         nodes {
             id
             path
@@ -109,7 +109,7 @@ run_mutation = gql(
 delete_module_instance = gql(
     """
     mutation delete_module_instance($moduleInstanceId: ModuleInstanceId) {
-        deleteModuleInstance(module: $moduleInstanceId) { id }
+        delete_module_instance(module: $moduleInstanceId) { id }
     }
     """
 )
@@ -217,7 +217,7 @@ frag_keywords = {
     "reference_fragment": 293,
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
-    "lattice_energy_calc": True,
+    "fragmented_energy_type": "InteractivityEnergy",
 }
 
 scf_keywords = {
@@ -303,6 +303,7 @@ class Provider:
         after: str | None = None,
         last: int | None = None,
         before: str | None = None,
+        names: list[str] | None = None,
     ):
         """
         Retrieve a list of modules.
@@ -322,6 +323,7 @@ class Provider:
                 "after": after,
                 "last": last,
                 "before": before,
+                "names": names,
             },
         )
         return response.get("latest_modules")
@@ -412,7 +414,9 @@ class Provider:
         model: Arg[dict[str, Any]] = Arg(None, default_model),
         keywords: Arg[dict[str, Any]] = Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
-        target: Literal["GADI", "NIX"] | None = None,
+        dry_run: Arg[bool] = Arg(None, False),
+        export_density: Arg[bool] = Arg(None, False),
+        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
         tags: list[str] | None = None,
@@ -449,6 +453,8 @@ class Provider:
                     Arg(qp_prep_instance["outs"][0]["id"], None),
                     Arg(qp_prep_instance["outs"][1]["id"], None),
                     Arg(qp_prep_instance["outs"][2]["id"], None),
+                    dry_run,
+                    export_density,
                 ],
                 target,
                 resources,
