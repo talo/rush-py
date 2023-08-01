@@ -222,11 +222,15 @@ frag_keywords = {
     "method": "MBE",
     "monomer_cutoff": 30,
     "monomer_mp2_cutoff": 30,
-    "ngpus_per_node": 4,
+    "ngpus_per_node": 1,
     "reference_fragment": 293,
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
     "fragmented_energy_type": "InteractivityEnergy",
+    "lattice_energy_calc": True,
+    "density_matrix_export": False,
+    "monomer_density_storage": True,
+    "monolithic_density_matrix_export": False,
 }
 
 scf_keywords = {
@@ -424,7 +428,6 @@ class Provider:
         keywords: Arg[dict[str, Any]] = Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         dry_run: Arg[bool] = Arg(None, False),
-        export_density: Arg[bool] = Arg(None, False),
         target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
@@ -455,6 +458,7 @@ class Provider:
             tags=tags,
             out_tags=([tags, tags, tags, tags] if tags else None),
         )
+        print("launched qp_prep_instance", qp_prep_instance)
         try:
             hermes_instance = self.run(
                 hermes_energy_path,
@@ -463,13 +467,15 @@ class Provider:
                     Arg(qp_prep_instance["outs"][1]["id"], None),
                     Arg(qp_prep_instance["outs"][2]["id"], None),
                     dry_run,
-                    export_density,
+                    Arg(value=True),
                 ],
                 target,
                 resources,
                 tags=tags,
-                out_tags=([tags] if tags else None),
+                out_tags=([tags, tags] if tags else None),
             )
+
+            print("launched hermes_instance", hermes_instance)
         except:
             self.delete_module_instance(qp_prep_instance["id"])
             raise
@@ -490,6 +496,7 @@ class Provider:
             raise
 
         if autopoll:
+            time.sleep(autopoll[0])
             prep = self.poll_module_instance(qp_prep_instance["id"], *autopoll)
             if prep["status"] == "FAILED":
                 self.delete_module_instance(hermes_instance["id"])
