@@ -428,6 +428,7 @@ class Provider:
         keywords: Arg[dict[str, Any]] = Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         dry_run: Arg[bool] = Arg(None, False),
+        spherical_sad_guess: Arg[bool] = Arg(None, True),
         target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
@@ -452,6 +453,9 @@ class Provider:
         :param tag: The tags to apply to all module instances, arguements and outs.
         """
 
+        if resources is not None and "gpus" in resources and keywords.value is not None:
+            keywords.value["frag"]["ngpus_per_node"] = resources["gpus"]
+
         qp_prep_instance = self.run(
             qp_gen_inputs_path,
             [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
@@ -467,7 +471,7 @@ class Provider:
                     Arg(qp_prep_instance["outs"][1]["id"], None),
                     Arg(qp_prep_instance["outs"][2]["id"], None),
                     dry_run,
-                    Arg(value=True),
+                    spherical_sad_guess,
                 ],
                 target,
                 resources,
@@ -543,13 +547,12 @@ class Provider:
         n_try = 0
 
         while n_try < n_retries:
+            time.sleep(poll_rate)
             n_try += 1
             response = self.client.execute(module_instance_query, variable_values={"id": id})
             module_instance: dict[str, Any] | None = response.get("module_instance")
             if module_instance and module_instance["status"] in ["COMPLETED", "FAILED"]:
                 return module_instance
-
-            time.sleep(poll_rate)
 
         raise Exception("Module polling timed out")
 
