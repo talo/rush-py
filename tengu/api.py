@@ -27,6 +27,15 @@ mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $mo
 """
 )
 
+upload = gql(
+    """
+    mutation upload($typeinfo: JSON, $file: Upload) {
+        upload(typeinfo: $typeinfo, file: $file ) { id value }
+    }
+    """
+)
+
+
 argument = gql(
     """
 query ($id: ArgumentId!) {
@@ -367,7 +376,7 @@ class Provider:
         self,
         path: str,
         args: list[Arg],
-        target: Literal["GADI", "NIX"] | None = None,
+        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
@@ -615,6 +624,16 @@ class Provider:
             },
         )
         return response["untag"]
+
+    def upload(
+        self,
+        file: Path | str,
+        typeinfo: dict[str, Any],
+    ):
+        response = self.client.execute(
+            upload, variable_values={"file": file, "typeinfo": typeinfo}, upload_files=True
+        )
+        return response["upload"]
 
     def module_instances(
         self,
