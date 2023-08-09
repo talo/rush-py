@@ -227,7 +227,6 @@ frag_keywords = {
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
     "fragmented_energy_type": "InteractivityEnergy",
-    "lattice_energy_calc": True,
     "density_matrix_export": False,
     "monomer_density_storage": True,
     "monolithic_density_matrix_export": False,
