@@ -425,8 +425,6 @@ class Provider:
             None, {"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "export": {}, "guess": {}}
         ),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
-        dry_run: Arg[bool] = Arg(None, False),
-        spherical_sad_guess: Arg[bool] = Arg(None, True),
         target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
@@ -468,8 +466,6 @@ class Provider:
                     Arg(qp_prep_instance["outs"][0]["id"], None),
                     Arg(qp_prep_instance["outs"][1]["id"], None),
                     Arg(qp_prep_instance["outs"][2]["id"], None),
-                    dry_run,
-                    spherical_sad_guess,
                 ],
                 target,
                 resources,
