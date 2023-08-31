@@ -12,17 +12,17 @@ from pathlib import Path
 
 import tengu
 
-TOKEN = "your qdx access token"
+TOKEN = "your tengu access token"
 
 # get our client to talk with the API
 client = tengu.Provider(access_token=TOKEN)
 
-# get newest versions modules that can be run
+# get newest module versions
 modules = client.latest_modules()
 # or for all modules
 modules = client.modules()
 
-# get input arguments that need to be provided for module
+# get input arguments needed for module
 print(modules[0]["ins"])
 
 ## running convert
@@ -50,22 +50,22 @@ client.poll_module_instance(id)
 // status, progress, logs, outs - out values will be null until module_instance is done
 ```
 
-## Local runner
-
-We also provide a local executor, that will run modules locally, without making remote calls
-
-First, you must have nix installed and configured with an access token for qdx projects.
-
-Then you must install the tengu-runtime with `nix run github:talo/tengu#tengu-runtime -- install`
-
-Finally, you can run locally with
-
+## Sample Hermes Run
+This will perform a Hermes calculation on a raw input file, without doing any transformations
 ``` python
-from tengu import LocalProvider
 
-client = LocalProvider()
+instance = client.run(
+    "github:talo/tengu-prelude/60662930969362ce73d321b38929dac878e4ec9f#hermes_raw",
+    provider.upload_arg(Path("params.json")),
+    "GADI",
+    {"walltime": 400},
+)
 
-## you should be able to use client.run / client.object / client.module_instance / client.poll_module instance as normal
+# keep polling to see if module_instance is successful. This may take a while
+completed_instance = client.poll_module_instance(instance["id"], n_retries=10, poll_rate=10) 
+
+# the result will be an object, so fetch from object store
+client.object(completed_instance["outs"][0]["id"]) # will return the json energy results
 ```
 
 ## Sample QP Run
@@ -116,7 +116,7 @@ qp_instances = client.qp_run(
         ],
     ),
     "GADI",
-    {"walltime": 420},
+    {"walltime": 400},
     autopoll = (10, 100) # optionally configure polling to wait on the final instance, 
                          # and clean up if any of the prior instances fails
 )
@@ -127,4 +127,22 @@ completed_instance = client.poll_module_instance(qp_collate_instance[2]["id"])
 
 # the result will be an object, so fetch from object store
 client.object(completed_instance["outs"][0]["id"]) # will return the json qp results
+```
+
+## Local runner
+
+We also provide a local executor, that will run modules locally, without making remote calls
+
+First, you must have nix installed and configured with an access token for qdx projects.
+
+Then you must install the tengu-runtime with `nix run github:talo/tengu#tengu-runtime -- install`
+
+Finally, you can run locally with
+
+``` python
+from tengu import LocalProvider
+
+client = LocalProvider()
+
+## you should be able to use client.run / client.object / client.module_instance / client.poll_module instance as normal
 ```

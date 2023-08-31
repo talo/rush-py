@@ -96,6 +96,8 @@ query ($first: Int, $after: String, $last: Int, $before: String, $names: [String
             path
             created_at
             deleted_at
+            usage
+            description
             ins
             outs
         }
