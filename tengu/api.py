@@ -177,7 +177,16 @@ module_instance_query = gql(
     stderr {
       nodes { content id created_at }
     }
-  } }"""
+    resource_utilization {
+      sus
+      gpu
+      target
+      storage
+      walltime
+      cputime
+      mem
+    }
+    } }"""
 )
 
 module_instances_query = gql(
