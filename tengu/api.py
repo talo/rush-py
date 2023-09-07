@@ -223,13 +223,10 @@ frag_keywords = {
     "monomer_cutoff": 30,
     "monomer_mp2_cutoff": 30,
     "ngpus_per_node": 1,
-    "reference_fragment": 293,
+    "reference_fragment": 1,
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
     "fragmented_energy_type": "InteractivityEnergy",
-    "density_matrix_export": False,
-    "monomer_density_storage": True,
-    "monolithic_density_matrix_export": False,
 }
 
 scf_keywords = {
@@ -424,7 +421,9 @@ class Provider:
         lig_type: Arg[Literal["sdf", "mol2"]],
         lig_res_id: Arg[str],
         model: Arg[dict[str, Any]] = Arg(None, default_model),
-        keywords: Arg[dict[str, Any]] = Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+        keywords: Arg[dict[str, Any]] = Arg(
+            None, {"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "export": {}, "guess": {}}
+        ),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         dry_run: Arg[bool] = Arg(None, False),
         spherical_sad_guess: Arg[bool] = Arg(None, True),
