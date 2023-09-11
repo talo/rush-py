@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 import tengu
+from tengu import Arg
 
 TOKEN = "your tengu access token"
 
@@ -37,7 +38,7 @@ protein_pdb = Path("./examples/4w9f_prepared_protein.pdb")
 file_arg = client.upload_arg(protein_pdb)
 
 convert_res = client.run("github:talo/tengu-prelude/77e44748f1d1e20c463ef34cc40178d4f656ef0a#convert", [
-Arg(value = "PDB"), file_arg
+  Arg(value = "PDB"), file_arg
 ])
 
 // res contains "id" - the instance id; and "outs" - the ids of the return values
@@ -45,7 +46,7 @@ Arg(value = "PDB"), file_arg
 // we can pass arguments by "id" reference or by value literal
 
 pick_res = client.run("github:talo/tengu-prelude/f8e2e55d9bd428aa7f2bbe3f87c24775fa592b10#pick_conformer", [
-Arg( id =  res["outs"][0]["id"] ), Arg( value = 0 ) }
+  Arg( id =  res["outs"][0]["id"] ), Arg( value = 0 ) }
 ])
 
 client.poll_module_instance(id)
@@ -134,11 +135,11 @@ frag_keywords = {
     "method": "MBE",
     "monomer_cutoff": 30,
     "monomer_mp2_cutoff": 30,
-    "ngpus_per_node": 4,
-    "reference_fragment": 293,
+    "ngpus_per_node": 1,
+    "reference_fragment": 1,
     "trimer_cutoff": 10,
     "trimer_mp2_cutoff": 10,
-    "lattice_energy_calc": True,
+    "fragmented_energy_type": "InteractivityEnergy",
 }
 
 scf_keywords = {
@@ -158,16 +159,14 @@ qp_instances = client.qp_run(
     provider.upload_arg(Path("some.pdb")),
     provider.upload_arg(Path("some.gro")),
     provider.upload_arg(Path("some.sdf")),
-    Arg(None, "sdf"),
-    Arg(None, "MOL"),
+    Arg(value = "sdf"),
+    Arg(value = "MOL"), # id of ligand in pdb
     Arg(
-        None,
-        default_model,
+        value = default_model,
     ),
-    Arg(None, {"frag": frag_keywords, "scf": scf_keywords}),
+    Arg(value = {"frag": frag_keywords, "scf": scf_keywords}),
     Arg(
-        None,
-        [
+        value = [
             ("GLY", 100), # map of amino acids of interest
         ],
     ),
