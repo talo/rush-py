@@ -431,3 +431,13 @@ def test_retry():
     instance = next(client.module_instances())[0]
     # this means that the instance made some progress, so we can retry it
     client.retry(instance["id"])
+
+
+def test_list_modules():
+    client = init_client()
+
+    modules = []
+    for page in client.latest_modules():
+        modules += [module for module in page]
+
+    assert len(modules) > 0

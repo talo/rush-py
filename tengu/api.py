@@ -305,14 +305,14 @@ class Provider:
         self.client = Client(transport=transport)
 
     def _query_with_pagination(self, query, variables: dict[str, Any], page_info_path, nodes_path):
-        page_info_res = {"hasNextPage": True, "endCursor": None}
+        original_before = variables.get("before")
+        page_info_res = {"hasPreviousPage": True, "endCursor": original_before}
 
-        while page_info_res["hasNextPage"]:
-            result = self.client.execute(
-                query, variable_values={"before": page_info_res["endCursor"]} | variables
-            )
+        while page_info_res["hasPreviousPage"]:
+            new_vars = variables | {"before": page_info_res["endCursor"]}
+            result = self.client.execute(query, variable_values=new_vars)
 
-            page_info_res = reduce(dict.get, page_info_path, result) or {"hasNextPage": False}
+            page_info_res = reduce(dict.get, page_info_path, result) or {"hasPreviousPage": False}
             yield reduce(dict.get, nodes_path, result) or []
 
     def argument(self, id: str) -> Any:
