@@ -42,7 +42,7 @@ where = [""]
 
 [tool.poetry]
 name = "tengu-py"
-version = "0.10.2"
+version = "0.11.0"
 description = "Python SDK for interacting with the QDX Tengu API and modules"
 authors = ["Ryan Swart <ryan@talosystems.com>"]
 readme = "README.md"

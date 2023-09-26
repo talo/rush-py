@@ -8,10 +8,28 @@ from typing import Literal
 
 from tengu.api import Arg, Provider
 
+
+def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] | None:
+    match s:
+        case None:
+            return None
+        case "NIX":
+            return s
+        case "GADI":
+            return s
+        case "NIX_SSH":
+            return s
+        case "SETONIX":
+            return s
+        case _:
+            raise ValueError(f"Invalid target {s}")
+
+
 API_URL = os.getenv("INTEGRATION_SERVER_URL") or "http://localhost:8080"
 TOKEN = os.getenv("INTEGRATION_TOKEN") or "b52509e6-5e61-4ae8-b43a-35a0ade4d806"
-TARGET: Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] = os.getenv("INTEGRATION_TARGET") or "GADI"
+TARGET: Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] = check_target(os.getenv("INTEGRATION_TARGET")) or "GADI"
 TARGET_GPUS = 4 if TARGET == "GADI" else 8 if TARGET == "SETONIX" else 1
+
 
 # We run pytest directly for integration tests, so we don't get test data alongside and have to explicitly
 # provide it
@@ -34,9 +52,9 @@ modules = None
 
 
 def get_modules(client: Provider):
-    module_list = client.latest_modules()
+    module_list = next(client.latest_modules())
     if module_list:
-        modules = {module["path"].split("#")[1]: module["path"] for module in module_list["nodes"]}
+        modules = {module["path"].split("#")[1]: module["path"] for module in module_list}
         return modules
     return None
 
@@ -278,6 +296,10 @@ def test_gmx_tengu_protein_only():
                             ("nstxout-compressed", "1"),
                             ("nstlog", "1"),
                         ],
+                        "em": [],
+                        "nvt": [],
+                        "ions": [],
+                        "npt": [],
                     },
                     "num_gpus": 0,
                     "num_replicas": 1,
@@ -403,11 +425,9 @@ def test_hermes_energy():
     client.object(completed_instance["outs"][0]["id"])  # will return the json energy results
 
 
-def test_retry_naughty():
+def test_retry():
     client = init_client()
 
-    instances = client.module_instances(tags=["Jak2_Cocrystal_PRT1008447-001_P212121_1.34A"], status="FAILED")
-    for instance in instances:
-        if instance["progress"]:
-            # this means that the instance made some progress, so we can retry it
-            client.retry()
+    instance = next(client.module_instances())[0]
+    # this means that the instance made some progress, so we can retry it
+    client.retry(instance["id"])

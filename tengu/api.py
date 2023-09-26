@@ -2,7 +2,8 @@ import base64
 from dataclasses import dataclass
 import time
 from pathlib import Path
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Generic, Iterable, Literal, TypeVar
+from functools import reduce
 
 import dataclasses_json
 from gql import Client, gql
@@ -47,6 +48,15 @@ upload = gql(
     """
 )
 
+page_info = """
+    pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+    }
+"""
+
 
 argument = gql(
     """
@@ -67,6 +77,9 @@ arguments_query = gql(
 query ($first: Int, $after: String, $last: Int, $before: String, $typeinfo: JSON, $tags: [String!]) {
     me { account {
         arguments(first: $first, last: $last, after: $after, before: $before, typeinfo: $typeinfo, tags: $tags) {
+    """
+    + page_info
+    + """
             nodes {
                 id
                 typeinfo
@@ -85,6 +98,9 @@ modules = gql(
     """
 query ($first: Int, $after: String, $last: Int, $before: String, $path: String, $tags: [String!]) {
     modules(first: $first, last: $last, after: $after, before: $before, path: $path, tags: $tags) {
+    """
+    + page_info
+    + """
         nodes {
             id
             path
@@ -103,6 +119,9 @@ latest_modules = gql(
     """
 query ($first: Int, $after: String, $last: Int, $before: String, $names: [String!]) {
     latest_modules(first: $first, last: $last, after: $after, before: $before, names: $names) {
+    """
+    + page_info
+    + """
         nodes {
             id
             path
@@ -184,6 +203,9 @@ module_instance_query = gql(
     + module_instance_fragment
     + """
     stdout {
+    """
+    + page_info
+    + """
       nodes { content id created_at }
     }
     stderr {
@@ -205,6 +227,9 @@ module_instances_query = gql(
     """query($first: Int, $after: String, $last: Int, $before: String, $path: String, $name: String, $status: ModuleInstanceStatus, $tags: [String!]) {
     me { account {
     module_instances(first: $first, last: $last, after: $after, before: $before, path: $path, status: $status, name: $name, tags: $tags) {
+    """
+    + page_info
+    + """
     nodes {
     """
     + module_instance_fragment
@@ -279,6 +304,17 @@ class Provider:
 
         self.client = Client(transport=transport)
 
+    def _query_with_pagination(self, query, variables: dict[str, Any], page_info_path, nodes_path):
+        page_info_res = {"hasNextPage": True, "endCursor": None}
+
+        while page_info_res["hasNextPage"]:
+            result = self.client.execute(
+                query, variable_values={"before": page_info_res["endCursor"]} | variables
+            )
+
+            page_info_res = reduce(dict.get, page_info_path, result) or {"hasNextPage": False}
+            yield reduce(dict.get, nodes_path, result) or []
+
     def argument(self, id: str) -> Any:
         """
         Retrieve an argument from the database.
@@ -296,28 +332,23 @@ class Provider:
         last: int | None = None,
         before: str | None = None,
         tags: list[str] | None = None,
-    ) -> list[Any]:
+    ) -> Iterable[Any]:
         """
         Retrieve a list of arguments.
         """
-        response = self.client.execute(
+        variables = {
+            "first": first,
+            "after": after,
+            "last": last,
+            "before": before,
+            "tags": tags,
+        }
+        return self._query_with_pagination(
             arguments_query,
-            variable_values={
-                "first": first,
-                "after": after,
-                "last": last,
-                "before": before,
-                "tags": tags,
-            },
+            variables,
+            ["me", "account", "arguments", "pageInfo"],
+            ["me", "account", "arguments", "nodes"],
         )
-
-        arguments = response["me"]["account"]["arguments"]
-
-        if arguments:
-            arguments = arguments.get("nodes")
-            if arguments:
-                return arguments
-        return []
 
     def object(self, id):
         """
@@ -348,23 +379,17 @@ class Provider:
         :param before: The cursor to start retrieving modules from.
         :return: A list of modules.
         """
-        response = self.client.execute(
-            latest_modules,
-            variable_values={
-                "first": first,
-                "after": after,
-                "last": last,
-                "before": before,
-                "names": names,
-            },
+        variables = {
+            "first": first,
+            "after": after,
+            "last": last,
+            "before": before,
+            "names": names,
+        }
+
+        return self._query_with_pagination(
+            latest_modules, variables, ["latest_modules", "pageInfo"], ["latest_modules", "nodes"]
         )
-
-        latest_module_res = response.get("latest_modules")
-
-        if latest_module_res:
-            modules = latest_module_res.get("nodes")
-            if modules:
-                return modules
 
     def modules(
         self,
@@ -387,19 +412,17 @@ class Provider:
         :param before: The cursor to start retrieving modules from.
         :return: A list of modules.
         """
-        response = self.client.execute(
-            modules,
-            variable_values={
-                "path": path,
-                "name": name,
-                "first": first,
-                "after": after,
-                "last": last,
-                "before": before,
-                "tags": tags,
-            },
-        )
-        return response.get("modules")
+        variables = {
+            "path": path,
+            "name": name,
+            "first": first,
+            "after": after,
+            "last": last,
+            "before": before,
+            "tags": tags,
+        }
+
+        return self._query_with_pagination(modules, variables, ["modules", "pageInfo"], ["modules", "nodes"])
 
     def run(
         self,
@@ -679,7 +702,7 @@ class Provider:
         name: str | None = None,
         status: Literal["CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED"] | None = None,
         tags: list[str] | None = None,
-    ) -> list[Any]:
+    ) -> Iterable[Any]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
 
@@ -691,27 +714,22 @@ class Provider:
         :param status: Retrieve module instancees with the specified status ("CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED").
         :return: A list of filtered module instancee.
         """
-        response = self.client.execute(
+        variables = {
+            "first": first,
+            "last": last,
+            "before": before,
+            "after": after,
+            "path": path,
+            "name": name,
+            "status": status,
+            "tags": tags,
+        }
+        return self._query_with_pagination(
             module_instances_query,
-            variable_values={
-                "first": first,
-                "last": last,
-                "before": before,
-                "after": after,
-                "path": path,
-                "name": name,
-                "status": status,
-                "tags": tags,
-            },
+            variables,
+            ["me", "account", "module_instances", "pageInfo"],
+            ["me", "account", "module_instances", "nodes"],
         )
-        module_instances = response["me"]["account"]["module_instances"]
-
-        if module_instances:
-            module_instances = module_instances.get("nodes")
-            if module_instances:
-                return module_instances
-
-        return []
 
     def retry(self, id: ModuleInstanceId, resources=None, target=None) -> ModuleInstanceId:
         """
