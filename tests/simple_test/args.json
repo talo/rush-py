@@ -1,0 +1,36 @@
+[
+  "cdk2_fixed_renumbered_nohet.pdb",
+  "cdk2_lig_17.pdb",
+  {
+    "param_overrides": [
+      [
+        "md",
+        [
+          [
+            "nsteps",
+            "10"
+          ],
+          [
+            "dt",
+            "0.002"
+          ],
+          [
+            "nstenergy",
+            "1"
+          ],
+          [
+            "nstxout-compressed",
+            "1"
+          ],
+          [
+            "nstlog",
+            "1"
+          ]
+        ]
+      ]
+    ],
+    "num_gpus": 0,
+    "num_replicas": 1,
+    "ligand_charge": null
+  }
+]

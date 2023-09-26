@@ -19,6 +19,18 @@ mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $modu
 """
 )
 
+retry = gql(
+    """
+mutation retry($instance: ModuleInstanceId!, $resources: ModuleInstanceResourcesInput, $target: ModuleInstanceTarget) {
+    retry(instance: $instance, resources: $resources, target: $target) {
+        id
+        tags
+        target
+    }
+}
+"""
+)
+
 untag = gql(
     """
 mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
@@ -346,7 +358,13 @@ class Provider:
                 "names": names,
             },
         )
-        return response.get("latest_modules")
+
+        latest_module_res = response.get("latest_modules")
+
+        if latest_module_res:
+            modules = latest_module_res.get("nodes")
+            if modules:
+                return modules
 
     def modules(
         self,
@@ -387,7 +405,7 @@ class Provider:
         self,
         path: str,
         args: list[Arg],
-        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
+        target: Literal["GADI", "SETONIX", "NIX", "NIX_SSH"] | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
@@ -694,3 +712,19 @@ class Provider:
                 return module_instances
 
         return []
+
+    def retry(self, id: ModuleInstanceId, resources=None, target=None) -> ModuleInstanceId:
+        """
+        Retry a module instance.
+
+        :param id: The ID of the module instance to be retried.
+        :return: The ID of the new module instance.
+        """
+        response = self.client.execute(
+            retry, variable_values={"instance": id, "resources": resources, "target": target}
+        )
+        taskId = response.get("retry")
+        if taskId:
+            return ModuleInstanceId(taskId["id"])
+        else:
+            raise RuntimeError(response)
