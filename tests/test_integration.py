@@ -9,7 +9,7 @@ from typing import Literal
 from tengu.api import Arg, Provider
 
 
-def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] | None:
+def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "NIX_SSH_2", "SETONIX"] | None:
     match s:
         case None:
             return None
@@ -19,6 +19,8 @@ def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] 
             return s
         case "NIX_SSH":
             return s
+        case "NIX_SSH_2":
+            return s
         case "SETONIX":
             return s
         case _:
@@ -27,7 +29,9 @@ def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] 
 
 API_URL = os.getenv("INTEGRATION_SERVER_URL") or "http://localhost:8080"
 TOKEN = os.getenv("INTEGRATION_TOKEN") or "b52509e6-5e61-4ae8-b43a-35a0ade4d806"
-TARGET: Literal["NIX", "GADI", "NIX_SSH", "SETONIX"] = check_target(os.getenv("INTEGRATION_TARGET")) or "GADI"
+TARGET: Literal["NIX", "GADI", "NIX_SSH", "SETONIX", "NIX_SSH_2"] = (
+    check_target(os.getenv("INTEGRATION_TARGET")) or "GADI"
+)
 TARGET_GPUS = 4 if TARGET == "GADI" else 8 if TARGET == "SETONIX" else 1
 
 
@@ -113,8 +117,18 @@ def test_gmx_tengu():
                             ["nstxout-compressed", "1"],
                             ["nstlog", "1"],
                         ],
+                        "nvt": [
+                            ["nsteps", "1000"],
+                        ],
+                        "npt": [
+                            ["nsteps", "1000"],
+                        ],
+                        "ions": [],
+                        "em": [
+                            ["nsteps", "1000"],
+                        ],
                     },
-                    "num_gpus": 0,
+                    "num_gpus": 4,
                     "num_replicas": 1,
                     "frame_sel": {"begin_time": 1, "end_time": 2, "delta_time": 1},
                     "ligand_charge": None,
@@ -123,7 +137,7 @@ def test_gmx_tengu():
         ],
         target=TARGET,
         tags=["integration_test"],
-        resources={"gpus": 0, "cpus": 48, "mem": 98, "walltime": 60},
+        resources={"gpus": 4, "cpus": 48, "mem": 98, "walltime": 60},
     )
     print(res)
     sleep(100)

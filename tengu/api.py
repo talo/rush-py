@@ -11,7 +11,6 @@ from gql.transport.requests import RequestsHTTPTransport
 
 ModuleInstanceId = str
 
-
 tag = gql(
     """
 mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
@@ -428,7 +427,7 @@ class Provider:
         self,
         path: str,
         args: list[Arg],
-        target: Literal["GADI", "SETONIX", "NIX", "NIX_SSH"] | None = None,
+        target: Literal["GADI", "SETONIX", "NIX", "NIX_SSH", "NIX_SSH_2"] | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
@@ -477,7 +476,7 @@ class Provider:
             None, {"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "export": {}, "guess": {}}
         ),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
-        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
+        target: Literal["GADI", "NIX", "NIX_SSH", "NIX_SSH_2"] | None = None,
         resources: dict[str, Any] | None = None,
         autopoll: tuple[int, int] | None = None,
         tags: list[str] | None = None,
