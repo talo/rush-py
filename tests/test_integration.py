@@ -429,7 +429,7 @@ def test_hermes_energy():
             Arg(value={"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "guess": {}, "export": {}}),
         ],
         TARGET,
-        {"walltime": 40, "gpus": TARGET_GPUS},
+        {"walltime": 40, "gpus": TARGET_GPUS, "storage": 2 * 1024 * 1024},
     )
 
     # keep polling to see if module_instance is successful. This may take a while, > 10 mins
