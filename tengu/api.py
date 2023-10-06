@@ -1,6 +1,9 @@
 import base64
-from dataclasses import dataclass
+import json
 import time
+import uuid
+from dataclasses import dataclass
+from io import IOBase
 from pathlib import Path
 from typing import Any, Generic, Iterable, Literal, TypeVar
 from functools import reduce
@@ -9,7 +12,8 @@ import dataclasses_json
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-ModuleInstanceId = str
+ArgId = uuid.UUID
+ModuleInstanceId = uuid.UUID
 
 tag = gql(
     """
@@ -359,6 +363,15 @@ class Provider:
         response = self.client.execute(object_query, variable_values={"id": id})
         return response.get("object")
 
+    def fetch(self, id):
+        """
+        Retrieve an object from the database. An alias for object with clearer name.
+
+        :param id: The ID of the object.
+        :return: The object.
+        """
+        return self.object(id)
+
     def latest_modules(
         self,
         first: int | None = None,
@@ -389,6 +402,27 @@ class Provider:
         return self._query_with_pagination(
             latest_modules, variables, ["latest_modules", "pageInfo"], ["latest_modules", "nodes"]
         )
+
+    def get_latest_module_paths(self, names: list[str] | None = None) -> dict[str, str]:
+        ret = {}
+        for module in self.latest_modules(names=names)["nodes"]:
+            path = module["path"]
+            name = module["path"].split("#")[-1]
+            if path:
+                ret[name] = path
+        return ret
+
+    def load_module_paths(self, filename: Path) -> dict[str, str]:
+        modules = None
+        with open(filename, "r") as f:
+            modules = json.load(f)
+        return modules
+
+    def save_module_paths(self, modules: dict[str, str]):
+        filename = Path(f'modules-{time.strftime("%Y%m%dT%H%M%S")}.json')
+        with open(filename, "w") as f:
+            json.dump(modules, f, indent=2)
+        return filename
 
     def modules(
         self,
@@ -423,6 +457,65 @@ class Provider:
 
         return self._query_with_pagination(modules, variables, ["modules", "pageInfo"], ["modules", "nodes"])
 
+    def run2(
+        self,
+        path: str,
+        args: list[Arg],
+        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
+        resources: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        out_tags: list[list[str] | None] | None = None,
+    ):
+        """
+        Run a module with the given inputs and outputs.
+        :param path: The path of the module.
+        :param args: The arguments to the module.
+        :param target: The target to run the module on.
+        :param resources: The resources to run the module with.
+        :param tags: The tags to apply to the module.
+        :param out_tags: The tags to apply to the outputs of the module.
+                         If provided, must be the same length as the number of outputs.
+        """
+
+        # TODO: less insane version of this
+        def gen_arg_dict(input):
+            arg = None
+            if isinstance(input, Arg):
+                arg = input
+            elif isinstance(input, ArgId):
+                arg = Arg(id=str(input))
+            elif isinstance(input, Path):
+                arg = Arg(value=base64.b64encode(input.read()).decode("utf-8"))
+            elif isinstance(input, IOBase):
+                arg = Arg(value=base64.b64encode(input.read()).decode("utf-8"))
+            else:
+                arg = Arg(value=input)
+            return arg.to_dict()
+
+        arg_dicts = [gen_arg_dict(input for input in args)]
+        response = self.client.execute(
+            run_mutation,
+            variable_values={
+                "instance": {
+                    "path": path,
+                    "args": arg_dicts,
+                    "target": target,
+                    "resources": resources,
+                    "tags": tags,
+                    "out_tags": out_tags,
+                }
+            },
+        )
+        module_instance = response.get("run")
+        if module_instance:
+            out2 = {}
+            # Convert IDs into ArgId type to keep them differentiated from vanilla strings
+            out2["module_instance_id"] = ArgId(module_instance["id"])
+            out2["output_ids"] = [ArgId(out["id"]) for out in module_instance["outs"]]
+            return out2
+        else:
+            raise RuntimeError(response)
+
     def run(
         self,
         path: str,
@@ -442,6 +535,7 @@ class Provider:
         :param out_tags: The tags to apply to the outputs of the module.
                          If provided, must be the same length as the number of outputs.
         """
+
         response = self.client.execute(
             run_mutation,
             variable_values={
@@ -461,7 +555,7 @@ class Provider:
         else:
             raise RuntimeError(response)
 
-    def qp_run(
+    def run_qp(
         self,
         qp_gen_inputs_path: str,
         hermes_energy_path: str,
@@ -478,8 +572,8 @@ class Provider:
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
         target: Literal["GADI", "NIX", "NIX_SSH", "NIX_SSH_2"] | None = None,
         resources: dict[str, Any] | None = None,
-        autopoll: tuple[int, int] | None = None,
         tags: list[str] | None = None,
+        autopoll: tuple[int, int] | None = None,
     ):
         """
         Construct the input and output module instance calls for QP run.
@@ -618,7 +712,7 @@ class Provider:
 
     def upload_arg(self, file: Path) -> Arg:
         """
-        Converts a file to bas64 and formats it for use as an argument
+        Converts a file to base64 and formats it for use as an argument
 
         :param file: The file to be uploaded.
         :return: The formatted file.

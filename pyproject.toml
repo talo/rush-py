@@ -52,11 +52,12 @@ packages = [{include = "tengu"}]
 # tengu = "tengu.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.13"
 dataclasses-json = "^0.5.14"
 gql = {extras = ["requests"], version = "^3.4.0"}
 datargs = "^0.11.0"
 rdkit-pypi = "^2022.9.5"
+uuid = "^1.30"
 
 
 [tool.poetry.group.dev.dependencies]
