@@ -19,7 +19,7 @@ TOKEN = "your tengu access token"
 client = tengu.Provider(access_token=TOKEN)
 
 # get newest module versions
-modules = client.latest_modules()
+modules = next(client.latest_modules())
 
 # get desciption and usage module
 print(modules[0]["description"])
@@ -39,7 +39,7 @@ file_arg = client.upload_arg(protein_pdb)
 
 convert_res = client.run("github:talo/tengu-prelude/77e44748f1d1e20c463ef34cc40178d4f656ef0a#convert", [
   Arg(value = "PDB"), file_arg
-])
+], tags=["my_run_identifier"])
 
 // res contains "id" - the instance id; and "outs" - the ids of the return values
 

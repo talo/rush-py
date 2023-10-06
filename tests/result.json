@@ -1,0 +1,44 @@
+{
+  "dimer_energies": {
+    "dimer_distances": [28.548466018211172],
+    "dimers": [[0, 293]],
+    "hf": [-2446.704742491938],
+    "hf_interaction": [0.0003925613032151886],
+    "mp2_os": [-4.133824821953601],
+    "mp2_os_interaction": [-0.00004954272686497063],
+    "mp2_ss": [-1.4931783567909886],
+    "mp2_ss_interaction": [-0.000028641359723247103]
+  },
+  "energy": {
+    "hf": 0.0003925613032151886,
+    "mp2_os": -0.00004954272686497063,
+    "mp2_ss": -0.000028641359723247103
+  },
+  "fragment_basis_functions": [
+    {
+      "n_occupied_basis_functions": 47,
+      "n_virtual_basis_functions": 213,
+      "total_n_basis_functions": 260
+    },
+    {
+      "n_occupied_basis_functions": 99,
+      "n_virtual_basis_functions": 379,
+      "total_n_basis_functions": 478
+    },
+    {
+      "n_occupied_basis_functions": 146,
+      "n_virtual_basis_functions": 592,
+      "total_n_basis_functions": 738
+    }
+  ],
+  "full_system_basis_functions": {
+    "n_occupied_basis_functions": 9324,
+    "n_virtual_basis_functions": 39735,
+    "total_n_basis_functions": 49059
+  },
+  "monomer_energies": {
+    "hf": [-567.4352599265206, -1879.2698751267203],
+    "mp2_os": [-1.4061340032321734, -2.727641275994562],
+    "mp2_ss": [-0.4757519585222556, -1.0173977569090098]
+  }
+}
