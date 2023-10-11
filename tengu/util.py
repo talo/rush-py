@@ -6,7 +6,7 @@ from rdkit import Chem
 
 from .api import ArgId
 
-RDKitMol = Chem.rdchem.mol
+RDKitMol = Chem.rdchem.Mol
 SDMolSupplier: Callable[[str], Iterable[RDKitMol]] = cast(Any, Chem).SDMolSupplier
 MolToPDBBlock: Callable[..., RDKitMol] = cast(Any, Chem).MolToPDBBlock
 

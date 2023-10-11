@@ -3,10 +3,10 @@ import json
 import time
 import uuid
 from dataclasses import dataclass
+from functools import reduce
 from io import IOBase
 from pathlib import Path
 from typing import Any, Generic, Iterable, Literal, TypeVar
-from functools import reduce
 
 import dataclasses_json
 from gql import Client, gql
@@ -405,11 +405,13 @@ class Provider:
 
     def get_latest_module_paths(self, names: list[str] | None = None) -> dict[str, str]:
         ret = {}
-        for module in self.latest_modules(names=names)["nodes"]:
-            path = module["path"]
-            name = module["path"].split("#")[-1]
-            if path:
-                ret[name] = path
+        module_pages = self.latest_modules(names=names)
+        for module_page in module_pages:
+            for module in module_page:
+                path = module["path"]
+                name = module["path"].split("#")[-1]
+                if path:
+                    ret[name] = path
         return ret
 
     def load_module_paths(self, filename: Path) -> dict[str, str]:
@@ -485,14 +487,14 @@ class Provider:
             elif isinstance(input, ArgId):
                 arg = Arg(id=str(input))
             elif isinstance(input, Path):
-                arg = Arg(value=base64.b64encode(input.read()).decode("utf-8"))
+                arg = Arg(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
             elif isinstance(input, IOBase):
-                arg = Arg(value=base64.b64encode(input.read()).decode("utf-8"))
+                arg = Arg(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
             else:
                 arg = Arg(value=input)
             return arg.to_dict()
 
-        arg_dicts = [gen_arg_dict(input for input in args)]
+        arg_dicts = [gen_arg_dict(input) for input in args]
         response = self.client.execute(
             run_mutation,
             variable_values={
@@ -619,7 +621,7 @@ class Provider:
             )
 
             print("launched hermes_instance", hermes_instance)
-        except:
+        except Exception:
             self.delete_module_instance(qp_prep_instance["id"])
             raise
 
@@ -633,7 +635,7 @@ class Provider:
                 tags=tags,
                 out_tags=([tags] if tags else None),
             )
-        except:
+        except Exception:
             self.delete_module_instance(qp_prep_instance["id"])
             self.delete_module_instance(hermes_instance["id"])
             raise
