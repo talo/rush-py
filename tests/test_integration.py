@@ -137,7 +137,7 @@ def test_gmx_tengu():
         ],
         target=TARGET,
         tags=["integration_test"],
-        resources={"gpus": 4, "cpus": 48, "mem": 98, "walltime": 60},
+        resources={"gpus": 4, "cpus": 48, "walltime": 60},
     )
     print(res)
     sleep(100)
@@ -148,7 +148,7 @@ def test_gmx_tengu():
         [Arg(id=res["outs"][0]["id"]), Arg(value=0), Arg(value=10), Arg(), Arg(value=48)],
         target=TARGET,
         tags=["integration_test"],
-        resources={"gpus": 0, "cpus": 48, "mem": 98},
+        resources={"gpus": 0, "cpus": 48, "mem": 98 * 1024, "storage": 1 * 1024 * 1024 * 1024},
     )
 
     # select frames
@@ -157,7 +157,7 @@ def test_gmx_tengu():
         [Arg(id=res["outs"][0]["id"]), Arg(value={"frame_selection": [120, 140, 160]})],
         target=TARGET,
         tags=["integration_test"],
-        resources={"gpus": 0, "cpus": 48, "mem": 98},
+        resources={"gpus": 0, "cpus": 48, "mem": 98 * 1024, "storage": 1 * 1024 * 1024 * 1024},
     )
 
     res_poll = client.poll_module_instance(res["id"])
@@ -310,10 +310,16 @@ def test_gmx_tengu_protein_only():
                             ("nstxout-compressed", "1"),
                             ("nstlog", "1"),
                         ],
-                        "em": [],
-                        "nvt": [],
+                        "em": [
+                            ("nsteps", "1000"),
+                        ],
+                        "nvt": [
+                            ("nsteps", "1000"),
+                        ],
+                        "npt": [
+                            ("nsteps", "1000"),
+                        ],
                         "ions": [],
-                        "npt": [],
                     },
                     "num_gpus": 0,
                     "num_replicas": 1,
@@ -324,7 +330,7 @@ def test_gmx_tengu_protein_only():
         ],
         target=TARGET,
         tags=["integration_test"],
-        resources={"gpus": 0, "cpus": 48, "mem": 98, "walltime": 60},
+        resources={"gpus": 0, "cpus": 48, "walltime": 60, "storage": 1 * 1024 * 1024 * 1024},
     )
     print(res)
     sleep(100)
