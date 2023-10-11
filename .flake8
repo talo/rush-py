@@ -1,0 +1,7 @@
+[flake8]
+# Increase line length because it is no longer 1804
+max-line-length = 110
+extend-ignore =
+    # See https://github.com/PyCQA/pycodestyle/issues/373
+    E203,D202,D105
+
