@@ -372,7 +372,11 @@ class Provider:
         """
         if isinstance(id, ArgId):
             id = str(id)
-        return self.object(id)
+        obj = self.object(id)
+        if obj.get("url"):
+           return requests.get(obj["url"])
+        else:
+           return obj
 
     def latest_modules(
         self,
