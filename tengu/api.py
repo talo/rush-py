@@ -691,6 +691,8 @@ class Provider:
         """
         Poll a module instance until it is completed, with a specified number of retries and poll rate.
 
+        We do exponential backoff from 0.5s, so a retry only counts once we hit the input poll rate.
+
         :param id: The ID of the module instance to be polled.
         :param n_retries: The maximum number of retries. Default is 10.
         :param poll_rate: The poll rate in seconds. Default is 30.
@@ -701,9 +703,13 @@ class Provider:
 
         if isinstance(id, ModuleInstanceId):
             id = str(id)
+
+        curr_poll_rate = 0.5
         while n_try < n_retries:
-            time.sleep(poll_rate)
-            n_try += 1
+            time.sleep(curr_poll_rate)
+            if curr_poll_rate == poll_rate:
+                n_try += 1
+            curr_poll_rate = min(curr_poll_rate * 2, poll_rate)
             response = self.client.execute(module_instance_query, variable_values={"id": id})
             module_instance: dict[str, Any] | None = response.get("module_instance")
             if module_instance and module_instance["status"] in ["COMPLETED", "FAILED"]:
