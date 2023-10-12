@@ -370,6 +370,8 @@ class Provider:
         :param id: The ID of the object.
         :return: The object.
         """
+        if isinstance(id, ArgId):
+            id = str(id)
         return self.object(id)
 
     def latest_modules(
