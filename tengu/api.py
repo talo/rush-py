@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Generic, Iterable, Literal, TypeVar
 
 import dataclasses_json
+import requests
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
@@ -363,20 +364,25 @@ class Provider:
         response = self.client.execute(object_query, variable_values={"id": id})
         return response.get("object")
 
-    def fetch(self, id):
+    def download_object(self, id, filepath):
         """
-        Retrieve an object from the database. An alias for object with clearer name.
+        Retrieve an object from the store: a wrapper for object with simpler behavior.
 
         :param id: The ID of the object.
-        :return: The object.
+        :param filepath: Where to download the object.
         """
         if isinstance(id, ArgId):
             id = str(id)
         obj = self.object(id)
-        if obj.get("url"):
-           return requests.get(obj["url"])
+        if "url" in obj:
+            with requests.get(obj["url"], stream=True) as r:
+                r.raise_for_status()
+                with open(filepath, "wb") as f:
+                    for chunk in r.iter_content():
+                        f.write(chunk)
         else:
-           return obj
+            with open(filepath, "w") as f:
+                f.write(obj)
 
     def latest_modules(
         self,
@@ -693,6 +699,8 @@ class Provider:
         """
         n_try = 0
 
+        if isinstance(id, ModuleInstanceId):
+            id = str(id)
         while n_try < n_retries:
             time.sleep(poll_rate)
             n_try += 1
