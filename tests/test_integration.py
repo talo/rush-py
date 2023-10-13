@@ -2,11 +2,12 @@
 
 import os
 import json
+import tempfile
 from pathlib import Path
 from time import sleep
 from typing import Literal
 
-from tengu.api import Arg, Provider
+from tengu.api import Arg, Provider, Targets
 
 
 def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "NIX_SSH_2", "SETONIX"] | None:
@@ -29,9 +30,8 @@ def check_target(s: str | None) -> Literal["NIX", "GADI", "NIX_SSH", "NIX_SSH_2"
 
 API_URL = os.getenv("INTEGRATION_SERVER_URL") or "http://localhost:8080"
 TOKEN = os.getenv("INTEGRATION_TOKEN") or "b52509e6-5e61-4ae8-b43a-35a0ade4d806"
-TARGET: Literal["NIX", "GADI", "NIX_SSH", "SETONIX", "NIX_SSH_2"] = (
-    check_target(os.getenv("INTEGRATION_TARGET")) or "GADI"
-)
+
+TARGET: Targets = check_target(os.getenv("INTEGRATION_TARGET")) or "GADI"
 TARGET_GPUS = 4 if TARGET == "GADI" else 8 if TARGET == "SETONIX" else 1
 
 
@@ -55,22 +55,14 @@ def init_client(test_url=API_URL, token=TOKEN) -> Provider:
 modules = None
 
 
-def get_modules(client: Provider):
-    module_list = next(client.latest_modules())
-    if module_list:
-        modules = {module["path"].split("#")[1]: module["path"] for module in module_list}
-        return modules
-    return None
-
-
 def test_qp():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("qp_gen_inputs") is not None
     assert modules.get("hermes_energy") is not None
     assert modules.get("qp_collate") is not None
-    res = client.qp_run(
+    res = client.run_qp(
         modules["qp_gen_inputs"],
         modules["hermes_energy"],
         modules["qp_collate"],
@@ -86,7 +78,10 @@ def test_qp():
         ),
         target=TARGET,
         tags=["integration_test"],
-        resources={"gpus": TARGET_GPUS},
+        resources={
+            "gpus": TARGET_GPUS,
+            "storage": 1 * 1024 * 1024,
+        },
         autopoll=(100, 100),
     )
     if not isinstance(res, list):
@@ -97,7 +92,7 @@ def test_qp():
 
 def test_gmx_tengu():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("gmx_tengu_pdb") is not None
     assert modules.get("gmx_mmpbsa_tengu") is not None
@@ -172,7 +167,7 @@ def test_gmx_tengu():
 
 def test_convert():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("convert") is not None
     res = client.run(
@@ -195,7 +190,7 @@ def test_convert():
 
 def test_hermes_density():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("hermes_energy") is not None
 
@@ -255,21 +250,20 @@ def test_hermes_density():
     client.object(completed_instance["outs"][0]["id"])  # will return the json energy results
 
 
-def test_fetch_result():
-    client = init_client()
+# def test_fetch_result():
+#     client = init_client()
 
-    json.dump(
-        client.object("420bcfbf-face-42d8-9354-d5284791718a"),
-        open("out_qdxf.json", "w"),
-        indent=2,
-        # sort_keys=True,
-    )  # will return the json energy results
-    assert False
+#     json.dump(
+#         client.object("420bcfbf-face-42d8-9354-d5284791718a"),
+#         open("out_qdxf.json", "w"),
+#         indent=2,
+#         # sort_keys=True,
+#     )  # will return the json energy results
 
 
 def test_gnina():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("gnina_tengu_pdb") is not None
     res = client.run(
@@ -292,7 +286,7 @@ def test_gnina():
 
 def test_gmx_tengu_protein_only():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("gmx_tengu_pdb") is not None
     res = client.run(
@@ -341,7 +335,7 @@ def test_gmx_tengu_protein_only():
 
 def test_hermes_lattice():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("hermes_lattice") is not None
 
@@ -394,7 +388,7 @@ def test_hermes_lattice():
 
 def test_hermes_energy():
     client = init_client()
-    modules = get_modules(client)
+    modules = client.get_latest_module_paths()
     assert modules
     assert modules.get("hermes_energy") is not None
 
@@ -461,3 +455,19 @@ def test_list_modules():
         modules += [module for module in page]
 
     assert len(modules) > 0
+
+
+def test_save_and_restore_modules():
+    client = init_client()
+    modules = client.get_latest_module_paths()
+    assert len(modules) > 0
+
+    # get temporary path
+    temp_path = tempfile.NamedTemporaryFile()
+
+    client.save_module_paths(modules, Path(temp_path.name))
+
+    loaded = client.load_module_paths(Path(temp_path.name))
+
+    assert len(loaded) == len(modules)
+    assert loaded == modules

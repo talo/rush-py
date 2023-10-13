@@ -16,6 +16,8 @@ from gql.transport.requests import RequestsHTTPTransport
 ArgId = uuid.UUID
 ModuleInstanceId = uuid.UUID
 
+Targets = Literal["GADI", "NIX", "NIX_SSH", "NIX_SSH_2", "SETONIX"]
+
 tag = gql(
     """
 mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
@@ -308,13 +310,17 @@ class Provider:
 
         self.client = Client(transport=transport)
 
-    def _query_with_pagination(self, query, variables: dict[str, Any], page_info_path, nodes_path):
+    def _query_with_pagination(
+        self, query, variables: dict[str, Any], page_info_path: list[str], nodes_path: list[str]
+    ):
         original_before = variables.get("before")
         page_info_res = {"hasPreviousPage": True, "endCursor": original_before}
 
         while page_info_res["hasPreviousPage"]:
             new_vars = variables | {"before": page_info_res["endCursor"]}
             result = self.client.execute(query, variable_values=new_vars)
+            if result is None:
+                raise RuntimeError(result)
 
             page_info_res = reduce(dict.get, page_info_path, result) or {"hasPreviousPage": False}
             yield reduce(dict.get, nodes_path, result) or []
@@ -362,9 +368,13 @@ class Provider:
         :return: The object.
         """
         response = self.client.execute(object_query, variable_values={"id": id})
-        return response.get("object")
 
-    def download_object(self, id, filepath):
+        object = response.get("object")
+        if object is None:
+            raise RuntimeError(response)
+        return object
+
+    def download_object(self, id, filepath: Path):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
 
@@ -374,6 +384,7 @@ class Provider:
         if isinstance(id, ArgId):
             id = str(id)
         obj = self.object(id)
+
         if "url" in obj:
             with requests.get(obj["url"], stream=True) as r:
                 r.raise_for_status()
@@ -416,6 +427,11 @@ class Provider:
         )
 
     def get_latest_module_paths(self, names: list[str] | None = None) -> dict[str, str]:
+        """
+        Get the latest module paths for a list of modules.
+
+        :param names: The names of the modules.
+        """
         ret = {}
         module_pages = self.latest_modules(names=names)
         for module_page in module_pages:
@@ -427,13 +443,23 @@ class Provider:
         return ret
 
     def load_module_paths(self, filename: Path) -> dict[str, str]:
+        """
+        Load all of the module versions from a file.
+
+        :param filename: Json module version file
+        """
         modules = None
         with open(filename, "r") as f:
             modules = json.load(f)
         return modules
 
-    def save_module_paths(self, modules: dict[str, str]):
-        filename = Path(f'modules-{time.strftime("%Y%m%dT%H%M%S")}.json')
+    def save_module_paths(self, modules: dict[str, str], filename: Path | None = None):
+        """
+        Lock all of the module versions to a file.
+
+        :param modules: The modules to lock.
+        """
+        filename = filename or Path(f'modules-{time.strftime("%Y%m%dT%H%M%S")}.json')
         with open(filename, "w") as f:
             json.dump(modules, f, indent=2)
         return filename
@@ -475,7 +501,7 @@ class Provider:
         self,
         path: str,
         args: list[Arg],
-        target: Literal["GADI", "NIX", "NIX_SSH"] | None = None,
+        target: Targets | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
@@ -534,7 +560,7 @@ class Provider:
         self,
         path: str,
         args: list[Arg],
-        target: Literal["GADI", "SETONIX", "NIX", "NIX_SSH", "NIX_SSH_2"] | None = None,
+        target: Targets | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
@@ -584,7 +610,7 @@ class Provider:
             None, {"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "export": {}, "guess": {}}
         ),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
-        target: Literal["GADI", "NIX", "NIX_SSH", "NIX_SSH_2"] | None = None,
+        target: Targets | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         autopoll: tuple[int, int] | None = None,
@@ -801,6 +827,12 @@ class Provider:
         file: Path | str,
         typeinfo: dict[str, Any],
     ):
+        """
+        Upload an Object with typeinfo and store as an Argument.
+
+        :param file: The file to be uploaded.
+        :param typeinfo: The typeinfo of the file.
+        """
         with open(file, "rb") as f:
             response = self.client.execute(
                 upload, variable_values={"file": f, "typeinfo": typeinfo}, upload_files=True
@@ -817,7 +849,7 @@ class Provider:
         name: str | None = None,
         status: Literal["CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED"] | None = None,
         tags: list[str] | None = None,
-    ) -> Iterable[Any]:
+    ):
         """
         Retrieve a list of module instancees filtered by the given parameters.
 
