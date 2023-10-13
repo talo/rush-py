@@ -42,7 +42,7 @@ where = [""]
 
 [tool.poetry]
 name = "tengu-py"
-version = "0.11.2"
+version = "0.12.1"
 description = "Python SDK for interacting with the QDX Tengu API and modules"
 authors = ["Ryan Swart <ryan@talosystems.com>"]
 readme = "README.md"
@@ -55,7 +55,6 @@ packages = [{include = "tengu"}]
 python = ">=3.10,<3.13"
 dataclasses-json = "^0.5.14"
 gql = {extras = ["requests"], version = "^3.4.0"}
-uuid = "^1.30"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
