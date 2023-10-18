@@ -527,7 +527,11 @@ class Provider:
             elif isinstance(input, Path):
                 arg = Arg(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
             elif isinstance(input, IOBase):
-                arg = Arg(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
+                data = input.read()
+                # The only other case is bytes-like, i.e. isinstance(data, (bytes, bytearray))
+                if isinstance(data, str):
+                    data = data.encode("utf-8")
+                arg = Arg(value=base64.b64encode(data).decode("utf-8"))
             else:
                 arg = Arg(value=input)
             return arg.to_dict()
