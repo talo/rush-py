@@ -91,49 +91,53 @@ FROZEN_MODULES_FILEPATH = 'tengu-modules-20231006T132244.json'
 frozen_modules = client.load_module_paths(FROZEN_MODULES_FILEPATH)
 ```
 
-Below we’ll call modules using `client.run2(...)`.
+Below we’ll call modules using `client.run2()`.
 
-The parameters to client.run2() are as follows: - `module_path`: The
-endpoint of the module we’ll be running; - `args`: A list of the
-arguments to the module; an argument can be one of the following: 1. A
-`pathlib.Path` or a file-like object like `BufferedReader`, `FileIO`,
-`StringIO` etc.:  
-Loads the data in the file as an argument.  
-**NOTE**: The uploaded value isn’t just the string of the file, so don’t
-pass the string directly; pass the path or wrap in StringIO. 2. A
-`tengu.ArgId`:  
-Uses an object already uploaded to tengu, such as outputs of other run
-calls.  
-See below for more details. It’s easier to understand when you see an
-example. 3. A parameter, i.e. a value of any other type, including
-`None`:  
-Tengu modules take configs as json in the backend; we’ll convert for
-you.  
-Just pass arguments directly, as per the schema for the module you’re
-running. - `target`: The machine we want to run on (`NIX_SSH` for a
-cluster, `GADI` for a supercomputer). - `resources`: The resources to
-use on the target. - `tags`: Tags to associate with our run, so we can
-easily look up our runs.
+The parameters to `client.run2()` are as follows:
 
-The return value is a dict that contains: - key `"module_instance_id"`
--\> val is a `ModuleInstanceId` for the run itself; - key `"output_ids"`
--\> val is a list of `ArgId`s, one for each output.
+- `module_path`: The endpoint of the module we’ll be running;
+- `args`: A list of the arguments to the module; an argument can be one
+  of the following:
+  1.  A `pathlib.Path` or a file-like object like `BufferedReader`,
+      `FileIO`, `StringIO` etc.:  
+      Loads the data in the file as an argument.  
+      **NOTE**: The uploaded value isn’t just the string of the file, so
+      don’t pass the string directly; pass the path or wrap in StringIO.
+  2.  A `tengu.ArgId`:  
+      Uses an object already uploaded to tengu, such as outputs of other
+      run calls.  
+      See below for more details. It’s easier to understand when you see
+      an example.
+  3.  A parameter, i.e. a value of any other type, including `None`:  
+      Tengu modules take configs as json in the backend; we’ll convert
+      for you.  
+      Just pass arguments directly, as per the schema for the module
+      you’re running.
+- `target`: The machine we want to run on (`NIX_SSH` for a cluster,
+  `GADI` for a supercomputer).
+- `resources`: The resources to use on the target.
+- `tags`: Tags to associate with our run, so we can easily look up our
+  runs.
+
+The return value is a dict that contains:
+
+- key `"module_instance_id"` -\> val is a `ModuleInstanceId` for the run
+  itself;
+- key `"output_ids"` -\> val is a list of `ArgId`s, one for each output.
 
 Both of these ID types have the form of a UUID. This ID lets you
-manipulate the output of this module without having to: 1) Wait for the
-module to finish its computation, or 2) Download the actual value
-corresponding to this output.
+manipulate the output of this module without having to:
+
+1.  Wait for the module to finish its computation, or
+2.  Download the actual value corresponding to this output.
 
 You can pass it to subsequent modules as if it were the value itself, or
 you can wait on it to obtain the value itself.
 
-<div class="alert alert-block alert-warning">
-
-A coming improvement will provide explicit naming and type info for the
-inputs and outputs of each module, which will improve clarity and
-discoverability.
-
-</div>
+> \[!NOTE\]  
+> A coming improvement will provide explicit naming and type info for
+> the inputs and outputs of each module, which will improve clarity and
+> discoverability.
 
 ### 1.1) Prep the protein
 
