@@ -1,3 +1,36 @@
+[tool.poetry]
+name = "tengu-py"
+version = "0.12.1"
+description = "Python SDK for interacting with the QDX Tengu API and modules"
+authors = ["Ryan Swart <ryan@talosystems.com>"]
+readme = "README.md"
+packages = [{include = "tengu"}]
+
+[tool.poetry.scripts]
+# tengu = "tengu.__main__:main"
+
+[tool.poetry.dependencies]
+python = "^3.10,<3.13"
+dataclasses-json = "^0.5.14"
+gql = {extras = ["requests"], version = "^3.4.0"}
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+pytest = "^7.0.0"
+pytest-xdist = "^3.0.0"
+jupyterlab = "^3.6.1"
+nbdev = "^2.3.12"
+parso = "^0.8.3"
+pip = "22.3.1"
+quarto = "^0.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
 [tool]
 [tool.black]
 line-length = 110
@@ -39,30 +72,3 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 exclude = ["test", "tests"]
 where = [""]
-
-[tool.poetry]
-name = "tengu-py"
-version = "0.12.1"
-description = "Python SDK for interacting with the QDX Tengu API and modules"
-authors = ["Ryan Swart <ryan@talosystems.com>"]
-readme = "README.md"
-packages = [{include = "tengu"}]
-
-[tool.poetry.scripts]
-# tengu = "tengu.__main__:main"
-
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-dataclasses-json = "^0.5.14"
-gql = {extras = ["requests"], version = "^3.4.0"}
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
-isort = "^5.12.0"
-flake8 = "^6.0.0"
-pytest = "^7.0.0"
-pytest-xdist = "^3.0.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

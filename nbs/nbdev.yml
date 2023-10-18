@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "tengu-py"
+  site-url: "https://talo.github.io/tengu-py"
+  description: "Test"
+  repo-branch: main
+  repo-url: "https://github.com/talo/tengu-py"
