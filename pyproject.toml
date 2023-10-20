@@ -12,7 +12,7 @@ packages = [{include = "tengu"}]
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
 dataclasses-json = "^0.5.14"
-gql = {extras = ["requests"], version = "^3.4.0"}
+gql = {extras = ["requests"], version = "^3.5.0b"}
 requests-toolbelt = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]

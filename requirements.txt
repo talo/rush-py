@@ -1,2 +1,2 @@
 dataclasses-json
-gql[requests]
+gql[requests]>=3.5.0b6
