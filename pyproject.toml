@@ -14,6 +14,7 @@ python = "^3.10,<3.13"
 dataclasses-json = "^0.5.14"
 gql = {extras = ["requests"], version = "^3.5.0b"}
 requests-toolbelt = "^1.0.0"
+pdb-tools = "^2.5.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
@@ -26,7 +27,6 @@ nbdev = "^2.3.12"
 parso = "^0.8.3"
 pip = "22.3.1"
 quarto = "^0.1.0"
-pdb-tools = "^2.5.0"
 
 [build-system]
 requires = ["poetry-core"]
