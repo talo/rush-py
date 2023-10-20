@@ -720,42 +720,42 @@ dev = ["jsonref", "matplotlib"]
 
 [[package]]
 name = "gql"
-version = "3.4.0"
+version = "3.5.0b6"
 description = "GraphQL client for Python"
 optional = false
 python-versions = "*"
 files = [
-    {file = "gql-3.4.0-py2.py3-none-any.whl", hash = "sha256:59c8a0b8f0a2f3b0b2ff970c94de86f82f65cb1da3340bfe57143e5f7ea82f71"},
-    {file = "gql-3.4.0.tar.gz", hash = "sha256:ca81aa8314fa88a8c57dd1ce34941278e0c352d762eb721edcba0387829ea7c0"},
+    {file = "gql-3.5.0b6-py2.py3-none-any.whl", hash = "sha256:e8631e0875a69c5b9a4501ad4c5387e3a3e3ff89bb2aa54c856a358a70431802"},
+    {file = "gql-3.5.0b6.tar.gz", hash = "sha256:7ec2adfab1aafba938b0668c4f4578c1aa90df587b0c792b48b4a7c873c1d9aa"},
 ]
 
 [package.dependencies]
 backoff = ">=1.11.1,<3.0"
-graphql-core = ">=3.2,<3.3"
+graphql-core = ">=3.3.0a3,<3.4"
 requests = {version = ">=2.26,<3", optional = true, markers = "extra == \"requests\""}
-requests-toolbelt = {version = ">=0.9.1,<1", optional = true, markers = "extra == \"requests\""}
-urllib3 = {version = ">=1.26", optional = true, markers = "extra == \"requests\""}
+requests-toolbelt = {version = ">=1.0.0,<2", optional = true, markers = "extra == \"requests\""}
 yarl = ">=1.6,<2.0"
 
 [package.extras]
-aiohttp = ["aiohttp (>=3.7.1,<3.9.0)"]
-all = ["aiohttp (>=3.7.1,<3.9.0)", "botocore (>=1.21,<2)", "requests (>=2.26,<3)", "requests-toolbelt (>=0.9.1,<1)", "urllib3 (>=1.26)", "websockets (>=10,<11)", "websockets (>=9,<10)"]
+aiohttp = ["aiohttp (>=3.8.0,<4)"]
+all = ["aiohttp (>=3.8.0,<4)", "botocore (>=1.21,<2)", "httpx (>=0.23.1,<1)", "requests (>=2.26,<3)", "requests-toolbelt (>=1.0.0,<2)", "websockets (>=10,<12)"]
 botocore = ["botocore (>=1.21,<2)"]
-dev = ["aiofiles", "aiohttp (>=3.7.1,<3.9.0)", "black (==22.3.0)", "botocore (>=1.21,<2)", "check-manifest (>=0.42,<1)", "flake8 (==3.8.1)", "isort (==4.3.21)", "mock (==4.0.2)", "mypy (==0.910)", "parse (==1.15.0)", "pytest (==6.2.5)", "pytest-asyncio (==0.16.0)", "pytest-console-scripts (==1.3.1)", "pytest-cov (==3.0.0)", "requests (>=2.26,<3)", "requests-toolbelt (>=0.9.1,<1)", "sphinx (>=3.0.0,<4)", "sphinx-argparse (==0.2.5)", "sphinx-rtd-theme (>=0.4,<1)", "types-aiofiles", "types-mock", "types-requests", "urllib3 (>=1.26)", "vcrpy (==4.0.2)", "websockets (>=10,<11)", "websockets (>=9,<10)"]
-requests = ["requests (>=2.26,<3)", "requests-toolbelt (>=0.9.1,<1)", "urllib3 (>=1.26)"]
-test = ["aiofiles", "aiohttp (>=3.7.1,<3.9.0)", "botocore (>=1.21,<2)", "mock (==4.0.2)", "parse (==1.15.0)", "pytest (==6.2.5)", "pytest-asyncio (==0.16.0)", "pytest-console-scripts (==1.3.1)", "pytest-cov (==3.0.0)", "requests (>=2.26,<3)", "requests-toolbelt (>=0.9.1,<1)", "urllib3 (>=1.26)", "vcrpy (==4.0.2)", "websockets (>=10,<11)", "websockets (>=9,<10)"]
-test-no-transport = ["aiofiles", "mock (==4.0.2)", "parse (==1.15.0)", "pytest (==6.2.5)", "pytest-asyncio (==0.16.0)", "pytest-console-scripts (==1.3.1)", "pytest-cov (==3.0.0)", "vcrpy (==4.0.2)"]
-websockets = ["websockets (>=10,<11)", "websockets (>=9,<10)"]
+dev = ["aiofiles", "aiohttp (>=3.8.0,<4)", "black (==22.3.0)", "botocore (>=1.21,<2)", "check-manifest (>=0.42,<1)", "flake8 (==3.8.1)", "httpx (>=0.23.1,<1)", "isort (==4.3.21)", "mock (==4.0.2)", "mypy (==0.910)", "parse (==1.15.0)", "pytest (==6.2.5)", "pytest-asyncio (==0.16.0)", "pytest-console-scripts (==1.3.1)", "pytest-cov (==3.0.0)", "requests (>=2.26,<3)", "requests-toolbelt (>=1.0.0,<2)", "sphinx (>=5.3.0,<6)", "sphinx-argparse (==0.2.5)", "sphinx-rtd-theme (>=0.4,<1)", "types-aiofiles", "types-mock", "types-requests", "vcrpy (==4.4.0)", "websockets (>=10,<12)"]
+httpx = ["httpx (>=0.23.1,<1)"]
+requests = ["requests (>=2.26,<3)", "requests-toolbelt (>=1.0.0,<2)"]
+test = ["aiofiles", "aiohttp (>=3.8.0,<4)", "botocore (>=1.21,<2)", "httpx (>=0.23.1,<1)", "mock (==4.0.2)", "parse (==1.15.0)", "pytest (==6.2.5)", "pytest-asyncio (==0.16.0)", "pytest-console-scripts (==1.3.1)", "pytest-cov (==3.0.0)", "requests (>=2.26,<3)", "requests-toolbelt (>=1.0.0,<2)", "vcrpy (==4.4.0)", "websockets (>=10,<12)"]
+test-no-transport = ["aiofiles", "mock (==4.0.2)", "parse (==1.15.0)", "pytest (==6.2.5)", "pytest-asyncio (==0.16.0)", "pytest-console-scripts (==1.3.1)", "pytest-cov (==3.0.0)", "vcrpy (==4.4.0)"]
+websockets = ["websockets (>=10,<12)"]
 
 [[package]]
 name = "graphql-core"
-version = "3.2.3"
-description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
+version = "3.3.0a3"
+description = "GraphQL-core is a Python port of GraphQL.js,the JavaScript reference implementation for GraphQL."
 optional = false
-python-versions = ">=3.6,<4"
+python-versions = ">=3.7,<4.0"
 files = [
-    {file = "graphql-core-3.2.3.tar.gz", hash = "sha256:06d2aad0ac723e35b1cb47885d3e5c45e956a53bc1b209a9fc5369007fe46676"},
-    {file = "graphql_core-3.2.3-py3-none-any.whl", hash = "sha256:5766780452bd5ec8ba133f8bf287dc92713e3868ddd83aee4faab9fc3e303dc3"},
+    {file = "graphql_core-3.3.0a3-py3-none-any.whl", hash = "sha256:b441346e61b2d7465a6f4001334ba1ddb123498a7e9dfe76cd323db8159aa707"},
+    {file = "graphql_core-3.3.0a3.tar.gz", hash = "sha256:065d23881d00d0b52b9a7c0a8d63451585549c13f3f05a214923b20dabbda290"},
 ]
 
 [[package]]
@@ -862,6 +862,27 @@ files = [
     {file = "ipython_genutils-0.2.0-py2.py3-none-any.whl", hash = "sha256:72dd37233799e619666c9f639a9da83c34013a73e8bbc79a7a6348d93c61fab8"},
     {file = "ipython_genutils-0.2.0.tar.gz", hash = "sha256:eb2e116e75ecef9d4d228fdc66af54269afa26ab4463042e33785b887c628ba8"},
 ]
+
+[[package]]
+name = "ipywidgets"
+version = "8.0.4"
+description = "Jupyter interactive widgets"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "ipywidgets-8.0.4-py3-none-any.whl", hash = "sha256:ebb195e743b16c3947fe8827190fb87b4d00979c0fbf685afe4d2c4927059fa1"},
+    {file = "ipywidgets-8.0.4.tar.gz", hash = "sha256:c0005a77a47d77889cafed892b58e33b4a2a96712154404c6548ec22272811ea"},
+]
+
+[package.dependencies]
+ipykernel = ">=4.5.1"
+ipython = ">=6.1.0"
+jupyterlab-widgets = ">=3.0,<4.0"
+traitlets = ">=4.3.1"
+widgetsnbextension = ">=4.0,<5.0"
+
+[package.extras]
+test = ["jsonschema", "pytest (>=3.6.0)", "pytest-cov", "pytz"]
 
 [[package]]
 name = "isoduration"
@@ -1241,6 +1262,17 @@ openapi = ["openapi-core (>=0.18.0,<0.19.0)", "ruamel-yaml"]
 test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-validator (>=0.6.0,<0.7.0)", "pytest (>=7.0)", "pytest-console-scripts", "pytest-cov", "pytest-jupyter[server] (>=0.6.2)", "pytest-timeout", "requests-mock", "ruamel-yaml", "sphinxcontrib-spelling", "strict-rfc3339", "werkzeug"]
 
 [[package]]
+name = "jupyterlab-widgets"
+version = "3.0.9"
+description = "Jupyter interactive widgets for JupyterLab"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "jupyterlab_widgets-3.0.9-py3-none-any.whl", hash = "sha256:3cf5bdf5b897bf3bccf1c11873aa4afd776d7430200f765e0686bd352487b58d"},
+    {file = "jupyterlab_widgets-3.0.9.tar.gz", hash = "sha256:6005a4e974c7beee84060fdfba341a3218495046de8ae3ec64888e5fe19fdb4c"},
+]
+
+[[package]]
 name = "markupsafe"
 version = "2.1.3"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -1555,13 +1587,13 @@ webpdf = ["playwright"]
 
 [[package]]
 name = "nbdev"
-version = "2.3.12"
+version = "2.3.13"
 description = "Create delightful software with Jupyter Notebooks"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "nbdev-2.3.12-py3-none-any.whl", hash = "sha256:0f914859503dd977c6a04f80056f69291d045f6d88c69b684e5e4820b8f2c720"},
-    {file = "nbdev-2.3.12.tar.gz", hash = "sha256:01058da82abd20458c2a4906e5bc34a64bd6b6f20c2a405b028b5f4d14533024"},
+    {file = "nbdev-2.3.13-py3-none-any.whl", hash = "sha256:7e76293c2b38183a103166da4900df6ddefc265fb4a2bb1f265b0d00c6700870"},
+    {file = "nbdev-2.3.13.tar.gz", hash = "sha256:52691fdc27114524bea4add429e4e0f91bb74d6faa1cda10d85ea7524f234145"},
 ]
 
 [package.dependencies]
@@ -1570,6 +1602,7 @@ astunparse = "*"
 execnb = ">=0.1.4"
 fastcore = ">=1.5.27"
 ghapi = ">=1.0.3"
+ipywidgets = "<=8.0.4"
 PyYAML = "*"
 watchdog = "*"
 
@@ -1716,6 +1749,17 @@ python-versions = ">=3.7"
 files = [
     {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
     {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
+]
+
+[[package]]
+name = "pdb-tools"
+version = "2.5.0"
+description = "A swiss army knife for PDB files."
+optional = false
+python-versions = "*"
+files = [
+    {file = "pdb-tools-2.5.0.tar.gz", hash = "sha256:b76c4cd6304a15e545eff2737a76b71db31b881573e5ba3a93dba9a71a79653b"},
+    {file = "pdb_tools-2.5.0-py3-none-any.whl", hash = "sha256:abd35bee5649dfd1664c3da796c118b9568d03b3e86e88c959d936c7aea99ca4"},
 ]
 
 [[package]]
@@ -2237,13 +2281,13 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "requests-toolbelt"
-version = "0.10.1"
+version = "1.0.0"
 description = "A utility belt for advanced users of python-requests"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "requests-toolbelt-0.10.1.tar.gz", hash = "sha256:62e09f7ff5ccbda92772a29f394a49c3ad6cb181d568b1337626b2abb628a63d"},
-    {file = "requests_toolbelt-0.10.1-py2.py3-none-any.whl", hash = "sha256:18565aa58116d9951ac39baa288d3adb5b3ff975c4f25eee78555d89e8f247f7"},
+    {file = "requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6"},
+    {file = "requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06"},
 ]
 
 [package.dependencies]
@@ -2709,6 +2753,17 @@ files = [
 test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 
 [[package]]
+name = "widgetsnbextension"
+version = "4.0.9"
+description = "Jupyter interactive widgets for Jupyter Notebook"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "widgetsnbextension-4.0.9-py3-none-any.whl", hash = "sha256:91452ca8445beb805792f206e560c1769284267a30ceb1cec9f5bcc887d15175"},
+    {file = "widgetsnbextension-4.0.9.tar.gz", hash = "sha256:3c1f5e46dc1166dfd40a42d685e6a51396fd34ff878742a3e47c6f0cc4a2a385"},
+]
+
+[[package]]
 name = "y-py"
 version = "0.6.2"
 description = "Python bindings for the Y-CRDT built from yrs (Rust)"
@@ -2900,4 +2955,4 @@ test = ["mypy", "pre-commit", "pytest", "pytest-asyncio", "websockets (>=10.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.13"
-content-hash = "e111c1c65d2a13624789e7f80889b4ce463b36a5e09ea07f053215eb2ab4e00f"
+content-hash = "95bb8270da48db4c41440dca3bb21ee33df36042ef09a0209a4b4dde09ccca4b"
