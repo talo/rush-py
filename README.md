@@ -103,9 +103,10 @@ The parameters to `client.run2()` are as follows:
       Loads the data in the file as an argument.  
       **NOTE**: The uploaded value isn’t just the string of the file, so
       don’t pass the string directly; pass the path or wrap in StringIO.
-  2.  A `tengu.ArgId`:  
-      Uses an object already uploaded to tengu, such as outputs of other
-      run calls.  
+  2.  An tengu ArgId returned by a previous call to `client.run2()`:  
+      The `ArgId` type wraps data for use within tengu. It may refer to
+      an object already uploaded to tengu storage, such as outputs of
+      other run calls.  
       See below for more details. It’s easier to understand when you see
       an example.
   3.  A parameter, i.e. a value of any other type, including `None`:  
