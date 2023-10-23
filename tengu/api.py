@@ -6,12 +6,14 @@ from dataclasses import dataclass
 from functools import reduce
 from io import IOBase
 from pathlib import Path
-from typing import Any, Generic, Iterable, Literal, TypeVar
+from typing import Any, Callable, Generic, Iterable, Literal, TypeVar
 
 import dataclasses_json
+from graphql import DocumentNode
 import requests
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
+from .typedef import build_function_with_typedef, type_from_typedef
 
 ArgId = uuid.UUID
 ModuleInstanceId = uuid.UUID
@@ -112,9 +114,14 @@ query ($first: Int, $after: String, $last: Int, $before: String, $path: String, 
             path
             created_at
             deleted_at
+            description
+            usage
+            ins_usage
+            outs_usage
             ins
             outs
             tags
+            typedesc
         }
     }
 }
@@ -133,10 +140,13 @@ query ($first: Int, $after: String, $last: Int, $before: String, $names: [String
             path
             created_at
             deleted_at
-            usage
             description
+            usage
+            ins_usage
+            outs_usage
             ins
             outs
+            typedesc
         }
     }
 }
@@ -311,16 +321,16 @@ class Provider:
         self.client = Client(transport=transport)
 
     def _query_with_pagination(
-        self, query, variables: dict[str, Any], page_info_path: list[str], nodes_path: list[str]
-    ):
+        self, query: DocumentNode, variables: dict[str, Any], page_info_path: list[str], nodes_path: list[str]
+    ) -> Iterable[Any]:
         original_before = variables.get("before")
         page_info_res = {"hasPreviousPage": True, "endCursor": original_before}
 
         while page_info_res["hasPreviousPage"]:
             new_vars = variables | {"before": page_info_res["endCursor"]}
             result = self.client.execute(query, variable_values=new_vars)
-            if result is None:
-                raise RuntimeError(result)
+            if result.get("error") is not None:
+                raise RuntimeError(result["error"])
 
             page_info_res = reduce(dict.get, page_info_path, result) or {"hasPreviousPage": False}
             yield reduce(dict.get, nodes_path, result) or []
@@ -360,7 +370,7 @@ class Provider:
             ["me", "account", "arguments", "nodes"],
         )
 
-    def object(self, id):
+    def object(self, id: str):
         """
         Retrieve an object from the database.
 
@@ -374,7 +384,7 @@ class Provider:
             raise RuntimeError(response)
         return object
 
-    def download_object(self, id, filepath: Path):
+    def download_object(self, id: str | ArgId, filepath: Path):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
 
@@ -402,7 +412,7 @@ class Provider:
         last: int | None = None,
         before: str | None = None,
         names: list[str] | None = None,
-    ):
+    ) -> Iterable[Any]:
         """
         Retrieve a list of modules.
 
@@ -414,13 +424,17 @@ class Provider:
         :param before: The cursor to start retrieving modules from.
         :return: A list of modules.
         """
-        variables = {
-            "first": first,
-            "after": after,
-            "last": last,
-            "before": before,
-            "names": names,
-        }
+        variables = {}
+        if names:
+            variables["names"] = names
+        if first:
+            variables["first"] = first
+        if after:
+            variables["after"] = after
+        if last:
+            variables["last"] = last
+        if before:
+            variables["before"] = before
 
         return self._query_with_pagination(
             latest_modules, variables, ["latest_modules", "pageInfo"], ["latest_modules", "nodes"]
@@ -440,6 +454,60 @@ class Provider:
                 name = module["path"].split("#")[-1]
                 if path:
                     ret[name] = path
+        return ret
+
+    def get_module_functions(
+        self, names: list[str] | None = None, lockfile: Path | None = None
+    ) -> dict[str, Callable[[list[Any]], list[Any]]]:
+        ret = {}
+        module_pages = []
+        if lockfile is not None:
+            module_paths = self.load_module_paths(lockfile)
+            module_pages = [self.modules(path=path) for path in module_paths.values()]
+        else:
+            module_pages = self.latest_modules(names=names)
+
+        for module_page in module_pages:
+            for module in module_page:
+                in_types = [type_from_typedef(i) for i in module["ins"]]
+                out_types = [type_from_typedef(i) for i in module["outs"]]
+
+                typechecker = build_function_with_typedef(in_types, "")
+
+                def runner(
+                    *args: Any,
+                    target: Targets,
+                    resources: dict[str, Any] | None = None,
+                    tags: list[str] | None = None,
+                ):
+                    typechecker(*args)
+                    return self.run2(module["path"], list(args), target, resources, tags, out_tags=None)
+
+                # convert ins_usage array to argument docs
+                ins_docs = ""
+                for ins in module["ins_usage"]:
+                    ins_docs += f"\n:param {ins}"
+
+                # convert outs_usage array to return docs
+                outs_docs = ""
+                for outs in module["outs_usage"]:
+                    outs_docs += f"\n:return {outs}"
+
+                if module["description"]:
+                    runner.__doc__ = (
+                        module["description"]
+                        + "\n\n"
+                        + module["typedesc"]
+                        + (module["usage"] if module["usage"] else "")
+                        + (ins_docs)
+                        + (outs_docs)
+                    )
+                else:
+                    runner.__doc__ = module["path"].split("#")[-1]
+                runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
+                runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
+
+                ret[module["path"].split("#")[-1]] = runner
         return ret
 
     def load_module_paths(self, filename: Path) -> dict[str, str]:
@@ -500,12 +568,12 @@ class Provider:
     def run2(
         self,
         path: str,
-        args: list[Arg],
+        args: list[Arg[Any] | ArgId | Path | IOBase | Any],
         target: Targets | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
-    ):
+    ) -> dict[str, Any]:
         """
         Run a module with the given inputs and outputs.
         :param path: The path of the module.
@@ -518,7 +586,7 @@ class Provider:
         """
 
         # TODO: less insane version of this
-        def gen_arg_dict(input):
+        def gen_arg_dict(input: Arg[Any] | ArgId | Path | IOBase | Any) -> dict[str, Any]:
             arg = None
             if isinstance(input, Arg):
                 arg = input
@@ -560,10 +628,12 @@ class Provider:
         else:
             raise RuntimeError(response)
 
+    # def run_with_typedef(self, values: list[Any], typedef: TypeDef):
+
     def run(
         self,
         path: str,
-        args: list[Arg],
+        args: list[Arg[Any]],
         target: Targets | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
@@ -717,7 +787,9 @@ class Provider:
         else:
             raise RuntimeError(response)
 
-    def poll_module_instance(self, id: ModuleInstanceId, n_retries: int = 10, poll_rate: int = 30) -> Any:
+    def poll_module_instance(
+        self, id: ModuleInstanceId | str, n_retries: int = 10, poll_rate: int = 30
+    ) -> Any:
         """
         Poll a module instance until it is completed, with a specified number of retries and poll rate.
 
@@ -762,7 +834,7 @@ class Provider:
 
         raise Exception("Failed to find task")
 
-    def upload_arg(self, file: Path) -> Arg:
+    def upload_arg(self, file: Path) -> Arg[Any]:
         """
         Converts a file to base64 and formats it for use as an argument
 
@@ -882,7 +954,12 @@ class Provider:
             ["me", "account", "module_instances", "nodes"],
         )
 
-    def retry(self, id: ModuleInstanceId, resources=None, target=None) -> ModuleInstanceId:
+    def retry(
+        self,
+        id: ModuleInstanceId,
+        resources: dict[str, str | int | float] | None = None,
+        target: Targets | None = None,
+    ) -> ModuleInstanceId:
         """
         Retry a module instance.
 
