@@ -8,3 +8,5 @@ jobs:
       - uses: fastai/workflows/nbdev-ci@master
         with:
           version: "3.10"
+        env: # Or as an environment variable
+          TENGU_TOKEN: ${{ secrets.TENGU_TOKEN }}

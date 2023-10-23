@@ -11,6 +11,9 @@ import json
 import os
 import sys
 import tarfile
+
+from pdbtools import *
+import requests
 from datetime import datetime
 from pathlib import Path
 
@@ -20,7 +23,7 @@ import tengu
 ### 0) Setup
 
 ``` python
-# Set our token
+# Set our token - ensure you have exported TENGU_TOKEN in your shell; or just replace the os.getenv with your token
 TOKEN = os.getenv("TENGU_TOKEN")
 ```
 
@@ -35,8 +38,24 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 # Set our inputs
 SYSTEM_PDB_PATH = WORK_DIR / "test.pdb"
 PROTEIN_PDB_PATH = WORK_DIR / "test_P.pdb"
-LIGAND_SMILES_STR = "CCO"
+LIGAND_SMILES_STR = "CCCc1ccccc1O"
 LIGAND_PDB_PATH = WORK_DIR / "test_L.pdb"
+```
+
+``` python
+# fetch datafiles
+complex = pdb_fetch.fetch_structure("3HTB")
+protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
+ligand = pdb_selres.select_residuese(complex, "JZ4")
+with open(SYSTEM_PDB_PATH, 'w') as f:
+    for l in complex:
+        f.write(str(l))
+with open(PROTEIN_PDB_PATH, 'w') as f:
+    for l in protein:
+        f.write(str(l))
+with open(LIGAND_PDB_PATH, 'w') as f:
+    for l in ligand:
+        f.write(str(l))
 ```
 
 ``` python
