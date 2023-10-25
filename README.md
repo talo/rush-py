@@ -15,6 +15,7 @@ import json
 import os
 import sys
 import tarfile
+import base64
 
 from pdbtools import *
 import requests
@@ -29,6 +30,8 @@ import tengu
 ``` python
 # Set our token - ensure you have exported TENGU_TOKEN in your shell; or just replace the os.getenv with your token
 TOKEN = os.getenv("TENGU_TOKEN")
+# You might have a custom deployment url, by default it will use https://tengu.qdx.ai
+URL = os.getenv("TENGU_URL") or "https://tengu.qdx.ai"
 ```
 
 ``` python
@@ -48,9 +51,9 @@ LIGAND_PDB_PATH = WORK_DIR / "test_L.pdb"
 
 ``` python
 # fetch datafiles
-complex = pdb_fetch.fetch_structure("3HTB")
+complex = list(pdb_keepcoord.keep_coordinates(pdb_fetch.fetch_structure("3HTB")))
 protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
-ligand = pdb_selres.select_residuese(complex, "JZ4")
+ligand = pdb_rplresname.rename_residues(pdb_selresname.filter_residue_by_name(complex, "JZ4"), "JZ4", "UNL")
 with open(SYSTEM_PDB_PATH, 'w') as f:
     for l in complex:
         f.write(str(l))
@@ -64,7 +67,7 @@ with open(LIGAND_PDB_PATH, 'w') as f:
 
 ``` python
 # Get our client, for calling modules and using the tengu API
-client = tengu.Provider(access_token=TOKEN)
+client = tengu.Provider(access_token=TOKEN, url=URL)
 ```
 
 ``` python
@@ -147,7 +150,7 @@ pdb2pqr_result = client.run2(
     [
         PROTEIN_PDB_PATH,
     ],
-    target="NIX_SSH",
+    target="NIX_SSH_3",
     resources={"gpus": 1, "storage": 1_024_000_000, "walltime": 15},
     tags=TAGS,
 )
@@ -197,7 +200,7 @@ ligand_prep_result = client.run2(
         LIGAND_PDB_PATH,
         ligand_prep_config,
     ],
-    target="NIX_SSH",
+    target="NIX_SSH_3",
     resources={"gpus": 1, "storage": 16_000_000, "walltime": 5},
     tags=TAGS,
 )
@@ -228,11 +231,11 @@ gmx_config = {
         "npt": [("nsteps", "1000")],
         "ions": [],
     },
-    "num_gpus": 4,
+    "num_gpus": 0,
     "num_replicas": 1,
     "ligand_charge": None,
     "frame_sel": {
-        "begin_time": 2,
+        "begin_time": 1,
         "end_time": 10,
         "delta_time": 2,
     },
@@ -245,8 +248,8 @@ gmx_result = client.run2(
         prepped_ligand_id,
         gmx_config,
     ],
-    target="GADI",
-    resources={"gpus": 4, "storage": 1_024_000_000, "cpus": 48, "walltime": 60},
+    target="NIX_SSH_3",
+    resources={"gpus": 0, "storage": 1_024_000_000, "cpus": 48, "walltime": 60},
     tags=TAGS,
 )
 gmx_run_id = gmx_result["module_instance_id"]
@@ -262,16 +265,21 @@ with open(OUT_DIR / f"02-gmx-{gmx_run_id}.json", "w") as f:
 
 ``` python
 client.poll_module_instance(gmx_run_id, n_retries=60, poll_rate=60)
-client.download_object(gmx_output_id, OUT_DIR / "02-gmx-output.zip")
-# Get the "dry" (i.e. non-solvated) frames we asked for
-with tarfile.open(OUT_DIR / "02-gmx-output.zip", "r") as tf:
+client.download_object(gmx_output_id, OUT_DIR / "02-gmx-output.tar.gz")
+print(f"{datetime.now().time()} | Downloaded GROMACS output!")
+```
+
+``` python
+# Extract the "dry" (i.e. non-solvated) frames we asked for
+with tarfile.open(OUT_DIR / "02-gmx-output.tar.gz", "r") as tf:
     selected_frame_pdbs = [
-        tf.extractfile(member)
+        base64.b64encode(tf.extractfile(member).read()).decode("utf-8")
         for member in sorted(tf, key=lambda m: m.name)
         if ("dry" in member.name and "pdb" in member.name)
     ]
-client.download_object(gmx_ligand_gro_id, OUT_DIR / "02-gmx-ligand.gro")
-print(f"{datetime.now().time()} | Downloaded GROMACS output!")
+    gmx_gro_base64_str = base64.b64encode(tf.extractfile([f for f in tf if f.name == "outputs/ligand_in_GMX.gro"][0]).read()).decode("utf-8")
+#client.download_object(gmx_ligand_gro_id, OUT_DIR / "02-gmx-ligand.gro")
+pdb_base64_str = selected_frame_pdbs[0]
 ```
 
 ### 3.1) Run quantum energy calculation (modules: qp_gen_inputs, hermes_energy, qp_collate)
@@ -283,17 +291,17 @@ print(f"{datetime.now().time()} | Downloaded GROMACS output!")
     modules["qp_gen_inputs"],
     modules["hermes_energy"],
     modules["qp_collate"],
-    pdb=selected_frame_pdbs[0],  # extractfile returns a BufferedReader, which is file-like
-    gro=gmx_ligand_gro_id,
-    lig=prepped_ligand_id,
-    lig_type="sdf",
-    lig_res_id="UNL",  # The ligand's residue code in the PDB file; this is what our prep uses
-    target="GADI",
+    pdb=tengu.Arg(value=pdb_base64_str),  # extractfile returns a BufferedReader, which is file-like
+    gro=tengu.Arg(value=gmx_gro_base64_str),
+    lig=tengu.Arg(id= str(prepped_ligand_id)),
+    lig_type=tengu.Arg(value="sdf"),
+    lig_res_id=tengu.Arg(value="UNL"),  # The ligand's residue code in the PDB file; this is what our prep uses
+    target="NIX_SSH_3",
     resources={"storage": 1_024_000_000, "walltime": 600},
     tags=TAGS,
 )
-qp_run_id = qp_result["module_instance_id"]
-qp_interaction_energy_id = qp_result["output_ids"][0]
+qp_run_id = qp_result["id"]
+qp_interaction_energy_id = qp_result["outs"][0]["id"]
 print(f"{datetime.now().time()} | Running QP energy calculation!")
 ```
 
