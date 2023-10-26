@@ -393,7 +393,7 @@ class Provider:
                         f.write(chunk)
         else:
             with open(filepath, "w") as f:
-                f.write(obj)
+                json.dump(obj, f)
 
     def latest_modules(
         self,
