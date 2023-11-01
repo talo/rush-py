@@ -483,6 +483,8 @@ class Provider:
                     typechecker(*args)
                     return self.run2(module["path"], list(args), target, resources, tags, out_tags=None)
 
+                runner.__name__ = module["path"].split("#")[-1]
+
                 # convert ins_usage array to argument docs
                 ins_docs = ""
                 for ins in module["ins_usage"]:
@@ -507,6 +509,7 @@ class Provider:
                 runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
                 runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
 
+                self.__setattr__(module["path"].split("#")[-1], runner)
                 ret[module["path"].split("#")[-1]] = runner
         return ret
 
