@@ -37,23 +37,24 @@ URL = os.getenv("TENGU_URL") or "https://tengu.qdx.ai"
 ``` python
 # Define our project information
 DESCRIPTION = "tengu-py demo notebook"
-TAGS = ["qdx", "tengu-py", "demo"]
+TAGS = ["qdx", "tengu-py", "demo", "cdk2", "atp", "caps"]
 WORK_DIR = Path.home() / "qdx" / "tengu-py-demo"
 OUT_DIR = WORK_DIR / "runs"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+MODULE_LOCK = WORK_DIR / "lock.json"
 
 # Set our inputs
 SYSTEM_PDB_PATH = WORK_DIR / "test.pdb"
 PROTEIN_PDB_PATH = WORK_DIR / "test_P.pdb"
-LIGAND_SMILES_STR = "CCCc1ccccc1O"
+LIGAND_SMILES_STR = "c1nc(c2c(n1)n(cn2)[C@H]3[C@@H]([C@@H]([C@H](O3)CO[P@@](=O)(O)O[P@](=O)(O)OP(=O)(O)O)O)O)N"
 LIGAND_PDB_PATH = WORK_DIR / "test_L.pdb"
 ```
 
 ``` python
 # fetch datafiles
-complex = list(pdb_keepcoord.keep_coordinates(pdb_fetch.fetch_structure("3HTB")))
+complex = list(pdb_fetch.fetch_structure("1B39"))
 protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
-ligand = pdb_rplresname.rename_residues(pdb_selresname.filter_residue_by_name(complex, "JZ4"), "JZ4", "UNL")
+ligand = pdb_keepcoord.keep_coordinates(pdb_rplresname.rename_residues(pdb_selresname.filter_residue_by_name(complex, "ATP"), "ATP", "UNL"))
 with open(SYSTEM_PDB_PATH, 'w') as f:
     for l in complex:
         f.write(str(l))
@@ -72,7 +73,16 @@ client = tengu.Provider(access_token=TOKEN, url=URL)
 
 ``` python
 # Get our latest modules as a dict[module_name, module_path]
-modules = client.get_latest_module_paths()
+# If a lock file exists, load it so that the run is reproducable
+if MODULE_LOCK.exists():
+    modules = client.load_module_paths(MODULE_LOCK)
+else: 
+    modules = client.get_latest_module_paths()
+    client.save_module_paths(modules, MODULE_LOCK)
+```
+
+``` python
+modules["hermes_energy"]
 ```
 
 - `module_name` is a descriptive string and indicates the “function” the
@@ -151,15 +161,16 @@ you can wait on it to obtain the value itself.
 
 ``` python
 pdb2pqr_result = client.run2(
-    modules["pdb2pqr_tengu"],
+    modules["prepare_protein_tengu"],
     [
         PROTEIN_PDB_PATH,
     ],
     target="NIX_SSH_3",
     resources={"gpus": 1, "storage": 1_024_000_000, "walltime": 15},
     tags=TAGS,
+    restore = True
 )
-pdb2pqr_run_id = pdb2pqr_result["module_instance_id"]
+pdb2pqr_run_id = pdb2pqr_result.get("module_instance_id")
 prepped_protein_id = pdb2pqr_result["output_ids"][0]
 print(f"{datetime.now().time()} | Running protein prep!")
 ```
@@ -206,11 +217,13 @@ ligand_prep_result = client.run2(
         ligand_prep_config,
     ],
     target="NIX_SSH_3",
-    resources={"gpus": 1, "storage": 16_000_000, "walltime": 5},
+    resources={"gpus": 1, "storage": 16 * 1024, "walltime": 5},
     tags=TAGS,
+    restore=True
 )
 ligand_prep_run_id = ligand_prep_result["module_instance_id"]
-prepped_ligand_id = ligand_prep_result["output_ids"][0]
+prepped_ligand_pdb_id = ligand_prep_result["output_ids"][0]
+prepped_ligand_sdf_id = ligand_prep_result["output_ids"][1]
 print(f"{datetime.now().time()} | Running ligand prep!")
 ```
 
@@ -220,8 +233,11 @@ with open(OUT_DIR / f"01-prepare-ligand-{ligand_prep_run_id}.json", "w") as f:
 ```
 
 ``` python
+print("Checking ligand prep instance", ligand_prep_run_id)
 client.poll_module_instance(ligand_prep_run_id)
-client.download_object(prepped_ligand_id, OUT_DIR / "01-prepped-ligand.pdb")
+client.download_object(prepped_ligand_pdb_id, OUT_DIR / "01-prepped-ligand.pdb")
+client.download_object(prepped_ligand_sdf_id, OUT_DIR / "01-prepped-ligand.sdf")
+
 print(f"{datetime.now().time()} | Downloaded prepped ligand!")
 ```
 
@@ -250,12 +266,13 @@ gmx_result = client.run2(
     modules["gmx_tengu_pdb"],
     [
         prepped_protein_id,
-        prepped_ligand_id,
+        prepped_ligand_pdb_id,
         gmx_config,
     ],
     target="NIX_SSH_3",
-    resources={"gpus": 0, "storage": 1_024_000_000, "cpus": 48, "walltime": 60},
+    resources={"gpus": 0, "storage": 1, "storage_units": "GB", "cpus": 48, "walltime": 60},
     tags=TAGS,
+    restore=True
 )
 gmx_run_id = gmx_result["module_instance_id"]
 gmx_output_id = gmx_result["output_ids"][0]
@@ -269,6 +286,7 @@ with open(OUT_DIR / f"02-gmx-{gmx_run_id}.json", "w") as f:
 ```
 
 ``` python
+print("Fetching gmx results", gmx_run_id)
 client.poll_module_instance(gmx_run_id, n_retries=60, poll_rate=60)
 client.download_object(gmx_output_id, OUT_DIR / "02-gmx-output.tar.gz")
 print(f"{datetime.now().time()} | Downloaded GROMACS output!")
@@ -278,13 +296,16 @@ print(f"{datetime.now().time()} | Downloaded GROMACS output!")
 # Extract the "dry" (i.e. non-solvated) frames we asked for
 with tarfile.open(OUT_DIR / "02-gmx-output.tar.gz", "r") as tf:
     selected_frame_pdbs = [
-        base64.b64encode(tf.extractfile(member).read()).decode("utf-8")
+        tf.extractfile(member).read()
         for member in sorted(tf, key=lambda m: m.name)
         if ("dry" in member.name and "pdb" in member.name)
     ]
+    for i, frame in enumerate(selected_frame_pdbs):
+        with open(OUT_DIR/f"02-gmx-output-frame{i}.pdb", "w") as pf:
+            print(frame.decode("utf-8"), file=pf)
     gmx_gro_base64_str = base64.b64encode(tf.extractfile([f for f in tf if f.name == "outputs/ligand_in_GMX.gro"][0]).read()).decode("utf-8")
 #client.download_object(gmx_ligand_gro_id, OUT_DIR / "02-gmx-ligand.gro")
-pdb_base64_str = selected_frame_pdbs[0]
+pdb_base64_str = base64.b64encode(selected_frame_pdbs[0]).decode("utf-8")
 ```
 
 ### 3.1) Run quantum energy calculation (modules: qp_gen_inputs, hermes_energy, qp_collate)
@@ -296,17 +317,19 @@ pdb_base64_str = selected_frame_pdbs[0]
     modules["qp_gen_inputs"],
     modules["hermes_energy"],
     modules["qp_collate"],
-    pdb=tengu.Arg(value=pdb_base64_str),  # extractfile returns a BufferedReader, which is file-like
+    pdb=tengu.Arg(value=pdb_base64_str),
     gro=tengu.Arg(value=gmx_gro_base64_str),
-    lig=tengu.Arg(id= str(prepped_ligand_id)),
+    lig=tengu.Arg(id= str(prepped_ligand_sdf_id)),
     lig_type=tengu.Arg(value="sdf"),
     lig_res_id=tengu.Arg(value="UNL"),  # The ligand's residue code in the PDB file; this is what our prep uses
+    use_new_fragmentation_method=False,
     target="NIX_SSH_3",
     resources={"storage": 1_024_000_000, "walltime": 600},
     tags=TAGS,
+    restore=True
 )
-qp_run_id = qp_result["id"]
-qp_interaction_energy_id = qp_result["outs"][0]["id"]
+qp_run_id = qp_result["module_instance_id"]
+qp_interaction_energy_id = qp_result["output_ids"][0]
 print(f"{datetime.now().time()} | Running QP energy calculation!")
 ```
 
@@ -324,21 +347,21 @@ print(f"{datetime.now().time()} | Downloaded qp interaction energy!")
 ### 3.2) Run MM-PBSA
 
 ``` python
-mmpbsa_config = [
-    401,  # start frame
-    901,  # end frame
-    None,  # optional argument for overriding raw GROMACS parameters
-    12,  # num_cpus
-]
+mmpbsa_config = {
+    "start_frame": 1,
+    "end_frame": 2,
+    "num_cpus": 1,  # cannot be greater than number of frames
+}
 mmpbsa_result = client.run2(
     modules["gmx_mmpbsa_tengu"],
     [
         gmx_output_id,
-        *mmpbsa_config,
+        mmpbsa_config,
     ],
     target="GADI",
-    resources={"storage": 1_024_000_000, "walltime": 600},
+    resources={"storage": 100, "storage_units": "MB", "walltime": 600},
     tags=TAGS,
+    restore=True
 )
 mmpbsa_run_id = mmpbsa_result["module_instance_id"]
 mmpbsa_output_id = mmpbsa_result["output_ids"][0]
