@@ -576,6 +576,7 @@ class Provider:
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
+        restore: bool | None = None,
     ) -> dict[str, Any]:
         """
         Run a module with the given inputs and outputs.
@@ -586,7 +587,20 @@ class Provider:
         :param tags: The tags to apply to the module.
         :param out_tags: The tags to apply to the outputs of the module.
                          If provided, must be the same length as the number of outputs.
+        :param restore: Check if a module instance with the same tags and path already exists.
         """
+
+        if restore:
+            prev = next(
+                map(lambda x: x[0] if len(x) > 0 else None, self.module_instances(tags=tags, path=path))
+            )
+            if prev:
+                out2 = {}
+                # Convert IDs into ArgId type to keep them differentiated from vanilla strings
+                out2["module_instance_id"] = ArgId(prev["id"])
+                out2["output_ids"] = [ArgId(out["id"]) for out in prev["outs"]]
+                out2["output_values"] = [out["value"] for out in prev["outs"]]
+                return out2
 
         # TODO: less insane version of this
         def gen_arg_dict(input: Arg[Any] | ArgId | Path | IOBase | Any) -> dict[str, Any]:
@@ -677,20 +691,22 @@ class Provider:
         qp_gen_inputs_path: str,
         hermes_energy_path: str,
         qp_collate_path: str,
-        pdb: Arg[Path],
-        gro: Arg[Path],
-        lig: Arg[Path],
-        lig_type: Arg[Literal["sdf", "mol2"]],
-        lig_res_id: Arg[str],
-        model: Arg[dict[str, Any]] = Arg(None, default_model),
+        pdb: Arg[Path] | Path,
+        gro: Arg[Path] | Path,
+        lig: Arg[Path] | Path,
+        lig_type: Arg[Literal["sdf", "mol2"]] | Literal["sdf", "mol2"],
+        lig_res_id: Arg[str] | str,
+        model: Arg[dict[str, Any]] | dict[str, Any] = Arg(None, default_model),
         keywords: Arg[dict[str, Any]] = Arg(
             None, {"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "export": {}, "guess": {}}
         ),
         amino_acids_of_interest: Arg[list[tuple[str, int]]] = Arg(None, None),
+        use_new_fragmentation_method: Arg[bool] | bool | None = None,
         target: Targets | None = None,
         resources: dict[str, Any] | None = None,
         tags: list[str] | None = None,
         autopoll: tuple[int, int] | None = None,
+        restore: bool | None = None,
     ):
         """
         Construct the input and output module instance calls for QP run.
@@ -714,67 +730,90 @@ class Provider:
         if resources is not None and "gpus" in resources and keywords.value is not None:
             keywords.value["frag"]["ngpus_per_node"] = resources["gpus"]
 
-        qp_prep_instance = self.run(
+        qp_prep_conf = {
+            "ligand_file_type": lig_type if isinstance(lig_type, str) else lig_type.value,
+            "ligand_res_id": lig_res_id if isinstance(lig_res_id, str) else lig_res_id.value,
+            "amino_acids_of_interest": amino_acids_of_interest
+            if isinstance(amino_acids_of_interest, list)
+            else amino_acids_of_interest.value,
+            "use_new_fragmentation_method": use_new_fragmentation_method
+            if isinstance(use_new_fragmentation_method, bool)
+            else None,
+        }
+
+        if use_new_fragmentation_method is not None:
+            qp_prep_conf["use_new_fragmentation_method"] = (
+                use_new_fragmentation_method.value
+                if isinstance(use_new_fragmentation_method, Arg)
+                else use_new_fragmentation_method
+            )
+
+        qp_prep_instance = self.run2(
             qp_gen_inputs_path,
-            [pdb, gro, lig, lig_type, lig_res_id, model, keywords, amino_acids_of_interest],
+            [pdb, gro, lig, model, keywords, qp_prep_conf],
             tags=tags,
             out_tags=([tags, tags, tags, tags] if tags else None),
+            restore=restore,
+            resources={"storage": 20, "storage_units": "MB"},
         )
         print("launched qp_prep_instance", qp_prep_instance)
         try:
-            hermes_instance = self.run(
+            hermes_instance = self.run2(
                 hermes_energy_path,
                 [
-                    Arg(qp_prep_instance["outs"][0]["id"], None),
-                    Arg(qp_prep_instance["outs"][1]["id"], None),
-                    Arg(qp_prep_instance["outs"][2]["id"], None),
+                    qp_prep_instance["output_ids"][0],
+                    qp_prep_instance["output_ids"][1],
+                    qp_prep_instance["output_ids"][2],
                 ],
                 target,
                 resources,
                 tags=tags,
                 out_tags=([tags, tags] if tags else None),
+                restore=restore,
             )
 
             print("launched hermes_instance", hermes_instance)
         except Exception:
-            self.delete_module_instance(qp_prep_instance["id"])
+            self.delete_module_instance(str(qp_prep_instance["module_instance_id"]))
             raise
 
         try:
-            qp_collate_instance = self.run(
+            qp_collate_instance = self.run2(
                 qp_collate_path,
                 [
-                    Arg(hermes_instance["outs"][0]["id"], None),
-                    Arg(qp_prep_instance["outs"][3]["id"], None),
+                    hermes_instance["output_ids"][0],
+                    qp_prep_instance["output_ids"][3],
                 ],
                 tags=tags,
                 out_tags=([tags] if tags else None),
+                restore=restore,
+                resources={"storage": 20, "storage_units": "MB"},
             )
         except Exception:
-            self.delete_module_instance(qp_prep_instance["id"])
-            self.delete_module_instance(hermes_instance["id"])
+            self.delete_module_instance(qp_prep_instance["module_instance_id"])
+            self.delete_module_instance(hermes_instance["module_instance_id"])
             raise
 
         if autopoll:
             time.sleep(autopoll[0])
-            prep = self.poll_module_instance(qp_prep_instance["id"], *autopoll)
+            prep = self.poll_module_instance(qp_prep_instance["module_instance_id"], *autopoll)
             if prep["status"] == "FAILED":
-                self.delete_module_instance(hermes_instance["id"])
-                self.delete_module_instance(qp_collate_instance["id"])
+                self.delete_module_instance(hermes_instance["module_instance_id"])
+                self.delete_module_instance(qp_collate_instance["module_instance_id"])
                 raise RuntimeError(prep["error"])
 
-            hermes = self.poll_module_instance(hermes_instance["id"], *autopoll)
+            hermes = self.poll_module_instance(hermes_instance["module_instance_id"], *autopoll)
             if hermes["status"] == "FAILED":
-                self.delete_module_instance(qp_collate_instance["id"])
+                self.delete_module_instance(qp_collate_instance["module_instance_id"])
                 raise RuntimeError(hermes["error"])
 
-            collate = self.poll_module_instance(qp_collate_instance["id"], *autopoll)
+            collate = self.poll_module_instance(qp_collate_instance["module_instance_id"], *autopoll)
 
             return collate
 
         return [qp_prep_instance, hermes_instance, qp_collate_instance]
 
-    def delete_module_instance(self, id: ModuleInstanceId):
+    def delete_module_instance(self, id: ModuleInstanceId | str):
         """
         Delete a module instance with a given ID.
 
@@ -782,6 +821,8 @@ class Provider:
         :return: The ID of the deleted module instance.
         :raise RuntimeError: If the operation fails.
         """
+        if isinstance(id, ModuleInstanceId):
+            id = str(id)
         response = self.client.execute(delete_module_instance, variable_values={"moduleInstanceId": id})
 
         taskId = response.get("delete_module_instance")
