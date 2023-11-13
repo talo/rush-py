@@ -1,3 +1,4 @@
 dataclasses-json
 gql[requests]>=3.5.0b6
 pdb-tools
+tengu-py>=0.12.1
