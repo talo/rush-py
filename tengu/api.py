@@ -304,19 +304,18 @@ scf_keywords = {
 default_model = {"method": "RIMP2", "basis": "cc-pVDZ", "aux_basis": "cc-pVDZ-RIFIT", "frag_enabled": True}
 
 
-class Provider:
+class BaseProvider:
     """
     A class representing a provider for the Tengu quantum chemistry workflow platform.
     """
 
-    def __init__(self, access_token: str, url: str = "https://tengu.qdx.ai"):
+    def __init__(self, transport: RequestsHTTPTransport):
         """
         Initialize the TenguProvider with a specified URL and access token.
 
         :param url: The URL of the Tengu platform.
         :param access_token: The access token for authentication.
         """
-        transport = RequestsHTTPTransport(url=url, headers={"authorization": f"bearer {access_token}"})
 
         self.client = Client(transport=transport)
 
@@ -487,19 +486,26 @@ class Provider:
 
                 # convert ins_usage array to argument docs
                 ins_docs = ""
-                for ins in module["ins_usage"]:
-                    ins_docs += f"\n:param {ins}"
+                if module["ins_usage"]:
+                    for ins in module["ins_usage"]:
+                        ins_docs += f"\n:param {ins}"
 
                 # convert outs_usage array to return docs
                 outs_docs = ""
-                for outs in module["outs_usage"]:
-                    outs_docs += f"\n:return {outs}"
+                if module["outs_usage"]:
+                    for outs in module["outs_usage"]:
+                        outs_docs += f"\n:return {outs}"
 
                 if module["description"]:
                     runner.__doc__ = (
                         module["description"]
-                        + "\n\n"
+                        + "\n\nQDX Type Description:\n\n    "
                         + module["typedesc"]
+                        .replace(",", ",\n\n    ")
+                        .replace("; ", ";\n\n    ")
+                        .replace("}", "\n\n    }")
+                        .replace("{", "{\n\n    ")
+                        .replace("-> ", "\n\n->\n\n    ")
                         + (module["usage"] if module["usage"] else "")
                         + (ins_docs)
                         + (outs_docs)
@@ -508,9 +514,9 @@ class Provider:
                     runner.__doc__ = module["path"].split("#")[-1]
                 runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
                 runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
-
-                self.__setattr__(module["path"].split("#")[-1], runner)
-                ret[module["path"].split("#")[-1]] = runner
+                name = module["path"].split("#")[-1]
+                self.__setattr__(name, runner)
+                ret[name] = runner
         return ret
 
     def load_module_paths(self, filename: Path) -> dict[str, str]:
@@ -1018,3 +1024,21 @@ class Provider:
             return ModuleInstanceId(taskId["id"])
         else:
             raise RuntimeError(response)
+
+
+class Provider(BaseProvider):
+    def __init__(self, access_token: str, url: str = "https://tengu.qdx.ai"):
+        transport = RequestsHTTPTransport(url=url, headers={"authorization": f"bearer {access_token}"})
+        super().__init__(transport)
+
+
+class BaseTypedProvider(BaseProvider):
+    def __init__(self, transport: RequestsHTTPTransport):
+        super().__init__(transport)
+        self.get_module_functions()
+
+
+class TypedProvider(BaseTypedProvider):
+    def __init__(self, access_token: str, url: str = "https://tengu.qdx.ai"):
+        transport = RequestsHTTPTransport(url=url, headers={"authorization": f"bearer {access_token}"})
+        super().__init__(transport)

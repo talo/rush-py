@@ -25,6 +25,7 @@ pytest-xdist = "^3.0.0"
 jupyterlab = "^3.6.1"
 nbdev = "^2.3.12"
 parso = "^0.8.3"
+pdoc= "^14.1.0"
 pip = "22.3.1"
 quarto = "^0.1.0"
 

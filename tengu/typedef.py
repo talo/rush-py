@@ -1,14 +1,35 @@
 #!/usr/bin/env python3
 
+from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any, Literal, Union
+from enum import Enum
 import typing
 import uuid
 
 SCALARS = Literal[
     "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes", "Conformer"
 ]
+
+SCALAR_STRS: list[SCALARS] = [
+    "bool",
+    "u8",
+    "u16",
+    "u32",
+    "u64",
+    "i8",
+    "i16",
+    "i32",
+    "i64",
+    "f32",
+    "f64",
+    "string",
+    "bytes",
+    "Conformer",
+]
+
+T = typing.TypeVar("T")
 
 
 def py_scalar_type(scalar: SCALARS):
@@ -32,14 +53,112 @@ def py_scalar_type(scalar: SCALARS):
     elif scalar == "bytes":
         return bytes
     elif scalar == "Conformer":
-        return dict
+        return dict[str, Any]
+    raise Exception(f"Invalid scalar type: {scalar}")
 
 
 KINDS = Literal["array", "optional", "enum", "record", "object", "tuple"]
 
 
-class Type:
-    def __init__(self, type: Union[dict[str, "Type"], list["Type"], "Type"], kind: KINDS | None = None):
+def py_kind(
+    _type: T, kind: KINDS
+) -> (
+    typing.Type[None | T]
+    | typing.Type[list[T]]
+    | typing.Type[tuple[T]]
+    | typing.Type[dict[str, Any] | str]
+    | typing.Type[dict[str, T]]
+    | typing.Type[Path]
+):
+    if kind == "array":
+        return list[T]
+    elif kind == "optional":
+        return Union[T, None]
+    elif kind == "enum":
+        return dict[str, Any] | str
+    elif kind == "record":
+        return dict[str, T]
+    elif kind == "object":
+        return Path
+    elif kind == "tuple":
+        return tuple[T]
+
+
+@dataclass
+class SimpleType:
+    k: KINDS | None
+    t: SCALARS | "SimpleType"
+
+
+@dataclass
+class Tagged:
+    n: str
+    t: SimpleType
+
+
+def recurse_typedef(
+    t: SCALARS
+    | SimpleType
+    | list[SCALARS | SimpleType]  # tuple
+    | list[str | dict[str, SimpleType]]  # rust style enum
+    | dict[str, SimpleType | SCALARS]  # record
+    | dict[str, list[SimpleType | SCALARS]],  # rust style enum
+    k: KINDS | None = None,
+):
+    if k is None:
+        if isinstance(t, SimpleType):
+            if not isinstance(t.t, SimpleType):
+                return py_scalar_type(t.t)
+            else:
+                return recurse_typedef(t.t, t.k)
+        if isinstance(t, list):
+            # check what kind of list we have
+            scalar_values: list[SCALARS | SimpleType] = [
+                x for x in t if isinstance(x, SimpleType) or x in SCALAR_STRS
+            ]
+            if scalar_values:
+                # we have a tuple list
+                return [py_scalar_type(x) if x in SCALAR_STRS else recurse_typedef(x) for x in scalar_values]
+
+            # we have an enum list
+            enum_values = [x for x in t if isinstance(x, str) and not x in SCALAR_STRS]
+            enum = None
+            if enum_values:
+                enum = Enum("Enum", enum_values)
+
+            r_type = type(enum)
+            # support rust enum values by making the enum a union of the enum and the recursive type
+            for x in t:
+                if isinstance(x, dict):
+                    k, v = list(x.items())[0]
+                    r_type = Union[r_type, Tagged(k, recurse_typedef(v))]
+
+            return [
+                recurse_typedef(x)
+                if isinstance(x, SimpleType)
+                else py_scalar_type(x)
+                if x in SCALAR_STRS
+                else Literal[x]
+                for x in t
+            ]
+        return py_scalar_type(t)
+    else:
+        if isinstance(t, SimpleType):
+            if not isinstance(t.t, SimpleType):
+                return py_kind(py_scalar_type(t.t), k)
+            else:
+                return recurse_typedef(t.t, k)
+        if isinstance(t, list):
+            return py_kind(
+                [recurse_typedef(x) if isinstance(x, SimpleType) else py_scalar_type(x) for x in t], k
+            )
+        return py_kind(py_scalar_type(t), k)
+
+
+class Type(typing.Generic[T]):
+    def __init__(
+        self, type: Union[dict[str, "Type[T]"], list["Type[T]"], "Type[T]"], kind: KINDS | None = None
+    ):
         self.k: KINDS | None = kind
         self.t = type
 
@@ -54,7 +173,7 @@ class Type:
                 inner_ts = {k: v.to_json() if isinstance(v, Type) else v for k, v in inner_ts.items()}
             return {"k": self.k, "t": inner_ts}
 
-    def to_python_type(self) -> typing.Type[Any]:
+    def to_python_type(self) -> typing.Type[T]:
         match self.k:
             case "array" | "tuple":
                 if isinstance(self.t, list):
@@ -62,14 +181,14 @@ class Type:
                 if isinstance(self.t, Type):
                     return list[self.t.to_python_type()]
                 else:
-                    return list[Any]
+                    return list[T]
             case "optional":
                 if isinstance(self.t, list):
                     return list[self.t[0].to_python_type()] | None
                 if isinstance(self.t, Type):
                     return list[self.t.to_python_type()] | None
                 else:
-                    return list[Any] | None
+                    return list[T] | None
             case "enum":
                 return dict[str, Any] | str
             case "record":
@@ -179,7 +298,7 @@ class Type:
         raise Exception("Invalid type")
 
 
-class ScalarType(Type):
+class ScalarType(Type[Any]):
     def __init__(self, scalar: SCALARS | "str"):
         self.k = None
         self.t = self  # scalar
@@ -201,7 +320,7 @@ class ScalarType(Type):
             return (False, f"Expected {self.r}, got {other}")
 
 
-def type_from_typedef(res: Any) -> Type:
+def type_from_typedef(res: Any) -> Type[Any]:
     if isinstance(res, dict):
         if res.get("t") and res.get("k"):
             return (
@@ -220,7 +339,7 @@ def type_from_typedef(res: Any) -> Type:
 sample_typedef_json = '{"k":"enum","t":["Foo",{"Bar":["i32","f32","string",{"k":"tuple","t":["i32","f32","string"]}]},{"Baz":{"f":"f32","i":"i32","s":"string","t":{"k":"tuple","t":["i32","f32","string"]}}}]}'
 
 
-def build_function_with_typedef(types: list[Type], docs: str):
+def build_function_with_typedef(types: list[Type[Any]], docs: str):
     def built(*args: Any):
         for t, a in zip(types, args):
             match = t.matches(a)
