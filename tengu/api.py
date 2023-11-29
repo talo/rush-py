@@ -13,7 +13,7 @@ from graphql import DocumentNode
 import requests
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
-from .typedef import build_function_with_typedef, type_from_typedef
+from .typedef import build_typechecker, type_from_typedef
 
 ArgId = uuid.UUID
 ModuleInstanceId = uuid.UUID
@@ -471,7 +471,7 @@ class BaseProvider:
                 in_types = [type_from_typedef(i) for i in module["ins"]]
                 out_types = [type_from_typedef(i) for i in module["outs"]]
 
-                typechecker = build_function_with_typedef(in_types, "")
+                typechecker = build_typechecker(*in_types)
 
                 def runner(
                     *args: Any,
