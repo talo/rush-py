@@ -1,0 +1,785 @@
+type Account {
+  id: AccountId!
+  created_at: DateTime!
+
+  # Get a summary of resources utilization for the account
+  resource_utilization(
+    from: DateTime
+    to: DateTime
+  ): [ResourceUtilizationReport!]!
+  module_instances(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+    path: String
+    name: String
+    status: ModuleInstanceStatus
+    target: ModuleInstanceTarget
+    tags: [String!]
+    deleted: Boolean
+  ): SimpleModuleInstanceConnection!
+
+  # Get all tags placed on module_instances
+  module_instance_tags(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+    contains: String
+    min_count: Int
+  ): TagConnection!
+  arguments(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+    typeinfo: Type
+    tags: [String!]
+    deleted: Boolean
+  ): ArgumentConnection!
+
+  # Get all tags placed on module_instances
+  argument_tags(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+    contains: String
+  ): TagConnection!
+}
+
+scalar AccountId
+
+type Argument {
+  id: ArgumentId!
+  created_at: DateTime!
+  deleted_at: DateTime
+  rejected_at: DateTime
+  account_id: AccountId!
+  typeinfo: Type!
+  value: JSON
+  tags: [String!]
+  source: ModuleInstanceId
+}
+
+type ArgumentConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ArgumentEdge!]!
+
+  # A list of nodes.
+  nodes: [Argument!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type ArgumentEdge {
+  # The item at the end of the edge
+  node: Argument!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+scalar ArgumentId
+
+input ArgumentInput {
+  id: ArgumentId
+  value: JSON
+  tags: [String!]
+}
+
+# Implement the DateTime<Utc> scalar
+#
+# The input/output is a string in RFC3339 format.
+scalar DateTime
+
+type GlobalStatus {
+  created_at: DateTime!
+  status: ModuleInstanceStatus!
+  count: Int!
+}
+
+type GlobalStatusConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [GlobalStatusEdge!]!
+
+  # A list of nodes.
+  nodes: [GlobalStatus!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type GlobalStatusEdge {
+  # The item at the end of the edge
+  node: GlobalStatus!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+# A scalar that can represent any JSON value.
+scalar JSON
+
+type LogEntry {
+  id: String!
+  created_at: DateTime!
+  content: [String!]!
+}
+
+type LogEntryConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [LogEntryEdge!]!
+
+  # A list of nodes.
+  nodes: [LogEntry!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type LogEntryEdge {
+  # The item at the end of the edge
+  node: LogEntry!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+# Units for memory and storage
+enum MemUnits {
+  B
+  KB
+  MB
+  GB
+  TB
+}
+
+type Module {
+  id: ModuleId!
+  created_at: DateTime!
+  deleted_at: DateTime
+  path: String!
+  ins: [Type!]!
+  outs: [Type!]!
+  tags: [String!]
+  description: String
+  usage: String
+  ins_usage: [String!]
+  outs_usage: [String!]
+  targets: [ModuleInstanceTarget!]
+  typedesc: String!
+}
+
+type ModuleConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ModuleEdge!]!
+
+  # A list of nodes.
+  nodes: [Module!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type ModuleEdge {
+  # The item at the end of the edge
+  node: Module!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+enum ModuleFailureReason {
+  # Module arguments failed to resolve
+  RESOLUTION
+
+  # Module failed to dispatch to a cluster
+  DISPATCH
+
+  # Module failed during execution
+  RUN
+
+  # Module instance has not made any progress for a given timeout.
+  STALLED
+
+  # Module instance can not be found on the cluster it was dispatched to.
+  MISSING
+
+  # Module instance has been corrupted and does not have a valid status.
+  CORRUPTED
+}
+
+scalar ModuleId
+
+input ModuleInput {
+  path: String!
+  tags: [String!]
+  tests: [TestCase!]!
+}
+
+type ModuleInstance {
+  id: ModuleInstanceId!
+  created_at: DateTime!
+  deleted_at: DateTime
+  account_id: AccountId!
+  path: String!
+  ins: [Argument!]!
+  outs: [Argument!]!
+  queued_at: DateTime
+  admitted_at: DateTime
+  dispatched_at: DateTime
+  run_at: DateTime
+  completed_at: DateTime
+  failure_reason: ModuleFailureReason
+  status: ModuleInstanceStatus!
+  target: ModuleInstanceTarget!
+  resources: ModuleInstanceResources
+  progress: ModuleInstanceProgress
+  tags: [String!]
+  module: Module!
+  stdout(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): LogEntryConnection!
+  stderr(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): LogEntryConnection!
+  resource_utilization: ResourceUtilization
+}
+
+scalar ModuleInstanceId
+
+input ModuleInstanceInput {
+  path: String!
+  args: [ArgumentInput!]!
+  target: ModuleInstanceTarget
+
+  # Resource specification
+  resources: ModuleInstanceResourcesInput
+
+  # Tags to place on the module instance
+  tags: [String!]
+
+  # Tags to apply to the outputs
+  out_tags: [[String!]]
+
+  # Is this the final module intance in the pipeline?
+  end: Boolean
+}
+
+type ModuleInstanceProgress {
+  n: Int!
+  n_expected: Int!
+  n_max: Int!
+  done: Boolean!
+}
+
+type ModuleInstanceResources {
+  gpus: Int
+  gpu_mem: Int
+  gpu_mem_units: MemUnits
+  cpus: Int
+  nodes: Int
+  mem: Int
+  mem_units: MemUnits
+  storage: Int
+  storage_units: MemUnits
+  walltime: Int
+  storage_mounts: [String!]
+}
+
+input ModuleInstanceResourcesInput {
+  gpus: Int
+  gpu_mem: Int
+  gpu_mem_units: MemUnits
+  cpus: Int
+  nodes: Int
+  mem: Int
+  mem_units: MemUnits
+  storage: Int
+  storage_units: MemUnits
+  walltime: Int
+  storage_mounts: [String!]
+}
+
+enum ModuleInstanceStatus {
+  # Module instance has been created.
+  CREATED
+
+  # Module instance is waiting for its arguments to be resolved. It will be admitted once all of its
+  # dependencies have been resolved (meaning that the module instances that
+  # will produce these dependencies have completed).
+  RESOLVING
+
+  # Module instance has been admitted. It will be dispatched when a cluster
+  # becomes available.
+  ADMITTED
+
+  # Module instance has been dispatched to run on a cluster. This will run
+  # the module instance until it is done or until it yields.
+  DISPATCHED
+
+  # Module instance is queued on the cluster. It will start running once the cluster's internal
+  # queue launches it.
+  QUEUED
+
+  # Module instance is running and making progress on the cluster.
+  RUNNING
+
+  # Module instance has been run to completion.
+  COMPLETED
+
+  # Module instance failed to run.
+  FAILED
+
+  # Module instance was cancelled.
+  CANCELLED
+}
+
+enum ModuleInstanceTarget {
+  NIX
+  GADI
+  NIX_SSH
+  NIX_SSH_2
+  NIX_SSH_3
+  NIX_SSH_4
+  SETONIX
+  GADI_GPU
+  NIX_SSH_GPU
+  NIX_SSH_2_GPU
+  NIX_SSH_3_GPU
+  NIX_SSH_4_GPU
+  SETONIX_GPU
+  GADI_EXPRESS
+  SETONIX_EXPRESS
+}
+
+type Mutation {
+  login(username: String!, password: String!): User!
+  deploy(module: ModuleInput!): SimpleModule!
+  destroy(module: ModuleId!): SimpleModule!
+  delete_module_instance(module: ModuleInstanceId!): SimpleModuleInstance!
+  tag(
+    module: ModuleId
+    module_instance: ModuleInstanceId
+    argument: ArgumentId
+    tags: [String!]!
+  ): [String!]!
+  untag(
+    module: ModuleId
+    module_instance: ModuleInstanceId
+    argument: ArgumentId
+    tags: [String!]!
+  ): [String!]!
+  upload_arg(typeinfo: JSON!, tags: [String!], file: Upload!): Argument!
+
+  # Cancel a currently running instance, but don't delete it
+  cancel(instance: ModuleInstanceId!): ModuleInstanceId!
+
+  # If a module instance fails due to environment issues (eg. inputs and module are valid),
+  # this method can be used to retry the module instance.
+  retry(
+    instance: ModuleInstanceId!
+    target: ModuleInstanceTarget
+    resources: ModuleInstanceResourcesInput
+  ): SimpleModuleInstance!
+  run(instance: ModuleInstanceInput!): SimpleModuleInstance!
+
+  # An (admin) endpoint to update all attributes of a module instance.
+  # Only to be used in debug / rescue situations.
+  update_module_instance(
+    instance_update: UpdateModuleInstanceInput!
+  ): SimpleModuleInstance!
+
+  # Track historical utilization
+  track_module_instance_resource_utilization(
+    utilization: ResourceUtilizationInput!
+  ): ResourceUtilization!
+}
+
+enum OrderBy {
+  ASC
+  DESC
+}
+
+# Information about pagination in a connection
+type PageInfo {
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+
+  # When paginating backwards, the cursor to continue.
+  startCursor: String
+
+  # When paginating forwards, the cursor to continue.
+  endCursor: String
+}
+
+type Query {
+  modules(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+    path: String
+    name: String
+    deleted: Boolean
+    tags: [String!]
+  ): ModuleConnection!
+  latest_modules(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+    names: [String!]
+    targets: [ModuleInstanceTarget!]
+  ): ModuleConnection!
+  me: User!
+  status_by_name(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): StatusByNameConnection!
+  status_by_name_and_account(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): StatusByNameAndAccountConnection!
+  status_by_account(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): StatusByAccountConnection!
+  global_status(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): GlobalStatusConnection!
+  utilization_for_target(
+    target: ModuleInstanceTarget!
+    from: DateTime
+    to: DateTime
+  ): ResourceUtilizationReport!
+  module(id: ModuleId!): Module!
+  module_instance(id: ModuleInstanceId!): ModuleInstance!
+  argument(id: ArgumentId!): Argument!
+  object(id: ArgumentId!): JSON!
+}
+
+type ResourceUtilization {
+  id: ResourceUtilizationId!
+  created_at: DateTime!
+  module_instance_id: ModuleInstanceId!
+  target: ModuleInstanceTarget!
+  gpu: Float
+  mem: Float
+  storage: Float!
+  walltime: Float!
+  cputime: Float!
+  inodes: Float!
+  sus: Int
+}
+
+scalar ResourceUtilizationId
+
+input ResourceUtilizationInput {
+  moduleInstanceId: ModuleInstanceId!
+  gpu: Float
+  mem: Float
+  storage: Float!
+  walltime: Float!
+  cputime: Float!
+  inodes: Float!
+  sus: Int
+}
+
+type ResourceUtilizationReport {
+  target: ModuleInstanceTarget!
+  from: DateTime!
+  to: DateTime!
+  gpu_avg: Float
+  mem_avg: Float
+  storage_total: Float!
+  storage_avg: Float!
+  walltime_total: Float!
+  walltime_avg: Float!
+  cputime_total: Float!
+  cputime_avg: Float!
+  inodes_total: Float!
+  sus_total: Int
+}
+
+type SimpleModule {
+  id: ModuleId!
+  created_at: DateTime!
+  deleted_at: DateTime
+  path: String!
+  ins: [Type!]!
+  outs: [Type!]!
+  tags: [String!]
+  description: String
+  usage: String
+  ins_usage: [String!]
+  outs_usage: [String!]
+  targets: [ModuleInstanceTarget!]
+}
+
+type SimpleModuleInstance {
+  id: ModuleInstanceId!
+  created_at: DateTime!
+  deleted_at: DateTime
+  account_id: AccountId!
+  path: String!
+  ins: [Argument!]!
+  outs: [Argument!]!
+  queued_at: DateTime
+  admitted_at: DateTime
+  dispatched_at: DateTime
+  run_at: DateTime
+  completed_at: DateTime
+  failure_reason: ModuleFailureReason
+  status: ModuleInstanceStatus!
+  target: ModuleInstanceTarget!
+  resources: ModuleInstanceResources
+  progress: ModuleInstanceProgress
+  tags: [String!]
+}
+
+type SimpleModuleInstanceConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [SimpleModuleInstanceEdge!]!
+
+  # A list of nodes.
+  nodes: [SimpleModuleInstance!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type SimpleModuleInstanceEdge {
+  # The item at the end of the edge
+  node: SimpleModuleInstance!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type StatusByAccount {
+  created_at: DateTime!
+  account_id: AccountId!
+  status: ModuleInstanceStatus!
+  count: Int!
+}
+
+type StatusByAccountConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [StatusByAccountEdge!]!
+
+  # A list of nodes.
+  nodes: [StatusByAccount!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type StatusByAccountEdge {
+  # The item at the end of the edge
+  node: StatusByAccount!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type StatusByName {
+  created_at: DateTime!
+  name: String!
+  status: ModuleInstanceStatus!
+  count: Int!
+}
+
+type StatusByNameAndAccount {
+  created_at: DateTime!
+  name: String!
+  account_id: AccountId!
+  status: ModuleInstanceStatus!
+  count: Int!
+}
+
+type StatusByNameAndAccountConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [StatusByNameAndAccountEdge!]!
+
+  # A list of nodes.
+  nodes: [StatusByNameAndAccount!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type StatusByNameAndAccountEdge {
+  # The item at the end of the edge
+  node: StatusByNameAndAccount!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type StatusByNameConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [StatusByNameEdge!]!
+
+  # A list of nodes.
+  nodes: [StatusByName!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type StatusByNameEdge {
+  # The item at the end of the edge
+  node: StatusByName!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type Subscription {
+  stream(argumentId: ArgumentId!): JSON!
+}
+
+type Tag {
+  tag: String!
+  created_at: DateTime!
+  count: Int!
+}
+
+type TagConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [TagEdge!]!
+
+  # A list of nodes.
+  nodes: [Tag!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type TagEdge {
+  # The item at the end of the edge
+  node: Tag!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input TestCase {
+  args: [ArgumentInput!]!
+  target: ModuleInstanceTarget!
+  resources: ModuleInstanceResourcesInput
+  tags: [String!]
+}
+
+type Token {
+  id: TokenId!
+  created_at: DateTime!
+  deleted_at: DateTime
+  user_id: UserId!
+}
+
+type TokenConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [TokenEdge!]!
+
+  # A list of nodes.
+  nodes: [Token!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type TokenEdge {
+  # The item at the end of the edge
+  node: Token!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+scalar TokenId
+
+scalar Type
+
+input UpdateModuleInstanceInput {
+  id: ModuleInstanceId!
+  path: String
+  ins: [ArgumentInput!]
+  outs: [ArgumentInput!]
+  target: ModuleInstanceTarget
+  status: ModuleInstanceStatus
+  resources: ModuleInstanceResourcesInput
+  tags: [String!]
+}
+
+scalar Upload
+
+type User {
+  id: UserId!
+  created_at: DateTime!
+  account_id: AccountId!
+  account: Account!
+  tokens(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    order: OrderBy
+  ): TokenConnection!
+}
+
+scalar UserId

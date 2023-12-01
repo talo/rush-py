@@ -1,0 +1,82 @@
+query argument($id: ArgumentId!) {
+  argument(id: $id) {
+    id
+    typeinfo
+    value
+    created_at
+    tags
+  }
+}
+
+query latest_modules(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $order: OrderBy
+  $names: [String!]
+) {
+  latest_modules(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    names: $names
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        created_at
+        deleted_at
+        path
+        ins
+        outs
+        tags
+      }
+    }
+  }
+}
+
+query object($id: ArgumentId!) {
+  object(id: $id)
+}
+
+# Mutations
+
+mutation deploy($module: ModuleInput!) {
+  deploy(module: $module) {
+    id
+    path
+  }
+}
+
+mutation run($instance: ModuleInstanceInput!) {
+  run(instance: $instance) {
+    id
+    outs {
+      id
+    }
+  }
+}
+
+mutation tag(
+  $moduleInstanceId: ModuleInstanceId
+  $argumentId: ArgumentId
+  $moduleId: ModuleId
+  $tags: [String!]!
+) {
+  tag(
+    module_instance: $moduleInstanceId
+    argument: $argumentId
+    module: $moduleId
+    tags: $tags
+  )
+}

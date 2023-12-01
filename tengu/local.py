@@ -9,7 +9,9 @@ from subprocess import run
 
 from typing import Any
 
-from .api import Arg, Provider
+from .provider import Provider
+
+Arg = Provider.Arg
 
 STATUS_PATH = "github:talo/tengu-module-flake-parts/6798b0c701ff0caa69a064d4e57431357fc3807c#dummy"
 
@@ -26,7 +28,7 @@ class LocalProvider:
             raise ValueError("Could not find tengu config file -- please run tengu-runtime install")
         self.config = json.loads(config_file.read_text())
 
-    def upload_arg(self, file: pathlib.Path) -> Arg:
+    def upload_arg(self, file: pathlib.Path) -> Arg[Any]:
         """
         Converts a file to bas64 and formats it for use as an argument
 

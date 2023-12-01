@@ -1,5 +1,5 @@
 """Main entrypoint into package."""
-from .api import Arg, Provider
+from .provider import Provider
 from .local import LocalProvider
 
-__all__ = ["Arg", "LocalProvider", "Provider"]
+__all__ = ["LocalProvider", "Provider"]
