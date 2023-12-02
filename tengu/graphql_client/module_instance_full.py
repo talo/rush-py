@@ -74,9 +74,7 @@ class ModuleInstanceFullModuleInstanceProgress(BaseModel):
 
 
 class ModuleInstanceFullModuleInstanceStdout(BaseModel):
-    page_info: "ModuleInstanceFullModuleInstanceStdoutPageInfo" = Field(
-        alias="pageInfo"
-    )
+    page_info: "ModuleInstanceFullModuleInstanceStdoutPageInfo" = Field(alias="pageInfo")
     edges: List["ModuleInstanceFullModuleInstanceStdoutEdges"]
 
 
@@ -99,9 +97,7 @@ class ModuleInstanceFullModuleInstanceStdoutEdgesNode(BaseModel):
 
 
 class ModuleInstanceFullModuleInstanceStderr(BaseModel):
-    page_info: "ModuleInstanceFullModuleInstanceStderrPageInfo" = Field(
-        alias="pageInfo"
-    )
+    page_info: "ModuleInstanceFullModuleInstanceStderrPageInfo" = Field(alias="pageInfo")
     edges: List["ModuleInstanceFullModuleInstanceStderrEdges"]
 
 

@@ -180,6 +180,7 @@ type Module {
   ins_usage: [String!]
   outs_usage: [String!]
   targets: [ModuleInstanceTarget!]
+  resource_bounds: ModuleResourceBounds
   typedesc: String!
 }
 
@@ -376,6 +377,56 @@ enum ModuleInstanceTarget {
   SETONIX_EXPRESS
 }
 
+type ModuleResourceBounds {
+  # number of gpus in node, 0 means no gpu required.
+  gpu_min: Int!
+
+  # max number of gpus in node that can used, 0 means no gpu support.
+  gpu_max: Int!
+
+  # optimal number of gpus in node
+  gpu_hint: Int!
+
+  # minimum gpu memory required in MB per gpu
+  gpu_mem_min: Int
+
+  # maxmimum memory that can be used in MB (None means no limit)
+  gpu_mem_max: Int
+
+  # optimal gpu memory in MB
+  gpu_mem_hint: Int
+
+  # minimum number of cpus required, should be > 0 if Some
+  cpu_min: Int
+
+  # maximum number of cpus that can be used, 0 means no limit
+  cpu_max: Int
+
+  # optimal number of cpus
+  cpu_hint: Int
+
+  # minimum node count
+  node_min: Int!
+
+  # maximum node count (e.g. maximum node parallelism)
+  node_max: Int!
+
+  # most optimal node count
+  node_hint: Int!
+
+  # Min RAM in MB
+  mem_min: Int!
+
+  # Max RAM in MB (0 means no limit)
+  mem_max: Int!
+
+  # in MB
+  storage_min: Int!
+
+  # in MB (0 means no limit)
+  storage_max: Int!
+}
+
 type Mutation {
   login(username: String!, password: String!): User!
   deploy(module: ModuleInput!): SimpleModule!
@@ -556,6 +607,7 @@ type SimpleModule {
   ins_usage: [String!]
   outs_usage: [String!]
   targets: [ModuleInstanceTarget!]
+  resource_bounds: ModuleResourceBounds
 }
 
 type SimpleModuleInstance {

@@ -16,6 +16,8 @@ class ArgumentFull(BaseModel):
     typeinfo: Any
     value: Optional[Any]
     created_at: datetime
+    rejected_at: Optional[datetime]
+    source: Optional[UUID]
     tags: Optional[List[str]]
 
 
@@ -32,6 +34,27 @@ class ModuleFull(BaseModel):
     description: Optional[str]
     typedesc: str
     tags: Optional[List[str]]
+    targets: Optional[List[ModuleInstanceTarget]]
+    resource_bounds: Optional["ModuleFullResourceBounds"]
+
+
+class ModuleFullResourceBounds(BaseModel):
+    gpu_min: int
+    gpu_max: int
+    gpu_hint: int
+    gpu_mem_min: Optional[int]
+    gpu_mem_max: Optional[int]
+    gpu_mem_hint: Optional[int]
+    cpu_min: Optional[int]
+    cpu_max: Optional[int]
+    cpu_hint: Optional[int]
+    node_min: int
+    node_max: int
+    node_hint: int
+    mem_min: int
+    mem_max: int
+    storage_min: int
+    storage_max: int
 
 
 class ModuleInstanceCommon(BaseModel):
@@ -161,6 +184,7 @@ class SimpleModuleInstanceFullProgress(BaseModel):
 
 ArgumentFull.model_rebuild()
 ModuleFull.model_rebuild()
+ModuleFullResourceBounds.model_rebuild()
 ModuleInstanceCommon.model_rebuild()
 ModuleInstanceFull.model_rebuild()
 ModuleInstanceFullIns.model_rebuild()

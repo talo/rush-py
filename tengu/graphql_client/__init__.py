@@ -35,6 +35,7 @@ from .exceptions import (
 from .fragments import (
     ArgumentFull,
     ModuleFull,
+    ModuleFullResourceBounds,
     ModuleInstanceCommon,
     ModuleInstanceFull,
     ModuleInstanceFullIns,
@@ -144,6 +145,7 @@ __all__ = [
     "MemUnits",
     "ModuleFailureReason",
     "ModuleFull",
+    "ModuleFullResourceBounds",
     "ModuleInput",
     "ModuleInstanceCommon",
     "ModuleInstanceDetails",

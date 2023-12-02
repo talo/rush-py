@@ -21,6 +21,8 @@ fragment ArgumentFull on Argument {
   typeinfo
   value
   created_at
+  rejected_at
+  source
   tags
 }
 
@@ -77,6 +79,29 @@ fragment ModuleFull on Module {
   description
   typedesc
   tags
+  targets
+  resource_bounds {
+    gpu_min
+    gpu_max
+    gpu_hint
+
+    gpu_mem_min
+    gpu_mem_max
+    gpu_mem_hint
+
+    cpu_min
+    cpu_max
+    cpu_hint
+    node_min
+    node_max
+    node_hint
+
+    mem_min
+    mem_max
+
+    storage_min
+    storage_max
+  }
 }
 
 query latest_modules(
