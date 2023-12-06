@@ -4,4 +4,4 @@
 __all__ = []
 
 # %% ../nbs/00_core.ipynb 3
-show_doc(Provider) 
+show_doc(Provider)
