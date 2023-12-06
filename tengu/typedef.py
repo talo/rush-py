@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Any, Literal, Union
 import typing
+from uuid import UUID
 
 SCALARS = Literal[
     "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes", "Conformer"
@@ -274,7 +275,11 @@ def build_typechecker(
         for t, a in zip(types, args):
             match = t.matches(a)
             if not match[0]:
-                raise Exception(f"Typecheck failed: {match[1]}")
+                # if args are references, let the api check them
+                if a.__dict__.get("id") or isinstance(a, UUID):
+                    return True
+                else:
+                    raise Exception(f"Typecheck failed: {match[1]}")
 
     return built
 

@@ -3,8 +3,8 @@
 from pathlib import Path
 from typing import Any, Literal
 
-from tengu.graphql_client.enums import MemUnits, ModuleInstanceTarget
-from tengu.graphql_client.input_types import ModuleInstanceResourcesInput
+from .graphql_client.enums import MemUnits, ModuleInstanceTarget
+from .graphql_client.input_types import ModuleInstanceResourcesInput
 from .provider import Provider
 
 frag_keywords = {
@@ -49,12 +49,11 @@ async def run_qp(
     ),
     amino_acids_of_interest: Provider.Arg[list[tuple[str, int]]] = Provider.Arg(None, None, None),
     use_new_fragmentation_method: Provider.Arg[bool] | bool | None = None,
-    target: ModuleInstanceTarget | None = None,
-    resources: ModuleInstanceResourcesInput | None = None,
+    hermes_target: ModuleInstanceTarget | None = None,
+    hermes_resources: ModuleInstanceResourcesInput | None = None,
     tags: list[str] | None = None,
-    autopoll: tuple[int, int] | None = None,
     restore: bool | None = None,
-):
+) -> tuple[Provider.Arg[Any], Provider.Arg[Any]]:
     """
     Construct the input and output module instance calls for QP run.
     :param qp_gen_inputs_path: The path of the QP gen inputs module.
@@ -72,10 +71,13 @@ async def run_qp(
     :param resources: The resources to run the module with.
     :param autopoll: The autopoll interval and timeout.
     :param tag: The tags to apply to all module instances, arguements and outs.
+
+    :return: The hermes energy output argument.
+    :return: The qp collate output argument.
     """
 
-    if resources is not None and resources.gpus and keywords.value is not None:
-        keywords.value["frag"]["ngpus_per_node"] = resources.gpus
+    if hermes_resources is not None and hermes_resources.gpus and keywords.value is not None:
+        keywords.value["frag"]["ngpus_per_node"] = hermes_resources.gpus
 
     qp_prep_conf = {
         "ligand_file_type": lig_type if isinstance(lig_type, str) else lig_type.value,
@@ -95,7 +97,7 @@ async def run_qp(
             else use_new_fragmentation_method
         )
 
-    qp_prep_instance = provider.run(
+    qp_prep_instance = await provider.run(
         qp_gen_inputs_path,
         [pdb, gro, lig, model, keywords, qp_prep_conf],
         tags=tags,
@@ -103,59 +105,45 @@ async def run_qp(
         restore=restore,
         resources=ModuleInstanceResourcesInput(storage=20, storage_units=MemUnits.MB),
     )
-    print("launched qp_prep_instance", qp_prep_instance)
+    print("launched qp_prep_instance", qp_prep_instance.id)
     try:
         hermes_instance = await provider.run(
             hermes_energy_path,
             [
-                qp_prep_instance["output_ids"][0],
-                qp_prep_instance["output_ids"][1],
-                qp_prep_instance["output_ids"][2],
+                qp_prep_instance.outs[0].id,
+                qp_prep_instance.outs[1].id,
+                qp_prep_instance.outs[2].id,
             ],
-            target,
-            resources,
+            hermes_target,
+            hermes_resources,
             tags=tags,
             out_tags=([tags, tags] if tags else None),
             restore=restore,
         )
 
-        print("launched hermes_instance", hermes_instance)
+        print("launched hermes_instance", hermes_instance.id)
     except Exception:
-        self.delete_module_instance(str(qp_prep_instance["module_instance_id"]))
+        await provider.delete_module_instance(qp_prep_instance.id)
         raise
 
     try:
-        qp_collate_instance = provider.run(
+        qp_collate_instance = await provider.run(
             qp_collate_path,
             [
-                hermes_instance["output_ids"][0],
-                qp_prep_instance["output_ids"][3],
+                hermes_instance.outs[0].id,
+                qp_prep_instance.outs[3].id,
             ],
             tags=tags,
             out_tags=([tags] if tags else None),
             restore=restore,
-            resources={"storage": 20, "storage_units": "MB"},
+            resources=ModuleInstanceResourcesInput(storage=20, storage_units=MemUnits.MB),
         )
     except Exception:
-        self.delete_module_instance(qp_prep_instance["module_instance_id"])
-        self.delete_module_instance(hermes_instance["module_instance_id"])
+        await provider.delete_module_instance(qp_prep_instance.id)
+        await provider.delete_module_instance(hermes_instance.id)
         raise
 
-    if autopoll:
-        time.sleep(autopoll[0])
-        prep = self.poll_module_instance(qp_prep_instance["module_instance_id"], *autopoll)
-        if prep["status"] == "FAILED":
-            self.delete_module_instance(hermes_instance["module_instance_id"])
-            self.delete_module_instance(qp_collate_instance["module_instance_id"])
-            raise RuntimeError(prep["error"])
-
-        hermes = self.poll_module_instance(hermes_instance["module_instance_id"], *autopoll)
-        if hermes["status"] == "FAILED":
-            self.delete_module_instance(qp_collate_instance["module_instance_id"])
-            raise RuntimeError(hermes["error"])
-
-        collate = self.poll_module_instance(qp_collate_instance["module_instance_id"], *autopoll)
-
-        return collate
-
-    return [qp_prep_instance, hermes_instance, qp_collate_instance]
+    return (
+        Provider.Arg(provider=provider, id=hermes_instance.outs[0].id),
+        Provider.Arg(provider=provider, id=qp_collate_instance.outs[0].id),
+    )

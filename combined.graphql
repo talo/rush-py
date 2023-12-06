@@ -317,6 +317,7 @@ query module_instances(
   $name: String
   $status: ModuleInstanceStatus
   $tags: [String!]
+  $ids: [ModuleInstanceId!]
 ) {
   me {
     account {
@@ -329,6 +330,7 @@ query module_instances(
         status: $status
         name: $name
         tags: $tags
+        ids: $ids
       ) {
         edges {
           cursor

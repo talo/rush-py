@@ -18,6 +18,7 @@ type Account {
     status: ModuleInstanceStatus
     target: ModuleInstanceTarget
     tags: [String!]
+    ids: [ModuleInstanceId!]
     deleted: Boolean
   ): SimpleModuleInstanceConnection!
 

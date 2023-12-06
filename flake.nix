@@ -1,5 +1,5 @@
 {
-  description = "A template QDX experiment repo";
+  description = "Tengu Python SDK";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";

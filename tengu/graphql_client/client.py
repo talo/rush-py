@@ -476,11 +476,12 @@ class Client(AsyncBaseClient):
         name: Union[Optional[str], UnsetType] = UNSET,
         status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
         tags: Union[Optional[List[str]], UnsetType] = UNSET,
+        ids: Union[Optional[List[UUID]], UnsetType] = UNSET,
         **kwargs: Any
     ) -> ModuleInstancesMe:
         query = gql(
             """
-            query module_instances($after: String, $before: String, $first: Int, $last: Int, $path: String, $name: String, $status: ModuleInstanceStatus, $tags: [String!]) {
+            query module_instances($after: String, $before: String, $first: Int, $last: Int, $path: String, $name: String, $status: ModuleInstanceStatus, $tags: [String!], $ids: [ModuleInstanceId!]) {
               me {
                 account {
                   module_instances(
@@ -492,6 +493,7 @@ class Client(AsyncBaseClient):
                     status: $status
                     name: $name
                     tags: $tags
+                    ids: $ids
                   ) {
                     edges {
                       cursor
@@ -576,12 +578,15 @@ class Client(AsyncBaseClient):
             "name": name,
             "status": status,
             "tags": tags,
+            "ids": ids,
         }
         response = await self.execute(query=query, variables=variables, **kwargs)
         data = self.get_data(response)
         return ModuleInstances.model_validate(data).me
 
-    async def module_instance_minimal(self, id: UUID, **kwargs: Any) -> ModuleInstanceMinimalModuleInstance:
+    async def module_instance_minimal(
+        self, id: UUID, **kwargs: Any
+    ) -> ModuleInstanceMinimalModuleInstance:
         query = gql(
             """
             query module_instance_minimal($id: ModuleInstanceId!) {
@@ -712,7 +717,9 @@ class Client(AsyncBaseClient):
         variables: Dict[str, object] = {"utilization": utilization}
         response = await self.execute(query=query, variables=variables, **kwargs)
         data = self.get_data(response)
-        return TrackUtilization.model_validate(data).track_module_instance_resource_utilization
+        return TrackUtilization.model_validate(
+            data
+        ).track_module_instance_resource_utilization
 
     async def untag(
         self,
@@ -762,7 +769,9 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return UpdateModuleInstance.model_validate(data).update_module_instance
 
-    async def upload_arg(self, typeinfo: Any, file: Upload, **kwargs: Any) -> UploadArgUploadArg:
+    async def upload_arg(
+        self, typeinfo: Any, file: Upload, **kwargs: Any
+    ) -> UploadArgUploadArg:
         query = gql(
             """
             mutation upload_arg($typeinfo: JSON!, $file: Upload!) {

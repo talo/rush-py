@@ -7,11 +7,10 @@ from io import IOBase
 from pathlib import Path
 from typing import Any, AsyncIterable, Generic, Iterable, List, Literal, Optional, Protocol, TypeVar, Union
 from uuid import UUID
+from collections import Counter
 
 import httpx
-from tengu.graphql_client.exceptions import GraphQLClientGraphQLMultiError
-
-from tengu.graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
+from pydantic_core import to_jsonable_python
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -22,10 +21,14 @@ from .graphql_client.arguments import (
 from .graphql_client.base_model import UNSET, UnsetType, Upload
 from .graphql_client.client import Client
 from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget
+from .graphql_client.exceptions import GraphQLClientGraphQLMultiError
 from .graphql_client.fragments import ModuleFull, PageInfoFull
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
-from .graphql_client.module_instance_full import ModuleInstanceFull, ModuleInstanceFullModuleInstance
+from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
+from .graphql_client.module_instance_full import (
+    ModuleInstanceFullModuleInstance,
+)
 from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesEdgesNode,
     ModuleInstancesMeAccountModuleInstancesPageInfo,
@@ -34,6 +37,25 @@ from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
 from .typedef import build_typechecker, type_from_typedef
+
+ArgId = UUID
+ModuleInstanceId = UUID
+Target = ModuleInstanceTarget
+
+
+@dataclass
+class ModuleInstanceHistory:
+    path: str
+    id: ModuleInstanceId
+    status: ModuleInstanceStatus
+    tags: list[str]
+
+
+@dataclass
+class History:
+    tags: list[str]
+    instances: list[ModuleInstanceHistory]
+
 
 T = TypeVar("T")
 TCo = TypeVar("TCo", covariant=True)
@@ -90,15 +112,16 @@ class TenguModuleRunner(Protocol[TCo]):
     async def __call__(
         self,
         *args: Any,
-        target: ModuleInstanceTarget,
+        target: Target,
         resources: ModuleInstanceResourcesInput | None = None,
         tags: list[str] | None = None,
+        restore: bool | None = None,
     ) -> TCo:
         ...
 
 
-ArgId = UUID
-ModuleInstanceId = UUID
+def get_name_from_path(path: str):
+    return path.split("#")[-1].replace("_tengu", "").replace("tengu_", "")
 
 
 class BaseProvider:
@@ -107,10 +130,17 @@ class BaseProvider:
     """
 
     class Arg(Generic[T]):
-        def __init__(self, provider: "BaseProvider | None", id: UUID | None = None, value: T | None = None):
+        def __init__(
+            self,
+            provider: "BaseProvider | None",
+            id: UUID | None = None,
+            value: T | None = None,
+            typeinfo: dict[str, Any] | None = None,
+        ):
             self.provider = provider
             self.id = id
             self.value = value
+            self.typeinfo = None
 
         def __repr__(self):
             return f"Arg(id={self.id}, value={self.value})"
@@ -121,6 +151,36 @@ class BaseProvider:
         def __eq__(self, other: "Provider.Arg[Any]"):
             return self.id == other.id
 
+        async def info(self) -> ArgumentArgument:
+            if self.id is None:
+                raise Exception("No ID provided")
+            if self.provider is None:
+                raise Exception("No provider provided")
+
+            return await self.provider.argument(self.id)
+
+        async def download(
+            self,
+            filename: str | None = None,
+            filepath: Path | None = None,
+        ):
+            if self.id is None:
+                raise Exception("No ID provided")
+            if self.provider is None:
+                raise Exception("No provider provided")
+            if self.typeinfo is None:
+                await self.get()
+
+            if self.typeinfo:
+                if self.typeinfo["k"] == "object" or (
+                    self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object"
+                ):
+                    await self.provider.download_object(self.id, filename, filepath)
+                else:
+                    raise Exception("Cannot download non-object argument")
+            else:
+                raise Exception("Cannot download argument without typeinfo")
+
         async def get(self) -> T:
             """
             Get the value of the argument.
@@ -129,7 +189,7 @@ class BaseProvider:
 
             :return: The value of the argument.
             """
-            if self.value is None:
+            if self.value is None or self.typeinfo is None:
                 if self.provider is None:
                     raise Exception("No provider provided")
                 if self.id is None:
@@ -160,19 +220,125 @@ class BaseProvider:
                             print(e.errors)
                             raise e
 
-            if self.typeinfo and self.provider:
+            if self.typeinfo and self.provider and self.id:
                 if self.typeinfo["k"] == "object" or (
                     self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object"
                 ):
                     return await self.provider.object(self.id)
             return self.value
 
-    def __init__(self, client: Client):
+    def __init__(
+        self, client: Client, workspace: str | Path | None = None, batch_tags: list[str] | None = None
+    ):
         """
         Initialize the TenguProvider a graphql client.
         """
 
+        self.history = None
         self.client = client
+        if workspace:
+            self.workspace = Path(workspace)
+            self.restore(workspace)
+
+        if not self.history:
+            self.history = History(tags=batch_tags or [], instances=[])
+        self.batch_tags = batch_tags or []
+
+    @staticmethod
+    def _load_history(history_file: str | Path):
+        """
+        Load the history from a file.
+        """
+        with open(history_file, "r") as f:
+            json_dict = json.load(f)
+            return History(
+                tags=json_dict["tags"],
+                instances=[ModuleInstanceHistory(**instance) for instance in json_dict["instances"]],
+            )
+
+    async def nuke(self, remote: bool = False):
+        """
+        Delete the workspace.
+        """
+        # first untrack the runs remotely if necessary
+        if remote:
+            if self.history:
+                for instance in self.history.instances:
+                    await self.delete_module_instance(instance.id)
+        if self.workspace.exists():
+            for f in self.workspace.glob("*"):
+                if f.is_dir():
+                    for ff in f.glob("*"):
+                        ff.unlink()
+                    f.rmdir()
+                else:
+                    f.unlink()
+            self.workspace.rmdir()
+
+    def restore(self, workspace: str | Path):
+        """
+        Restore the workspace.
+        """
+        self.workspace = Path(workspace)
+        # read the workspace history file
+        # if it exists, load the history
+        workspace_history = self.workspace / "history.json"
+        if workspace_history.exists():
+            self.history = self._load_history(workspace_history)
+
+    def save(self, history_file: str | Path | None = None):
+        """
+        Save the workspace.
+        """
+        if history_file is None:
+            history_file = self.workspace / "history.json"
+        with open(history_file, "w") as f:
+            json.dump(self.history, f, default=to_jsonable_python, indent=2)
+
+    async def status(
+        self,
+        instance_ids: list[ModuleInstanceId] | None = None,
+        workspace: str | Path | None = None,
+        history_file: str | Path | None = None,
+        group_by: Literal["tag", "path", "id"] = "id",
+    ) -> dict[str, tuple[ModuleInstanceStatus, str, int]]:
+        """
+        Get the status of all module instances in a workspace, grouped by tag, path, or id.
+        """
+        if not instance_ids:
+            history = self.history
+            if workspace:
+                if isinstance(workspace, str):
+                    workspace = Path(workspace)
+                history = self._load_history(workspace / "history.json")
+            elif history_file:
+                history = self._load_history(history_file)
+
+            if not history:
+                return {}
+
+            instance_ids = [instance.id for instance in history.instances]
+
+        instances: list[ModuleInstanceFullModuleInstance] = []
+        async for page in await self.module_instances(ids=instance_ids):
+            for instance in page.edges:
+                instances.append(instance.node)
+
+        if group_by == "id":
+            return {
+                str(instance.id): (instance.status, get_name_from_path(instance.path), 1)
+                for instance in instances
+            }
+
+        if group_by == "path":
+            c = Counter([(instance.status, get_name_from_path(instance.path)) for instance in instances])
+            return {f"{name} ({status})": (status, name, count) for (status, name), count in c.items()}
+
+        if group_by == "tag":
+            c = Counter([(instance.status, instance.tags) for instance in instances])
+            return {f"{tag} ({status})": (status, "", count) for (status, tag), count in c.items()}
+
+        raise Exception("Invalid group_by")
 
     async def _query_with_pagination(
         self,
@@ -245,24 +411,38 @@ class BaseProvider:
         """
         return await self.client.object(id)
 
-    async def download_object(self, id: ArgId, filepath: Path):
+    async def download_object(self, id: ArgId, filename: str | None = None, filepath: Path | None = None):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
 
         :param id: The ID of the object.
         :param filepath: Where to download the object.
+        :param filename: Download to the workspace with this name under "objects".
         """
         obj = await self.object(id)
 
-        if "url" in obj:
-            with httpx.stream(method="get", url=obj["url"]) as r:
-                r.raise_for_status()
-                with open(filepath, "wb") as f:
-                    async for chunk in r.aiter_bytes():
-                        f.write(chunk)
-        else:
-            with open(filepath, "w") as f:
-                json.dump(obj, f)
+        if filepath is None:
+            if filename is None:
+                filename = str(id)
+            if filename:
+                if not (self.workspace / "objects").exists():
+                    (self.workspace / "objects").mkdir()
+                filepath = self.workspace / "objects" / filename
+
+                # we only error on the implicit path, if the user provides filepath we will overwrite
+                if filepath.exists():
+                    raise FileExistsError(f"File {filename} already exists in workspace")
+
+        if filepath:
+            if "url" in obj:
+                with httpx.stream(method="get", url=obj["url"]) as r:
+                    r.raise_for_status()
+                    with open(filepath, "wb") as f:
+                        for chunk in r.iter_bytes():
+                            f.write(chunk)
+            else:
+                with open(filepath, "w") as f:
+                    json.dump(obj, f)
 
     def load_module_paths(self, filename: Path) -> dict[str, str]:
         """
@@ -289,8 +469,8 @@ class BaseProvider:
     async def run(
         self,
         path: str,
-        args: list[Arg[Any] | Argument | Path | IOBase | Any],
-        target: ModuleInstanceTarget | None = None,
+        args: list[Arg[Any] | Argument | ArgId | Path | IOBase | Any],
+        target: Target | None = None,
         resources: ModuleInstanceResourcesInput | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
@@ -307,14 +487,16 @@ class BaseProvider:
                          If provided, must be the same length as the number of outputs.
         :param restore: Check if a module instance with the same tags and path already exists.
         """
+        tags = tags + self.batch_tags if tags else self.batch_tags
 
         if restore:
             res: list[ModuleInstanceFullModuleInstance] = []
             async for page in await self.module_instances(tags=tags, path=path):
                 for edge in page.edges:
                     instance = edge.node
-                    res.append(instance.module_instance)
+                    res.append(instance)
                     if len(res) > 1:
+                        print("Warning: multiple module instances found with the same tags and path")
                         break
             if len(res) == 1:
                 return res[0]
@@ -325,8 +507,10 @@ class BaseProvider:
         def gen_arg_dict(input: Provider.Arg[Any] | ArgId | UUID | Path | IOBase | Any) -> ArgumentInput:
             arg = ArgumentInput()
             if isinstance(input, Provider.Arg):
-                arg.id = input.id
-                arg.value = input.value
+                if input.id is None:
+                    arg.value = input.value
+                else:
+                    arg.id = input.id
             elif isinstance(input, ArgId):
                 arg.id = input
             elif isinstance(input, Path):
@@ -351,7 +535,7 @@ class BaseProvider:
                 storage=int(math.ceil(storage_requirements["storage"] / 1024)), storage_units=MemUnits.MB
             )
 
-        return await self.client.run(
+        runres = await self.client.run(
             ModuleInstanceInput(
                 path=path,
                 args=arg_dicts,
@@ -361,6 +545,18 @@ class BaseProvider:
                 out_tags=out_tags,
             )
         )
+        if not self.history:
+            self.history = History(tags=tags, instances=[])
+        self.history.instances.append(
+            ModuleInstanceHistory(
+                path=path,
+                id=runres.id,
+                status=ModuleInstanceStatus.CREATED,
+                tags=tags,
+            )
+        )
+        self.save()
+        return runres
 
     async def module_instances(
         self,
@@ -372,8 +568,10 @@ class BaseProvider:
         name: Union[Optional[str], UnsetType] = UNSET,
         status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
         tags: Union[Optional[List[str]], UnsetType] = UNSET,
-        **kwargs: Any,
-    ) -> AsyncIterable[Page[ModuleInstanceFull, ModuleInstancesMeAccountModuleInstancesPageInfo]]:
+        ids: Union[Optional[List[ModuleInstanceId]], UnsetType] = UNSET,
+    ) -> AsyncIterable[
+        Page[ModuleInstanceFullModuleInstance, ModuleInstancesMeAccountModuleInstancesPageInfo]
+    ]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
 
@@ -406,12 +604,7 @@ class BaseProvider:
         return self._query_with_pagination(
             return_paged,  # type: ignore
             PageVars(after=after, before=before, first=first, last=last),
-            {
-                "path": path,
-                "name": name,
-                "status": status,
-                "tags": tags,
-            },
+            {"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
         )
 
     async def modules(
@@ -421,9 +614,7 @@ class BaseProvider:
         last: Union[Optional[int], UnsetType] = UNSET,
         before: Union[Optional[str], UnsetType] = UNSET,
         path: Union[Optional[str], UnsetType] = UNSET,
-        name: Union[Optional[str], UnsetType] = UNSET,
         tags: Union[Optional[List[str]], UnsetType] = UNSET,
-        **kwargs: Any,
     ) -> AsyncIterable[Page[ModuleFull, ModulesModulesPageInfo]]:
         """
         Get all modules.
@@ -442,7 +633,6 @@ class BaseProvider:
             PageVars(after=after, before=before, first=first, last=last),
             {
                 "path": path,
-                "name": name,
                 "tags": tags,
             },
         )
@@ -454,7 +644,6 @@ class BaseProvider:
         last: Union[Optional[int], UnsetType] = UNSET,
         before: Union[Optional[str], UnsetType] = UNSET,
         names: Union[Optional[list[str]], UnsetType] = UNSET,
-        **kwargs: Any,
     ) -> AsyncIterable[Page[ModuleFull, LatestModulesLatestModulesPageInfo]]:
         """
         Get latest modules.
@@ -479,7 +668,7 @@ class BaseProvider:
         async for module_page in module_pages:
             for module in module_page.edges:
                 path = module.node.path
-                name = module.node.path.split("#")[-1]
+                name = get_name_from_path(module.node.path)
                 if path:
                     ret[name] = path
         return ret
@@ -580,30 +769,29 @@ class BaseProvider:
                         gpus=module.resource_bounds.gpu_hint,
                     )
 
-                name = module.path.split("#")[-1].replace("_tengu", "").replace("tengu_", "")
+                name = get_name_from_path(module.path)
 
                 def closure(
                     name: str,
                     path: str,
                     typechecker: Any,
-                    default_target: ModuleInstanceTarget | None,
+                    default_target: Target | None,
                     default_resources: ModuleInstanceResourcesInput | None,
                 ):
                     async def runner(
                         *args: Any,
-                        target: ModuleInstanceTarget | None = default_target,
+                        target: Target | None = default_target,
                         resources: ModuleInstanceResourcesInput | None = default_resources,
                         tags: list[str] | None = None,
+                        restore: bool | None = None,
                     ):
                         typechecker(*args)
-                        run = await self.run(path, list(args), target, resources, tags, out_tags=None)
+                        run = await self.run(
+                            path, list(args), target, resources, tags, out_tags=None, restore=restore
+                        )
                         outs: list[Any] = []
-                        if isinstance(run, ModuleInstanceFull):
-                            for out in run.module_instance.outs:
-                                outs.append(Provider.Arg(self, out.id, out.value))
-                        if isinstance(run, RunRun):
-                            for out in run.outs:
-                                outs.append(Provider.Arg(self, out.id))
+                        for out in run.outs:
+                            outs.append(Provider.Arg(self, out.id))
                         return outs
 
                     runner.__name__ = name
@@ -623,6 +811,8 @@ class BaseProvider:
                     if module.description:
                         runner.__doc__ = (
                             module.description
+                            + "\n\nModule version: "
+                            + path
                             + "\n\nQDX Type Description:\n\n    "
                             + module.typedesc.replace(",", ",\n\n    ")
                             .replace("; ", ";\n\n    ")
@@ -630,12 +820,12 @@ class BaseProvider:
                             .replace("{", "{\n\n    ")
                             .replace("-> ", "\n\n->\n\n    ")
                             + (module.usage if module.usage else "")
-                            + "\n\n"
+                            + "\n\n\n"
                             + (ins_docs)
                             + (outs_docs)
                         )
                     else:
-                        runner.__doc__ = name
+                        runner.__doc__ = name + " @" + path
 
                     runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
                     runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
@@ -650,7 +840,7 @@ class BaseProvider:
     async def retry(
         self,
         id: ModuleInstanceId,
-        target: ModuleInstanceTarget,
+        target: Target,
         resources: ModuleInstanceResourcesInput | None = None,
     ) -> RetryRetry:
         """
@@ -708,7 +898,7 @@ class BaseProvider:
         async def return_paged(
             after: Union[Optional[str], UnsetType] = UNSET,
             before: Union[Optional[str], UnsetType] = UNSET,
-            first: Union[Optional[int], UnsetType] = UNSET,
+            _: Union[Optional[int], UnsetType] = UNSET,
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
         ) -> Page[Any, Any]:
@@ -727,13 +917,17 @@ class BaseProvider:
 
             res = await self.client.module_instance_details(id, **args)
 
-            return res.stderr if kind == "stderr" else res.stdout
+            return res.stderr if kind == "stderr" else res.stdout  # type: ignore
 
+        i = 0
         async for page in self._query_with_pagination(
             return_paged, PageVars(after=after, before=before), {}  # type: ignore
         ):
             for edge in page.edges:
                 yield edge.node.content
+                i += 1
+                if pages is not None and i > pages:
+                    return
 
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -775,18 +969,36 @@ class BaseProvider:
 
 
 class Provider(BaseProvider):
-    def __init__(self, access_token: str, url: str = "https://tengu.qdx.ai"):
-        client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
-        super().__init__(client)
+    def __init__(
+        self,
+        access_token: str | None = None,
+        url: str | None = None,
+        workspace: str | Path | None = None,
+        batch_tags: list[str] | None = None,
+    ):
+        """
+        Initialize the TenguProvider with a graphql client.
 
+        :param access_token: The access token to use.
+        :param url: The url to use.
+        :param workspace: The workspace directory to use.
+        :param batch_tags: The tags that will be placed on all runs by default.
+        """
+        if access_token or url is None:
+            # try to check the environment variables
+            import os
 
-class BaseTypedProvider(BaseProvider):
-    def __init__(self, client: Client):
-        super().__init__(client)
-        self._setup = self.get_module_functions()
+            if access_token is None:
+                access_token = os.environ.get("TENGU_TOKEN")
+                if access_token is None:
+                    raise Exception("No access token provided")
 
-
-class TypedProvider(BaseTypedProvider):
-    def __init__(self, access_token: str, url: str = "https://tengu.qdx.ai"):
-        client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
-        super().__init__(client)
+            if url is None:
+                url = os.environ.get("TENGU_URL")
+                if url is None:
+                    raise Exception("No url provided")
+            client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
+            super().__init__(client, workspace=workspace, batch_tags=batch_tags)
+        else:
+            client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
+            super().__init__(client, workspace=workspace, batch_tags=batch_tags)
