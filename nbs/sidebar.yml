@@ -2,4 +2,16 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - 00_core.ipynb
+      - api2.html
+      - section: api
+        contents:
+          - api/api.html
+        href: api/index.html
+      - section: tutorials
+        contents:
+          - tutorials/batch_run.ipynb
+          - tutorials/gmx_metadynamics.ipynb
+          - tutorials/hermes.ipynb
+          - tutorials/md_only.ipynb
+          - tutorials/qp.ipynb
+          - tutorials/rerun_everything.ipynb

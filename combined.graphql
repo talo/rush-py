@@ -1,0 +1,398 @@
+mutation delete_module_instance($moduleInstanceId: ModuleInstanceId!) {
+    delete_module_instance(module: $moduleInstanceId) { id }
+}
+mutation deploy($module: ModuleInput!) {
+  deploy(module: $module) {
+    id
+    path
+  }
+}
+# Common Fragments across all queries
+fragment PageInfoFull on PageInfo {
+  hasPreviousPage
+  hasNextPage
+  startCursor
+  endCursor
+}
+
+## Arguments fragments and queries
+fragment ArgumentFull on Argument {
+  id
+  typeinfo
+  value
+  created_at
+  rejected_at
+  source
+  tags
+}
+
+query argument($id: ArgumentId!) {
+  argument(id: $id) {
+    ...ArgumentFull
+  }
+}
+
+query arguments(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $typeinfo: Type
+  $tags: [String!]
+) {
+  me {
+    account {
+      arguments(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        typeinfo: $typeinfo
+        tags: $tags
+      ) {
+        pageInfo {
+          ...PageInfoFull
+        }
+        edges {
+          cursor
+          node {
+            ...ArgumentFull
+          }
+        }
+      }
+    }
+  }
+}
+
+## Module fragments and queries
+
+fragment ModuleFull on Module {
+  id
+  created_at
+  deleted_at
+  path
+  usage
+  ins
+  ins_usage
+  outs
+  outs_usage
+  description
+  typedesc
+  tags
+  targets
+  resource_bounds {
+    gpu_min
+    gpu_max
+    gpu_hint
+
+    gpu_mem_min
+    gpu_mem_max
+    gpu_mem_hint
+
+    cpu_min
+    cpu_max
+    cpu_hint
+    node_min
+    node_max
+    node_hint
+
+    mem_min
+    mem_max
+
+    storage_min
+    storage_max
+  }
+}
+
+query latest_modules(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $order: OrderBy
+  $names: [String!]
+) {
+  latest_modules(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    names: $names
+  ) {
+    pageInfo {
+      ...PageInfoFull
+    }
+    edges {
+      cursor
+      node {
+        ...ModuleFull
+      }
+    }
+  }
+}
+
+query modules(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $path: String
+  $tags: [String!]
+) {
+  modules(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    path: $path
+    tags: $tags
+  ) {
+    pageInfo {
+      ...PageInfoFull
+    }
+    edges {
+      cursor
+      node {
+        ...ModuleFull
+      }
+    }
+  }
+}
+
+## ModuleInstance fragments and queries
+
+fragment ModuleInstanceCommon on ModuleInstance {
+  id
+  account_id
+
+  created_at
+  deleted_at
+  queued_at
+  admitted_at
+  dispatched_at
+  completed_at
+
+  path
+  status
+  target
+  tags
+}
+
+fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
+  id
+  account_id
+
+  created_at
+  deleted_at
+  queued_at
+  admitted_at
+  dispatched_at
+  completed_at
+
+  path
+  status
+  target
+  tags
+}
+
+fragment ModuleInstanceFull on ModuleInstance {
+  ...ModuleInstanceCommon
+  ins {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  outs {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  resources {
+    gpus
+    nodes
+    mem
+    storage
+    walltime
+  }
+  progress {
+    n
+    n_expected
+    n_max
+    done
+  }
+}
+
+fragment SimpleModuleInstanceFull on SimpleModuleInstance {
+  ...SimpleModuleInstanceCommon
+  ins {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  outs {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  resources {
+    gpus
+    nodes
+    mem
+    storage
+    walltime
+  }
+  progress {
+    n
+    n_expected
+    n_max
+    done
+  }
+}
+
+query module_instance_details(
+  $id: ModuleInstanceId!
+  $stderr_after: String
+  $stderr_before: String
+  $stdout_after: String
+  $stdout_before: String
+) {
+  module_instance(id: $id) {
+    ...ModuleInstanceFull
+    stdout(after: $stdout_after, before: $stdout_before) {
+      pageInfo {
+        ...PageInfoFull
+      }
+      edges {
+        cursor
+        node {
+          id
+          created_at
+          content
+        }
+      }
+    }
+    stderr(after: $stderr_after, before: $stderr_before) {
+      pageInfo {
+        ...PageInfoFull
+      }
+      edges {
+        cursor
+        node {
+          id
+          created_at
+          content
+        }
+      }
+    }
+  }
+}
+
+query module_instances(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $path: String
+  $name: String
+  $status: ModuleInstanceStatus
+  $tags: [String!]
+  $ids: [ModuleInstanceId!]
+) {
+  me {
+    account {
+      module_instances(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        path: $path
+        status: $status
+        name: $name
+        tags: $tags
+        ids: $ids
+      ) {
+        edges {
+          cursor
+          node {
+            ...SimpleModuleInstanceFull
+          }
+        }
+        pageInfo {
+          ...PageInfoFull
+        }
+      }
+    }
+  }
+}
+
+query module_instance_minimal($id: ModuleInstanceId!) {
+  module_instance(id: $id) {
+    ...ModuleInstanceCommon
+  }
+}
+
+query object($id: ArgumentId!) {
+  object(id: $id)
+}
+# Retries a failed module instance
+mutation retry(
+  $instance: ModuleInstanceId!
+  $target: ModuleInstanceTarget!
+  $resources: ModuleInstanceResourcesInput
+) {
+  retry(instance: $instance, target: $target, resources: $resources) {
+    id
+  }
+}
+mutation run($instance: ModuleInstanceInput!) {
+    run(instance: $instance) {
+        id
+        outs {id}
+    }
+}
+mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
+    tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+}
+mutation track_utilization($utilization: ResourceUtilizationInput!) {
+  track_module_instance_resource_utilization(utilization: $utilization) {
+    id
+  }
+}
+mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
+    untag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+}
+mutation update_module_instance(
+  $moduleInstanceUpdate: UpdateModuleInstanceInput!
+) {
+  update_module_instance(instance_update: $moduleInstanceUpdate) {
+    id
+    status
+  }
+}
+mutation upload_arg($typeinfo: JSON!, $file: Upload!) {
+  upload_arg(typeinfo: $typeinfo, file: $file) {
+    id
+    value
+  }
+}

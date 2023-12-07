@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "tengu-py"
-version = "0.13.0"
+version = "1.0.0"
 description = "Python SDK for interacting with the QDX Tengu API and modules"
-authors = ["Ryan Swart <ryan@talosystems.com>"]
+authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"
 packages = [{include = "tengu"}]
 
@@ -11,12 +11,14 @@ packages = [{include = "tengu"}]
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
-dataclasses-json = "^0.5.14"
-gql = {extras = ["requests"], version = "^3.5.0b"}
-requests-toolbelt = "^1.0.0"
 pdb-tools = "^2.5.0"
+httpx = "^0.25.2"
+pydantic = "^2.5.2"
+websockets = "^11.0"
+
 
 [tool.poetry.group.dev.dependencies]
+ariadne-codegen = "0.10.0"
 black = "^23.3.0"
 isort = "^5.12.0"
 flake8 = "^6.0.0"
@@ -25,12 +27,14 @@ pytest-xdist = "^3.0.0"
 jupyterlab = "^3.6.1"
 nbdev = "^2.3.12"
 parso = "^0.8.3"
+pdoc= "^14.1.0"
 pip = "22.3.1"
 quarto = "^0.1.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
 
 
 [tool]
@@ -74,3 +78,28 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 exclude = ["test", "tests"]
 where = [""]
+
+[tool.ariadne-codegen]
+schema_path = "schema.graphql"
+queries_path = "combined.graphql"
+target_package_path = "./tengu"
+plugins = ["ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"]
+
+[tool.ariadne-codegen.scalars.DateTime]
+type = "datetime.datetime"
+
+[tool.ariadne-codegen.scalars.UserId]
+type = "uuid.UUID"
+
+[tool.ariadne-codegen.scalars.AccountId]
+type = "uuid.UUID"
+
+
+[tool.ariadne-codegen.scalars.ArgumentId]
+type = "uuid.UUID"
+
+[tool.ariadne-codegen.scalars.ModuleId]
+type = "uuid.UUID"
+
+[tool.ariadne-codegen.scalars.ModuleInstanceId]
+type = "uuid.UUID"
