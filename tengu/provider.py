@@ -140,7 +140,7 @@ class BaseProvider:
             self.provider = provider
             self.id = id
             self.value = value
-            self.typeinfo = None
+            self.typeinfo = typeinfo
 
         def __repr__(self):
             return f"Arg(id={self.id}, value={self.value})"
@@ -236,6 +236,7 @@ class BaseProvider:
 
         self.history = None
         self.client = client
+        self.module_paths: dict[str, str] = {}
         if workspace:
             self.workspace = Path(workspace)
             self.restore(workspace)
@@ -258,7 +259,7 @@ class BaseProvider:
 
     async def nuke(self, remote: bool = False):
         """
-        Delete the workspace.
+        Delete the workspace, and optionally the data stored for it on the server.
         """
         # first untrack the runs remotely if necessary
         if remote:
@@ -286,12 +287,16 @@ class BaseProvider:
         if workspace_history.exists():
             self.history = self._load_history(workspace_history)
 
+        if (self.workspace / "tengu.lock").exists():
+            self.load_module_paths(self.workspace / "tengu.lock")
+
     def save(self, history_file: str | Path | None = None):
         """
         Save the workspace.
         """
         if history_file is None:
             history_file = self.workspace / "history.json"
+        self.save_module_paths(self.module_paths, self.workspace / "tengu.lock")
         with open(history_file, "w") as f:
             json.dump(self.history, f, default=to_jsonable_python, indent=2)
 
@@ -444,16 +449,20 @@ class BaseProvider:
                 with open(filepath, "w") as f:
                     json.dump(obj, f)
 
-    def load_module_paths(self, filename: Path) -> dict[str, str]:
+    def load_module_paths(self, filepath: Path) -> dict[str, str]:
         """
         Load all of the module versions from a file.
 
         :param filename: Json module version file
         """
         modules = None
-        with open(filename, "r") as f:
-            modules = json.load(f)
-        return modules
+        if filepath.exists() and filepath.stat().st_size > 0:
+            with open(filepath, "r") as f:
+                modules = json.load(f)
+            self.module_paths = modules
+            return modules
+        else:
+            raise FileNotFoundError("Lock file not found")
 
     def save_module_paths(self, modules: dict[str, str], filename: Path | None = None):
         """
@@ -746,12 +755,24 @@ class BaseProvider:
             module_paths = self.load_module_paths(lockfile)
             module_pages = self.get_modules_for_paths(list(module_paths.values()))
         else:
-            module_pages = await self.latest_modules(names=names)
+            if self.__dict__.get("workspace"):
+                if self.module_paths.items():
+                    # we have already loaded a lock via the workspace
+                    module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
+                else:
+                    # lets load the latest paths and lock them
+                    paths = await self.get_latest_module_paths(names)
+                    module_pages = self.get_modules_for_paths(list(paths.values()))
+                    self.module_paths = paths
+                    self.save_module_paths(self.module_paths, self.workspace / "tengu.lock")
+            else:
+                # no workspace, so up the user to lock it
+                module_pages = await self.latest_modules(names=names)
 
         async for page in module_pages:
             for edge in page.edges:
                 module = edge.node.__deepcopy__()
-                path = module.path + ""
+                path = module.path
                 in_types = tuple([type_from_typedef(i) for i in module.ins])
                 out_types = tuple([type_from_typedef(i) for i in module.outs])
 
@@ -1002,3 +1023,25 @@ class Provider(BaseProvider):
         else:
             client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
             super().__init__(client, workspace=workspace, batch_tags=batch_tags)
+
+
+async def build_provider_with_functions(
+    access_token: str | None = None,
+    url: str | None = None,
+    workspace: str | Path | None = None,
+    batch_tags: list[str] | None = None,
+    module_names: list[str] | None = None,
+) -> Provider:
+    """
+    Build a TenguProvider with the given access token and url.
+
+    :param access_token: The access token to use.
+    :param url: The url to use.
+    :param workspace: The workspace directory to use.
+    :param batch_tags: The tags that will be placed on all runs by default.
+    :return: The built TenguProvider.
+    """
+    provider = Provider(access_token, url, workspace, batch_tags)
+
+    await provider.get_module_functions(names=module_names)
+    return provider

@@ -20,10 +20,8 @@ we’ll be working with
 ## 0.0) Imports
 
 ``` python
-import json
 import os
 import tarfile
-import base64
 from datetime import datetime
 from pathlib import Path
 
@@ -49,9 +47,6 @@ URL = os.getenv("TENGU_URL") or "https://tengu.qdx.ai"
 DESCRIPTION = "tengu-py demo notebook"
 TAGS = ["qdx", "tengu-py-v2", "demo", "cdk2", "atp"]
 WORK_DIR = Path.home() / "qdx" / "tengu-py-demo"
-OUT_DIR = WORK_DIR / "runs"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-MODULE_LOCK = WORK_DIR / "lock.json"
 
 # Set our inputs
 SYSTEM_PDB_PATH = WORK_DIR / "test.pdb"
@@ -92,10 +87,36 @@ with open(LIGAND_PDB_PATH, "w") as f:
 # Get our client, for calling modules and using the tengu API
 # Note, access_token and url are optional, if you have set the env variables TENGU_TOKEN and TENGU_URL
 # Workspace sets the location where we will store our session history file and module lock file
-client = tengu.Provider(access_token=TOKEN, url=URL, workspace=WORK_DIR, batch_tags=TAGS)
+# By using the `build_provider_with_functions` method, we will also build helper functions calling each module
+client = await tengu.build_provider_with_functions(
+    access_token=TOKEN, url=URL, workspace=WORK_DIR, batch_tags=TAGS
+)
 ```
 
-### 0.6) Fetch tengu modules
+    building module for github:talo/tengu-prelude/083e958d64e9e716754f76560bd3e60557e6a691#hermes_binding
+    building module for github:talo/gmx_tengu_support/68cfc9dc1533bd54dfa21b346642410ff0fce570#gmx_frame_select_pdb
+    building module for github:talo/gmx_tengu_support/a15ebf3e86b779203b463193c0ecc025c9f916df#gmx_frame_select
+    building module for github:talo/gmx_tengu_support/d4ea797dcdedf9b91de1b76a32f8a95f0cbf21df#gmx_mmpbsa_tengu
+    building module for github:talo/tengu-module-example/b334a851530033b79762c3341bf584f8939feee1#tengu_echo
+    building module for github:talo/tengu-module-example/b334a851530033b79762c3341bf584f8939feee1#spam
+    building module for github:talo/tengu-module-example/b334a851530033b79762c3341bf584f8939feee1#delay
+    building module for github:talo/tengu-module-flake-parts/b6afd5abb624fed203990045927d381cefc6ef04#dummy
+    building module for github:talo/gmx_tengu_support/a473bc4a302eebebcb5f54a899192be75c0daa91#gmx_tengu_pdb
+    building module for github:talo/gmx_tengu_support/a473bc4a302eebebcb5f54a899192be75c0daa91#gmx_tengu
+    building module for github:talo/gmx_tengu_support/e36ef0823a083d16d8bd0a36f57aef1bc8735c8d#gmx_em
+    building module for github:talo/gypsum_dl/04acd1852cb3e2c8d0347e15763926fdf9a93a5d#prepare_ligand_tengu
+    building module for github:talo/pdb2pqr/6a0c4b2cf6d42f53d1cc889f3926b7e0ab8d1552#prepare_protein_tengu
+    building module for github:talo/pdb2pqr/6a0c4b2cf6d42f53d1cc889f3926b7e0ab8d1552#pdb2pqr_tengu
+    building module for github:talo/tengu-prelude/b624dbe6f9ccb7ccc417d52cdc3dd251de76b604#hermes_lattice
+    building module for github:talo/tengu-prelude/b624dbe6f9ccb7ccc417d52cdc3dd251de76b604#qp_gen_inputs
+    building module for github:talo/tengu-prelude/b624dbe6f9ccb7ccc417d52cdc3dd251de76b604#qp_collate
+    building module for github:talo/tengu-prelude/9b0c89cbd3b7541b6d700ccf66bbdf9e4c82b630#pick_conformer
+    building module for github:talo/tengu-prelude/9b0c89cbd3b7541b6d700ccf66bbdf9e4c82b630#pdbfixer
+    building module for github:talo/tengu-prelude/9b0c89cbd3b7541b6d700ccf66bbdf9e4c82b630#hermes_energy
+    building module for github:talo/tengu-prelude/9b0c89cbd3b7541b6d700ccf66bbdf9e4c82b630#convert
+    building module for github:talo/tengu-prelude/9b0c89cbd3b7541b6d700ccf66bbdf9e4c82b630#concat
+
+### 0.6) View tengu modules
 
 Tengu modules are “functions” that perform various computational
 chemistry tasks can be run on HPC infrastructure. We maintain multiple
@@ -105,11 +126,8 @@ upgrades.
 ``` python
 # Get our latest modules as a dict[module_name, module_path]
 # If a lock file exists, load it so that the run is reproducable
-if MODULE_LOCK.exists() and MODULE_LOCK.stat().st_size > 0:
-    modules = client.load_module_paths(MODULE_LOCK)
-else:
-    modules = await client.get_latest_module_paths()
-    client.save_module_paths(modules, MODULE_LOCK)
+# This will be done automatically if you use the `build_provider_with_functions` method
+modules = await client.get_latest_module_paths()
 ```
 
 ``` python
@@ -132,13 +150,8 @@ reproducibility.
 
 Next, we’ll build helper functions for the modules that we’ve fetched
 
-``` python
-fns = await client.get_module_functions(lockfile=MODULE_LOCK)
-```
-
-`get_module_functions` will add a number of new functions to our client
-that represent the tengu modules we have mentioned previously. We can
-use the python `help()` function to describe their usage.
+`get_module_functions` We can use the python `help()` function to
+describe their usage.
 
 The QDX Type Description is a standard type definition across multiple
 programing languages to assist in interoperablility. @ indicates that
@@ -247,15 +260,13 @@ help(client.prepare_protein)
 
 ``` python
 # Here we run the function, it will return a Provider.Arg which you can use to fetch the results
-(prepared_protein,) = await client.prepare_protein(
-    PROTEIN_PDB_PATH,
-    restore = True
-)
+# We set restore = True so that we can restore a previous run to the same path with the same tags
+(prepared_protein,) = await client.prepare_protein(PROTEIN_PDB_PATH, restore=True)
 print(f"{datetime.now().time()} | Running protein prep!")
-prepared_protein # this initially only have the id of your result, we will show how to fetch the actual value later
+prepared_protein  # this initially only have the id of your result, we will show how to fetch the actual value later
 ```
 
-    15:32:08.352337 | Running protein prep!
+    10:23:14.188124 | Running protein prep!
 
     Arg(id=a963bca4-cb29-46bf-8df6-3bf5a3c2ee1b, value=None)
 
@@ -266,13 +277,28 @@ prepared_protein # this initially only have the id of your result, we will show 
 await client.status()
 ```
 
-    {'847ba79d-c6a0-43e5-acce-28928b2f349f': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+    {'e581230b-894f-46a5-bdbb-f07c8f8ceff8': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_collate',
+      1),
+     '5f6a969b-3a56-48a2-afa1-25939218fc52': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'hermes_energy',
+      1),
+     '51d050d4-1dbf-4915-b590-9c3dcd475d14': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_gen_inputs',
+      1),
+     '748d3de2-8984-4c4a-bd8c-090430b8db86': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'gmx_pdb',
+      1),
+     '746ee040-7450-4917-b60d-e4056c9d850a': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'prepare_ligand',
+      1),
+     '847ba79d-c6a0-43e5-acce-28928b2f349f': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
       'prepare_protein',
       1)}
 
 ``` python
 # If any of our runs fail, we can check their logs with
-for (instance_id, (status,name,count)) in (await client.status()).items():
+for instance_id, (status, name, count) in (await client.status()).items():
     if status.value == "FAILED":
         async for log_page in client.logs(instance_id, "stderr"):
             for log in log_page:
@@ -280,18 +306,18 @@ for (instance_id, (status,name,count)) in (await client.status()).items():
 ```
 
 ``` python
-# this will return the "value" of the output from the function - for files you will recieve a url that you can download, 
+# this will return the "value" of the output from the function - for files you will recieve a url that you can download,
 # otherwise you will recieve them as python types
 await prepared_protein.get()
 ```
 
-    {'url': 'https://storage.googleapis.com/qdx-store/1b2fab86-8335-41c3-a1fa-1989f1e72378?x-goog-signature=1dc0ba95243b66bfff83d8bed49ca9068c864461d0d8a06f2db8ef1e16a78f2e67eeb65627edd72540ae5372984bff5e6167923dad8213d8b8fe0429c89fb5fab7c47f76794718d53daccc68cb54598475e7fc54078567a58c32f26c1891cad4d3207476204bf3ba9b023d3df189e47a79e0d739aeb507f935e5086ea895466b86bbd798471fb78d26eaa59ca92f6503722d6454a228a6a1003f864d53b03fe7a7d00b16c13fb25ba581c7f1db75eed77c8d6942a6a988110c131ff094f58b5d9624d78b09217297efcfb2841149148faffede67e0b779349b3e3934defc91497c0562ca76c40b2c60c8804fec375cac07f7473494df38fd99c54b8ac583e394&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20231206%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20231206T073241Z&x-goog-expires=3600&x-goog-signedheaders=host'}
+    {'url': 'https://storage.googleapis.com/qdx-store/1b2fab86-8335-41c3-a1fa-1989f1e72378?x-goog-signature=404e416df57e358769ffb1be5b7fcd295a0f7d7dbe092f2b000162122bcfdf12f10b9797352cd407911d916f7336c9ccd6e6de90eb438527578b48c6dadbb29fc355e27a355795ba6024988ebec0dde9550a5c1fa9c3ba030f2c5d86c508e8264f21933c5d557fc228b5e77fe2efd6a2f4690e522f0fcebce908592e446a82f27a0078d89432ef7e82b1644b2c149d0bcdd59778eb0d6221974c211bccca4d2381991ba10dbe80d30111ac7d72322a6ce11d249dc8192f3572cf710369a582e7b26e75d9454b5077ca5b5ffb7cb562a5ca4f281ddfc76c3852fc27b2e910ac319ace6704a5ece45520279890c9bc99fe69ed3ad700a1f7a6dfbd7374b825404b&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20231207%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20231207T022316Z&x-goog-expires=3600&x-goog-signedheaders=host'}
 
 ``` python
 # we provide a utility to download files into your workspace,
 # you can either provide a filename, which will be saved in workspace/objects/[filename],
 # or you can provide your own filepath which the client will use as-is
-try: 
+try:
     await prepared_protein.download(filename="01_prepared_protein.pdb")
 except FileExistsError:
     # we will raise an error if you try to overwrite an existing file, you can force the file to overwrite
@@ -416,14 +442,26 @@ ligand_prep_config = {
 print(f"{datetime.now().time()} | Running ligand prep!")
 ```
 
-    15:32:44.053399 | Running ligand prep!
+    10:23:18.129087 | Running ligand prep!
 
 ``` python
 # we can check the status again
 await client.status()
 ```
 
-    {'746ee040-7450-4917-b60d-e4056c9d850a': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+    {'e581230b-894f-46a5-bdbb-f07c8f8ceff8': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_collate',
+      1),
+     '5f6a969b-3a56-48a2-afa1-25939218fc52': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'hermes_energy',
+      1),
+     '51d050d4-1dbf-4915-b590-9c3dcd475d14': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_gen_inputs',
+      1),
+     '748d3de2-8984-4c4a-bd8c-090430b8db86': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'gmx_pdb',
+      1),
+     '746ee040-7450-4917-b60d-e4056c9d850a': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
       'prepare_ligand',
       1),
      '847ba79d-c6a0-43e5-acce-28928b2f349f': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
@@ -441,7 +479,7 @@ except FileExistsError:
 print(f"{datetime.now().time()} | Downloaded prepped ligand!")
 ```
 
-    15:33:10.917009 | Downloaded prepped ligand!
+    10:23:21.141026 | Downloaded prepped ligand!
 
 ``` python
 # we can read our outputs
@@ -571,14 +609,23 @@ gmx_config = {
 print(f"{datetime.now().time()} | Running GROMACS simulation!")
 ```
 
-    15:33:11.314815 | Running GROMACS simulation!
+    10:23:21.201348 | Running GROMACS simulation!
 
 ``` python
 # we can check the status again
 await client.status()
 ```
 
-    {'748d3de2-8984-4c4a-bd8c-090430b8db86': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+    {'e581230b-894f-46a5-bdbb-f07c8f8ceff8': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_collate',
+      1),
+     '5f6a969b-3a56-48a2-afa1-25939218fc52': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'hermes_energy',
+      1),
+     '51d050d4-1dbf-4915-b590-9c3dcd475d14': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_gen_inputs',
+      1),
+     '748d3de2-8984-4c4a-bd8c-090430b8db86': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
       'gmx_pdb',
       1),
      '746ee040-7450-4917-b60d-e4056c9d850a': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
@@ -602,14 +649,12 @@ print(f"{datetime.now().time()} | Downloaded GROMACS output!")
 ```
 
     Fetching gmx results
+    10:23:24.315210 | Downloaded GROMACS output!
 
 ``` python
 # Extract the "dry" (i.e. non-solvated) pdb frames we asked for
 with tarfile.open(client.workspace / "objects" / "02_gmx_dry_frames.tar.gz", "r") as tf:
-    selected_frame_pdbs = [
-        tf.extractfile(member).read()
-        for member in tf if "pdb" in member.name
-    ]
+    selected_frame_pdbs = [tf.extractfile(member).read() for member in tf if "pdb" in member.name]
     for i, frame in enumerate(selected_frame_pdbs):
         with open(client.workspace / "objects" / f"02_gmx_output_frame_{i}.pdb", "w") as pf:
             print(frame.decode("utf-8"), file=pf)
@@ -618,10 +663,7 @@ with tarfile.open(client.workspace / "objects" / "02_gmx_dry_frames.tar.gz", "r"
 ``` python
 # Extract the ligand.gro file
 with tarfile.open(client.workspace / "objects" / "02_gmx_lig_gro.tar.gz", "r") as tf:
-    gro = [
-        tf.extractfile(member).read()
-        for member in tf if "temp" in member.name
-    ][0]
+    gro = [tf.extractfile(member).read() for member in tf if "temp" in member.name][0]
     with open(client.workspace / "objects" / f"02_gmx_lig.gro", "w") as pf:
         print(gro.decode("utf-8"), file=pf)
 ```
@@ -629,6 +671,98 @@ with tarfile.open(client.workspace / "objects" / "02_gmx_lig_gro.tar.gz", "r") a
 ``` python
 help(client.qp_collate)
 ```
+
+    Help on function qp_collate in module tengu.provider:
+
+    async qp_collate(*args: [<class 'pathlib.Path'>, list[~T]], target: tengu.graphql_client.enums.ModuleInstanceTarget | None = <ModuleInstanceTarget.NIX: 'NIX'>, resources: tengu.graphql_client.input_types.ModuleInstanceResourcesInput | None = None, tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>]
+        Takes hermes results and amino acid to fragment indexes and outputs interaction energies.
+        
+        Module version: github:talo/tengu-prelude/b624dbe6f9ccb7ccc417d52cdc3dd251de76b604#qp_collate
+        
+        QDX Type Description:
+        
+            hermes_results: @{
+        
+            dimer_energies:DimerEnergies?,
+        
+            energy:Energy,
+        
+            fragment_basis_functions:[{
+        
+            n_occupied_basis_functions:u32,
+        
+            n_virtual_basis_functions:u32,
+        
+            total_n_basis_functions:u32
+        
+            }]?,
+        
+            full_system_basis_functions:{
+        
+            n_occupied_basis_functions:u32,
+        
+            n_virtual_basis_functions:u32,
+        
+            total_n_basis_functions:u32
+        
+            }?,
+        
+            monomer_energies:MonomerEnergies?,
+        
+            trimer_energies:TrimerEnergies?
+        
+            };
+        
+            amino_acid_to_fragment_indexes: [(string,
+        
+            u32)] 
+        
+        ->
+        
+            out: @{
+        
+            amino_acid_interaction_energies:[{
+        
+            amino_acid_id:string,
+        
+            dimer_hf_interaction_e:f64,
+        
+            dimer_mp2_os_interaction_e:f64?,
+        
+            dimer_mp2_ss_interaction_e:f64?
+        
+            }],
+        
+            amino_acid_to_fragment_indexes:[(string,
+        
+            u32)],
+        
+            dimer_hf_energies:[f64],
+        
+            dimer_hf_interaction_energies:[f64],
+        
+            dimer_mp2_os_energies:[f64?],
+        
+            dimer_mp2_os_interaction_energies:[f64?],
+        
+            dimer_mp2_ss_energies:[f64?],
+        
+            dimer_mp2_ss_interaction_energies:[f64?],
+        
+            dimer_pairs:[[u32]],
+        
+            full_lattice_energy:(f64,
+        
+            f64?,
+        
+            f64?)
+        
+            }
+        
+        
+        
+        :param hermes_results: hermes results
+        :param amino_acid_to_fragment_indexes: amino acid to fragment indexes, from qp-gen-inputs
 
 ## 1.3) Run quantum energy calculation (modules: qp_gen_inputs, hermes_energy, qp_collate)
 
@@ -653,16 +787,39 @@ of the 3 modules it requires
     lig_res_id="UNL",  # The ligand's residue code in the PDB file; this is what our prep uses
     use_new_fragmentation_method=True,
     hermes_target="NIX_SSH_3",
-    hermes_resources=tengu.Resources(storage = 10, storage_units = "MB", gpus = 1, walltime = 60),
+    hermes_resources=tengu.Resources(storage=10, storage_units="MB", gpus=1, walltime=60),
     restore=True,
-    tags = ["with_resources", "with_new_frag"]
+    tags=["with_resources", "with_new_frag"],
 )
 print(f"{datetime.now().time()} | Running QP energy calculation!")
 ```
 
+    launched qp_prep_instance 51d050d4-1dbf-4915-b590-9c3dcd475d14
+    launched hermes_instance 5f6a969b-3a56-48a2-afa1-25939218fc52
+    10:23:24.474485 | Running QP energy calculation!
+
 ``` python
 await client.status()
 ```
+
+    {'e581230b-894f-46a5-bdbb-f07c8f8ceff8': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_collate',
+      1),
+     '5f6a969b-3a56-48a2-afa1-25939218fc52': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'hermes_energy',
+      1),
+     '51d050d4-1dbf-4915-b590-9c3dcd475d14': (<ModuleInstanceStatus.FAILED: 'FAILED'>,
+      'qp_gen_inputs',
+      1),
+     '748d3de2-8984-4c4a-bd8c-090430b8db86': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'gmx_pdb',
+      1),
+     '746ee040-7450-4917-b60d-e4056c9d850a': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'prepare_ligand',
+      1),
+     '847ba79d-c6a0-43e5-acce-28928b2f349f': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'prepare_protein',
+      1)}
 
 ``` python
 await qp_result.get()
@@ -675,6 +832,49 @@ print(f"{datetime.now().time()} | Got qp interaction energy!")
 help(client.gmx_mmpbsa)
 ```
 
+    Help on function gmx_mmpbsa in module tengu.provider:
+
+    async gmx_mmpbsa(*args: [<class 'pathlib.Path'>, dict[str, ~T]], target: tengu.graphql_client.enums.ModuleInstanceTarget | None = <ModuleInstanceTarget.NIX_SSH_3: 'NIX_SSH_3'>, resources: tengu.graphql_client.input_types.ModuleInstanceResourcesInput | None = None, tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>]
+        Updates the geometry of a conformer runnning GROMACS's energy minimization in solvent
+        
+        Module version: github:talo/gmx_tengu_support/d4ea797dcdedf9b91de1b76a32f8a95f0cbf21df#gmx_mmpbsa_tengu
+        
+        QDX Type Description:
+        
+            output_tar_gz: @bytes;
+        
+            mmpbsa_config: {
+        
+            end_frame:u64,
+        
+            interaction_entropy:bool?,
+        
+            interval:u32?,
+        
+            num_cpus:u32,
+        
+            rerun_consolidate:bool?,
+        
+            start_frame:u64
+        
+            } 
+        
+        ->
+        
+            output: @bytes
+        
+        
+        
+        :param output_tar_gz: Compressed GROMACS output folder
+        :param mmpbsa_config: Configuration record for mmpbsa:
+        start_frame: Frame to start with
+        end_frame: Frame to end with
+        num_cpus: Number of CPUs to use - cannot be larger than the number of frames
+        rerun_consolidate: Rerun consolidate if you are unsure of the validity of the dry.xtc
+        interaction_entropy: Calculate interaction entropy
+        
+        :return output: Compressed mmpbsa output folder
+
 ``` python
 mmpbsa_config = {
     "start_frame": 1,
@@ -684,11 +884,13 @@ mmpbsa_config = {
 (mmpbsa_result_tar,) = await client.gmx_mmpbsa(
     gmx_run_folder_tar,
     mmpbsa_config,
-    resources=tengu.Resources(storage = 100, storage_units = "MB", gpus = 0, walltime = 60),
+    resources=tengu.Resources(storage=100, storage_units="MB", gpus=0, walltime=60),
     target="GADI",
 )
 print(f"{datetime.now().time()} | Running GROMACS MM-PBSA calculation!")
 ```
+
+    10:25:11.820807 | Running GROMACS MM-PBSA calculation!
 
 ``` python
 print("Fetching gmx_mmpbsa results")
@@ -698,3 +900,5 @@ except FileExistsError:
     pass
 print(f"{datetime.now().time()} | Downloaded MM-PBSA results!")
 ```
+
+    Fetching gmx_mmpbsa results
