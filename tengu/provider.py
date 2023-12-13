@@ -240,6 +240,8 @@ class BaseProvider:
         if workspace:
             self.workspace = Path(workspace)
             self.restore(workspace)
+        else:
+            self.workspace = None
 
         if not self.history:
             self.history = History(tags=batch_tags or [], instances=[])
@@ -266,7 +268,7 @@ class BaseProvider:
             if self.history:
                 for instance in self.history.instances:
                     await self.delete_module_instance(instance.id)
-        if self.workspace.exists():
+        if self.workspace:
             for f in self.workspace.glob("*"):
                 if f.is_dir():
                     for ff in f.glob("*"):
@@ -294,6 +296,8 @@ class BaseProvider:
         """
         Save the workspace.
         """
+        if self.workspace is None:
+            raise Exception("No workspace provided")
         if history_file is None:
             history_file = self.workspace / "history.json"
         self.save_module_paths(self.module_paths, self.workspace / "tengu.lock")
@@ -429,7 +433,7 @@ class BaseProvider:
         if filepath is None:
             if filename is None:
                 filename = str(id)
-            if filename:
+            if filename and self.workspace:
                 if not (self.workspace / "objects").exists():
                     (self.workspace / "objects").mkdir()
                 filepath = self.workspace / "objects" / filename
@@ -448,6 +452,8 @@ class BaseProvider:
             else:
                 with open(filepath, "w") as f:
                     json.dump(obj, f)
+        else:
+            return obj
 
     def load_module_paths(self, filepath: Path) -> dict[str, str]:
         """
@@ -525,8 +531,10 @@ class BaseProvider:
             elif isinstance(input, Path):
                 storage_requirements["storage"] += input.stat().st_size
                 if input.name.endswith(".json"):
-                    arg = ArgumentInput(value=json.loads(input.read_text()))
-                arg = ArgumentInput(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
+                    with open(input, "r") as f:
+                        arg = ArgumentInput(value=json.load(f))
+                else:
+                    arg = ArgumentInput(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
             elif isinstance(input, IOBase):
                 data = input.read()
                 # The only other case is bytes-like, i.e. isinstance(data, (bytes, bytearray))
@@ -564,7 +572,8 @@ class BaseProvider:
                 tags=tags,
             )
         )
-        self.save()
+        if self.workspace:
+            self.save()
         return runres
 
     async def module_instances(
@@ -755,7 +764,7 @@ class BaseProvider:
             module_paths = self.load_module_paths(lockfile)
             module_pages = self.get_modules_for_paths(list(module_paths.values()))
         else:
-            if self.__dict__.get("workspace"):
+            if self.workspace:
                 if self.module_paths.items():
                     # we have already loaded a lock via the workspace
                     module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
