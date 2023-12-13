@@ -9,8 +9,5 @@ website:
       - section: tutorials
         contents:
           - tutorials/batch_run.ipynb
-          - tutorials/gmx_metadynamics.ipynb
           - tutorials/hermes.ipynb
-          - tutorials/md_only.ipynb
-          - tutorials/qp.ipynb
           - tutorials/rerun_everything.ipynb

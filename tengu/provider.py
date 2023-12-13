@@ -530,7 +530,6 @@ class BaseProvider:
                 arg.id = input
             elif isinstance(input, Path):
                 storage_requirements["storage"] += input.stat().st_size
-                print("loading object")
                 if input.name.endswith(".json"):
                     with open(input, "r") as f:
                         arg = ArgumentInput(value=json.load(f))
