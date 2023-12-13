@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tengu-py"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python SDK for interacting with the QDX Tengu API and modules"
 authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"

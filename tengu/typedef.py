@@ -276,7 +276,7 @@ def build_typechecker(
             match = t.matches(a)
             if not match[0]:
                 # if args are references, let the api check them
-                if a.__dict__.get("id") or isinstance(a, UUID):
+                if "__dict__" in a.__dir__() and a.__dict__.get("id") or isinstance(a, UUID):
                     return True
                 else:
                     raise Exception(f"Typecheck failed: {match[1]}")
