@@ -120,7 +120,9 @@ class RecordKind(typing.Generic[T], Type[T]):
         if not isinstance(other, dict):
             return (False, f"Expected dict, got {type(other)}")
         for k, v in self.t.items():
-            if k not in other:
+            if v.k == "optional" and k not in other:
+                return (True, None)
+            if k not in other and v.k != "optional":
                 return (False, f"Expected key {k} in dict")
             ok, reason = v.matches(other[k])
             if not ok:
