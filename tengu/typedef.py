@@ -101,7 +101,8 @@ class EnumKind(typing.Generic[T], Type[T]):
                     return t[other_key].matches(other[other_key])
             return (False, f"Unknown enum variant {other_key}")
         if isinstance(other, str):
-            if any([x == other for x in self.literals]):
+            # FIXME: make case sensitive once enum serialization case bug is fixed
+            if any([x.lower() == other.lower() for x in self.literals]):
                 return (True, None)
 
         return (False, f"Unknown enum variant {other}")
