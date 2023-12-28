@@ -157,7 +157,23 @@ class BaseProvider:
             if self.provider is None:
                 raise Exception("No provider provided")
 
-            return await self.provider.argument(self.id)
+            retries = 0
+            while self.typeinfo is None:
+                try:
+                    remote_arg = await self.provider.argument(self.id)
+                    self.typeinfo = remote_arg.typeinfo
+                    return remote_arg
+                except GraphQLClientGraphQLMultiError as e:
+                    if e.errors[0].message == "not found":
+                        if retries < 10:
+                            time.sleep(5)
+                            retries += 1
+                        else:
+                            raise e
+                    else:
+                        print(e.errors)
+                        raise e
+            raise Exception("No typeinfo found")
 
         async def download(
             self,
@@ -170,6 +186,9 @@ class BaseProvider:
                 raise Exception("No provider provided")
             if self.typeinfo is None:
                 await self.get()
+
+            if not self.typeinfo:
+                await self.info()
 
             if self.typeinfo:
                 if self.typeinfo["k"] == "object" or (
@@ -196,8 +215,7 @@ class BaseProvider:
                     raise Exception("No ID provided")
                 while self.value is None:
                     try:
-                        remote_arg = await self.provider.argument(self.id)
-                        self.typeinfo = remote_arg.typeinfo
+                        remote_arg = await self.info()
                         if remote_arg.rejected_at:
                             if remote_arg.source:
                                 # get the failure reason by checking the source module instance
@@ -429,6 +447,8 @@ class BaseProvider:
         :param filename: Download to the workspace with this name under "objects".
         """
         obj = await self.object(id)
+        if not obj:
+            return None
 
         if filepath is None:
             if filename is None:

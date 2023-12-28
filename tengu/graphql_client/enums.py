@@ -28,6 +28,7 @@ class ModuleInstanceStatus(str, Enum):
     DISPATCHED = "DISPATCHED"
     QUEUED = "QUEUED"
     RUNNING = "RUNNING"
+    AWAITING_UPLOAD = "AWAITING_UPLOAD"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     CANCELLED = "CANCELLED"
@@ -49,6 +50,11 @@ class ModuleInstanceTarget(str, Enum):
     SETONIX_GPU = "SETONIX_GPU"
     GADI_EXPRESS = "GADI_EXPRESS"
     SETONIX_EXPRESS = "SETONIX_EXPRESS"
+
+
+class Order(str, Enum):
+    ASC = "ASC"
+    DESC = "DESC"
 
 
 class OrderBy(str, Enum):
