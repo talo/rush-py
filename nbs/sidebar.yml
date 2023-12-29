@@ -9,5 +9,6 @@ website:
       - section: tutorials
         contents:
           - tutorials/batch_run.ipynb
+          - tutorials/convert.ipynb
           - tutorials/hermes.ipynb
           - tutorials/rerun_everything.ipynb
