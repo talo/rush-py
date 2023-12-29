@@ -251,12 +251,13 @@ class BaseProvider:
         """
         Initialize the TenguProvider a graphql client.
         """
-
         self.history = None
         self.client = client
         self.module_paths: dict[str, str] = {}
         if workspace:
             self.workspace = Path(workspace)
+            if not self.workspace.exists():
+                raise Exception("Workspace directory does not exist")
             self.restore(workspace)
         else:
             self.workspace = None
@@ -1034,7 +1035,7 @@ class Provider(BaseProvider):
         :param workspace: The workspace directory to use.
         :param batch_tags: The tags that will be placed on all runs by default.
         """
-        if access_token or url is None:
+        if access_token is None or url is None:
             # try to check the environment variables
             import os
 
@@ -1047,10 +1048,10 @@ class Provider(BaseProvider):
                 url = os.environ.get("TENGU_URL")
                 if url is None:
                     raise Exception("No url provided")
-            client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
+            client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
             super().__init__(client, workspace=workspace, batch_tags=batch_tags)
         else:
-            client = Client(url=url, headers={"authorization": f"bearer {access_token}"})
+            client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
             super().__init__(client, workspace=workspace, batch_tags=batch_tags)
 
 
