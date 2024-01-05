@@ -1,3 +1,6 @@
+mutation cancel_module_instance($moduleInstanceId: ModuleInstanceId!) {
+  cancel(instance: $moduleInstanceId)
+}
 mutation delete_module_instance($moduleInstanceId: ModuleInstanceId!) {
     delete_module_instance(module: $moduleInstanceId) { id }
 }
@@ -5,6 +8,33 @@ mutation deploy($module: ModuleInput!) {
   deploy(module: $module) {
     id
     path
+  }
+}
+mutation create_entity($entity: RawEntityInput!) {
+  create_entity(entity: $entity) {
+    id
+  }
+}
+mutation create_experiment($experiment: CreateExperimentInput!) {
+  create_experiment(input: $experiment) {
+    id
+  }
+}
+mutation create_project($project: CreateProjectInput!) {
+  create_project(input: $project) {
+    id
+  }
+}
+mutation create_protein_conformer(
+  $protein_conformer: CreateProteinConformerInput!
+) {
+  create_protein_conformer(input: $protein_conformer) {
+    id
+  }
+}
+mutation create_protein($protein: CreateProteinInput!) {
+  create_protein(input: $protein) {
+    id
   }
 }
 # Common Fragments across all queries
@@ -177,6 +207,13 @@ fragment ModuleInstanceCommon on ModuleInstance {
   status
   target
   tags
+
+  failure_reason
+  failure_context {
+    stdout
+    stderr
+    syserr
+  }
 }
 
 fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
@@ -194,6 +231,13 @@ fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
   status
   target
   tags
+
+  failure_reason
+  failure_context {
+    stdout
+    stderr
+    syserr
+  }
 }
 
 fragment ModuleInstanceFull on ModuleInstance {
@@ -355,6 +399,178 @@ query module_instance_minimal($id: ModuleInstanceId!) {
 query object($id: ArgumentId!) {
   object(id: $id)
 }
+
+## Raw Entity (v2)
+
+query entity($id: UUID!) {
+  entity(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data
+    tags
+  }
+}
+
+## Project
+
+query project($id: UUID!) {
+  project(id: $id) {
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    tags
+    proteins {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    protein_conformers {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    smols {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    smol_conformers {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    smol_tautomers {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+
+query protein($id: UUID!) {
+  protein(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      sequence
+    }
+    tags
+  }
+}
+
+query protein_conformer($id: UUID!) {
+  protein_conformer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    tags
+  }
+}
+
+query smol($id: UUID!) {
+  smol(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      inchi
+    }
+    tags
+  }
+}
+
+query smol_conformer($id: UUID!) {
+  smol_conformer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    tags
+  }
+}
+
+query smol_tautomer($id: UUID!) {
+  smol_tautomer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      inchi
+    }
+    tags
+  }
+}
+
+query structure($id: UUID!) {
+  structure(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    topology {
+      symbols
+      geometry
+      connectivity
+      atom_charges
+      atom_labels
+      partial_charges
+      fragments
+      fragment_charges
+      alts
+    }
+    # signed_url
+    tags
+  }
+}
+
+query experiment($id: UUID!) {
+  experiment(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      unit
+      measure
+      value
+      assay
+    }
+    tags
+  }
+}
 # Retries a failed module instance
 mutation retry(
   $instance: ModuleInstanceId!
@@ -370,6 +586,26 @@ mutation run($instance: ModuleInstanceInput!) {
         id
         outs {id}
     }
+}
+mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+  create_smol_conformer(input: $smol_conformer) {
+    id
+  }
+}
+mutation create_smol($smol: CreateSmolInput!) {
+  create_smol(input: $smol) {
+    id
+  }
+}
+mutation create_smol_tautomer($smol_tautomer: CreateSmolTautomerInput!) {
+  create_smol_tautomer(input: $smol_tautomer) {
+    id
+  }
+}
+mutation create_structure($structure: CreateStructureInput!) {
+  create_structure(input: $structure) {
+    id
+  }
 }
 mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
     tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)

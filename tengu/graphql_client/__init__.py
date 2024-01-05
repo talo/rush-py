@@ -12,13 +12,34 @@ from .arguments import (
 )
 from .async_base_client import AsyncBaseClient
 from .base_model import BaseModel, Upload
+from .cancel_module_instance import CancelModuleInstance
 from .client import Client
+from .create_entity import CreateEntity, CreateEntityCreateEntity
+from .create_experiment import CreateExperiment, CreateExperimentCreateExperiment
+from .create_project import CreateProject, CreateProjectCreateProject
+from .create_protein import CreateProtein, CreateProteinCreateProtein
+from .create_protein_conformer import (
+    CreateProteinConformer,
+    CreateProteinConformerCreateProteinConformer,
+)
+from .create_smol import CreateSmol, CreateSmolCreateSmol
+from .create_smol_conformer import (
+    CreateSmolConformer,
+    CreateSmolConformerCreateSmolConformer,
+)
+from .create_smol_tautomer import (
+    CreateSmolTautomer,
+    CreateSmolTautomerCreateSmolTautomer,
+)
+from .create_structure import CreateStructure, CreateStructureCreateStructure
 from .delete_module_instance import (
     DeleteModuleInstance,
     DeleteModuleInstanceDeleteModuleInstance,
 )
 from .deploy import Deploy, DeployDeploy
+from .entity import Entity, EntityEntity
 from .enums import (
+    Element,
     MemUnits,
     ModuleFailureReason,
     ModuleInstanceStatus,
@@ -33,11 +54,13 @@ from .exceptions import (
     GraphQLClientHttpError,
     GraphQlClientInvalidResponseError,
 )
+from .experiment import Experiment, ExperimentExperiment, ExperimentExperimentData
 from .fragments import (
     ArgumentFull,
     ModuleFull,
     ModuleFullResourceBounds,
     ModuleInstanceCommon,
+    ModuleInstanceCommonFailureContext,
     ModuleInstanceFull,
     ModuleInstanceFullIns,
     ModuleInstanceFullOuts,
@@ -45,6 +68,7 @@ from .fragments import (
     ModuleInstanceFullResources,
     PageInfoFull,
     SimpleModuleInstanceCommon,
+    SimpleModuleInstanceCommonFailureContext,
     SimpleModuleInstanceFull,
     SimpleModuleInstanceFullIns,
     SimpleModuleInstanceFullOuts,
@@ -86,10 +110,13 @@ from .input_types import (
     SmolTautomerDataInput,
     SmolTautomerFilterBy,
     SmolTautomerSortBy,
+    StringFilter,
     StructureFilterBy,
     StructureSortBy,
     TagFilter,
     TestCase,
+    TokenFilterBy,
+    TokenSortBy,
     TopologyInput,
     UpdateModuleInstanceInput,
     UuidFilter,
@@ -134,8 +161,51 @@ from .modules import (
     ModulesModulesPageInfo,
 )
 from .object import Object
+from .project import (
+    Project,
+    ProjectProject,
+    ProjectProjectData,
+    ProjectProjectProteinConformers,
+    ProjectProjectProteinConformersEdges,
+    ProjectProjectProteinConformersEdgesNode,
+    ProjectProjectProteins,
+    ProjectProjectProteinsEdges,
+    ProjectProjectProteinsEdgesNode,
+    ProjectProjectSmolConformers,
+    ProjectProjectSmolConformersEdges,
+    ProjectProjectSmolConformersEdgesNode,
+    ProjectProjectSmols,
+    ProjectProjectSmolsEdges,
+    ProjectProjectSmolsEdgesNode,
+    ProjectProjectSmolTautomers,
+    ProjectProjectSmolTautomersEdges,
+    ProjectProjectSmolTautomersEdgesNode,
+)
+from .protein import Protein, ProteinProtein, ProteinProteinData
+from .protein_conformer import (
+    ProteinConformer,
+    ProteinConformerProteinConformer,
+    ProteinConformerProteinConformerData,
+)
 from .retry import Retry, RetryRetry
 from .run import Run, RunRun, RunRunOuts
+from .smol import Smol, SmolSmol, SmolSmolData
+from .smol_conformer import (
+    SmolConformer,
+    SmolConformerSmolConformer,
+    SmolConformerSmolConformerData,
+)
+from .smol_tautomer import (
+    SmolTautomer,
+    SmolTautomerSmolTautomer,
+    SmolTautomerSmolTautomerData,
+)
+from .structure import (
+    Structure,
+    StructureStructure,
+    StructureStructureData,
+    StructureStructureTopology,
+)
 from .tag import Tag
 from .track_utilization import (
     TrackUtilization,
@@ -162,23 +232,48 @@ __all__ = [
     "ArgumentsMeAccountArgumentsPageInfo",
     "AsyncBaseClient",
     "BaseModel",
+    "CancelModuleInstance",
     "Client",
+    "CreateEntity",
+    "CreateEntityCreateEntity",
+    "CreateExperiment",
+    "CreateExperimentCreateExperiment",
     "CreateExperimentInput",
+    "CreateProject",
+    "CreateProjectCreateProject",
     "CreateProjectInput",
+    "CreateProtein",
+    "CreateProteinConformer",
+    "CreateProteinConformerCreateProteinConformer",
     "CreateProteinConformerInput",
+    "CreateProteinCreateProtein",
     "CreateProteinInput",
+    "CreateSmol",
+    "CreateSmolConformer",
+    "CreateSmolConformerCreateSmolConformer",
     "CreateSmolConformerInput",
+    "CreateSmolCreateSmol",
     "CreateSmolInput",
+    "CreateSmolTautomer",
+    "CreateSmolTautomerCreateSmolTautomer",
     "CreateSmolTautomerInput",
+    "CreateStructure",
+    "CreateStructureCreateStructure",
     "CreateStructureInput",
     "DateTimeFilter",
     "DeleteModuleInstance",
     "DeleteModuleInstanceDeleteModuleInstance",
     "Deploy",
     "DeployDeploy",
+    "Element",
+    "Entity",
+    "EntityEntity",
     "EntityFilterBy",
     "EntitySortBy",
+    "Experiment",
     "ExperimentDataInput",
+    "ExperimentExperiment",
+    "ExperimentExperimentData",
     "ExperimentFilterBy",
     "ExperimentSortBy",
     "GraphQLClientError",
@@ -197,6 +292,7 @@ __all__ = [
     "ModuleFullResourceBounds",
     "ModuleInput",
     "ModuleInstanceCommon",
+    "ModuleInstanceCommonFailureContext",
     "ModuleInstanceDetails",
     "ModuleInstanceDetailsModuleInstance",
     "ModuleInstanceDetailsModuleInstanceStderr",
@@ -234,11 +330,35 @@ __all__ = [
     "Order",
     "OrderBy",
     "PageInfoFull",
+    "Project",
     "ProjectFilterBy",
+    "ProjectProject",
+    "ProjectProjectData",
+    "ProjectProjectProteinConformers",
+    "ProjectProjectProteinConformersEdges",
+    "ProjectProjectProteinConformersEdgesNode",
+    "ProjectProjectProteins",
+    "ProjectProjectProteinsEdges",
+    "ProjectProjectProteinsEdgesNode",
+    "ProjectProjectSmolConformers",
+    "ProjectProjectSmolConformersEdges",
+    "ProjectProjectSmolConformersEdgesNode",
+    "ProjectProjectSmolTautomers",
+    "ProjectProjectSmolTautomersEdges",
+    "ProjectProjectSmolTautomersEdgesNode",
+    "ProjectProjectSmols",
+    "ProjectProjectSmolsEdges",
+    "ProjectProjectSmolsEdgesNode",
     "ProjectSortBy",
+    "Protein",
+    "ProteinConformer",
     "ProteinConformerFilterBy",
+    "ProteinConformerProteinConformer",
+    "ProteinConformerProteinConformerData",
     "ProteinConformerSortBy",
     "ProteinFilterBy",
+    "ProteinProtein",
+    "ProteinProteinData",
     "ProteinSortBy",
     "RawEntityInput",
     "ResourceUtilizationInput",
@@ -248,24 +368,41 @@ __all__ = [
     "RunRun",
     "RunRunOuts",
     "SimpleModuleInstanceCommon",
+    "SimpleModuleInstanceCommonFailureContext",
     "SimpleModuleInstanceFull",
     "SimpleModuleInstanceFullIns",
     "SimpleModuleInstanceFullOuts",
     "SimpleModuleInstanceFullProgress",
     "SimpleModuleInstanceFullResources",
+    "Smol",
+    "SmolConformer",
     "SmolConformerFilterBy",
+    "SmolConformerSmolConformer",
+    "SmolConformerSmolConformerData",
     "SmolConformerSortBy",
     "SmolDataInput",
     "SmolFilterBy",
+    "SmolSmol",
+    "SmolSmolData",
     "SmolSortBy",
+    "SmolTautomer",
     "SmolTautomerDataInput",
     "SmolTautomerFilterBy",
+    "SmolTautomerSmolTautomer",
+    "SmolTautomerSmolTautomerData",
     "SmolTautomerSortBy",
+    "StringFilter",
+    "Structure",
     "StructureFilterBy",
     "StructureSortBy",
+    "StructureStructure",
+    "StructureStructureData",
+    "StructureStructureTopology",
     "Tag",
     "TagFilter",
     "TestCase",
+    "TokenFilterBy",
+    "TokenSortBy",
     "TopologyInput",
     "TrackUtilization",
     "TrackUtilizationTrackModuleInstanceResourceUtilization",

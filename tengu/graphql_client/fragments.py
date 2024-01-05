@@ -8,7 +8,7 @@ from uuid import UUID
 from pydantic import Field
 
 from .base_model import BaseModel
-from .enums import ModuleInstanceStatus, ModuleInstanceTarget
+from .enums import ModuleFailureReason, ModuleInstanceStatus, ModuleInstanceTarget
 
 
 class ArgumentFull(BaseModel):
@@ -70,6 +70,14 @@ class ModuleInstanceCommon(BaseModel):
     status: ModuleInstanceStatus
     target: ModuleInstanceTarget
     tags: Optional[List[str]]
+    failure_reason: Optional[ModuleFailureReason]
+    failure_context: Optional["ModuleInstanceCommonFailureContext"]
+
+
+class ModuleInstanceCommonFailureContext(BaseModel):
+    stdout: Optional[str]
+    stderr: Optional[str]
+    syserr: Optional[str]
 
 
 class ModuleInstanceFull(ModuleInstanceCommon):
@@ -136,6 +144,14 @@ class SimpleModuleInstanceCommon(BaseModel):
     status: ModuleInstanceStatus
     target: ModuleInstanceTarget
     tags: Optional[List[str]]
+    failure_reason: Optional[ModuleFailureReason]
+    failure_context: Optional["SimpleModuleInstanceCommonFailureContext"]
+
+
+class SimpleModuleInstanceCommonFailureContext(BaseModel):
+    stdout: Optional[str]
+    stderr: Optional[str]
+    syserr: Optional[str]
 
 
 class SimpleModuleInstanceFull(SimpleModuleInstanceCommon):
@@ -186,6 +202,7 @@ ArgumentFull.model_rebuild()
 ModuleFull.model_rebuild()
 ModuleFullResourceBounds.model_rebuild()
 ModuleInstanceCommon.model_rebuild()
+ModuleInstanceCommonFailureContext.model_rebuild()
 ModuleInstanceFull.model_rebuild()
 ModuleInstanceFullIns.model_rebuild()
 ModuleInstanceFullOuts.model_rebuild()
@@ -193,6 +210,7 @@ ModuleInstanceFullResources.model_rebuild()
 ModuleInstanceFullProgress.model_rebuild()
 PageInfoFull.model_rebuild()
 SimpleModuleInstanceCommon.model_rebuild()
+SimpleModuleInstanceCommonFailureContext.model_rebuild()
 SimpleModuleInstanceFull.model_rebuild()
 SimpleModuleInstanceFullIns.model_rebuild()
 SimpleModuleInstanceFullOuts.model_rebuild()

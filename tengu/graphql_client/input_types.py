@@ -8,7 +8,7 @@ from uuid import UUID
 from pydantic import Field
 
 from .base_model import BaseModel
-from .enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, Order
+from .enums import Element, MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, Order
 
 
 class ArgumentInput(BaseModel):
@@ -268,6 +268,7 @@ class SmolFilterBy(BaseModel):
     deleted_at: Optional["DateTimeFilter"] = None
     tags: Optional["TagFilter"] = None
     project_id: Optional["UuidFilter"] = None
+    smol_name: Optional["StringFilter"] = None
 
 
 class SmolSortBy(BaseModel):
@@ -298,6 +299,18 @@ class SmolTautomerSortBy(BaseModel):
     created_at: Optional[Order] = None
     updated_at: Optional[Order] = None
     deleted_at: Optional[Order] = None
+
+
+class StringFilter(BaseModel):
+    eq: Optional[str] = None
+    ne: Optional[str] = None
+    gt: Optional[str] = None
+    ge: Optional[str] = None
+    lt: Optional[str] = None
+    le: Optional[str] = None
+    like: Optional[str] = None
+    in_: Optional[List[str]] = Field(alias="in", default=None)
+    not_in: Optional[List[str]] = None
 
 
 class StructureFilterBy(BaseModel):
@@ -331,8 +344,26 @@ class TestCase(BaseModel):
     tags: Optional[List[str]] = None
 
 
+class TokenFilterBy(BaseModel):
+    and_: Optional[List["TokenFilterBy"]] = Field(alias="and", default=None)
+    or_: Optional[List["TokenFilterBy"]] = Field(alias="or", default=None)
+    not_: Optional["TokenFilterBy"] = Field(alias="not", default=None)
+    id: Optional["UuidFilter"] = None
+    created_at: Optional["DateTimeFilter"] = None
+    updated_at: Optional["DateTimeFilter"] = None
+    deleted_at: Optional["DateTimeFilter"] = None
+    tags: Optional["TagFilter"] = None
+
+
+class TokenSortBy(BaseModel):
+    id: Optional[Order] = None
+    created_at: Optional[Order] = None
+    updated_at: Optional[Order] = None
+    deleted_at: Optional[Order] = None
+
+
 class TopologyInput(BaseModel):
-    symbols: List[str]
+    symbols: List[Element]
     geometry: List[float]
     connectivity: Optional[List[Any]] = None
     atom_charges: Optional[List[int]] = None
@@ -395,10 +426,13 @@ SmolSortBy.model_rebuild()
 SmolTautomerDataInput.model_rebuild()
 SmolTautomerFilterBy.model_rebuild()
 SmolTautomerSortBy.model_rebuild()
+StringFilter.model_rebuild()
 StructureFilterBy.model_rebuild()
 StructureSortBy.model_rebuild()
 TagFilter.model_rebuild()
 TestCase.model_rebuild()
+TokenFilterBy.model_rebuild()
+TokenSortBy.model_rebuild()
 TopologyInput.model_rebuild()
 UpdateModuleInstanceInput.model_rebuild()
 UuidFilter.model_rebuild()
