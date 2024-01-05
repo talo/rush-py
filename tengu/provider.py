@@ -220,12 +220,9 @@ class BaseProvider:
                             if remote_arg.source:
                                 # get the failure reason by checking the source module instance
                                 module_instance = await self.provider.module_instance(remote_arg.source)
-                                if (
-                                    module_instance.stderr
-                                    and module_instance.stderr.edges
-                                    and len(module_instance.stderr.edges) > 0
-                                ):
-                                    raise Exception(module_instance.stderr.edges[-1].node.content)
+                                raise Exception(
+                                    (module_instance.failure_reason, module_instance.failure_context)
+                                )
                             raise Exception("Argument was rejected")
                         else:
                             self.value = remote_arg.value

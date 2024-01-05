@@ -8,16 +8,46 @@ from .argument import Argument, ArgumentArgument
 from .arguments import Arguments, ArgumentsMe
 from .async_base_client import AsyncBaseClient
 from .base_model import UNSET, UnsetType, Upload
+from .cancel_module_instance import CancelModuleInstance
+from .create_entity import CreateEntity, CreateEntityCreateEntity
+from .create_experiment import CreateExperiment, CreateExperimentCreateExperiment
+from .create_project import CreateProject, CreateProjectCreateProject
+from .create_protein import CreateProtein, CreateProteinCreateProtein
+from .create_protein_conformer import (
+    CreateProteinConformer,
+    CreateProteinConformerCreateProteinConformer,
+)
+from .create_smol import CreateSmol, CreateSmolCreateSmol
+from .create_smol_conformer import (
+    CreateSmolConformer,
+    CreateSmolConformerCreateSmolConformer,
+)
+from .create_smol_tautomer import (
+    CreateSmolTautomer,
+    CreateSmolTautomerCreateSmolTautomer,
+)
+from .create_structure import CreateStructure, CreateStructureCreateStructure
 from .delete_module_instance import (
     DeleteModuleInstance,
     DeleteModuleInstanceDeleteModuleInstance,
 )
 from .deploy import Deploy, DeployDeploy
+from .entity import Entity, EntityEntity
 from .enums import ModuleInstanceStatus, ModuleInstanceTarget, OrderBy
+from .experiment import Experiment, ExperimentExperiment
 from .input_types import (
+    CreateExperimentInput,
+    CreateProjectInput,
+    CreateProteinConformerInput,
+    CreateProteinInput,
+    CreateSmolConformerInput,
+    CreateSmolInput,
+    CreateSmolTautomerInput,
+    CreateStructureInput,
     ModuleInput,
     ModuleInstanceInput,
     ModuleInstanceResourcesInput,
+    RawEntityInput,
     ResourceUtilizationInput,
     UpdateModuleInstanceInput,
 )
@@ -33,8 +63,15 @@ from .module_instance_minimal import (
 from .module_instances import ModuleInstances, ModuleInstancesMe
 from .modules import Modules, ModulesModules
 from .object import Object
+from .project import Project, ProjectProject
+from .protein import Protein, ProteinProtein
+from .protein_conformer import ProteinConformer, ProteinConformerProteinConformer
 from .retry import Retry, RetryRetry
 from .run import Run, RunRun
+from .smol import Smol, SmolSmol
+from .smol_conformer import SmolConformer, SmolConformerSmolConformer
+from .smol_tautomer import SmolTautomer, SmolTautomerSmolTautomer
+from .structure import Structure, StructureStructure
 from .tag import Tag
 from .track_utilization import (
     TrackUtilization,
@@ -53,6 +90,21 @@ def gql(q: str) -> str:
 
 
 class Client(AsyncBaseClient):
+    async def cancel_module_instance(
+        self, module_instance_id: UUID, **kwargs: Any
+    ) -> UUID:
+        query = gql(
+            """
+            mutation cancel_module_instance($moduleInstanceId: ModuleInstanceId!) {
+              cancel(instance: $moduleInstanceId)
+            }
+            """
+        )
+        variables: Dict[str, object] = {"moduleInstanceId": module_instance_id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CancelModuleInstance.model_validate(data).cancel
+
     async def delete_module_instance(
         self, module_instance_id: UUID, **kwargs: Any
     ) -> DeleteModuleInstanceDeleteModuleInstance:
@@ -85,6 +137,91 @@ class Client(AsyncBaseClient):
         response = await self.execute(query=query, variables=variables, **kwargs)
         data = self.get_data(response)
         return Deploy.model_validate(data).deploy
+
+    async def create_entity(
+        self, entity: RawEntityInput, **kwargs: Any
+    ) -> CreateEntityCreateEntity:
+        query = gql(
+            """
+            mutation create_entity($entity: RawEntityInput!) {
+              create_entity(entity: $entity) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"entity": entity}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateEntity.model_validate(data).create_entity
+
+    async def create_experiment(
+        self, experiment: CreateExperimentInput, **kwargs: Any
+    ) -> CreateExperimentCreateExperiment:
+        query = gql(
+            """
+            mutation create_experiment($experiment: CreateExperimentInput!) {
+              create_experiment(input: $experiment) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"experiment": experiment}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateExperiment.model_validate(data).create_experiment
+
+    async def create_project(
+        self, project: CreateProjectInput, **kwargs: Any
+    ) -> CreateProjectCreateProject:
+        query = gql(
+            """
+            mutation create_project($project: CreateProjectInput!) {
+              create_project(input: $project) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project": project}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateProject.model_validate(data).create_project
+
+    async def create_protein_conformer(
+        self, protein_conformer: CreateProteinConformerInput, **kwargs: Any
+    ) -> CreateProteinConformerCreateProteinConformer:
+        query = gql(
+            """
+            mutation create_protein_conformer($protein_conformer: CreateProteinConformerInput!) {
+              create_protein_conformer(input: $protein_conformer) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"protein_conformer": protein_conformer}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateProteinConformer.model_validate(data).create_protein_conformer
+
+    async def create_protein(
+        self, protein: CreateProteinInput, **kwargs: Any
+    ) -> CreateProteinCreateProtein:
+        query = gql(
+            """
+            mutation create_protein($protein: CreateProteinInput!) {
+              create_protein(input: $protein) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"protein": protein}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateProtein.model_validate(data).create_protein
 
     async def argument(self, id: UUID, **kwargs: Any) -> ArgumentArgument:
         query = gql(
@@ -408,6 +545,12 @@ class Client(AsyncBaseClient):
               status
               target
               tags
+              failure_reason
+              failure_context {
+                stdout
+                stderr
+                syserr
+              }
             }
 
             fragment ModuleInstanceFull on ModuleInstance {
@@ -529,6 +672,12 @@ class Client(AsyncBaseClient):
               status
               target
               tags
+              failure_reason
+              failure_context {
+                stdout
+                stderr
+                syserr
+              }
             }
 
             fragment SimpleModuleInstanceFull on SimpleModuleInstance {
@@ -608,6 +757,12 @@ class Client(AsyncBaseClient):
               status
               target
               tags
+              failure_reason
+              failure_context {
+                stdout
+                stderr
+                syserr
+              }
             }
             """
         )
@@ -628,6 +783,262 @@ class Client(AsyncBaseClient):
         response = await self.execute(query=query, variables=variables, **kwargs)
         data = self.get_data(response)
         return Object.model_validate(data).object
+
+    async def entity(self, id: Any, **kwargs: Any) -> Optional[EntityEntity]:
+        query = gql(
+            """
+            query entity($id: UUID!) {
+              entity(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return Entity.model_validate(data).entity
+
+    async def project(self, id: Any, **kwargs: Any) -> Optional[ProjectProject]:
+        query = gql(
+            """
+            query project($id: UUID!) {
+              project(id: $id) {
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                }
+                tags
+                proteins {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+                protein_conformers {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+                smols {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+                smol_conformers {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+                smol_tautomers {
+                  edges {
+                    node {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return Project.model_validate(data).project
+
+    async def protein(self, id: Any, **kwargs: Any) -> Optional[ProteinProtein]:
+        query = gql(
+            """
+            query protein($id: UUID!) {
+              protein(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                  sequence
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return Protein.model_validate(data).protein
+
+    async def protein_conformer(
+        self, id: Any, **kwargs: Any
+    ) -> Optional[ProteinConformerProteinConformer]:
+        query = gql(
+            """
+            query protein_conformer($id: UUID!) {
+              protein_conformer(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return ProteinConformer.model_validate(data).protein_conformer
+
+    async def smol(self, id: Any, **kwargs: Any) -> Optional[SmolSmol]:
+        query = gql(
+            """
+            query smol($id: UUID!) {
+              smol(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                  inchi
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return Smol.model_validate(data).smol
+
+    async def smol_conformer(
+        self, id: Any, **kwargs: Any
+    ) -> Optional[SmolConformerSmolConformer]:
+        query = gql(
+            """
+            query smol_conformer($id: UUID!) {
+              smol_conformer(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return SmolConformer.model_validate(data).smol_conformer
+
+    async def smol_tautomer(
+        self, id: Any, **kwargs: Any
+    ) -> Optional[SmolTautomerSmolTautomer]:
+        query = gql(
+            """
+            query smol_tautomer($id: UUID!) {
+              smol_tautomer(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                  inchi
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return SmolTautomer.model_validate(data).smol_tautomer
+
+    async def structure(self, id: Any, **kwargs: Any) -> Optional[StructureStructure]:
+        query = gql(
+            """
+            query structure($id: UUID!) {
+              structure(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                }
+                topology {
+                  symbols
+                  geometry
+                  connectivity
+                  atom_charges
+                  atom_labels
+                  partial_charges
+                  fragments
+                  fragment_charges
+                  alts
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return Structure.model_validate(data).structure
+
+    async def experiment(
+        self, id: Any, **kwargs: Any
+    ) -> Optional[ExperimentExperiment]:
+        query = gql(
+            """
+            query experiment($id: UUID!) {
+              experiment(id: $id) {
+                id
+                createdAt
+                updatedAt
+                deletedAt
+                data {
+                  name
+                  unit
+                  measure
+                  value
+                  assay
+                }
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return Experiment.model_validate(data).experiment
 
     async def retry(
         self,
@@ -671,6 +1082,74 @@ class Client(AsyncBaseClient):
         response = await self.execute(query=query, variables=variables, **kwargs)
         data = self.get_data(response)
         return Run.model_validate(data).run
+
+    async def create_smol_conformer(
+        self, smol_conformer: CreateSmolConformerInput, **kwargs: Any
+    ) -> CreateSmolConformerCreateSmolConformer:
+        query = gql(
+            """
+            mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+              create_smol_conformer(input: $smol_conformer) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol_conformer": smol_conformer}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateSmolConformer.model_validate(data).create_smol_conformer
+
+    async def create_smol(
+        self, smol: CreateSmolInput, **kwargs: Any
+    ) -> CreateSmolCreateSmol:
+        query = gql(
+            """
+            mutation create_smol($smol: CreateSmolInput!) {
+              create_smol(input: $smol) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol": smol}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateSmol.model_validate(data).create_smol
+
+    async def create_smol_tautomer(
+        self, smol_tautomer: CreateSmolTautomerInput, **kwargs: Any
+    ) -> CreateSmolTautomerCreateSmolTautomer:
+        query = gql(
+            """
+            mutation create_smol_tautomer($smol_tautomer: CreateSmolTautomerInput!) {
+              create_smol_tautomer(input: $smol_tautomer) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol_tautomer": smol_tautomer}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateSmolTautomer.model_validate(data).create_smol_tautomer
+
+    async def create_structure(
+        self, structure: CreateStructureInput, **kwargs: Any
+    ) -> CreateStructureCreateStructure:
+        query = gql(
+            """
+            mutation create_structure($structure: CreateStructureInput!) {
+              create_structure(input: $structure) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"structure": structure}
+        response = await self.execute(query=query, variables=variables, **kwargs)
+        data = self.get_data(response)
+        return CreateStructure.model_validate(data).create_structure
 
     async def tag(
         self,

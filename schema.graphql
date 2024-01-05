@@ -249,6 +249,127 @@ input DateTimeFilter {
   le: DateTime
 }
 
+enum Element {
+  H
+  HE
+  LI
+  BE
+  B
+  C
+  N
+  O
+  F
+  NE
+  NA
+  MG
+  AL
+  SI
+  P
+  S
+  CL
+  AR
+  K
+  CA
+  SC
+  TI
+  V
+  CR
+  MN
+  FE
+  CO
+  NI
+  CU
+  ZN
+  GA
+  GE
+  AS
+  SE
+  BR
+  KR
+  RB
+  SR
+  Y
+  ZR
+  NB
+  MO
+  TC
+  RU
+  RH
+  PD
+  AG
+  CD
+  IN
+  SN
+  SB
+  TE
+  I
+  XE
+  CS
+  BA
+  LA
+  CE
+  PR
+  ND
+  PM
+  SM
+  EU
+  GD
+  TB
+  DY
+  HO
+  ER
+  TM
+  YB
+  LU
+  HF
+  TA
+  W
+  RE
+  OS
+  IR
+  PT
+  AU
+  HG
+  TL
+  PB
+  BI
+  PO
+  AT
+  RN
+  FR
+  RA
+  AC
+  TH
+  PA
+  U
+  NP
+  PU
+  AM
+  CM
+  BK
+  CF
+  ES
+  FM
+  MD
+  NO
+  LR
+  RF
+  DB
+  SG
+  BH
+  HS
+  MT
+  DS
+  RG
+  CN
+  NH
+  FL
+  MC
+  LV
+  TS
+  OG
+}
+
 type Entity {
   id: EntityId!
   createdAt: DateTime!
@@ -475,6 +596,12 @@ type ModuleEdge {
   cursor: String!
 }
 
+type ModuleFailureContext {
+  stderr: String
+  stdout: String
+  syserr: String
+}
+
 enum ModuleFailureReason {
   # Module arguments failed to resolve
   RESOLUTION
@@ -517,6 +644,7 @@ type ModuleInstance {
   run_at: DateTime
   completed_at: DateTime
   failure_reason: ModuleFailureReason
+  failure_context: ModuleFailureContext
   status: ModuleInstanceStatus!
   target: ModuleInstanceTarget!
   resources: ModuleInstanceResources
@@ -702,7 +830,7 @@ type ModuleResourceBounds {
 }
 
 type Mutation {
-  login(username: String!, password: String!): User!
+  login(username: String!, password: String!): User
   deploy(module: ModuleInput!): SimpleModule!
   destroy(module: ModuleId!): SimpleModule!
   delete_module_instance(module: ModuleInstanceId!): SimpleModuleInstance!
@@ -1158,6 +1286,7 @@ type SimpleModuleInstance {
   run_at: DateTime
   completed_at: DateTime
   failure_reason: ModuleFailureReason
+  failure_context: ModuleFailureContext
   status: ModuleInstanceStatus!
   target: ModuleInstanceTarget!
   resources: ModuleInstanceResources
@@ -1298,6 +1427,7 @@ input SmolFilterBy {
   deleted_at: DateTimeFilter
   tags: TagFilter
   project_id: UuidFilter
+  smol_name: StringFilter
 }
 
 input SmolSortBy {
@@ -1454,6 +1584,18 @@ type StatusByNameEdge {
   cursor: String!
 }
 
+input StringFilter {
+  eq: String
+  ne: String
+  gt: String
+  ge: String
+  lt: String
+  le: String
+  like: String
+  in: [String!]
+  not_in: [String!]
+}
+
 type Structure {
   id: EntityId!
   createdAt: DateTime!
@@ -1560,8 +1702,8 @@ input TestCase {
 type Token {
   id: TokenId!
   created_at: DateTime!
+  updated_at: DateTime!
   deleted_at: DateTime
-  user_id: UserId!
 }
 
 type TokenConnection {
@@ -1585,14 +1727,33 @@ type TokenEdge {
   cursor: String!
 }
 
+input TokenFilterBy {
+  and: [TokenFilterBy!]
+  or: [TokenFilterBy!]
+  not: TokenFilterBy
+  id: UuidFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeFilter
+  deleted_at: DateTimeFilter
+  tags: TagFilter
+}
+
 scalar TokenId
+
+input TokenSortBy {
+  id: Order
+  created_at: Order
+  updated_at: Order
+  deleted_at: Order
+}
 
 # An structure-of-arrays based representation of coordinates, charges and bonds between atoms, with utilty functions to manipulate them.
 # # Example
 # ```
 # use qdx_common::{Bond, Topology};
+# use qdx_common::element::Element;
 # Topology {
-# symbols: vec!["H".into(), "O".into(), "H".into()],
+# symbols: vec![Element::H, Element::O, Element::H],
 # geometry: vec![0.0,0.0,0.0,
 # 1.0,0.0,0.0,
 # 1.0,1.0,0.0],
@@ -1621,7 +1782,7 @@ scalar TokenId
 # ```
 type Topology {
   # Atomic symbols of elements
-  symbols: [String!]!
+  symbols: [Element!]!
 
   # Flat vector of X,Y,Z coordinates for atoms in Angstroms
   geometry: [Float!]!
@@ -1649,8 +1810,9 @@ type Topology {
 # # Example
 # ```
 # use qdx_common::{Bond, Topology};
+# use qdx_common::element::Element;
 # Topology {
-# symbols: vec!["H".into(), "O".into(), "H".into()],
+# symbols: vec![Element::H, Element::O, Element::H],
 # geometry: vec![0.0,0.0,0.0,
 # 1.0,0.0,0.0,
 # 1.0,1.0,0.0],
@@ -1679,7 +1841,7 @@ type Topology {
 # ```
 input TopologyInput {
   # Atomic symbols of elements
-  symbols: [String!]!
+  symbols: [Element!]!
 
   # Flat vector of X,Y,Z coordinates for atoms in Angstroms
   geometry: [Float!]!
@@ -1733,14 +1895,17 @@ scalar Upload
 type User {
   id: UserId!
   created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   account_id: AccountId!
-  account: Account!
-  tokens(
+  account: Account
+  token(
     after: String
     before: String
     first: Int
     last: Int
-    order: OrderBy
+    filter: TokenFilterBy
+    sort: TokenSortBy
   ): TokenConnection!
 }
 
