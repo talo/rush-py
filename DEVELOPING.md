@@ -38,4 +38,11 @@ Step 5. Update the `tengu/provider.py` to address any incompatibilities / add he
 Step 1. Update all of the notebooks in nb/* to reflect changes
 Step 2. Run pdoc to document the api `pdoc ./tengu/doc.py -o ./nbs/api`
 Step 3. Fix pathing incompatabilities with `quarto` - `mv ./nbs/api/tengu/* ./nbs/api/` & `mv ./nbs/api/doc.html ./nbs/api/index.html `
-Step 2. Run the following `nbdev` commands for generating final documentation
+Step 4. Run the following `nbdev` commands for generating final documentation (if notebooks have changed)
+```
+nbdev_docs
+nbdev_readme
+nbdev_prepare # TODO: the checks don't pass yet
+```
+Step 5. Increment package version in `pyproject.toml`
+Step 6. `poetry build` & `poetry publish` (ensure you have set up your pypi token https://python-poetry.org/docs/repositories/)
