@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import math
@@ -166,7 +167,7 @@ class BaseProvider:
                 except GraphQLClientGraphQLMultiError as e:
                     if e.errors[0].message == "not found":
                         if retries < 10:
-                            time.sleep(5)
+                            await asyncio.sleep(5)
                             retries += 1
                         else:
                             raise e
@@ -227,10 +228,10 @@ class BaseProvider:
                         else:
                             self.value = remote_arg.value
                             if self.value is None:
-                                time.sleep(1)
+                                await asyncio.sleep(1)
                     except GraphQLClientGraphQLMultiError as e:
                         if e.errors[0].message == "not found":
-                            time.sleep(1)
+                            await asyncio.sleep(1)
                         else:
                             print(e.errors)
                             raise e
@@ -1005,7 +1006,7 @@ class BaseProvider:
 
         curr_poll_rate = 0.5
         while n_try < n_retries:
-            time.sleep(curr_poll_rate)
+            await asyncio.sleep(curr_poll_rate)
             if curr_poll_rate == poll_rate:
                 n_try += 1
             curr_poll_rate = min(curr_poll_rate * 2, poll_rate)
