@@ -2,16 +2,16 @@
   description = "Tengu Python SDK";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     talo-flake-parts.url = "github:talo/talo-flake-parts";
   };
 
-  outputs = inputs@{ flake-parts, talo-flake-parts, ... }:
+  outputs = inputs@{ flake-parts, poetry2nix, talo-flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ talo-flake-parts.flakeModule ];
-      systems = [ "x86_64-linux" ];
-      # no quarto support "aarch64-darwin" ];
+      systems = [ "x86_64-linux" "aarch64-darwin" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
+        poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
         poetryProjects.default = {
           projectDir = ./.;
           flake8Check = { enable = false; };
