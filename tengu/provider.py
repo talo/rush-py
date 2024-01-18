@@ -284,7 +284,13 @@ class BaseProvider:
         if remote:
             if self.history:
                 for instance in self.history.instances:
-                    await self.delete_module_instance(instance.id)
+                    try:
+                        await self.delete_module_instance(instance.id)
+                    except e:
+                        if "not found" in str(e):
+                            pass
+                        else:
+                            raise e
         if self.workspace:
             for f in self.workspace.glob("*"):
                 if f.is_dir():
@@ -535,7 +541,8 @@ class BaseProvider:
             if len(res) == 1:
                 return res[0]
 
-        storage_requirements = {"storage": 0}
+        # always request a bit of space because the a run will always create files
+        storage_requirements = {"storage": 1024}
 
         # TODO: less insane version of this
         def gen_arg_dict(input: Provider.Arg[Any] | ArgId | UUID | Path | IOBase | Any) -> ArgumentInput:
