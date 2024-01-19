@@ -3,6 +3,8 @@ import base64
 import json
 import math
 import time
+import logging
+import sys
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
@@ -135,11 +137,14 @@ class BaseProvider:
             self,
             provider: "BaseProvider | None",
             id: UUID | None = None,
+            source: UUID | None = None,
             value: T | None = None,
             typeinfo: dict[str, Any] | None = None,
         ):
             self.provider = provider
             self.id = id
+            self.source = source
+            self.status = ModuleInstanceStatus.CREATED
             self.value = value
             self.typeinfo = typeinfo
 
@@ -167,12 +172,19 @@ class BaseProvider:
                 except GraphQLClientGraphQLMultiError as e:
                     if e.errors[0].message == "not found":
                         if retries < 10:
+                            if self.source:
+                                module_instance = await self.provider.module_instance(self.source)
+                                if module_instance.status != self.status:
+                                    self.provider.logger.info(
+                                        f"Argument {self.id} is now {module_instance.status}"
+                                    )
+                                    self.status = module_instance.status
                             await asyncio.sleep(5)
                             retries += 1
                         else:
                             raise e
                     else:
-                        print(e.errors)
+                        self.provider.logger.error(e.errors)
                         raise e
             raise Exception("No typeinfo found")
 
@@ -228,15 +240,25 @@ class BaseProvider:
                         else:
                             self.value = remote_arg.value
                             if self.value is None:
+                                if remote_arg.source or self.source:
+                                    module_instance = await self.provider.module_instance(
+                                        remote_arg.source or self.source
+                                    )
+                                    if module_instance.status != self.status:
+                                        self.provider.logger.info(
+                                            f"Argument {self.id} is now {module_instance.status}"
+                                        )
+                                        self.status = module_instance.status
                                 await asyncio.sleep(1)
                     except GraphQLClientGraphQLMultiError as e:
                         if e.errors[0].message == "not found":
                             await asyncio.sleep(1)
                         else:
-                            print(e.errors)
+                            self.provider.logger.error(e.errors)
                             raise e
 
-            if self.typeinfo and self.provider and self.id:
+            # if typeinfo is a dict, check if it is an object, and if so, download it
+            if self.typeinfo and self.provider and self.id and isinstance(self.typeinfo, dict):
                 if self.typeinfo["k"] == "object" or (
                     self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object"
                 ):
@@ -244,7 +266,11 @@ class BaseProvider:
             return self.value
 
     def __init__(
-        self, client: Client, workspace: str | Path | None = None, batch_tags: list[str] | None = None
+        self,
+        client: Client,
+        workspace: str | Path | None = None,
+        batch_tags: list[str] | None = None,
+        logger: logging.Logger | None = None,
     ):
         """
         Initialize the TenguProvider a graphql client.
@@ -252,6 +278,28 @@ class BaseProvider:
         self.history = None
         self.client = client
         self.module_paths: dict[str, str] = {}
+        if not logger:
+            self.logger = logging.getLogger("tengu")
+            stderr_handler = logging.StreamHandler()
+            stderr_handler.setLevel(logging.ERROR)
+            stderr_handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            )
+
+            stdout_handler = logging.StreamHandler(sys.stdout)
+            stdout_handler.setLevel(logging.INFO)
+            stdout_handler.setFormatter(
+                logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            )
+
+            # add filter to prevent errors from being logged twice
+            stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
+            self.logger.setLevel(logging.INFO)
+
+            self.logger.addHandler(stdout_handler)
+            self.logger.addHandler(stderr_handler)
+        else:
+            self.logger = logger
         if workspace:
             self.workspace = Path(workspace)
             if not self.workspace.exists():
@@ -286,7 +334,7 @@ class BaseProvider:
                 for instance in self.history.instances:
                     try:
                         await self.delete_module_instance(instance.id)
-                    except e:
+                    except Exception as e:
                         if "not found" in str(e):
                             pass
                         else:
@@ -536,7 +584,7 @@ class BaseProvider:
                     instance = edge.node
                     res.append(instance)
                     if len(res) > 1:
-                        print("Warning: multiple module instances found with the same tags and path")
+                        self.logger.warn("Multiple module instances found with the same tags and path")
                         break
             if len(res) == 1:
                 return res[0]
@@ -725,8 +773,11 @@ class BaseProvider:
         """
         for path in paths:
             ms = await self.modules(path=path)
-            async for m in ms:
-                yield m
+            mps = [m async for m in ms]
+            if len(mps) != 1:
+                self.logger.warn(f"Found no modules for path {path} - remove your lockfile and try again")
+            else:
+                yield mps[0]
 
     async def tag(
         self,
@@ -847,7 +898,7 @@ class BaseProvider:
                         )
                         outs: list[Any] = []
                         for out in run.outs:
-                            outs.append(Provider.Arg(self, out.id))
+                            outs.append(Provider.Arg(self, out.id, source=run.id))
                         return outs
 
                     runner.__name__ = name
@@ -1031,6 +1082,7 @@ class Provider(BaseProvider):
         url: str | None = None,
         workspace: str | Path | None = None,
         batch_tags: list[str] | None = None,
+        logger: logging.Logger | None = None,
     ):
         """
         Initialize the TenguProvider with a graphql client.
@@ -1054,10 +1106,10 @@ class Provider(BaseProvider):
                 if url is None:
                     raise Exception("No url provided")
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
-            super().__init__(client, workspace=workspace, batch_tags=batch_tags)
+            super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
         else:
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
-            super().__init__(client, workspace=workspace, batch_tags=batch_tags)
+            super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
 
 
 async def build_provider_with_functions(
@@ -1066,6 +1118,7 @@ async def build_provider_with_functions(
     workspace: str | Path | None = None,
     batch_tags: list[str] | None = None,
     module_names: list[str] | None = None,
+    logger: logging.Logger | None = None,
 ) -> Provider:
     """
     Build a TenguProvider with the given access token and url.
@@ -1076,7 +1129,7 @@ async def build_provider_with_functions(
     :param batch_tags: The tags that will be placed on all runs by default.
     :return: The built TenguProvider.
     """
-    provider = Provider(access_token, url, workspace, batch_tags)
+    provider = Provider(access_token, url, workspace, batch_tags, logger)
 
     await provider.get_module_functions(names=module_names)
     return provider
