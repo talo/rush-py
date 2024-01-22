@@ -158,20 +158,18 @@ class BaseProvider:
             return self.id == other.id
 
         async def info(self) -> ArgumentArgument:
-            if self.id is None:
-                raise Exception("No ID provided")
-            if self.provider is None:
-                raise Exception("No provider provided")
-
-            retries = 0
-            while self.typeinfo is None:
+            async def get_remote_arg(retries: int):
+                if self.id is None:
+                    raise Exception("No ID provided")
+                if self.provider is None:
+                    raise Exception("No provider provided")
                 try:
                     remote_arg = await self.provider.argument(self.id)
                     self.typeinfo = remote_arg.typeinfo
                     return remote_arg
                 except GraphQLClientGraphQLMultiError as e:
                     if e.errors[0].message == "not found":
-                        if retries < 10:
+                        if retries > 0:
                             if self.source:
                                 module_instance = await self.provider.module_instance(self.source)
                                 if module_instance.status != self.status:
@@ -180,13 +178,18 @@ class BaseProvider:
                                     )
                                     self.status = module_instance.status
                             await asyncio.sleep(5)
-                            retries += 1
                         else:
                             raise e
                     else:
                         self.provider.logger.error(e.errors)
                         raise e
-            raise Exception("No typeinfo found")
+
+            retries = 10
+            remote_arg = await get_remote_arg(retries)
+            while remote_arg is None:
+                retries -= 1
+                remote_arg = await get_remote_arg(retries)
+            return remote_arg
 
         async def download(
             self,
@@ -297,7 +300,7 @@ class BaseProvider:
                 stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
                 self.logger.setLevel(logging.INFO)
 
-                # self.logger.addHandler(stdout_handler)
+                self.logger.addHandler(stdout_handler)
                 self.logger.addHandler(stderr_handler)
         else:
             self.logger = logger
