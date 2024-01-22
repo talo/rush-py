@@ -280,24 +280,25 @@ class BaseProvider:
         self.module_paths: dict[str, str] = {}
         if not logger:
             self.logger = logging.getLogger("tengu")
-            stderr_handler = logging.StreamHandler()
-            stderr_handler.setLevel(logging.ERROR)
-            stderr_handler.setFormatter(
-                logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            )
+            if len(self.logger.handlers) == 0:
+                stderr_handler = logging.StreamHandler()
+                stderr_handler.setLevel(logging.ERROR)
+                stderr_handler.setFormatter(
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                )
 
-            stdout_handler = logging.StreamHandler(sys.stdout)
-            stdout_handler.setLevel(logging.INFO)
-            stdout_handler.setFormatter(
-                logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            )
+                stdout_handler = logging.StreamHandler(sys.stdout)
+                stdout_handler.setLevel(logging.INFO)
+                stdout_handler.setFormatter(
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                )
 
-            # add filter to prevent errors from being logged twice
-            stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
-            self.logger.setLevel(logging.INFO)
+                # add filter to prevent errors from being logged twice
+                stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
+                self.logger.setLevel(logging.INFO)
 
-            self.logger.addHandler(stdout_handler)
-            self.logger.addHandler(stderr_handler)
+                # self.logger.addHandler(stdout_handler)
+                self.logger.addHandler(stderr_handler)
         else:
             self.logger = logger
         if workspace:
