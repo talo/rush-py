@@ -8,7 +8,11 @@ website:
         href: api/index.html
       - section: tutorials
         contents:
+          - tutorials/batch_run-prep.ipynb
           - tutorials/batch_run.ipynb
+          - tutorials/cairo-ligand_conformer_search.ipynb
           - tutorials/convert.ipynb
           - tutorials/hermes.ipynb
+          - tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
+          - tutorials/protein_ligand_hermes_setonix.ipynb
           - tutorials/rerun_everything.ipynb
