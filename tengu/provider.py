@@ -25,7 +25,7 @@ from .graphql_client.base_model import UNSET, UnsetType, Upload
 from .graphql_client.client import Client
 from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget
 from .graphql_client.exceptions import GraphQLClientGraphQLMultiError
-from .graphql_client.fragments import ModuleFull, PageInfoFull
+from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
@@ -145,6 +145,7 @@ class BaseProvider:
             self.id = id
             self.source = source
             self.status = ModuleInstanceStatus.CREATED
+            self.progress = ModuleInstanceFullProgress(n=0, n_max=0, n_expected=0, done=False)
             self.value = value
             self.typeinfo = typeinfo
 
@@ -177,6 +178,9 @@ class BaseProvider:
                                         f"Argument {self.id} is now {module_instance.status}"
                                     )
                                     self.status = module_instance.status
+                                if module_instance.status == ModuleInstanceStatus.RUNNING:
+                                    if module_instance.progress != self.progress:
+                                        print(f"Progress: {module_instance.progress}", end="\r")
                             await asyncio.sleep(5)
                         else:
                             raise e
@@ -872,7 +876,7 @@ class BaseProvider:
                 default_resources = None
                 if module.resource_bounds:
                     default_resources = ModuleInstanceResourcesInput(
-                        storage=module.resource_bounds.storage_min,
+                        storage=module.resource_bounds.storage_min + 10,
                         storage_units=MemUnits.MB,
                         gpus=module.resource_bounds.gpu_hint,
                     )
@@ -993,6 +997,7 @@ class BaseProvider:
         after: Optional[str] = None,
         before: Optional[str] = None,
         pages: int | None = None,
+        print_logs: bool = True,
     ) -> AsyncIterable[str]:
         """
         Retrieve the stdout and stderr of a module instance.
@@ -1032,7 +1037,10 @@ class BaseProvider:
             return_paged, PageVars(after=after, before=before), {}  # type: ignore
         ):
             for edge in page.edges:
-                yield edge.node.content
+                if print_logs:
+                    print(edge.node.content)
+                else:
+                    yield edge.node.content
                 i += 1
                 if pages is not None and i > pages:
                     return
