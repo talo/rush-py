@@ -200,11 +200,7 @@ class BaseProvider:
                 raise Exception("No ID provided")
             if self.provider is None:
                 raise Exception("No provider provided")
-            if self.typeinfo is None:
-                await self.get()
-
-            if not self.typeinfo:
-                await self.info()
+            await self.get()
 
             if self.typeinfo:
                 if self.typeinfo["k"] == "object" or (
@@ -493,6 +489,7 @@ class BaseProvider:
         :param id: The ID of the object.
         :return: The object.
         """
+        self.client.http_client.timeout = httpx.Timeout(60)
         return await self.client.object(id)
 
     async def download_object(self, id: ArgId, filename: str | None = None, filepath: Path | None = None):
