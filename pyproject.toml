@@ -1,15 +1,15 @@
 [tool.poetry]
-name = "tengu-py"
+name = "rush-py"
 version = "1.2.1"
-description = "Python SDK for interacting with the QDX Tengu API and modules"
+description = "Python SDK for interacting with the QDX Rush API and modules"
 authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"
-packages = [{include = "tengu"}]
-documentation = "https://talo.github.io/tengu-py"
+packages = [{include = "rush"}]
+documentation = "https://talo.github.io/rush-py"
 homepage = "https://rush.qdx.co"
 
 [tool.poetry.scripts]
-# tengu = "tengu.__main__:main"
+# rush = "rush.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
@@ -86,7 +86,7 @@ where = [""]
 [tool.ariadne-codegen]
 schema_path = "schema.graphql"
 queries_path = "combined.graphql"
-target_package_path = "./tengu"
+target_package_path = "./rush"
 plugins = ["ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"]
 
 [tool.ariadne-codegen.scalars.DateTime]

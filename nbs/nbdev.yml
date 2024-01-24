@@ -2,8 +2,8 @@ project:
   output-dir: _docs
 
 website:
-  title: "tengu-py"
-  site-url: "https://talo.github.io/tengu-py"
+  title: "rush-py"
+  site-url: "https://talo.github.io/rush-py"
   description: "Test"
   repo-branch: main
-  repo-url: "https://github.com/talo/tengu-py"
+  repo-url: "https://github.com/talo/rush-py"
