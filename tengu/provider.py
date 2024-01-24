@@ -594,7 +594,7 @@ class BaseProvider:
             if len(res) == 1:
                 return res[0]
 
-        # always request a bit of space because the a run will always create files
+        # always request a bit of space because the run will always create files
         storage_requirements = {"storage": 1024}
 
         # TODO: less insane version of this
