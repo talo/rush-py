@@ -4,7 +4,10 @@
 
 # Quickstart
 
-This document will walk through executing jobs on the Rush platform
+This document will walk through executing jobs on the Rush platform. For
+a comprehensive guide on the concepts and constructing a full workflow,
+see the [full rush-py
+explainer](./Tutorials/full-rush-py-explainer.ipynb) document
 
 First, install the following modules via pip - we require Python \> 3.10
 
@@ -186,16 +189,11 @@ you will recieve a url that you can download, otherwise you will recieve
 them as python types
 
 ``` python
-await prepared_protein_pdb.get()
+protein_qdxf_value = await prepared_protein_qdxf.get()
+len(protein_qdxf_value[0]["topology"]["symbols"])
 ```
 
-    2024-01-24 17:52:21,863 - rush - INFO - Argument f7f29282-abcd-41dc-b7cd-c19ba9fdc65b is now ModuleInstanceStatus.RESOLVING
-    2024-01-24 17:52:27,372 - rush - INFO - Argument f7f29282-abcd-41dc-b7cd-c19ba9fdc65b is now ModuleInstanceStatus.ADMITTED
-    2024-01-24 17:52:42,814 - rush - INFO - Argument f7f29282-abcd-41dc-b7cd-c19ba9fdc65b is now ModuleInstanceStatus.DISPATCHED
-    2024-01-24 17:52:49,472 - rush - INFO - Argument f7f29282-abcd-41dc-b7cd-c19ba9fdc65b is now ModuleInstanceStatus.RUNNING
-    2024-01-24 17:53:24,438 - rush - INFO - Argument f7f29282-abcd-41dc-b7cd-c19ba9fdc65b is now ModuleInstanceStatus.AWAITING_UPLOAD
-
-    {'url': 'https://storage.googleapis.com/qdx-store/acc65a4f-6a15-4b0c-8c8d-18f33217eedd?x-goog-signature=241df7158c4253a4f684998e63f46fa8f23c4ee863640f0f489c5d52f515ecd50f3b42c8d3860750ffc8be6dbc8a9f4b9b64903c9d07ed44dcf538b5bf0d3a9f09530a7140b35df5d1bf74134402839a380d51e4115a270c63e4060b2d7b32ff9e564bc8c819b39fdcde602aa44f32ea9988bb291d5a6ba32c91581bddc730fa97387b2e0c05cc7ab46136321a6caa1d9872ced7c80e2847e95cab2bd3a8a67b775b673d2a99bb2338bf25ccfc4836589accadcf121b28f93e682cfeb0c9bfbd280dc0e44612070e5a46f8bbc2b3b26f39c2dff0c120d4b50e338742a669295f29fe3233697e8faf93a91db6392382365ad9f41f1432201e41d540c9db10521a&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20240124%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20240124T095355Z&x-goog-expires=3600&x-goog-signedheaders=host'}
+    4852
 
 ## 1.5) Downloads
 
