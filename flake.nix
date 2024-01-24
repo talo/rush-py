@@ -1,5 +1,5 @@
 {
-  description = "Tengu Python SDK";
+  description = "Rush Python SDK";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";

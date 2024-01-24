@@ -111,7 +111,7 @@ class EmptyPage(Generic[T1, TPage], Page[T1, TPage]):
     edges = []
 
 
-class TenguModuleRunner(Protocol[TCo]):
+class RushModuleRunner(Protocol[TCo]):
     async def __call__(
         self,
         *args: Any,
@@ -129,7 +129,7 @@ def get_name_from_path(path: str):
 
 class BaseProvider:
     """
-    A class representing a provider for the Tengu quantum chemistry workflow platform.
+    A class representing a provider for the Rush quantum chemistry workflow platform.
     """
 
     class Arg(Generic[T]):
@@ -276,13 +276,13 @@ class BaseProvider:
         logger: logging.Logger | None = None,
     ):
         """
-        Initialize the TenguProvider a graphql client.
+        Initialize the RushProvider a graphql client.
         """
         self.history = None
         self.client = client
         self.module_paths: dict[str, str] = {}
         if not logger:
-            self.logger = logging.getLogger("tengu")
+            self.logger = logging.getLogger("rush")
             if len(self.logger.handlers) == 0:
                 stderr_handler = logging.StreamHandler()
                 stderr_handler.setLevel(logging.ERROR)
@@ -364,8 +364,8 @@ class BaseProvider:
         if workspace_history.exists():
             self.history = self._load_history(workspace_history)
 
-        if (self.workspace / "tengu.lock").exists():
-            self.load_module_paths(self.workspace / "tengu.lock")
+        if (self.workspace / "rush.lock").exists():
+            self.load_module_paths(self.workspace / "rush.lock")
 
     def save(self, history_file: str | Path | None = None):
         """
@@ -375,7 +375,7 @@ class BaseProvider:
             raise Exception("No workspace provided")
         if history_file is None:
             history_file = self.workspace / "history.json"
-        self.save_module_paths(self.module_paths, self.workspace / "tengu.lock")
+        self.save_module_paths(self.module_paths, self.workspace / "rush.lock")
         with open(history_file, "w") as f:
             json.dump(self.history, f, default=to_jsonable_python, indent=2)
 
@@ -832,7 +832,7 @@ class BaseProvider:
 
     async def get_module_functions(
         self, names: list[str] | None = None, lockfile: Path | None = None
-    ) -> dict[str, TenguModuleRunner[Any]]:
+    ) -> dict[str, RushModuleRunner[Any]]:
         """
         Get a dictionary of module functions.
 
@@ -841,7 +841,7 @@ class BaseProvider:
         :return: A dictionary of module functions.
         """
 
-        ret: dict[str, TenguModuleRunner[Any]] = {}
+        ret: dict[str, RushModuleRunner[Any]] = {}
         if lockfile is not None:
             module_paths = self.load_module_paths(lockfile)
             module_pages = self.get_modules_for_paths(list(module_paths.values()))
@@ -855,7 +855,7 @@ class BaseProvider:
                     paths = await self.get_latest_module_paths(names)
                     module_pages = self.get_modules_for_paths(list(paths.values()))
                     self.module_paths = paths
-                    self.save_module_paths(self.module_paths, self.workspace / "tengu.lock")
+                    self.save_module_paths(self.module_paths, self.workspace / "rush.lock")
             else:
                 # no workspace, so up the user to lock it
                 module_pages = await self.latest_modules(names=names)
@@ -1038,7 +1038,8 @@ class BaseProvider:
         ):
             for edge in page.edges:
                 if print_logs:
-                    print(edge.node.content)
+                    for line in edge.node.content:
+                        print(line)
                 else:
                     yield edge.node.content
                 i += 1
@@ -1094,7 +1095,7 @@ class Provider(BaseProvider):
         logger: logging.Logger | None = None,
     ):
         """
-        Initialize the TenguProvider with a graphql client.
+        Initialize the RushProvider with a graphql client.
 
         :param access_token: The access token to use.
         :param url: The url to use.
@@ -1106,12 +1107,12 @@ class Provider(BaseProvider):
             import os
 
             if access_token is None:
-                access_token = os.environ.get("TENGU_TOKEN")
+                access_token = os.environ.get("RUSH_TOKEN")
                 if access_token is None:
                     raise Exception("No access token provided")
 
             if url is None:
-                url = os.environ.get("TENGU_URL")
+                url = os.environ.get("RUSH_URL")
                 if url is None:
                     raise Exception("No url provided")
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
@@ -1130,13 +1131,13 @@ async def build_provider_with_functions(
     logger: logging.Logger | None = None,
 ) -> Provider:
     """
-    Build a TenguProvider with the given access token and url.
+    Build a RushProvider with the given access token and url.
 
     :param access_token: The access token to use.
     :param url: The url to use.
     :param workspace: The workspace directory to use.
     :param batch_tags: The tags that will be placed on all runs by default.
-    :return: The built TenguProvider.
+    :return: The built RushProvider.
     """
     provider = Provider(access_token, url, workspace, batch_tags, logger)
 

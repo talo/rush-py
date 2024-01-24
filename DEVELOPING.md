@@ -21,23 +21,23 @@ Add development dependencies to the dev group
 
 ## Updating Graphql queries/mutations
 
-We auto-generate client functions from the Tengu graphql schema.
+We auto-generate client functions from the Rush graphql schema.
 
 Step 1. download the latest SDL from the playground #TODO: set up some form of schema-fetching endpoint
 Step 2. replace `schema.graphql` in the root of this repo with the new version
-Step 3. Copy the queries from tengu-client into `combined.graphql` - we try to keep `tengu-client` in sync with
-        tengu-py to reduce feature divergence and unify the interaction approaches. 
+Step 3. Copy the queries from rush-client into `combined.graphql` - we try to keep `tengu-client` in sync with
+        rush-py to reduce feature divergence and unify the interaction approaches. 
         I use `cat ../tengu/tengu-client/queries/* > combined.graphql` to combine everything into one file
         that ariadne-codegen understands
 Step 4. Run `ariadne-codegen` in an environment with it installed to update the deps
-Step 5. Update the `tengu/provider.py` to address any incompatibilities / add helpers for new features
+Step 5. Update the `rush/provider.py` to address any incompatibilities / add helpers for new features
 
 
 ## Publishing
 
 Step 1. Update all of the notebooks in nb/* to reflect changes
-Step 2. Run pdoc to document the api `pdoc ./tengu/doc.py -o ./nbs/api`
-Step 3. Fix pathing incompatabilities with `quarto` - `mv ./nbs/api/tengu/* ./nbs/api/ && mv ./nbs/api/doc.html ./nbs/api/index.html `
+Step 2. Run pdoc to document the api `pdoc ./rush/doc.py -o ./nbs/api`
+Step 3. Fix pathing incompatabilities with `quarto` - `mv ./nbs/api/rush/* ./nbs/api/ && mv ./nbs/api/doc.html ./nbs/api/index.html `
 Step 4. Run the following `nbdev` commands for generating final documentation (if notebooks have changed)
 ```
 nbdev_docs
