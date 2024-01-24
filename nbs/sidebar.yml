@@ -2,13 +2,14 @@ website:
   sidebar:
     contents:
       - index.ipynb
+      - section: Tutorials
+        contents:
+          - Tutorials/batch_run-protein-prep.ipynb
+          - Tutorials/convert.ipynb
+          - Tutorials/hermes_hartree_fock_energy_calculation.ipynb
+          - Tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
+          - Tutorials/protein-ligand-interactions.ipynb
       - section: api
         contents:
           - api/api.html
         href: api/index.html
-      - section: tutorials
-        contents:
-          - tutorials/batch_run.ipynb
-          - tutorials/convert.ipynb
-          - tutorials/hermes.ipynb
-          - tutorials/rerun_everything.ipynb
