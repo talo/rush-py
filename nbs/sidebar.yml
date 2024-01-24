@@ -10,6 +10,5 @@ website:
           - Tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
           - Tutorials/protein-ligand-interactions.ipynb
       - section: api
-        contents:
-          - api/api.html
+        contents: []
         href: api/index.html
