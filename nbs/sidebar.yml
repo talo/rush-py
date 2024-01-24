@@ -6,6 +6,7 @@ website:
         contents:
           - Tutorials/batch_run-protein-prep.ipynb
           - Tutorials/convert.ipynb
+          - Tutorials/full-rush-py-explainer.ipynb
           - Tutorials/hermes_hartree_fock_energy_calculation.ipynb
           - Tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
           - Tutorials/protein-ligand-interactions.ipynb
