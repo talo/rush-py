@@ -33,49 +33,67 @@ import py3Dmol
 import rush
 ```
 
-## 0.1) Credentials
+**NOTE**: This walkthrough assumes that you are running code in a
+Jupyter notebook, which allows for top level `await` calls. If you are
+writing a normal Python script, you will need to wrap your code in
+something like the following:
 
 ``` python
-# Set our token - ensure you have exported RUSH_TOKEN in your shell; or just replace the os.getenv with your token
-TOKEN = os.getenv("RUSH_TOKEN")
-# You might have a custom deployment url, by default it will use https://tengu.qdx.ai
-URL = os.getenv("RUSH_URL") or "https://tengu.qdx.ai"
-# These env variables will be read by default, so you can skip this step in future
+import asyncio
+def main():
+    #your code here
+asyncio.run(main)
+```
+
+## 0.1) Credentials
+
+Retrieve your api token from the [Rush
+UI](https://rush.qdx.co/dashboard/settings).
+
+You can either set the RUSH_TOKEN and RUSH_URL environment variables, or
+provide them as variables to the client directly.
+
+To see how to set environment variables,
+[Wikipedia](https://en.wikipedia.org/wiki/Environment_variable) has an
+extensive article
+
+``` python
+RUSH_TOKEN = os.getenv("RUSH_TOKEN") or "YOUR_TOKEN_HERE"
+RUSH_URL = os.getenv("RUSH_URL") or "https://tengu.qdx.ai"
 ```
 
 ## 0.2) Configuration
 
 Lets set some global variables that define our project, these are not
 required, but are good practice to help organize the jobs that will be
-persisted under your account
+persisted under your account.
+
+Make sure you create a unique set of tags for each run. Good practice is
+to have at least each of the experiment name and system name as a tag.
 
 ``` python
-# Make sure you create a unique set of tags for each run.
-# Good practice is to have at least each of the experiment name and system name as a tag.
 EXPERIMENT = "tengu-py-v2-quickstart"
-SYSTEM = "cdk2"
+SYSTEM = "1B39"
 TAGS = ["qdx", EXPERIMENT, SYSTEM]
-# Set our inputs
-WORK_DIR = Path.home() / "qdx" / EXPERIMENT
-PROTEIN_PDB_PATH = WORK_DIR / "test_P.pdb"
-```
-
-Ensure your workdir exists
-
-``` python
-os.makedirs(WORK_DIR)
 ```
 
 ## 0.2) Build your client
 
-Get our client, for calling modules and using the Rush API
+Get our client, for calling modules and using the Rush API.
+
+As mentioned earlier access_token and url are optional, if you have set
+the env variables RUSH_TOKEN and RUSH_URL.
+
+`batch_tags` will be applied to each run that is spawned by this client.
+
+A folder called `.rush` will be created in your workspace directory
+(defaults to the current working directory, can be overridden by passing
+`workspace=` to the provider builder
 
 ``` python
-# Note, access_token and url are optional, if you have set the env variables RUSH_TOKEN and RUSH_URL
-# Workspace sets the location where we will store our session history file and module lock file
 # By using the `build_provider_with_functions` method, we will also build helper functions calling each module
 client = await rush.build_provider_with_functions(
-    access_token=TOKEN, url=URL, workspace=WORK_DIR, batch_tags=TAGS
+    access_token=RUSH_TOKEN, url=RUSH_URL, batch_tags=TAGS
 )
 ```
 
@@ -84,7 +102,9 @@ client = await rush.build_provider_with_functions(
 Fetch data files from RCSB to pass as input to the modules
 
 ``` python
-complex = list(pdb_fetch.fetch_structure("1B39"))
+PROTEIN_PDB_PATH = client.workspace / f"{SYSTEM}_P.pdb"
+
+complex = list(pdb_fetch.fetch_structure(SYSTEM))
 protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
 with open(PROTEIN_PDB_PATH, "w") as f:
     for l in protein:
@@ -125,8 +145,8 @@ in the [API Dodumentation](./api/index.html)
 
 ## 1.1) Prep the protein
 
-First we will run the protein preparation routine (using pdbfixer
-internally) to prepare the protein for molecular dynamics
+First we will run the protein preparation routine (using pdbfixer and
+pdb2pqr internally) to prepare the protein for molecular dynamics
 
 ``` python
 # we can check the arguments and outputs for prepare_protein with help()
@@ -135,7 +155,7 @@ help(client.prepare_protein)
 
     Help on function prepare_protein in module rush.provider:
 
-    async prepare_protein(*args: [<class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = <ModuleInstanceTarget.NIX_SSH_2: 'NIX_SSH_2'>, resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=1, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=138, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>, <class 'pathlib.Path'>]
+    async prepare_protein(*args: [<class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = <ModuleInstanceTarget.NIX_SSH_2_GPU: 'NIX_SSH_2_GPU'>, resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=1, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=138, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>, <class 'pathlib.Path'>]
         Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.
         
         Module version: github:talo/pdb2pqr/ff5abe87af13f31478ede490d37468a536621e9c#prepare_protein_tengu
@@ -166,19 +186,26 @@ print(f"{datetime.now().time()} | Running protein prep!")
 prepared_protein_qdxf  # this initially only have the id of your result, we will show how to fetch the actual value later
 ```
 
-    17:52:21.654575 | Running protein prep!
+    23:32:40.657673 | Running protein prep!
 
-    Arg(id=bd64bd44-118f-435b-be7a-64d25f76c5dc, value=None)
+    Arg(id=1c19095e-4bd0-4fa1-bd60-e52338e2d9c2, value=None)
 
 ## 1.3) Run statuses
 
-This will show the status of all of your runs
+This will show the status of all of your runs. You can also view run
+statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs)
 
 ``` python
 await client.status()
 ```
 
-    {'687a9367-9866-4999-9586-7480ba581b54': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+    {'6e643129-f6e9-47f4-9b6f-414bacc29944': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+      'prepare_protein',
+      1),
+     '0cae0860-f8c7-4afb-8fe2-144ab175a415': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'prepare_protein',
+      1),
+     '0c2b5aa5-36c2-4180-b242-c2ff622a14f4': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
       'prepare_protein',
       1)}
 
@@ -193,6 +220,12 @@ protein_qdxf_value = await prepared_protein_qdxf.get()
 len(protein_qdxf_value[0]["topology"]["symbols"])
 ```
 
+    2024-01-27 23:32:40,880 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.RESOLVING
+    2024-01-27 23:32:46,504 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.ADMITTED
+    2024-01-27 23:33:00,993 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.DISPATCHED
+    2024-01-27 23:33:06,618 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.RUNNING
+    2024-01-27 23:33:30,495 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.AWAITING_UPLOAD
+
     4852
 
 ## 1.5) Downloads
@@ -203,12 +236,7 @@ either provide a filename, which will be saved in
 which the client will use as-is
 
 ``` python
-try:
-    await prepared_protein_pdb.download(filename="01_prepared_protein.pdb")
-except FileExistsError:
-    # we will raise an error if you try to overwrite an existing file, you can force the file to overwrite
-    # by passing an absolute filepath instead
-    pass
+await prepared_protein_pdb.download(filename="01_prepared_protein.pdb", overwrite=True)
 ```
 
 ``` python
@@ -217,5 +245,5 @@ with open(client.workspace / "objects" / "01_prepared_protein.pdb", "r") as f:
     print(f.readline(), "...")
 ```
 
-    REMARK   1 PDBFIXER FROM: /home/ubuntu/.cache/tengu_store/run/687a9367-9866-4999-9586-7480ba581b54/.tmp/m2_protein.pdb
+    REMARK   1 PDBFIXER FROM: /home/ubuntu/.cache/tengu_store/run/6e643129-f6e9-47f4-9b6f-414bacc29944/.tmp/m2_protein.pdb
      ...

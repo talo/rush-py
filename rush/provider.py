@@ -201,6 +201,7 @@ class BaseProvider:
             self,
             filename: str | None = None,
             filepath: Path | None = None,
+            overwrite: bool = False,
         ):
             if self.id is None:
                 raise Exception("No ID provided")
@@ -213,7 +214,7 @@ class BaseProvider:
                     self.typeinfo["k"] == "object"
                     or (self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object")
                 ):
-                    await self.provider.download_object(self.id, filename, filepath)
+                    await self.provider.download_object(self.id, filename, filepath, overwrite)
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -515,7 +516,9 @@ class BaseProvider:
         self.client.http_client.timeout = httpx.Timeout(60)
         return await self.client.object(id)
 
-    async def download_object(self, id: ArgId, filename: str | None = None, filepath: Path | None = None):
+    async def download_object(
+        self, id: ArgId, filename: str | None = None, filepath: Path | None = None, overwrite: bool = False
+    ):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
 
@@ -535,11 +538,12 @@ class BaseProvider:
                     (self.workspace / "objects").mkdir()
                 filepath = self.workspace / "objects" / filename
 
-                # we only error on the implicit path, if the user provides filepath we will overwrite
-                if filepath.exists():
+                if filepath.exists() and not overwrite:
                     raise FileExistsError(f"File {filename} already exists in workspace")
 
         if filepath:
+            if filepath.exists() and not overwrite:
+                raise FileExistsError(f"File {filename} already exists in workspace")
             if "url" in obj:
                 with httpx.stream(method="get", url=obj["url"]) as r:
                     r.raise_for_status()
@@ -890,6 +894,7 @@ class BaseProvider:
 
                 default_target = None
                 if module.targets:
+                    # select a random target to be the default, until we have our own cluster set up
                     random.shuffle(module.targets)
                     default_target = module.targets[0]
 
