@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# # tengu-py
-#
-# > Python SDK for the QDX Quantum Chemistry workflow management system
 
 import asyncio
 from datetime import datetime
@@ -13,18 +8,18 @@ from pdbtools import pdb_fetch, pdb_delhetatm
 
 import rush
 
-from .common import setup_workspace, check_status_and_report_failures
+from .common import setup_workspace, check_status_and_report_failures, get_resources
 
+# Define our project information
 EXPERIMENT = "experiment-e2e-charge"
 RCSB_ID = "3h7w"
 TAGS = [EXPERIMENT, RCSB_ID]
-WORKSPACE_DIR = Path.home() / "scratch" / "tengu" / EXPERIMENT
+WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
 SMALL_JOB_RESOURCES = rush.Resources(storage=100, storage_units="MB")
 
 # Set our inputs
 SYSTEM_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_C.pdb"
 PROTEIN_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_P.pdb"
-LIGAND_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_L.pdb"
 
 
 async def main(clean_workspace=False):
@@ -50,55 +45,46 @@ async def main(clean_workspace=False):
 
     # ## 1.1) Input Preparation
 
+    prep_target = "NIX_SSH_2"
+
     # ### 1.1.1) Prep the protein
 
     (_prepared_protein_qdxf, prepared_protein_pdb) = await client.prepare_protein(
-        PROTEIN_PDB_PATH,
-        target="NIX_SSH_3",
-        resources={"gpus": 1, "storage": 10, "storage_units": "GB", "cpus": 48, "walltime": 60},
-        restore=False,
+        PROTEIN_PDB_PATH, target=prep_target, resources=SMALL_JOB_RESOURCES, restore=False
     )
     print(f"{datetime.now().time()} | Running protein prep!")
     await check_status_and_report_failures(client)
     await prepared_protein_pdb.download(filename=f"01_{RCSB_ID}_prepared_protein_allchains.pdb")
     print(f"{datetime.now().time()} | Downloaded prepped protein! {prepared_protein_pdb}")
 
-    ## 1.2) Run GROMACS (module: gmx_tengu / gmx_tengu_pdb)
+    ## 1.2) Run GROMACS (module: gmx_tengu)
 
+    gmx_target = "GADI"
+    gmx_resources = get_resources(gmx_target, 4)
     gmx_config = {
         "params_overrides": {
             "md": {
-                "nsteps": 50000,
+                "nsteps": 5000,
                 "nstenergy": 5000,
                 "nstlog": 5000,
                 "nstxout-compressed": 5000,
             },
-            "em": {"nsteps": 50000},
-            "nvt": {"nsteps": 50000},
-            "npt": {"nsteps": 50000},
+            "em": {"nsteps": 10000},
+            "nvt": {"nsteps": 5000},
+            "npt": {"nsteps": 5000},
         },
-        "num_gpus": 4,
+        "num_gpus": gmx_resources["gpus"],
         "num_replicas": 1,
-        "frame_sel": {"start_frame": 40000, "end_frame": 50000, "interval": 1000},
+        "frame_sel": {"start_time_ps": 0, "end_time_ps": 10, "delta_time_ps": 1},
         "ligand_charge": None,
-        "save_wets": False,
     }
-    (
-        gros,
-        tprs,
-        tops,
-        logs,
-        dry_xtc,
-        dry_frames,
-        index,
-        _wet_xtc,
-    ) = await client.gmx(
+    (gros, tprs, tops, logs, index, dry_xtc, dry_frames, _wet_xtc) = await client.gmx(
         None,
         prepared_protein_pdb,
         None,
         gmx_config,
-        target="GADI",
-        resources={"gpus": 4, "storage": 10, "storage_units": "GB", "cpus": 48, "walltime": 60 * 6},
+        target=gmx_target,
+        resources=gmx_resources,
         restore=False,
     )
     print(f"{datetime.now().time()} | Running GROMACS simulation!")
