@@ -28,3 +28,24 @@ async def check_status_and_report_failures(client):
                 pass
 
 
+def get_resources(machine_name, gpus):
+    machine_data = {}
+    machine_data["target"] = machine_name
+    if machine_name == "GADI":
+        if gpus != 4:
+            print("WARNING: Gadi runs should use 4 GPUs; setting gpus to 4")
+        # Gadi needs CPUs and walltime
+        machine_data["resources"] = {
+            "gpus": 4,
+            "storage": 10,
+            "storage_units": "GB",
+            "cpus": 48,
+            "walltime": 60,
+        }
+    elif machine_name.startswith("NIX_SSH"):
+        # All the Nix machines care about
+        machine_data["resources"] = {
+            "gpus": gpus,
+            "storage": 10,
+            "storage_units": "GB",
+        }

@@ -12,8 +12,7 @@ from pathlib import Path
 
 import rush
 
-from .common import setup_workspace, check_status_and_report_failures
-
+from .common import setup_workspace, check_status_and_report_failures, get_resources
 
 EXPERIMENT = "experiment-e2e-charge"
 RCSB_ID = "3h7w"
@@ -21,25 +20,6 @@ TAGS = [EXPERIMENT, RCSB_ID]
 WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
 SMALL_JOB_RESOURCES = rush.Resources(storage=100, storage_units="MB")
 MACHINE_NAME = "NIX_SSH_2"
-
-machine_data = {}
-machine_data["target"] = MACHINE_NAME
-if MACHINE_NAME == "GADI":
-    # Gadi needs CPUs and walltime
-    machine_data["resources"] = {
-        "gpus": 4,
-        "storage": 10,
-        "storage_units": "GB",
-        "cpus": 48,
-        "walltime": 60,
-    }
-elif MACHINE_NAME == "NIX_SSH_2" or MACHINE_NAME == "NIX_SSH_3":
-    # All the Nix machines care about
-    machine_data["resources"] = {
-        "gpus": 0,
-        "storage": 10,
-        "storage_units": "GB",
-    }
 
 # Set our inputs
 PREPARED_PROTEIN_PDB_PATH = WORKSPACE_DIR / f"01_{RCSB_ID}_prepared_P.pdb"
@@ -84,6 +64,7 @@ async def main(clean_workspace=False):
 
     ## 1.2) Run GROMACS (module: gmx_tengu / gmx_tengu_pdb)
 
+    resources = get_resources(MACHINE_NAME, 1)
     gmx_config = {
         "params_overrides": {
             "md": {
@@ -96,7 +77,7 @@ async def main(clean_workspace=False):
             "nvt": {"nsteps": 5000},
             "npt": {"nsteps": 5000},
         },
-        "num_gpus": machine_data["resources"]["gpus"],
+        "num_gpus": resources["gpus"],
         "num_replicas": 1,
         "frame_sel": {"start_frame": 0, "end_frame": 10, "interval": 1},
         "ligand_charge": None,
@@ -116,8 +97,8 @@ async def main(clean_workspace=False):
         PREPARED_PROTEIN_PDB_PATH,
         PREPARED_LIGAND_PDB_PATH,
         gmx_config,
-        target=machine_data["target"],
-        resources=machine_data["resources"],
+        target=MACHINE_NAME,
+        resources=resources,
         restore=False,
     )
     print(f"{datetime.now().time()} | Running GROMACS simulation!")

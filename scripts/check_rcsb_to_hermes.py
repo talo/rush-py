@@ -23,25 +23,6 @@ WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
 SMALL_JOB_RESOURCES = rush.Resources(storage=100, storage_units="MB")
 MACHINE_NAME = "NIX_SSH_2"
 
-machine_data = {}
-machine_data["target"] = MACHINE_NAME
-if MACHINE_NAME == "GADI":
-    # Gadi needs CPUs and walltime
-    machine_data["resources"] = {
-        "gpus": 4,
-        "storage": 10,
-        "storage_units": "GB",
-        "cpus": 48,
-        "walltime": 60,
-    }
-elif MACHINE_NAME == "NIX_SSH_2" or MACHINE_NAME == "NIX_SSH_3":
-    # All the Nix machines care about
-    machine_data["resources"] = {
-        "gpus": 0,
-        "storage": 10,
-        "storage_units": "GB",
-    }
-
 # Set our inputs
 PROTEIN_PDB_PATH = WORKSPACE_DIR / "test_P.pdb"
 
