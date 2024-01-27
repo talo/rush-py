@@ -2,9 +2,11 @@ import asyncio
 import base64
 import json
 import math
+import os
 import time
 import logging
 import sys
+import random
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
@@ -39,7 +41,7 @@ from .graphql_client.module_instances import (
 from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
-from .typedef import build_typechecker, type_from_typedef
+from .typedef import build_typechecker, type_from_typedef, SCALARS
 
 ArgId = UUID
 ModuleInstanceId = UUID
@@ -139,7 +141,7 @@ class BaseProvider:
             id: UUID | None = None,
             source: UUID | None = None,
             value: T | None = None,
-            typeinfo: dict[str, Any] | None = None,
+            typeinfo: dict[str, Any] | SCALARS | None = None,
         ):
             self.provider = provider
             self.id = id
@@ -199,6 +201,7 @@ class BaseProvider:
             self,
             filename: str | None = None,
             filepath: Path | None = None,
+            overwrite: bool = False,
         ):
             if self.id is None:
                 raise Exception("No ID provided")
@@ -207,10 +210,11 @@ class BaseProvider:
             await self.get()
 
             if self.typeinfo:
-                if self.typeinfo["k"] == "object" or (
-                    self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object"
+                if isinstance(self.typeinfo, dict) and (
+                    self.typeinfo["k"] == "object"
+                    or (self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object")
                 ):
-                    await self.provider.download_object(self.id, filename, filepath)
+                    await self.provider.download_object(self.id, filename, filepath, overwrite)
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -304,13 +308,22 @@ class BaseProvider:
                 self.logger.addHandler(stderr_handler)
         else:
             self.logger = logger
+
         if workspace:
             self.workspace = Path(workspace)
             if not self.workspace.exists():
                 raise Exception("Workspace directory does not exist")
+            if (self.workspace / "rush.lock").exists():
+                self.config_dir = self.workspace
+            else:
+                self.config_dir = self.workspace / ".rush"
+                if not self.config_dir.exists():
+                    self.config_dir.mkdir()
+
             self.restore(workspace)
         else:
             self.workspace = None
+            self.config_dir = None
 
         if not self.history:
             self.history = History(tags=batch_tags or [], instances=[])
@@ -358,24 +371,31 @@ class BaseProvider:
         Restore the workspace.
         """
         self.workspace = Path(workspace)
+
+        if (self.workspace / "rush.lock").exists():
+            self.config_dir = self.workspace
+        else:
+            self.config_dir = self.workspace / ".rush"
+            if not self.config_dir.exists():
+                self.config_dir.mkdir()
         # read the workspace history file
         # if it exists, load the history
-        workspace_history = self.workspace / "history.json"
+        workspace_history = self.config_dir / "history.json"
         if workspace_history.exists():
             self.history = self._load_history(workspace_history)
 
-        if (self.workspace / "rush.lock").exists():
-            self.load_module_paths(self.workspace / "rush.lock")
+        if (self.config_dir / "rush.lock").exists():
+            self.load_module_paths(self.config_dir / "rush.lock")
 
     def save(self, history_file: str | Path | None = None):
         """
         Save the workspace.
         """
-        if self.workspace is None:
+        if self.config_dir is None:
             raise Exception("No workspace provided")
         if history_file is None:
-            history_file = self.workspace / "history.json"
-        self.save_module_paths(self.module_paths, self.workspace / "rush.lock")
+            history_file = self.config_dir / "history.json"
+        self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
         with open(history_file, "w") as f:
             json.dump(self.history, f, default=to_jsonable_python, indent=2)
 
@@ -496,7 +516,9 @@ class BaseProvider:
         self.client.http_client.timeout = httpx.Timeout(60)
         return await self.client.object(id)
 
-    async def download_object(self, id: ArgId, filename: str | None = None, filepath: Path | None = None):
+    async def download_object(
+        self, id: ArgId, filename: str | None = None, filepath: Path | None = None, overwrite: bool = False
+    ):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
 
@@ -516,11 +538,12 @@ class BaseProvider:
                     (self.workspace / "objects").mkdir()
                 filepath = self.workspace / "objects" / filename
 
-                # we only error on the implicit path, if the user provides filepath we will overwrite
-                if filepath.exists():
+                if filepath.exists() and not overwrite:
                     raise FileExistsError(f"File {filename} already exists in workspace")
 
         if filepath:
+            if filepath.exists() and not overwrite:
+                raise FileExistsError(f"File {filename} already exists in workspace")
             if "url" in obj:
                 with httpx.stream(method="get", url=obj["url"]) as r:
                     r.raise_for_status()
@@ -846,7 +869,7 @@ class BaseProvider:
             module_paths = self.load_module_paths(lockfile)
             module_pages = self.get_modules_for_paths(list(module_paths.values()))
         else:
-            if self.workspace:
+            if self.config_dir:
                 if self.module_paths.items():
                     # we have already loaded a lock via the workspace
                     module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
@@ -855,7 +878,7 @@ class BaseProvider:
                     paths = await self.get_latest_module_paths(names)
                     module_pages = self.get_modules_for_paths(list(paths.values()))
                     self.module_paths = paths
-                    self.save_module_paths(self.module_paths, self.workspace / "rush.lock")
+                    self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
             else:
                 # no workspace, so up the user to lock it
                 module_pages = await self.latest_modules(names=names)
@@ -871,6 +894,8 @@ class BaseProvider:
 
                 default_target = None
                 if module.targets:
+                    # select a random target to be the default, until we have our own cluster set up
+                    random.shuffle(module.targets)
                     default_target = module.targets[0]
 
                 default_resources = None
@@ -1090,7 +1115,7 @@ class Provider(BaseProvider):
         self,
         access_token: str | None = None,
         url: str | None = None,
-        workspace: str | Path | None = None,
+        workspace: str | Path | None = os.getcwd(),
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
     ):
@@ -1123,9 +1148,9 @@ class Provider(BaseProvider):
 
 
 async def build_provider_with_functions(
+    workspace: str | Path | None = os.getcwd(),
     access_token: str | None = None,
     url: str | None = None,
-    workspace: str | Path | None = None,
     batch_tags: list[str] | None = None,
     module_names: list[str] | None = None,
     logger: logging.Logger | None = None,
