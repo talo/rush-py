@@ -1,49 +1,38 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # tengu-py
+# # rush-py
 #
 # > Python SDK for the QDX Quantum Chemistry workflow management system
 
 import asyncio
 import json
-import os
 import tarfile
 from datetime import datetime
 from pathlib import Path
 
 from pdbtools import pdb_fetch, pdb_delhetatm, pdb_selchain, pdb_rplresname, pdb_keepcoord, pdb_selresname
 
-import tengu
+import rush
 import qdx_py
 
+from .common import setup_workspace
 
 # ## 0.2) Configuration
 # Lets set some global variables that define our project
 
 # Define our project information
-DESCRIPTION = "tengu-py demo notebook"
-TAGS = ["checker-testing"]
-WORK_DIR = Path.home() / "scratch" / "tengu" / "checker_full"
+EXPERIMENT = "debug-gmx-hermes-bridge"
+SYSTEM = "quek_frame00"
+TAGS = [EXPERIMENT, SYSTEM]
+WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
+SMALL_JOB_RESOURCES = rush.Resources(storage=100, storage_units="MB")
+
 # Set our inputs
-SYSTEM_PDB_PATH = WORK_DIR / "test_C.pdb"
-PROTEIN_PDB_PATH = WORK_DIR / "test_P.pdb"
-LIGAND_PDB_PATH = WORK_DIR / "test_L.pdb"
-LIGAND_SMI_PATH = WORK_DIR / "test_L.smi"
-
-
-async def check_status_and_report_failures(client):
-    """
-    This will show the status of all of your runs
-    """
-    await client.status()
-    for instance_id, (status, name, count) in (await client.status()).items():
-        print(f"{count}. {name}: {status}")
-        if status.value == "FAILED":
-            async for log_page in client.logs(instance_id, "stderr"):
-                for log in log_page:
-                    print(log)
-        print()
+SYSTEM_PDB_PATH = WORKSPACE_DIR / "test_C.pdb"
+PROTEIN_PDB_PATH = WORKSPACE_DIR / "test_P.pdb"
+LIGAND_PDB_PATH = WORKSPACE_DIR / "test_L.pdb"
+LIGAND_SMI_PATH = WORKSPACE_DIR / "test_L.smi"
 
 
 def fix_gmx_output(client):
@@ -72,46 +61,11 @@ def split_complex(complex):
     return (protein, ligand)
 
 
-async def get_hermes_ready_conformer(client, rcsb_id):
-    """
-    Asynchronously start a protein preparation job
-    """
-    # ## Input selection
-
-    # # fetch datafiles
-    # complex = list(pdb_fetch.fetch_structure(rcsb_id))
-    # print(complex[0:10])
-    # protein = pdb_delhetatm.remove_hetatm(complex)
-    # # write our files to the locations defined in the config block
-    # with open(PROTEIN_PDB_PATH, "w") as f:
-    #     for substructure in protein:
-    #         f.write(str(substructure))
-
-    # ## Prepare protein
-
-    (prepared_protein_qdxf, _) = await client.prepare_protein(
-        PROTEIN_PDB_PATH, target="NIX_SSH_3", restore=False
-    )
-
-    return prepared_protein_qdxf
-
-
-async def main():
-    """
-    Main function
-    """
-    # Ensure your workdir exists
-    # if WORK_DIR.exists():
-    #     client = tengu.Provider(workspace=WORK_DIR)
-    #     await client.nuke()
-    if not WORK_DIR.exists():
-        os.makedirs(WORK_DIR)
-
+async def main(clean_workspace=False):
     # ## Build your client
-    client = await tengu.build_provider_with_functions(
-        url=os.getenv("TENGU_URL"),
-        access_token=os.getenv("TENGU_TOKEN"),
-        workspace=WORK_DIR,
+    await setup_workspace(WORKSPACE_DIR, clean_workspace)
+    client = await rush.build_provider_with_functions(
+        workspace=WORKSPACE_DIR,
         batch_tags=TAGS,
     )
 
@@ -224,14 +178,14 @@ async def main():
 
     # Split the complex; otherwise, fragment_aa will put each ligand atom into seperate fragments
     (protein, ligand) = split_complex((await prepared_gmx_protein_qdxf.get())[0])
-    json.dump(protein, open(WORK_DIR / "objects" / "prepared_gmx_protein.qdxf.json", "w"))
-    json.dump(ligand, open(WORK_DIR / "objects" / "prepared_gmx_ligand.qdxf.json", "w"))
+    json.dump(protein, open(WORKSPACE_DIR / "objects" / "prepared_gmx_protein.qdxf.json", "w"))
+    json.dump(ligand, open(WORKSPACE_DIR / "objects" / "prepared_gmx_ligand.qdxf.json", "w"))
     (fragmented,) = await client.fragment_aa(
-        WORK_DIR / "objects" / "prepared_gmx_protein.qdxf.json", 1, "All", resources={"storage": 1000000}
+        WORKSPACE_DIR / "objects" / "prepared_gmx_protein.qdxf.json", 1, "All", resources={"storage": 1000000}
     )
     hermes_result = await client.hermes_lattice(
         fragmented,
-        WORK_DIR / "objects" / "prepared_gmx_ligand.qdxf.json",
+        WORKSPACE_DIR / "objects" / "prepared_gmx_ligand.qdxf.json",
         None,
         None,
         target="NIX_SSH_3",
