@@ -4,6 +4,7 @@ website:
       - index.ipynb
       - section: Tutorials
         contents:
+          - Tutorials/auto3d_conformer_tautomer_generation.ipynb
           - Tutorials/batch_run-protein-prep.ipynb
           - Tutorials/convert.ipynb
           - Tutorials/full-rush-py-explainer.ipynb
