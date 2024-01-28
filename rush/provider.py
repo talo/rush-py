@@ -32,9 +32,7 @@ from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, Pa
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
-from .graphql_client.module_instance_full import (
-    ModuleInstanceFullModuleInstance,
-)
+from .graphql_client.module_instance_full import ModuleInstanceFullModuleInstance
 from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesEdgesNode,
     ModuleInstancesMeAccountModuleInstancesPageInfo,
@@ -42,7 +40,7 @@ from .graphql_client.module_instances import (
 from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
-from .typedef import build_typechecker, type_from_typedef, SCALARS
+from .typedef import SCALARS, build_typechecker, type_from_typedef
 
 ArgId = UUID
 ModuleInstanceId = UUID
@@ -95,7 +93,8 @@ class Paged(
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any,
-    ) -> Page[T1, TPage]: ...
+    ) -> Page[T1, TPage]:
+        ...
 
 
 @dataclass
@@ -121,7 +120,8 @@ class RushModuleRunner(Protocol[TCo]):
         resources: ModuleInstanceResourcesInput | None = None,
         tags: list[str] | None = None,
         restore: bool | None = None,
-    ) -> TCo: ...
+    ) -> TCo:
+        ...
 
 
 def get_name_from_path(path: str):
@@ -300,10 +300,12 @@ class BaseProvider:
                             if remote_arg.source:
                                 # get the failure reason by checking the source module instance
                                 module_instance = await self.provider.module_instance(remote_arg.source)
-                                raise Exception((
-                                    module_instance.failure_reason,
-                                    module_instance.failure_context,
-                                ))
+                                raise Exception(
+                                    (
+                                        module_instance.failure_reason,
+                                        module_instance.failure_context,
+                                    )
+                                )
                             raise Exception("Argument was rejected")
                         else:
                             self.value = remote_arg.value
@@ -1114,8 +1116,10 @@ class BaseProvider:
             return res.stderr if kind == "stderr" else res.stdout  # type: ignore
 
         i = 0
-        async for page in self._query_with_pagination(
-            return_paged, PageVars(after=after, before=before), {}  # type: ignore
+        async for page in self._query_with_pagination(  # type: ignore
+            return_paged,
+            PageVars(after=after, before=before),
+            {},
         ):
             for edge in page.edges:
                 if print_logs:
