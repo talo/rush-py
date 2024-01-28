@@ -141,7 +141,7 @@ help(client.convert)
 # 1) Running Rush Modules
 
 You can view which modules are available, alongside their documentation,
-in the [API Dodumentation](./api/index.html)
+in the [API Dodumentation](https://talo.github.io/rush-py/api/)
 
 ## 1.1) Prep the protein
 
