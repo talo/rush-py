@@ -8,10 +8,10 @@ from pdbtools import pdb_fetch, pdb_delhetatm
 
 import rush
 
-from .common import setup_workspace, check_status_and_report_failures, get_resources
+from .common import setup_workspace, check_status_and_report_failures, get_resources, extract_gmx_dry_frames
 
 # Define our project information
-EXPERIMENT = "experiment-e2e-charge"
+EXPERIMENT = "experiment-e2e"
 RCSB_ID = "3h7w"
 TAGS = [EXPERIMENT, RCSB_ID]
 WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
@@ -50,53 +50,110 @@ async def main(clean_workspace=False):
     # ### 1.1.1) Prep the protein
 
     (_prepared_protein_qdxf, prepared_protein_pdb) = await client.prepare_protein(
-        PROTEIN_PDB_PATH, target=prep_target, resources=SMALL_JOB_RESOURCES, restore=False
+        PROTEIN_PDB_PATH, target=prep_target, resources=SMALL_JOB_RESOURCES, restore=True
     )
     print(f"{datetime.now().time()} | Running protein prep!")
     await check_status_and_report_failures(client)
-    await prepared_protein_pdb.download(filename=f"01_{RCSB_ID}_prepared_protein_allchains.pdb")
+    await prepared_protein_pdb.download(filename=f"01_{RCSB_ID}_prepared_protein.pdb")
     print(f"{datetime.now().time()} | Downloaded prepped protein! {prepared_protein_pdb}")
 
     ## 1.2) Run GROMACS (module: gmx_tengu)
 
-    gmx_target = "GADI"
-    gmx_resources = get_resources(gmx_target, 4)
+    gmx_target = "NIX_SSH_2"
+    gmx_resources = get_resources(gmx_target, 1)
     gmx_config = {
         "params_overrides": {
-            "md": {
-                "nsteps": 5000,
-                "nstenergy": 5000,
-                "nstlog": 5000,
-                "nstxout-compressed": 5000,
-            },
             "em": {"nsteps": 10000},
-            "nvt": {"nsteps": 5000},
-            "npt": {"nsteps": 5000},
+            "nvt": {"nsteps": 1000},
+            "npt": {"nsteps": 1000},
+            "md": {"nsteps": 1000},
         },
         "num_gpus": gmx_resources["gpus"],
         "num_replicas": 1,
         "frame_sel": {"start_time_ps": 0, "end_time_ps": 10, "delta_time_ps": 1},
         "ligand_charge": None,
     }
-    (gros, tprs, tops, logs, index, dry_xtc, dry_frames, _wet_xtc) = await client.gmx(
+    (_gros, _tprs, _tops, _logs, _index, _dry_xtc, gmx_dry_frames, _wet_xtc) = await client.gmx(
         None,
         prepared_protein_pdb,
         None,
         gmx_config,
         target=gmx_target,
         resources=gmx_resources,
-        restore=False,
+        restore=True,
     )
     print(f"{datetime.now().time()} | Running GROMACS simulation!")
     await check_status_and_report_failures(client)
-    await gros.download(filename=f"02_{RCSB_ID}_gmx_gros.tar.gz")
-    await tprs.download(filename=f"02_{RCSB_ID}_gmx_tprs.tar.gz")
-    await tops.download(filename=f"02_{RCSB_ID}_gmx_tops.tar.gz")
-    await logs.download(filename=f"02_{RCSB_ID}_gmx_logs.tar.gz")
-    await dry_xtc.download(filename=f"02_{RCSB_ID}_gmx_dry_xtc.tar.gz")
-    await dry_frames.download(filename=f"02_{RCSB_ID}_gmx_dry_frames.tar.gz")
-    await index.download(filename=f"02_{RCSB_ID}_gmx_index.tar.gz")
-    print(f"{datetime.now().time()} | Downloaded GROMACS output! {dry_frames}")
+    await gmx_dry_frames.download(filename=f"02_{RCSB_ID}_gmx_dry_frames.tar.gz")
+    print(f"{datetime.now().time()} | Downloaded GROMACS output! {gmx_dry_frames}")
+
+    extract_gmx_dry_frames(client, WORKSPACE_DIR / f"02_{RCSB_ID}_gmx_dry_frames.tar.gz", RCSB_ID)
+
+    # ## 1.3) Run HERMES (module: hermes_energy)
+
+    (converted_protein,) = await client.convert(
+        "PDB",
+        WORKSPACE_DIR / f"02_{RCSB_ID}_gmx_frame0.pdb",
+        target="NIX_SSH_2",
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+    print(f"{datetime.now().time()} | Running protein conversion!")
+
+    (picked_protein,) = await client.pick_conformer(
+        converted_protein,
+        0,
+        target="NIX_SSH_2",
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+    print(f"{datetime.now().time()} | Picking protein!")
+
+    (fragmented_protein,) = await client.fragment_aa(
+        picked_protein,
+        1,
+        "All",
+        target="NIX_SSH_2",
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+    print(f"{datetime.now().time()} | Running protein fragmentation!")
+
+    hermes_target = "NIX_SSH_2"
+    hermes_resources = get_resources(hermes_target, 1)
+    (hermes_energy, _hermes_gradient) = await client.hermes_energy(
+        fragmented_protein,
+        {
+            "basis": "cc-pVDZ",
+            "aux_basis": "cc-pVDZ-RIFIT",
+            "method": "RHF",
+        },
+        {
+            "debug": {},
+            "export": {},
+            "frag": {
+                "method": "MBE",
+                "fragmentation_level": 1,
+                "fragmented_energy_type": "TotalEnergy",
+                "ngpus_per_node": 4,
+            },
+            "guess": {},
+            "scf": {
+                "convergence_metric": "diis",
+                "dynamic_screening_threshold_exp": 10,
+                "niter": 40,
+                "ndiis": 8,
+                "scf_conv": 1e-6,
+            },
+        },
+        target=hermes_target,
+        resources=hermes_resources,
+        resture=True,
+    )
+    print(f"{datetime.now().time()} | Running HERMES!")
+    await check_status_and_report_failures(client)
+    await hermes_energy.download(filename=f"02_{RCSB_ID}_hermes_energy.json")
+    print(f"{datetime.now().time()} | Downloaded HERMES output! {hermes_energy}")
 
 
 if __name__ == "__main__":

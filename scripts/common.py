@@ -1,6 +1,8 @@
 import os
+import tarfile
 
 import rush
+
 
 async def setup_workspace(workspace_dir, clean_workspace):
     if not workspace_dir.exists():
@@ -49,3 +51,18 @@ def get_resources(machine_name, gpus):
             "storage": 10,
             "storage_units": "GB",
         }
+
+
+def extract_gmx_dry_frames(client, dry_frames_path, rcsb_id):
+    # Extract the "dry" (i.e. non-solvated) pdb frames we asked for
+    with tarfile.open(dry_frames_path, "r") as tf:
+        selected_frame_pdbs = [
+            (member.name, tf.extractfile(member).read())
+            for member in tf
+            if member.name.startswith("outputs_md.dry.pdb/md") and member.name.endswith("pdb")
+        ]
+        for name, frame in selected_frame_pdbs:
+            print(type(name))
+            index = name.split("/")[1].split(".")[2][3]
+            with open(client.workspace / f"02_{rcsb_id}_gmx_frame{index}.pdb", "w") as pf:
+                pf.write(frame.decode("utf-8"))

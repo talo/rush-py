@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-import tarfile
 from datetime import datetime
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from pdbtools import pdb_fetch, pdb_delhetatm, pdb_selchain, pdb_rplresname, pdb
 import rush
 import qdx_py
 
-from .common import setup_workspace, get_resources
+from .common import setup_workspace, get_resources, extract_gmx_dry_frames
 
 # Define our project information
 EXPERIMENT = "debug-gmx-hermes-bridge"
@@ -25,25 +24,6 @@ SYSTEM_PDB_PATH = WORKSPACE_DIR / "test_C.pdb"
 PROTEIN_PDB_PATH = WORKSPACE_DIR / "test_P.pdb"
 LIGAND_PDB_PATH = WORKSPACE_DIR / "test_L.pdb"
 LIGAND_SMI_PATH = WORKSPACE_DIR / "test_L.smi"
-
-
-def fix_gmx_output(client):
-    # Extract the "dry" (i.e. non-solvated) pdb frames we asked for
-    with tarfile.open(client.workspace / "objects" / "02_gmx_dry_frames.tar.gz", "r") as tf:
-        selected_frame_pdbs = [tf.extractfile(member).read() for member in tf if "pdb" in member.name]
-        for i, frame in enumerate(selected_frame_pdbs):
-            with open(client.workspace / "objects" / f"02_gmx_output_frame_{i}.pdb", "w") as pf:
-                print(frame.decode("utf-8"), file=pf)
-    # Extract the ligand.gro file
-    with tarfile.open(client.workspace / "objects" / "02_gmx_gros.tar.gz", "r") as tf:
-        gro = [tf.extractfile(member).read() for member in tf if "temp" in member.name][0]
-        with open(client.workspace / "objects" / "02_gmx_lig.gro", "w") as pf:
-            print(gro.decode("utf-8"), file=pf)
-    # Fix up the output from gromacs
-    # prepared_gmx_protein_outs = await client.prepare_protein(
-    #     client.workspace / "objects" / "02_gmx_output_frame_0.pdb", target="NIX_SSH_3", restore=False
-    # )
-    # return prepared_gmx_protein_outs
 
 
 def split_complex(complex):
@@ -168,7 +148,7 @@ async def main(clean_workspace=False):
 
     """
     # TODO: Remove need for this
-    (prepared_gmx_protein_qdxf, prepared_gmx_protein) = fix_gmx_output(client)
+    (prepared_gmx_protein_qdxf, prepared_gmx_protein) = extract_gmx_dry_frames(client)
     print(f"{datetime.now().time()} | Finished re-prepping protein after GROMACS run! {prepared_gmx_protein}")
 
     # ## 1.3) Run quantum energy calculation (modules: qp_gen_inputs, hermes_energy, qp_collate)

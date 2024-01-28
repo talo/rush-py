@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# # tengu-py
-#
-# > Python SDK for the QDX Quantum Chemistry workflow management system
 
 import asyncio
 import json
@@ -44,9 +39,12 @@ async def get_hermes_ready_conformer(client, rcsb_id):
 
     # ## Prepare protein
 
-    prep_resources = rush.Resources(gpus=1, storage=1, storage_units="GB", walltime=60)
     (prepared_protein_qdxf, _) = await client.prepare_protein(
-        PROTEIN_PDB_PATH, tags=TAGS + [rcsb_id], target="NIX_SSH_2", resources=prep_resources, restore=False
+        PROTEIN_PDB_PATH,
+        tags=TAGS + [rcsb_id],
+        target="NIX_SSH_2",
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
     )
 
     return prepared_protein_qdxf
@@ -62,10 +60,10 @@ async def main(rcsb_ids, clean_workspace=False):
     )
     # print(await client.get_latest_module_paths())
 
-    print(f"{datetime.now().time()} | Running protein prep!")
     prep_outputs = [(rcsb_id, await get_hermes_ready_conformer(client, rcsb_id)) for rcsb_id in rcsb_ids]
     for rcsb_id in rcsb_ids:
         Path(client.workspace / f"objects/prepared_{rcsb_id}.qdxf.json").unlink(missing_ok=True)
+    print(f"{datetime.now().time()} | Running protein prep!")
     await check_status_and_report_failures(client)
     await asyncio.gather(*[
         output[1].download(filename=f"prepared_{output[0]}.qdxf.json") for output in prep_outputs
@@ -84,7 +82,51 @@ async def main(rcsb_ids, clean_workspace=False):
     print(f"{datetime.now().time()} | Saved charged protein!")
 
     # ## Validate protein
-    # TODO
+
+    print(f"{datetime.now().time()} | Running protein fragmentation!")
+    (fragmented_protein,) = await client.fragment_aa(
+        client.workspace / f"objects/charged_{rcsb_id}.qdxf.json",
+        1,
+        "All",
+        tags=TAGS + [rcsb_id],
+        target="NIX_SSH_2",
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+
+    print(f"{datetime.now().time()} | Running HERMES!")
+    (hermes_energy, _hermes_gradient) = await client.hermes_energy(
+        fragmented_protein,
+        {
+            "basis": "cc-pVDZ",
+            "aux_basis": "cc-pVDZ-RIFIT",
+            "method": "RHF",
+        },
+        {
+            "debug": {},
+            "export": {},
+            "frag": {
+                "method": "MBE",
+                "fragmentation_level": 1,
+                "fragmented_energy_type": "TotalEnergy",
+                "ngpus_per_node": 4,
+            },
+            "guess": {},
+            "scf": {
+                "convergence_metric": "diis",
+                "dynamic_screening_threshold_exp": 10,
+                "niter": 40,
+                "ndiis": 8,
+                "scf_conv": 1e-6,
+            },
+        },
+        tags=TAGS + [rcsb_id],
+        target="GADI",
+        resources=rush.Resources(gpus=4, storage=10, storage_units="GB", walltime=60),
+        restore=True,
+    )
+    await check_status_and_report_failures(client)
+    await hermes_energy.download(filename=f"02_hermes_energy_{rcsb_id}.json")
 
 
 if __name__ == "__main__":
