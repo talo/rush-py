@@ -158,9 +158,6 @@ def format_module_typedesc(typedesc_in):
                 new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1]]
                 last_break_pos = i + 1
             if seen_nester and seen_dict["{}"] == 0 and seen_dict["()"] == 0:
-                print(char, file=sys.stderr)
-                print(i, file=sys.stderr)
-                print(len(old_line), file=sys.stderr)
                 assert char in "})"
                 new_lines += [leading_spaces + "    " + old_line[last_break_pos:i]]
                 new_lines += [leading_spaces + old_line[i:]]
@@ -186,7 +183,7 @@ def format_module_typedesc(typedesc_in):
     finalized_str = "\n".join([line.rstrip() for line in new_lines])
     finalized_str = re.sub(r": +", ": ", finalized_str)
 
-    return finalized_str + "  \n\n"
+    return finalized_str + "\n"
 
 
 class BaseProvider:
