@@ -45,5 +45,6 @@ nbdev_readme
 nbdev_prepare # TODO: the checks don't pass yet
 nbdev_preview # check that to docs look sane
 ```
-Step 5. Increment package version in `pyproject.toml`
-Step 6. `poetry build` & `poetry publish` (ensure you have set up your pypi token https://python-poetry.org/docs/repositories/)
+Step 5. ensure relative links in readme gets fixed to point to their deployed version # TODO: automate this
+Step 6. Increment package version in `pyproject.toml`
+Step 7. `poetry build` & `poetry publish` (ensure you have set up your pypi token https://python-poetry.org/docs/repositories/)
