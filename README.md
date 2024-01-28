@@ -7,7 +7,7 @@
 This document will walk through executing jobs on the Rush platform. For
 a comprehensive guide on the concepts and constructing a full workflow,
 see the [full rush-py
-explainer](./Tutorials/full-rush-py-explainer.ipynb) document
+explainer](https://talo.github.io/rush-py/Tutorials/full-rush-py-explainer.html) document
 
 First, install the following modules via pip - we require Python \> 3.10
 
