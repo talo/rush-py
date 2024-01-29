@@ -4,7 +4,7 @@ import asyncio
 from . import provider
 
 _x = provider.Provider()
-fns = asyncio.run(_x.get_module_functions())
+fns = asyncio.run(_x.get_module_functions(tags=["rush-py-v1.4.0"]))
 RushProvider = type(
     "RushProvider",
     (provider.Provider,),

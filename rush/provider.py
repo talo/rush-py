@@ -846,9 +846,9 @@ class BaseProvider:
         ret = {}
         module_pages = await self.latest_modules(names=names)
         async for module_page in module_pages:
-            for module in module_page.edges:
-                path = module.node.path
-                name = get_name_from_path(module.node.path)
+            for edge in module_page.edges:
+                path = edge.node.path
+                name = get_name_from_path(edge.node.path)
                 if path:
                     ret[name] = path
         return ret
@@ -914,7 +914,7 @@ class BaseProvider:
         )
 
     async def get_module_functions(
-        self, names: list[str] | None = None, lockfile: Path | None = None
+        self, names: list[str] | None = None, tags: list[str] | None = None, lockfile: Path | None = None
     ) -> dict[str, RushModuleRunner[Any]]:
         """
         Get a dictionary of module functions.
@@ -935,98 +935,122 @@ class BaseProvider:
                     module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
                 else:
                     # lets load the latest paths and lock them
-                    paths = await self.get_latest_module_paths(names)
-                    module_pages = self.get_modules_for_paths(list(paths.values()))
-                    self.module_paths = paths
-                    self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+                    if tags:
+                        module_pages = await self.modules(tags=tags)
+                        self.module_paths = {}
+                        async for module_page in module_pages:
+                            for edge in module_page.edges:
+                                path = edge.node.path
+                                name = get_name_from_path(edge.node.path)
+                                if (names and name in names) and path:
+                                    self.module_paths[name] = path
+                        module_pages = await self.modules(tags=tags)
+                    else:
+                        paths = await self.get_latest_module_paths(names)
+                        module_pages = self.get_modules_for_paths(list(paths.values()))
+                        self.module_paths = paths
+                        self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            elif tags:
+                # no workspace, so up the user to lock it
+                module_pages = await self.modules(tags=tags)
             else:
                 # no workspace, so up the user to lock it
                 module_pages = await self.latest_modules(names=names)
 
-        async for page in module_pages:
-            for edge in page.edges:
+        # so that our modules get constructed in sorted order for docs
+        modules = []
+        async for module_page in module_pages:
+            for edge in module_page.edges:
                 module = edge.node.__deepcopy__()
                 path = module.path
-                in_types = tuple([type_from_typedef(i) for i in module.ins])
-                out_types = tuple([type_from_typedef(i) for i in module.outs])
+                name = get_name_from_path(edge.node.path)
+                # in the case of if not self.config dir and names and tags,
+                # we have to filter by the names still, so do it here
+                if names and name not in names and tags:
+                    continue
+                modules += [(name, module)]
 
-                typechecker = build_typechecker(*in_types)
+        for name, module in sorted(modules):
+            path = module.path
 
-                default_target = None
-                if module.targets:
-                    # select a random target to be the default, until we have our own cluster set up
-                    random.shuffle(module.targets)
-                    default_target = module.targets[0]
+            in_types = tuple([type_from_typedef(i) for i in module.ins])
+            out_types = tuple([type_from_typedef(i) for i in module.outs])
 
-                default_resources = None
-                if module.resource_bounds:
-                    default_resources = ModuleInstanceResourcesInput(
-                        storage=module.resource_bounds.storage_min + 10,
-                        storage_units=MemUnits.MB,
-                        gpus=module.resource_bounds.gpu_hint,
-                    )
+            typechecker = build_typechecker(*in_types)
 
-                name = get_name_from_path(module.path)
+            default_target = None
+            if module.targets:
+                # select a random target to be the default, until we have our own cluster set up
+                random.shuffle(module.targets)
+                default_target = module.targets[0]
 
-                def closure(
-                    name: str,
-                    path: str,
-                    typechecker: Any,
-                    default_target: Target | None,
-                    default_resources: ModuleInstanceResourcesInput | None,
+            default_resources = None
+            if module.resource_bounds:
+                default_resources = ModuleInstanceResourcesInput(
+                    storage=module.resource_bounds.storage_min + 10,
+                    storage_units=MemUnits.MB,
+                    gpus=module.resource_bounds.gpu_hint,
+                )
+
+            def closure(
+                name: str,
+                path: str,
+                typechecker: Any,
+                default_target: Target | None,
+                default_resources: ModuleInstanceResourcesInput | None,
+            ):
+                async def runner(
+                    *args: Any,
+                    target: Target | None = default_target,
+                    resources: ModuleInstanceResourcesInput | None = default_resources,
+                    tags: list[str] | None = None,
+                    restore: bool | None = None,
                 ):
-                    async def runner(
-                        *args: Any,
-                        target: Target | None = default_target,
-                        resources: ModuleInstanceResourcesInput | None = default_resources,
-                        tags: list[str] | None = None,
-                        restore: bool | None = None,
-                    ):
-                        typechecker(*args)
-                        run = await self.run(
-                            path, list(args), target, resources, tags, out_tags=None, restore=restore
-                        )
-                        outs: list[Any] = []
-                        for out in run.outs:
-                            outs.append(Provider.Arg(self, out.id, source=run.id))
-                        return outs
+                    typechecker(*args)
+                    run = await self.run(
+                        path, list(args), target, resources, tags, out_tags=None, restore=restore
+                    )
+                    outs: list[Any] = []
+                    for out in run.outs:
+                        outs.append(Provider.Arg(self, out.id, source=run.id))
+                    return outs
 
-                    runner.__name__ = name
+                runner.__name__ = name
 
-                    # convert ins_usage array to argument docs
-                    ins_docs = ""
-                    if module.ins_usage:
-                        for ins in module.ins_usage:
-                            ins_docs += f"\n:param {ins}"
+                # convert ins_usage array to argument docs
+                ins_docs = ""
+                if module.ins_usage:
+                    for ins in module.ins_usage:
+                        ins_docs += f"\n:param {ins}"
 
-                    # convert outs_usage array to return docs
-                    outs_docs = ""
-                    if module.outs_usage:
-                        for outs in module.outs_usage:
-                            outs_docs += f"\n:return {outs}"
+                # convert outs_usage array to return docs
+                outs_docs = ""
+                if module.outs_usage:
+                    for outs in module.outs_usage:
+                        outs_docs += f"\n:return {outs}"
 
-                    if module.description:
-                        runner.__doc__ = (
-                            module.description
-                            + "\n\nModule version: `"
-                            + "/".join(path.split("/")[1:]).split("#")[0]
-                            + "`\n\nQDX Type Description:\n\n"
-                            + format_module_typedesc(module.typedesc)
-                            + (module.usage + "  \n" if module.usage else "")
-                            + (ins_docs)
-                            + (outs_docs)
-                        )
-                    else:
-                        runner.__doc__ = name + " @" + path
+                if module.description:
+                    runner.__doc__ = (
+                        module.description
+                        + "\n\nModule version: `"
+                        + "/".join(path.split("/")[1:]).split("#")[0]
+                        + "`\n\nQDX Type Description:\n\n"
+                        + format_module_typedesc(module.typedesc)
+                        + (module.usage + "  \n" if module.usage else "")
+                        + (ins_docs)
+                        + (outs_docs)
+                    )
+                else:
+                    runner.__doc__ = name + " @" + path
 
-                    runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
-                    runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
+                runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
+                runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
 
-                    return runner
+                return runner
 
-                runner = closure(name, path, typechecker, default_target, default_resources)
-                self.__setattr__(name, runner)
-                ret[name] = runner
+            runner = closure(name, path, typechecker, default_target, default_resources)
+            self.__setattr__(name, runner)
+            ret[name] = runner
         return ret
 
     async def retry(
@@ -1210,6 +1234,7 @@ async def build_provider_with_functions(
     url: str | None = None,
     batch_tags: list[str] | None = None,
     module_names: list[str] | None = None,
+    module_tags: list[str] | None = None,
     logger: logging.Logger | None = None,
 ) -> Provider:
     """
@@ -1223,5 +1248,5 @@ async def build_provider_with_functions(
     """
     provider = Provider(access_token, url, workspace, batch_tags, logger)
 
-    await provider.get_module_functions(names=module_names)
+    await provider.get_module_functions(names=module_names, tags=module_tags)
     return provider
