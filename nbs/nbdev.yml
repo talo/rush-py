@@ -4,6 +4,6 @@ project:
 website:
   title: "rush-py"
   site-url: "https://talo.github.io/rush-py"
-  description: "Python SDK for the QDX Quantum Chemistry workflow management system"
+  description: "Python SDK for interacting with the QDX Rush API and modules"
   repo-branch: main
   repo-url: "https://github.com/talo/rush-py"

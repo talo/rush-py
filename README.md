@@ -7,7 +7,7 @@
 This document will walk through executing jobs on the Rush platform. For
 a comprehensive guide on the concepts and constructing a full workflow,
 see the [full rush-py
-explainer](https://talo.github.io/rush-py/Tutorials/full-rush-py-explainer.html) document
+explainer](https://talo.github.io/rush-py/Tutorials/0-full-rush-py-explainer.ipynb) document
 
 First, install the following modules via pip - we require Python \> 3.10
 
@@ -141,7 +141,7 @@ help(client.convert)
 # 1) Running Rush Modules
 
 You can view which modules are available, alongside their documentation,
-in the [API Dodumentation](https://talo.github.io/rush-py/api/)
+in the [API Dodumentation](https://talo.github.io/rush-py/api/index.html)
 
 ## 1.1) Prep the protein
 
