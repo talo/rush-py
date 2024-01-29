@@ -1036,8 +1036,8 @@ class BaseProvider:
                 if module.description:
                     runner.__doc__ = (
                         module.description
-                        + "\n\nModule version: `"
-                        + "/".join(path.split("/")[1:]).split("#")[0]
+                        + "\n\nModule version:  \n`"
+                        + path
                         + "`\n\nQDX Type Description:\n\n"
                         + format_module_typedesc(module.typedesc)
                         + (module.usage + "  \n" if module.usage else "")
