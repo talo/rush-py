@@ -40,9 +40,9 @@ Step 2. Run pdoc to document the api `pdoc ./rush/doc.py -o ./nbs/api`
 Step 3. Fix pathing incompatabilities with `quarto` - `mv ./nbs/api/rush/* ./nbs/api/ && cp ./nbs/api/doc.html ./nbs/api/index.html `
 Step 4. Run the following `nbdev` commands for generating final documentation (if notebooks have changed)
 ```
+nbdev_prepare
 nbdev_docs
 nbdev_readme
-nbdev_prepare # TODO: the checks don't pass yet
 nbdev_preview # check that to docs look sane
 ```
 Step 5. ensure relative links in readme gets fixed to point to their deployed version # TODO: automate this

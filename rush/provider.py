@@ -1,18 +1,19 @@
 import asyncio
 import base64
 import json
+import logging
 import math
 import os
-import time
-import logging
-import sys
 import random
+import re
+import sys
+import time
+from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
 from typing import Any, AsyncIterable, Generic, Iterable, List, Literal, Optional, Protocol, TypeVar, Union
 from uuid import UUID
-from collections import Counter
 
 import httpx
 from pydantic_core import to_jsonable_python
@@ -31,9 +32,7 @@ from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, Pa
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
-from .graphql_client.module_instance_full import (
-    ModuleInstanceFullModuleInstance,
-)
+from .graphql_client.module_instance_full import ModuleInstanceFullModuleInstance
 from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesEdgesNode,
     ModuleInstancesMeAccountModuleInstancesPageInfo,
@@ -41,7 +40,7 @@ from .graphql_client.module_instances import (
 from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
-from .typedef import build_typechecker, type_from_typedef, SCALARS
+from .typedef import SCALARS, build_typechecker, type_from_typedef
 
 ArgId = UUID
 ModuleInstanceId = UUID
@@ -127,6 +126,64 @@ class RushModuleRunner(Protocol[TCo]):
 
 def get_name_from_path(path: str):
     return path.split("#")[-1].replace("_tengu", "").replace("tengu_", "")
+
+
+def format_module_typedesc(typedesc_in):
+    def format_typedesc_line(old_line):
+        new_lines = []
+        seen_nester = False
+        nester_char = None
+        seen_dict = {"{}": 0, "()": 0}
+        last_break_pos = None
+        good_nesting_level = False
+        leading_spaces = " " * (len(old_line) - len(old_line.lstrip(" ")))
+        for i, char in enumerate(old_line):
+            if char in "{(":
+                if not seen_nester:
+                    seen_nester = True
+                    nester_char = char
+                    new_lines += [old_line[: i + 1]]
+                    last_break_pos = i + 1
+                seen_dict["{}" if char in "{}" else "()"] += 1
+            if char in "})":
+                seen_dict["{}" if char in "{}" else "()"] -= 1
+            if seen_nester:
+                if nester_char == "{":
+                    good_nesting_level = seen_dict["{}"] == 1 and seen_dict["()"] == 0
+                elif nester_char == "(":
+                    good_nesting_level = seen_dict["()"] == 1 and seen_dict["{}"] == 0
+                else:
+                    print("ERROR!")
+            if seen_nester and good_nesting_level and char == ",":
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1]]
+                last_break_pos = i + 1
+            if seen_nester and seen_dict["{}"] == 0 and seen_dict["()"] == 0:
+                assert char in "})"
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos:i]]
+                new_lines += [leading_spaces + old_line[i:]]
+                break
+        return new_lines
+
+    old_lines = typedesc_in.replace(";", ";\n").replace("-> ", "\n->\n").split("\n")
+    old_lines = ["    " + line.strip() for line in old_lines]
+    some_line_too_long = True
+    while some_line_too_long:
+        some_line_too_long = False
+        new_lines = []
+        for line in old_lines:
+            if len(line) > 88:
+                some_line_too_long = True
+                new_lines += format_typedesc_line(line)
+            else:
+                new_lines += [line]
+        old_lines = new_lines
+
+    new_lines = [line.replace(",", ", ").replace(":", ": ").replace("|", " | ") for line in new_lines]
+
+    finalized_str = "\n".join([line.rstrip() for line in new_lines])
+    finalized_str = re.sub(r": +", ": ", finalized_str)
+
+    return finalized_str + "\n"
 
 
 class BaseProvider:
@@ -241,7 +298,10 @@ class BaseProvider:
                                 # get the failure reason by checking the source module instance
                                 module_instance = await self.provider.module_instance(remote_arg.source)
                                 raise Exception(
-                                    (module_instance.failure_reason, module_instance.failure_context)
+                                    (
+                                        module_instance.failure_reason,
+                                        module_instance.failure_context,
+                                    )
                                 )
                             raise Exception("Argument was rejected")
                         else:
@@ -948,24 +1008,19 @@ class BaseProvider:
                     if module.description:
                         runner.__doc__ = (
                             module.description
-                            + "\n\nModule version: "
-                            + path
-                            + "\n\nQDX Type Description:\n\n    "
-                            + module.typedesc.replace(",", ",\n\n    ")
-                            .replace("; ", ";\n\n    ")
-                            .replace("}", "\n\n    }")
-                            .replace("{", "{\n\n    ")
-                            .replace("-> ", "\n\n->\n\n    ")
-                            + (module.usage if module.usage else "")
-                            + "\n\n\n"
+                            + "\n\nModule version: `"
+                            + "/".join(path.split("/")[1:]).split("#")[0]
+                            + "`\n\nQDX Type Description:\n\n"
+                            + format_module_typedesc(module.typedesc)
+                            + (module.usage + "  \n" if module.usage else "")
                             + (ins_docs)
                             + (outs_docs)
                         )
                     else:
                         runner.__doc__ = name + " @" + path
 
-                    runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
                     runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
+                    runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
 
                     return runner
 
@@ -1058,8 +1113,10 @@ class BaseProvider:
             return res.stderr if kind == "stderr" else res.stdout  # type: ignore
 
         i = 0
-        async for page in self._query_with_pagination(
-            return_paged, PageVars(after=after, before=before), {}  # type: ignore
+        async for page in self._query_with_pagination(  # type: ignore
+            return_paged,
+            PageVars(after=after, before=before),
+            {},
         ):
             for edge in page.edges:
                 if print_logs:
