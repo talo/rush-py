@@ -4,19 +4,19 @@
 
 # Quickstart
 
-This document will walk through executing jobs on the Rush platform. For
+This document will walk through executing jobs on the rush platform. For
 a comprehensive guide on the concepts and constructing a full workflow,
 see the [full rush-py
-explainer](https://talo.github.io/rush-py/Tutorials/0-full-rush-py-explainer.ipynb) document
+explainer](https://talo.github.io/rush-py/Tutorials/0-full-rush-py-explainer.ipynb) document.
 
-First, install the following modules via pip - we require Python \> 3.10
+First, install the following modules via pip—we require Python ≥ 3.10:
 
     pip install rush-py pdb-tools
 
 # 0) Setup
 
 This is where we prepare the rush client, directories, and input data
-we’ll be working with
+we’ll be working with.
 
 ## 0.0) Imports
 
@@ -26,9 +26,9 @@ import tarfile
 from datetime import datetime
 from pathlib import Path
 
-from pdbtools import pdb_fetch, pdb_delhetatm, pdb_selchain, pdb_rplresname, pdb_keepcoord, pdb_selresname
-import requests
 import py3Dmol
+import requests
+from pdbtools import pdb_delhetatm, pdb_fetch, pdb_selchain
 
 import rush
 ```
@@ -47,24 +47,24 @@ asyncio.run(main)
 
 ## 0.1) Credentials
 
-Retrieve your api token from the [Rush
+Retrieve your API token from the [Rush
 UI](https://rush.qdx.co/dashboard/settings).
 
-You can either set the RUSH_TOKEN and RUSH_URL environment variables, or
-provide them as variables to the client directly.
+You can either set the `RUSH_URL` and `RUSH_TOKEN` environment variables
+or provide them as variables to the client directly.
 
 To see how to set environment variables,
 [Wikipedia](https://en.wikipedia.org/wiki/Environment_variable) has an
-extensive article
+extensive article.
 
 ``` python
-RUSH_TOKEN = os.getenv("RUSH_TOKEN") or "YOUR_TOKEN_HERE"
 RUSH_URL = os.getenv("RUSH_URL") or "https://tengu.qdx.ai"
+RUSH_TOKEN = os.getenv("RUSH_TOKEN") or "YOUR_TOKEN_HERE"
 ```
 
 ## 0.2) Configuration
 
-Lets set some global variables that define our project, these are not
+Lets set some global variables that define our project. These are not
 required, but are good practice to help organize the jobs that will be
 persisted under your account.
 
@@ -72,34 +72,35 @@ Make sure you create a unique set of tags for each run. Good practice is
 to have at least each of the experiment name and system name as a tag.
 
 ``` python
-EXPERIMENT = "tengu-py-v2-quickstart"
+EXPERIMENT = "rush-py-quickstart"
 SYSTEM = "1B39"
 TAGS = ["qdx", EXPERIMENT, SYSTEM]
 ```
 
 ## 0.2) Build your client
 
-Get our client, for calling modules and using the Rush API.
+Get our client, which we’ll use for calling modules and generally for
+using the Rush API.
 
-As mentioned earlier access_token and url are optional, if you have set
-the env variables RUSH_TOKEN and RUSH_URL.
+As mentioned earlier, `url` and `access_token` are optional if you have
+set the env variables `RUSH_URL` and `RUSH_TOKEN` respectively.
 
 `batch_tags` will be applied to each run that is spawned by this client.
 
 A folder called `.rush` will be created in your workspace directory
 (defaults to the current working directory, can be overridden by passing
-`workspace=` to the provider builder
+`workspace=` to the provider builder).
 
 ``` python
 # By using the `build_provider_with_functions` method, we will also build helper functions calling each module
 client = await rush.build_provider_with_functions(
-    access_token=RUSH_TOKEN, url=RUSH_URL, batch_tags=TAGS
+    url=RUSH_URL, access_token=RUSH_TOKEN, batch_tags=TAGS
 )
 ```
 
 ## 0.3) Input selection
 
-Fetch data files from RCSB to pass as input to the modules
+Fetch data files from RCSB to pass as input to the modules:
 
 ``` python
 PROTEIN_PDB_PATH = client.workspace / f"{SYSTEM}_P.pdb"
@@ -117,22 +118,17 @@ help(client.convert)
 
     Help on function convert in module rush.provider:
 
-    async convert(*args: [list[typing.Union[str, ~T]], <class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = <ModuleInstanceTarget.NIX: 'NIX'>, resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=0, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=10, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>]
+    async convert(*args: [list[typing.Union[str, ~T]], <class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = 'NIX_SSH', resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=0, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=10, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>]
         Convert biomolecular and chemical file formats to the QDX file format. Supports PDB and SDF
         
-        Module version: github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#convert
+        Module version: `tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56`
         
         QDX Type Description:
         
-            format: PDB|SDF;
-        
-            input: @bytes 
-        
-        ->
-        
+            format: PDB | SDF;
+            input: @bytes
+            ->
             output: @[Conformer]
-        
-        
         
         :param format: the format of the input file
         :param input: the input file
@@ -141,12 +137,13 @@ help(client.convert)
 # 1) Running Rush Modules
 
 You can view which modules are available, alongside their documentation,
-in the [API Dodumentation](https://talo.github.io/rush-py/api/index.html)
+in the [API Documentation](https://talo.github.io/rush-py/api/index.html).
 
 ## 1.1) Prep the protein
 
 First we will run the protein preparation routine (using pdbfixer and
-pdb2pqr internally) to prepare the protein for molecular dynamics
+pdb2pqr internally) to prepare the protein for a molecular dynamics
+simulation.
 
 ``` python
 # we can check the arguments and outputs for prepare_protein with help()
@@ -155,22 +152,17 @@ help(client.prepare_protein)
 
     Help on function prepare_protein in module rush.provider:
 
-    async prepare_protein(*args: [<class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = <ModuleInstanceTarget.NIX_SSH_2_GPU: 'NIX_SSH_2_GPU'>, resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=1, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=138, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>, <class 'pathlib.Path'>]
+    async prepare_protein(*args: [<class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = 'NIX_SSH_2', resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=1, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=138, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>, <class 'pathlib.Path'>]
         Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.
         
-        Module version: github:talo/pdb2pqr/ff5abe87af13f31478ede490d37468a536621e9c#prepare_protein_tengu
+        Module version: `prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c`
         
         QDX Type Description:
         
-            input_pdb: @bytes 
-        
-        ->
-        
+            input_pdb: @bytes
+            ->
             output_qdxf: @[Conformer];
-        
             output_pdb: @bytes
-        
-        
         
         :param input_pdb: An input protein as a file: one PDB file
         :return output_qdxf: An output protein a vec: one qdxf per model in pdb
@@ -179,61 +171,62 @@ help(client.prepare_protein)
 ``` python
 # Here we run the function, it will return a Provider.Arg which you can use to fetch the results
 # We set restore = True so that we can restore a previous run to the same path with the same tags
-(prepared_protein_qdxf, prepared_protein_pdb) = await client.prepare_protein(
-    PROTEIN_PDB_PATH
-)
-print(f"{datetime.now().time()} | Running protein prep!")
-prepared_protein_qdxf  # this initially only have the id of your result, we will show how to fetch the actual value later
+prepared_protein_qdxf, prepared_protein_pdb = await client.prepare_protein(PROTEIN_PDB_PATH)
+prepared_protein_qdxf  # this initially only have the id of your result; we will show how to fetch the actual value later
 ```
 
-    23:32:40.657673 | Running protein prep!
-
-    Arg(id=1c19095e-4bd0-4fa1-bd60-e52338e2d9c2, value=None)
+    Arg(id=f1b19818-53bc-4cc5-8a4d-466695df7fe7, value=None)
 
 ## 1.3) Run statuses
 
 This will show the status of all of your runs. You can also view run
-statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs)
+statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs).
 
 ``` python
 await client.status()
 ```
 
-    {'6e643129-f6e9-47f4-9b6f-414bacc29944': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+    {'12a34c57-4f6f-42e6-a40e-094f51120e44': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
       'prepare_protein',
       1),
-     '0cae0860-f8c7-4afb-8fe2-144ab175a415': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+     '30d2e785-a9a1-4084-8258-ae8b244f5a9c': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
       'prepare_protein',
       1),
-     '0c2b5aa5-36c2-4180-b242-c2ff622a14f4': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+     '2ae750f0-87d3-4709-b971-9eac24fffbc2': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'prepare_protein',
+      1),
+     '7d67f71b-efc0-4c73-8e49-1a8fc16a5441': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
+      'prepare_protein',
+      1),
+     '4d24286f-ae31-4e3a-95e9-b874b56febbe': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>,
       'prepare_protein',
       1)}
 
 ## 1.4) Run Values
 
-This will return the “value” of the output from the function - for files
+This will return the “value” of the output from the function—for files
 you will recieve a url that you can download, otherwise you will recieve
-them as python types
+them as python types:
 
 ``` python
 protein_qdxf_value = await prepared_protein_qdxf.get()
 len(protein_qdxf_value[0]["topology"]["symbols"])
 ```
 
-    2024-01-27 23:32:40,880 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.RESOLVING
-    2024-01-27 23:32:46,504 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.ADMITTED
-    2024-01-27 23:33:00,993 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.DISPATCHED
-    2024-01-27 23:33:06,618 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.RUNNING
-    2024-01-27 23:33:30,495 - rush - INFO - Argument 1c19095e-4bd0-4fa1-bd60-e52338e2d9c2 is now ModuleInstanceStatus.AWAITING_UPLOAD
+    2024-01-29 20:20:36,260 - rush - INFO - Argument f1b19818-53bc-4cc5-8a4d-466695df7fe7 is now ModuleInstanceStatus.RESOLVING
+    2024-01-29 20:20:41,071 - rush - INFO - Argument f1b19818-53bc-4cc5-8a4d-466695df7fe7 is now ModuleInstanceStatus.ADMITTED
+    2024-01-29 20:21:09,641 - rush - INFO - Argument f1b19818-53bc-4cc5-8a4d-466695df7fe7 is now ModuleInstanceStatus.DISPATCHED
+    2024-01-29 20:21:15,560 - rush - INFO - Argument f1b19818-53bc-4cc5-8a4d-466695df7fe7 is now ModuleInstanceStatus.RUNNING
+    2024-01-29 20:21:38,928 - rush - INFO - Argument f1b19818-53bc-4cc5-8a4d-466695df7fe7 is now ModuleInstanceStatus.AWAITING_UPLOAD
 
-    4852
+    4848
 
 ## 1.5) Downloads
 
 We provide a utility to download files into your workspace, you can
 either provide a filename, which will be saved in
 `workspace/objects/[filename]`, or you can provide your own filepath
-which the client will use as-is
+which the client will use as-is:
 
 ``` python
 await prepared_protein_pdb.download(filename="01_prepared_protein.pdb", overwrite=True)
@@ -245,5 +238,5 @@ with open(client.workspace / "objects" / "01_prepared_protein.pdb", "r") as f:
     print(f.readline(), "...")
 ```
 
-    REMARK   1 PDBFIXER FROM: /home/ubuntu/.cache/tengu_store/run/6e643129-f6e9-47f4-9b6f-414bacc29944/.tmp/m2_protein.pdb
+    REMARK   1 CREATED WITH OPENMM 8.0, 2024-01-29
      ...
