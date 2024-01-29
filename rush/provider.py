@@ -4,7 +4,6 @@ import json
 import logging
 import math
 import os
-import random
 import re
 import sys
 import time
@@ -970,7 +969,7 @@ class BaseProvider:
                     continue
                 modules += [(name, module)]
 
-        for name, module in sorted(modules):
+        for module_count, (name, module) in enumerate(sorted(modules)):
             path = module.path
 
             in_types = tuple([type_from_typedef(i) for i in module.ins])
@@ -980,9 +979,14 @@ class BaseProvider:
 
             default_target = None
             if module.targets:
-                # select a random target to be the default, until we have our own cluster set up
-                random.shuffle(module.targets)
-                default_target = module.targets[0]
+                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
+                # pick different targets as defaults, until we have our own cluster set up
+                if "hermes" in name:
+                    # hermes doesn't work on NIX_SSH_2 right now since it's not ampere
+                    default_target = "NIX_SSH"
+                else:
+                    i = module_count % len(allowed_default_targets)
+                    default_target = allowed_default_targets[i]
 
             default_resources = None
             if module.resource_bounds:
