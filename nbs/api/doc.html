@@ -1443,8 +1443,8 @@ If provided, must be the same length as the number of outputs.</li>
 </span><span id="RushProvider.get_module_functions-1037"><a href="#RushProvider.get_module_functions-1037"><span class="linenos">1037</span></a>                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
 </span><span id="RushProvider.get_module_functions-1038"><a href="#RushProvider.get_module_functions-1038"><span class="linenos">1038</span></a>                    <span class="n">runner</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
 </span><span id="RushProvider.get_module_functions-1039"><a href="#RushProvider.get_module_functions-1039"><span class="linenos">1039</span></a>                        <span class="n">module</span><span class="o">.</span><span class="n">description</span>
-</span><span id="RushProvider.get_module_functions-1040"><a href="#RushProvider.get_module_functions-1040"><span class="linenos">1040</span></a>                        <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Module version: `&quot;</span>
-</span><span id="RushProvider.get_module_functions-1041"><a href="#RushProvider.get_module_functions-1041"><span class="linenos">1041</span></a>                        <span class="o">+</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="RushProvider.get_module_functions-1040"><a href="#RushProvider.get_module_functions-1040"><span class="linenos">1040</span></a>                        <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Module version:  </span><span class="se">\n</span><span class="s2">`&quot;</span>
+</span><span id="RushProvider.get_module_functions-1041"><a href="#RushProvider.get_module_functions-1041"><span class="linenos">1041</span></a>                        <span class="o">+</span> <span class="n">path</span>
 </span><span id="RushProvider.get_module_functions-1042"><a href="#RushProvider.get_module_functions-1042"><span class="linenos">1042</span></a>                        <span class="o">+</span> <span class="s2">&quot;`</span><span class="se">\n\n</span><span class="s2">QDX Type Description:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
 </span><span id="RushProvider.get_module_functions-1043"><a href="#RushProvider.get_module_functions-1043"><span class="linenos">1043</span></a>                        <span class="o">+</span> <span class="n">format_module_typedesc</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">typedesc</span><span class="p">)</span>
 </span><span id="RushProvider.get_module_functions-1044"><a href="#RushProvider.get_module_functions-1044"><span class="linenos">1044</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">usage</span> <span class="o">+</span> <span class="s2">&quot;  </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">usage</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -1834,7 +1834,8 @@ If provided, must be the same length as the number of outputs.</li>
 
             <div class="docstring"><p>Generate 3D conformers from SMILES strings and other inputs</p>
 
-<p>Module version: <code>tengu-auto3d/f5f26308f74bde570c870ff0b5bb1be42ac9c712</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-auto3d/f5f26308f74bde570c870ff0b5bb1be42ac9c712#auto3d_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -1918,7 +1919,8 @@ conformers: @[Conformer]
 
             <div class="docstring"><p>Conformer search algorithm. Finds candidate conformers for a molecular system ranked by their energy.</p>
 
-<p>Module version: <code>cairo/665b83a4ed8ff5e811fcbd9e55ddf8f21e820aeb</code></p>
+<p>Module version: <br />
+<code>github:talo/cairo/665b83a4ed8ff5e811fcbd9e55ddf8f21e820aeb#cairo_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2013,7 +2015,8 @@ num_conformations - number of conformations that Cairo will output</li>
 
             <div class="docstring"><p>Concatenate two QDX files</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#concat</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2057,7 +2060,8 @@ out: @Conformer
 
             <div class="docstring"><p>Convert biomolecular and chemical file formats to the QDX file format. Supports PDB and SDF</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#convert</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2114,7 +2118,8 @@ output: @[Conformer]
 
             <div class="docstring"><p>Perform quantum accurate bond inference and partial charge calculation on a Conformer</p>
 
-<p>Module version: <code>Dubai/a76eaabb0caa2196e390141cdac2e950ae29e665</code></p>
+<p>Module version: <br />
+<code>github:talo/Dubai/a76eaabb0caa2196e390141cdac2e950ae29e665#dubai_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2169,7 +2174,8 @@ output: @Conformer
 
             <div class="docstring"><p>Fragments and infers formal charges for a protein QDX file by cutting the backbone at the alpha-beta carbon bonds every n steps, with more accurate amino-acid based bond perception</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#fragment_aa</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2229,7 +2235,8 @@ output: @Conformer
             <div class="docstring"><p>Runs a molecular dynamics simluation using GROMACS from either protein, ligand pdbs or conformers as inputs.
 Uses GMX 2023.3 <a href="https://doi.org/10.5281/zenodo.10017686">https://doi.org/10.5281/zenodo.10017686</a> and Acpype <a href="https://doi.org/10.1186/1756-0500-5-367">https://doi.org/10.1186/1756-0500-5-367</a></p>
 
-<p>Module version: <code>gmx_tengu_support/cb9c066a1fd43aa1e3982643eaaf8be21ec0a502</code></p>
+<p>Module version: <br />
+<code>github:talo/gmx_tengu_support/cb9c066a1fd43aa1e3982643eaaf8be21ec0a502#gmx_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2487,7 +2494,8 @@ output_xtcs_wet: @bytes
 
             <div class="docstring"><p>Run gmx mmpbsa on the outputs of a gmx simulation </p>
 
-<p>Module version: <code>gmx_tengu_support/6bd881c6bb32ac85ab9cb9c95d2b16676cc72b7a</code></p>
+<p>Module version: <br />
+<code>github:talo/gmx_tengu_support/6bd881c6bb32ac85ab9cb9c95d2b16676cc72b7a#gmx_mmpbsa_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2562,7 +2570,8 @@ interaction_entropy: Calculate interaction entropy</li>
 
             <div class="docstring"><p>Run docking of small molecules to proteins with gnina</p>
 
-<p>Module version: <code>gnina/2f8afc6591416c3ac986bc87ee424f9d21548590</code></p>
+<p>Module version: <br />
+<code>github:talo/gnina/2f8afc6591416c3ac986bc87ee424f9d21548590#gnina_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2640,7 +2649,8 @@ out: @[[{
 
             <div class="docstring"><p>Run docking of small molecules to proteins with gnina</p>
 
-<p>Module version: <code>tengu-gnina/6f97cbd5df44535f439a9f94bb3af3d5d72c933c</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-gnina/6f97cbd5df44535f439a9f94bb3af3d5d72c933c#gnina_tengu_pdb</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2734,7 +2744,8 @@ The binding site information can be specified in the GninaOptions as well.</li>
 
             <div class="docstring"><p>Generate 3D conformers from SMILES strings and other inputs</p>
 
-<p>Module version: <code>gypsum_dl/97f5d845dd68ebe9ccc7d44bb9cc9647f4856f1a</code></p>
+<p>Module version: <br />
+<code>github:talo/gypsum_dl/97f5d845dd68ebe9ccc7d44bb9cc9647f4856f1a#gypsum_dl_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2809,7 +2820,8 @@ out: @bytes
             <div class="docstring"><p>Runs a HERMES energy calculation given a topology, and optionally model and keyword configurations.
 Will use the default model and keywords if none are provided</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#hermes_energy</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -2959,7 +2971,8 @@ gradient bytes: @bytes
             <div class="docstring"><p>Runs a HERMES energy calculation given a protein topology, a optionally a ligand topology, and optionally model and keyword configurations.
 // Will use the default model and keywords if none are provided. If you do not provide a ligand topology, the final fragment in your protein topology will be considered to be the ligand</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#hermes_lattice</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3110,7 +3123,8 @@ gradient bytes: @bytes
 
             <div class="docstring"><p>Compute the solvation energy of a Conformer via the Poisson-Boltzmann Surface Area (PBSA) method</p>
 
-<p>Module version: <code>pbsa-cuda/399ed826b15af36391e7ab9cea93b5e551e784bf</code></p>
+<p>Module version: <br />
+<code>github:talo/pbsa-cuda/399ed826b15af36391e7ab9cea93b5e551e784bf#pbsa_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3204,7 +3218,8 @@ box_size_factor - Factor by which to scale the dimensions of the lattice that co
 
             <div class="docstring"><p>Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.</p>
 
-<p>Module version: <code>prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c</code></p>
+<p>Module version: <br />
+<code>github:talo/prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c#pdb2pqr_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3259,7 +3274,8 @@ output_pdb: @bytes
 
             <div class="docstring"><p>Runs a pdb through pdbfixer</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#pdbfixer</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3316,7 +3332,8 @@ output: @bytes
 
             <div class="docstring"><p>Selects a single conformer from a vec of conformers. NOTE: will be deprecated in future once mapping is supported</p>
 
-<p>Module version: <code>tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#pick_conformer</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3360,7 +3377,8 @@ out: @Conformer
 
             <div class="docstring"><p>Run PLIP on the input PDB file of a protein-ligand complex to obtain interaction data.</p>
 
-<p>Module version: <code>tengu-plip/9a4ff5b9e5fe77f37505c4718d0d63182885c805</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-plip/9a4ff5b9e5fe77f37505c4718d0d63182885c805#plip_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3422,7 +3440,8 @@ output_txt_file: @bytes
 
             <div class="docstring"><p>Prepare ligand for sim. or quantum energy calc. using gypsum_dl</p>
 
-<p>Module version: <code>gypsum_dl/04acd1852cb3e2c8d0347e15763926fdf9a93a5d</code></p>
+<p>Module version: <br />
+<code>github:talo/gypsum_dl/04acd1852cb3e2c8d0347e15763926fdf9a93a5d#prepare_ligand_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3497,7 +3516,8 @@ out: @bytes
 
             <div class="docstring"><p>Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.</p>
 
-<p>Module version: <code>prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c</code></p>
+<p>Module version: <br />
+<code>github:talo/prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c#prepare_protein_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
@@ -3559,7 +3579,8 @@ output_pdb: @bytes
 
             <div class="docstring"><p>Run rxdock with protein, ligand, and parameter file</p>
 
-<p>Module version: <code>tengu-rxdock/5e2e5b18995f3730e5f77cd4c90b593e862ca974</code></p>
+<p>Module version: <br />
+<code>github:talo/tengu-rxdock/5e2e5b18995f3730e5f77cd4c90b593e862ca974#rxdock_tengu</code></p>
 
 <p>QDX Type Description:</p>
 
