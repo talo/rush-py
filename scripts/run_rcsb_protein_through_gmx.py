@@ -8,7 +8,12 @@ from pdbtools import pdb_fetch, pdb_delhetatm
 
 import rush
 
-from .common import setup_workspace, check_status_and_report_failures, get_resources, extract_gmx_dry_frames
+from scripts.common import (
+    setup_workspace,
+    check_status_and_report_failures,
+    get_resources,
+    extract_gmx_dry_frames,
+)
 
 # Define our project information
 EXPERIMENT = "experiment-e2e"
@@ -24,6 +29,7 @@ PROTEIN_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_P.pdb"
 
 async def main(clean_workspace=False):
     # ## Build your client
+
     await setup_workspace(WORKSPACE_DIR, clean_workspace)
     client = await rush.build_provider_with_functions(
         workspace=WORKSPACE_DIR,
@@ -54,23 +60,26 @@ async def main(clean_workspace=False):
     )
     print(f"{datetime.now().time()} | Running protein prep!")
     await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/01_{RCSB_ID}_prepared_protein.pdb").unlink(missing_ok=True)
     await prepared_protein_pdb.download(filename=f"01_{RCSB_ID}_prepared_protein.pdb")
     print(f"{datetime.now().time()} | Downloaded prepped protein! {prepared_protein_pdb}")
 
-    ## 1.2) Run GROMACS (module: gmx_tengu)
+    # ## 1.2) Run GROMACS (module: gmx_tengu)
 
     gmx_target = "NIX_SSH_2"
-    gmx_resources = get_resources(gmx_target, 1)
+    gmx_resources = get_resources(gmx_target, 0)
     gmx_config = {
         "params_overrides": {
             "em": {"nsteps": 10000},
             "nvt": {"nsteps": 1000},
             "npt": {"nsteps": 1000},
             "md": {"nsteps": 1000},
+            "ions": {},
         },
+        "frame_sel": {"start_time_ps": 0, "end_time_ps": 10, "delta_time_ps": 1},
         "num_gpus": gmx_resources["gpus"],
         "num_replicas": 1,
-        "frame_sel": {"start_time_ps": 0, "end_time_ps": 10, "delta_time_ps": 1},
+        "save_wets": False,
         "ligand_charge": None,
     }
     (_gros, _tprs, _tops, _logs, _index, _dry_xtc, gmx_dry_frames, _wet_xtc) = await client.gmx(
@@ -84,17 +93,20 @@ async def main(clean_workspace=False):
     )
     print(f"{datetime.now().time()} | Running GROMACS simulation!")
     await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/02_{RCSB_ID}_gmx_dry_frames.tar.gz").unlink(missing_ok=True)
     await gmx_dry_frames.download(filename=f"02_{RCSB_ID}_gmx_dry_frames.tar.gz")
     print(f"{datetime.now().time()} | Downloaded GROMACS output! {gmx_dry_frames}")
 
-    extract_gmx_dry_frames(client, WORKSPACE_DIR / f"02_{RCSB_ID}_gmx_dry_frames.tar.gz", RCSB_ID)
+    extract_gmx_dry_frames(client, WORKSPACE_DIR / f"objects/02_{RCSB_ID}_gmx_dry_frames.tar.gz", RCSB_ID)
 
     # ## 1.3) Run HERMES (module: hermes_energy)
+
+    hermes_target = "NIX_SSH_3"
 
     (converted_protein,) = await client.convert(
         "PDB",
         WORKSPACE_DIR / f"02_{RCSB_ID}_gmx_frame0.pdb",
-        target="NIX_SSH_2",
+        target=hermes_target,
         resources=SMALL_JOB_RESOURCES,
         restore=True,
     )
@@ -103,7 +115,7 @@ async def main(clean_workspace=False):
     (picked_protein,) = await client.pick_conformer(
         converted_protein,
         0,
-        target="NIX_SSH_2",
+        target=hermes_target,
         resources=SMALL_JOB_RESOURCES,
         restore=True,
     )
@@ -113,14 +125,17 @@ async def main(clean_workspace=False):
         picked_protein,
         1,
         "All",
-        target="NIX_SSH_2",
+        target=hermes_target,
         resources=SMALL_JOB_RESOURCES,
         restore=True,
     )
     print(f"{datetime.now().time()} | Running protein fragmentation!")
+    await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/03_{RCSB_ID}_fragmented_protein.qdxf.json").unlink(missing_ok=True)
+    await fragmented_protein.download(filename=f"03_{RCSB_ID}_fragmented_protein.qdxf.json")
+    print(f"{datetime.now().time()} | Downloaded fragmented protein! {gmx_dry_frames}")
 
-    hermes_target = "NIX_SSH_2"
-    hermes_resources = get_resources(hermes_target, 1)
+    hermes_resources = get_resources(hermes_target, 4)
     (hermes_energy, _hermes_gradient) = await client.hermes_energy(
         fragmented_protein,
         {
@@ -135,7 +150,7 @@ async def main(clean_workspace=False):
                 "method": "MBE",
                 "fragmentation_level": 1,
                 "fragmented_energy_type": "TotalEnergy",
-                "ngpus_per_node": 4,
+                "ngpus_per_node": hermes_resources["gpus"],
             },
             "guess": {},
             "scf": {
@@ -148,11 +163,12 @@ async def main(clean_workspace=False):
         },
         target=hermes_target,
         resources=hermes_resources,
-        resture=True,
+        restore=False,
     )
     print(f"{datetime.now().time()} | Running HERMES!")
     await check_status_and_report_failures(client)
-    await hermes_energy.download(filename=f"02_{RCSB_ID}_hermes_energy.json")
+    Path(client.workspace / f"objects/03_{RCSB_ID}_hermes_energy.json").unlink(missing_ok=True)
+    await hermes_energy.download(filename=f"03_{RCSB_ID}_hermes_energy.json")
     print(f"{datetime.now().time()} | Downloaded HERMES output! {hermes_energy}")
 
 
