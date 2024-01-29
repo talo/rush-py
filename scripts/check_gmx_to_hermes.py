@@ -10,20 +10,27 @@ from pdbtools import pdb_fetch, pdb_delhetatm, pdb_selchain, pdb_rplresname, pdb
 import rush
 import qdx_py
 
-from .common import setup_workspace, get_resources, extract_gmx_dry_frames
+from scripts.common import (
+    setup_workspace,
+    check_status_and_report_failures,
+    get_resources,
+    extract_gmx_dry_frames,
+)
 
 # Define our project information
-EXPERIMENT = "debug-gmx-hermes-bridge"
-SYSTEM = "quek_frame00"
-TAGS = [EXPERIMENT, SYSTEM]
+EXPERIMENT = "experiment-e2e-complex"
+RCSB_ID = "1b39"
+TAGS = [EXPERIMENT, RCSB_ID]
 WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
 SMALL_JOB_RESOURCES = rush.Resources(storage=100, storage_units="MB")
 
 # Set our inputs
-SYSTEM_PDB_PATH = WORKSPACE_DIR / "test_C.pdb"
-PROTEIN_PDB_PATH = WORKSPACE_DIR / "test_P.pdb"
-LIGAND_PDB_PATH = WORKSPACE_DIR / "test_L.pdb"
-LIGAND_SMI_PATH = WORKSPACE_DIR / "test_L.smi"
+SYSTEM_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_C.pdb"
+PROTEIN_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_P.pdb"
+LIGAND_PDB_PATH = WORKSPACE_DIR / f"00_{RCSB_ID}_L.pdb"
+LIGAND_SMILES_STR = (
+    "c1nc(c2c(n1)n(cn2)[C@H]3[C@@H]([C@@H]([C@H](O3)CO[P@@](=O)(O)O[P@](=O)(O)OP(=O)(O)O)O)O)N"
+)
 
 
 def split_complex(complex):
@@ -35,16 +42,17 @@ def split_complex(complex):
 
 async def main(clean_workspace=False):
     # ## Build your client
+
     await setup_workspace(WORKSPACE_DIR, clean_workspace)
     client = await rush.build_provider_with_functions(
         workspace=WORKSPACE_DIR,
         batch_tags=TAGS,
     )
 
-    # ## Input selection
+    # ## Fetch system (SMILES string is hardcoded for now)
 
     # fetch datafiles
-    complex = list(pdb_fetch.fetch_structure("1b39"))
+    complex = list(pdb_fetch.fetch_structure(RCSB_ID))
     protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
     # select the ATP residue
     ligand = pdb_selresname.filter_residue_by_name(complex, "ATP")
@@ -70,10 +78,12 @@ async def main(clean_workspace=False):
     # ### 1.1.1) Prep the protein
 
     (_prepared_protein_qdxf, prepared_protein_pdb) = await client.prepare_protein(
-        PROTEIN_PDB_PATH, target=prep_target, resources=SMALL_JOB_RESOURCES, restore=False
+        PROTEIN_PDB_PATH, target=prep_target, resources=SMALL_JOB_RESOURCES, restore=True
     )
     print(f"{datetime.now().time()} | Running protein prep!")
-    await prepared_protein_pdb.download(filename="01_prepared_protein.pdb")
+    await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/01_{RCSB_ID}_prepared_protein.pdb").unlink(missing_ok=True)
+    await prepared_protein_pdb.download(filename=f"01_{RCSB_ID}_prepared_protein.pdb")
     print(f"{datetime.now().time()} | Downloaded prepped protein! {prepared_protein_pdb}")
 
     # ### 1.1.2) Prep the ligand
@@ -99,40 +109,40 @@ async def main(clean_workspace=False):
         "use_durrant_lab_filters": True,
     }
     (prepared_ligand_pdb, prepared_ligand_sdf) = await client.prepare_ligand(
-        Path(LIGAND_SMI_PATH).read_text(),
+        LIGAND_SMILES_STR,
         LIGAND_PDB_PATH,
         ligand_prep_config,
         target=prep_target,
         resources=SMALL_JOB_RESOURCES,
-        restore=False,
+        restore=True,
     )
     print(f"{datetime.now().time()} | Running ligand prep!")
-    await prepared_ligand_pdb.download(filename="01_prepped_ligand.pdb")
-    await prepared_ligand_sdf.download(filename="01_prepped_ligand.sdf")
+    Path(client.workspace / f"objects/01_{RCSB_ID}_prepared_ligand.pdb").unlink(missing_ok=True)
+    Path(client.workspace / f"objects/01_{RCSB_ID}_prepared_ligand.sdf").unlink(missing_ok=True)
+    await prepared_ligand_pdb.download(filename=f"01_{RCSB_ID}_prepared_ligand.pdb")
+    await prepared_ligand_sdf.download(filename=f"01_{RCSB_ID}_prepared_ligand.sdf")
     print(f"{datetime.now().time()} | Downloaded prepped ligand! {prepared_ligand_sdf}")
 
     # ## 1.2) Run GROMACS (module: gmx_tengu)
 
     gmx_target = "NIX_SSH_2"
     gmx_resources = get_resources(gmx_target, 0)
+
     gmx_config = {
         "params_overrides": {
-            "md": {
-                "nsteps": 5000,
-                "nstenergy": 5000,
-                "nstlog": 5000,
-                "nstxout-compressed": 5000,
-            },
             "em": {"nsteps": 10000},
-            "nvt": {"nsteps": 5000},
-            "npt": {"nsteps": 5000},
+            "nvt": {"nsteps": 1000},
+            "npt": {"nsteps": 1000},
+            "md": {"nsteps": 1000},
+            "ions": {},
         },
+        "frame_sel": {"start_time_ps": 0, "end_time_ps": 10, "delta_time_ps": 1},
         "num_gpus": gmx_resources["gpus"],
         "num_replicas": 1,
-        "frame_sel": {"start_time_ps": 0, "end_time_ps": 10, "delta_time_ps": 1},
+        "save_wets": False,
         "ligand_charge": None,
     }
-    (gros, _tprs, _tops, _logs, _index, _dry_xtc, dry_frames, _wet_xtc) = await client.gmx(
+    (_gros, _tprs, _tops, _logs, _index, _dry_xtc, gmx_dry_frames, _wet_xtc) = await client.gmx(
         None,
         prepared_protein_pdb,
         prepared_ligand_pdb,
@@ -142,36 +152,69 @@ async def main(clean_workspace=False):
         restore=True,
     )
     print(f"{datetime.now().time()} | Running GROMACS simulation!")
-    await dry_frames.download(filename="02_gmx_dry_frames.tar.gz")
-    await gros.download(filename="02_gmx_gros.tar.gz")
-    print(f"{datetime.now().time()} | Downloaded GROMACS output! {dry_frames} {gros}")
+    await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/02_{RCSB_ID}_gmx_dry_frames.tar.gz").unlink(missing_ok=True)
+    await gmx_dry_frames.download(filename=f"02_{RCSB_ID}_gmx_dry_frames.tar.gz")
+    print(f"{datetime.now().time()} | Downloaded GROMACS output! {gmx_dry_frames}")
 
-    """
-    # TODO: Remove need for this
-    (prepared_gmx_protein_qdxf, prepared_gmx_protein) = extract_gmx_dry_frames(client)
-    print(f"{datetime.now().time()} | Finished re-prepping protein after GROMACS run! {prepared_gmx_protein}")
+    extract_gmx_dry_frames(client, WORKSPACE_DIR / f"objects/02_{RCSB_ID}_gmx_dry_frames.tar.gz", RCSB_ID)
 
     # ## 1.3) Run quantum energy calculation (modules: qp_gen_inputs, hermes_energy, qp_collate)
 
+    hermes_target = "NIX_SSH_3"
+
+    (converted_system,) = await client.convert(
+        "PDB",
+        WORKSPACE_DIR / f"02_{RCSB_ID}_gmx_frame0.pdb",
+        target=hermes_target,
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+    print(f"{datetime.now().time()} | Running system conversion!")
+
+    (picked_system,) = await client.pick_conformer(
+        converted_system,
+        0,
+        target=hermes_target,
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+    print(f"{datetime.now().time()} | Picking system!")
+
     # Split the complex; otherwise, fragment_aa will put each ligand atom into seperate fragments
-    (protein, ligand) = split_complex((await prepared_gmx_protein_qdxf.get())[0])
-    json.dump(protein, open(WORKSPACE_DIR / "objects" / "prepared_gmx_protein.qdxf.json", "w"))
-    json.dump(ligand, open(WORKSPACE_DIR / "objects" / "prepared_gmx_ligand.qdxf.json", "w"))
-    (fragmented,) = await client.fragment_aa(
-        WORKSPACE_DIR / "objects" / "prepared_gmx_protein.qdxf.json", 1, "All", resources={"storage": 1000000}
+    (picked_protein, picked_ligand) = split_complex(await picked_system.get())
+    json.dump(picked_protein, open(WORKSPACE_DIR / f"03_{RCSB_ID}_prepared_protein.qdxf.json", "w"))
+    json.dump(picked_ligand, open(WORKSPACE_DIR / f"03_{RCSB_ID}_prepared_ligand.qdxf.json", "w"))
+
+    (fragmented_protein,) = await client.fragment_aa(
+        WORKSPACE_DIR / f"03_{RCSB_ID}_prepared_protein.qdxf.json",
+        1,
+        "All",
+        target=hermes_target,
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
     )
-    hermes_result = await client.hermes_lattice(
-        fragmented,
-        WORKSPACE_DIR / "objects" / "prepared_gmx_ligand.qdxf.json",
+    print(f"{datetime.now().time()} | Running protein fragmentation!")
+    await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/03_{RCSB_ID}_fragmented_protein.qdxf.json").unlink(missing_ok=True)
+    await fragmented_protein.download(filename=f"03_{RCSB_ID}_fragmented_protein.qdxf.json")
+    print(f"{datetime.now().time()} | Downloaded fragmented protein! {gmx_dry_frames}")
+
+    hermes_resources = get_resources(hermes_target, 1)
+    (hermes_energy, _hermes_gradient) = await client.hermes_lattice(
+        fragmented_protein,
+        WORKSPACE_DIR / f"03_{RCSB_ID}_prepared_ligand.qdxf.json",
         None,
         None,
-        target="NIX_SSH_3",
-        resources={"storage": 10, "storage_units": "MB"},
+        target=hermes_target,
+        resources=hermes_resources,
+        restore=False,
     )
-    await hermes_result[0].get()
-    await hermes_result.get()
-    print(f"{datetime.now().time()} | Got qp interaction energy! {hermes_result}")
-    """
+    print(f"{datetime.now().time()} | Running HERMES!")
+    await check_status_and_report_failures(client)
+    Path(client.workspace / f"objects/03_{RCSB_ID}_hermes_energy.json").unlink(missing_ok=True)
+    await hermes_energy.download(filename=f"03_{RCSB_ID}_hermes_energy.json")
+    print(f"{datetime.now().time()} | Downloaded HERMES output! {hermes_energy}")
 
 
 if __name__ == "__main__":

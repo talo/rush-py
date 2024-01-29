@@ -1,48 +1,40 @@
 #!/usr/bin/env python
 
 import asyncio
-import json
 from datetime import datetime
 from pathlib import Path
 
 from pdbtools import pdb_fetch, pdb_delhetatm
 
 import rush
-import qdx_py
 
-from .common import setup_workspace, check_status_and_report_failures
+from scripts.common import (
+    setup_workspace,
+    check_status_and_report_failures,
+    get_resources,
+)
 
 EXPERIMENT = "check-rcsb-to-hermes"
 TAGS = [EXPERIMENT]
 WORKSPACE_DIR = Path.home() / "scratch" / "rush" / EXPERIMENT
 SMALL_JOB_RESOURCES = rush.Resources(storage=100, storage_units="MB")
-MACHINE_NAME = "NIX_SSH_2"
-
-# Set our inputs
-PROTEIN_PDB_PATH = WORKSPACE_DIR / "test_P.pdb"
 
 
 async def get_hermes_ready_conformer(client, rcsb_id):
     """
     Asynchronously start a protein preparation job
     """
-    # ## Input selection
-
-    # fetch datafiles
+    protein_pdb_path = WORKSPACE_DIR / "00_{rcsb_id}_P.pdb"
     complex = list(pdb_fetch.fetch_structure(rcsb_id))
-    print(complex[0:10])
     protein = pdb_delhetatm.remove_hetatm(complex)
-    # write our files to the locations defined in the config block
-    with open(PROTEIN_PDB_PATH, "w") as f:
+    with open(protein_pdb_path, "w") as f:
         for substructure in protein:
             f.write(str(substructure))
 
-    # ## Prepare protein
-
     (prepared_protein_qdxf, _) = await client.prepare_protein(
-        PROTEIN_PDB_PATH,
+        protein_pdb_path,
         tags=TAGS + [rcsb_id],
-        target="NIX_SSH_2",
+        target="NIX_SSH_3",
         resources=SMALL_JOB_RESOURCES,
         restore=True,
     )
@@ -58,43 +50,49 @@ async def main(rcsb_ids, clean_workspace=False):
         workspace=WORKSPACE_DIR,
         batch_tags=TAGS,
     )
-    # print(await client.get_latest_module_paths())
+
+    # ## Fetch and prepare protein
 
     prep_outputs = [(rcsb_id, await get_hermes_ready_conformer(client, rcsb_id)) for rcsb_id in rcsb_ids]
-    for rcsb_id in rcsb_ids:
-        Path(client.workspace / f"objects/prepared_{rcsb_id}.qdxf.json").unlink(missing_ok=True)
     print(f"{datetime.now().time()} | Running protein prep!")
     await check_status_and_report_failures(client)
+    for rcsb_id in rcsb_ids:
+        Path(client.workspace / f"objects/01_{rcsb_id}_prepared_protein.qdxf.json").unlink(missing_ok=True)
     await asyncio.gather(*[
-        output[1].download(filename=f"prepared_{output[0]}.qdxf.json") for output in prep_outputs
+        prepared_protein.download(filename=f"01_{rcsb_id}_prepared_protein.qdxf.json")
+        for rcsb_id, prepared_protein in prep_outputs
     ])
     print(f"{datetime.now().time()} | Downloaded prepped proteins!")
 
-    # ## Perceive bonds and charges for protein
-
-    print(f"{datetime.now().time()} | Running protein bond and charge perception!")
-    for rcsb_id in rcsb_ids:
-        with open(client.workspace / f"objects/prepared_{rcsb_id}.qdxf.json", "r") as f:
-            prepared_protein_qdxf = json.load(f)[0]
-        charged_protein_qdxf = json.loads(qdx_py.formal_charge(json.dumps(prepared_protein_qdxf), "All"))
-        with open(client.workspace / f"objects/charged_{rcsb_id}.qdxf.json", "w") as f:
-            json.dump(charged_protein_qdxf, f, indent=2)
-    print(f"{datetime.now().time()} | Saved charged protein!")
-
     # ## Validate protein
 
-    print(f"{datetime.now().time()} | Running protein fragmentation!")
-    (fragmented_protein,) = await client.fragment_aa(
-        client.workspace / f"objects/charged_{rcsb_id}.qdxf.json",
-        1,
-        "All",
+    hermes_target = "NIX_SSH_3"
+    hermes_resources = get_resources(hermes_target, 1)
+
+    # TODO: batch
+    rcsb_id = rcsb_ids[0]
+
+    (picked_protein,) = await client.pick_conformer(
+        client.workspace / f"objects/01_{rcsb_id}_prepared_protein.qdxf.json",
+        0,
         tags=TAGS + [rcsb_id],
-        target="NIX_SSH_2",
+        target="NIX_SSH_3",
         resources=SMALL_JOB_RESOURCES,
         restore=True,
     )
 
-    print(f"{datetime.now().time()} | Running HERMES!")
+    print(f"{datetime.now().time()} | Picking protein!")
+    (fragmented_protein,) = await client.fragment_aa(
+        picked_protein,
+        1,
+        "All",
+        tags=TAGS + [rcsb_id],
+        target=hermes_target,
+        resources=SMALL_JOB_RESOURCES,
+        restore=True,
+    )
+    print(f"{datetime.now().time()} | Running protein fragmentation!")
+
     (hermes_energy, _hermes_gradient) = await client.hermes_energy(
         fragmented_protein,
         {
@@ -109,7 +107,7 @@ async def main(rcsb_ids, clean_workspace=False):
                 "method": "MBE",
                 "fragmentation_level": 1,
                 "fragmented_energy_type": "TotalEnergy",
-                "ngpus_per_node": 4,
+                "ngpus_per_node": hermes_resources["gpus"],
             },
             "guess": {},
             "scf": {
@@ -121,20 +119,23 @@ async def main(rcsb_ids, clean_workspace=False):
             },
         },
         tags=TAGS + [rcsb_id],
-        target="GADI",
-        resources=rush.Resources(gpus=4, storage=10, storage_units="GB", walltime=60),
-        restore=True,
+        target=hermes_target,
+        resources=hermes_resources,
+        restore=False,
     )
+    print(f"{datetime.now().time()} | Running HERMES!")
     await check_status_and_report_failures(client)
-    await hermes_energy.download(filename=f"02_hermes_energy_{rcsb_id}.json")
+    Path(client.workspace / f"objects/02_{rcsb_id}_hermes_energy.json").unlink(missing_ok=True)
+    await hermes_energy.download(filename=f"02_{rcsb_id}_hermes_energy.json")
+    print(f"{datetime.now().time()} | Downloaded HERMES output! {hermes_energy}")
 
 
 if __name__ == "__main__":
     asyncio.run(
         main([
-            "3h7w",
-            # "1alc",
-            # "1b2a",
+            # "3h7w",
+            "1alc",
+            "1b2a",
             # "1b9c",
             # "1cx8",
             # "1eyi",

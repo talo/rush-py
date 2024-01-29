@@ -31,13 +31,12 @@ async def check_status_and_report_failures(client):
 
 
 def get_resources(machine_name, gpus):
-    machine_data = {}
-    machine_data["target"] = machine_name
+    resources = {}
     if machine_name == "GADI":
         if gpus != 4:
             print("WARNING: Gadi runs should use 4 GPUs; setting gpus to 4")
         # Gadi needs CPUs and walltime
-        machine_data["resources"] = {
+        resources = {
             "gpus": 4,
             "storage": 10,
             "storage_units": "GB",
@@ -46,11 +45,12 @@ def get_resources(machine_name, gpus):
         }
     elif machine_name.startswith("NIX_SSH"):
         # All the Nix machines care about
-        machine_data["resources"] = {
+        resources = {
             "gpus": gpus,
             "storage": 10,
             "storage_units": "GB",
         }
+    return resources
 
 
 def extract_gmx_dry_frames(client, dry_frames_path, rcsb_id):
@@ -59,10 +59,14 @@ def extract_gmx_dry_frames(client, dry_frames_path, rcsb_id):
         selected_frame_pdbs = [
             (member.name, tf.extractfile(member).read())
             for member in tf
-            if member.name.startswith("outputs_md.dry.pdb/md") and member.name.endswith("pdb")
+            if (
+                member.name.startswith("outputs_md.dry.pdb/md")
+                or member.name.startswith("outputs_md.ligand_in.dry.pdb/md")
+            )
+            and member.name.endswith("pdb")
         ]
         for name, frame in selected_frame_pdbs:
             print(type(name))
-            index = name.split("/")[1].split(".")[2][3]
+            index = name.split("/")[1].split(".")[-2][3]
             with open(client.workspace / f"02_{rcsb_id}_gmx_frame{index}.pdb", "w") as pf:
                 pf.write(frame.decode("utf-8"))
