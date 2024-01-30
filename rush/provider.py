@@ -118,7 +118,7 @@ class RushModuleRunner(Protocol[TCo]):
         target: Target,
         resources: ModuleInstanceResourcesInput | None = None,
         tags: list[str] | None = None,
-        restore: bool | None = None,
+        restore: bool | None = False,
     ) -> TCo:
         ...
 
@@ -661,7 +661,7 @@ class BaseProvider:
         resources: ModuleInstanceResourcesInput | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
-        restore: bool | None = None,
+        restore: bool | None = False,
     ) -> RunRun | ModuleInstanceFullModuleInstance:
         """
         Run a module with the given inputs and outputs.
@@ -1020,7 +1020,7 @@ class BaseProvider:
                     target: Target | None = default_target,
                     resources: ModuleInstanceResourcesInput | None = default_resources,
                     tags: list[str] | None = None,
-                    restore: bool | None = None,
+                    restore: bool | None = False,
                 ):
                     typechecker(*args)
                     run = await self.run(
