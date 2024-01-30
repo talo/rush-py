@@ -2,9 +2,10 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Union
-import typing
+from typing import Any, Generic, Literal, Type
 from uuid import UUID
+
+from typing_extensions import TypeAliasType, TypeVar
 
 SCALARS = Literal[
     "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes", "Conformer"
@@ -27,10 +28,20 @@ SCALAR_STRS: list[SCALARS] = [
     "Conformer",
 ]
 
-T = typing.TypeVar("T")
-U = typing.TypeVar("U")
-V = typing.TypeVar("V")
+T = TypeVar("T")
+U = TypeVar("U")
+V = TypeVar("V")
+W = TypeVar("W", bytes, dict, list)
 
+
+class RushObject(Generic[W]):
+    object: T = None
+
+
+Object = TypeAliasType("Object", RushObject)
+Conformer = TypeAliasType("Conformer", dict)
+Record = TypeAliasType("Record", dict[str, Any])
+EnumValue = TypeAliasType("EnumValue", str)
 
 scalar_types_mapping = {
     "bool": bool,
@@ -46,7 +57,7 @@ scalar_types_mapping = {
     "f64": float,
     "string": str,
     "bytes": bytes,
-    "Conformer": dict,
+    "Conformer": Conformer,
 }
 
 
@@ -65,10 +76,8 @@ class Tagged:
     t: SimpleType
 
 
-class Type(typing.Generic[T]):
-    def __init__(
-        self, type: Union[dict[str, "Type[T]"], list["Type[T]"], "Type[T]"], kind: KINDS | None = None
-    ):
+class Type(Generic[T]):
+    def __init__(self, type: dict[str, Type[T]] | list[Type[T]] | Type[T], kind: KINDS | None = None):
         self.k: KINDS | None = kind
         self.t = type
 
@@ -82,15 +91,15 @@ class Type(typing.Generic[T]):
         raise Exception("Invalid type")
 
 
-class EnumKind(typing.Generic[T], Type[T]):
-    def __init__(self, enum: list[str | dict[str, Type[T]]]):
+class EnumKind(Generic[T]):
+    def __init__(self, enum: list[str | dict[str, T]]):
         self.k = "enum"
         self.t = enum
         self.literals = [x for x in enum if isinstance(x, str)]
         self.tags = [x for x in enum if isinstance(x, dict)]
 
     def to_python_type(self):
-        return list[str | T]
+        return EnumValue
 
     def matches(self, other: str | dict[str, Type[T]] | Any) -> tuple[bool, str | None]:
         if isinstance(other, dict) and len(other) == 1:
@@ -107,13 +116,13 @@ class EnumKind(typing.Generic[T], Type[T]):
         return (False, f"Unknown enum variant {other}")
 
 
-class RecordKind(typing.Generic[T], Type[T]):
+class RecordKind(Generic[T], Type[T]):
     def __init__(self, record: dict[str, Type[T]]):
         self.k = "record"
         self.t = record
 
     def to_python_type(self):
-        return dict[str, T]
+        return Record
 
     def matches(self, other: dict[str, Any] | Any) -> tuple[bool, str | None]:
         if not isinstance(other, dict):
@@ -129,13 +138,13 @@ class RecordKind(typing.Generic[T], Type[T]):
         return (True, None)
 
 
-class ArrayKind(typing.Generic[T], Type[T]):
+class ArrayKind(Generic[T], Type[T]):
     def __init__(self, array: Type[T]):
         self.k = "array"
         self.t = array
 
     def to_python_type(self):
-        return list[T]
+        return list[self.t.to_python_type()]
 
     def matches(self, other: list[T] | Any) -> tuple[bool, str | None]:
         if not (isinstance(other, list) or isinstance(other, tuple)):
@@ -147,13 +156,13 @@ class ArrayKind(typing.Generic[T], Type[T]):
         return (True, None)
 
 
-class TupleKind(typing.Generic[T], Type[T]):
+class TupleKind(Generic[T], Type[T]):
     def __init__(self, tuple: list[Type[T]]):
         self.k = "tuple"
         self.t = tuple
 
     def to_python_type(self):
-        return tuple[T]
+        return tuple[*(t.to_python_type() for t in self.t)]
 
     def matches(self, other: tuple[T] | list[T] | Any) -> tuple[bool, str | None]:
         if not (isinstance(other, list) or isinstance(other, tuple)):
@@ -167,13 +176,13 @@ class TupleKind(typing.Generic[T], Type[T]):
         return (True, None)
 
 
-class OptionalKind(typing.Generic[T], Type[T]):
+class OptionalKind(Generic[T], Type[T]):
     def __init__(self, optional: Type[T]):
         self.k = "optional"
         self.t = optional
 
     def to_python_type(self):
-        return T | None
+        return self.t.to_python_type() | None
 
     def matches(self, other: T | None | Any) -> tuple[bool, str | None]:
         if other is None:
@@ -182,22 +191,22 @@ class OptionalKind(typing.Generic[T], Type[T]):
             return self.t.matches(other)
 
 
-class ObjectKind(typing.Generic[T], Type[T]):
+class ObjectKind(Generic[T], Type[T]):
     def __init__(self, object: Type[T]):
         self.k = "object"
         self.t = object
 
     def to_python_type(self):
-        return Path
+        return Object[self.t.to_python_type()]
 
     def matches(self, other: Path | Any) -> tuple[bool, str | None]:
-        if isinstance(other, Path):
+        if isinstance(other, RushObject) or isinstance(other, Path):
             return (True, None)
         else:
             return (False, f"Expected Path, got {type(other)}")
 
 
-class ScalarType(typing.Generic[T], Type[T]):
+class ScalarType(Generic[T], Type[T]):
     def __init__(self, scalar: SCALARS | "str"):
         self.k = None
         self.t = self  # scalar
@@ -233,13 +242,13 @@ def type_from_typedef(res: Any) -> Type[Any]:
                 x = None
                 for i in literals:
                     if x:
-                        x = Union[Literal[i], x]
+                        x = Literal[i] | x
                     else:
                         x = Literal[i]
 
                 for i in tags:
                     if x:
-                        x = Union[type(i), x]
+                        x = type(i) | x
                     else:
                         x = type(i)
 
