@@ -11,11 +11,12 @@ from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-from typing import Any, AsyncIterable, Generic, Iterable, List, Literal, Optional, Protocol, TypeVar, Union
+from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union, Unpack
 from uuid import UUID
 
 import httpx
 from pydantic_core import to_jsonable_python
+from typing_extensions import TypeAliasType
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -43,7 +44,9 @@ from .typedef import SCALARS, build_typechecker, type_from_typedef
 
 ArgId = UUID
 ModuleInstanceId = UUID
-Target = ModuleInstanceTarget
+
+Target = TypeAliasType("Target", ModuleInstanceTarget)
+Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput)
 
 
 @dataclass
@@ -758,8 +761,8 @@ class BaseProvider:
         path: Union[Optional[str], UnsetType] = UNSET,
         name: Union[Optional[str], UnsetType] = UNSET,
         status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
-        ids: Union[Optional[List[ModuleInstanceId]], UnsetType] = UNSET,
+        tags: Union[Optional[list[str]], UnsetType] = UNSET,
+        ids: Union[Optional[list[ModuleInstanceId]], UnsetType] = UNSET,
     ) -> AsyncIterable[
         Page[ModuleInstanceFullModuleInstance, ModuleInstancesMeAccountModuleInstancesPageInfo]
     ]:
@@ -805,7 +808,7 @@ class BaseProvider:
         last: Union[Optional[int], UnsetType] = UNSET,
         before: Union[Optional[str], UnsetType] = UNSET,
         path: Union[Optional[str], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
+        tags: Union[Optional[list[str]], UnsetType] = UNSET,
     ) -> AsyncIterable[Page[ModuleFull, ModulesModulesPageInfo]]:
         """
         Get all modules.
@@ -1002,23 +1005,23 @@ class BaseProvider:
 
             default_resources = None
             if module.resource_bounds:
-                default_resources = ModuleInstanceResourcesInput(
-                    storage=module.resource_bounds.storage_min + 10,
-                    storage_units=MemUnits.MB,
-                    gpus=module.resource_bounds.gpu_hint,
-                )
+                default_resources = {
+                    "storage": module.resource_bounds.storage_min + 10,
+                    "storage_units": "MB",
+                    "gpus": module.resource_bounds.gpu_hint,
+                }
 
             def closure(
                 name: str,
                 path: str,
                 typechecker: Any,
                 default_target: Target | None,
-                default_resources: ModuleInstanceResourcesInput | None,
+                default_resources: Resources | None,
             ):
                 async def runner(
                     *args: Any,
                     target: Target | None = default_target,
-                    resources: ModuleInstanceResourcesInput | None = default_resources,
+                    resources: Resources | None = default_resources,
                     tags: list[str] | None = None,
                     restore: bool | None = False,
                 ):
@@ -1059,8 +1062,8 @@ class BaseProvider:
                 else:
                     runner.__doc__ = name + " @" + path
 
-                runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
-                runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
+                runner.__annotations__["args"] = Unpack[tuple[*(t.to_python_type() for t in in_types)]]
+                runner.__annotations__["return"] = tuple[*(t.to_python_type() for t in out_types)]
 
                 return runner
 
@@ -1114,8 +1117,8 @@ class BaseProvider:
         self,
         id: ModuleInstanceId,
         kind: Literal["stdout", "stderr"],
-        after: Optional[str] = None,
-        before: Optional[str] = None,
+        after: str | None = None,
+        before: str | None = None,
         pages: int | None = None,
         print_logs: bool = True,
     ) -> AsyncIterable[str]:
