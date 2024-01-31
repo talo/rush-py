@@ -7,12 +7,14 @@ from typing_extensions import TypeAliasType
 from . import provider, typedef
 
 Conformer: TypeAlias = dict[str, Any]
-""" A `dict[str, Any]` serializable to JSON storing a QDX Conformer."""
+""" A Conformer represents a biochemical structure. It is documented in:   
+https://talo.github.io/qdx-common/qdx_common/conformer/struct.Conformer.html
+"""
 
 Record: TypeAlias = dict[str, Any]
-""" A `dict[str, Any]` serializable to JSON.
+""" A `dictionary` representing JSON data.
 
-As an input, it usually stores config data.
+As an input, it usually stores configuration info.
 
 As an output, it usually stores data containing results from the corresponding run.
 """
