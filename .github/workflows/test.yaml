@@ -35,3 +35,5 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v2
       - name: nix checks
         run: nix flake check --accept-flake-config --show-trace
+      - name: nbdev checks
+        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test
