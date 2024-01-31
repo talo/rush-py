@@ -104,13 +104,10 @@ class PageVars:
     last: Union[Optional[int], UnsetType] = UNSET
 
 
-__empty_page = PageInfoFull(hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None)
-
-
 class EmptyPage(Generic[T1, TPage], Page[T1, TPage]):
     # skip the type checker for this class
     # since it is only used for the empty page
-    page_info: Any = __empty_page
+    page_info: Any = PageInfoFull(hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None)
     edges = []
 
 
