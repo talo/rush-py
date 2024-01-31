@@ -1,0 +1,37 @@
+name: Integration tests
+
+on:
+  pull_request:
+    branches: [master]
+
+env:
+  NIXPKGS_ALLOW_UNFREE: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: |
+            ${{ secrets.QDX_COMMON_SSH }}
+      - uses: cachix/install-nix-action@v25
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GA_ACCESS_TOKEN }}
+            extra-substituters = file://${{ github.workspace }}/store-cache?trusted=true https://nixpkgs-unfree.cachix.org
+      - uses: cachix/cachix-action@v14
+        with:
+          name: qdx-api
+          authToken: "${{ secrets.QDX_CACHIX }}"
+          pushFilter: tarpaulin
+      - name: cachix
+        uses: actions/cache@v3
+        with:
+          path: store-cache
+          key: nix-store
+      - name: Run the Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v2
+      - name: nix checks
+        run: nix flake check --accept-flake-config --show-trace
