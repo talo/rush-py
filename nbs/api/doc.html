@@ -236,7 +236,7 @@ rush<wbr>.doc    </h1>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">provider</span><span class="p">,</span> <span class="n">typedef</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="n">Conformer</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">&quot;&quot;&quot; A Conformer represents a biochemical structure. It is documented in:   </span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">&quot;&quot;&quot; A Conformer represents a biochemical structure. It is documented in:  </span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">https://talo.github.io/qdx-common/qdx_common/conformer/struct.Conformer.html</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>
@@ -372,40 +372,40 @@ an object uploaded or obtained from another run, a <code>pathlib.Path</code>, or
 
     </div>
     <a class="headerlink" href="#RushProvider.__init__"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.__init__-1210"><a href="#RushProvider.__init__-1210"><span class="linenos">1210</span></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-</span><span id="RushProvider.__init__-1211"><a href="#RushProvider.__init__-1211"><span class="linenos">1211</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="RushProvider.__init__-1212"><a href="#RushProvider.__init__-1212"><span class="linenos">1212</span></a>        <span class="n">access_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.__init__-1213"><a href="#RushProvider.__init__-1213"><span class="linenos">1213</span></a>        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.__init__-1214"><a href="#RushProvider.__init__-1214"><span class="linenos">1214</span></a>        <span class="n">workspace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
-</span><span id="RushProvider.__init__-1215"><a href="#RushProvider.__init__-1215"><span class="linenos">1215</span></a>        <span class="n">batch_tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.__init__-1216"><a href="#RushProvider.__init__-1216"><span class="linenos">1216</span></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.__init__-1217"><a href="#RushProvider.__init__-1217"><span class="linenos">1217</span></a>    <span class="p">):</span>
-</span><span id="RushProvider.__init__-1218"><a href="#RushProvider.__init__-1218"><span class="linenos">1218</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.__init__-1219"><a href="#RushProvider.__init__-1219"><span class="linenos">1219</span></a><span class="sd">        Initialize the RushProvider with a graphql client.</span>
-</span><span id="RushProvider.__init__-1220"><a href="#RushProvider.__init__-1220"><span class="linenos">1220</span></a>
-</span><span id="RushProvider.__init__-1221"><a href="#RushProvider.__init__-1221"><span class="linenos">1221</span></a><span class="sd">        :param access_token: The access token to use.</span>
-</span><span id="RushProvider.__init__-1222"><a href="#RushProvider.__init__-1222"><span class="linenos">1222</span></a><span class="sd">        :param url: The url to use.</span>
-</span><span id="RushProvider.__init__-1223"><a href="#RushProvider.__init__-1223"><span class="linenos">1223</span></a><span class="sd">        :param workspace: The workspace directory to use.</span>
-</span><span id="RushProvider.__init__-1224"><a href="#RushProvider.__init__-1224"><span class="linenos">1224</span></a><span class="sd">        :param batch_tags: The tags that will be placed on all runs by default.</span>
-</span><span id="RushProvider.__init__-1225"><a href="#RushProvider.__init__-1225"><span class="linenos">1225</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.__init__-1226"><a href="#RushProvider.__init__-1226"><span class="linenos">1226</span></a>        <span class="k">if</span> <span class="n">access_token</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="RushProvider.__init__-1227"><a href="#RushProvider.__init__-1227"><span class="linenos">1227</span></a>            <span class="c1"># try to check the environment variables</span>
-</span><span id="RushProvider.__init__-1228"><a href="#RushProvider.__init__-1228"><span class="linenos">1228</span></a>            <span class="kn">import</span> <span class="nn">os</span>
-</span><span id="RushProvider.__init__-1229"><a href="#RushProvider.__init__-1229"><span class="linenos">1229</span></a>
-</span><span id="RushProvider.__init__-1230"><a href="#RushProvider.__init__-1230"><span class="linenos">1230</span></a>            <span class="k">if</span> <span class="n">access_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="RushProvider.__init__-1231"><a href="#RushProvider.__init__-1231"><span class="linenos">1231</span></a>                <span class="n">access_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RUSH_TOKEN&quot;</span><span class="p">)</span>
-</span><span id="RushProvider.__init__-1232"><a href="#RushProvider.__init__-1232"><span class="linenos">1232</span></a>                <span class="k">if</span> <span class="n">access_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="RushProvider.__init__-1233"><a href="#RushProvider.__init__-1233"><span class="linenos">1233</span></a>                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No access token provided&quot;</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.__init__-1224"><a href="#RushProvider.__init__-1224"><span class="linenos">1224</span></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+</span><span id="RushProvider.__init__-1225"><a href="#RushProvider.__init__-1225"><span class="linenos">1225</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="RushProvider.__init__-1226"><a href="#RushProvider.__init__-1226"><span class="linenos">1226</span></a>        <span class="n">access_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.__init__-1227"><a href="#RushProvider.__init__-1227"><span class="linenos">1227</span></a>        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.__init__-1228"><a href="#RushProvider.__init__-1228"><span class="linenos">1228</span></a>        <span class="n">workspace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
+</span><span id="RushProvider.__init__-1229"><a href="#RushProvider.__init__-1229"><span class="linenos">1229</span></a>        <span class="n">batch_tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.__init__-1230"><a href="#RushProvider.__init__-1230"><span class="linenos">1230</span></a>        <span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.__init__-1231"><a href="#RushProvider.__init__-1231"><span class="linenos">1231</span></a>    <span class="p">):</span>
+</span><span id="RushProvider.__init__-1232"><a href="#RushProvider.__init__-1232"><span class="linenos">1232</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.__init__-1233"><a href="#RushProvider.__init__-1233"><span class="linenos">1233</span></a><span class="sd">        Initialize the RushProvider with a graphql client.</span>
 </span><span id="RushProvider.__init__-1234"><a href="#RushProvider.__init__-1234"><span class="linenos">1234</span></a>
-</span><span id="RushProvider.__init__-1235"><a href="#RushProvider.__init__-1235"><span class="linenos">1235</span></a>            <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="RushProvider.__init__-1236"><a href="#RushProvider.__init__-1236"><span class="linenos">1236</span></a>                <span class="n">url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RUSH_URL&quot;</span><span class="p">)</span>
-</span><span id="RushProvider.__init__-1237"><a href="#RushProvider.__init__-1237"><span class="linenos">1237</span></a>                <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="RushProvider.__init__-1238"><a href="#RushProvider.__init__-1238"><span class="linenos">1238</span></a>                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No url provided&quot;</span><span class="p">)</span>
-</span><span id="RushProvider.__init__-1239"><a href="#RushProvider.__init__-1239"><span class="linenos">1239</span></a>            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-</span><span id="RushProvider.__init__-1240"><a href="#RushProvider.__init__-1240"><span class="linenos">1240</span></a>            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">batch_tags</span><span class="o">=</span><span class="n">batch_tags</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-</span><span id="RushProvider.__init__-1241"><a href="#RushProvider.__init__-1241"><span class="linenos">1241</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="RushProvider.__init__-1242"><a href="#RushProvider.__init__-1242"><span class="linenos">1242</span></a>            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-</span><span id="RushProvider.__init__-1243"><a href="#RushProvider.__init__-1243"><span class="linenos">1243</span></a>            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">batch_tags</span><span class="o">=</span><span class="n">batch_tags</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+</span><span id="RushProvider.__init__-1235"><a href="#RushProvider.__init__-1235"><span class="linenos">1235</span></a><span class="sd">        :param access_token: The access token to use.</span>
+</span><span id="RushProvider.__init__-1236"><a href="#RushProvider.__init__-1236"><span class="linenos">1236</span></a><span class="sd">        :param url: The url to use.</span>
+</span><span id="RushProvider.__init__-1237"><a href="#RushProvider.__init__-1237"><span class="linenos">1237</span></a><span class="sd">        :param workspace: The workspace directory to use.</span>
+</span><span id="RushProvider.__init__-1238"><a href="#RushProvider.__init__-1238"><span class="linenos">1238</span></a><span class="sd">        :param batch_tags: The tags that will be placed on all runs by default.</span>
+</span><span id="RushProvider.__init__-1239"><a href="#RushProvider.__init__-1239"><span class="linenos">1239</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.__init__-1240"><a href="#RushProvider.__init__-1240"><span class="linenos">1240</span></a>        <span class="k">if</span> <span class="n">access_token</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="RushProvider.__init__-1241"><a href="#RushProvider.__init__-1241"><span class="linenos">1241</span></a>            <span class="c1"># try to check the environment variables</span>
+</span><span id="RushProvider.__init__-1242"><a href="#RushProvider.__init__-1242"><span class="linenos">1242</span></a>            <span class="kn">import</span> <span class="nn">os</span>
+</span><span id="RushProvider.__init__-1243"><a href="#RushProvider.__init__-1243"><span class="linenos">1243</span></a>
+</span><span id="RushProvider.__init__-1244"><a href="#RushProvider.__init__-1244"><span class="linenos">1244</span></a>            <span class="k">if</span> <span class="n">access_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="RushProvider.__init__-1245"><a href="#RushProvider.__init__-1245"><span class="linenos">1245</span></a>                <span class="n">access_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RUSH_TOKEN&quot;</span><span class="p">)</span>
+</span><span id="RushProvider.__init__-1246"><a href="#RushProvider.__init__-1246"><span class="linenos">1246</span></a>                <span class="k">if</span> <span class="n">access_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="RushProvider.__init__-1247"><a href="#RushProvider.__init__-1247"><span class="linenos">1247</span></a>                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No access token provided&quot;</span><span class="p">)</span>
+</span><span id="RushProvider.__init__-1248"><a href="#RushProvider.__init__-1248"><span class="linenos">1248</span></a>
+</span><span id="RushProvider.__init__-1249"><a href="#RushProvider.__init__-1249"><span class="linenos">1249</span></a>            <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="RushProvider.__init__-1250"><a href="#RushProvider.__init__-1250"><span class="linenos">1250</span></a>                <span class="n">url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RUSH_URL&quot;</span><span class="p">)</span>
+</span><span id="RushProvider.__init__-1251"><a href="#RushProvider.__init__-1251"><span class="linenos">1251</span></a>                <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="RushProvider.__init__-1252"><a href="#RushProvider.__init__-1252"><span class="linenos">1252</span></a>                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No url provided&quot;</span><span class="p">)</span>
+</span><span id="RushProvider.__init__-1253"><a href="#RushProvider.__init__-1253"><span class="linenos">1253</span></a>            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+</span><span id="RushProvider.__init__-1254"><a href="#RushProvider.__init__-1254"><span class="linenos">1254</span></a>            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">batch_tags</span><span class="o">=</span><span class="n">batch_tags</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+</span><span id="RushProvider.__init__-1255"><a href="#RushProvider.__init__-1255"><span class="linenos">1255</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="RushProvider.__init__-1256"><a href="#RushProvider.__init__-1256"><span class="linenos">1256</span></a>            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+</span><span id="RushProvider.__init__-1257"><a href="#RushProvider.__init__-1257"><span class="linenos">1257</span></a>            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">batch_tags</span><span class="o">=</span><span class="n">batch_tags</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1537,37 +1537,51 @@ If provided, must be the same length as the number of outputs.</li>
 </span><span id="RushProvider.get_module_functions-1036"><a href="#RushProvider.get_module_functions-1036"><span class="linenos">1036</span></a>                <span class="n">ins_docs</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 </span><span id="RushProvider.get_module_functions-1037"><a href="#RushProvider.get_module_functions-1037"><span class="linenos">1037</span></a>                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">ins_usage</span><span class="p">:</span>
 </span><span id="RushProvider.get_module_functions-1038"><a href="#RushProvider.get_module_functions-1038"><span class="linenos">1038</span></a>                    <span class="k">for</span> <span class="n">ins</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">ins_usage</span><span class="p">:</span>
-</span><span id="RushProvider.get_module_functions-1039"><a href="#RushProvider.get_module_functions-1039"><span class="linenos">1039</span></a>                        <span class="n">ins_docs</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">:param </span><span class="si">{</span><span class="n">ins</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="RushProvider.get_module_functions-1040"><a href="#RushProvider.get_module_functions-1040"><span class="linenos">1040</span></a>
-</span><span id="RushProvider.get_module_functions-1041"><a href="#RushProvider.get_module_functions-1041"><span class="linenos">1041</span></a>                <span class="c1"># convert outs_usage array to return docs</span>
-</span><span id="RushProvider.get_module_functions-1042"><a href="#RushProvider.get_module_functions-1042"><span class="linenos">1042</span></a>                <span class="n">outs_docs</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-</span><span id="RushProvider.get_module_functions-1043"><a href="#RushProvider.get_module_functions-1043"><span class="linenos">1043</span></a>                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">outs_usage</span><span class="p">:</span>
-</span><span id="RushProvider.get_module_functions-1044"><a href="#RushProvider.get_module_functions-1044"><span class="linenos">1044</span></a>                    <span class="k">for</span> <span class="n">outs</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">outs_usage</span><span class="p">:</span>
-</span><span id="RushProvider.get_module_functions-1045"><a href="#RushProvider.get_module_functions-1045"><span class="linenos">1045</span></a>                        <span class="n">outs_docs</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">:return </span><span class="si">{</span><span class="n">outs</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="RushProvider.get_module_functions-1046"><a href="#RushProvider.get_module_functions-1046"><span class="linenos">1046</span></a>
-</span><span id="RushProvider.get_module_functions-1047"><a href="#RushProvider.get_module_functions-1047"><span class="linenos">1047</span></a>                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-</span><span id="RushProvider.get_module_functions-1048"><a href="#RushProvider.get_module_functions-1048"><span class="linenos">1048</span></a>                    <span class="n">runner</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="RushProvider.get_module_functions-1049"><a href="#RushProvider.get_module_functions-1049"><span class="linenos">1049</span></a>                        <span class="n">module</span><span class="o">.</span><span class="n">description</span>
-</span><span id="RushProvider.get_module_functions-1050"><a href="#RushProvider.get_module_functions-1050"><span class="linenos">1050</span></a>                        <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Module version:  </span><span class="se">\n</span><span class="s2">`&quot;</span>
-</span><span id="RushProvider.get_module_functions-1051"><a href="#RushProvider.get_module_functions-1051"><span class="linenos">1051</span></a>                        <span class="o">+</span> <span class="n">path</span>
-</span><span id="RushProvider.get_module_functions-1052"><a href="#RushProvider.get_module_functions-1052"><span class="linenos">1052</span></a>                        <span class="o">+</span> <span class="s2">&quot;`</span><span class="se">\n\n</span><span class="s2">QDX Type Description:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-</span><span id="RushProvider.get_module_functions-1053"><a href="#RushProvider.get_module_functions-1053"><span class="linenos">1053</span></a>                        <span class="o">+</span> <span class="n">format_module_typedesc</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">typedesc</span><span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1054"><a href="#RushProvider.get_module_functions-1054"><span class="linenos">1054</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">usage</span> <span class="o">+</span> <span class="s2">&quot;  </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">usage</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1055"><a href="#RushProvider.get_module_functions-1055"><span class="linenos">1055</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">ins_docs</span><span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1056"><a href="#RushProvider.get_module_functions-1056"><span class="linenos">1056</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">outs_docs</span><span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1057"><a href="#RushProvider.get_module_functions-1057"><span class="linenos">1057</span></a>                    <span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1058"><a href="#RushProvider.get_module_functions-1058"><span class="linenos">1058</span></a>                <span class="k">else</span><span class="p">:</span>
-</span><span id="RushProvider.get_module_functions-1059"><a href="#RushProvider.get_module_functions-1059"><span class="linenos">1059</span></a>                    <span class="n">runner</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; @&quot;</span> <span class="o">+</span> <span class="n">path</span>
+</span><span id="RushProvider.get_module_functions-1039"><a href="#RushProvider.get_module_functions-1039"><span class="linenos">1039</span></a>                        <span class="c1"># replace the first non-markup colon on the first line with a semicolon,</span>
+</span><span id="RushProvider.get_module_functions-1040"><a href="#RushProvider.get_module_functions-1040"><span class="linenos">1040</span></a>                        <span class="c1"># so the docs don&#39;t get rendered incorrectly</span>
+</span><span id="RushProvider.get_module_functions-1041"><a href="#RushProvider.get_module_functions-1041"><span class="linenos">1041</span></a>                        <span class="n">ins_firstline</span><span class="p">,</span> <span class="n">ins_rest</span> <span class="o">=</span> <span class="n">ins</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ins</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+</span><span id="RushProvider.get_module_functions-1042"><a href="#RushProvider.get_module_functions-1042"><span class="linenos">1042</span></a>                        <span class="n">ins_parts</span> <span class="o">=</span> <span class="n">ins_firstline</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1043"><a href="#RushProvider.get_module_functions-1043"><span class="linenos">1043</span></a>                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins_parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="RushProvider.get_module_functions-1044"><a href="#RushProvider.get_module_functions-1044"><span class="linenos">1044</span></a>                            <span class="n">ins</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="RushProvider.get_module_functions-1045"><a href="#RushProvider.get_module_functions-1045"><span class="linenos">1045</span></a>                                <span class="n">ins_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="RushProvider.get_module_functions-1046"><a href="#RushProvider.get_module_functions-1046"><span class="linenos">1046</span></a>                                <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
+</span><span id="RushProvider.get_module_functions-1047"><a href="#RushProvider.get_module_functions-1047"><span class="linenos">1047</span></a>                                <span class="o">+</span> <span class="n">ins_parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="RushProvider.get_module_functions-1048"><a href="#RushProvider.get_module_functions-1048"><span class="linenos">1048</span></a>                                <span class="o">+</span> <span class="s2">&quot;; &quot;</span>
+</span><span id="RushProvider.get_module_functions-1049"><a href="#RushProvider.get_module_functions-1049"><span class="linenos">1049</span></a>                                <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ins_parts</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+</span><span id="RushProvider.get_module_functions-1050"><a href="#RushProvider.get_module_functions-1050"><span class="linenos">1050</span></a>                                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="RushProvider.get_module_functions-1051"><a href="#RushProvider.get_module_functions-1051"><span class="linenos">1051</span></a>                                <span class="o">+</span> <span class="n">ins_rest</span>
+</span><span id="RushProvider.get_module_functions-1052"><a href="#RushProvider.get_module_functions-1052"><span class="linenos">1052</span></a>                            <span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1053"><a href="#RushProvider.get_module_functions-1053"><span class="linenos">1053</span></a>                        <span class="n">ins_docs</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">:param </span><span class="si">{</span><span class="n">ins</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="RushProvider.get_module_functions-1054"><a href="#RushProvider.get_module_functions-1054"><span class="linenos">1054</span></a>
+</span><span id="RushProvider.get_module_functions-1055"><a href="#RushProvider.get_module_functions-1055"><span class="linenos">1055</span></a>                <span class="c1"># convert outs_usage array to return docs</span>
+</span><span id="RushProvider.get_module_functions-1056"><a href="#RushProvider.get_module_functions-1056"><span class="linenos">1056</span></a>                <span class="n">outs_docs</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+</span><span id="RushProvider.get_module_functions-1057"><a href="#RushProvider.get_module_functions-1057"><span class="linenos">1057</span></a>                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">outs_usage</span><span class="p">:</span>
+</span><span id="RushProvider.get_module_functions-1058"><a href="#RushProvider.get_module_functions-1058"><span class="linenos">1058</span></a>                    <span class="k">for</span> <span class="n">outs</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">outs_usage</span><span class="p">:</span>
+</span><span id="RushProvider.get_module_functions-1059"><a href="#RushProvider.get_module_functions-1059"><span class="linenos">1059</span></a>                        <span class="n">outs_docs</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">:return </span><span class="si">{</span><span class="n">outs</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span id="RushProvider.get_module_functions-1060"><a href="#RushProvider.get_module_functions-1060"><span class="linenos">1060</span></a>
-</span><span id="RushProvider.get_module_functions-1061"><a href="#RushProvider.get_module_functions-1061"><span class="linenos">1061</span></a>                <span class="n">runner</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Unpack</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">to_python_type</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">in_types</span><span class="p">)]]</span>
-</span><span id="RushProvider.get_module_functions-1062"><a href="#RushProvider.get_module_functions-1062"><span class="linenos">1062</span></a>                <span class="n">runner</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;return&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">to_python_type</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">out_types</span><span class="p">)]</span>
-</span><span id="RushProvider.get_module_functions-1063"><a href="#RushProvider.get_module_functions-1063"><span class="linenos">1063</span></a>
-</span><span id="RushProvider.get_module_functions-1064"><a href="#RushProvider.get_module_functions-1064"><span class="linenos">1064</span></a>                <span class="k">return</span> <span class="n">runner</span>
-</span><span id="RushProvider.get_module_functions-1065"><a href="#RushProvider.get_module_functions-1065"><span class="linenos">1065</span></a>
-</span><span id="RushProvider.get_module_functions-1066"><a href="#RushProvider.get_module_functions-1066"><span class="linenos">1066</span></a>            <span class="n">runner</span> <span class="o">=</span> <span class="n">closure</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">typechecker</span><span class="p">,</span> <span class="n">default_target</span><span class="p">,</span> <span class="n">default_resources</span><span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1067"><a href="#RushProvider.get_module_functions-1067"><span class="linenos">1067</span></a>            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">runner</span><span class="p">)</span>
-</span><span id="RushProvider.get_module_functions-1068"><a href="#RushProvider.get_module_functions-1068"><span class="linenos">1068</span></a>            <span class="n">ret</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">runner</span>
-</span><span id="RushProvider.get_module_functions-1069"><a href="#RushProvider.get_module_functions-1069"><span class="linenos">1069</span></a>        <span class="k">return</span> <span class="n">ret</span>
+</span><span id="RushProvider.get_module_functions-1061"><a href="#RushProvider.get_module_functions-1061"><span class="linenos">1061</span></a>                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+</span><span id="RushProvider.get_module_functions-1062"><a href="#RushProvider.get_module_functions-1062"><span class="linenos">1062</span></a>                    <span class="n">runner</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="RushProvider.get_module_functions-1063"><a href="#RushProvider.get_module_functions-1063"><span class="linenos">1063</span></a>                        <span class="n">module</span><span class="o">.</span><span class="n">description</span>
+</span><span id="RushProvider.get_module_functions-1064"><a href="#RushProvider.get_module_functions-1064"><span class="linenos">1064</span></a>                        <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Module version:  </span><span class="se">\n</span><span class="s2">`&quot;</span>
+</span><span id="RushProvider.get_module_functions-1065"><a href="#RushProvider.get_module_functions-1065"><span class="linenos">1065</span></a>                        <span class="o">+</span> <span class="n">path</span>
+</span><span id="RushProvider.get_module_functions-1066"><a href="#RushProvider.get_module_functions-1066"><span class="linenos">1066</span></a>                        <span class="o">+</span> <span class="s2">&quot;`</span><span class="se">\n\n</span><span class="s2">QDX Type Description:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span id="RushProvider.get_module_functions-1067"><a href="#RushProvider.get_module_functions-1067"><span class="linenos">1067</span></a>                        <span class="o">+</span> <span class="n">format_module_typedesc</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">typedesc</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1068"><a href="#RushProvider.get_module_functions-1068"><span class="linenos">1068</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">usage</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;  </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">usage</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1069"><a href="#RushProvider.get_module_functions-1069"><span class="linenos">1069</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">ins_docs</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1070"><a href="#RushProvider.get_module_functions-1070"><span class="linenos">1070</span></a>                        <span class="o">+</span> <span class="p">(</span><span class="n">outs_docs</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1071"><a href="#RushProvider.get_module_functions-1071"><span class="linenos">1071</span></a>                    <span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1072"><a href="#RushProvider.get_module_functions-1072"><span class="linenos">1072</span></a>                <span class="k">else</span><span class="p">:</span>
+</span><span id="RushProvider.get_module_functions-1073"><a href="#RushProvider.get_module_functions-1073"><span class="linenos">1073</span></a>                    <span class="n">runner</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; @&quot;</span> <span class="o">+</span> <span class="n">path</span>
+</span><span id="RushProvider.get_module_functions-1074"><a href="#RushProvider.get_module_functions-1074"><span class="linenos">1074</span></a>
+</span><span id="RushProvider.get_module_functions-1075"><a href="#RushProvider.get_module_functions-1075"><span class="linenos">1075</span></a>                <span class="n">runner</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Unpack</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">to_python_type</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">in_types</span><span class="p">)]]</span>
+</span><span id="RushProvider.get_module_functions-1076"><a href="#RushProvider.get_module_functions-1076"><span class="linenos">1076</span></a>                <span class="n">runner</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;return&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">to_python_type</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">out_types</span><span class="p">)]</span>
+</span><span id="RushProvider.get_module_functions-1077"><a href="#RushProvider.get_module_functions-1077"><span class="linenos">1077</span></a>
+</span><span id="RushProvider.get_module_functions-1078"><a href="#RushProvider.get_module_functions-1078"><span class="linenos">1078</span></a>                <span class="k">return</span> <span class="n">runner</span>
+</span><span id="RushProvider.get_module_functions-1079"><a href="#RushProvider.get_module_functions-1079"><span class="linenos">1079</span></a>
+</span><span id="RushProvider.get_module_functions-1080"><a href="#RushProvider.get_module_functions-1080"><span class="linenos">1080</span></a>            <span class="n">runner</span> <span class="o">=</span> <span class="n">closure</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">typechecker</span><span class="p">,</span> <span class="n">default_target</span><span class="p">,</span> <span class="n">default_resources</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1081"><a href="#RushProvider.get_module_functions-1081"><span class="linenos">1081</span></a>            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">runner</span><span class="p">)</span>
+</span><span id="RushProvider.get_module_functions-1082"><a href="#RushProvider.get_module_functions-1082"><span class="linenos">1082</span></a>            <span class="n">ret</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">runner</span>
+</span><span id="RushProvider.get_module_functions-1083"><a href="#RushProvider.get_module_functions-1083"><span class="linenos">1083</span></a>        <span class="k">return</span> <span class="n">ret</span>
 </span></pre></div>
 
 
@@ -1600,19 +1614,19 @@ If provided, must be the same length as the number of outputs.</li>
 
     </div>
     <a class="headerlink" href="#RushProvider.retry"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.retry-1071"><a href="#RushProvider.retry-1071"><span class="linenos">1071</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">retry</span><span class="p">(</span>
-</span><span id="RushProvider.retry-1072"><a href="#RushProvider.retry-1072"><span class="linenos">1072</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="RushProvider.retry-1073"><a href="#RushProvider.retry-1073"><span class="linenos">1073</span></a>        <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">,</span>
-</span><span id="RushProvider.retry-1074"><a href="#RushProvider.retry-1074"><span class="linenos">1074</span></a>        <span class="n">target</span><span class="p">:</span> <span class="n">Target</span><span class="p">,</span>
-</span><span id="RushProvider.retry-1075"><a href="#RushProvider.retry-1075"><span class="linenos">1075</span></a>        <span class="n">resources</span><span class="p">:</span> <span class="n">Resources</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.retry-1076"><a href="#RushProvider.retry-1076"><span class="linenos">1076</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RetryRetry</span><span class="p">:</span>
-</span><span id="RushProvider.retry-1077"><a href="#RushProvider.retry-1077"><span class="linenos">1077</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.retry-1078"><a href="#RushProvider.retry-1078"><span class="linenos">1078</span></a><span class="sd">        Retry a module instance.</span>
-</span><span id="RushProvider.retry-1079"><a href="#RushProvider.retry-1079"><span class="linenos">1079</span></a>
-</span><span id="RushProvider.retry-1080"><a href="#RushProvider.retry-1080"><span class="linenos">1080</span></a><span class="sd">        :param id: The ID of the module instance to be retried.</span>
-</span><span id="RushProvider.retry-1081"><a href="#RushProvider.retry-1081"><span class="linenos">1081</span></a><span class="sd">        :return: The ID of the new module instance.</span>
-</span><span id="RushProvider.retry-1082"><a href="#RushProvider.retry-1082"><span class="linenos">1082</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.retry-1083"><a href="#RushProvider.retry-1083"><span class="linenos">1083</span></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="n">resources</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.retry-1085"><a href="#RushProvider.retry-1085"><span class="linenos">1085</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">retry</span><span class="p">(</span>
+</span><span id="RushProvider.retry-1086"><a href="#RushProvider.retry-1086"><span class="linenos">1086</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="RushProvider.retry-1087"><a href="#RushProvider.retry-1087"><span class="linenos">1087</span></a>        <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">,</span>
+</span><span id="RushProvider.retry-1088"><a href="#RushProvider.retry-1088"><span class="linenos">1088</span></a>        <span class="n">target</span><span class="p">:</span> <span class="n">Target</span><span class="p">,</span>
+</span><span id="RushProvider.retry-1089"><a href="#RushProvider.retry-1089"><span class="linenos">1089</span></a>        <span class="n">resources</span><span class="p">:</span> <span class="n">Resources</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.retry-1090"><a href="#RushProvider.retry-1090"><span class="linenos">1090</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RetryRetry</span><span class="p">:</span>
+</span><span id="RushProvider.retry-1091"><a href="#RushProvider.retry-1091"><span class="linenos">1091</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.retry-1092"><a href="#RushProvider.retry-1092"><span class="linenos">1092</span></a><span class="sd">        Retry a module instance.</span>
+</span><span id="RushProvider.retry-1093"><a href="#RushProvider.retry-1093"><span class="linenos">1093</span></a>
+</span><span id="RushProvider.retry-1094"><a href="#RushProvider.retry-1094"><span class="linenos">1094</span></a><span class="sd">        :param id: The ID of the module instance to be retried.</span>
+</span><span id="RushProvider.retry-1095"><a href="#RushProvider.retry-1095"><span class="linenos">1095</span></a><span class="sd">        :return: The ID of the new module instance.</span>
+</span><span id="RushProvider.retry-1096"><a href="#RushProvider.retry-1096"><span class="linenos">1096</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.retry-1097"><a href="#RushProvider.retry-1097"><span class="linenos">1097</span></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="n">resources</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </span></pre></div>
 
 
@@ -1644,22 +1658,22 @@ If provided, must be the same length as the number of outputs.</li>
 
     </div>
     <a class="headerlink" href="#RushProvider.upload"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.upload-1085"><a href="#RushProvider.upload-1085"><span class="linenos">1085</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span>
-</span><span id="RushProvider.upload-1086"><a href="#RushProvider.upload-1086"><span class="linenos">1086</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="RushProvider.upload-1087"><a href="#RushProvider.upload-1087"><span class="linenos">1087</span></a>        <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="RushProvider.upload-1088"><a href="#RushProvider.upload-1088"><span class="linenos">1088</span></a>        <span class="n">typeinfo</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="RushProvider.upload-1089"><a href="#RushProvider.upload-1089"><span class="linenos">1089</span></a>    <span class="p">):</span>
-</span><span id="RushProvider.upload-1090"><a href="#RushProvider.upload-1090"><span class="linenos">1090</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.upload-1091"><a href="#RushProvider.upload-1091"><span class="linenos">1091</span></a><span class="sd">        Upload an Object with typeinfo and store as an Argument.</span>
-</span><span id="RushProvider.upload-1092"><a href="#RushProvider.upload-1092"><span class="linenos">1092</span></a>
-</span><span id="RushProvider.upload-1093"><a href="#RushProvider.upload-1093"><span class="linenos">1093</span></a><span class="sd">        :param file: The file to be uploaded.</span>
-</span><span id="RushProvider.upload-1094"><a href="#RushProvider.upload-1094"><span class="linenos">1094</span></a><span class="sd">        :param typeinfo: The typeinfo of the file.</span>
-</span><span id="RushProvider.upload-1095"><a href="#RushProvider.upload-1095"><span class="linenos">1095</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.upload-1096"><a href="#RushProvider.upload-1096"><span class="linenos">1096</span></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="RushProvider.upload-1097"><a href="#RushProvider.upload-1097"><span class="linenos">1097</span></a>            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">upload_arg</span><span class="p">(</span>
-</span><span id="RushProvider.upload-1098"><a href="#RushProvider.upload-1098"><span class="linenos">1098</span></a>                <span class="n">typeinfo</span><span class="o">=</span><span class="n">typeinfo</span><span class="p">,</span>
-</span><span id="RushProvider.upload-1099"><a href="#RushProvider.upload-1099"><span class="linenos">1099</span></a>                <span class="n">file</span><span class="o">=</span><span class="n">Upload</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s2">&quot;application/octet-stream&quot;</span><span class="p">),</span>
-</span><span id="RushProvider.upload-1100"><a href="#RushProvider.upload-1100"><span class="linenos">1100</span></a>            <span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.upload-1099"><a href="#RushProvider.upload-1099"><span class="linenos">1099</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span>
+</span><span id="RushProvider.upload-1100"><a href="#RushProvider.upload-1100"><span class="linenos">1100</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="RushProvider.upload-1101"><a href="#RushProvider.upload-1101"><span class="linenos">1101</span></a>        <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="RushProvider.upload-1102"><a href="#RushProvider.upload-1102"><span class="linenos">1102</span></a>        <span class="n">typeinfo</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="RushProvider.upload-1103"><a href="#RushProvider.upload-1103"><span class="linenos">1103</span></a>    <span class="p">):</span>
+</span><span id="RushProvider.upload-1104"><a href="#RushProvider.upload-1104"><span class="linenos">1104</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.upload-1105"><a href="#RushProvider.upload-1105"><span class="linenos">1105</span></a><span class="sd">        Upload an Object with typeinfo and store as an Argument.</span>
+</span><span id="RushProvider.upload-1106"><a href="#RushProvider.upload-1106"><span class="linenos">1106</span></a>
+</span><span id="RushProvider.upload-1107"><a href="#RushProvider.upload-1107"><span class="linenos">1107</span></a><span class="sd">        :param file: The file to be uploaded.</span>
+</span><span id="RushProvider.upload-1108"><a href="#RushProvider.upload-1108"><span class="linenos">1108</span></a><span class="sd">        :param typeinfo: The typeinfo of the file.</span>
+</span><span id="RushProvider.upload-1109"><a href="#RushProvider.upload-1109"><span class="linenos">1109</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.upload-1110"><a href="#RushProvider.upload-1110"><span class="linenos">1110</span></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="RushProvider.upload-1111"><a href="#RushProvider.upload-1111"><span class="linenos">1111</span></a>            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">upload_arg</span><span class="p">(</span>
+</span><span id="RushProvider.upload-1112"><a href="#RushProvider.upload-1112"><span class="linenos">1112</span></a>                <span class="n">typeinfo</span><span class="o">=</span><span class="n">typeinfo</span><span class="p">,</span>
+</span><span id="RushProvider.upload-1113"><a href="#RushProvider.upload-1113"><span class="linenos">1113</span></a>                <span class="n">file</span><span class="o">=</span><span class="n">Upload</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s2">&quot;application/octet-stream&quot;</span><span class="p">),</span>
+</span><span id="RushProvider.upload-1114"><a href="#RushProvider.upload-1114"><span class="linenos">1114</span></a>            <span class="p">)</span>
 </span></pre></div>
 
 
@@ -1686,15 +1700,15 @@ If provided, must be the same length as the number of outputs.</li>
 
     </div>
     <a class="headerlink" href="#RushProvider.module_instance"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.module_instance-1102"><a href="#RushProvider.module_instance-1102"><span class="linenos">1102</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">module_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModuleInstanceDetailsModuleInstance</span><span class="p">:</span>
-</span><span id="RushProvider.module_instance-1103"><a href="#RushProvider.module_instance-1103"><span class="linenos">1103</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.module_instance-1104"><a href="#RushProvider.module_instance-1104"><span class="linenos">1104</span></a><span class="sd">        Retrieve a module instance by its ID.</span>
-</span><span id="RushProvider.module_instance-1105"><a href="#RushProvider.module_instance-1105"><span class="linenos">1105</span></a>
-</span><span id="RushProvider.module_instance-1106"><a href="#RushProvider.module_instance-1106"><span class="linenos">1106</span></a><span class="sd">        :param id: The ID of the module instance to be retrieved.</span>
-</span><span id="RushProvider.module_instance-1107"><a href="#RushProvider.module_instance-1107"><span class="linenos">1107</span></a><span class="sd">        :return: The retrieved module instance.</span>
-</span><span id="RushProvider.module_instance-1108"><a href="#RushProvider.module_instance-1108"><span class="linenos">1108</span></a><span class="sd">        :raise Exception: If the module instance is not found.</span>
-</span><span id="RushProvider.module_instance-1109"><a href="#RushProvider.module_instance-1109"><span class="linenos">1109</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.module_instance-1110"><a href="#RushProvider.module_instance-1110"><span class="linenos">1110</span></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">module_instance_details</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.module_instance-1116"><a href="#RushProvider.module_instance-1116"><span class="linenos">1116</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">module_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModuleInstanceDetailsModuleInstance</span><span class="p">:</span>
+</span><span id="RushProvider.module_instance-1117"><a href="#RushProvider.module_instance-1117"><span class="linenos">1117</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.module_instance-1118"><a href="#RushProvider.module_instance-1118"><span class="linenos">1118</span></a><span class="sd">        Retrieve a module instance by its ID.</span>
+</span><span id="RushProvider.module_instance-1119"><a href="#RushProvider.module_instance-1119"><span class="linenos">1119</span></a>
+</span><span id="RushProvider.module_instance-1120"><a href="#RushProvider.module_instance-1120"><span class="linenos">1120</span></a><span class="sd">        :param id: The ID of the module instance to be retrieved.</span>
+</span><span id="RushProvider.module_instance-1121"><a href="#RushProvider.module_instance-1121"><span class="linenos">1121</span></a><span class="sd">        :return: The retrieved module instance.</span>
+</span><span id="RushProvider.module_instance-1122"><a href="#RushProvider.module_instance-1122"><span class="linenos">1122</span></a><span class="sd">        :raises Exception: If the module instance is not found.</span>
+</span><span id="RushProvider.module_instance-1123"><a href="#RushProvider.module_instance-1123"><span class="linenos">1123</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.module_instance-1124"><a href="#RushProvider.module_instance-1124"><span class="linenos">1124</span></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">module_instance_details</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1709,9 +1723,14 @@ If provided, must be the same length as the number of outputs.</li>
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>The retrieved module instance.
-  :raise Exception: If the module instance is not found.</p>
+  <p>The retrieved module instance.</p>
 </blockquote>
+
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li><strong>Exception</strong>:  If the module instance is not found.</li>
+</ul>
 </div>
 
 
@@ -1727,63 +1746,63 @@ If provided, must be the same length as the number of outputs.</li>
 
     </div>
     <a class="headerlink" href="#RushProvider.logs"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.logs-1112"><a href="#RushProvider.logs-1112"><span class="linenos">1112</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">logs</span><span class="p">(</span>
-</span><span id="RushProvider.logs-1113"><a href="#RushProvider.logs-1113"><span class="linenos">1113</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1114"><a href="#RushProvider.logs-1114"><span class="linenos">1114</span></a>        <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1115"><a href="#RushProvider.logs-1115"><span class="linenos">1115</span></a>        <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">],</span>
-</span><span id="RushProvider.logs-1116"><a href="#RushProvider.logs-1116"><span class="linenos">1116</span></a>        <span class="n">after</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1117"><a href="#RushProvider.logs-1117"><span class="linenos">1117</span></a>        <span class="n">before</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1118"><a href="#RushProvider.logs-1118"><span class="linenos">1118</span></a>        <span class="n">pages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1119"><a href="#RushProvider.logs-1119"><span class="linenos">1119</span></a>        <span class="n">print_logs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1120"><a href="#RushProvider.logs-1120"><span class="linenos">1120</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span id="RushProvider.logs-1121"><a href="#RushProvider.logs-1121"><span class="linenos">1121</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.logs-1122"><a href="#RushProvider.logs-1122"><span class="linenos">1122</span></a><span class="sd">        Retrieve the stdout and stderr of a module instance.</span>
-</span><span id="RushProvider.logs-1123"><a href="#RushProvider.logs-1123"><span class="linenos">1123</span></a>
-</span><span id="RushProvider.logs-1124"><a href="#RushProvider.logs-1124"><span class="linenos">1124</span></a><span class="sd">        :param id: The ID of the module instance.</span>
-</span><span id="RushProvider.logs-1125"><a href="#RushProvider.logs-1125"><span class="linenos">1125</span></a><span class="sd">        :return: The stdout and stderr of the module instance.</span>
-</span><span id="RushProvider.logs-1126"><a href="#RushProvider.logs-1126"><span class="linenos">1126</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.logs-1127"><a href="#RushProvider.logs-1127"><span class="linenos">1127</span></a>
-</span><span id="RushProvider.logs-1128"><a href="#RushProvider.logs-1128"><span class="linenos">1128</span></a>        <span class="c1"># page through the logs</span>
-</span><span id="RushProvider.logs-1129"><a href="#RushProvider.logs-1129"><span class="linenos">1129</span></a>
-</span><span id="RushProvider.logs-1130"><a href="#RushProvider.logs-1130"><span class="linenos">1130</span></a>        <span class="k">async</span> <span class="k">def</span> <span class="nf">return_paged</span><span class="p">(</span>
-</span><span id="RushProvider.logs-1131"><a href="#RushProvider.logs-1131"><span class="linenos">1131</span></a>            <span class="n">after</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1132"><a href="#RushProvider.logs-1132"><span class="linenos">1132</span></a>            <span class="n">before</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1133"><a href="#RushProvider.logs-1133"><span class="linenos">1133</span></a>            <span class="n">_</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1134"><a href="#RushProvider.logs-1134"><span class="linenos">1134</span></a>            <span class="n">last</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1135"><a href="#RushProvider.logs-1135"><span class="linenos">1135</span></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1136"><a href="#RushProvider.logs-1136"><span class="linenos">1136</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="RushProvider.logs-1137"><a href="#RushProvider.logs-1137"><span class="linenos">1137</span></a>            <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="RushProvider.logs-1138"><a href="#RushProvider.logs-1138"><span class="linenos">1138</span></a>
-</span><span id="RushProvider.logs-1139"><a href="#RushProvider.logs-1139"><span class="linenos">1139</span></a>            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;stdout&quot;</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1140"><a href="#RushProvider.logs-1140"><span class="linenos">1140</span></a>                <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="RushProvider.logs-1141"><a href="#RushProvider.logs-1141"><span class="linenos">1141</span></a>                    <span class="s2">&quot;stdout_after&quot;</span><span class="p">:</span> <span class="n">after</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1142"><a href="#RushProvider.logs-1142"><span class="linenos">1142</span></a>                    <span class="s2">&quot;stdout_before&quot;</span><span class="p">:</span> <span class="n">before</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1143"><a href="#RushProvider.logs-1143"><span class="linenos">1143</span></a>                <span class="p">}</span>
-</span><span id="RushProvider.logs-1144"><a href="#RushProvider.logs-1144"><span class="linenos">1144</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1145"><a href="#RushProvider.logs-1145"><span class="linenos">1145</span></a>                <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="RushProvider.logs-1146"><a href="#RushProvider.logs-1146"><span class="linenos">1146</span></a>                    <span class="s2">&quot;stderr_after&quot;</span><span class="p">:</span> <span class="n">after</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1147"><a href="#RushProvider.logs-1147"><span class="linenos">1147</span></a>                    <span class="s2">&quot;stderr_before&quot;</span><span class="p">:</span> <span class="n">before</span><span class="p">,</span>
-</span><span id="RushProvider.logs-1148"><a href="#RushProvider.logs-1148"><span class="linenos">1148</span></a>                <span class="p">}</span>
-</span><span id="RushProvider.logs-1149"><a href="#RushProvider.logs-1149"><span class="linenos">1149</span></a>
-</span><span id="RushProvider.logs-1150"><a href="#RushProvider.logs-1150"><span class="linenos">1150</span></a>            <span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">module_instance_details</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
-</span><span id="RushProvider.logs-1151"><a href="#RushProvider.logs-1151"><span class="linenos">1151</span></a>
-</span><span id="RushProvider.logs-1152"><a href="#RushProvider.logs-1152"><span class="linenos">1152</span></a>            <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">stderr</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;stderr&quot;</span> <span class="k">else</span> <span class="n">res</span><span class="o">.</span><span class="n">stdout</span>  <span class="c1"># type: ignore</span>
-</span><span id="RushProvider.logs-1153"><a href="#RushProvider.logs-1153"><span class="linenos">1153</span></a>
-</span><span id="RushProvider.logs-1154"><a href="#RushProvider.logs-1154"><span class="linenos">1154</span></a>        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span id="RushProvider.logs-1155"><a href="#RushProvider.logs-1155"><span class="linenos">1155</span></a>        <span class="k">async</span> <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_with_pagination</span><span class="p">(</span>
-</span><span id="RushProvider.logs-1156"><a href="#RushProvider.logs-1156"><span class="linenos">1156</span></a>            <span class="n">return_paged</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-</span><span id="RushProvider.logs-1157"><a href="#RushProvider.logs-1157"><span class="linenos">1157</span></a>            <span class="n">PageVars</span><span class="p">(</span><span class="n">after</span><span class="o">=</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="n">before</span><span class="p">),</span>
-</span><span id="RushProvider.logs-1158"><a href="#RushProvider.logs-1158"><span class="linenos">1158</span></a>            <span class="p">{},</span>
-</span><span id="RushProvider.logs-1159"><a href="#RushProvider.logs-1159"><span class="linenos">1159</span></a>        <span class="p">):</span>
-</span><span id="RushProvider.logs-1160"><a href="#RushProvider.logs-1160"><span class="linenos">1160</span></a>            <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1161"><a href="#RushProvider.logs-1161"><span class="linenos">1161</span></a>                <span class="k">if</span> <span class="n">print_logs</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1162"><a href="#RushProvider.logs-1162"><span class="linenos">1162</span></a>                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1163"><a href="#RushProvider.logs-1163"><span class="linenos">1163</span></a>                        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span id="RushProvider.logs-1164"><a href="#RushProvider.logs-1164"><span class="linenos">1164</span></a>                <span class="k">else</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1165"><a href="#RushProvider.logs-1165"><span class="linenos">1165</span></a>                    <span class="k">yield</span> <span class="n">edge</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">content</span>
-</span><span id="RushProvider.logs-1166"><a href="#RushProvider.logs-1166"><span class="linenos">1166</span></a>                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span id="RushProvider.logs-1167"><a href="#RushProvider.logs-1167"><span class="linenos">1167</span></a>                <span class="k">if</span> <span class="n">pages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">pages</span><span class="p">:</span>
-</span><span id="RushProvider.logs-1168"><a href="#RushProvider.logs-1168"><span class="linenos">1168</span></a>                    <span class="k">return</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.logs-1126"><a href="#RushProvider.logs-1126"><span class="linenos">1126</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">logs</span><span class="p">(</span>
+</span><span id="RushProvider.logs-1127"><a href="#RushProvider.logs-1127"><span class="linenos">1127</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1128"><a href="#RushProvider.logs-1128"><span class="linenos">1128</span></a>        <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1129"><a href="#RushProvider.logs-1129"><span class="linenos">1129</span></a>        <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">],</span>
+</span><span id="RushProvider.logs-1130"><a href="#RushProvider.logs-1130"><span class="linenos">1130</span></a>        <span class="n">after</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1131"><a href="#RushProvider.logs-1131"><span class="linenos">1131</span></a>        <span class="n">before</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1132"><a href="#RushProvider.logs-1132"><span class="linenos">1132</span></a>        <span class="n">pages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1133"><a href="#RushProvider.logs-1133"><span class="linenos">1133</span></a>        <span class="n">print_logs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1134"><a href="#RushProvider.logs-1134"><span class="linenos">1134</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="RushProvider.logs-1135"><a href="#RushProvider.logs-1135"><span class="linenos">1135</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.logs-1136"><a href="#RushProvider.logs-1136"><span class="linenos">1136</span></a><span class="sd">        Retrieve the stdout and stderr of a module instance.</span>
+</span><span id="RushProvider.logs-1137"><a href="#RushProvider.logs-1137"><span class="linenos">1137</span></a>
+</span><span id="RushProvider.logs-1138"><a href="#RushProvider.logs-1138"><span class="linenos">1138</span></a><span class="sd">        :param id: The ID of the module instance.</span>
+</span><span id="RushProvider.logs-1139"><a href="#RushProvider.logs-1139"><span class="linenos">1139</span></a><span class="sd">        :return: The stdout and stderr of the module instance.</span>
+</span><span id="RushProvider.logs-1140"><a href="#RushProvider.logs-1140"><span class="linenos">1140</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.logs-1141"><a href="#RushProvider.logs-1141"><span class="linenos">1141</span></a>
+</span><span id="RushProvider.logs-1142"><a href="#RushProvider.logs-1142"><span class="linenos">1142</span></a>        <span class="c1"># page through the logs</span>
+</span><span id="RushProvider.logs-1143"><a href="#RushProvider.logs-1143"><span class="linenos">1143</span></a>
+</span><span id="RushProvider.logs-1144"><a href="#RushProvider.logs-1144"><span class="linenos">1144</span></a>        <span class="k">async</span> <span class="k">def</span> <span class="nf">return_paged</span><span class="p">(</span>
+</span><span id="RushProvider.logs-1145"><a href="#RushProvider.logs-1145"><span class="linenos">1145</span></a>            <span class="n">after</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1146"><a href="#RushProvider.logs-1146"><span class="linenos">1146</span></a>            <span class="n">before</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1147"><a href="#RushProvider.logs-1147"><span class="linenos">1147</span></a>            <span class="n">_</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1148"><a href="#RushProvider.logs-1148"><span class="linenos">1148</span></a>            <span class="n">last</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">UnsetType</span><span class="p">]</span> <span class="o">=</span> <span class="n">UNSET</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1149"><a href="#RushProvider.logs-1149"><span class="linenos">1149</span></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1150"><a href="#RushProvider.logs-1150"><span class="linenos">1150</span></a>        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="RushProvider.logs-1151"><a href="#RushProvider.logs-1151"><span class="linenos">1151</span></a>            <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="RushProvider.logs-1152"><a href="#RushProvider.logs-1152"><span class="linenos">1152</span></a>
+</span><span id="RushProvider.logs-1153"><a href="#RushProvider.logs-1153"><span class="linenos">1153</span></a>            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;stdout&quot;</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1154"><a href="#RushProvider.logs-1154"><span class="linenos">1154</span></a>                <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="RushProvider.logs-1155"><a href="#RushProvider.logs-1155"><span class="linenos">1155</span></a>                    <span class="s2">&quot;stdout_after&quot;</span><span class="p">:</span> <span class="n">after</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1156"><a href="#RushProvider.logs-1156"><span class="linenos">1156</span></a>                    <span class="s2">&quot;stdout_before&quot;</span><span class="p">:</span> <span class="n">before</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1157"><a href="#RushProvider.logs-1157"><span class="linenos">1157</span></a>                <span class="p">}</span>
+</span><span id="RushProvider.logs-1158"><a href="#RushProvider.logs-1158"><span class="linenos">1158</span></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1159"><a href="#RushProvider.logs-1159"><span class="linenos">1159</span></a>                <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="RushProvider.logs-1160"><a href="#RushProvider.logs-1160"><span class="linenos">1160</span></a>                    <span class="s2">&quot;stderr_after&quot;</span><span class="p">:</span> <span class="n">after</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1161"><a href="#RushProvider.logs-1161"><span class="linenos">1161</span></a>                    <span class="s2">&quot;stderr_before&quot;</span><span class="p">:</span> <span class="n">before</span><span class="p">,</span>
+</span><span id="RushProvider.logs-1162"><a href="#RushProvider.logs-1162"><span class="linenos">1162</span></a>                <span class="p">}</span>
+</span><span id="RushProvider.logs-1163"><a href="#RushProvider.logs-1163"><span class="linenos">1163</span></a>
+</span><span id="RushProvider.logs-1164"><a href="#RushProvider.logs-1164"><span class="linenos">1164</span></a>            <span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">module_instance_details</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+</span><span id="RushProvider.logs-1165"><a href="#RushProvider.logs-1165"><span class="linenos">1165</span></a>
+</span><span id="RushProvider.logs-1166"><a href="#RushProvider.logs-1166"><span class="linenos">1166</span></a>            <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">stderr</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;stderr&quot;</span> <span class="k">else</span> <span class="n">res</span><span class="o">.</span><span class="n">stdout</span>  <span class="c1"># type: ignore</span>
+</span><span id="RushProvider.logs-1167"><a href="#RushProvider.logs-1167"><span class="linenos">1167</span></a>
+</span><span id="RushProvider.logs-1168"><a href="#RushProvider.logs-1168"><span class="linenos">1168</span></a>        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="RushProvider.logs-1169"><a href="#RushProvider.logs-1169"><span class="linenos">1169</span></a>        <span class="k">async</span> <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_with_pagination</span><span class="p">(</span>
+</span><span id="RushProvider.logs-1170"><a href="#RushProvider.logs-1170"><span class="linenos">1170</span></a>            <span class="n">return_paged</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+</span><span id="RushProvider.logs-1171"><a href="#RushProvider.logs-1171"><span class="linenos">1171</span></a>            <span class="n">PageVars</span><span class="p">(</span><span class="n">after</span><span class="o">=</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="n">before</span><span class="p">),</span>
+</span><span id="RushProvider.logs-1172"><a href="#RushProvider.logs-1172"><span class="linenos">1172</span></a>            <span class="p">{},</span>
+</span><span id="RushProvider.logs-1173"><a href="#RushProvider.logs-1173"><span class="linenos">1173</span></a>        <span class="p">):</span>
+</span><span id="RushProvider.logs-1174"><a href="#RushProvider.logs-1174"><span class="linenos">1174</span></a>            <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1175"><a href="#RushProvider.logs-1175"><span class="linenos">1175</span></a>                <span class="k">if</span> <span class="n">print_logs</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1176"><a href="#RushProvider.logs-1176"><span class="linenos">1176</span></a>                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1177"><a href="#RushProvider.logs-1177"><span class="linenos">1177</span></a>                        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="RushProvider.logs-1178"><a href="#RushProvider.logs-1178"><span class="linenos">1178</span></a>                <span class="k">else</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1179"><a href="#RushProvider.logs-1179"><span class="linenos">1179</span></a>                    <span class="k">yield</span> <span class="n">edge</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">content</span>
+</span><span id="RushProvider.logs-1180"><a href="#RushProvider.logs-1180"><span class="linenos">1180</span></a>                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="RushProvider.logs-1181"><a href="#RushProvider.logs-1181"><span class="linenos">1181</span></a>                <span class="k">if</span> <span class="n">pages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">pages</span><span class="p">:</span>
+</span><span id="RushProvider.logs-1182"><a href="#RushProvider.logs-1182"><span class="linenos">1182</span></a>                    <span class="k">return</span>
 </span></pre></div>
 
 
@@ -1815,15 +1834,15 @@ If provided, must be the same length as the number of outputs.</li>
 
     </div>
     <a class="headerlink" href="#RushProvider.delete_module_instance"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.delete_module_instance-1170"><a href="#RushProvider.delete_module_instance-1170"><span class="linenos">1170</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">delete_module_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">):</span>
-</span><span id="RushProvider.delete_module_instance-1171"><a href="#RushProvider.delete_module_instance-1171"><span class="linenos">1171</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.delete_module_instance-1172"><a href="#RushProvider.delete_module_instance-1172"><span class="linenos">1172</span></a><span class="sd">        Delete a module instance with a given ID.</span>
-</span><span id="RushProvider.delete_module_instance-1173"><a href="#RushProvider.delete_module_instance-1173"><span class="linenos">1173</span></a>
-</span><span id="RushProvider.delete_module_instance-1174"><a href="#RushProvider.delete_module_instance-1174"><span class="linenos">1174</span></a><span class="sd">        :param id: The ID of the module instance to be deleted.</span>
-</span><span id="RushProvider.delete_module_instance-1175"><a href="#RushProvider.delete_module_instance-1175"><span class="linenos">1175</span></a><span class="sd">        :return: The ID of the deleted module instance.</span>
-</span><span id="RushProvider.delete_module_instance-1176"><a href="#RushProvider.delete_module_instance-1176"><span class="linenos">1176</span></a><span class="sd">        :raise RuntimeError: If the operation fails.</span>
-</span><span id="RushProvider.delete_module_instance-1177"><a href="#RushProvider.delete_module_instance-1177"><span class="linenos">1177</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.delete_module_instance-1178"><a href="#RushProvider.delete_module_instance-1178"><span class="linenos">1178</span></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete_module_instance</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.delete_module_instance-1184"><a href="#RushProvider.delete_module_instance-1184"><span class="linenos">1184</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">delete_module_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">):</span>
+</span><span id="RushProvider.delete_module_instance-1185"><a href="#RushProvider.delete_module_instance-1185"><span class="linenos">1185</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.delete_module_instance-1186"><a href="#RushProvider.delete_module_instance-1186"><span class="linenos">1186</span></a><span class="sd">        Delete a module instance with a given ID.</span>
+</span><span id="RushProvider.delete_module_instance-1187"><a href="#RushProvider.delete_module_instance-1187"><span class="linenos">1187</span></a>
+</span><span id="RushProvider.delete_module_instance-1188"><a href="#RushProvider.delete_module_instance-1188"><span class="linenos">1188</span></a><span class="sd">        :param id: The ID of the module instance to be deleted.</span>
+</span><span id="RushProvider.delete_module_instance-1189"><a href="#RushProvider.delete_module_instance-1189"><span class="linenos">1189</span></a><span class="sd">        :return: The ID of the deleted module instance.</span>
+</span><span id="RushProvider.delete_module_instance-1190"><a href="#RushProvider.delete_module_instance-1190"><span class="linenos">1190</span></a><span class="sd">        :raises RuntimeError: If the operation fails.</span>
+</span><span id="RushProvider.delete_module_instance-1191"><a href="#RushProvider.delete_module_instance-1191"><span class="linenos">1191</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.delete_module_instance-1192"><a href="#RushProvider.delete_module_instance-1192"><span class="linenos">1192</span></a>        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete_module_instance</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1838,9 +1857,14 @@ If provided, must be the same length as the number of outputs.</li>
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>The ID of the deleted module instance.
-  :raise RuntimeError: If the operation fails.</p>
+  <p>The ID of the deleted module instance.</p>
 </blockquote>
+
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li><strong>RuntimeError</strong>:  If the operation fails.</li>
+</ul>
 </div>
 
 
@@ -1856,33 +1880,33 @@ If provided, must be the same length as the number of outputs.</li>
 
     </div>
     <a class="headerlink" href="#RushProvider.poll_module_instance"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.poll_module_instance-1180"><a href="#RushProvider.poll_module_instance-1180"><span class="linenos">1180</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">poll_module_instance</span><span class="p">(</span>
-</span><span id="RushProvider.poll_module_instance-1181"><a href="#RushProvider.poll_module_instance-1181"><span class="linenos">1181</span></a>        <span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">,</span> <span class="n">n_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">poll_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
-</span><span id="RushProvider.poll_module_instance-1182"><a href="#RushProvider.poll_module_instance-1182"><span class="linenos">1182</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="RushProvider.poll_module_instance-1183"><a href="#RushProvider.poll_module_instance-1183"><span class="linenos">1183</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="RushProvider.poll_module_instance-1184"><a href="#RushProvider.poll_module_instance-1184"><span class="linenos">1184</span></a><span class="sd">        Poll a module instance until it is completed, with a specified number of retries and poll rate.</span>
-</span><span id="RushProvider.poll_module_instance-1185"><a href="#RushProvider.poll_module_instance-1185"><span class="linenos">1185</span></a>
-</span><span id="RushProvider.poll_module_instance-1186"><a href="#RushProvider.poll_module_instance-1186"><span class="linenos">1186</span></a><span class="sd">        We do exponential backoff from 0.5s, so a retry only counts once we hit the input poll rate.</span>
-</span><span id="RushProvider.poll_module_instance-1187"><a href="#RushProvider.poll_module_instance-1187"><span class="linenos">1187</span></a>
-</span><span id="RushProvider.poll_module_instance-1188"><a href="#RushProvider.poll_module_instance-1188"><span class="linenos">1188</span></a><span class="sd">        :param id: The ID of the module instance to be polled.</span>
-</span><span id="RushProvider.poll_module_instance-1189"><a href="#RushProvider.poll_module_instance-1189"><span class="linenos">1189</span></a><span class="sd">        :param n_retries: The maximum number of retries. Default is 10.</span>
-</span><span id="RushProvider.poll_module_instance-1190"><a href="#RushProvider.poll_module_instance-1190"><span class="linenos">1190</span></a><span class="sd">        :param poll_rate: The poll rate in seconds. Default is 30.</span>
-</span><span id="RushProvider.poll_module_instance-1191"><a href="#RushProvider.poll_module_instance-1191"><span class="linenos">1191</span></a><span class="sd">        :return: The completed module instance.</span>
-</span><span id="RushProvider.poll_module_instance-1192"><a href="#RushProvider.poll_module_instance-1192"><span class="linenos">1192</span></a><span class="sd">        :raise Exception: If the module instance fails or polling times out.</span>
-</span><span id="RushProvider.poll_module_instance-1193"><a href="#RushProvider.poll_module_instance-1193"><span class="linenos">1193</span></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="RushProvider.poll_module_instance-1194"><a href="#RushProvider.poll_module_instance-1194"><span class="linenos">1194</span></a>        <span class="n">n_try</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span id="RushProvider.poll_module_instance-1195"><a href="#RushProvider.poll_module_instance-1195"><span class="linenos">1195</span></a>
-</span><span id="RushProvider.poll_module_instance-1196"><a href="#RushProvider.poll_module_instance-1196"><span class="linenos">1196</span></a>        <span class="n">curr_poll_rate</span> <span class="o">=</span> <span class="mf">0.5</span>
-</span><span id="RushProvider.poll_module_instance-1197"><a href="#RushProvider.poll_module_instance-1197"><span class="linenos">1197</span></a>        <span class="k">while</span> <span class="n">n_try</span> <span class="o">&lt;</span> <span class="n">n_retries</span><span class="p">:</span>
-</span><span id="RushProvider.poll_module_instance-1198"><a href="#RushProvider.poll_module_instance-1198"><span class="linenos">1198</span></a>            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">curr_poll_rate</span><span class="p">)</span>
-</span><span id="RushProvider.poll_module_instance-1199"><a href="#RushProvider.poll_module_instance-1199"><span class="linenos">1199</span></a>            <span class="k">if</span> <span class="n">curr_poll_rate</span> <span class="o">==</span> <span class="n">poll_rate</span><span class="p">:</span>
-</span><span id="RushProvider.poll_module_instance-1200"><a href="#RushProvider.poll_module_instance-1200"><span class="linenos">1200</span></a>                <span class="n">n_try</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span id="RushProvider.poll_module_instance-1201"><a href="#RushProvider.poll_module_instance-1201"><span class="linenos">1201</span></a>            <span class="n">curr_poll_rate</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">curr_poll_rate</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">poll_rate</span><span class="p">)</span>
-</span><span id="RushProvider.poll_module_instance-1202"><a href="#RushProvider.poll_module_instance-1202"><span class="linenos">1202</span></a>            <span class="n">module_instance</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">module_instance_minimal</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
-</span><span id="RushProvider.poll_module_instance-1203"><a href="#RushProvider.poll_module_instance-1203"><span class="linenos">1203</span></a>            <span class="k">if</span> <span class="n">module_instance</span> <span class="ow">and</span> <span class="n">module_instance</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;COMPLETED&quot;</span><span class="p">,</span> <span class="s2">&quot;FAILED&quot;</span><span class="p">]:</span>
-</span><span id="RushProvider.poll_module_instance-1204"><a href="#RushProvider.poll_module_instance-1204"><span class="linenos">1204</span></a>                <span class="k">return</span> <span class="n">module_instance</span>
-</span><span id="RushProvider.poll_module_instance-1205"><a href="#RushProvider.poll_module_instance-1205"><span class="linenos">1205</span></a>
-</span><span id="RushProvider.poll_module_instance-1206"><a href="#RushProvider.poll_module_instance-1206"><span class="linenos">1206</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Module polling timed out&quot;</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="RushProvider.poll_module_instance-1194"><a href="#RushProvider.poll_module_instance-1194"><span class="linenos">1194</span></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">poll_module_instance</span><span class="p">(</span>
+</span><span id="RushProvider.poll_module_instance-1195"><a href="#RushProvider.poll_module_instance-1195"><span class="linenos">1195</span></a>        <span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="n">ModuleInstanceId</span><span class="p">,</span> <span class="n">n_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">poll_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+</span><span id="RushProvider.poll_module_instance-1196"><a href="#RushProvider.poll_module_instance-1196"><span class="linenos">1196</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="RushProvider.poll_module_instance-1197"><a href="#RushProvider.poll_module_instance-1197"><span class="linenos">1197</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="RushProvider.poll_module_instance-1198"><a href="#RushProvider.poll_module_instance-1198"><span class="linenos">1198</span></a><span class="sd">        Poll a module instance until it is completed, with a specified number of retries and poll rate.</span>
+</span><span id="RushProvider.poll_module_instance-1199"><a href="#RushProvider.poll_module_instance-1199"><span class="linenos">1199</span></a>
+</span><span id="RushProvider.poll_module_instance-1200"><a href="#RushProvider.poll_module_instance-1200"><span class="linenos">1200</span></a><span class="sd">        We do exponential backoff from 0.5s, so a retry only counts once we hit the input poll rate.</span>
+</span><span id="RushProvider.poll_module_instance-1201"><a href="#RushProvider.poll_module_instance-1201"><span class="linenos">1201</span></a>
+</span><span id="RushProvider.poll_module_instance-1202"><a href="#RushProvider.poll_module_instance-1202"><span class="linenos">1202</span></a><span class="sd">        :param id: The ID of the module instance to be polled.</span>
+</span><span id="RushProvider.poll_module_instance-1203"><a href="#RushProvider.poll_module_instance-1203"><span class="linenos">1203</span></a><span class="sd">        :param n_retries: The maximum number of retries. Default is 10.</span>
+</span><span id="RushProvider.poll_module_instance-1204"><a href="#RushProvider.poll_module_instance-1204"><span class="linenos">1204</span></a><span class="sd">        :param poll_rate: The poll rate in seconds. Default is 30.</span>
+</span><span id="RushProvider.poll_module_instance-1205"><a href="#RushProvider.poll_module_instance-1205"><span class="linenos">1205</span></a><span class="sd">        :return: The completed module instance.</span>
+</span><span id="RushProvider.poll_module_instance-1206"><a href="#RushProvider.poll_module_instance-1206"><span class="linenos">1206</span></a><span class="sd">        :raises Exception: If the module instance fails or polling times out.</span>
+</span><span id="RushProvider.poll_module_instance-1207"><a href="#RushProvider.poll_module_instance-1207"><span class="linenos">1207</span></a><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="RushProvider.poll_module_instance-1208"><a href="#RushProvider.poll_module_instance-1208"><span class="linenos">1208</span></a>        <span class="n">n_try</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="RushProvider.poll_module_instance-1209"><a href="#RushProvider.poll_module_instance-1209"><span class="linenos">1209</span></a>
+</span><span id="RushProvider.poll_module_instance-1210"><a href="#RushProvider.poll_module_instance-1210"><span class="linenos">1210</span></a>        <span class="n">curr_poll_rate</span> <span class="o">=</span> <span class="mf">0.5</span>
+</span><span id="RushProvider.poll_module_instance-1211"><a href="#RushProvider.poll_module_instance-1211"><span class="linenos">1211</span></a>        <span class="k">while</span> <span class="n">n_try</span> <span class="o">&lt;</span> <span class="n">n_retries</span><span class="p">:</span>
+</span><span id="RushProvider.poll_module_instance-1212"><a href="#RushProvider.poll_module_instance-1212"><span class="linenos">1212</span></a>            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">curr_poll_rate</span><span class="p">)</span>
+</span><span id="RushProvider.poll_module_instance-1213"><a href="#RushProvider.poll_module_instance-1213"><span class="linenos">1213</span></a>            <span class="k">if</span> <span class="n">curr_poll_rate</span> <span class="o">==</span> <span class="n">poll_rate</span><span class="p">:</span>
+</span><span id="RushProvider.poll_module_instance-1214"><a href="#RushProvider.poll_module_instance-1214"><span class="linenos">1214</span></a>                <span class="n">n_try</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="RushProvider.poll_module_instance-1215"><a href="#RushProvider.poll_module_instance-1215"><span class="linenos">1215</span></a>            <span class="n">curr_poll_rate</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">curr_poll_rate</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">poll_rate</span><span class="p">)</span>
+</span><span id="RushProvider.poll_module_instance-1216"><a href="#RushProvider.poll_module_instance-1216"><span class="linenos">1216</span></a>            <span class="n">module_instance</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">module_instance_minimal</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+</span><span id="RushProvider.poll_module_instance-1217"><a href="#RushProvider.poll_module_instance-1217"><span class="linenos">1217</span></a>            <span class="k">if</span> <span class="n">module_instance</span> <span class="ow">and</span> <span class="n">module_instance</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;COMPLETED&quot;</span><span class="p">,</span> <span class="s2">&quot;FAILED&quot;</span><span class="p">]:</span>
+</span><span id="RushProvider.poll_module_instance-1218"><a href="#RushProvider.poll_module_instance-1218"><span class="linenos">1218</span></a>                <span class="k">return</span> <span class="n">module_instance</span>
+</span><span id="RushProvider.poll_module_instance-1219"><a href="#RushProvider.poll_module_instance-1219"><span class="linenos">1219</span></a>
+</span><span id="RushProvider.poll_module_instance-1220"><a href="#RushProvider.poll_module_instance-1220"><span class="linenos">1220</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Module polling timed out&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1901,9 +1925,14 @@ If provided, must be the same length as the number of outputs.</li>
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>The completed module instance.
-  :raise Exception: If the module instance fails or polling times out.</p>
+  <p>The completed module instance.</p>
 </blockquote>
+
+<h6 id="raises">Raises</h6>
+
+<ul>
+<li><strong>Exception</strong>:  If the module instance fails or polling times out.</li>
+</ul>
 </div>
 
 
@@ -1973,8 +2002,8 @@ conformers: @[Conformer]
 <h6 id="parameters">Parameters</h6>
 
 <ul>
-<li><strong>molecule_file: The input molecules as a file</strong>:  either one SMILES string per line, or an SDF</li>
-<li><strong>molecule_file_type</strong>:  The string 'smi' or 'sdf', depending on the input type</li>
+<li><p><strong>molecule_file</strong>:  The input molecules as a file;  either one SMILES string per line, or an SDF</p></li>
+<li><p><strong>molecule_file_type</strong>:  The string 'smi' or 'sdf', depending on the input type</p></li>
 <li><strong>options</strong>:  A dict with options to pass; see auto3d docs for details</li>
 </ul>
 
@@ -2057,7 +2086,7 @@ energies: @[f64]
 
 <ul>
 <li><strong>input</strong>:  A Conformer. The Conformer's Topology requires formal charges.</li>
-<li><strong>parameters: A Record containing the following fields</strong>: 
+<li><strong>parameters</strong>:  A Record containing the following fields; 
 num_rounds - is the number of rounds the genetic algorithm will run for
 population_size - number of candidate Conformers during each round of genetic algorithm
 fitness_alpha - tunable parameter (α) for fitness function
@@ -2628,7 +2657,7 @@ output: @bytes
 <li><strong>dry_xtc_tar_gz</strong>:  Compressed GROMACS output folder</li>
 <li><strong>index_file</strong>:  Compressed GROMACS output folder</li>
 <li><strong>topol_file</strong>:  Compressed GROMACS output folder</li>
-<li><strong>mmpbsa_config: Configuration record for mmpbsa</strong>: 
+<li><strong>mmpbsa_config</strong>:  Configuration record for mmpbsa; 
 start_frame: Frame to start with
 end_frame: Frame to end with
 num_cpus: Number of CPUs to use - cannot be larger than the number of frames
@@ -2704,20 +2733,20 @@ out: @[[{
 }]]
 </code></pre>
 
-<p>Inputs:
-    - Protein conformer
-    - Ligand conformer
-    - Either a reference ligand or binding site information.
-    Either a reference ligand could be used to demarcate the binding site or xyz coordinates of the
-    binding site and its size in the xyz direction in terms of Angstroms will be used.
-    The binding site information can be specified in the GninaOptions as well.
-    Within the GninaOptions:
-    - The exhaustiveness would determine the search extent for the docking algorithm.
-    - The num_modes would determine the number of dock poses to report.
-    - The minimise argument would determine whether to minimise the energy of the final pose.
-    - The docking_site would be for specifying where to dock the ligand to.</p>
+<p>Inputs: <br />
+    - Protein conformer <br />
+    - Ligand conformer <br />
+    - Either a reference ligand or binding site information. <br />
+    Either a reference ligand could be used to demarcate the binding site or xyz coordinates of the <br />
+    binding site and its size in the xyz direction in terms of Angstroms will be used. <br />
+    The binding site information can be specified in the GninaOptions as well. <br />
+    Within the GninaOptions: <br />
+    - The exhaustiveness would determine the search extent for the docking algorithm. <br />
+    - The num_modes would determine the number of dock poses to report. <br />
+    - The minimise argument would determine whether to minimise the energy of the final pose. <br />
+    - The docking_site would be for specifying where to dock the ligand to.  </p>
 
-<p>Outputs:
+<p>Outputs: <br />
     - A json file containing an array of docked ligand Conformers and their scores.</p>
 </div>
 
@@ -2880,14 +2909,14 @@ in: {
 out: @bytes
 </code></pre>
 
-<p>Generate 3D conformers from SMILES strings and other inputs.</p>
+<p>Generate 3D conformers from SMILES strings and other inputs.  </p>
 
-<p>Inputs:
-    - An input molecule as a file: either one SMILES string per line, or an SDF
-    - The string 'smi' or 'sdf', depending on the input type
-    - A json file representing any other options to pass; see gypsum_dl docs for details</p>
+<p>Inputs: <br />
+    - An input molecule as a file: either one SMILES string per line, or an SDF <br />
+    - The string 'smi' or 'sdf', depending on the input type <br />
+    - A json file representing any other options to pass; see gypsum_dl docs for details  </p>
 
-<p>Outputs:
+<p>Outputs: <br />
     - A sdf file containing the ligand(s)'s conformers</p>
 </div>
 
@@ -3257,7 +3286,7 @@ non_polar_energy: f64
 
 <ul>
 <li><strong>input</strong>:  A Conformer. The Conformer's Topology needs to have partial_charges.</li>
-<li><strong>params: A Record containing the following fields</strong>: 
+<li><strong>params</strong>:  A Record containing the following fields; 
 solute dielectric - Dielectric constant of the solute
 solvent dielectric - Dielectric constant of the solvent
 solvent radius - Radius of the solvent in nm
@@ -3336,7 +3365,7 @@ output_pdb: @bytes
 <h6 id="parameters">Parameters</h6>
 
 <ul>
-<li><strong>input_pdb: An input molecule as a file</strong>:  one PDB file</li>
+<li><strong>input_pdb</strong>:  An input molecule as a file;  one PDB file</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -3577,14 +3606,14 @@ out: @bytes;
 out: @bytes
 </code></pre>
 
-<p>Prepare ligand for sim. or quantum energy calc. using gypsum_dl.</p>
+<p>Prepare ligand for sim. or quantum energy calc. using gypsum_dl.  </p>
 
-<p>Inputs:
-    - An input molecule as a SMILES string
-    - The same input molecule as a PDB file
-    - A json file representing any other options to pass; see gypsum_dl docs for details</p>
+<p>Inputs: <br />
+    - An input molecule as a SMILES string <br />
+    - The same input molecule as a PDB file <br />
+    - A json file representing any other options to pass; see gypsum_dl docs for details  </p>
 
-<p>Outputs:
+<p>Outputs: <br />
     - A pdb file containing the prepared version of the molecule, ready for downstream use</p>
 </div>
 
@@ -3635,7 +3664,7 @@ output_pdb: @bytes
 <h6 id="parameters">Parameters</h6>
 
 <ul>
-<li><strong>input_pdb: An input protein as a file</strong>:  one PDB file</li>
+<li><strong>input_pdb</strong>:  An input protein as a file;  one PDB file</li>
 </ul>
 
 <h6 id="returns">Returns</h6>

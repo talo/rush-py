@@ -7,7 +7,7 @@ from typing_extensions import TypeAliasType
 from . import provider, typedef
 
 Conformer: TypeAlias = dict[str, Any]
-""" A Conformer represents a biochemical structure. It is documented in:   
+""" A Conformer represents a biochemical structure. It is documented in:  
 https://talo.github.io/qdx-common/qdx_common/conformer/struct.Conformer.html
 """
 

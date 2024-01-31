@@ -1047,6 +1047,20 @@ class BaseProvider:
                 ins_docs = ""
                 if module.ins_usage:
                     for ins in module.ins_usage:
+                        # replace the first non-markup colon on the first line with a semicolon,
+                        # so the docs don't get rendered incorrectly
+                        ins_firstline, ins_rest = ins.split("\n")[0], "\n".join(ins.split("\n")[1:])
+                        ins_parts = ins_firstline.split(":")
+                        if len(ins_parts) > 2:
+                            ins = (
+                                ins_parts[0]
+                                + ":"
+                                + ins_parts[1]
+                                + "; "
+                                + ":".join(ins_parts[2:])
+                                + "\n"
+                                + ins_rest
+                            )
                         ins_docs += f"\n:param {ins}"
 
                 # convert outs_usage array to return docs
@@ -1062,7 +1076,7 @@ class BaseProvider:
                         + path
                         + "`\n\nQDX Type Description:\n\n"
                         + format_module_typedesc(module.typedesc)
-                        + (module.usage + "  \n" if module.usage else "")
+                        + (module.usage.replace("\n", "  \n") if module.usage else "")
                         + (ins_docs)
                         + (outs_docs)
                     )
@@ -1116,7 +1130,7 @@ class BaseProvider:
 
         :param id: The ID of the module instance to be retrieved.
         :return: The retrieved module instance.
-        :raise Exception: If the module instance is not found.
+        :raises Exception: If the module instance is not found.
         """
         return await self.client.module_instance_details(id)
 
@@ -1184,7 +1198,7 @@ class BaseProvider:
 
         :param id: The ID of the module instance to be deleted.
         :return: The ID of the deleted module instance.
-        :raise RuntimeError: If the operation fails.
+        :raises RuntimeError: If the operation fails.
         """
         return await self.client.delete_module_instance(id)
 
@@ -1200,7 +1214,7 @@ class BaseProvider:
         :param n_retries: The maximum number of retries. Default is 10.
         :param poll_rate: The poll rate in seconds. Default is 30.
         :return: The completed module instance.
-        :raise Exception: If the module instance fails or polling times out.
+        :raises Exception: If the module instance fails or polling times out.
         """
         n_try = 0
 
