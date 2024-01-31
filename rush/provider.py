@@ -92,8 +92,7 @@ class Paged(
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any,
-    ) -> Page[T1, TPage]:
-        ...
+    ) -> Page[T1, TPage]: ...
 
 
 @dataclass
@@ -119,8 +118,7 @@ class RushModuleRunner(Protocol[TCo]):
         resources: ModuleInstanceResourcesInput | None = None,
         tags: list[str] | None = None,
         restore: bool | None = None,
-    ) -> TCo:
-        ...
+    ) -> TCo: ...
 
 
 def get_name_from_path(path: str):
