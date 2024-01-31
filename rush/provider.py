@@ -1222,9 +1222,7 @@ class Provider(BaseProvider):
                     raise Exception("No access token provided")
 
             if url is None:
-                url = os.environ.get("RUSH_URL")
-                if url is None:
-                    raise Exception("No url provided")
+                url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
             super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
         else:
