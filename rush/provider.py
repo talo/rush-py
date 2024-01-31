@@ -45,8 +45,8 @@ from .typedef import SCALARS, build_typechecker, type_from_typedef
 ArgId = UUID
 ModuleInstanceId = UUID
 
-Target = TypeAliasType("Target", ModuleInstanceTarget)
-Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput)
+Target = TypeAliasType("Target", ModuleInstanceTarget | str)
+Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput | dict[str, Any])
 
 
 @dataclass
@@ -119,7 +119,7 @@ class RushModuleRunner(Protocol[TCo]):
         self,
         *args: Any,
         target: Target,
-        resources: ModuleInstanceResourcesInput | None = None,
+        resources: Resources | None = None,
         tags: list[str] | None = None,
         restore: bool | None = False,
     ) -> TCo:
@@ -130,8 +130,8 @@ def get_name_from_path(path: str):
     return path.split("#")[-1].replace("_tengu", "").replace("tengu_", "")
 
 
-def format_module_typedesc(typedesc_in):
-    def format_typedesc_line(old_line):
+def format_module_typedesc(typedesc_in: str) -> str:
+    def format_typedesc_line(old_line: str) -> list[str]:
         new_lines = []
         seen_nester = False
         nester_char = None
@@ -169,6 +169,7 @@ def format_module_typedesc(typedesc_in):
     old_lines = typedesc_in.replace(";", ";\n").replace("-> ", "\n->\n").split("\n")
     old_lines = ["    " + line.strip() for line in old_lines]
     some_line_too_long = True
+    new_lines: list[str] = []
     while some_line_too_long:
         some_line_too_long = False
         new_lines = []
@@ -216,7 +217,9 @@ class BaseProvider:
         def __str__(self):
             return f"Arg(id={self.id}, value={self.value})"
 
-        def __eq__(self, other: "Provider.Arg[Any]"):
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, Provider.Arg):
+                return NotImplemented
             return self.id == other.id
 
         async def info(self) -> ArgumentArgument:
@@ -372,11 +375,11 @@ class BaseProvider:
             self.logger = logger
 
         if workspace:
-            self.workspace = Path(workspace)
+            self.workspace: Path | None = Path(workspace)
             if not self.workspace.exists():
                 raise Exception("Workspace directory does not exist")
             if (self.workspace / "rush.lock").exists():
-                self.config_dir = self.workspace
+                self.config_dir: Path | None = self.workspace
             else:
                 self.config_dir = self.workspace / ".rush"
                 if not self.config_dir.exists():
@@ -525,7 +528,7 @@ class BaseProvider:
             )
             page_info_res = result.page_info
             yield result or EmptyPage()
-            if len(result.edges) > 0:
+            if len(result.edges) > 0:  # type: ignore
                 break
 
     async def argument(self, id: ArgId) -> ArgumentArgument:
@@ -661,7 +664,7 @@ class BaseProvider:
         path: str,
         args: list[Arg[Any] | Argument | ArgId | Path | IOBase | Any],
         target: Target | None = None,
-        resources: ModuleInstanceResourcesInput | None = None,
+        resources: Resources | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
         restore: bool | None = False,
@@ -728,6 +731,10 @@ class BaseProvider:
                 storage=int(math.ceil(storage_requirements["storage"] / 1024)), storage_units=MemUnits.MB
             )
 
+        if isinstance(target, str):
+            target = ModuleInstanceTarget(target)
+        if isinstance(resources, dict):
+            resources = ModuleInstanceResourcesInput(**resources)
         runres = await self.client.run(
             ModuleInstanceInput(
                 path=path,
@@ -972,7 +979,7 @@ class BaseProvider:
                 module_pages = await self.latest_modules(names=names)
 
         # so that our modules get constructed in sorted order for docs
-        modules = []
+        modules: list[tuple[str, Any]] = []
         async for module_page in module_pages:
             for edge in module_page.edges:
                 module = edge.node.__deepcopy__()
@@ -987,8 +994,8 @@ class BaseProvider:
         for module_count, (name, module) in enumerate(sorted(modules)):
             path = module.path
 
-            in_types = tuple([type_from_typedef(i) for i in module.ins])
-            out_types = tuple([type_from_typedef(i) for i in module.outs])
+            in_types = tuple(type_from_typedef(i) for i in module.ins)
+            out_types = tuple(type_from_typedef(i) for i in module.outs)
 
             typechecker = build_typechecker(*in_types)
 
@@ -1076,7 +1083,7 @@ class BaseProvider:
         self,
         id: ModuleInstanceId,
         target: Target,
-        resources: ModuleInstanceResourcesInput | None = None,
+        resources: Resources | None = None,
     ) -> RetryRetry:
         """
         Retry a module instance.
@@ -1084,7 +1091,7 @@ class BaseProvider:
         :param id: The ID of the module instance to be retried.
         :return: The ID of the new module instance.
         """
-        return await self.client.retry(instance=id, resources=resources, target=target)
+        return await self.client.retry(instance=id, resources=resources, target=target)  # type: ignore
 
     async def upload(
         self,
@@ -1156,8 +1163,8 @@ class BaseProvider:
             return res.stderr if kind == "stderr" else res.stdout  # type: ignore
 
         i = 0
-        async for page in self._query_with_pagination(  # type: ignore
-            return_paged,
+        async for page in self._query_with_pagination(
+            return_paged,  # type: ignore
             PageVars(after=after, before=before),
             {},
         ):
