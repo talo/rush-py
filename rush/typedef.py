@@ -31,7 +31,12 @@ SCALAR_STRS: list[SCALARS] = [
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V")
-W = TypeVar("W", bytes, dict[str, Any], list[Any])
+
+Conformer = TypeAliasType("Conformer", dict[str, Any])
+Record = TypeAliasType("Record", dict[str, Any])
+EnumValue = TypeAliasType("EnumValue", str)
+
+W = TypeVar("W", bytes, Conformer, Record, list[Any], float)
 
 
 class _RushObject(Generic[W]):
@@ -39,9 +44,6 @@ class _RushObject(Generic[W]):
 
 
 RushObject = TypeAliasType("RushObject", _RushObject[W], type_params=(W,))
-Conformer = TypeAliasType("Conformer", dict[str, Any])
-Record = TypeAliasType("Record", dict[str, Any])
-EnumValue = TypeAliasType("EnumValue", str)
 
 scalar_types_mapping: dict[str, type[Any]] = {
     "bool": bool,

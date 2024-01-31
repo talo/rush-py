@@ -24,7 +24,16 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
-                    <a class="variable" href="#fns">fns</a>
+                    <a class="variable" href="#Conformer">Conformer</a>
+            </li>
+            <li>
+                    <a class="variable" href="#Record">Record</a>
+            </li>
+            <li>
+                    <a class="variable" href="#EnumValue">EnumValue</a>
+            </li>
+            <li>
+                    <a class="variable" href="#RushObject">RushObject</a>
             </li>
             <li>
                     <a class="class" href="#RushProvider">RushProvider</a>
@@ -220,31 +229,120 @@ rush<wbr>.doc    </h1>
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="ch">#!/usr/bin/env python3</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="kn">import</span> <span class="nn">asyncio</span>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">provider</span>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="n">_x</span> <span class="o">=</span> <span class="n">provider</span><span class="o">.</span><span class="n">Provider</span><span class="p">()</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="n">fns</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_x</span><span class="o">.</span><span class="n">get_module_functions</span><span class="p">(</span><span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py-v1.4.0&quot;</span><span class="p">]))</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="n">RushProvider</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>    <span class="s2">&quot;RushProvider&quot;</span><span class="p">,</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>    <span class="p">(</span><span class="n">provider</span><span class="o">.</span><span class="n">Provider</span><span class="p">,),</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>    <span class="n">fns</span> <span class="o">|</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_x</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">_x</span><span class="p">)},</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="p">)</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">TypeVar</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypeAliasType</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">provider</span><span class="p">,</span> <span class="n">typedef</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="n">Conformer</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">&quot;&quot;&quot; A `dict[str, Any]` serializable to JSON storing a QDX Conformer.&quot;&quot;&quot;</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="n">Record</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">&quot;&quot;&quot; A `dict[str, Any]` serializable to JSON.</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">As an input, it usually stores config data.</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">As an output, it usually stores data containing results from the corresponding run.</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a><span class="n">EnumValue</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">str</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a><span class="sd">&quot;&quot;&quot; A QDX Enum type. From python, pass a `str`.&quot;&quot;&quot;</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">Conformer</span><span class="p">,</span> <span class="n">Record</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="n">_RushObject</span> <span class="o">=</span> <span class="n">TypeAliasType</span><span class="p">(</span><span class="s2">&quot;_RushObject&quot;</span><span class="p">,</span> <span class="n">typedef</span><span class="o">.</span><span class="n">RushObject</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">type_params</span><span class="o">=</span><span class="p">(</span><span class="n">T</span><span class="p">,))</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="n">RushObject</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">_RushObject</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">&quot;&quot;&quot; Represents a file in object storage.</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">As an input argument, pass</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">an object uploaded or obtained from another run, a `pathlib.Path`, or a `StringIO`.</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">As an output argument, you can expect:</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">  - a URL for non-JSON files,</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">  - a `Conformer` or `Record` (i.e. `dict`) for JSON files, or</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="sd">  - the expected containers or values for other types (`list`, `float`, et cetera).</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="n">_x</span> <span class="o">=</span> <span class="n">provider</span><span class="o">.</span><span class="n">Provider</span><span class="p">()</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="n">_fns</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_x</span><span class="o">.</span><span class="n">get_module_functions</span><span class="p">(</span><span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py-v1.4.0&quot;</span><span class="p">]))</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="n">RushProvider</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>    <span class="s2">&quot;RushProvider&quot;</span><span class="p">,</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="p">(</span><span class="n">provider</span><span class="o">.</span><span class="n">Provider</span><span class="p">,),</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="n">_fns</span> <span class="o">|</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_x</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">_x</span><span class="p">)},</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="p">)</span>
 </span></pre></div>
 
 
             </section>
-                <section id="fns">
+                <section id="Conformer">
                     <div class="attr variable">
-            <span class="name">fns</span>        =
-<input id="fns-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="fns-view-value"></label><span class="default_value">{&#39;auto3d&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;cairo&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;concat&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;convert&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;dubai&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;fragment_aa&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;gmx&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;gmx_mmpbsa&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;gnina&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;gnina_pdb&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;gypsum_dl&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;hermes_energy&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;hermes_lattice&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;pbsa&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;pdb2pqr&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;pdbfixer&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;pick_conformer&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;plip&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;prepare_ligand&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;prepare_protein&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;, &#39;rxdock&#39;: &lt;function BaseProvider.get_module_functions.&lt;locals&gt;.closure.&lt;locals&gt;.runner&gt;}</span>
+            <span class="name">Conformer</span><span class="annotation">: TypeAlias</span>        =
+<span class="default_value">dict[str, typing.Any]</span>
 
         
     </div>
-    <a class="headerlink" href="#fns"></a>
+    <a class="headerlink" href="#Conformer"></a>
     
+            <div class="docstring"><p>A <code>dict[str, Any]</code> serializable to JSON storing a QDX Conformer.</p>
+</div>
+
+
+                </section>
+                <section id="Record">
+                    <div class="attr variable">
+            <span class="name">Record</span><span class="annotation">: TypeAlias</span>        =
+<span class="default_value">dict[str, typing.Any]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Record"></a>
     
+            <div class="docstring"><p>A <code>dict[str, Any]</code> serializable to JSON.</p>
+
+<p>As an input, it usually stores config data.</p>
+
+<p>As an output, it usually stores data containing results from the corresponding run.</p>
+</div>
+
+
+                </section>
+                <section id="EnumValue">
+                    <div class="attr variable">
+            <span class="name">EnumValue</span><span class="annotation">: TypeAlias</span>        =
+<span class="default_value">str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#EnumValue"></a>
+    
+            <div class="docstring"><p>A QDX Enum type. From python, pass a <code>str</code>.</p>
+</div>
+
+
+                </section>
+                <section id="RushObject">
+                    <div class="attr variable">
+            <span class="name">RushObject</span><span class="annotation">: TypeAlias</span>        =
+<span class="default_value">_RushObject[~T]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#RushObject"></a>
+    
+            <div class="docstring"><p>Represents a file in object storage.</p>
+
+<p>As an input argument, pass
+an object uploaded or obtained from another run, a <code>pathlib.Path</code>, or a <code>StringIO</code>.</p>
+
+<p>As an output argument, you can expect:</p>
+
+<ul>
+<li>a URL for non-JSON files,</li>
+<li>a <code><a href="#Conformer">Conformer</a></code> or <code><a href="#Record">Record</a></code> (i.e. <code>dict</code>) for JSON files, or</li>
+<li>the expected containers or values for other types (<code>list</code>, <code>float</code>, et cetera).</li>
+</ul>
+</div>
+
 
                 </section>
                 <section id="RushProvider">
