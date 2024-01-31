@@ -2,7 +2,7 @@ name: Integration tests
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
 
 env:
   NIXPKGS_ALLOW_UNFREE: 1
