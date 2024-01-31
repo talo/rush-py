@@ -6,6 +6,8 @@ on:
 
 env:
   NIXPKGS_ALLOW_UNFREE: 1
+  RUSH_URL: "https://tengu.qdx.ai"
+  RUSH_TOKEN: ${{ secrets.RUSH_TOKEN }}
 
 jobs:
   build:
