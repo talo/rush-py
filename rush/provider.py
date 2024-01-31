@@ -104,10 +104,13 @@ class PageVars:
     last: Union[Optional[int], UnsetType] = UNSET
 
 
+__empty_page = PageInfoFull(hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None)
+
+
 class EmptyPage(Generic[T1, TPage], Page[T1, TPage]):
     # skip the type checker for this class
     # since it is only used for the empty page
-    page_info: Any = PageInfoFull(hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None)
+    page_info: Any = __empty_page
     edges = []
 
 
@@ -760,7 +763,7 @@ class BaseProvider:
         :param before: Retrieve module instances before a certain cursor.
         :param path: Retrieve module instancees with for the given module path.
         :param name: Retrieve module instancees with for the given module name.
-        :param status: Retrieve module instancees with the specified status ("CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED").
+        :param status: Retrieve module instancees with the specified status (CREATED, RUNNING, etc.).
         :param tags: Retrieve module instancees with the given list of tags.
         :return: A list of filtered module instancee.
         """

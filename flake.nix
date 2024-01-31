@@ -14,9 +14,6 @@
         poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
         poetryProjects.default = {
           projectDir = ./.;
-          flake8Check = { enable = false; };
-          pyrightCheck = { enable = false; };
-          pytestCheck = { enable = false; };
           overrides = inputs.talo-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python3Packages.pip; });
           extraPackages = [ pkgs.quarto ];
