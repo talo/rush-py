@@ -141,12 +141,30 @@
         "type": "indirect"
       }
     },
+    "qdx-python-flake-parts": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1706759000,
+        "narHash": "sha256-7AcAgT0jxIxy0DM+Yy2H8FV3Tq3vcyJavaHIQ0b6diI=",
+        "owner": "talo",
+        "repo": "qdx-python-flake-parts",
+        "rev": "02a4615268dfce600e5fda465c1759ac7d2277a4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "talo",
+        "repo": "qdx-python-flake-parts",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs",
         "poetry2nix": "poetry2nix",
-        "talo-flake-parts": "talo-flake-parts"
+        "qdx-python-flake-parts": "qdx-python-flake-parts"
       }
     },
     "systems": {
@@ -176,25 +194,6 @@
       "original": {
         "id": "systems",
         "type": "indirect"
-      }
-    },
-    "talo-flake-parts": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_3"
-      },
-      "locked": {
-        "lastModified": 1706752735,
-        "narHash": "sha256-ZKPyPNvEIzK6GqEsmw8zLArkDLE6ctWJ2i5xVHuCV78=",
-        "owner": "talo",
-        "repo": "talo-flake-parts",
-        "rev": "952605db3664504e8c44031f2365266df4ff37e3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "talo",
-        "ref": "fix/nixos-23.11",
-        "repo": "talo-flake-parts",
-        "type": "github"
       }
     },
     "treefmt-nix": {
