@@ -1056,9 +1056,9 @@ class BaseProvider:
                                 ins_parts[0]
                                 + ":"
                                 + ins_parts[1]
-                                + "; "
+                                + ";"
                                 + ":".join(ins_parts[2:])
-                                + "\n"
+                                + ("\n" if ins_rest else "")
                                 + ins_rest
                             )
                         ins_docs += f"\n:param {ins}"
