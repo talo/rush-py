@@ -183,15 +183,16 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1691403794,
-        "narHash": "sha256-LHz1QEziMCEq57zw+HocXtkkKEcpR5s4bWs4QzupHz0=",
+        "lastModified": 1706752735,
+        "narHash": "sha256-ZKPyPNvEIzK6GqEsmw8zLArkDLE6ctWJ2i5xVHuCV78=",
         "owner": "talo",
         "repo": "talo-flake-parts",
-        "rev": "331cd33f1db7a089351e6bc8299b3ec49149950b",
+        "rev": "952605db3664504e8c44031f2365266df4ff37e3",
         "type": "github"
       },
       "original": {
         "owner": "talo",
+        "ref": "fix/nixos-23.11",
         "repo": "talo-flake-parts",
         "type": "github"
       }

@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-    talo-flake-parts.url = "github:talo/talo-flake-parts";
+    talo-flake-parts.url = "github:talo/talo-flake-parts/fix/nixos-23.11";
   };
 
   outputs = inputs@{ flake-parts, poetry2nix, talo-flake-parts, ... }:

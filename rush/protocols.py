@@ -42,9 +42,8 @@ async def run_qp(
     lig: Provider.Arg[Path] | Path,
     lig_type: Provider.Arg[Literal["sdf", "mol2"]] | Literal["sdf", "mol2"],
     lig_res_id: Provider.Arg[str] | str,
-    model: Provider.Arg[dict[str, Any]] | dict[str, Any] = Provider.Arg(
-        provider=None, id=None, value=default_model
-    ),
+    model: Provider.Arg[dict[str, Any]]
+    | dict[str, Any] = Provider.Arg(provider=None, id=None, value=default_model),
     keywords: Provider.Arg[dict[str, Any]] = Provider.Arg(
         None, None, {"frag": frag_keywords, "scf": scf_keywords, "debug": {}, "export": {}, "guess": {}}
     ),
