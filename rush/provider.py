@@ -573,7 +573,19 @@ class BaseProvider:
         :return: The object.
         """
         self.client.http_client.timeout = httpx.Timeout(60)
-        return await self.client.object(id)
+        self.client.http_client.retries = 5
+
+        # retry the download if it fails
+        retries = 3
+        while retries > 0:
+            try:
+                return await self.client.object(id)
+            except Exception as e:
+                retries -= 1
+                if retries == 0:
+                    raise e
+                else:
+                    await asyncio.sleep(1)
 
     async def download_object(
         self, id: ArgId, filename: str | None = None, filepath: Path | None = None, overwrite: bool = False
@@ -1200,7 +1212,7 @@ class Provider(BaseProvider):
         self,
         access_token: str | None = None,
         url: str | None = None,
-        workspace: str | Path | None = os.getcwd(),
+        workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
     ):
@@ -1212,9 +1224,15 @@ class Provider(BaseProvider):
         :param workspace: The workspace directory to use.
         :param batch_tags: The tags that will be placed on all runs by default.
         """
+        if workspace is None:
+            workspace = os.getcwd()
+        if workspace is True:
+            workspace = os.getcwd()
+        if workspace is False:
+            workspace = None
+
         if access_token is None or url is None:
             # try to check the environment variables
-            import os
 
             if access_token is None:
                 access_token = os.environ.get("RUSH_TOKEN")
@@ -1231,7 +1249,7 @@ class Provider(BaseProvider):
 
 
 async def build_provider_with_functions(
-    workspace: str | Path | None = os.getcwd(),
+    workspace: str | Path | bool | None = None,
     access_token: str | None = None,
     url: str | None = None,
     batch_tags: list[str] | None = None,

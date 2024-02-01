@@ -13,32 +13,31 @@ homepage = "https://rush.qdx.co"
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
+httpx = "^0.26.0"
 pdb-tools = "^2.5.0"
-httpx = "^0.25.2"
-pydantic = "^2.5.2"
-websockets = "^11.0"
+pydantic = "^2.6.0"
+websockets = "^12"
 
 
 [tool.poetry.group.dev.dependencies]
 ariadne-codegen = "0.10.0"
-black = {extras = ["jupyter"], version = "^23.9.0"}
-isort = "^5.12.0"
-flake8 = "^6.0.0"
-pytest = "^7.0.0"
-pytest-xdist = "^3.0.0"
-jupyterlab = "^3.6.1"
+black = {extras = ["jupyter"], version = "~=23.9.1"}
+flake8 = "~=6.1.0"
+isort = "~=5.12.0"
+jupyterlab = "^4.0.6"
 nbdev = "^2.3.12"
+notebook = "^7.0.7"
 parso = "^0.8.3"
-pdoc= "^14.1.0"
-pip = "22.3.1"
-quarto = "^0.1.0"
-qdx-py = "^0.6.0"
+pdoc= "^14.4.0"
+pip = "~=23.2.1"
 py3Dmol = "^2.0.4"
+pytest = "~=7.4.3"
+pytest-xdist = "~=3.3.1"
+qdx-py = "^0.6.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
 
 
 [tool]
