@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-    talo-flake-parts.url = "github:talo/talo-flake-parts";
+    talo-flake-parts.url = "github:talo/talo-flake-parts/fix/nixos-23.11";
   };
 
   outputs = inputs@{ flake-parts, poetry2nix, talo-flake-parts, ... }:
@@ -14,9 +14,6 @@
         poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
         poetryProjects.default = {
           projectDir = ./.;
-          flake8Check = { enable = false; };
-          pyrightCheck = { enable = false; };
-          pytestCheck = { enable = false; };
           overrides = inputs.talo-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python3Packages.pip; });
           extraPackages = [ pkgs.quarto ];

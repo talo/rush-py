@@ -82,12 +82,14 @@ async def run_qp(
     qp_prep_conf = {
         "ligand_file_type": lig_type if isinstance(lig_type, str) else lig_type.value,
         "ligand_res_id": lig_res_id if isinstance(lig_res_id, str) else lig_res_id.value,
-        "amino_acids_of_interest": amino_acids_of_interest
-        if isinstance(amino_acids_of_interest, list)
-        else amino_acids_of_interest.value,
-        "use_new_fragmentation_method": use_new_fragmentation_method
-        if isinstance(use_new_fragmentation_method, bool)
-        else None,
+        "amino_acids_of_interest": (
+            amino_acids_of_interest
+            if isinstance(amino_acids_of_interest, list)
+            else amino_acids_of_interest.value
+        ),
+        "use_new_fragmentation_method": (
+            use_new_fragmentation_method if isinstance(use_new_fragmentation_method, bool) else None
+        ),
     }
 
     if use_new_fragmentation_method is not None:

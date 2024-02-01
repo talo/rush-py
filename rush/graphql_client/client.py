@@ -90,9 +90,7 @@ def gql(q: str) -> str:
 
 
 class Client(AsyncBaseClient):
-    async def cancel_module_instance(
-        self, module_instance_id: UUID, **kwargs: Any
-    ) -> UUID:
+    async def cancel_module_instance(self, module_instance_id: UUID, **kwargs: Any) -> UUID:
         query = gql(
             """
             mutation cancel_module_instance($moduleInstanceId: ModuleInstanceId!) {
@@ -138,9 +136,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return Deploy.model_validate(data).deploy
 
-    async def create_entity(
-        self, entity: RawEntityInput, **kwargs: Any
-    ) -> CreateEntityCreateEntity:
+    async def create_entity(self, entity: RawEntityInput, **kwargs: Any) -> CreateEntityCreateEntity:
         query = gql(
             """
             mutation create_entity($entity: RawEntityInput!) {
@@ -172,9 +168,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateExperiment.model_validate(data).create_experiment
 
-    async def create_project(
-        self, project: CreateProjectInput, **kwargs: Any
-    ) -> CreateProjectCreateProject:
+    async def create_project(self, project: CreateProjectInput, **kwargs: Any) -> CreateProjectCreateProject:
         query = gql(
             """
             mutation create_project($project: CreateProjectInput!) {
@@ -206,9 +200,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateProteinConformer.model_validate(data).create_protein_conformer
 
-    async def create_protein(
-        self, protein: CreateProteinInput, **kwargs: Any
-    ) -> CreateProteinCreateProtein:
+    async def create_protein(self, protein: CreateProteinInput, **kwargs: Any) -> CreateProteinCreateProtein:
         query = gql(
             """
             mutation create_protein($protein: CreateProteinInput!) {
@@ -733,9 +725,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return ModuleInstances.model_validate(data).me
 
-    async def module_instance_minimal(
-        self, id: UUID, **kwargs: Any
-    ) -> ModuleInstanceMinimalModuleInstance:
+    async def module_instance_minimal(self, id: UUID, **kwargs: Any) -> ModuleInstanceMinimalModuleInstance:
         query = gql(
             """
             query module_instance_minimal($id: ModuleInstanceId!) {
@@ -883,9 +873,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return Protein.model_validate(data).protein
 
-    async def protein_conformer(
-        self, id: Any, **kwargs: Any
-    ) -> Optional[ProteinConformerProteinConformer]:
+    async def protein_conformer(self, id: Any, **kwargs: Any) -> Optional[ProteinConformerProteinConformer]:
         query = gql(
             """
             query protein_conformer($id: UUID!) {
@@ -930,9 +918,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return Smol.model_validate(data).smol
 
-    async def smol_conformer(
-        self, id: Any, **kwargs: Any
-    ) -> Optional[SmolConformerSmolConformer]:
+    async def smol_conformer(self, id: Any, **kwargs: Any) -> Optional[SmolConformerSmolConformer]:
         query = gql(
             """
             query smol_conformer($id: UUID!) {
@@ -954,9 +940,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return SmolConformer.model_validate(data).smol_conformer
 
-    async def smol_tautomer(
-        self, id: Any, **kwargs: Any
-    ) -> Optional[SmolTautomerSmolTautomer]:
+    async def smol_tautomer(self, id: Any, **kwargs: Any) -> Optional[SmolTautomerSmolTautomer]:
         query = gql(
             """
             query smol_tautomer($id: UUID!) {
@@ -1012,9 +996,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return Structure.model_validate(data).structure
 
-    async def experiment(
-        self, id: Any, **kwargs: Any
-    ) -> Optional[ExperimentExperiment]:
+    async def experiment(self, id: Any, **kwargs: Any) -> Optional[ExperimentExperiment]:
         query = gql(
             """
             query experiment($id: UUID!) {
@@ -1100,9 +1082,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateSmolConformer.model_validate(data).create_smol_conformer
 
-    async def create_smol(
-        self, smol: CreateSmolInput, **kwargs: Any
-    ) -> CreateSmolCreateSmol:
+    async def create_smol(self, smol: CreateSmolInput, **kwargs: Any) -> CreateSmolCreateSmol:
         query = gql(
             """
             mutation create_smol($smol: CreateSmolInput!) {
@@ -1196,9 +1176,7 @@ class Client(AsyncBaseClient):
         variables: Dict[str, object] = {"utilization": utilization}
         response = await self.execute(query=query, variables=variables, **kwargs)
         data = self.get_data(response)
-        return TrackUtilization.model_validate(
-            data
-        ).track_module_instance_resource_utilization
+        return TrackUtilization.model_validate(data).track_module_instance_resource_utilization
 
     async def untag(
         self,
@@ -1248,9 +1226,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return UpdateModuleInstance.model_validate(data).update_module_instance
 
-    async def upload_arg(
-        self, typeinfo: Any, file: Upload, **kwargs: Any
-    ) -> UploadArgUploadArg:
+    async def upload_arg(self, typeinfo: Any, file: Upload, **kwargs: Any) -> UploadArgUploadArg:
         query = gql(
             """
             mutation upload_arg($typeinfo: JSON!, $file: Upload!) {

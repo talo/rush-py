@@ -760,7 +760,7 @@ class BaseProvider:
         :param before: Retrieve module instances before a certain cursor.
         :param path: Retrieve module instancees with for the given module path.
         :param name: Retrieve module instancees with for the given module name.
-        :param status: Retrieve module instancees with the specified status ("CREATED", "ADMITTED", "QUEUED", "DISPATCHED", "COMPLETED", "FAILED").
+        :param status: Retrieve module instancees with the specified status (CREATED, RUNNING, etc.).
         :param tags: Retrieve module instancees with the given list of tags.
         :return: A list of filtered module instancee.
         """
