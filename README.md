@@ -92,7 +92,8 @@ A folder called `.rush` will be created in your workspace directory
 `workspace=` to the provider builder).
 
 ``` python
-# By using the `build_provider_with_functions` method, we will also build helper functions calling each module
+# By using the `build_provider_with_functions` method,
+# we will also build helper functions calling each module
 client = await rush.build_provider_with_functions(
     url=RUSH_URL, access_token=RUSH_TOKEN, batch_tags=TAGS
 )
@@ -118,10 +119,11 @@ help(client.convert)
 
     Help on function convert in module rush.provider:
 
-    async convert(*args: [list[typing.Union[str, ~T]], <class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = 'NIX_SSH', resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=0, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=10, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>]
+    async convert(*args: *tuple[EnumValue, RushObject[bytes]], target: Optional[Target] = 'NIX_SSH', resources: Optional[Resources] = {'storage': 10, 'storage_units': 'MB', 'gpus': 0}, tags: list[str] | None = None, restore: bool | None = False) -> tuple[RushObject[list[Conformer]]]
         Convert biomolecular and chemical file formats to the QDX file format. Supports PDB and SDF
         
-        Module version: `tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56`
+        Module version:  
+        `github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#convert`
         
         QDX Type Description:
         
@@ -152,10 +154,11 @@ help(client.prepare_protein)
 
     Help on function prepare_protein in module rush.provider:
 
-    async prepare_protein(*args: [<class 'pathlib.Path'>], target: rush.graphql_client.enums.ModuleInstanceTarget | None = 'NIX_SSH_2', resources: rush.graphql_client.input_types.ModuleInstanceResourcesInput | None = ModuleInstanceResourcesInput(gpus=1, gpu_mem=None, gpu_mem_units=None, cpus=None, nodes=None, mem=None, mem_units=None, storage=138, storage_units=<MemUnits.MB: 'MB'>, walltime=None, storage_mounts=None), tags: list[str] | None = None, restore: bool | None = None) -> [<class 'pathlib.Path'>, <class 'pathlib.Path'>]
+    async prepare_protein(*args: *tuple[RushObject[bytes]], target: Optional[Target] = 'NIX_SSH_2', resources: Optional[Resources] = {'storage': 138, 'storage_units': 'MB', 'gpus': 1}, tags: list[str] | None = None, restore: bool | None = False) -> tuple[RushObject[list[Conformer]], RushObject[bytes]]
         Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.
         
-        Module version: `prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c`
+        Module version:  
+        `github:talo/prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c#prepare_protein_tengu`
         
         QDX Type Description:
         
@@ -164,15 +167,21 @@ help(client.prepare_protein)
             output_qdxf: @[Conformer];
             output_pdb: @bytes
         
-        :param input_pdb: An input protein as a file: one PDB file
+        :param input_pdb: An input protein as a file; one PDB file
         :return output_qdxf: An output protein a vec: one qdxf per model in pdb
         :return output_pdb: An output protein as a file: one PDB file
 
 ``` python
-# Here we run the function, it will return a Provider.Arg which you can use to fetch the results
-# We set restore = True so that we can restore a previous run to the same path with the same tags
-prepared_protein_qdxf, prepared_protein_pdb = await client.prepare_protein(PROTEIN_PDB_PATH)
-prepared_protein_qdxf  # this initially only have the id of your result; we will show how to fetch the actual value later
+# Here we run the function, it will return a Provider.Arg which you can use to
+# fetch the results
+# We set restore = True so that we can restore a previous run to the same path
+# with the same tags
+prepared_protein_qdxf, prepared_protein_pdb = await client.prepare_protein(
+    PROTEIN_PDB_PATH
+)
+# This initially only has the id of your result; we will show how to fetch the
+# actual value later
+prepared_protein_qdxf
 ```
 
     Arg(id=f1b19818-53bc-4cc5-8a4d-466695df7fe7, value=None)
@@ -229,7 +238,9 @@ either provide a filename, which will be saved in
 which the client will use as-is:
 
 ``` python
-await prepared_protein_pdb.download(filename="01_prepared_protein.pdb", overwrite=True)
+await prepared_protein_pdb.download(
+    filename="01_prepared_protein.pdb", overwrite=True
+)
 ```
 
 ``` python

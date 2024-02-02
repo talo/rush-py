@@ -52,7 +52,7 @@ async def run_qp(
     hermes_target: ModuleInstanceTarget | None = None,
     hermes_resources: ModuleInstanceResourcesInput | None = None,
     tags: list[str] | None = None,
-    restore: bool | None = None,
+    restore: bool | None = False,
 ) -> tuple[Provider.Arg[Any], Provider.Arg[Any]]:
     """
     Construct the input and output module instance calls for QP run.

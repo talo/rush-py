@@ -11,11 +11,12 @@ from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-from typing import Any, AsyncIterable, Generic, Iterable, List, Literal, Optional, Protocol, TypeVar, Union
+from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union, Unpack
 from uuid import UUID
 
 import httpx
 from pydantic_core import to_jsonable_python
+from typing_extensions import TypeAliasType
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -43,7 +44,9 @@ from .typedef import SCALARS, build_typechecker, type_from_typedef
 
 ArgId = UUID
 ModuleInstanceId = UUID
-Target = ModuleInstanceTarget
+
+Target = TypeAliasType("Target", ModuleInstanceTarget | str)
+Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput | dict[str, Any])
 
 
 @dataclass
@@ -116,9 +119,9 @@ class RushModuleRunner(Protocol[TCo]):
         self,
         *args: Any,
         target: Target,
-        resources: ModuleInstanceResourcesInput | None = None,
+        resources: Resources | None = None,
         tags: list[str] | None = None,
-        restore: bool | None = None,
+        restore: bool | None = False,
     ) -> TCo:
         ...
 
@@ -127,8 +130,8 @@ def get_name_from_path(path: str):
     return path.split("#")[-1].replace("_tengu", "").replace("tengu_", "")
 
 
-def format_module_typedesc(typedesc_in):
-    def format_typedesc_line(old_line):
+def format_module_typedesc(typedesc_in: str) -> str:
+    def format_typedesc_line(old_line: str) -> list[str]:
         new_lines = []
         seen_nester = False
         nester_char = None
@@ -166,6 +169,7 @@ def format_module_typedesc(typedesc_in):
     old_lines = typedesc_in.replace(";", ";\n").replace("-> ", "\n->\n").split("\n")
     old_lines = ["    " + line.strip() for line in old_lines]
     some_line_too_long = True
+    new_lines: list[str] = []
     while some_line_too_long:
         some_line_too_long = False
         new_lines = []
@@ -213,7 +217,9 @@ class BaseProvider:
         def __str__(self):
             return f"Arg(id={self.id}, value={self.value})"
 
-        def __eq__(self, other: "Provider.Arg[Any]"):
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, Provider.Arg):
+                return NotImplemented
             return self.id == other.id
 
         async def info(self) -> ArgumentArgument:
@@ -369,11 +375,11 @@ class BaseProvider:
             self.logger = logger
 
         if workspace:
-            self.workspace = Path(workspace)
+            self.workspace: Path | None = Path(workspace)
             if not self.workspace.exists():
                 raise Exception("Workspace directory does not exist")
             if (self.workspace / "rush.lock").exists():
-                self.config_dir = self.workspace
+                self.config_dir: Path | None = self.workspace
             else:
                 self.config_dir = self.workspace / ".rush"
                 if not self.config_dir.exists():
@@ -522,7 +528,7 @@ class BaseProvider:
             )
             page_info_res = result.page_info
             yield result or EmptyPage()
-            if len(result.edges) > 0:
+            if len(result.edges) > 0:  # type: ignore
                 break
 
     async def argument(self, id: ArgId) -> ArgumentArgument:
@@ -658,10 +664,10 @@ class BaseProvider:
         path: str,
         args: list[Arg[Any] | Argument | ArgId | Path | IOBase | Any],
         target: Target | None = None,
-        resources: ModuleInstanceResourcesInput | None = None,
+        resources: Resources | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
-        restore: bool | None = None,
+        restore: bool | None = False,
     ) -> RunRun | ModuleInstanceFullModuleInstance:
         """
         Run a module with the given inputs and outputs.
@@ -725,6 +731,10 @@ class BaseProvider:
                 storage=int(math.ceil(storage_requirements["storage"] / 1024)), storage_units=MemUnits.MB
             )
 
+        if isinstance(target, str):
+            target = ModuleInstanceTarget(target)
+        if isinstance(resources, dict):
+            resources = ModuleInstanceResourcesInput(**resources)
         runres = await self.client.run(
             ModuleInstanceInput(
                 path=path,
@@ -758,8 +768,8 @@ class BaseProvider:
         path: Union[Optional[str], UnsetType] = UNSET,
         name: Union[Optional[str], UnsetType] = UNSET,
         status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
-        ids: Union[Optional[List[ModuleInstanceId]], UnsetType] = UNSET,
+        tags: Union[Optional[list[str]], UnsetType] = UNSET,
+        ids: Union[Optional[list[ModuleInstanceId]], UnsetType] = UNSET,
     ) -> AsyncIterable[
         Page[ModuleInstanceFullModuleInstance, ModuleInstancesMeAccountModuleInstancesPageInfo]
     ]:
@@ -805,7 +815,7 @@ class BaseProvider:
         last: Union[Optional[int], UnsetType] = UNSET,
         before: Union[Optional[str], UnsetType] = UNSET,
         path: Union[Optional[str], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
+        tags: Union[Optional[list[str]], UnsetType] = UNSET,
     ) -> AsyncIterable[Page[ModuleFull, ModulesModulesPageInfo]]:
         """
         Get all modules.
@@ -969,7 +979,7 @@ class BaseProvider:
                 module_pages = await self.latest_modules(names=names)
 
         # so that our modules get constructed in sorted order for docs
-        modules = []
+        modules: list[tuple[str, Any]] = []
         async for module_page in module_pages:
             for edge in module_page.edges:
                 module = edge.node.__deepcopy__()
@@ -984,8 +994,8 @@ class BaseProvider:
         for module_count, (name, module) in enumerate(sorted(modules)):
             path = module.path
 
-            in_types = tuple([type_from_typedef(i) for i in module.ins])
-            out_types = tuple([type_from_typedef(i) for i in module.outs])
+            in_types = tuple(type_from_typedef(i) for i in module.ins)
+            out_types = tuple(type_from_typedef(i) for i in module.outs)
 
             typechecker = build_typechecker(*in_types)
 
@@ -1002,25 +1012,25 @@ class BaseProvider:
 
             default_resources = None
             if module.resource_bounds:
-                default_resources = ModuleInstanceResourcesInput(
-                    storage=module.resource_bounds.storage_min + 10,
-                    storage_units=MemUnits.MB,
-                    gpus=module.resource_bounds.gpu_hint,
-                )
+                default_resources = {
+                    "storage": module.resource_bounds.storage_min + 10,
+                    "storage_units": "MB",
+                    "gpus": module.resource_bounds.gpu_hint,
+                }
 
             def closure(
                 name: str,
                 path: str,
                 typechecker: Any,
                 default_target: Target | None,
-                default_resources: ModuleInstanceResourcesInput | None,
+                default_resources: Resources | None,
             ):
                 async def runner(
                     *args: Any,
                     target: Target | None = default_target,
-                    resources: ModuleInstanceResourcesInput | None = default_resources,
+                    resources: Resources | None = default_resources,
                     tags: list[str] | None = None,
-                    restore: bool | None = None,
+                    restore: bool | None = False,
                 ):
                     typechecker(*args)
                     run = await self.run(
@@ -1037,6 +1047,20 @@ class BaseProvider:
                 ins_docs = ""
                 if module.ins_usage:
                     for ins in module.ins_usage:
+                        # replace the first non-markup colon on the first line with a semicolon,
+                        # so the docs don't get rendered incorrectly
+                        ins_firstline, ins_rest = ins.split("\n")[0], "\n".join(ins.split("\n")[1:])
+                        ins_parts = ins_firstline.split(":")
+                        if len(ins_parts) > 2:
+                            ins = (
+                                ins_parts[0]
+                                + ":"
+                                + ins_parts[1]
+                                + ";"
+                                + ":".join(ins_parts[2:])
+                                + ("\n" if ins_rest else "")
+                                + ins_rest
+                            )
                         ins_docs += f"\n:param {ins}"
 
                 # convert outs_usage array to return docs
@@ -1048,19 +1072,19 @@ class BaseProvider:
                 if module.description:
                     runner.__doc__ = (
                         module.description
-                        + "\n\nModule version: `"
-                        + "/".join(path.split("/")[1:]).split("#")[0]
+                        + "\n\nModule version:  \n`"
+                        + path
                         + "`\n\nQDX Type Description:\n\n"
                         + format_module_typedesc(module.typedesc)
-                        + (module.usage + "  \n" if module.usage else "")
+                        + (module.usage.replace("\n", "  \n") if module.usage else "")
                         + (ins_docs)
                         + (outs_docs)
                     )
                 else:
                     runner.__doc__ = name + " @" + path
 
-                runner.__annotations__["args"] = [t.to_python_type() for t in in_types]
-                runner.__annotations__["return"] = [t.to_python_type() for t in out_types]
+                runner.__annotations__["args"] = Unpack[tuple[*(t.to_python_type() for t in in_types)]]
+                runner.__annotations__["return"] = tuple[*(t.to_python_type() for t in out_types)]
 
                 return runner
 
@@ -1073,7 +1097,7 @@ class BaseProvider:
         self,
         id: ModuleInstanceId,
         target: Target,
-        resources: ModuleInstanceResourcesInput | None = None,
+        resources: Resources | None = None,
     ) -> RetryRetry:
         """
         Retry a module instance.
@@ -1081,7 +1105,7 @@ class BaseProvider:
         :param id: The ID of the module instance to be retried.
         :return: The ID of the new module instance.
         """
-        return await self.client.retry(instance=id, resources=resources, target=target)
+        return await self.client.retry(instance=id, resources=resources, target=target)  # type: ignore
 
     async def upload(
         self,
@@ -1106,7 +1130,7 @@ class BaseProvider:
 
         :param id: The ID of the module instance to be retrieved.
         :return: The retrieved module instance.
-        :raise Exception: If the module instance is not found.
+        :raises Exception: If the module instance is not found.
         """
         return await self.client.module_instance_details(id)
 
@@ -1114,8 +1138,8 @@ class BaseProvider:
         self,
         id: ModuleInstanceId,
         kind: Literal["stdout", "stderr"],
-        after: Optional[str] = None,
-        before: Optional[str] = None,
+        after: str | None = None,
+        before: str | None = None,
         pages: int | None = None,
         print_logs: bool = True,
     ) -> AsyncIterable[str]:
@@ -1153,8 +1177,8 @@ class BaseProvider:
             return res.stderr if kind == "stderr" else res.stdout  # type: ignore
 
         i = 0
-        async for page in self._query_with_pagination(  # type: ignore
-            return_paged,
+        async for page in self._query_with_pagination(
+            return_paged,  # type: ignore
             PageVars(after=after, before=before),
             {},
         ):
@@ -1174,7 +1198,7 @@ class BaseProvider:
 
         :param id: The ID of the module instance to be deleted.
         :return: The ID of the deleted module instance.
-        :raise RuntimeError: If the operation fails.
+        :raises RuntimeError: If the operation fails.
         """
         return await self.client.delete_module_instance(id)
 
@@ -1190,7 +1214,7 @@ class BaseProvider:
         :param n_retries: The maximum number of retries. Default is 10.
         :param poll_rate: The poll rate in seconds. Default is 30.
         :return: The completed module instance.
-        :raise Exception: If the module instance fails or polling times out.
+        :raises Exception: If the module instance fails or polling times out.
         """
         n_try = 0
 
