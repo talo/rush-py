@@ -14,7 +14,20 @@ from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union
+from typing import (
+    Any,
+    AsyncIterable,
+    Generic,
+    Iterable,
+    Literal,
+    Optional,
+    Protocol,
+    TypeAlias,
+    TypedDict,
+    TypeVar,
+    Union,
+    Unpack,
+)
 from uuid import UUID
 
 import httpx
@@ -119,11 +132,38 @@ class Paged(
 
 
 @dataclass
-class PageVars:
-    after: Union[Optional[str], UnsetType] = UNSET
-    before: Union[Optional[str], UnsetType] = UNSET
-    first: Union[Optional[int], UnsetType] = UNSET
-    last: Union[Optional[int], UnsetType] = UNSET
+class PagingOptsImpl:
+    after: str | UnsetType
+    before: str | UnsetType
+    first: int | UnsetType
+    last: int | UnsetType
+
+    def __init__(
+        self,
+        after: str | None = None,
+        before: str | None = None,
+        first: int | None = None,
+        last: int | None = None,
+    ):
+        self.after = after if after else UNSET
+        self.before = before if before else UNSET
+        self.first = first if first else UNSET
+        self.last = last if last else UNSET
+
+
+class PagingOptsT(TypedDict, total=False):
+    """
+    For any member, if the argument is omitted or None is passed
+    it will set the internal to `UNSET`, which will behave as expected.
+    """
+
+    after: str | None
+    before: str | None
+    first: int | None
+    last: int | None
+
+
+PagingOpts = TypeAliasType("PagingOpts", PagingOptsT)
 
 
 class EmptyPage(Generic[T1, TPage], Page[T1, TPage]):
@@ -523,9 +563,8 @@ class BaseProvider:
             instance_ids = [instance.id for instance in history.instances]
 
         instances: list[ModuleInstanceFullModuleInstance] = []
-        async for page in await self.module_instances(ids=instance_ids):
-            for instance in page.edges:
-                instances.append(instance.node)
+        async for instance in self.module_instances(ids=instance_ids):
+            instances.append(instance)
 
         if group_by == "id":
             return {
@@ -546,24 +585,13 @@ class BaseProvider:
     async def _query_with_pagination(
         self,
         fn: Paged[T1, TPage],
-        page_vars: PageVars,
-        variables: dict[str, Any],
+        paging_opts: PagingOptsImpl,
+        **kwargs: Any,
     ) -> AsyncIterable[Page[T1, TPage]]:
-        result = await fn(**variables)
-
-        page_info_res = result.page_info
+        result = await fn(
+            paging_opts.after, paging_opts.before, paging_opts.first, paging_opts.last, **kwargs
+        )
         yield result or EmptyPage[T1, TPage]()
-
-        while page_info_res.has_previous_page:
-            page_vars.before = page_info_res.end_cursor
-            result = await fn(
-                **page_vars.__dict__,
-                **variables,
-            )
-            page_info_res = result.page_info
-            yield result or EmptyPage()
-            if len(result.edges) > 0:  # type: ignore
-                break
 
     async def argument(self, id: ArgId) -> ArgumentArgument:
         """
@@ -576,33 +604,26 @@ class BaseProvider:
 
     async def arguments(
         self,
-        after: str | None = None,
-        before: str | None = None,
-        first: int | None = None,
-        last: int | None = None,
         tags: list[str] | None = None,
+        **paging_opts: Unpack[PagingOpts],
     ) -> AsyncIterable[Page[ArgumentsMeAccountArguments, ArgumentsMeAccountArgumentsPageInfo]]:
         """
         Retrieve a list of arguments.
+        :param tags: The tags to apply to the module.
+        :param paging_opts: first, after, last, before; see `PagingOpts` for details.
         """
 
         async def return_paged(
-            after: Union[Optional[str], UnsetType] = UNSET,
-            before: Union[Optional[str], UnsetType] = UNSET,
-            first: Union[Optional[int], UnsetType] = UNSET,
-            last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
         ) -> Page[ArgumentsMeAccountArgumentsEdgesNode, ArgumentsMeAccountArgumentsPageInfo]:
-            res = await self.client.arguments(first=first, after=after, last=last, before=before, **kwargs)
+            res = await self.client.arguments(**kwargs)
             # The types for this pass in mypy, but not in pyright
             return res.account.arguments  # type: ignore
 
         return self._query_with_pagination(
             return_paged,  # type: ignore
-            PageVars(after=after, before=before, first=first, last=last),
-            {
-                "tags": tags,
-            },
+            PagingOptsImpl(**paging_opts),
+            tags=tags if tags else UNSET,
         )
 
     async def object(self, id: ArgId):
@@ -720,12 +741,10 @@ class BaseProvider:
         if try_restore:
             self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
             res: list[ModuleInstanceFullModuleInstance] = []
-            async for page in await self.module_instances(tags=tags, path=path):
-                for edge in page.edges:
-                    instance = edge.node
-                    res.append(instance)
-                    if len(res) > 1:
-                        self.logger.warn("Multiple module instances found with the same tags and path")
+            async for instance in self.module_instances(tags=tags, path=path):
+                res.append(instance)
+                if len(res) > 1:
+                    self.logger.warn("Multiple module instances found with the same tags and path")
             if len(res) >= 1:
                 self.logger.info(f"Restoring job from previous run with id {res[0].id}")
                 return res[0]
@@ -797,102 +816,87 @@ class BaseProvider:
 
     async def module_instances(
         self,
-        first: Union[Optional[int], UnsetType] = UNSET,
-        after: Union[Optional[str], UnsetType] = UNSET,
-        last: Union[Optional[int], UnsetType] = UNSET,
-        before: Union[Optional[str], UnsetType] = UNSET,
-        path: Union[Optional[str], UnsetType] = UNSET,
-        name: Union[Optional[str], UnsetType] = UNSET,
-        status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
-        tags: Union[Optional[list[str]], UnsetType] = UNSET,
-        ids: Union[Optional[list[ModuleInstanceId]], UnsetType] = UNSET,
-    ) -> AsyncIterable[
-        Page[ModuleInstanceFullModuleInstance, ModuleInstancesMeAccountModuleInstancesPageInfo]
-    ]:
+        path: str | None = None,
+        name: str | None = None,
+        status: ModuleInstanceStatus | None = None,
+        tags: list[str] | None = None,
+        ids: list[ModuleInstanceId] | None = None,
+        **paging_opts: Unpack[PagingOpts],
+    ) -> AsyncIterable[ModuleInstanceFullModuleInstance]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
 
-        :param first: Retrieve the first N module instances.
-        :param after: Retrieve module instances after a certain cursor.
-        :param last: Retrieve the last N module instances.
-        :param before: Retrieve module instances before a certain cursor.
         :param path: Retrieve module instancees with for the given module path.
         :param name: Retrieve module instancees with for the given module name.
         :param status: Retrieve module instancees with the specified status (CREATED, RUNNING, etc.).
         :param tags: Retrieve module instancees with the given list of tags.
+        :param ids: Retrieve module instancees with the given list of ids.
+        :param paging_opts: first, after, last, before; see `PagingOpts` for details.
         :return: A list of filtered module instancee.
         """
 
         async def return_paged(
-            after: Union[Optional[str], UnsetType] = UNSET,
-            before: Union[Optional[str], UnsetType] = UNSET,
-            first: Union[Optional[int], UnsetType] = UNSET,
-            last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
         ) -> Page[
             ModuleInstancesMeAccountModuleInstancesEdgesNode, ModuleInstancesMeAccountModuleInstancesPageInfo
         ]:
-            res = await self.client.module_instances(
-                first=first, after=after, last=last, before=before, **kwargs
-            )
+            res = await self.client.module_instances(**kwargs)
             # FIXME: this passes in mypy but not in pyright
             return res.account.module_instances  # type: ignore
 
-        return self._query_with_pagination(
+        async for page in self._query_with_pagination(
             return_paged,  # type: ignore
-            PageVars(after=after, before=before, first=first, last=last),
-            {"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
-        )
+            PagingOptsImpl(**paging_opts),
+            path=path if path else UNSET,
+            name=name if name else UNSET,
+            status=status if status else UNSET,
+            tags=tags if tags else UNSET,
+            ids=ids if ids else UNSET,
+        ):
+            for edge in page.edges:
+                yield edge.node
 
     async def modules(
         self,
-        first: Union[Optional[int], UnsetType] = UNSET,
-        after: Union[Optional[str], UnsetType] = UNSET,
-        last: Union[Optional[int], UnsetType] = UNSET,
-        before: Union[Optional[str], UnsetType] = UNSET,
-        path: Union[Optional[str], UnsetType] = UNSET,
-        tags: Union[Optional[list[str]], UnsetType] = UNSET,
-    ) -> AsyncIterable[Page[ModuleFull, ModulesModulesPageInfo]]:
+        path: str | None = None,
+        tags: list[str] | None = None,
+        **paging_opts: Unpack[PagingOpts],
+    ) -> AsyncIterable[ModuleFull]:
         """
         Get all modules.
 
-        :param first: Retrieve the first N modules.
-        :param after: Retrieve modules after a certain cursor.
-        :param last: Retrieve the last N modules.
-        :param before: Retrieve modules before a certain cursor.
         :param path: Retrieve modules with for the given module path.
-        :param name: Retrieve modules with for the given module name.
         :param tags: Retrieve modules with the given list of tags.
+        :param paging_opts: first, after, last, before; see `PagingOpts` for details.
         """
 
-        return self._query_with_pagination(
+        async for page in self._query_with_pagination(
             self.client.modules,  # type: ignore
-            PageVars(after=after, before=before, first=first, last=last),
-            {
-                "path": path,
-                "tags": tags,
-            },
-        )
+            PagingOptsImpl(**paging_opts),
+            path=path if path else UNSET,
+            tags=tags if tags else UNSET,
+        ):
+            for edge in page.edges:
+                yield edge.node
 
     async def latest_modules(
         self,
-        first: Union[Optional[int], UnsetType] = UNSET,
-        after: Union[Optional[str], UnsetType] = UNSET,
-        last: Union[Optional[int], UnsetType] = UNSET,
-        before: Union[Optional[str], UnsetType] = UNSET,
-        names: Union[Optional[list[str]], UnsetType] = UNSET,
-    ) -> AsyncIterable[Page[ModuleFull, LatestModulesLatestModulesPageInfo]]:
+        names: list[str] | None = None,
+        **paging_opts: Unpack[PagingOpts],
+    ) -> AsyncIterable[ModuleFull]:
         """
         Get latest modules.
+        :param names: The names of the modules.
+        :param paging_opts: first, after, last, before; see `PagingOpts` for details.
         """
 
-        return self._query_with_pagination(
+        async for page in self._query_with_pagination(
             self.client.latest_modules,  # type: ignore
-            PageVars(after=after, before=before, first=first, last=last),
-            {
-                "names": names,
-            },
-        )
+            PagingOptsImpl(**paging_opts),
+            names=names if names else UNSET,
+        ):
+            for edge in page.edges:
+                yield edge.node
 
     async def get_latest_module_paths(self, names: list[str] | None = None) -> dict[str, str]:
         """
@@ -901,24 +905,19 @@ class BaseProvider:
         :param names: The names of the modules.
         """
         ret = {}
-        module_pages = await self.latest_modules(names=names)
-        async for module_page in module_pages:
-            for edge in module_page.edges:
-                path = edge.node.path
-                name = get_name_from_path(edge.node.path)
-                if path:
-                    ret[name] = path
+        async for module in self.latest_modules(names=names):
+            path = module.path
+            name = get_name_from_path(path)
+            if path:
+                ret[name] = path
         return ret
 
-    async def get_modules_for_paths(
-        self, paths: list[str]
-    ) -> AsyncIterable[Page[ModuleFull, ModulesModulesPageInfo]]:
+    async def get_modules_for_paths(self, paths: list[str]) -> AsyncIterable[ModuleFull]:
         """
         Get modules for the provided paths.
         """
         for path in paths:
-            ms = await self.modules(path=path)
-            mps = [m async for m in ms]
+            mps = [m async for m in self.modules(path=path)]
             if len(mps) != 1:
                 self.logger.warn(f"Found no modules for path {path} - remove your lockfile and try again")
             else:
@@ -993,15 +992,14 @@ class BaseProvider:
                 else:
                     # lets load the latest paths and lock them
                     if tags:
-                        module_pages = await self.modules(tags=tags)
+                        module_pages = self.modules(tags=tags)
                         self.module_paths = {}
-                        async for module_page in module_pages:
-                            for edge in module_page.edges:
-                                path = edge.node.path
-                                name = get_name_from_path(edge.node.path)
-                                if (names and name in names) and path:
-                                    self.module_paths[name] = path
-                        module_pages = await self.modules(tags=tags)
+                        async for module in module_pages:
+                            path = module.path
+                            name = get_name_from_path(path)
+                            if (names and name in names) and path:
+                                self.module_paths[name] = path
+                        module_pages = self.modules(tags=tags)
                     else:
                         paths = await self.get_latest_module_paths(names)
                         module_pages = self.get_modules_for_paths(list(paths.values()))
@@ -1009,23 +1007,22 @@ class BaseProvider:
                         self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
             elif tags:
                 # no workspace, so up the user to lock it
-                module_pages = await self.modules(tags=tags)
+                module_pages = self.modules(tags=tags)
             else:
                 # no workspace, so up the user to lock it
-                module_pages = await self.latest_modules(names=names)
+                module_pages = self.latest_modules(names=names)
 
         # so that our modules get constructed in sorted order for docs
         modules: list[tuple[str, Any]] = []
-        async for module_page in module_pages:
-            for edge in module_page.edges:
-                module = edge.node.__deepcopy__()
-                path = module.path
-                name = get_name_from_path(edge.node.path)
-                # in the case of if not self.config dir and names and tags,
-                # we have to filter by the names still, so do it here
-                if names and name not in names and tags:
-                    continue
-                modules += [(name, module)]
+        async for module in module_pages:
+            module = module.__deepcopy__()
+            path = module.path
+            name = get_name_from_path(module.path)
+            # in the case of if not self.config dir and names and tags,
+            # we have to filter by the names still, so do it here
+            if names and name not in names and tags:
+                continue
+            modules += [(name, module)]
 
         for name, module in sorted(modules):
             path = module.path
@@ -1183,49 +1180,39 @@ class BaseProvider:
         self,
         id: ModuleInstanceId,
         kind: Literal["stdout", "stderr"],
-        after: str | None = None,
-        before: str | None = None,
         pages: int | None = None,
         print_logs: bool = True,
+        **paging_opts: Unpack[PagingOpts],
     ) -> AsyncIterable[str]:
         """
         Retrieve the stdout and stderr of a module instance.
 
         :param id: The ID of the module instance.
+        :param kind: Whether to get stdout or stderr logs.
+        :param pages: How many gql pages of logs to get.
+        :param print_logs: Whether to print logs to stdout or yield them.
+        :param paging_opts: first, after, last, before; see `PagingOpts` for details.
         :return: The stdout and stderr of the module instance.
         """
 
         # page through the logs
 
-        async def return_paged(
-            after: Union[Optional[str], UnsetType] = UNSET,
-            before: Union[Optional[str], UnsetType] = UNSET,
-            _: Union[Optional[int], UnsetType] = UNSET,
-            last: Union[Optional[int], UnsetType] = UNSET,
-            **kwargs: Any,
-        ) -> Page[Any, Any]:
-            args = {}
+        async def return_paged(**kwargs: Any) -> Page[Any, Any]:
+            paging_opts: dict[str, str] = {}
+            if "after" in kwargs:
+                paging_opts[f"{kind}_after"] = kwargs["after"]
+            if "before" in kwargs:
+                paging_opts[f"{kind}_before"] = kwargs["before"]
 
-            if kind == "stdout":
-                args = {
-                    "stdout_after": after,
-                    "stdout_before": before,
-                }
-            else:
-                args = {
-                    "stderr_after": after,
-                    "stderr_before": before,
-                }
-
-            res = await self.client.module_instance_details(id, **args)
+            res = await self.client.module_instance_details(id, **paging_opts)
 
             return res.stderr if kind == "stderr" else res.stdout  # type: ignore
 
         i = 0
         async for page in self._query_with_pagination(
             return_paged,  # type: ignore
-            PageVars(after=after, before=before),
-            {},
+            PagingOptsImpl(**paging_opts),
+            kind=kind,
         ):
             for edge in page.edges:
                 if print_logs:
