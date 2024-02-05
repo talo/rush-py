@@ -45,14 +45,12 @@ from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstance
 from .graphql_client.exceptions import GraphQLClientGraphQLMultiError
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
-from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
 from .graphql_client.module_instance_full import ModuleInstanceFullModuleInstance
 from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesEdgesNode,
     ModuleInstancesMeAccountModuleInstancesPageInfo,
 )
-from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
 from .typedef import SCALARS, build_typechecker, type_from_typedef
@@ -254,6 +252,10 @@ class BaseProvider:
     """
 
     class Arg(Generic[T]):
+        """
+        Represents a value in the Rush object store.
+        """
+
         def __init__(
             self,
             provider: "BaseProvider | None",
@@ -282,6 +284,12 @@ class BaseProvider:
             return self.id == other.id
 
         async def info(self) -> ArgumentArgument:
+            """
+            Fetches the argument info from the store.
+
+            :return: The argument.
+            """
+
             async def get_remote_arg(retries: int):
                 if self.id is None:
                     raise Exception("No ID provided")
@@ -324,6 +332,14 @@ class BaseProvider:
             filepath: Path | None = None,
             overwrite: bool = False,
         ):
+            """
+            Downloads the object corresponding to the argument to a file.
+
+            :param filename: Download to the workspace with this name under "objects".
+            :param filepath: Where to download the object.
+            :param overwrite: Whether to overwrite any existing file at the download path.
+            """
+
             if self.id is None:
                 raise Exception("No ID provided")
             if self.provider is None:
@@ -373,7 +389,7 @@ class BaseProvider:
                             if self.value is None:
                                 if remote_arg.source or self.source:
                                     module_instance = await self.provider.module_instance(
-                                        remote_arg.source or self.source
+                                        remote_arg.source or self.source  # type: ignore
                                     )
                                     if module_instance.status != self.status:
                                         self.provider.logger.info(
@@ -626,7 +642,7 @@ class BaseProvider:
             tags=tags if tags else UNSET,
         )
 
-    async def object(self, id: ArgId):
+    async def object(self, id: ArgId) -> Any:
         """
         Retrieve an object from the database.
 
@@ -634,29 +650,31 @@ class BaseProvider:
         :return: The object.
         """
         self.client.http_client.timeout = httpx.Timeout(60)
-        self.client.http_client.retries = 5
+        self.client.http_client.retries = 5  # type: ignore
 
         # retry the download if it fails
         retries = 3
         while retries > 0:
             try:
                 return await self.client.object(id)
-            except Exception as e:
+            except Exception as _:
                 retries -= 1
-                if retries == 0:
-                    raise e
-                else:
-                    await asyncio.sleep(1)
+                await asyncio.sleep(1)
+        try:
+            return await self.client.object(id)
+        except Exception as e:
+            raise e
 
     async def download_object(
         self, id: ArgId, filename: str | None = None, filepath: Path | None = None, overwrite: bool = False
-    ):
+    ) -> Any | None:
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
 
         :param id: The ID of the object.
         :param filepath: Where to download the object.
         :param filename: Download to the workspace with this name under "objects".
+        :param: overwrite: Whether to overwrite any existing file at the download path.
         """
         obj = await self.object(id)
         if not obj:
@@ -676,7 +694,7 @@ class BaseProvider:
         if filepath:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
-            if "url" in obj:
+            if isinstance(obj, dict) and "url" in obj:
                 with httpx.stream(method="get", url=obj["url"]) as r:
                     r.raise_for_status()
                     with open(filepath, "wb") as f:
@@ -717,7 +735,7 @@ class BaseProvider:
     async def run(
         self,
         path: str,
-        args: list[Arg[Any] | Argument | ArgId | Path | IOBase | Any],
+        args: list[Provider.Arg[Any] | Argument | ArgId | Path | IOBase | Any],
         target: Target | None = None,
         resources: Resources | None = None,
         tags: list[str] | None = None,
@@ -1266,8 +1284,8 @@ class BaseProvider:
 class Provider(BaseProvider):
     def __init__(
         self,
-        access_token: str | None = None,
         url: str | None = None,
+        access_token: str | None = None,
         workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
@@ -1276,10 +1294,11 @@ class Provider(BaseProvider):
         """
         Initialize the RushProvider with a graphql client.
 
-        :param access_token: The access token to use.
         :param url: The url to use.
+        :param access_token: The access token to use.
         :param workspace: The workspace directory to use.
         :param batch_tags: The tags that will be placed on all runs by default.
+        :param _logger: Used internally.
         """
         if workspace is None:
             workspace = os.getcwd()

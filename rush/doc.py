@@ -43,3 +43,15 @@ RushProvider = type(
     (provider.Provider,),
     _fns | {n: getattr(_x, n) for n in dir(_x)},
 )
+
+
+class PagingOpts(TypedDict, total=False):
+    """
+    For any member, if the argument is omitted or None is passed
+    it will set the internal to `UNSET`, which will behave as expected.
+    """
+
+    after: str | None
+    before: str | None
+    first: int | None
+    last: int | None
