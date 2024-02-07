@@ -20,7 +20,9 @@ class ModuleInstanceDetailsModuleInstance(ModuleInstanceFull):
 
 
 class ModuleInstanceDetailsModuleInstanceStdout(BaseModel):
-    page_info: "ModuleInstanceDetailsModuleInstanceStdoutPageInfo" = Field(alias="pageInfo")
+    page_info: "ModuleInstanceDetailsModuleInstanceStdoutPageInfo" = Field(
+        alias="pageInfo"
+    )
     edges: List["ModuleInstanceDetailsModuleInstanceStdoutEdges"]
 
 
@@ -40,7 +42,9 @@ class ModuleInstanceDetailsModuleInstanceStdoutEdgesNode(BaseModel):
 
 
 class ModuleInstanceDetailsModuleInstanceStderr(BaseModel):
-    page_info: "ModuleInstanceDetailsModuleInstanceStderrPageInfo" = Field(alias="pageInfo")
+    page_info: "ModuleInstanceDetailsModuleInstanceStderrPageInfo" = Field(
+        alias="pageInfo"
+    )
     edges: List["ModuleInstanceDetailsModuleInstanceStderrEdges"]
 
 
@@ -57,15 +61,3 @@ class ModuleInstanceDetailsModuleInstanceStderrEdgesNode(BaseModel):
     id: str
     created_at: datetime
     content: List[str]
-
-
-ModuleInstanceDetails.model_rebuild()
-ModuleInstanceDetailsModuleInstance.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStdout.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStdoutPageInfo.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStdoutEdges.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStdoutEdgesNode.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStderr.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStderrPageInfo.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStderrEdges.model_rebuild()
-ModuleInstanceDetailsModuleInstanceStderrEdgesNode.model_rebuild()

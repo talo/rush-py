@@ -12,7 +12,3 @@ class CreateProtein(BaseModel):
 
 class CreateProteinCreateProtein(BaseModel):
     id: Any
-
-
-CreateProtein.model_rebuild()
-CreateProteinCreateProtein.model_rebuild()

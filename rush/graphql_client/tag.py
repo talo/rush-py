@@ -8,6 +8,3 @@ from .base_model import BaseModel
 
 class Tag(BaseModel):
     tag: List[str]
-
-
-Tag.model_rebuild()

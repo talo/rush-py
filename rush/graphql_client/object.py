@@ -8,6 +8,3 @@ from .base_model import BaseModel
 
 class Object(BaseModel):
     object: Any
-
-
-Object.model_rebuild()

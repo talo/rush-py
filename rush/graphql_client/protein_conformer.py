@@ -24,8 +24,3 @@ class ProteinConformerProteinConformer(BaseModel):
 
 class ProteinConformerProteinConformerData(BaseModel):
     name: Optional[str]
-
-
-ProteinConformer.model_rebuild()
-ProteinConformerProteinConformer.model_rebuild()
-ProteinConformerProteinConformerData.model_rebuild()

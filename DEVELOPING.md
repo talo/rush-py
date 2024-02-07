@@ -30,7 +30,7 @@ Step 2. replace `schema.graphql` in the root of this repo with the new version
 Step 3. Copy the queries from rush-client into `combined.graphql` - we try to keep `tengu-client` in sync with
         rush-py to reduce feature divergence and unify the interaction approaches.
 
-        I use `cat ../tengu/tengu-client/queries/* > combined.graphql` to combine everything into one file
+        Use `cat ../tengu/tengu-client/queries/* > combined.graphql` to combine everything into one file
         that ariadne-codegen understands
 
 Step 4. Run `ariadne-codegen` in an environment with it installed to update the deps

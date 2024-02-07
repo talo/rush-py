@@ -25,8 +25,3 @@ class SmolTautomerSmolTautomer(BaseModel):
 class SmolTautomerSmolTautomerData(BaseModel):
     name: Optional[str]
     inchi: str
-
-
-SmolTautomer.model_rebuild()
-SmolTautomerSmolTautomer.model_rebuild()
-SmolTautomerSmolTautomerData.model_rebuild()

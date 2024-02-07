@@ -12,7 +12,3 @@ class CreateEntity(BaseModel):
 
 class CreateEntityCreateEntity(BaseModel):
     id: Any
-
-
-CreateEntity.model_rebuild()
-CreateEntityCreateEntity.model_rebuild()

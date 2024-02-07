@@ -12,7 +12,3 @@ class CreateExperiment(BaseModel):
 
 class CreateExperimentCreateExperiment(BaseModel):
     id: Any
-
-
-CreateExperiment.model_rebuild()
-CreateExperimentCreateExperiment.model_rebuild()

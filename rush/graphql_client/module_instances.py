@@ -23,7 +23,9 @@ class ModuleInstancesMeAccount(BaseModel):
 
 class ModuleInstancesMeAccountModuleInstances(BaseModel):
     edges: List["ModuleInstancesMeAccountModuleInstancesEdges"]
-    page_info: "ModuleInstancesMeAccountModuleInstancesPageInfo" = Field(alias="pageInfo")
+    page_info: "ModuleInstancesMeAccountModuleInstancesPageInfo" = Field(
+        alias="pageInfo"
+    )
 
 
 class ModuleInstancesMeAccountModuleInstancesEdges(BaseModel):
@@ -37,12 +39,3 @@ class ModuleInstancesMeAccountModuleInstancesEdgesNode(SimpleModuleInstanceFull)
 
 class ModuleInstancesMeAccountModuleInstancesPageInfo(PageInfoFull):
     pass
-
-
-ModuleInstances.model_rebuild()
-ModuleInstancesMe.model_rebuild()
-ModuleInstancesMeAccount.model_rebuild()
-ModuleInstancesMeAccountModuleInstances.model_rebuild()
-ModuleInstancesMeAccountModuleInstancesEdges.model_rebuild()
-ModuleInstancesMeAccountModuleInstancesEdgesNode.model_rebuild()
-ModuleInstancesMeAccountModuleInstancesPageInfo.model_rebuild()

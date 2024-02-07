@@ -20,7 +20,3 @@ class EntityEntity(BaseModel):
     deleted_at: Optional[datetime] = Field(alias="deletedAt")
     data: Optional[Any]
     tags: List[str]
-
-
-Entity.model_rebuild()
-EntityEntity.model_rebuild()

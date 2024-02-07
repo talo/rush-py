@@ -32,15 +32,11 @@ class StructureStructureTopology(BaseModel):
     symbols: List[Element]
     geometry: List[float]
     connectivity: Optional[List[Any]]
-    atom_charges: Optional[List[int]]
-    atom_labels: Optional[List[str]]
+    formal_charges: Optional[List[int]]
+    labels: Optional[List[str]]
     partial_charges: Optional[List[float]]
     fragments: Optional[List[List[int]]]
-    fragment_charges: Optional[List[int]]
+    fragment_formal_charges: Optional[List[int]]
+    fragment_partial_charges: Optional[List[float]]
+    velocities: Optional[List[float]]
     alts: Optional[List[Any]]
-
-
-Structure.model_rebuild()
-StructureStructure.model_rebuild()
-StructureStructureData.model_rebuild()
-StructureStructureTopology.model_rebuild()

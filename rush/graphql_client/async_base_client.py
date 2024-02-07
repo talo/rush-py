@@ -14,12 +14,19 @@ from .exceptions import (
     GraphQLClientGraphQLMultiError,
     GraphQLClientHttpError,
     GraphQLClientInvalidMessageFormat,
-    GraphQlClientInvalidResponseError,
+    GraphQLClientInvalidResponseError,
 )
 
 try:
-    from websockets.client import WebSocketClientProtocol, connect as ws_connect
-    from websockets.typing import Data, Origin, Subprotocol
+    from websockets.client import (  # type: ignore[import-not-found,unused-ignore]
+        WebSocketClientProtocol,
+        connect as ws_connect,
+    )
+    from websockets.typing import (  # type: ignore[import-not-found,unused-ignore]
+        Data,
+        Origin,
+        Subprotocol,
+    )
 except ImportError:
     from contextlib import asynccontextmanager
 
@@ -28,9 +35,9 @@ except ImportError:
         raise NotImplementedError("Subscriptions require 'websockets' package.")
         yield  # pylint: disable=unreachable
 
-    WebSocketClientProtocol = Any  # type: ignore
-    Data = Any  # type: ignore
-    Origin = Any  # type: ignore
+    WebSocketClientProtocol = Any  # type: ignore[misc,assignment,unused-ignore]
+    Data = Any  # type: ignore[misc,assignment,unused-ignore]
+    Origin = Any  # type: ignore[misc,assignment,unused-ignore]
 
     def Subprotocol(*args, **kwargs):  # type: ignore # pylint: disable=invalid-name
         raise NotImplementedError("Subscriptions require 'websockets' package.")
@@ -65,7 +72,9 @@ class AsyncBaseClient:
     ) -> None:
         self.url = url
         self.headers = headers
-        self.http_client = http_client if http_client else httpx.AsyncClient(headers=headers)
+        self.http_client = (
+            http_client if http_client else httpx.AsyncClient(headers=headers)
+        )
 
         self.ws_url = ws_url
         self.ws_headers = ws_headers or {}
@@ -84,43 +93,63 @@ class AsyncBaseClient:
         await self.http_client.aclose()
 
     async def execute(
-        self, query: str, variables: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self,
+        query: str,
+        operation_name: Optional[str] = None,
+        variables: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
     ) -> httpx.Response:
         processed_variables, files, files_map = self._process_variables(variables)
 
         if files and files_map:
             return await self._execute_multipart(
                 query=query,
+                operation_name=operation_name,
                 variables=processed_variables,
                 files=files,
                 files_map=files_map,
                 **kwargs,
             )
 
-        return await self._execute_json(query=query, variables=processed_variables, **kwargs)
+        return await self._execute_json(
+            query=query,
+            operation_name=operation_name,
+            variables=processed_variables,
+            **kwargs,
+        )
 
     def get_data(self, response: httpx.Response) -> Dict[str, Any]:
         if not response.is_success:
-            raise GraphQLClientHttpError(status_code=response.status_code, response=response)
+            raise GraphQLClientHttpError(
+                status_code=response.status_code, response=response
+            )
 
         try:
             response_json = response.json()
         except ValueError as exc:
-            raise GraphQlClientInvalidResponseError(response=response) from exc
+            raise GraphQLClientInvalidResponseError(response=response) from exc
 
-        if (not isinstance(response_json, dict)) or ("data" not in response_json):
-            raise GraphQlClientInvalidResponseError(response=response)
+        if (not isinstance(response_json, dict)) or (
+            "data" not in response_json and "errors" not in response_json
+        ):
+            raise GraphQLClientInvalidResponseError(response=response)
 
-        data = response_json["data"]
+        data = response_json.get("data")
         errors = response_json.get("errors")
 
         if errors:
-            raise GraphQLClientGraphQLMultiError.from_errors_dicts(errors_dicts=errors, data=data)
+            raise GraphQLClientGraphQLMultiError.from_errors_dicts(
+                errors_dicts=errors, data=data
+            )
 
         return cast(Dict[str, Any], data)
 
     async def execute_ws(
-        self, query: str, variables: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self,
+        query: str,
+        operation_name: Optional[str] = None,
+        variables: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
     ) -> AsyncIterator[Dict[str, Any]]:
         headers = self.ws_headers.copy()
         headers.update(kwargs.get("extra_headers", {}))
@@ -136,10 +165,17 @@ class AsyncBaseClient:
             **merged_kwargs,
         ) as websocket:
             await self._send_connection_init(websocket)
+            # wait for connection_ack from server
+            await self._handle_ws_message(
+                await websocket.recv(),
+                websocket,
+                expected_type=GraphQLTransportWSMessageType.CONNECTION_ACK,
+            )
             await self._send_subscribe(
                 websocket,
                 operation_id=operation_id,
                 query=query,
+                operation_name=operation_name,
                 variables=variables,
             )
 
@@ -150,15 +186,23 @@ class AsyncBaseClient:
 
     def _process_variables(
         self, variables: Optional[Dict[str, Any]]
-    ) -> Tuple[Dict[str, Any], Dict[str, Tuple[str, IO[bytes], str]], Dict[str, List[str]]]:
+    ) -> Tuple[
+        Dict[str, Any], Dict[str, Tuple[str, IO[bytes], str]], Dict[str, List[str]]
+    ]:
         if not variables:
             return {}, {}, {}
 
         serializable_variables = self._convert_dict_to_json_serializable(variables)
         return self._get_files_from_variables(serializable_variables)
 
-    def _convert_dict_to_json_serializable(self, dict_: Dict[str, Any]) -> Dict[str, Any]:
-        return {key: self._convert_value(value) for key, value in dict_.items() if value is not UNSET}
+    def _convert_dict_to_json_serializable(
+        self, dict_: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        return {
+            key: self._convert_value(value)
+            for key, value in dict_.items()
+            if value is not UNSET
+        }
 
     def _convert_value(self, value: Any) -> Any:
         if isinstance(value, BaseModel):
@@ -169,7 +213,9 @@ class AsyncBaseClient:
 
     def _get_files_from_variables(
         self, variables: Dict[str, Any]
-    ) -> Tuple[Dict[str, Any], Dict[str, Tuple[str, IO[bytes], str]], Dict[str, List[str]]]:
+    ) -> Tuple[
+        Dict[str, Any], Dict[str, Tuple[str, IO[bytes], str]], Dict[str, List[str]]
+    ]:
         files_map: Dict[str, List[str]] = {}
         files_list: List[Upload] = []
 
@@ -210,19 +256,35 @@ class AsyncBaseClient:
     async def _execute_multipart(
         self,
         query: str,
+        operation_name: Optional[str],
         variables: Dict[str, Any],
         files: Dict[str, Tuple[str, IO[bytes], str]],
         files_map: Dict[str, List[str]],
         **kwargs: Any,
     ) -> httpx.Response:
         data = {
-            "operations": json.dumps({"query": query, "variables": variables}, default=to_jsonable_python),
+            "operations": json.dumps(
+                {
+                    "query": query,
+                    "operationName": operation_name,
+                    "variables": variables,
+                },
+                default=to_jsonable_python,
+            ),
             "map": json.dumps(files_map, default=to_jsonable_python),
         }
 
-        return await self.http_client.post(url=self.url, data=data, files=files, **kwargs)
+        return await self.http_client.post(
+            url=self.url, data=data, files=files, **kwargs
+        )
 
-    async def _execute_json(self, query: str, variables: Dict[str, Any], **kwargs: Any) -> httpx.Response:
+    async def _execute_json(
+        self,
+        query: str,
+        operation_name: Optional[str],
+        variables: Dict[str, Any],
+        **kwargs: Any,
+    ) -> httpx.Response:
         headers: Dict[str, str] = {"Content-Type": "application/json"}
         headers.update(kwargs.get("headers", {}))
 
@@ -231,12 +293,21 @@ class AsyncBaseClient:
 
         return await self.http_client.post(
             url=self.url,
-            content=json.dumps({"query": query, "variables": variables}, default=to_jsonable_python),
+            content=json.dumps(
+                {
+                    "query": query,
+                    "operationName": operation_name,
+                    "variables": variables,
+                },
+                default=to_jsonable_python,
+            ),
             **merged_kwargs,
         )
 
     async def _send_connection_init(self, websocket: WebSocketClientProtocol) -> None:
-        payload: Dict[str, Any] = {"type": GraphQLTransportWSMessageType.CONNECTION_INIT.value}
+        payload: Dict[str, Any] = {
+            "type": GraphQLTransportWSMessageType.CONNECTION_INIT.value
+        }
         if self.ws_connection_init_payload:
             payload["payload"] = self.ws_connection_init_payload
         await websocket.send(json.dumps(payload))
@@ -246,19 +317,25 @@ class AsyncBaseClient:
         websocket: WebSocketClientProtocol,
         operation_id: str,
         query: str,
+        operation_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
     ) -> None:
         payload: Dict[str, Any] = {
             "id": operation_id,
             "type": GraphQLTransportWSMessageType.SUBSCRIBE.value,
-            "payload": {"query": query},
+            "payload": {"query": query, "operationName": operation_name},
         }
         if variables:
-            payload["payload"]["variables"] = self._convert_dict_to_json_serializable(variables)
+            payload["payload"]["variables"] = self._convert_dict_to_json_serializable(
+                variables
+            )
         await websocket.send(json.dumps(payload))
 
     async def _handle_ws_message(
-        self, message: Data, websocket: WebSocketClientProtocol
+        self,
+        message: Data,
+        websocket: WebSocketClientProtocol,
+        expected_type: Optional[GraphQLTransportWSMessageType] = None,
     ) -> Optional[Dict[str, Any]]:
         try:
             message_dict = json.loads(message)
@@ -271,6 +348,11 @@ class AsyncBaseClient:
         if not type_ or type_ not in {t.value for t in GraphQLTransportWSMessageType}:
             raise GraphQLClientInvalidMessageFormat(message=message)
 
+        if expected_type and expected_type != type_:
+            raise GraphQLClientInvalidMessageFormat(
+                f"Invalid message received. Expected: {expected_type.value}"
+            )
+
         if type_ == GraphQLTransportWSMessageType.NEXT:
             if "data" not in payload:
                 raise GraphQLClientInvalidMessageFormat(message=message)
@@ -279,8 +361,12 @@ class AsyncBaseClient:
         if type_ == GraphQLTransportWSMessageType.COMPLETE:
             await websocket.close()
         elif type_ == GraphQLTransportWSMessageType.PING:
-            await websocket.send(json.dumps({"type": GraphQLTransportWSMessageType.PONG.value}))
+            await websocket.send(
+                json.dumps({"type": GraphQLTransportWSMessageType.PONG.value})
+            )
         elif type_ == GraphQLTransportWSMessageType.ERROR:
-            raise GraphQLClientGraphQLMultiError.from_errors_dicts(errors_dicts=payload, data=message_dict)
+            raise GraphQLClientGraphQLMultiError.from_errors_dicts(
+                errors_dicts=payload, data=message_dict
+            )
 
         return None

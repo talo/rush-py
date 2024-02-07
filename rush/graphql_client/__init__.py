@@ -46,13 +46,14 @@ from .enums import (
     ModuleInstanceTarget,
     Order,
     OrderBy,
+    TopologyVersion,
 )
 from .exceptions import (
     GraphQLClientError,
     GraphQLClientGraphQLError,
     GraphQLClientGraphQLMultiError,
     GraphQLClientHttpError,
-    GraphQlClientInvalidResponseError,
+    GraphQLClientInvalidResponseError,
 )
 from .experiment import Experiment, ExperimentExperiment, ExperimentExperimentData
 from .fragments import (
@@ -280,7 +281,7 @@ __all__ = [
     "GraphQLClientGraphQLError",
     "GraphQLClientGraphQLMultiError",
     "GraphQLClientHttpError",
-    "GraphQlClientInvalidResponseError",
+    "GraphQLClientInvalidResponseError",
     "LatestModules",
     "LatestModulesLatestModules",
     "LatestModulesLatestModulesEdges",
@@ -404,6 +405,7 @@ __all__ = [
     "TokenFilterBy",
     "TokenSortBy",
     "TopologyInput",
+    "TopologyVersion",
     "TrackUtilization",
     "TrackUtilizationTrackModuleInstanceResourceUtilization",
     "Untag",
