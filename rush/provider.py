@@ -685,8 +685,10 @@ class BaseProvider:
         """
         tags = tags + self.batch_tags if tags else self.batch_tags
 
+        self.logger.info(f'{restore=} {self.restore_by_default=}')
         try_restore = restore if restore is not None else self.restore_by_default
         if try_restore:
+            self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
             res: list[ModuleInstanceFullModuleInstance] = []
             async for page in await self.module_instances(tags=tags, path=path):
                 for edge in page.edges:
@@ -1034,7 +1036,7 @@ class BaseProvider:
                     target: Target | None = default_target,
                     resources: Resources | None = default_resources,
                     tags: list[str] | None = None,
-                    restore: bool | None = False,
+                    restore: bool | None = None,
                 ):
                     typechecker(*args)
                     run = await self.run(
