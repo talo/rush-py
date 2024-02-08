@@ -690,8 +690,8 @@ class BaseProvider:
                     res.append(instance)
                     if len(res) > 1:
                         self.logger.warn("Multiple module instances found with the same tags and path")
-                        break
-            if len(res) == 1:
+            if len(res) >= 1:
+                self.logger.info(f"Restoring job from previous run with id {res[0].id}")
                 return res[0]
 
         # always request a bit of space because the run will always create files
