@@ -340,6 +340,7 @@ class BaseProvider:
     def __init__(
         self,
         client: Client,
+        restore_by_default: bool = False,
         workspace: str | Path | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
@@ -347,9 +348,11 @@ class BaseProvider:
         """
         Initialize the RushProvider a graphql client.
         """
+        self.restore_by_default = restore_by_default
         self.history = None
         self.client = client
         self.module_paths: dict[str, str] = {}
+
         if not logger:
             self.logger = logging.getLogger("rush")
             if len(self.logger.handlers) == 0:
@@ -667,7 +670,7 @@ class BaseProvider:
         resources: Resources | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
-        restore: bool | None = False,
+        restore: bool | None = None,
     ) -> RunRun | ModuleInstanceFullModuleInstance:
         """
         Run a module with the given inputs and outputs.
@@ -682,7 +685,8 @@ class BaseProvider:
         """
         tags = tags + self.batch_tags if tags else self.batch_tags
 
-        if restore:
+        try_restore = restore if restore is not None else self.restore_by_default
+        if try_restore:
             res: list[ModuleInstanceFullModuleInstance] = []
             async for page in await self.module_instances(tags=tags, path=path):
                 for edge in page.edges:
@@ -1239,6 +1243,7 @@ class Provider(BaseProvider):
         workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
+        restore_by_default: bool = False,
     ):
         """
         Initialize the RushProvider with a graphql client.
@@ -1266,10 +1271,14 @@ class Provider(BaseProvider):
             if url is None:
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
-            super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
+            super().__init__(
+                client, workspace=workspace, batch_tags=batch_tags, logger=logger, restore_by_default=restore_by_default
+            )
         else:
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
-            super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
+            super().__init__(
+                client, workspace=workspace, batch_tags=batch_tags, logger=logger, restore_by_default=restore_by_default
+            )
 
 
 async def build_provider_with_functions(
