@@ -1289,6 +1289,7 @@ async def build_provider_with_functions(
     module_names: list[str] | None = None,
     module_tags: list[str] | None = None,
     logger: logging.Logger | None = None,
+    restore_by_default: bool = False,
 ) -> Provider:
     """
     Build a RushProvider with the given access token and url.
@@ -1299,7 +1300,7 @@ async def build_provider_with_functions(
     :param batch_tags: The tags that will be placed on all runs by default.
     :return: The built RushProvider.
     """
-    provider = Provider(access_token, url, workspace, batch_tags, logger)
+    provider = Provider(access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default)
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
     return provider
