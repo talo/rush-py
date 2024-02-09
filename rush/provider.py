@@ -1273,12 +1273,20 @@ class Provider(BaseProvider):
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
             super().__init__(
-                client, workspace=workspace, batch_tags=batch_tags, logger=logger, restore_by_default=restore_by_default
+                client,
+                workspace=workspace,
+                batch_tags=batch_tags,
+                logger=logger,
+                restore_by_default=restore_by_default,
             )
         else:
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
             super().__init__(
-                client, workspace=workspace, batch_tags=batch_tags, logger=logger, restore_by_default=restore_by_default
+                client,
+                workspace=workspace,
+                batch_tags=batch_tags,
+                logger=logger,
+                restore_by_default=restore_by_default,
             )
 
 
@@ -1301,7 +1309,9 @@ async def build_provider_with_functions(
     :param batch_tags: The tags that will be placed on all runs by default.
     :return: The built RushProvider.
     """
-    provider = Provider(access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default)
+    provider = Provider(
+        access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
+    )
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
     return provider
