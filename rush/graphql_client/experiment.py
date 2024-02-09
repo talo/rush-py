@@ -28,8 +28,3 @@ class ExperimentExperimentData(BaseModel):
     measure: str
     value: float
     assay: str
-
-
-Experiment.model_rebuild()
-ExperimentExperiment.model_rebuild()
-ExperimentExperimentData.model_rebuild()

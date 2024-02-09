@@ -25,8 +25,3 @@ class ProteinProtein(BaseModel):
 class ProteinProteinData(BaseModel):
     name: str
     sequence: str
-
-
-Protein.model_rebuild()
-ProteinProtein.model_rebuild()
-ProteinProteinData.model_rebuild()

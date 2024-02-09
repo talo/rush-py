@@ -12,7 +12,3 @@ class CreateSmolConformer(BaseModel):
 
 class CreateSmolConformerCreateSmolConformer(BaseModel):
     id: Any
-
-
-CreateSmolConformer.model_rebuild()
-CreateSmolConformerCreateSmolConformer.model_rebuild()

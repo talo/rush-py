@@ -12,7 +12,3 @@ class CreateProject(BaseModel):
 
 class CreateProjectCreateProject(BaseModel):
     id: Any
-
-
-CreateProject.model_rebuild()
-CreateProjectCreateProject.model_rebuild()

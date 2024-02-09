@@ -12,7 +12,3 @@ class CreateSmolTautomer(BaseModel):
 
 class CreateSmolTautomerCreateSmolTautomer(BaseModel):
     id: Any
-
-
-CreateSmolTautomer.model_rebuild()
-CreateSmolTautomerCreateSmolTautomer.model_rebuild()

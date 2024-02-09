@@ -25,8 +25,3 @@ class SmolSmol(BaseModel):
 class SmolSmolData(BaseModel):
     name: str
     inchi: str
-
-
-Smol.model_rebuild()
-SmolSmol.model_rebuild()
-SmolSmolData.model_rebuild()

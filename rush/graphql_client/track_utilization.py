@@ -12,7 +12,3 @@ class TrackUtilization(BaseModel):
 
 class TrackUtilizationTrackModuleInstanceResourceUtilization(BaseModel):
     id: Any
-
-
-TrackUtilization.model_rebuild()
-TrackUtilizationTrackModuleInstanceResourceUtilization.model_rebuild()

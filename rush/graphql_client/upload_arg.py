@@ -14,7 +14,3 @@ class UploadArg(BaseModel):
 class UploadArgUploadArg(BaseModel):
     id: UUID
     value: Optional[Any]
-
-
-UploadArg.model_rebuild()
-UploadArgUploadArg.model_rebuild()

@@ -14,7 +14,3 @@ class UpdateModuleInstance(BaseModel):
 class UpdateModuleInstanceUpdateModuleInstance(BaseModel):
     id: UUID
     status: ModuleInstanceStatus
-
-
-UpdateModuleInstance.model_rebuild()
-UpdateModuleInstanceUpdateModuleInstance.model_rebuild()

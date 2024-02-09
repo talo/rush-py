@@ -12,7 +12,3 @@ class CreateProteinConformer(BaseModel):
 
 class CreateProteinConformerCreateProteinConformer(BaseModel):
     id: Any
-
-
-CreateProteinConformer.model_rebuild()
-CreateProteinConformerCreateProteinConformer.model_rebuild()

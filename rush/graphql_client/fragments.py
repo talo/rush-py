@@ -13,6 +13,7 @@ from .enums import ModuleFailureReason, ModuleInstanceStatus, ModuleInstanceTarg
 
 class ArgumentFull(BaseModel):
     id: UUID
+    name: Optional[str]
     typeinfo: Any
     value: Optional[Any]
     created_at: datetime
@@ -23,6 +24,7 @@ class ArgumentFull(BaseModel):
 
 class ModuleFull(BaseModel):
     id: UUID
+    name: str
     created_at: datetime
     deleted_at: Optional[datetime]
     path: str
@@ -60,6 +62,7 @@ class ModuleFullResourceBounds(BaseModel):
 class ModuleInstanceCommon(BaseModel):
     id: UUID
     account_id: UUID
+    name: Optional[str]
     created_at: datetime
     deleted_at: Optional[datetime]
     queued_at: Optional[datetime]
@@ -200,19 +203,8 @@ class SimpleModuleInstanceFullProgress(BaseModel):
 
 ArgumentFull.model_rebuild()
 ModuleFull.model_rebuild()
-ModuleFullResourceBounds.model_rebuild()
 ModuleInstanceCommon.model_rebuild()
-ModuleInstanceCommonFailureContext.model_rebuild()
 ModuleInstanceFull.model_rebuild()
-ModuleInstanceFullIns.model_rebuild()
-ModuleInstanceFullOuts.model_rebuild()
-ModuleInstanceFullResources.model_rebuild()
-ModuleInstanceFullProgress.model_rebuild()
 PageInfoFull.model_rebuild()
 SimpleModuleInstanceCommon.model_rebuild()
-SimpleModuleInstanceCommonFailureContext.model_rebuild()
 SimpleModuleInstanceFull.model_rebuild()
-SimpleModuleInstanceFullIns.model_rebuild()
-SimpleModuleInstanceFullOuts.model_rebuild()
-SimpleModuleInstanceFullResources.model_rebuild()
-SimpleModuleInstanceFullProgress.model_rebuild()

@@ -8,6 +8,3 @@ from .base_model import BaseModel
 
 class Untag(BaseModel):
     untag: List[str]
-
-
-Untag.model_rebuild()

@@ -24,8 +24,3 @@ class SmolConformerSmolConformer(BaseModel):
 
 class SmolConformerSmolConformerData(BaseModel):
     name: Optional[str]
-
-
-SmolConformer.model_rebuild()
-SmolConformerSmolConformer.model_rebuild()
-SmolConformerSmolConformerData.model_rebuild()

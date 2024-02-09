@@ -88,23 +88,3 @@ class ProjectProjectSmolTautomersEdges(BaseModel):
 
 class ProjectProjectSmolTautomersEdgesNode(BaseModel):
     id: Any
-
-
-Project.model_rebuild()
-ProjectProject.model_rebuild()
-ProjectProjectData.model_rebuild()
-ProjectProjectProteins.model_rebuild()
-ProjectProjectProteinsEdges.model_rebuild()
-ProjectProjectProteinsEdgesNode.model_rebuild()
-ProjectProjectProteinConformers.model_rebuild()
-ProjectProjectProteinConformersEdges.model_rebuild()
-ProjectProjectProteinConformersEdgesNode.model_rebuild()
-ProjectProjectSmols.model_rebuild()
-ProjectProjectSmolsEdges.model_rebuild()
-ProjectProjectSmolsEdgesNode.model_rebuild()
-ProjectProjectSmolConformers.model_rebuild()
-ProjectProjectSmolConformersEdges.model_rebuild()
-ProjectProjectSmolConformersEdgesNode.model_rebuild()
-ProjectProjectSmolTautomers.model_rebuild()
-ProjectProjectSmolTautomersEdges.model_rebuild()
-ProjectProjectSmolTautomersEdgesNode.model_rebuild()
