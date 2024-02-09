@@ -685,7 +685,6 @@ class BaseProvider:
         """
         tags = tags + self.batch_tags if tags else self.batch_tags
 
-        self.logger.info(f'{restore=} {self.restore_by_default=}')
         try_restore = restore if restore is not None else self.restore_by_default
         if try_restore:
             self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
