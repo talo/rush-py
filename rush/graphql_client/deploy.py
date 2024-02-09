@@ -13,7 +13,3 @@ class Deploy(BaseModel):
 class DeployDeploy(BaseModel):
     id: UUID
     path: str
-
-
-Deploy.model_rebuild()
-DeployDeploy.model_rebuild()

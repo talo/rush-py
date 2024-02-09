@@ -12,7 +12,3 @@ class Retry(BaseModel):
 
 class RetryRetry(BaseModel):
     id: UUID
-
-
-Retry.model_rebuild()
-RetryRetry.model_rebuild()

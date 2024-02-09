@@ -181,3 +181,8 @@ class Order(str, Enum):
 class OrderBy(str, Enum):
     ASC = "ASC"
     DESC = "DESC"
+
+
+class TopologyVersion(str, Enum):
+    V0 = "V0"
+    V1 = "V1"

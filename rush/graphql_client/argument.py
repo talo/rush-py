@@ -11,7 +11,3 @@ class Argument(BaseModel):
 
 class ArgumentArgument(ArgumentFull):
     pass
-
-
-Argument.model_rebuild()
-ArgumentArgument.model_rebuild()

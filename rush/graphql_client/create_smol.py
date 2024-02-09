@@ -12,7 +12,3 @@ class CreateSmol(BaseModel):
 
 class CreateSmolCreateSmol(BaseModel):
     id: Any
-
-
-CreateSmol.model_rebuild()
-CreateSmolCreateSmol.model_rebuild()

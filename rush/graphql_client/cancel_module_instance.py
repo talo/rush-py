@@ -8,6 +8,3 @@ from .base_model import BaseModel
 
 class CancelModuleInstance(BaseModel):
     cancel: UUID
-
-
-CancelModuleInstance.model_rebuild()

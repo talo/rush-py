@@ -1,0 +1,4 @@
+[tool.black]
+line-length = 82
+target-version = ['py311']
+include = '\.ipynb$'

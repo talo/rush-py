@@ -8,13 +8,21 @@ from uuid import UUID
 from pydantic import Field
 
 from .base_model import BaseModel
-from .enums import Element, MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, Order
+from .enums import (
+    Element,
+    MemUnits,
+    ModuleInstanceStatus,
+    ModuleInstanceTarget,
+    Order,
+    TopologyVersion,
+)
 
 
 class ArgumentInput(BaseModel):
     id: Optional[UUID] = None
-    value: Optional[Any] = None
+    name: Optional[str] = None
     tags: Optional[List[str]] = None
+    value: Optional[Any] = None
 
 
 class CreateExperimentInput(BaseModel):
@@ -141,10 +149,12 @@ class ModuleInput(BaseModel):
 class ModuleInstanceInput(BaseModel):
     path: str
     args: List["ArgumentInput"]
+    name: Optional[str] = None
     target: Optional[ModuleInstanceTarget] = None
     resources: Optional["ModuleInstanceResourcesInput"] = None
     tags: Optional[List[str]] = None
     out_tags: Optional[List[Optional[List[str]]]] = None
+    out_names: Optional[List[Optional[str]]] = None
     end: Optional[bool] = None
 
 
@@ -363,14 +373,20 @@ class TokenSortBy(BaseModel):
 
 
 class TopologyInput(BaseModel):
+    version: Optional[TopologyVersion] = None
     symbols: List[Element]
     geometry: List[float]
+    velocities: Optional[List[float]] = None
     connectivity: Optional[List[Any]] = None
+    formal_charges: Optional[List[int]] = None
     atom_charges: Optional[List[int]] = None
     partial_charges: Optional[List[float]] = None
+    labels: Optional[List[str]] = None
     atom_labels: Optional[List[str]] = None
     fragments: Optional[List[List[int]]] = None
+    fragment_formal_charges: Optional[List[int]] = None
     fragment_charges: Optional[List[int]] = None
+    fragment_partial_charges: Optional[List[float]] = None
     fragment_multiplicities: Optional[List[int]] = None
     alts: Optional[List[Any]] = None
 
@@ -390,49 +406,3 @@ class UuidFilter(BaseModel):
     eq: Optional[Any] = None
     ne: Optional[Any] = None
     in_: Optional[List[Any]] = Field(alias="in", default=None)
-
-
-ArgumentInput.model_rebuild()
-CreateExperimentInput.model_rebuild()
-CreateProjectInput.model_rebuild()
-CreateProteinConformerInput.model_rebuild()
-CreateProteinInput.model_rebuild()
-CreateSmolConformerInput.model_rebuild()
-CreateSmolInput.model_rebuild()
-CreateSmolTautomerInput.model_rebuild()
-CreateStructureInput.model_rebuild()
-DateTimeFilter.model_rebuild()
-EntityFilterBy.model_rebuild()
-EntitySortBy.model_rebuild()
-ExperimentDataInput.model_rebuild()
-ExperimentFilterBy.model_rebuild()
-ExperimentSortBy.model_rebuild()
-ModuleInput.model_rebuild()
-ModuleInstanceInput.model_rebuild()
-ModuleInstanceResourcesInput.model_rebuild()
-ProjectFilterBy.model_rebuild()
-ProjectSortBy.model_rebuild()
-ProteinConformerFilterBy.model_rebuild()
-ProteinConformerSortBy.model_rebuild()
-ProteinFilterBy.model_rebuild()
-ProteinSortBy.model_rebuild()
-RawEntityInput.model_rebuild()
-ResourceUtilizationInput.model_rebuild()
-SmolConformerFilterBy.model_rebuild()
-SmolConformerSortBy.model_rebuild()
-SmolDataInput.model_rebuild()
-SmolFilterBy.model_rebuild()
-SmolSortBy.model_rebuild()
-SmolTautomerDataInput.model_rebuild()
-SmolTautomerFilterBy.model_rebuild()
-SmolTautomerSortBy.model_rebuild()
-StringFilter.model_rebuild()
-StructureFilterBy.model_rebuild()
-StructureSortBy.model_rebuild()
-TagFilter.model_rebuild()
-TestCase.model_rebuild()
-TokenFilterBy.model_rebuild()
-TokenSortBy.model_rebuild()
-TopologyInput.model_rebuild()
-UpdateModuleInstanceInput.model_rebuild()
-UuidFilter.model_rebuild()

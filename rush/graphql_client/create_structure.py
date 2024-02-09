@@ -12,7 +12,3 @@ class CreateStructure(BaseModel):
 
 class CreateStructureCreateStructure(BaseModel):
     id: Any
-
-
-CreateStructure.model_rebuild()
-CreateStructureCreateStructure.model_rebuild()

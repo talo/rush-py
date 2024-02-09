@@ -25,15 +25,15 @@ mutation create_project($project: CreateProjectInput!) {
     id
   }
 }
+mutation create_protein($protein: CreateProteinInput!) {
+  create_protein(input: $protein) {
+    id
+  }
+}
 mutation create_protein_conformer(
   $protein_conformer: CreateProteinConformerInput!
 ) {
   create_protein_conformer(input: $protein_conformer) {
-    id
-  }
-}
-mutation create_protein($protein: CreateProteinInput!) {
-  create_protein(input: $protein) {
     id
   }
 }
@@ -48,6 +48,7 @@ fragment PageInfoFull on PageInfo {
 ## Arguments fragments and queries
 fragment ArgumentFull on Argument {
   id
+  name
   typeinfo
   value
   created_at
@@ -67,8 +68,9 @@ query arguments(
   $before: String
   $first: Int
   $last: Int
-  $typeinfo: Type
+  $typeinfo: [Type!]
   $tags: [String!]
+  $resolved: Boolean
 ) {
   me {
     account {
@@ -79,6 +81,7 @@ query arguments(
         before: $before
         typeinfo: $typeinfo
         tags: $tags
+        resolved: $resolved
       ) {
         pageInfo {
           ...PageInfoFull
@@ -98,6 +101,7 @@ query arguments(
 
 fragment ModuleFull on Module {
   id
+  name
   created_at
   deleted_at
   path
@@ -195,6 +199,7 @@ query modules(
 fragment ModuleInstanceCommon on ModuleInstance {
   id
   account_id
+  name
 
   created_at
   deleted_at
@@ -362,6 +367,7 @@ query module_instances(
   $status: ModuleInstanceStatus
   $tags: [String!]
   $ids: [ModuleInstanceId!]
+  $in_argument_ids: [ArgumentId!]
 ) {
   me {
     account {
@@ -375,6 +381,7 @@ query module_instances(
         name: $name
         tags: $tags
         ids: $ids
+        in_arguments: $in_argument_ids
       ) {
         edges {
           cursor
@@ -543,11 +550,13 @@ query structure($id: UUID!) {
       symbols
       geometry
       connectivity
-      atom_charges
-      atom_labels
+      formal_charges
+      labels
       partial_charges
       fragments
-      fragment_charges
+      fragment_formal_charges
+      fragment_partial_charges
+      velocities
       alts
     }
     # signed_url
@@ -587,13 +596,13 @@ mutation run($instance: ModuleInstanceInput!) {
         outs {id}
     }
 }
-mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
-  create_smol_conformer(input: $smol_conformer) {
+mutation create_smol($smol: CreateSmolInput!) {
+  create_smol(input: $smol) {
     id
   }
 }
-mutation create_smol($smol: CreateSmolInput!) {
-  create_smol(input: $smol) {
+mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+  create_smol_conformer(input: $smol_conformer) {
     id
   }
 }

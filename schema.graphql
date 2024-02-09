@@ -20,6 +20,7 @@ type Account {
     tags: [String!]
     ids: [ModuleInstanceId!]
     deleted: Boolean
+    in_arguments: [ArgumentId!]
   ): SimpleModuleInstanceConnection!
 
   # Get all tags placed on module_instances
@@ -38,8 +39,9 @@ type Account {
     first: Int
     last: Int
     order: OrderBy
-    typeinfo: Type
+    typeinfo: [Type!]
     tags: [String!]
+    resolved: Boolean
     deleted: Boolean
   ): ArgumentConnection!
 
@@ -132,9 +134,11 @@ scalar Alt
 
 type Argument {
   id: ArgumentId!
+  name: String
   created_at: DateTime!
   deleted_at: DateTime
   rejected_at: DateTime
+  resolved_at: DateTime
   account_id: AccountId!
   typeinfo: Type!
   value: JSON
@@ -167,8 +171,9 @@ scalar ArgumentId
 
 input ArgumentInput {
   id: ArgumentId
-  value: JSON
+  name: String
   tags: [String!]
+  value: JSON
 }
 
 scalar Bond
@@ -559,18 +564,44 @@ enum MemUnits {
 }
 
 type Module {
+  # Unique identifier for module
   id: ModuleId!
   created_at: DateTime!
+
+  # When the module was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # Path to module, used for resolving the module entrypoint
   path: String!
+
+  # Name of module, used for display + search purposes. Will strip _tengu / tengu_ from the path
+  name: String!
+
+  # The types of the module's inputs
   ins: [Type!]!
+
+  # The types of the module's outputs
   outs: [Type!]!
+
+  # Tags to apply to the module
   tags: [String!]
+
+  # Description of module
   description: String
+
+  # Usage instructions for module - NOTE: this is deprecated, use ins_usage and outs_usage instead
   usage: String
+
+  # Usage instructions for module inputs
   ins_usage: [String!]
+
+  # Usage instructions for module outputs
   outs_usage: [String!]
+
+  # Targets that this module can be dispatched to
   targets: [ModuleInstanceTarget!]
+
+  # Resource specification indicating bounds on the resources required by this module
   resource_bounds: ModuleResourceBounds
   typedesc: String!
 }
@@ -631,24 +662,64 @@ input ModuleInput {
 }
 
 type ModuleInstance {
+  # Unique identifier for module instance
   id: ModuleInstanceId!
+
+  # When the module instance was created
   created_at: DateTime!
+
+  # When the module instance was deleted, is used to determine if a module instance is soft-deleted
   deleted_at: DateTime
+
+  # Account that created the module instance
   account_id: AccountId!
+
+  # Path to module, used for resolving the module entrypoint
   path: String!
+
+  # The arguments that will be passed to the module instance
   ins: [Argument!]!
+
+  # The arguments that will be produced by the module instance
   outs: [Argument!]!
+
+  # Name of the module instance
+  name: String
+
+  # When the module entered the QUEUED state
   queued_at: DateTime
+
+  # When the module entered the ADMITTED state
   admitted_at: DateTime
+
+  # When the module entered the DISPATCHED state
   dispatched_at: DateTime
+
+  # When the module entered the RUNNING state
   run_at: DateTime
+
+  # When the module entered the COMPLETED or FAILED state
   completed_at: DateTime
+
+  # Module failure category
   failure_reason: ModuleFailureReason
+
+  # Module failure context, useful for debugging
   failure_context: ModuleFailureContext
+
+  # Current module instance status
   status: ModuleInstanceStatus!
+
+  # Target that this module instance will be / is dispatched to
   target: ModuleInstanceTarget!
+
+  # Resources allocated to this module instance
   resources: ModuleInstanceResources
+
+  # Progress of the module instance
   progress: ModuleInstanceProgress
+
+  # Tags applied to the module instance
   tags: [String!]
   module: Module!
   stdout(
@@ -673,6 +744,7 @@ scalar ModuleInstanceId
 input ModuleInstanceInput {
   path: String!
   args: [ArgumentInput!]!
+  name: String
   target: ModuleInstanceTarget
 
   # Resource specification
@@ -683,6 +755,9 @@ input ModuleInstanceInput {
 
   # Tags to apply to the outputs
   out_tags: [[String!]]
+
+  # Tags to apply to the outputs
+  out_names: [String]
 
   # Is this the final module intance in the pipeline?
   end: Boolean
@@ -696,29 +771,71 @@ type ModuleInstanceProgress {
 }
 
 type ModuleInstanceResources {
+  # Number of gpus to be allocated to job
   gpus: Int
+
+  # Minimum amount of gpu memory required per gpu, denominate in gpu_mem_units
   gpu_mem: Int
+
+  # Unit of gpu memory, defaults to B
   gpu_mem_units: MemUnits
+
+  # Number of cpus to be allocated to job
   cpus: Int
+
+  # Number of nodes to be allocated to job
   nodes: Int
+
+  # Amount of RAM to be allocated to job, denominated in mem_units
   mem: Int
+
+  # Units for RAM, defaults to B
   mem_units: MemUnits
+
+  # Space to be allocated on the target denominated in storage_units, must be > the size of Object inputs.
+  # The runtime will ensure this amount of space is reserved on the target, so try to take the output
+  # size into account so that the target does not run out of space.
   storage: Int
+
+  # Units for storage, defaults to B
   storage_units: MemUnits
+
+  # walltime request in minutes - job will be killed if it exceeds this number
   walltime: Int
   storage_mounts: [String!]
 }
 
 input ModuleInstanceResourcesInput {
+  # Number of gpus to be allocated to job
   gpus: Int
+
+  # Minimum amount of gpu memory required per gpu, denominate in gpu_mem_units
   gpu_mem: Int
+
+  # Unit of gpu memory, defaults to B
   gpu_mem_units: MemUnits
+
+  # Number of cpus to be allocated to job
   cpus: Int
+
+  # Number of nodes to be allocated to job
   nodes: Int
+
+  # Amount of RAM to be allocated to job, denominated in mem_units
   mem: Int
+
+  # Units for RAM, defaults to B
   mem_units: MemUnits
+
+  # Space to be allocated on the target denominated in storage_units, must be > the size of Object inputs.
+  # The runtime will ensure this amount of space is reserved on the target, so try to take the output
+  # size into account so that the target does not run out of space.
   storage: Int
+
+  # Units for storage, defaults to B
   storage_units: MemUnits
+
+  # walltime request in minutes - job will be killed if it exceeds this number
   walltime: Int
   storage_mounts: [String!]
 }
@@ -833,7 +950,15 @@ type Mutation {
   login(username: String!, password: String!): User
   deploy(module: ModuleInput!): SimpleModule!
   destroy(module: ModuleId!): SimpleModule!
+  delete_argument(arg_id: ArgumentId!): Argument!
   delete_module_instance(module: ModuleInstanceId!): SimpleModuleInstance!
+  delete_token(token_id: TokenId!): Token!
+  rename(
+    module: ModuleId
+    module_instance: ModuleInstanceId
+    argument: ArgumentId
+    name: String
+  ): [String!]!
   tag(
     module: ModuleId
     module_instance: ModuleInstanceId
@@ -846,7 +971,12 @@ type Mutation {
     argument: ArgumentId
     tags: [String!]!
   ): [String!]!
-  upload_arg(typeinfo: JSON!, tags: [String!], file: Upload!): Argument!
+  upload_arg(
+    typeinfo: JSON!
+    tags: [String!]
+    file: Upload!
+    name: String
+  ): Argument!
 
   # Cancel a currently running instance, but don't delete it
   cancel(instance: ModuleInstanceId!): ModuleInstanceId!
@@ -870,6 +1000,13 @@ type Mutation {
   track_module_instance_resource_utilization(
     utilization: ResourceUtilizationInput!
   ): ResourceUtilization!
+  create_argument(
+    name: String
+    typeinfo: JSON!
+    tags: [String!]
+    value: JSON!
+  ): Argument!
+  create_token: Token!
   create_entity(entity: RawEntityInput!): Entity!
   create_experiment(input: CreateExperimentInput!): Experiment!
   create_project(input: CreateProjectInput!): Project!
@@ -1256,41 +1393,114 @@ type ResourceUtilizationReport {
   sus_total: Int
 }
 
+# A module defines an interface to a program that can be run on a cluster.
+# It is a wrapper around a computational-chemistry program that defines well-typed inputs and outputs,
+# as well as resource requirements and documentation.
 type SimpleModule {
+  # Unique identifier for module
   id: ModuleId!
+
+  # When the module was created
   created_at: DateTime!
+
+  # When the module was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # Path to module, used for resolving the module entrypoint
   path: String!
+
+  # Name of module, used for display + search purposes. Will strip _tengu / tengu_ from the path
+  name: String!
+
+  # The types of the module's inputs
   ins: [Type!]!
+
+  # The types of the module's outputs
   outs: [Type!]!
+
+  # Tags to apply to the module
   tags: [String!]
+
+  # Description of module
   description: String
+
+  # Usage instructions for module - NOTE: this is deprecated, use ins_usage and outs_usage instead
   usage: String
+
+  # Usage instructions for module inputs
   ins_usage: [String!]
+
+  # Usage instructions for module outputs
   outs_usage: [String!]
+
+  # Targets that this module can be dispatched to
   targets: [ModuleInstanceTarget!]
+
+  # Resource specification indicating bounds on the resources required by this module
   resource_bounds: ModuleResourceBounds
 }
 
+# A module instance is a single invocation of a module. It is created when a user submits a module
+# Can be thought of as a "job"
 type SimpleModuleInstance {
+  # Unique identifier for module instance
   id: ModuleInstanceId!
+
+  # When the module instance was created
   created_at: DateTime!
+
+  # When the module instance was deleted, is used to determine if a module instance is soft-deleted
   deleted_at: DateTime
+
+  # Account that created the module instance
   account_id: AccountId!
+
+  # Path to module, used for resolving the module entrypoint
   path: String!
+
+  # The arguments that will be passed to the module instance
   ins: [Argument!]!
+
+  # The arguments that will be produced by the module instance
   outs: [Argument!]!
+
+  # Name of the module instance
+  name: String
+
+  # When the module entered the QUEUED state
   queued_at: DateTime
+
+  # When the module entered the ADMITTED state
   admitted_at: DateTime
+
+  # When the module entered the DISPATCHED state
   dispatched_at: DateTime
+
+  # When the module entered the RUNNING state
   run_at: DateTime
+
+  # When the module entered the COMPLETED or FAILED state
   completed_at: DateTime
+
+  # Module failure category
   failure_reason: ModuleFailureReason
+
+  # Module failure context, useful for debugging
   failure_context: ModuleFailureContext
+
+  # Current module instance status
   status: ModuleInstanceStatus!
+
+  # Target that this module instance will be / is dispatched to
   target: ModuleInstanceTarget!
+
+  # Resources allocated to this module instance
   resources: ModuleInstanceResources
+
+  # Progress of the module instance
   progress: ModuleInstanceProgress
+
+  # Tags applied to the module instance
   tags: [String!]
 }
 
@@ -1750,21 +1960,21 @@ input TokenSortBy {
 # An structure-of-arrays based representation of coordinates, charges and bonds between atoms, with utilty functions to manipulate them.
 # # Example
 # ```
-# use qdx_common::{Bond, Topology};
+# use qdx_common::{Bond, Topology, TopologyVersion};
 # use qdx_common::element::Element;
 # Topology {
+# version: Some(TopologyVersion::V1),
 # symbols: vec![Element::H, Element::O, Element::H],
 # geometry: vec![0.0,0.0,0.0,
 # 1.0,0.0,0.0,
 # 1.0,1.0,0.0],
 # connectivity: Some(vec![Bond(0,1,1), Bond(1,2,1)]),
-# atom_charges: Some(vec![0,0,0]),
-# partial_charges: None,
-# atom_labels: None,
+# formal_charges: Some(vec![0,0,0]),
 # fragments: Some(vec![vec![0,1,2]]),
-# fragment_charges: Some(vec![0]),
+# fragment_formal_charges: Some(vec![0]),
+# fragment_partial_charges: Some(vec![0.0]),
 # fragment_multiplicities: Some(vec![1]),
-# alts: None,
+# ..Default::default()
 # };
 # /* JSON
 # {
@@ -1773,35 +1983,65 @@ input TokenSortBy {
 # 1.0,0.0,0.0,
 # 1.0,1.0,0.0],
 # "connectivity": [[0,1,1], [1,2,1]],
-# "atom_charges": [0,0,0],
+# "charges": [0,0,0],
 # "fragments": [[0,1,2]],
-# "fragment_charges": [0]
+# "fragment_formal_charges": [0]
+# "fragment_partial_charges": [0]
 # "fragment_multiplicities": [1]
 # }
 # */
 # ```
 type Topology {
+  version: TopologyVersion
+
   # Atomic symbols of elements
   symbols: [Element!]!
 
   # Flat vector of X,Y,Z coordinates for atoms in Angstroms
   geometry: [Float!]!
 
+  # Contains the x, y, z components of initial atom velocities in Angstroms/ps
+  # V1 only
+  velocities: [Float!]
+
   # Bonds between atoms
   connectivity: [Bond!]
 
   # Formal charges for each atom
+  # V0 version was atom_charges
+  formal_charges: [Int!]
+
+  # DEPRECATED please upgrade to V1 and use formal_charges instead
+  # Formal charges for each atom
   atom_charges: [Int!]
+
+  # Contains the Mulliken partial charges for each of the atoms
   partial_charges: [Float!]
+
+  # Mapping of atoms to their label
+  # V0 version was atom_labels
+  labels: [String!]
+
+  # DEPRECATED please upgrade to V1 and use labels instead
+  # Mapping of atoms to their label
   atom_labels: [String!]
 
   # A list of fragments, where each fragment is a list of atom indices
   fragments: [[Int!]!]
 
   # A list of sums of all atom formal charges for each fragment
+  # V0 version was fragment_charges
+  fragment_formal_charges: [Int!]
+
+  # DEPRECATED please upgrade to V1 and use fragment_formal_charges instead
+  # A list of sums of all atom formal charges for each fragment
   fragment_charges: [Int!]
 
-  # A list of multiplicities for each fragment
+  # A list of sums of all atom formal charges for each fragment
+  fragment_partial_charges: [Float!]
+
+  # A list of multiplicities for each fragment. Fragment multiplicity is a measure
+  # of the energy level of a fragment, and is related to the number of unpaired electrons within the fragment
   fragment_multiplicities: [Int!]
   alts: [Alt!]
 }
@@ -1809,21 +2049,21 @@ type Topology {
 # An structure-of-arrays based representation of coordinates, charges and bonds between atoms, with utilty functions to manipulate them.
 # # Example
 # ```
-# use qdx_common::{Bond, Topology};
+# use qdx_common::{Bond, Topology, TopologyVersion};
 # use qdx_common::element::Element;
 # Topology {
+# version: Some(TopologyVersion::V1),
 # symbols: vec![Element::H, Element::O, Element::H],
 # geometry: vec![0.0,0.0,0.0,
 # 1.0,0.0,0.0,
 # 1.0,1.0,0.0],
 # connectivity: Some(vec![Bond(0,1,1), Bond(1,2,1)]),
-# atom_charges: Some(vec![0,0,0]),
-# partial_charges: None,
-# atom_labels: None,
+# formal_charges: Some(vec![0,0,0]),
 # fragments: Some(vec![vec![0,1,2]]),
-# fragment_charges: Some(vec![0]),
+# fragment_formal_charges: Some(vec![0]),
+# fragment_partial_charges: Some(vec![0.0]),
 # fragment_multiplicities: Some(vec![1]),
-# alts: None,
+# ..Default::default()
 # };
 # /* JSON
 # {
@@ -1832,40 +2072,78 @@ type Topology {
 # 1.0,0.0,0.0,
 # 1.0,1.0,0.0],
 # "connectivity": [[0,1,1], [1,2,1]],
-# "atom_charges": [0,0,0],
+# "charges": [0,0,0],
 # "fragments": [[0,1,2]],
-# "fragment_charges": [0]
+# "fragment_formal_charges": [0]
+# "fragment_partial_charges": [0]
 # "fragment_multiplicities": [1]
 # }
 # */
 # ```
 input TopologyInput {
+  version: TopologyVersion
+
   # Atomic symbols of elements
   symbols: [Element!]!
 
   # Flat vector of X,Y,Z coordinates for atoms in Angstroms
   geometry: [Float!]!
 
+  # Contains the x, y, z components of initial atom velocities in Angstroms/ps
+  # V1 only
+  velocities: [Float!]
+
   # Bonds between atoms
   connectivity: [Bond!]
 
   # Formal charges for each atom
+  # V0 version was atom_charges
+  formal_charges: [Int!]
+
+  # DEPRECATED please upgrade to V1 and use formal_charges instead
+  # Formal charges for each atom
   atom_charges: [Int!]
+
+  # Contains the Mulliken partial charges for each of the atoms
   partial_charges: [Float!]
+
+  # Mapping of atoms to their label
+  # V0 version was atom_labels
+  labels: [String!]
+
+  # DEPRECATED please upgrade to V1 and use labels instead
+  # Mapping of atoms to their label
   atom_labels: [String!]
 
   # A list of fragments, where each fragment is a list of atom indices
   fragments: [[Int!]!]
 
   # A list of sums of all atom formal charges for each fragment
+  # V0 version was fragment_charges
+  fragment_formal_charges: [Int!]
+
+  # DEPRECATED please upgrade to V1 and use fragment_formal_charges instead
+  # A list of sums of all atom formal charges for each fragment
   fragment_charges: [Int!]
 
-  # A list of multiplicities for each fragment
+  # A list of sums of all atom formal charges for each fragment
+  fragment_partial_charges: [Float!]
+
+  # A list of multiplicities for each fragment. Fragment multiplicity is a measure
+  # of the energy level of a fragment, and is related to the number of unpaired electrons within the fragment
   fragment_multiplicities: [Int!]
   alts: [Alt!]
 }
 
 scalar TopologyObject
+
+enum TopologyVersion {
+  # Version prior to hermes v3
+  V0
+
+  # Hermes v3
+  V1
+}
 
 scalar Type
 
