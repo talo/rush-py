@@ -4,6 +4,7 @@ import json
 import logging
 import math
 import os
+import random
 import re
 import sys
 import time
@@ -340,6 +341,7 @@ class BaseProvider:
     def __init__(
         self,
         client: Client,
+        restore_by_default: bool = False,
         workspace: str | Path | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
@@ -347,9 +349,11 @@ class BaseProvider:
         """
         Initialize the RushProvider a graphql client.
         """
+        self.restore_by_default = restore_by_default
         self.history = None
         self.client = client
         self.module_paths: dict[str, str] = {}
+
         if not logger:
             self.logger = logging.getLogger("rush")
             if len(self.logger.handlers) == 0:
@@ -406,7 +410,7 @@ class BaseProvider:
                 instances=[ModuleInstanceHistory(**instance) for instance in json_dict["instances"]],
             )
 
-    async def nuke(self, remote: bool = False):
+    async def nuke(self, remote: bool = False, tags: bool = False):
         """
         Delete the workspace, and optionally the data stored for it on the server.
         """
@@ -421,15 +425,27 @@ class BaseProvider:
                             pass
                         else:
                             raise e
+            if tags:
+                async for page in await self.module_instances(tags=self.batch_tags):
+                    for instance in page.edges:
+                        try:
+                            await self.delete_module_instance(instance.node.id)
+                        except Exception as e:
+                            if "not found" in str(e):
+                                pass
+                            else:
+                                raise e
         if self.workspace:
-            for f in self.workspace.glob("*"):
-                if f.is_dir():
-                    for ff in f.glob("*"):
-                        ff.unlink()
-                    f.rmdir()
-                else:
-                    f.unlink()
-            self.workspace.rmdir()
+            if (self.workspace / "rush.lock").exists():
+                (self.workspace / "rush.lock").unlink()
+            for file in (self.workspace / ".rush").glob("*"):
+                file.unlink()
+            for file in (self.workspace / "objects").glob("*"):
+                file.unlink()
+            if (self.workspace / ".rush").exists():
+                (self.workspace / ".rush").rmdir()
+            if (self.workspace / "objects").exists():
+                (self.workspace / "objects").rmdir()
 
     def restore(self, workspace: str | Path):
         """
@@ -667,7 +683,7 @@ class BaseProvider:
         resources: Resources | None = None,
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
-        restore: bool | None = False,
+        restore: bool | None = None,
     ) -> RunRun | ModuleInstanceFullModuleInstance:
         """
         Run a module with the given inputs and outputs.
@@ -682,7 +698,9 @@ class BaseProvider:
         """
         tags = tags + self.batch_tags if tags else self.batch_tags
 
-        if restore:
+        try_restore = restore if restore is not None else self.restore_by_default
+        if try_restore:
+            self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
             res: list[ModuleInstanceFullModuleInstance] = []
             async for page in await self.module_instances(tags=tags, path=path):
                 for edge in page.edges:
@@ -690,8 +708,8 @@ class BaseProvider:
                     res.append(instance)
                     if len(res) > 1:
                         self.logger.warn("Multiple module instances found with the same tags and path")
-                        break
-            if len(res) == 1:
+            if len(res) >= 1:
+                self.logger.info(f"Restoring job from previous run with id {res[0].id}")
                 return res[0]
 
         # always request a bit of space because the run will always create files
@@ -991,7 +1009,7 @@ class BaseProvider:
                     continue
                 modules += [(name, module)]
 
-        for module_count, (name, module) in enumerate(sorted(modules)):
+        for name, module in sorted(modules):
             path = module.path
 
             in_types = tuple(type_from_typedef(i) for i in module.ins)
@@ -999,16 +1017,9 @@ class BaseProvider:
 
             typechecker = build_typechecker(*in_types)
 
-            default_target = None
-            if module.targets:
-                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
-                # pick different targets as defaults, until we have our own cluster set up
-                if "hermes" in name:
-                    # hermes doesn't work on NIX_SSH_2 right now since it's not ampere
-                    default_target = "NIX_SSH"
-                else:
-                    i = module_count % len(allowed_default_targets)
-                    default_target = allowed_default_targets[i]
+            def random_target():
+                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2", "NIX_SSH_3"]
+                return random.choice(allowed_default_targets)
 
             default_resources = None
             if module.resource_bounds:
@@ -1022,16 +1033,17 @@ class BaseProvider:
                 name: str,
                 path: str,
                 typechecker: Any,
-                default_target: Target | None,
                 default_resources: Resources | None,
             ):
                 async def runner(
                     *args: Any,
-                    target: Target | None = default_target,
+                    target: Target | None = None,
                     resources: Resources | None = default_resources,
                     tags: list[str] | None = None,
-                    restore: bool | None = False,
+                    restore: bool | None = None,
                 ):
+                    if target is None:
+                        target = random_target()
                     typechecker(*args)
                     run = await self.run(
                         path, list(args), target, resources, tags, out_tags=None, restore=restore
@@ -1088,7 +1100,7 @@ class BaseProvider:
 
                 return runner
 
-            runner = closure(name, path, typechecker, default_target, default_resources)
+            runner = closure(name, path, typechecker, default_resources)
             self.__setattr__(name, runner)
             ret[name] = runner
         return ret
@@ -1239,6 +1251,7 @@ class Provider(BaseProvider):
         workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
+        restore_by_default: bool = False,
     ):
         """
         Initialize the RushProvider with a graphql client.
@@ -1266,10 +1279,22 @@ class Provider(BaseProvider):
             if url is None:
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
-            super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
+            super().__init__(
+                client,
+                workspace=workspace,
+                batch_tags=batch_tags,
+                logger=logger,
+                restore_by_default=restore_by_default,
+            )
         else:
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
-            super().__init__(client, workspace=workspace, batch_tags=batch_tags, logger=logger)
+            super().__init__(
+                client,
+                workspace=workspace,
+                batch_tags=batch_tags,
+                logger=logger,
+                restore_by_default=restore_by_default,
+            )
 
 
 async def build_provider_with_functions(
@@ -1280,6 +1305,7 @@ async def build_provider_with_functions(
     module_names: list[str] | None = None,
     module_tags: list[str] | None = None,
     logger: logging.Logger | None = None,
+    restore_by_default: bool = False,
 ) -> Provider:
     """
     Build a RushProvider with the given access token and url.
@@ -1290,7 +1316,9 @@ async def build_provider_with_functions(
     :param batch_tags: The tags that will be placed on all runs by default.
     :return: The built RushProvider.
     """
-    provider = Provider(access_token, url, workspace, batch_tags, logger)
+    provider = Provider(
+        access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
+    )
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
     return provider
