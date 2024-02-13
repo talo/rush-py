@@ -2,9 +2,9 @@ website:
   sidebar:
     contents:
       - index.ipynb
+      - full-rush-py-explainer.ipynb
       - section: Tutorials
         contents:
-          - Tutorials/0-full-rush-py-explainer.ipynb
           - Tutorials/auto3d_conformer_tautomer_generation.ipynb
           - Tutorials/batch_run-protein-prep.ipynb
           - Tutorials/convert.ipynb
