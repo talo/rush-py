@@ -3,9 +3,12 @@ project:
 
 format:
   html:
-    theme: cosmo
-    css: styles.css
+    theme:
+    - cosmo
+    - styles.scss
+    css: styles.scss
     toc: true
+    highlight-style: github
 
 website:
   twitter-card: true
@@ -14,6 +17,10 @@ website:
   navbar:
     background: primary
     search: true
+    logo: assets/img/logo.png
+    right:
+      - text: "API Docs"
+        href: "https://talo.github.io/rush-py/api"
   sidebar:
     style: floating
 

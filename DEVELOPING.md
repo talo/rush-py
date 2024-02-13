@@ -45,9 +45,9 @@ Step 5. Update the `rush/provider.py` to address any incompatibilities / add hel
 
 Step 1. Update all of the notebooks in nb/* to reflect changes
 
-Step 2. Run pdoc to document the api `pdoc ./rush/doc.py -o ./nbs/api`
+Step 2. Run pdoc to document the api `pdoc ./rush/doc.py -o ./nbs/api --logo ../assets/img/logo.png --logo-link https://talo.github.io/rush-py`
 
-Step 3. Fix pathing incompatabilities with `quarto` - `mv ./nbs/api/rush/* ./nbs/api/ && cp ./nbs/api/doc.html ./nbs/api/index.html `
+Step 3. Fix pathing incompatabilities with `quarto` - `mv ./nbs/api/rush/* ./nbs/api/ && cp ./nbs/api/doc.html ./nbs/api/index.html`
 
 Step 4. Run the following `nbdev` commands for generating final documentation (if notebooks have changed)
 ```
