@@ -15,5 +15,4 @@ website:
       - section: api
         contents:
           - api/doc.html
-          - api/typedef.html
         href: api/index.html
