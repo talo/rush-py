@@ -2235,6 +2235,8 @@ python-versions = ">=3.7"
 files = [
     {file = "qdx_py-0.6.2-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:8e5411fca29b752ef910b67db0f05e64f0729ffd003182abe59fe111a73a488c"},
     {file = "qdx_py-0.6.2-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:f5b295c9b1feaca7813a2734edf0580fd8dcec717d745666cb4102499bd8bfc1"},
+    {file = "qdx_py-0.6.2-cp38-cp38-manylinux_2_28_x86_64.whl", hash = "sha256:4fdd648ab76fbe7e51af6e65479a47a902e2c3e9b0e6cf9760c6e98303c6433b"},
+    {file = "qdx_py-0.6.2-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:cf826beb875ccf32fe915f79e77a15ac0da8414732e151f487667a171dd53e67"},
     {file = "qdx_py-0.6.2.tar.gz", hash = "sha256:c3e938e16ff04af34ab538053b4f03a350ad0ae4cc59f9da4cd3f910b21ba9bc"},
 ]
 
