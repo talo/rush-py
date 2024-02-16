@@ -14,11 +14,32 @@
         poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
         poetryProjects.default = {
           projectDir = ./.;
-          overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides(
-            self: super: { pip = pkgs.python3Packages.pip; }
-          );
+          overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
+            (self: super: { pip = pkgs.python3Packages.pip; });
           extraPackages = [ pkgs.quarto ];
         };
+        poetryProjects.py310 = {
+          projectDir = ./.;
+          python = pkgs.python310;
+          overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
+            (self: super: { pip = pkgs.python310Packages.pip; });
+          extraPackages = [ pkgs.quarto ];
+        };
+        poetryProjects.py39 = {
+          projectDir = ./.;
+          python = pkgs.python39;
+          overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
+            (self: super: { pip = pkgs.python39Packages.pip; });
+          extraPackages = [ pkgs.quarto ];
+        };
+        # disabling because it locks us to old flake8
+        # poetryProjects.py38 = {
+        #   projectDir = ./.;
+        #   python = pkgs.python38;
+        #   overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
+        #     (self: super: { pip = pkgs.python38Packages.pip; });
+        #   extraPackages = [ pkgs.quarto ];
+        # };
       };
     };
 }

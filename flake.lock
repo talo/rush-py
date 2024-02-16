@@ -146,11 +146,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1707976766,
-        "narHash": "sha256-lSZdiwDMuCsbtOADZShSBBatLpXlwcGX5Gk7B9vumwE=",
+        "lastModified": 1708066120,
+        "narHash": "sha256-/vofU4tgfj0MrHQ1B9uHH5lmBT1WCfnHjC63IL7ei3w=",
         "owner": "talo",
         "repo": "qdx-python-flake-parts",
-        "rev": "6ecbae923d9b79d9d7ddefc6db8cbb5d25e9ed50",
+        "rev": "1ce21ece6485b08a0a733276da0390947cf0fcd3",
         "type": "github"
       },
       "original": {
