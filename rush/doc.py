@@ -1,17 +1,19 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.12
+# flake8: noqa
 import asyncio
-from typing import Any, TypeAlias, TypeVar
-
-from typing_extensions import TypeAliasType
+from typing import Any as _Any
 
 from . import provider, typedef
 
-Conformer: TypeAlias = dict[str, Any]
+type Any = _Any
+"@private"
+
+type Conformer = dict[str, Any]
 """ A Conformer represents a biochemical structure. It is documented in:  
 https://talo.github.io/qdx-common/qdx_common/conformer/struct.Conformer.html
 """  # noqa: W291
 
-Record: TypeAlias = dict[str, Any]
+type Record = dict[str, Any]
 """ A `dictionary` representing JSON data.
 
 As an input, it usually stores configuration info.
@@ -19,12 +21,10 @@ As an input, it usually stores configuration info.
 As an output, it usually stores data containing results from the corresponding run.
 """
 
-EnumValue: TypeAlias = str
+type EnumValue = str
 """ A QDX Enum type. From python, pass a `str`."""
 
-T = TypeVar("T", bytes, Conformer, Record, list[Any], float)
-_RushObject = TypeAliasType("_RushObject", typedef.RushObject[T], type_params=(T,))
-RushObject: TypeAlias = _RushObject[T]
+type RushObject = typedef.RushObject[Any]
 """ Represents a file in object storage.
 
 As an input argument, pass

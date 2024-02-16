@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import base64
 import json
@@ -12,12 +14,11 @@ from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union, Unpack
+from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
 import httpx
 from pydantic_core import to_jsonable_python
-from typing_extensions import TypeAliasType
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -43,11 +44,28 @@ from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
 from .typedef import SCALARS, build_typechecker, type_from_typedef
 
-ArgId = UUID
-ModuleInstanceId = UUID
-
-Target = TypeAliasType("Target", ModuleInstanceTarget | str)
-Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput | dict[str, Any])
+if sys.version_info >= (3, 12):
+    exec("type Target = ModuleInstanceTarget | str")
+    exec("type Resources = ModuleInstanceResourcesInput | dict[str, Any]")
+    exec("ArgId = UUID")
+    exec("ModuleInstanceId = UUID")
+else:
+    try:
+        from typing import TypeAlias
+    except ImportError:
+        from typing_extensions import TypeAlias
+    try:
+        from typing import TypeAliasType
+    except ImportError:
+        from typing_extensions import TypeAliasType
+    ArgId: TypeAlias = UUID
+    ModuleInstanceId: TypeAlias = UUID
+    if sys.version_info >= (3, 10):
+        Target = TypeAliasType("Target", ModuleInstanceTarget | str)
+        Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput | dict[str, Any])
+    else:
+        Target = TypeAliasType("Target", Union[ModuleInstanceTarget, str])
+        Resources = TypeAliasType("Resources", Union[ModuleInstanceResourcesInput, dict[str, Any]])
 
 
 @dataclass
@@ -1095,8 +1113,18 @@ class BaseProvider:
                 else:
                     runner.__doc__ = name + " @" + path
 
-                runner.__annotations__["args"] = Unpack[tuple[*(t.to_python_type() for t in in_types)]]
-                runner.__annotations__["return"] = tuple[*(t.to_python_type() for t in out_types)]
+                if sys.version_info >= (3, 11):
+                    exec(
+                        "runner.__annotations__['args'] = (*tuple[*(t.to_python_type() for t in in_types)],)[0]"  # noqa: E501
+                    )
+                    exec("runner.__annotations__['return'] = tuple[*(t.to_python_type() for t in out_types)]")
+                else:
+                    from typing_extensions import Unpack
+
+                    runner.__annotations__["args"] = Unpack[
+                        tuple[tuple(t.to_python_type() for t in in_types)]
+                    ]
+                    runner.__annotations__["return"] = tuple[tuple(t.to_python_type() for t in out_types)]
 
                 return runner
 

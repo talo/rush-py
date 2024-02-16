@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+from __future__ import annotations
+
 import base64
 import json
 import os
-from time import time
-import uuid
 import pathlib
+import uuid
 from subprocess import run
-
+from time import time
 from typing import Any
 
 from .provider import Provider
