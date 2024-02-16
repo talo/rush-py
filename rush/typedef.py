@@ -17,10 +17,10 @@ T = TypeVar("T")
 
 
 if sys.version_info >= (3, 12):
-    from typing import Optional as _Optional
+    from typing import Optional as _Optional  # noqa: F401
 
     # For type styling in docs
-    type Optional[T] = _Optional[T]
+    exec("type Optional[T] = _Optional[T]")
     exec("type Conformer = dict[str, Any]")
     exec("type Record = dict[str, Any]")
     exec("type EnumValue = str")
