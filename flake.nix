@@ -14,9 +14,8 @@
         poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
         poetryProjects.default = {
           projectDir = ./.;
-          python = pkgs.python39;
           overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides(
-            self: super: { pip = pkgs.python39Packages.pip; }
+            self: super: { pip = pkgs.python3Packages.pip; }
           );
           extraPackages = [ pkgs.quarto ];
         };
