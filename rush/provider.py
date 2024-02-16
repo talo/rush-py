@@ -1106,7 +1106,12 @@ class BaseProvider:
                         + path
                         + "`\n\nQDX Type Description:\n\n"
                         + format_module_typedesc(module.typedesc)
-                        + (module.usage.replace("\n", "  \n") if module.usage else "")
+                        + "\n"
+                        + (
+                            module.usage.replace("\n\n\n", "\n\n").replace("\n", "  \n")
+                            if module.usage
+                            else ""
+                        )
                         + (ins_docs)
                         + (outs_docs)
                     )
