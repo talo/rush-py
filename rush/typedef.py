@@ -1,11 +1,52 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generic, Literal, Optional, TypeVar, Unpack
+from typing import Any, Generic, Literal, TypeVar
 from uuid import UUID
 
-from typing_extensions import TypeAliasType
+try:
+    from typing import Unpack
+except ImportError:
+    from typing_extensions import Unpack
+
+
+T = TypeVar("T")
+
+
+if sys.version_info >= (3, 12):
+    from typing import Optional as _Optional  # noqa: F401
+
+    # For type styling in docs
+    exec("type Optional[T] = _Optional[T]")
+    exec("type Conformer = dict[str, Any]")
+    exec("type Record = dict[str, Any]")
+    exec("type EnumValue = str")
+else:
+    from typing import Optional
+
+    try:
+        from typing import TypeAliasType
+    except ImportError:
+        from typing_extensions import TypeAliasType
+    Conformer = TypeAliasType("Conformer", dict[str, Any])
+    Record = TypeAliasType("Record", dict[str, Any])
+    EnumValue = TypeAliasType("EnumValue", str)
+
+U = TypeVar("U", bytes, Conformer, Record, list[Any], float)
+
+
+class _RushObject(Generic[U]):
+    object: U | None = None
+
+
+if sys.version_info >= (3, 12):
+    exec("type RushObject[U] = _RushObject[Any]")
+else:
+    RushObject = TypeAliasType("RushObject", _RushObject[U], type_params=(U,))
+
 
 SCALARS = Literal[
     "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes", "Conformer"
@@ -28,22 +69,6 @@ SCALAR_STRS: list[SCALARS] = [
     "Conformer",
 ]
 
-T = TypeVar("T")
-U = TypeVar("U")
-V = TypeVar("V")
-
-Conformer = TypeAliasType("Conformer", dict[str, Any])
-Record = TypeAliasType("Record", dict[str, Any])
-EnumValue = TypeAliasType("EnumValue", str)
-
-W = TypeVar("W", bytes, Conformer, Record, list[Any], float)
-
-
-class _RushObject(Generic[W]):
-    object: W | None = None
-
-
-RushObject = TypeAliasType("RushObject", _RushObject[W], type_params=(W,))
 
 scalar_types_mapping: dict[str, type[Any]] = {
     "bool": bool,
@@ -166,7 +191,10 @@ class TupleKind(Generic[T], RushType[T]):
         self.t = tuple
 
     def to_python_type(self) -> type[tuple[Any]]:
-        return tuple[*(t.to_python_type() for t in self.t)]
+        if sys.version_info >= (3, 11):
+            return exec("tuple[*(t.to_python_type() for t in self.t)]")  # type: ignore
+        else:
+            return tuple[tuple(t.to_python_type() for t in self.t)]  # type: ignore
 
     def matches(self, other: tuple[T] | list[T] | Any) -> tuple[bool, str | None]:
         if not (isinstance(other, list) or isinstance(other, tuple)):

@@ -13,8 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: webfactory/ssh-agent@v0.5.4
+      - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: |
             ${{ secrets.QDX_COMMON_SSH }}
@@ -29,12 +29,12 @@ jobs:
           authToken: "${{ secrets.QDX_CACHIX }}"
           pushFilter: tarpaulin
       - name: cachix
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: store-cache
           key: nix-store
       - name: Run the Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v2
+        uses: DeterminateSystems/magic-nix-cache-action@v3
       - name: nix checks
         run: nix flake check --accept-flake-config --show-trace
       - name: nbdev checks
