@@ -20,7 +20,17 @@ First, install the following modules via pip—we require Python ≥ 3.10:
 See the detailed breakdown in sections.
 
 ``` python
-#...import the dependencies and set your configuration (see 1.0, 1.1, 1.2), then:
+#...import the dependencies and set your configuration
+import os
+from pdbtools import pdb_delhetatm, pdb_fetch, pdb_selchain
+import rush
+
+RUSH_URL = os.getenv("RUSH_URL") or "https://tengu.qdx.ai"
+RUSH_TOKEN = os.getenv("RUSH_TOKEN") or "YOUR_TOKEN_HERE"
+
+EXPERIMENT = "rush-py-quickstart"
+SYSTEM = "1B39"
+TAGS = ["qdx", EXPERIMENT, SYSTEM]
 
 # 1.3 Build your client
 client = await rush.build_provider_with_functions(url=RUSH_URL, access_token=RUSH_TOKEN, batch_tags=TAGS)
@@ -176,7 +186,7 @@ help(client.convert)
 You can view which modules are available, alongside their documentation,
 in the [API Documentation](https://talo.github.io/rush-py/api/).
 
-## 2.1) Prep the protein
+## 2.0) Prep the protein
 
 First we will run the protein preparation routine (using pdbfixer and
 pdb2pqr internally) to prepare the protein for a molecular dynamics
@@ -225,7 +235,7 @@ prepared_protein_qdxf
 
     Arg(id=906fad5a-4829-4a39-8ffa-73bcdfd82c17, value=None)
 
-## 2.2) Run statuses
+## 2.1) Run statuses
 
 This will show the status of all of your runs. You can also view run
 statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs).
@@ -236,7 +246,7 @@ await client.status()
 
     {}
 
-## 2.3) Run Values
+## 2.2) Run Values
 
 This will return the “value” of the output from the function—for files
 you will recieve a url that you can download, otherwise you will recieve
@@ -249,7 +259,7 @@ len(protein_qdxf_value[0]["topology"]["symbols"])
 
     4849
 
-## 2.4) Downloads
+## 2.3) Downloads
 
 We provide a utility to download files into your workspace, you can
 either provide a filename, which will be saved in

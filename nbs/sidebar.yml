@@ -12,6 +12,9 @@ website:
           - Tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
           - Tutorials/protein-ligand-interactions.ipynb
           - Tutorials/qm_geo_opt_calculation.ipynb
+          - section: Notebooks
+            contents:
+              - Tutorials/Notebooks/convert-sample.ipynb
       - section: api
         contents:
           - api/doc.html
