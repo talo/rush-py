@@ -14,6 +14,7 @@ website:
           - Tutorials/qm_geo_opt_calculation.ipynb
           - section: Notebooks
             contents:
+              - Tutorials/Notebooks/auto3d_conformer_tautomer_generation-sample.ipynb
               - Tutorials/Notebooks/convert-sample.ipynb
       - section: api
         contents:
