@@ -292,10 +292,13 @@ class BaseProvider:
 
             if self.typeinfo:
                 if isinstance(self.typeinfo, dict) and (
-                    self.typeinfo["k"] == "object"
-                    or (self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object")
+                    (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object")
+                    or (
+                        self.typeinfo["k"] == "optional"
+                        and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
+                    )
                 ):
-                    await self.provider.download_object(self.id, filename, filepath, overwrite)
+                    return await self.provider.download_object(self.id, filename, filepath, overwrite)
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -350,8 +353,9 @@ class BaseProvider:
 
             # if typeinfo is a dict, check if it is an object, and if so, download it
             if self.typeinfo and self.provider and self.id and isinstance(self.typeinfo, dict):
-                if self.typeinfo["k"] == "object" or (
-                    self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object"
+                if (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object") or (
+                    self.typeinfo["k"] == "optional"
+                    and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
                 ):
                     return await self.provider.object(self.id)
             return self.value
@@ -370,6 +374,7 @@ class BaseProvider:
         self.restore_by_default = restore_by_default
         self.history = None
         self.client = client
+        self.client.http_client.timeout = httpx.Timeout(60)
         self.module_paths: dict[str, str] = {}
 
         if not logger:
@@ -612,7 +617,6 @@ class BaseProvider:
         :param id: The ID of the object.
         :return: The object.
         """
-        self.client.http_client.timeout = httpx.Timeout(60)
         self.client.http_client.retries = 5
 
         # retry the download if it fails
@@ -664,6 +668,7 @@ class BaseProvider:
             else:
                 with open(filepath, "w") as f:
                     json.dump(obj, f)
+            return filepath
         else:
             return obj
 
@@ -1036,7 +1041,9 @@ class BaseProvider:
             typechecker = build_typechecker(*in_types)
 
             def random_target():
-                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2", "NIX_SSH_3"]
+                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
+                if "NIX_SSH_3" in str(module.targets) or "NIX_SSH_3_GPU" in str(module.targets):
+                    allowed_default_targets.append("NIX_SSH_3")
                 return random.choice(allowed_default_targets)
 
             default_resources = None

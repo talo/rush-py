@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+from io import BytesIO, IOBase, StringIO
 
 import sys
 from dataclasses import dataclass
@@ -66,7 +67,6 @@ SCALAR_STRS: list[SCALARS] = [
     "f64",
     "string",
     "bytes",
-    "Conformer",
 ]
 
 
@@ -84,11 +84,10 @@ scalar_types_mapping: dict[str, type[Any]] = {
     "f64": float,
     "string": str,
     "bytes": bytes,
-    "Conformer": Conformer,
 }
 
 
-KINDS = Literal["array", "optional", "enum", "record", "object", "tuple"]
+KINDS = Literal["array", "optional", "enum", "record", "tuple", "@"]
 
 
 @dataclass
@@ -105,10 +104,16 @@ class Tagged:
 
 class RushType(Generic[T]):
     def __init__(
-        self, type: "dict[str, RushType[T]] | list[RushType[T]] | RushType[T]", kind: KINDS | None = None
+        self,
+        type: "dict[str, RushType[T]] | list[RushType[T]] | RushType[T]",
+        kind: KINDS | None = None,
+        name: str | None = None,
+        doc: str | None = None,
     ):
         self.k = kind
         self.t = type
+        self.n = name
+        self.doc = doc
 
     def to_python_type(self) -> type[Any]:
         raise Exception("Invalid type")
@@ -146,7 +151,7 @@ class EnumKind(Generic[T], RushType[T]):
 
 
 class RecordKind(Generic[T], RushType[T]):
-    def __init__(self, record: dict[str, RushType[T]]):
+    def __init__(self, record: dict[str, RushType[T]] | tuple[RushType[T]]):
         self.k = "record"
         self.t = record
 
@@ -225,14 +230,15 @@ class OptionalKind(Generic[T], RushType[T]):
 
 class ObjectKind(Generic[T], RushType[T]):
     def __init__(self, object: RushType[T]):
-        self.k = "object"
+        self.k = "record"
         self.t = object
+        self.n = "Object"
 
     def to_python_type(self) -> type[RushObject[Any]]:
         return RushObject[self.t.to_python_type()]
 
-    def matches(self, other: Path | Any) -> tuple[bool, str | None]:
-        if isinstance(other, _RushObject) or isinstance(other, Path):
+    def matches(self, other: Path | StringIO | BytesIO | Any) -> tuple[bool, str | None]:
+        if isinstance(other, _RushObject) or isinstance(other, Path) or isinstance(other, StringIO):
             return (True, None)
         else:
             return (False, f"Expected Path, got {type(other)}")
@@ -273,16 +279,21 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                     if isinstance(x, dict)
                 ]
                 return EnumKind(literals + tags)
+            elif res["k"] == "record" and res["n"] == "Object":
+                return ObjectKind(type_from_typedef(res["t"]["path"]["t"]))
             elif res["k"] == "record":
-                return RecordKind({k: type_from_typedef(v) for k, v in res["t"].items()})
+                if isinstance(res["t"], dict):
+                    return RecordKind({k: type_from_typedef(v) for k, v in res["t"].items()})
+                else:
+                    return RecordKind([type_from_typedef(v) for v in res["t"]])
             elif res["k"] == "array":
                 return ArrayKind(type_from_typedef(res["t"]))
             elif res["k"] == "tuple":
                 return TupleKind([type_from_typedef(x) for x in res["t"]])
             elif res["k"] == "optional":
                 return OptionalKind(type_from_typedef(res["t"]))
-            elif res["k"] == "object":
-                return ObjectKind(type_from_typedef(res["t"]))
+            elif res["k"] == "@":
+                return type_from_typedef(res["t"])
             else:
                 raise Exception(f"Unknown kind {res['k']}")
         else:
