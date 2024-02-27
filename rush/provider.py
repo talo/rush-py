@@ -659,16 +659,53 @@ class BaseProvider:
         if filepath:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
-            if "url" in obj:
-                with httpx.stream(method="get", url=obj["url"]) as r:
-                    r.raise_for_status()
-                    with open(filepath, "wb") as f:
-                        for chunk in r.iter_bytes():
+
+            with httpx.stream(method="get", url=obj["url"]) as r:
+                r.raise_for_status()
+
+                buf = b""
+                with open(filepath, "wb") as f:
+                    first_chunk = True
+                    is_encoded = False
+                    for chunk in r.iter_bytes():
+                        if not first_chunk and not is_encoded:
                             f.write(chunk)
-            else:
-                with open(filepath, "w") as f:
-                    json.dump(obj, f)
+                            continue
+                        # handle json
+                        if first_chunk:
+                            if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
+                                f.write(chunk)
+                                first_chunk = False
+                                continue
+                            else:
+                                first_chunk = False
+                                is_encoded = True
+
+                        # handle quotes
+                        if len(chunk) > 0 and chunk[0] == '"':
+                            chunk = chunk[1:]
+                        if len(chunk) > 0 and chunk[-1] == '"':
+                            chunk = chunk[:-1]
+                        if len(chunk) == 0:
+                            continue
+
+                        len_to_take = math.floor(len(chunk) / 4) * 4
+                        if (len(chunk) - len_to_take) >= (4 - len(buf)):
+                            # if we have enough more data to round out a multiple of 4
+                            len_to_take += 4 - len(buf)
+                        elif len_to_take - len(buf) > 0:
+                            # if we can trim our amount to take to get a multiple of 4
+                            len_to_take -= len(buf)
+                        else:
+                            # if we don't and can't
+                            buf += chunk
+                            continue
+
+                        f.write(base64.b64decode(buf + chunk[:len_to_take]))
+                        buf = chunk[len_to_take:]
+
             return filepath
+
         else:
             return obj
 
