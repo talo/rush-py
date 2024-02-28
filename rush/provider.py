@@ -678,6 +678,7 @@ class BaseProvider:
                             if not first_chunk and not is_encoded:
                                 f.write(chunk)
                                 continue
+
                             # handle json
                             if first_chunk:
                                 if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
@@ -1117,10 +1118,7 @@ class BaseProvider:
                     run = await self.run(
                         path, list(args), target, resources, tags, out_tags=None, restore=restore
                     )
-                    outs: list[Any] = []
-                    for out in run.outs:
-                        outs.append(Provider.Arg(self, out.id, source=run.id))
-                    return outs
+                    return tuple(Provider.Arg(self, out.id, source=run.id) for out in run.outs)
 
                 runner.__name__ = name
 

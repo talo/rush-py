@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-from io import BytesIO, StringIO
 
 import sys
 from dataclasses import dataclass
+from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any, Generic, Literal, TypeVar
 from uuid import UUID
@@ -50,7 +50,7 @@ else:
 
 
 SCALARS = Literal[
-    "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes", "Conformer"
+    "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes"
 ]
 
 SCALAR_STRS: list[SCALARS] = [
@@ -94,12 +94,6 @@ KINDS = Literal["array", "optional", "enum", "record", "tuple", "@"]
 class SimpleType:
     k: KINDS | None
     t: SCALARS | "SimpleType"
-
-
-@dataclass
-class Tagged:
-    n: str
-    t: SimpleType
 
 
 class RushType(Generic[T]):
@@ -289,7 +283,7 @@ def type_from_typedef(res: Any) -> RushType[Any]:
             elif res["k"] == "array":
                 return ArrayKind(type_from_typedef(res["t"]))
             elif res["k"] == "tuple":
-                return TupleKind([type_from_typedef(x) for x in res["t"]])
+                return TupleKind(tuple(type_from_typedef(x) for x in res["t"]))
             elif res["k"] == "optional":
                 return OptionalKind(type_from_typedef(res["t"]))
             elif res["k"] == "@":
