@@ -1,10 +1,103 @@
+# Common Fragments across all queries
+fragment PageInfoFull on PageInfo {
+  hasPreviousPage
+  hasNextPage
+  startCursor
+  endCursor
+}
+
+## Arguments fragments and queries
+fragment ArgumentFull on Argument {
+  id
+  name
+  typeinfo
+  value
+  created_at
+  rejected_at
+  source
+  tags
+}
+
 query argument($id: ArgumentId!) {
   argument(id: $id) {
-    id
-    typeinfo
-    value
-    created_at
-    tags
+    ...ArgumentFull
+  }
+}
+
+query arguments(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $typeinfo: [Type!]
+  $typequery: [TypeQuery!]
+  $tags: [String!]
+  $resolved: Boolean
+) {
+  me {
+    account {
+      arguments(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        typeinfo: $typeinfo
+        typequery: $typequery
+        tags: $tags
+        resolved: $resolved
+      ) {
+        pageInfo {
+          ...PageInfoFull
+        }
+        edges {
+          cursor
+          node {
+            ...ArgumentFull
+          }
+        }
+      }
+    }
+  }
+}
+
+## Module fragments and queries
+
+fragment ModuleFull on Module {
+  id
+  name
+  created_at
+  deleted_at
+  path
+  usage
+  ins
+  ins_usage
+  outs
+  outs_usage
+  description
+  typedesc
+  tags
+  targets
+  resource_bounds {
+    gpu_min
+    gpu_max
+    gpu_hint
+
+    gpu_mem_min
+    gpu_mem_max
+    gpu_mem_hint
+
+    cpu_min
+    cpu_max
+    cpu_hint
+    node_min
+    node_max
+    node_hint
+
+    mem_min
+    mem_max
+
+    storage_min
+    storage_max
   }
 }
 
@@ -25,58 +118,445 @@ query latest_modules(
     names: $names
   ) {
     pageInfo {
-      hasPreviousPage
-      hasNextPage
-      startCursor
-      endCursor
+      ...PageInfoFull
     }
     edges {
       cursor
       node {
-        id
-        created_at
-        deleted_at
-        path
-        ins
-        outs
-        tags
+        ...ModuleFull
       }
     }
   }
 }
 
-query object($id: ArgumentId!) {
-  object(id: $id)
-}
-
-# Mutations
-
-mutation deploy($module: ModuleInput!) {
-  deploy(module: $module) {
-    id
-    path
-  }
-}
-
-mutation run($instance: ModuleInstanceInput!) {
-  run(instance: $instance) {
-    id
-    outs {
-      id
+query modules(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $path: String
+  $tags: [String!]
+) {
+  modules(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    path: $path
+    tags: $tags
+  ) {
+    pageInfo {
+      ...PageInfoFull
+    }
+    edges {
+      cursor
+      node {
+        ...ModuleFull
+      }
     }
   }
 }
 
-mutation tag(
-  $moduleInstanceId: ModuleInstanceId
-  $argumentId: ArgumentId
-  $moduleId: ModuleId
-  $tags: [String!]!
+## ModuleInstance fragments and queries
+
+fragment ModuleInstanceCommon on ModuleInstance {
+  id
+  account_id
+  name
+
+  created_at
+  deleted_at
+  queued_at
+  admitted_at
+  dispatched_at
+  completed_at
+
+  path
+  status
+  target
+  tags
+
+  failure_reason
+  failure_context {
+    stdout
+    stderr
+    syserr
+  }
+}
+
+fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
+  id
+  account_id
+
+  created_at
+  deleted_at
+  queued_at
+  admitted_at
+  dispatched_at
+  completed_at
+
+  path
+  status
+  target
+  tags
+
+  failure_reason
+  failure_context {
+    stdout
+    stderr
+    syserr
+  }
+}
+
+fragment ModuleInstanceFull on ModuleInstance {
+  ...ModuleInstanceCommon
+  ins {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  outs {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  resources {
+    gpus
+    nodes
+    mem
+    storage
+    walltime
+  }
+  progress {
+    n
+    n_expected
+    n_max
+    done
+  }
+  resource_utilization {
+    gpu
+    mem
+    storage
+    walltime
+    cputime
+    inodes
+    sus
+  }
+}
+
+fragment SimpleModuleInstanceFull on SimpleModuleInstance {
+  ...SimpleModuleInstanceCommon
+  ins {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  outs {
+    id
+    created_at
+    deleted_at
+    rejected_at
+    account_id
+    typeinfo
+    value
+    tags
+  }
+  resources {
+    gpus
+    nodes
+    mem
+    storage
+    walltime
+  }
+  progress {
+    n
+    n_expected
+    n_max
+    done
+  }
+}
+
+query module_instance_details(
+  $id: ModuleInstanceId!
+  $stderr_after: String
+  $stderr_before: String
+  $stdout_after: String
+  $stdout_before: String
 ) {
-  tag(
-    module_instance: $moduleInstanceId
-    argument: $argumentId
-    module: $moduleId
-    tags: $tags
-  )
+  module_instance(id: $id) {
+    ...ModuleInstanceFull
+    stdout(after: $stdout_after, before: $stdout_before) {
+      pageInfo {
+        ...PageInfoFull
+      }
+      edges {
+        cursor
+        node {
+          id
+          created_at
+          content
+        }
+      }
+    }
+    stderr(after: $stderr_after, before: $stderr_before) {
+      pageInfo {
+        ...PageInfoFull
+      }
+      edges {
+        cursor
+        node {
+          id
+          created_at
+          content
+        }
+      }
+    }
+  }
+}
+
+query module_instances(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $path: String
+  $name: String
+  $status: ModuleInstanceStatus
+  $tags: [String!]
+  $ids: [ModuleInstanceId!]
+  $in_argument_ids: [ArgumentId!]
+) {
+  me {
+    account {
+      module_instances(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        path: $path
+        status: $status
+        name: $name
+        tags: $tags
+        ids: $ids
+        in_arguments: $in_argument_ids
+      ) {
+        edges {
+          cursor
+          node {
+            ...SimpleModuleInstanceFull
+          }
+        }
+        pageInfo {
+          ...PageInfoFull
+        }
+      }
+    }
+  }
+}
+
+query module_instance_minimal($id: ModuleInstanceId!) {
+  module_instance(id: $id) {
+    ...ModuleInstanceCommon
+  }
+}
+
+query object_url($id: ArgumentId!) {
+  object(id: $id) {
+    url
+  }
+}
+
+query object_contents($id: ArgumentId!) {
+  object(id: $id) {
+    contents
+  }
+}
+
+## Raw Entity (v2)
+
+query entity($id: UUID!) {
+  entity(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data
+    tags
+  }
+}
+
+## Project
+
+query project($id: UUID!) {
+  project(id: $id) {
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    tags
+    proteins {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    protein_conformers {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    smols {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    smol_conformers {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    smol_tautomers {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+
+query protein($id: UUID!) {
+  protein(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      sequence
+    }
+    tags
+  }
+}
+
+query protein_conformer($id: UUID!) {
+  protein_conformer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    tags
+  }
+}
+
+query smol($id: UUID!) {
+  smol(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      inchi
+    }
+    tags
+  }
+}
+
+query smol_conformer($id: UUID!) {
+  smol_conformer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    tags
+  }
+}
+
+query smol_tautomer($id: UUID!) {
+  smol_tautomer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      inchi
+    }
+    tags
+  }
+}
+
+query structure($id: UUID!) {
+  structure(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+    }
+    topology {
+      symbols
+      geometry
+      connectivity
+      formal_charges
+      labels
+      partial_charges
+      fragments
+      fragment_formal_charges
+      fragment_partial_charges
+      velocities
+      alts
+    }
+    # signed_url
+    tags
+  }
+}
+
+query experiment($id: UUID!) {
+  experiment(id: $id) {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    data {
+      name
+      unit
+      measure
+      value
+      assay
+    }
+    tags
+  }
 }

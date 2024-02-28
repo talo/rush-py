@@ -22,6 +22,10 @@ poetry add -- dependency
 
 Add development dependencies to the dev group
 
+## Running notebooks locally
+If you want to run notebooks locally, you need to run
+`export PYTHONPATH=$(pwd)`
+
 ## Updating Graphql queries/mutations
 
 We auto-generate client functions from the Rush graphql schema.

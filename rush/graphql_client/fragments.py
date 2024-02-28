@@ -88,6 +88,7 @@ class ModuleInstanceFull(ModuleInstanceCommon):
     outs: List["ModuleInstanceFullOuts"]
     resources: Optional["ModuleInstanceFullResources"]
     progress: Optional["ModuleInstanceFullProgress"]
+    resource_utilization: Optional["ModuleInstanceFullResourceUtilization"]
 
 
 class ModuleInstanceFullIns(BaseModel):
@@ -125,6 +126,16 @@ class ModuleInstanceFullProgress(BaseModel):
     n_expected: int
     n_max: int
     done: bool
+
+
+class ModuleInstanceFullResourceUtilization(BaseModel):
+    gpu: Optional[float]
+    mem: Optional[float]
+    storage: float
+    walltime: float
+    cputime: float
+    inodes: float
+    sus: Optional[int]
 
 
 class PageInfoFull(BaseModel):
