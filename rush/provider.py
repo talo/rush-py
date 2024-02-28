@@ -177,12 +177,12 @@ def format_module_typedesc(typedesc_in: str) -> str:
                 else:
                     print("ERROR!")
             if seen_nester and good_nesting_level and char == ",":
-                new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1]]
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1].lstrip(" ")]
                 last_break_pos = i + 1
             if seen_nester and seen_dict["{}"] == 0 and seen_dict["()"] == 0:
                 assert char in "})"
-                new_lines += [leading_spaces + "    " + old_line[last_break_pos:i]]
-                new_lines += [leading_spaces + old_line[i:]]
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos:i].lstrip(" ")]
+                new_lines += [leading_spaces + old_line[i:].lstrip(" ")]
                 break
         return new_lines
 
@@ -201,10 +201,19 @@ def format_module_typedesc(typedesc_in: str) -> str:
                 new_lines += [line]
         old_lines = new_lines
 
-    new_lines = [line.replace(",", ", ").replace(":", ": ").replace("|", " | ") for line in new_lines]
+    new_lines = [
+        line.replace("{", " {").replace(",", ", ").replace(":", ": ").replace("|", " | ")
+        for line in new_lines
+    ]
 
     finalized_str = "\n".join([line.rstrip() for line in new_lines])
+    finalized_str = re.sub(r", +", ", ", finalized_str)
     finalized_str = re.sub(r": +", ": ", finalized_str)
+    finalized_str = re.sub(r" +\|", " |", finalized_str)
+    finalized_str = re.sub(r"\| +", "| ", finalized_str)
+    # TODO: render object properly and remove this hack
+    finalized_str = re.sub(r" \{path: (.*?), size: (.*?)\}", r"[\1]", finalized_str)
+    finalized_str = re.sub(r" \{size: (.*?), path: (.*?)\}", r"[\2]", finalized_str)
 
     return finalized_str + "\n"
 

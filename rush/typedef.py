@@ -242,7 +242,9 @@ class ScalarType(Generic[T], RushType[T]):
     def __init__(self, scalar: SCALARS | str):
         self.k = None
         self.t = scalar
-        self.py_type = scalar_types_mapping.get(scalar)
+        if isinstance(self.t, str):
+            self.t = self.t.replace("$", "").lower()
+        self.py_type = scalar_types_mapping.get(self.t)
         self.literal = scalar if not self.py_type else None
 
     def to_python_type(self) -> type[Any] | None:
