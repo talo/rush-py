@@ -4,6 +4,14 @@
 from enum import Enum
 
 
+class AccountType(str, Enum):
+    FREE = "FREE"
+    PRO = "PRO"
+    STARTUP = "STARTUP"
+    ACADEMIC = "ACADEMIC"
+    ENTERPRISE = "ENTERPRISE"
+
+
 class Element(str, Enum):
     H = "H"
     HE = "HE"
