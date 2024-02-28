@@ -39,6 +39,7 @@ from .delete_module_instance import (
 from .deploy import Deploy, DeployDeploy
 from .entity import Entity, EntityEntity
 from .enums import (
+    AccountType,
     Element,
     MemUnits,
     ModuleFailureReason,
@@ -67,6 +68,7 @@ from .fragments import (
     ModuleInstanceFullOuts,
     ModuleInstanceFullProgress,
     ModuleInstanceFullResources,
+    ModuleInstanceFullResourceUtilization,
     PageInfoFull,
     SimpleModuleInstanceCommon,
     SimpleModuleInstanceCommonFailureContext,
@@ -119,6 +121,7 @@ from .input_types import (
     TokenFilterBy,
     TokenSortBy,
     TopologyInput,
+    TypeQuery,
     UpdateModuleInstanceInput,
     UuidFilter,
 )
@@ -161,7 +164,8 @@ from .modules import (
     ModulesModulesEdgesNode,
     ModulesModulesPageInfo,
 )
-from .object import Object
+from .object_contents import ObjectContents, ObjectContentsObject
+from .object_url import ObjectUrl, ObjectUrlObject
 from .project import (
     Project,
     ProjectProject,
@@ -220,6 +224,7 @@ from .update_module_instance import (
 from .upload_arg import UploadArg, UploadArgUploadArg
 
 __all__ = [
+    "AccountType",
     "Argument",
     "ArgumentArgument",
     "ArgumentFull",
@@ -308,6 +313,7 @@ __all__ = [
     "ModuleInstanceFullIns",
     "ModuleInstanceFullOuts",
     "ModuleInstanceFullProgress",
+    "ModuleInstanceFullResourceUtilization",
     "ModuleInstanceFullResources",
     "ModuleInstanceInput",
     "ModuleInstanceMinimal",
@@ -327,7 +333,10 @@ __all__ = [
     "ModulesModulesEdges",
     "ModulesModulesEdgesNode",
     "ModulesModulesPageInfo",
-    "Object",
+    "ObjectContents",
+    "ObjectContentsObject",
+    "ObjectUrl",
+    "ObjectUrlObject",
     "Order",
     "OrderBy",
     "PageInfoFull",
@@ -408,6 +417,7 @@ __all__ = [
     "TopologyVersion",
     "TrackUtilization",
     "TrackUtilizationTrackModuleInstanceResourceUtilization",
+    "TypeQuery",
     "Untag",
     "UpdateModuleInstance",
     "UpdateModuleInstanceInput",

@@ -19,6 +19,9 @@ from uuid import UUID
 
 import httpx
 from pydantic_core import to_jsonable_python
+from rush.graphql_client.object_contents import ObjectContentsObject
+
+from rush.graphql_client.object_url import ObjectUrlObject
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -292,10 +295,14 @@ class BaseProvider:
 
             if self.typeinfo:
                 if isinstance(self.typeinfo, dict) and (
-                    self.typeinfo["k"] == "object"
-                    or (self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object")
+                    (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object")
+                    or (
+                        self.typeinfo["k"] == "optional"
+                        and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
+                    )
                 ):
-                    await self.provider.download_object(self.id, filename, filepath, overwrite)
+                    signed = "$" in json.dumps(self.typeinfo)
+                    return await self.provider.download_object(self.id, filename, filepath, overwrite, signed)
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -350,8 +357,9 @@ class BaseProvider:
 
             # if typeinfo is a dict, check if it is an object, and if so, download it
             if self.typeinfo and self.provider and self.id and isinstance(self.typeinfo, dict):
-                if self.typeinfo["k"] == "object" or (
-                    self.typeinfo["k"] == "optional" and self.typeinfo["t"]["k"] == "object"
+                if (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object") or (
+                    self.typeinfo["k"] == "optional"
+                    and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
                 ):
                     return await self.provider.object(self.id)
             return self.value
@@ -370,6 +378,7 @@ class BaseProvider:
         self.restore_by_default = restore_by_default
         self.history = None
         self.client = client
+        self.client.http_client.timeout = httpx.Timeout(60)
         self.module_paths: dict[str, str] = {}
 
         if not logger:
@@ -612,14 +621,11 @@ class BaseProvider:
         :param id: The ID of the object.
         :return: The object.
         """
-        self.client.http_client.timeout = httpx.Timeout(60)
-        self.client.http_client.retries = 5
-
         # retry the download if it fails
         retries = 3
         while retries > 0:
             try:
-                return await self.client.object(id)
+                return await self.client.object_url(id)
             except Exception as e:
                 retries -= 1
                 if retries == 0:
@@ -628,7 +634,12 @@ class BaseProvider:
                     await asyncio.sleep(1)
 
     async def download_object(
-        self, id: ArgId, filename: str | None = None, filepath: Path | None = None, overwrite: bool = False
+        self,
+        id: ArgId,
+        filename: str | None = None,
+        filepath: Path | None = None,
+        overwrite: bool = False,
+        signed: bool = True,
     ):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
@@ -637,7 +648,7 @@ class BaseProvider:
         :param filepath: Where to download the object.
         :param filename: Download to the workspace with this name under "objects".
         """
-        obj = await self.object(id)
+        obj = (await self.object(id)) if signed else (await self.client.object_contents(id))
         if not obj:
             return None
 
@@ -655,15 +666,55 @@ class BaseProvider:
         if filepath:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
-            if "url" in obj:
-                with httpx.stream(method="get", url=obj["url"]) as r:
+            if obj and isinstance(obj, ObjectContentsObject):
+                json.dump(obj.contents, open(filepath, "w"))
+            elif obj:
+                with httpx.stream(method="get", url=obj.url) as r:
                     r.raise_for_status()
+
+                    buf = ""
                     with open(filepath, "wb") as f:
-                        for chunk in r.iter_bytes():
-                            f.write(chunk)
-            else:
-                with open(filepath, "w") as f:
-                    json.dump(obj, f)
+                        first_chunk = True
+                        is_encoded = False
+                        for chunk in r.iter_text():
+                            if not first_chunk and not is_encoded:
+                                f.write(chunk)
+                                continue
+                            # handle json
+                            if first_chunk:
+                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
+                                    f.write(chunk)
+                                    first_chunk = False
+                                    continue
+                                else:
+                                    first_chunk = False
+                                    is_encoded = True
+
+                            # handle quotes
+                            if len(chunk) > 0 and chunk[0] == '"':
+                                chunk = chunk[1:]
+                            if len(chunk) > 0 and chunk[-1] == '"':
+                                chunk = chunk[:-1]
+                            if len(chunk) == 0:
+                                continue
+
+                            len_to_take = math.floor(len(chunk) / 4) * 4
+                            if (len(chunk) - len_to_take) >= (4 - len(buf)):
+                                # if we have enough data to round out a multiple of 4
+                                len_to_take += 4 - len(buf)
+                            elif len_to_take - len(buf) > 0:
+                                # if we can trim our amount to take to get a multiple of 4
+                                len_to_take -= len(buf)
+                            else:
+                                # if we don't and can't
+                                buf += chunk
+                                continue
+
+                            f.write(base64.b64decode(buf + chunk[:len_to_take]))
+                            buf = chunk[len_to_take:]
+
+            return filepath
+
         else:
             return obj
 
@@ -1036,7 +1087,9 @@ class BaseProvider:
             typechecker = build_typechecker(*in_types)
 
             def random_target():
-                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2", "NIX_SSH_3"]
+                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
+                if "NIX_SSH_3" in str(module.targets) or "NIX_SSH_3_GPU" in str(module.targets):
+                    allowed_default_targets.append("NIX_SSH_3")
                 return random.choice(allowed_default_targets)
 
             default_resources = None

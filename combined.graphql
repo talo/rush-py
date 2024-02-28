@@ -25,15 +25,15 @@ mutation create_project($project: CreateProjectInput!) {
     id
   }
 }
-mutation create_protein($protein: CreateProteinInput!) {
-  create_protein(input: $protein) {
-    id
-  }
-}
 mutation create_protein_conformer(
   $protein_conformer: CreateProteinConformerInput!
 ) {
   create_protein_conformer(input: $protein_conformer) {
+    id
+  }
+}
+mutation create_protein($protein: CreateProteinInput!) {
+  create_protein(input: $protein) {
     id
   }
 }
@@ -69,6 +69,7 @@ query arguments(
   $first: Int
   $last: Int
   $typeinfo: [Type!]
+  $typequery: [TypeQuery!]
   $tags: [String!]
   $resolved: Boolean
 ) {
@@ -80,6 +81,7 @@ query arguments(
         after: $after
         before: $before
         typeinfo: $typeinfo
+        typequery: $typequery
         tags: $tags
         resolved: $resolved
       ) {
@@ -280,6 +282,15 @@ fragment ModuleInstanceFull on ModuleInstance {
     n_max
     done
   }
+  resource_utilization {
+    gpu
+    mem
+    storage
+    walltime
+    cputime
+    inodes
+    sus
+  }
 }
 
 fragment SimpleModuleInstanceFull on SimpleModuleInstance {
@@ -403,8 +414,16 @@ query module_instance_minimal($id: ModuleInstanceId!) {
   }
 }
 
-query object($id: ArgumentId!) {
-  object(id: $id)
+query object_url($id: ArgumentId!) {
+  object(id: $id) {
+    url
+  }
+}
+
+query object_contents($id: ArgumentId!) {
+  object(id: $id) {
+    contents
+  }
 }
 
 ## Raw Entity (v2)
@@ -596,13 +615,13 @@ mutation run($instance: ModuleInstanceInput!) {
         outs {id}
     }
 }
-mutation create_smol($smol: CreateSmolInput!) {
-  create_smol(input: $smol) {
+mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+  create_smol_conformer(input: $smol_conformer) {
     id
   }
 }
-mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
-  create_smol_conformer(input: $smol_conformer) {
+mutation create_smol($smol: CreateSmolInput!) {
+  create_smol(input: $smol) {
     id
   }
 }
