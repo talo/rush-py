@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-from io import BytesIO, IOBase, StringIO
+from io import BytesIO, StringIO
 
 import sys
 from dataclasses import dataclass

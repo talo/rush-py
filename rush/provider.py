@@ -21,8 +21,6 @@ import httpx
 from pydantic_core import to_jsonable_python
 from rush.graphql_client.object_contents import ObjectContentsObject
 
-from rush.graphql_client.object_url import ObjectUrlObject
-
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
     ArgumentsMeAccountArguments,
