@@ -1,5 +1,7 @@
 type Account {
   id: AccountId!
+  tier: AccountType!
+  config: JSON
   created_at: DateTime!
 
   # Get a summary of resources utilization for the account
@@ -40,6 +42,7 @@ type Account {
     last: Int
     order: OrderBy
     typeinfo: [Type!]
+    typequery: [TypeQuery!]
     tags: [String!]
     resolved: Boolean
     deleted: Boolean
@@ -129,6 +132,14 @@ type Account {
 }
 
 scalar AccountId
+
+enum AccountType {
+  FREE
+  PRO
+  STARTUP
+  ACADEMIC
+  ENTERPRISE
+}
 
 scalar Alt
 
@@ -1020,6 +1031,22 @@ type Mutation {
   create_structure(input: CreateStructureInput!): Structure!
 }
 
+type Object {
+  id: ArgumentId!
+  name: String
+  created_at: DateTime!
+  deleted_at: DateTime
+  rejected_at: DateTime
+  resolved_at: DateTime
+  account_id: AccountId!
+  typeinfo: Type!
+  value: JSON
+  tags: [String!]
+  source: ModuleInstanceId
+  contents: JSON!
+  url: String!
+}
+
 enum Order {
   ASC
   DESC
@@ -1330,7 +1357,7 @@ type Query {
   module(id: ModuleId!): Module!
   module_instance(id: ModuleInstanceId!): ModuleInstance!
   argument(id: ArgumentId!): Argument!
-  object(id: ArgumentId!): JSON!
+  object(id: ArgumentId!): Object
   entity(id: UUID!): Entity
   experiment(id: UUID!): Experiment
   project(id: UUID!): Project
@@ -1818,7 +1845,7 @@ type Structure {
   # User-defined tags.
   tags: [String!]!
   topology: Topology!
-  signed_url: JSON!
+  signed_url: String!
 }
 
 type StructureConnection {
@@ -2037,7 +2064,7 @@ type Topology {
   # A list of sums of all atom formal charges for each fragment
   fragment_charges: [Int!]
 
-  # A list of sums of all atom formal charges for each fragment
+  # A list of sums of all atom partial charges for each fragment
   fragment_partial_charges: [Float!]
 
   # A list of multiplicities for each fragment. Fragment multiplicity is a measure
@@ -2126,7 +2153,7 @@ input TopologyInput {
   # A list of sums of all atom formal charges for each fragment
   fragment_charges: [Int!]
 
-  # A list of sums of all atom formal charges for each fragment
+  # A list of sums of all atom partial charges for each fragment
   fragment_partial_charges: [Float!]
 
   # A list of multiplicities for each fragment. Fragment multiplicity is a measure
@@ -2146,6 +2173,11 @@ enum TopologyVersion {
 }
 
 scalar Type
+
+input TypeQuery {
+  path: [String!]!
+  query: JSON!
+}
 
 # A UUID is a unique 128-bit number, stored as 16 octets. UUIDs are parsed as
 # Strings within GraphQL. UUIDs are used to assign unique identifiers to

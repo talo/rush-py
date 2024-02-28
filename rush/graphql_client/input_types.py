@@ -391,6 +391,11 @@ class TopologyInput(BaseModel):
     alts: Optional[List[Any]] = None
 
 
+class TypeQuery(BaseModel):
+    path: List[str]
+    query: Any
+
+
 class UpdateModuleInstanceInput(BaseModel):
     id: UUID
     path: Optional[str] = None

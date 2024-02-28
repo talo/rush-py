@@ -49,6 +49,7 @@ from .input_types import (
     ModuleInstanceResourcesInput,
     RawEntityInput,
     ResourceUtilizationInput,
+    TypeQuery,
     UpdateModuleInstanceInput,
 )
 from .latest_modules import LatestModules, LatestModulesLatestModules
@@ -62,7 +63,8 @@ from .module_instance_minimal import (
 )
 from .module_instances import ModuleInstances, ModuleInstancesMe
 from .modules import Modules, ModulesModules
-from .object import Object
+from .object_contents import ObjectContents, ObjectContentsObject
+from .object_url import ObjectUrl, ObjectUrlObject
 from .project import Project, ProjectProject
 from .protein import Protein, ProteinProtein
 from .protein_conformer import ProteinConformer, ProteinConformerProteinConformer
@@ -193,23 +195,6 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateProject.model_validate(data).create_project
 
-    async def create_protein(self, protein: CreateProteinInput, **kwargs: Any) -> CreateProteinCreateProtein:
-        query = gql(
-            """
-            mutation create_protein($protein: CreateProteinInput!) {
-              create_protein(input: $protein) {
-                id
-              }
-            }
-            """
-        )
-        variables: Dict[str, object] = {"protein": protein}
-        response = await self.execute(
-            query=query, operation_name="create_protein", variables=variables, **kwargs
-        )
-        data = self.get_data(response)
-        return CreateProtein.model_validate(data).create_protein
-
     async def create_protein_conformer(
         self, protein_conformer: CreateProteinConformerInput, **kwargs: Any
     ) -> CreateProteinConformerCreateProteinConformer:
@@ -228,6 +213,23 @@ class Client(AsyncBaseClient):
         )
         data = self.get_data(response)
         return CreateProteinConformer.model_validate(data).create_protein_conformer
+
+    async def create_protein(self, protein: CreateProteinInput, **kwargs: Any) -> CreateProteinCreateProtein:
+        query = gql(
+            """
+            mutation create_protein($protein: CreateProteinInput!) {
+              create_protein(input: $protein) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"protein": protein}
+        response = await self.execute(
+            query=query, operation_name="create_protein", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateProtein.model_validate(data).create_protein
 
     async def argument(self, id: UUID, **kwargs: Any) -> ArgumentArgument:
         query = gql(
@@ -262,13 +264,14 @@ class Client(AsyncBaseClient):
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         typeinfo: Union[Optional[List[Any]], UnsetType] = UNSET,
+        typequery: Union[Optional[List[TypeQuery]], UnsetType] = UNSET,
         tags: Union[Optional[List[str]], UnsetType] = UNSET,
         resolved: Union[Optional[bool], UnsetType] = UNSET,
         **kwargs: Any
     ) -> ArgumentsMe:
         query = gql(
             """
-            query arguments($after: String, $before: String, $first: Int, $last: Int, $typeinfo: [Type!], $tags: [String!], $resolved: Boolean) {
+            query arguments($after: String, $before: String, $first: Int, $last: Int, $typeinfo: [Type!], $typequery: [TypeQuery!], $tags: [String!], $resolved: Boolean) {
               me {
                 account {
                   arguments(
@@ -277,6 +280,7 @@ class Client(AsyncBaseClient):
                     after: $after
                     before: $before
                     typeinfo: $typeinfo
+                    typequery: $typequery
                     tags: $tags
                     resolved: $resolved
                   ) {
@@ -319,6 +323,7 @@ class Client(AsyncBaseClient):
             "first": first,
             "last": last,
             "typeinfo": typeinfo,
+            "typequery": typequery,
             "tags": tags,
             "resolved": resolved,
         }
@@ -604,6 +609,15 @@ class Client(AsyncBaseClient):
                 n_max
                 done
               }
+              resource_utilization {
+                gpu
+                mem
+                storage
+                walltime
+                cputime
+                inodes
+                sus
+              }
             }
 
             fragment PageInfoFull on PageInfo {
@@ -795,18 +809,37 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return ModuleInstanceMinimal.model_validate(data).module_instance
 
-    async def object(self, id: UUID, **kwargs: Any) -> Any:
+    async def object_url(self, id: UUID, **kwargs: Any) -> Optional[ObjectUrlObject]:
         query = gql(
             """
-            query object($id: ArgumentId!) {
-              object(id: $id)
+            query object_url($id: ArgumentId!) {
+              object(id: $id) {
+                url
+              }
             }
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(query=query, operation_name="object", variables=variables, **kwargs)
+        response = await self.execute(query=query, operation_name="object_url", variables=variables, **kwargs)
         data = self.get_data(response)
-        return Object.model_validate(data).object
+        return ObjectUrl.model_validate(data).object
+
+    async def object_contents(self, id: UUID, **kwargs: Any) -> Optional[ObjectContentsObject]:
+        query = gql(
+            """
+            query object_contents($id: ArgumentId!) {
+              object(id: $id) {
+                contents
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = await self.execute(
+            query=query, operation_name="object_contents", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return ObjectContents.model_validate(data).object
 
     async def entity(self, id: Any, **kwargs: Any) -> Optional[EntityEntity]:
         query = gql(
@@ -1107,23 +1140,6 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return Run.model_validate(data).run
 
-    async def create_smol(self, smol: CreateSmolInput, **kwargs: Any) -> CreateSmolCreateSmol:
-        query = gql(
-            """
-            mutation create_smol($smol: CreateSmolInput!) {
-              create_smol(input: $smol) {
-                id
-              }
-            }
-            """
-        )
-        variables: Dict[str, object] = {"smol": smol}
-        response = await self.execute(
-            query=query, operation_name="create_smol", variables=variables, **kwargs
-        )
-        data = self.get_data(response)
-        return CreateSmol.model_validate(data).create_smol
-
     async def create_smol_conformer(
         self, smol_conformer: CreateSmolConformerInput, **kwargs: Any
     ) -> CreateSmolConformerCreateSmolConformer:
@@ -1142,6 +1158,23 @@ class Client(AsyncBaseClient):
         )
         data = self.get_data(response)
         return CreateSmolConformer.model_validate(data).create_smol_conformer
+
+    async def create_smol(self, smol: CreateSmolInput, **kwargs: Any) -> CreateSmolCreateSmol:
+        query = gql(
+            """
+            mutation create_smol($smol: CreateSmolInput!) {
+              create_smol(input: $smol) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol": smol}
+        response = await self.execute(
+            query=query, operation_name="create_smol", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateSmol.model_validate(data).create_smol
 
     async def create_smol_tautomer(
         self, smol_tautomer: CreateSmolTautomerInput, **kwargs: Any
