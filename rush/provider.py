@@ -19,7 +19,6 @@ from uuid import UUID
 
 import httpx
 from pydantic_core import to_jsonable_python
-from rush.graphql_client.object_contents import ObjectContentsObject
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -41,6 +40,7 @@ from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesPageInfo,
 )
 from .graphql_client.modules import ModulesModulesPageInfo
+from .graphql_client.object_contents import ObjectContentsObject
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
 from .typedef import SCALARS, build_typechecker, type_from_typedef
@@ -177,12 +177,12 @@ def format_module_typedesc(typedesc_in: str) -> str:
                 else:
                     print("ERROR!")
             if seen_nester and good_nesting_level and char == ",":
-                new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1]]
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1].lstrip(" ")]
                 last_break_pos = i + 1
             if seen_nester and seen_dict["{}"] == 0 and seen_dict["()"] == 0:
                 assert char in "})"
-                new_lines += [leading_spaces + "    " + old_line[last_break_pos:i]]
-                new_lines += [leading_spaces + old_line[i:]]
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos:i].lstrip(" ")]
+                new_lines += [leading_spaces + old_line[i:].lstrip(" ")]
                 break
         return new_lines
 
@@ -201,10 +201,19 @@ def format_module_typedesc(typedesc_in: str) -> str:
                 new_lines += [line]
         old_lines = new_lines
 
-    new_lines = [line.replace(",", ", ").replace(":", ": ").replace("|", " | ") for line in new_lines]
+    new_lines = [
+        line.replace("{", " {").replace(",", ", ").replace(":", ": ").replace("|", " | ")
+        for line in new_lines
+    ]
 
     finalized_str = "\n".join([line.rstrip() for line in new_lines])
+    finalized_str = re.sub(r", +", ", ", finalized_str)
     finalized_str = re.sub(r": +", ": ", finalized_str)
+    finalized_str = re.sub(r" +\|", " |", finalized_str)
+    finalized_str = re.sub(r"\| +", "| ", finalized_str)
+    # TODO: render object properly and remove this hack
+    finalized_str = re.sub(r" \{path: (.*?), size: (.*?)\}", r"[\1]", finalized_str)
+    finalized_str = re.sub(r" \{size: (.*?), path: (.*?)\}", r"[\2]", finalized_str)
 
     return finalized_str + "\n"
 
@@ -359,7 +368,7 @@ class BaseProvider:
                     self.typeinfo["k"] == "optional"
                     and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
                 ):
-                    return await self.provider.object(self.id)
+                    return (await self.provider.object(self.id)).url
             return self.value
 
     def __init__(
@@ -678,6 +687,7 @@ class BaseProvider:
                             if not first_chunk and not is_encoded:
                                 f.write(chunk)
                                 continue
+
                             # handle json
                             if first_chunk:
                                 if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
@@ -811,9 +821,13 @@ class BaseProvider:
 
         arg_dicts = [gen_arg_dict(input) for input in args]
 
-        if resources is None and storage_requirements["storage"] > 0:
+        if not resources:
             resources = ModuleInstanceResourcesInput(
-                storage=int(math.ceil(storage_requirements["storage"] / 1024)), storage_units=MemUnits.MB
+                storage=max(
+                    int(math.ceil(storage_requirements["storage"] / 1024 / 1024)),
+                    100,
+                ),
+                storage_units=MemUnits.MB,
             )
 
         if isinstance(target, str):
@@ -1117,10 +1131,7 @@ class BaseProvider:
                     run = await self.run(
                         path, list(args), target, resources, tags, out_tags=None, restore=restore
                     )
-                    outs: list[Any] = []
-                    for out in run.outs:
-                        outs.append(Provider.Arg(self, out.id, source=run.id))
-                    return outs
+                    return tuple(Provider.Arg(self, out.id, source=run.id) for out in run.outs)
 
                 runner.__name__ = name
 
