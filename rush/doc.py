@@ -37,7 +37,7 @@ As an output argument, you can expect:
 """
 
 _x = provider.Provider()
-_fns = asyncio.run(_x.get_module_functions(tags=["rush-py-v1.4.0"]))
+_fns = asyncio.run(_x.get_module_functions(tags=["rush-py-v2.0.0"]))
 RushProvider = type(
     "RushProvider",
     (provider.Provider,),
