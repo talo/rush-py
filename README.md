@@ -88,7 +88,7 @@ something like the following:
 import asyncio
 def main():
     #your code here
-asyncio.run(main)
+asyncio.run(main())
 ```
 
 ## 1.1) Credentials
