@@ -821,9 +821,13 @@ class BaseProvider:
 
         arg_dicts = [gen_arg_dict(input) for input in args]
 
-        if resources is None and storage_requirements["storage"] > 0:
+        if not resources:
             resources = ModuleInstanceResourcesInput(
-                storage=int(math.ceil(storage_requirements["storage"] / 1024)), storage_units=MemUnits.MB
+                storage=max(
+                    int(math.ceil(storage_requirements["storage"] / 1024 / 1024)),
+                    100,
+                ),
+                storage_units=MemUnits.MB,
             )
 
         if isinstance(target, str):
