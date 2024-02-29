@@ -5,13 +5,13 @@
 
 # Quickstart
 
-This document will walk through executing jobs on the rush platform. For
+This document will walk through executing jobs on the Rush platform. For
 a comprehensive guide on the concepts and constructing a full workflow,
 see the [full rush-py
 explainer](https://talo.github.io/rush-py/full-rush-py-explainer.html)
 document.
 
-First, install the following modules via pip—we require Python ≥ 3.10:
+First, install the following modules via pip—we require Python ≥ 3.9:
 
     pip install rush-py pdb-tools
 
@@ -19,45 +19,49 @@ First, install the following modules via pip—we require Python ≥ 3.10:
 
 See the detailed breakdown in sections.
 
-``` python
-#...import the dependencies and set your configuration
-import os
-from pdbtools import pdb_delhetatm, pdb_fetch, pdb_selchain
-import rush
+**NOTE**: This assumes that you are running code in a Jupyter notebook,
+which allows for top level `await` calls. If you are writing a normal
+Python script, you will need to wrap your code in something like the
+following:
 
-RUSH_URL = os.getenv("RUSH_URL") or "https://tengu.qdx.ai"
+``` python
+import asyncio
+async def main():
+    #your code here
+asyncio.run(main())
+```
+
+``` python
+# Get a pdb to work with - we use the pdb-tools cli here
+# but you can download directly from rcsb.org
+!pdb_fetch '1brs' | pdb_selchain -A | pdb_delhetatm > '1B39_A_nohet.pdb'
+```
+
+``` python
+# ...import the dependencies and set your configuration
+import os
+from pathlib import Path
+import rush
+import asyncio
+
 RUSH_TOKEN = os.getenv("RUSH_TOKEN") or "YOUR_TOKEN_HERE"
 
-EXPERIMENT = "rush-py-quickstart"
-SYSTEM = "1B39"
-TAGS = ["qdx", EXPERIMENT, SYSTEM]
-
 # 1.3 Build your client
-client = await rush.build_provider_with_functions(url=RUSH_URL, access_token=RUSH_TOKEN, batch_tags=TAGS)
-
-# 1.4 Input selection - fetch data files from RCSB to pass as input to the modules
-PROTEIN_PDB_PATH = client.workspace / f"{SYSTEM}_P.pdb"
-
-complex = list(pdb_fetch.fetch_structure(SYSTEM))
-protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
-with open(PROTEIN_PDB_PATH, "w") as f:
-    for l in protein:
-        f.write(str(l))
+client = await rush.build_provider_with_functions(access_token=RUSH_TOKEN)
 
 # 2.1 Prepare the protein
 prepared_protein_qdxf, prepared_protein_pdb = await client.prepare_protein(
-    PROTEIN_PDB_PATH,
+    Path("1B39_A_nohet.pdb")
 )
 
-# 2.2 Report run status
-await client.status()
-
 # 2.3 Return run values
-# This will return the "value" of the output from the function —
-# for files you will recieve a url that you can download, otherwise you will recieve them as python types
 protein_qdxf_value = await prepared_protein_qdxf.get()
-len(protein_qdxf_value[0]["topology"]["symbols"])
 ```
+
+    2024-02-29 12:13:37,765 - rush - INFO - Argument a940d387-80be-4b30-8deb-b8039a19f959 is now ModuleInstanceStatus.RESOLVING
+    2024-02-29 12:13:40,000 - rush - INFO - Argument a940d387-80be-4b30-8deb-b8039a19f959 is now ModuleInstanceStatus.ADMITTED
+    2024-02-29 12:13:53,525 - rush - INFO - Argument a940d387-80be-4b30-8deb-b8039a19f959 is now ModuleInstanceStatus.DISPATCHED
+    2024-02-29 12:14:00,314 - rush - INFO - Argument a940d387-80be-4b30-8deb-b8039a19f959 is now ModuleInstanceStatus.AWAITING_UPLOAD
 
 # 1) Setup
 
@@ -67,6 +71,7 @@ we’ll be working with.
 ## 1.0) Imports
 
 ``` python
+import json
 import os
 import tarfile
 from datetime import datetime
@@ -77,18 +82,6 @@ import requests
 from pdbtools import pdb_delhetatm, pdb_fetch, pdb_selchain
 
 import rush
-```
-
-**NOTE**: This walkthrough assumes that you are running code in a
-Jupyter notebook, which allows for top level `await` calls. If you are
-writing a normal Python script, you will need to wrap your code in
-something like the following:
-
-``` python
-import asyncio
-def main():
-    #your code here
-asyncio.run(main())
 ```
 
 ## 1.1) Credentials
@@ -140,7 +133,9 @@ A folder called `.rush` will be created in your workspace directory
 ``` python
 # By using the `build_provider_with_functions` method,
 # we will also build helper functions calling each module
-client = await rush.build_provider_with_functions(url=RUSH_URL, access_token=RUSH_TOKEN, batch_tags=TAGS)
+client = await rush.build_provider_with_functions(
+    url=RUSH_URL, access_token=RUSH_TOKEN, batch_tags=TAGS
+)
 ```
 
 ## 1.4) Input selection
@@ -163,20 +158,20 @@ help(client.convert)
 
     Help on function convert in module rush.provider:
 
-    async convert(*args: *tuple[EnumValue, RushObject[bytes]], target: 'Target | None' = None, resources: 'Resources | None' = {'storage': 10, 'storage_units': 'MB', 'gpus': 0}, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Conformer]]]
+    async convert(*args: *tuple[EnumValue, RushObject[bytes]], target: 'Target | None' = None, resources: 'Resources | None' = {'storage': 10, 'storage_units': 'MB', 'gpus': 0}, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Record]]]
         Convert biomolecular and chemical file formats to the QDX file format. Supports PDB and SDF
-        
-        Module version:  
-        `github:talo/tengu-prelude/efc6d8b3a8cc342cd9866d037abb77dac40a4d56#convert`
-        
+
+        Module version:
+        `github:talo/tengu-prelude/f506c7ead174cdb7e8d1725139254bb85c6b62f8#convert`
+
         QDX Type Description:
-        
-            format: PDB | SDF;
-            input: @bytes
+
+            format: Format[PDB | SDF];
+            input: Object[@$Bytes]
             ->
-            output: @[Conformer]
-        
-        
+            output: Object[[Conformer]]
+
+
         :param format: the format of the input file
         :param input: the input file
         :return output: the output conformers
@@ -199,20 +194,20 @@ help(client.prepare_protein)
 
     Help on function prepare_protein in module rush.provider:
 
-    async prepare_protein(*args: *tuple[RushObject[bytes]], target: 'Target | None' = None, resources: 'Resources | None' = {'storage': 138, 'storage_units': 'MB', 'gpus': 1}, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Conformer]], RushObject[bytes]]
+    async prepare_protein(*args: *tuple[RushObject[bytes]], target: 'Target | None' = None, resources: 'Resources | None' = {'storage': 138, 'storage_units': 'MB', 'gpus': 1}, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Record]], RushObject[bytes]]
         Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.
-        
-        Module version:  
-        `github:talo/prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c#prepare_protein_tengu`
-        
+
+        Module version:
+        `github:talo/prepare_protein/947cdbc000031e192153a20a9b4a8fbb12279102#prepare_protein_tengu`
+
         QDX Type Description:
-        
-            input_pdb: @bytes
+
+            input_pdb: Object[@$Bytes]
             ->
-            output_qdxf: @[Conformer];
-            output_pdb: @bytes
-        
-        
+            output_qdxf: Object[[Conformer]];
+            output_pdb: Object[@$Bytes]
+
+
         :param input_pdb: An input protein as a file; one PDB file
         :return output_qdxf: An output protein a vec: one qdxf per model in pdb
         :return output_pdb: An output protein as a file: one PDB file
@@ -230,10 +225,9 @@ prepared_protein_qdxf, prepared_protein_pdb = await client.prepare_protein(
 prepared_protein_qdxf
 ```
 
-    2024-02-16 17:14:00,643 - rush - INFO - Trying to restore job with tags: ['qdx', 'rush-py-quickstart', '1B39'] and path: github:talo/prepare_protein/83bed2ad1f01f495c94518717f9f5b1bd7fe855c#prepare_protein_tengu
-    2024-02-16 17:14:00,835 - rush - INFO - Restoring job from previous run with id b073d2c8-5754-4b8e-8bd4-31d7b2c6a0b7
+    2024-02-29 12:14:44,224 - rush - INFO - Trying to restore job with tags: ['qdx', 'rush-py-quickstart', '1B39'] and path: github:talo/prepare_protein/947cdbc000031e192153a20a9b4a8fbb12279102#prepare_protein_tengu
 
-    Arg(id=906fad5a-4829-4a39-8ffa-73bcdfd82c17, value=None)
+    Arg(id=2a211718-9b94-4fc8-bd35-0026a8abd6d4, value=None)
 
 ## 2.1) Run statuses
 
@@ -244,7 +238,9 @@ statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs).
 await client.status()
 ```
 
-    {}
+    {'07909fb9-c568-4c37-85bb-ef67401444f3': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+      'prepare_protein',
+      1)}
 
 ## 2.2) Run Values
 
@@ -253,11 +249,17 @@ you will recieve a url that you can download, otherwise you will recieve
 them as python types:
 
 ``` python
-protein_qdxf_value = await prepared_protein_qdxf.get()
-len(protein_qdxf_value[0]["topology"]["symbols"])
+protein_qdxf_info = await prepared_protein_qdxf.get()
+protein_qdxf_info
 ```
 
-    4849
+    2024-02-29 12:14:44,587 - rush - INFO - Argument 2a211718-9b94-4fc8-bd35-0026a8abd6d4 is now ModuleInstanceStatus.RESOLVING
+    2024-02-29 12:14:46,812 - rush - INFO - Argument 2a211718-9b94-4fc8-bd35-0026a8abd6d4 is now ModuleInstanceStatus.ADMITTED
+    2024-02-29 12:15:01,429 - rush - INFO - Argument 2a211718-9b94-4fc8-bd35-0026a8abd6d4 is now ModuleInstanceStatus.DISPATCHED
+    2024-02-29 12:15:09,328 - rush - INFO - Argument 2a211718-9b94-4fc8-bd35-0026a8abd6d4 is now ModuleInstanceStatus.QUEUED
+    2024-02-29 12:15:33,948 - rush - INFO - Argument 2a211718-9b94-4fc8-bd35-0026a8abd6d4 is now ModuleInstanceStatus.AWAITING_UPLOAD
+
+    'https://storage.googleapis.com/rush_store_default/50b50c06-776a-45b7-90d6-c4f9c82f6789?x-goog-signature=82a7783e39fa0fef7a7c3f6775adba197124cf59a00ab4a459184b9cf7580c0d5277c698c9db357ed32edb3d16a1ccfd92c14174c992f4fd45609a73a61b53330d91f4bdf652998a2f6c67386e3d257315260bda8327def894e99c1b65f747fc359a9ba5e27f5e90d55b95899d221de9226dc24fd31db6095e668911ea757d662670770f9151e88337a988262c491e73e129fa922ed5bb1c73b61419d09bbd96559292fe6df6c2d969e560b3d5a42bdf77425506ba699873aa90fff0086cc657ec0f6bbb623697534560276394a5c30c205f4211c806ec465f72a5154e5456994b68877103dec717839a5bd18253214fcd0ab9e36b010ef7a64db95d6b6f8114&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20240229%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20240229T041606Z&x-goog-expires=3600&x-goog-signedheaders=host'
 
 ## 2.3) Downloads
 
@@ -267,8 +269,25 @@ either provide a filename, which will be saved in
 which the client will use as-is:
 
 ``` python
-await prepared_protein_pdb.download(filename="01_prepared_protein.pdb", overwrite=True)
+protein_qdxf_file = await prepared_protein_qdxf.download(overwrite=True)
 ```
+
+``` python
+# qdxf files can be loaded as json
+with open(protein_qdxf_file) as f:
+    protein_qdxf_data = json.load(f)[0]
+protein_qdxf_data["amino_acid_seq"][:10]
+```
+
+    ['MET', 'GLU', 'ASN', 'PHE', 'GLN', 'LYS', 'VAL', 'GLU', 'LYS', 'ILE']
+
+``` python
+await prepared_protein_pdb.download(
+    filename="01_prepared_protein.pdb", overwrite=True
+)
+```
+
+    PosixPath('/home/machineer/qdx/rush-py-quickstart/objects/01_prepared_protein.pdb')
 
 ``` python
 # we can read our prepared protein pdb like this
@@ -276,5 +295,5 @@ with open(client.workspace / "objects" / "01_prepared_protein.pdb", "r") as f:
     print(f.readline(), "...")
 ```
 
-    REMARK   1 CREATED WITH OPENMM 8.0, 2024-02-10
+    REMARK   1 CREATED WITH OPENMM 8.0, 2024-02-29
      ...
