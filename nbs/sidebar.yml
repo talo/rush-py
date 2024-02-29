@@ -11,7 +11,6 @@ website:
           - Quickstarts/hermes_hartree_fock_energy_calculation-sample.ipynb
           - Quickstarts/ligand_bond_inference_and_partial_charge_calculation-sample.ipynb
           - Quickstarts/protein-ligand-interactions-sample.ipynb
-          - Quickstarts/qm_geo_opt_calculation-sample.ipynb
       - section: Tutorials
         contents:
           - Tutorials/auto3d_conformer_tautomer_generation.ipynb
@@ -20,7 +19,6 @@ website:
           - Tutorials/hermes_hartree_fock_energy_calculation.ipynb
           - Tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
           - Tutorials/protein-ligand-interactions.ipynb
-          - Tutorials/qm_geo_opt_calculation.ipynb
       - section: api
         contents:
           - api/doc.html

@@ -19,7 +19,6 @@ from uuid import UUID
 
 import httpx
 from pydantic_core import to_jsonable_python
-from rush.graphql_client.object_contents import ObjectContentsObject
 
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
@@ -41,6 +40,7 @@ from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesPageInfo,
 )
 from .graphql_client.modules import ModulesModulesPageInfo
+from .graphql_client.object_contents import ObjectContentsObject
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
 from .typedef import SCALARS, build_typechecker, type_from_typedef
@@ -368,7 +368,7 @@ class BaseProvider:
                     self.typeinfo["k"] == "optional"
                     and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
                 ):
-                    return await self.provider.object(self.id)
+                    return (await self.provider.object(self.id)).url
             return self.value
 
     def __init__(
