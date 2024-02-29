@@ -790,7 +790,7 @@ class BaseProvider:
                 return res[0]
 
         # always request a bit of space because the run will always create files
-        storage_requirements = {"storage": 1024}
+        storage_requirements = {"storage": 10 * 1024 * 1024}
 
         # TODO: less insane version of this
         def gen_arg_dict(input: Provider.Arg[Any] | ArgId | UUID | Path | IOBase | Any) -> ArgumentInput:
