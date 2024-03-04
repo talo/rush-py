@@ -17,6 +17,9 @@
           overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python3Packages.pip; });
           extraPackages = [ pkgs.quarto ];
+          blackCheck = {
+            extraCmd = "black ./nbs --config pyproject.ipynb.toml --ipynb --check";
+          };
         };
         poetryProjects.py310 = {
           projectDir = ./.;
