@@ -38,4 +38,6 @@ jobs:
       - name: nix checks
         run: nix flake check --accept-flake-config --show-trace
       - name: nbdev checks
+        env: 
+          RUSH_RESTORE_BY_DEFAULT: "True"
         run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print

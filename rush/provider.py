@@ -774,7 +774,7 @@ class BaseProvider:
         :param restore: Check if a module instance with the same tags and path already exists.
         """
         tags = tags + self.batch_tags if tags else self.batch_tags
-
+        
         try_restore = restore if restore is not None else self.restore_by_default
         if try_restore:
             self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
@@ -1346,7 +1346,7 @@ class Provider(BaseProvider):
         workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
-        restore_by_default: bool = False,
+        restore_by_default: bool | None  = None,
     ):
         """
         Initialize the RushProvider with a graphql client.
@@ -1374,6 +1374,15 @@ class Provider(BaseProvider):
             if url is None:
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
+
+            if os.environ["RUSH_RESTORE_BY_DEFAULT"] == "True" and restore_by_default is None:
+                restore_by_default = True
+            elif os.environ["RUSH_RESTORE_BY_DEFAULT"] == "False" and restore_by_default is None:
+                restore_by_default = False
+
+            elif restore_by_default is None:
+                restore_by_default = False
+                
             super().__init__(
                 client,
                 workspace=workspace,
