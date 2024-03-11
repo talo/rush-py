@@ -10,11 +10,23 @@ import random
 import re
 import sys
 import time
+import threading
 from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union
+from typing import (
+    Any,
+    AsyncIterable,
+    Awaitable,
+    Generic,
+    Iterable,
+    Literal,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 import httpx
@@ -288,6 +300,11 @@ class BaseProvider:
                 remote_arg = await get_remote_arg(retries)
             return remote_arg
 
+        async def info_blocking(
+            self,
+        ) -> ArgumentArgument:
+            return asyncio_run(self.info())
+
         async def download(
             self,
             filename: str | None = None,
@@ -314,6 +331,14 @@ class BaseProvider:
                     raise Exception("Cannot download non-object argument")
             else:
                 raise Exception("Cannot download argument without typeinfo")
+
+        def download_blocking(
+            self,
+            filename: str | None = None,
+            filepath: Path | None = None,
+            overwrite: bool = False,
+        ):
+            return asyncio_run(self.download(filename=filename, filepath=filepath, overwrite=overwrite))
 
         async def get(self) -> T:
             """
@@ -370,6 +395,16 @@ class BaseProvider:
                 ):
                     return (await self.provider.object(self.id)).url
             return self.value
+
+        def get_blocking(self) -> T:
+            """
+            Get the value of the argument.
+
+            This will block until the argument is ready.
+
+            :return: The value of the argument.
+            """
+            return asyncio_run(self.get())
 
     def __init__(
         self,
@@ -737,6 +772,21 @@ class BaseProvider:
             with open(filepath, "r") as f:
                 modules = json.load(f)
             self.module_paths = modules
+
+            # check against latest modules
+            async def get_latest_modules():
+                async for page in await self.latest_modules():
+                    for edge in page.edges:
+                        module = edge.node
+                        if module.name in modules:
+                            if module.path != modules[module.name]:
+                                self.logger.warning(
+                                    f"Module {module.name} has a different version on the server: {module.path}. Use `.update_modules()` to update the lock file"
+                                )
+                        else:
+                            self.logger.warning(f"Module {module.path} is not in the lock file")
+
+            asyncio_run(get_latest_modules())
             return modules
         else:
             raise FileNotFoundError("Lock file not found")
@@ -774,7 +824,7 @@ class BaseProvider:
         :param restore: Check if a module instance with the same tags and path already exists.
         """
         tags = tags + self.batch_tags if tags else self.batch_tags
-        
+
         try_restore = restore if restore is not None else self.restore_by_default
         if try_restore:
             self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
@@ -1299,6 +1349,34 @@ class BaseProvider:
                 if pages is not None and i > pages:
                     return
 
+    async def update_modules(self, names: list[str] | None = None, tags: list[str] | None = None):
+        """
+        Update the module paths in the lockfile.
+
+        :param names: Optional list of names to update.
+        :param tags: Optionally only upate modules with this tag.
+        """
+        if not self.config_dir:
+            raise Exception("No workspace provided")
+
+        if tags:
+            module_pages = await self.modules(tags=tags)
+            self.module_paths = {}
+            async for module_page in module_pages:
+                for edge in module_page.edges:
+                    path = edge.node.path
+                    name = get_name_from_path(edge.node.path)
+                    if names:
+                        if name in names and path:
+                            self.module_paths[name] = path
+                    else:
+                        self.module_paths[name] = path
+            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+        else:
+            paths = await self.get_latest_module_paths(names)
+            self.module_paths = paths
+            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
         Delete a module instance with a given ID.
@@ -1346,7 +1424,7 @@ class Provider(BaseProvider):
         workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
-        restore_by_default: bool | None  = None,
+        restore_by_default: bool | None = None,
     ):
         """
         Initialize the RushProvider with a graphql client.
@@ -1363,6 +1441,14 @@ class Provider(BaseProvider):
         if workspace is False:
             workspace = None
 
+        if os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
+            restore_by_default = True
+        elif os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
+            restore_by_default = False
+
+        elif restore_by_default is None:
+            restore_by_default = False
+
         if access_token is None or url is None:
             # try to check the environment variables
 
@@ -1375,14 +1461,6 @@ class Provider(BaseProvider):
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
 
-            if os.environ["RUSH_RESTORE_BY_DEFAULT"] == "True" and restore_by_default is None:
-                restore_by_default = True
-            elif os.environ["RUSH_RESTORE_BY_DEFAULT"] == "False" and restore_by_default is None:
-                restore_by_default = False
-
-            elif restore_by_default is None:
-                restore_by_default = False
-                
             super().__init__(
                 client,
                 workspace=workspace,
@@ -1426,3 +1504,91 @@ async def build_provider_with_functions(
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
     return provider
+
+
+def build_blocking_provider_with_functions(
+    workspace: str | Path | bool | None = None,
+    access_token: str | None = None,
+    url: str | None = None,
+    batch_tags: list[str] | None = None,
+    module_names: list[str] | None = None,
+    module_tags: list[str] | None = None,
+    logger: logging.Logger | None = None,
+    restore_by_default: bool = False,
+) -> Provider:
+    """
+    Build a RushProvider with the given access token and url.
+
+    :param access_token: The access token to use.
+    :param url: The url to use.
+    :param workspace: The workspace directory to use.
+    :param batch_tags: The tags that will be placed on all runs by default.
+    :return: The built RushProvider.
+    """
+    provider = Provider(
+        access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
+    )
+
+    # functions that don't get called internally can be overridden with blocking versions
+    blockable_functions = ("nuke", "status", "logs", "upload", "retry", "tag")
+    built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
+    # for each async function in the provider, create a blocking version
+    blocking_versions = {}
+    for name, func in provider.__dict__.items():
+        if asyncio.iscoroutinefunction(func):
+
+            def closure(func):
+                def blocking_func(*args, **kwargs):
+                    return asyncio_run(func(*args, **kwargs))
+
+                return blocking_func
+
+            name = name if name in built_fns else f"{name}_blocking"
+            blocking_func = closure(func)
+            blocking_func.__name__ = f"{name}"
+            blocking_func.__doc__ = func.__doc__
+            blocking_func.__annotations__ = func.__annotations__
+
+            blocking_versions[name] = blocking_func
+
+    for name, func in BaseProvider.__dict__.items():
+        if asyncio.iscoroutinefunction(func):
+
+            def closure(func):
+                def blocking_func(*args, **kwargs):
+                    return asyncio_run(func(provider, *args, **kwargs))
+
+                return blocking_func
+
+            name = name if name in blockable_functions else f"{name}_blocking"
+            blocking_func = closure(func)
+            blocking_func.__name__ = f"{name}"
+            blocking_func.__doc__ = func.__doc__
+            blocking_func.__annotations__ = func.__annotations__
+
+            blocking_versions[name] = blocking_func
+
+    provider.__dict__.update(blocking_versions)
+    return provider
+
+
+def _start_background_loop(loop: asyncio.AbstractEventLoop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+
+_LOOP = asyncio.new_event_loop()
+_LOOP_THREAD = threading.Thread(target=_start_background_loop, args=(_LOOP,))
+_LOOP_THREAD.start()
+
+
+def asyncio_run(coro: Awaitable[T]) -> T:
+    """
+    Runs the coroutine in an event loop running on a background thread,
+    and blocks the current thread until it returns a result.
+    This plays well with gevent, since it can yield on the Future result call.
+
+    :param coro: A coroutine, typically an async method
+    :param timeout: How many seconds we should wait for a result before raising an error
+    """
+    return asyncio.run_coroutine_threadsafe(coro, _LOOP).result()

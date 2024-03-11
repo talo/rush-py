@@ -1,14 +1,15 @@
-name: Integration tests
+name: Release Integration tests
 
+# only run when pr name contains release
 on:
   pull_request:
-    branches: [main]
+    branches: ["release/**"]
 
 env:
   NIXPKGS_ALLOW_UNFREE: 1
   RUSH_URL: "https://tengu.qdx.ai"
   RUSH_TOKEN: ${{ secrets.RUSH_TOKEN }}
-  RUSH_RESTORE_BY_DEFAULT: "True"
+  RUSH_RESTORE_BY_DEFAULT: "False"
 
 jobs:
   build:
