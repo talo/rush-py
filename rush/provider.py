@@ -778,11 +778,11 @@ class BaseProvider:
                 async for page in await self.latest_modules():
                     for edge in page.edges:
                         module = edge.node
-                        if module.name in modules:
-                            if module.path != modules[module.name]:
-                                self.logger.warning(
-                                    f"Module {module.name} has a different version on the server: {module.path}. Use `.update_modules()` to update the lock file"
-                                )
+                        if module.name in modules and module.path != modules[module.name]:
+                            self.logger.warning(
+                                f"""Module {module.name} has a different version on the server: {module.path}.
+                                Use `.update_modules()` to update the lock file"""
+                            )
                         else:
                             self.logger.warning(f"Module {module.path} is not in the lock file")
 
