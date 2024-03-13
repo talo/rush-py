@@ -35,6 +35,7 @@ py3Dmol = "^2.0.4"
 pytest = "~=7.4.3"
 pytest-xdist = "~=3.3.1"
 qdx-py = "^0.6.2"
+pickleshare = "^0.7.5"
 
 [build-system]
 requires = ["poetry-core"]
