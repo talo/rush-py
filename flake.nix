@@ -2,7 +2,7 @@
   description = "Rush Python SDK";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     qdx-python-flake-parts.url = "github:talo/qdx-python-flake-parts";
   };
 
@@ -14,11 +14,24 @@
         poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
         poetryProjects.default = {
           projectDir = ./.;
+          python = pkgs.python312;
+          overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
+            (self: super: { pip = pkgs.python312Packages.pip; });
+          extraPackages = [ pkgs.quarto ];
+          blackCheck = {
+            extraCmd =
+              "black ./nbs --config pyproject.ipynb.toml --ipynb --check";
+          };
+        };
+        poetryProjects.py311 = {
+          projectDir = ./.;
+          python = pkgs.python311;
           overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python3Packages.pip; });
           extraPackages = [ pkgs.quarto ];
           blackCheck = {
-            extraCmd = "black ./nbs --config pyproject.ipynb.toml --ipynb --check";
+            extraCmd =
+              "black ./nbs --config pyproject.ipynb.toml --ipynb --check";
           };
         };
         poetryProjects.py310 = {
