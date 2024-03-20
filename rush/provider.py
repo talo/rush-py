@@ -512,13 +512,13 @@ class BaseProvider:
                         is_encoded = False
                         for chunk in r.iter_text():
                             if not first_chunk and not is_encoded:
-                                f.write(chunk)
+                                f.write(chunk.encode("utf-8"))
                                 continue
 
                             # handle json
                             if first_chunk:
                                 if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
-                                    f.write(chunk)
+                                    f.write(chunk.encode("utf-8"))
                                     first_chunk = False
                                     continue
                                 else:
