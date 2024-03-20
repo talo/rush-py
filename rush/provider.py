@@ -60,7 +60,11 @@ from .graphql_client.object_contents import ObjectContentsObject
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
 from .typedef import SCALARS, build_typechecker, type_from_typedef
-from .types import ArgId, ModuleInstanceId, Resources, Target
+
+if sys.version_info >= (3, 12):
+    from .types import ArgId, ModuleInstanceId, Resources, Target
+else:
+    from .legacy_types import ArgId, ModuleInstanceId, Resources, Target
 
 
 @dataclass
@@ -220,10 +224,10 @@ class BaseProvider:
     def __init__(
         self,
         client: Client,
+        logger: logging.Logger,
         restore_by_default: bool = False,
         workspace: str | Path | None = None,
         batch_tags: list[str] | None = None,
-        logger: logging.Logger | None = None,
     ):
         """
         Initialize the RushProvider a graphql client.
@@ -233,30 +237,7 @@ class BaseProvider:
         self.client = client
         self.client.http_client.timeout = httpx.Timeout(60)
         self.module_paths: dict[str, str] = {}
-
-        if not logger:
-            self.logger = logging.getLogger("rush")
-            if len(self.logger.handlers) == 0:
-                stderr_handler = logging.StreamHandler()
-                stderr_handler.setLevel(logging.ERROR)
-                stderr_handler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-                )
-
-                stdout_handler = logging.StreamHandler(sys.stdout)
-                stdout_handler.setLevel(logging.INFO)
-                stdout_handler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-                )
-
-                # add filter to prevent errors from being logged twice
-                stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
-                self.logger.setLevel(logging.INFO)
-
-                self.logger.addHandler(stdout_handler)
-                self.logger.addHandler(stderr_handler)
-        else:
-            self.logger = logger
+        self.logger = logger
 
         if workspace:
             self.workspace: Path | None = Path(workspace)
@@ -579,26 +560,28 @@ class BaseProvider:
         :param filename: Json module version file
         """
         modules = None
+
+        async def get_latest_modules(modules: dict[str, str]):
+            async for page in await self.latest_modules():
+                for edge in page.edges:
+                    module = edge.node
+                    if module.name in modules:
+                        if module.path != modules[module.name]:
+                            self.logger.warning(
+                                f"""Module {module.name} has a different version on the server: {module.path}.
+                                Use `.update_modules()` to update the lock file"""
+                            )
+                    else:
+                        self.logger.warning(f"Module {module.path} is not in the lock file")
+
         if filepath.exists() and filepath.stat().st_size > 0:
             with open(filepath, "r") as f:
                 modules = json.load(f)
             self.module_paths = modules
 
             # check against latest modules
-            async def get_latest_modules():
-                async for page in await self.latest_modules():
-                    for edge in page.edges:
-                        module = edge.node
-                        if module.name in modules:
-                            if module.path != modules[module.name]:
-                                self.logger.warning(
-                                    f"""Module {module.name} has a different version on the server: {module.path}.
-                                    Use `.update_modules()` to update the lock file"""
-                                )
-                        else:
-                            self.logger.warning(f"Module {module.path} is not in the lock file")
 
-            asyncio_run(get_latest_modules())
+            asyncio_run(get_latest_modules(modules))
             return modules
         else:
             raise FileNotFoundError("Lock file not found")
@@ -1370,10 +1353,9 @@ class BaseProvider:
                         else:
                             self.value = remote_arg.value
                             if self.value is None:
-                                if remote_arg.source or self.source:
-                                    module_instance = await self.provider.module_instance(
-                                        remote_arg.source or self.source
-                                    )
+                                source = remote_arg.source or self.source
+                                if source:
+                                    module_instance = await self.provider.module_instance(source)
                                     if module_instance.status != self.status:
                                         self.provider.logger.info(
                                             f"Argument {self.id} is now {module_instance.status}"
@@ -1408,6 +1390,7 @@ class BaseProvider:
             super().__init__(provider, id, source, value, typeinfo)
 
         def get(self) -> T:
+            print("Blocking get")
             return asyncio_run(super().get())
 
         def download(
@@ -1447,12 +1430,37 @@ class Provider(BaseProvider):
         if workspace is False:
             workspace = None
 
+        if not logger:
+            logger = logging.getLogger("rush")
+            if len(logger.handlers) == 0:
+                stderr_handler = logging.StreamHandler()
+                stderr_handler.setLevel(logging.ERROR)
+                stderr_handler.setFormatter(
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                )
+
+                stdout_handler = logging.StreamHandler(sys.stdout)
+                stdout_handler.setLevel(logging.INFO)
+                stdout_handler.setFormatter(
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                )
+
+                # add filter to prevent errors from being logged twice
+                stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
+                logger.setLevel(logging.INFO)
+
+                logger.addHandler(stdout_handler)
+                logger.addHandler(stderr_handler)
+
         if os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
+            logger.info("Restoring by default via env")
             restore_by_default = True
         elif os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
+            logger.info("Not restoring by default via env")
             restore_by_default = False
 
         elif restore_by_default is None:
+            logger.info("Not restoring by default via default")
             restore_by_default = False
 
         if access_token is None or url is None:
@@ -1493,7 +1501,7 @@ async def build_provider_with_functions(
     module_names: list[str] | None = None,
     module_tags: list[str] | None = None,
     logger: logging.Logger | None = None,
-    restore_by_default: bool = False,
+    restore_by_default: bool | None = None,
 ) -> Provider:
     """
     Build a RushProvider with the given access token and url.
@@ -1520,7 +1528,7 @@ def build_blocking_provider_with_functions(
     module_names: list[str] | None = None,
     module_tags: list[str] | None = None,
     logger: logging.Logger | None = None,
-    restore_by_default: bool = False,
+    restore_by_default: bool | None = None,
 ) -> Provider:
     """
     Build a RushProvider with the given access token and url.
@@ -1535,7 +1543,7 @@ def build_blocking_provider_with_functions(
         access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
     )
     if not LOOP.is_running():
-        _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,))
+        _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
         _LOOP_THREAD.start()
 
     # functions that don't get called internally can be overridden with blocking versions
@@ -1564,7 +1572,7 @@ def build_blocking_provider_with_functions(
         if asyncio.iscoroutinefunction(func):
 
             def closure(func: Callable[..., Awaitable[T]]):
-                def blocking_func(*args: Any, **kwargs: Any):
+                def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     return asyncio_run(func(provider, *args, **kwargs))
 
                 return blocking_func

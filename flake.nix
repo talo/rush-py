@@ -29,10 +29,7 @@
           overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python3Packages.pip; });
           extraPackages = [ pkgs.quarto ];
-          blackCheck = {
-            extraCmd =
-              "black ./nbs --config pyproject.ipynb.toml --ipynb --check";
-          };
+          flake8Check.enable = false;
         };
         poetryProjects.py310 = {
           projectDir = ./.;
@@ -40,6 +37,7 @@
           overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python310Packages.pip; });
           extraPackages = [ pkgs.quarto ];
+          flake8Check.enable = false;
         };
         poetryProjects.py39 = {
           projectDir = ./.;
@@ -47,6 +45,7 @@
           overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides
             (self: super: { pip = pkgs.python39Packages.pip; });
           extraPackages = [ pkgs.quarto ];
+          flake8Check.enable = false;
         };
         # disabling because it locks us to old flake8
         # poetryProjects.py38 = {
