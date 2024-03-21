@@ -3,7 +3,7 @@
 import asyncio
 from typing import Any as _Any
 
-from . import provider, typedef
+from . import provider, types
 
 type Any = _Any
 "@private"
@@ -24,7 +24,7 @@ As an output, it usually stores data containing results from the corresponding r
 type EnumValue = str
 """ A QDX Enum type. From python, pass a `str`."""
 
-type RushObject = typedef.RushObject[Any]
+type RushObject = types.RushObject[bytes | types.Conformer | types.Record | list[RushObject] | float]
 """ Represents a file in object storage.
 
 As an input argument, pass
