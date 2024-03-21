@@ -1387,7 +1387,6 @@ class BaseProvider:
             super().__init__(provider, id, source, value, typeinfo)
 
         def get(self) -> T:
-            print("Blocking get")
             return asyncio_run(super().get())
 
         def download(
