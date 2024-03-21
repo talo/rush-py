@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+from collections.abc import AsyncGenerator
 import json
 import logging
 import math
@@ -29,6 +30,7 @@ from typing import (
     Union,
 )
 from uuid import UUID
+import inspect
 
 import httpx
 from pydantic_core import to_jsonable_python
@@ -811,8 +813,8 @@ class BaseProvider:
         :param names: The names of the modules.
         """
         ret = {}
-        module_pages = await self.latest_modules(names=names)
-        async for module_page in module_pages:
+        module_pages = [i async for i in await self.latest_modules(names=names)]
+        for module_page in module_pages:
             for edge in module_page.edges:
                 path = edge.node.path
                 name = get_name_from_path(edge.node.path)
@@ -1100,7 +1102,6 @@ class BaseProvider:
         after: str | None = None,
         before: str | None = None,
         pages: int | None = None,
-        print_logs: bool = True,
     ) -> AsyncIterable[str]:
         """
         Retrieve the stdout and stderr of a module instance.
@@ -1142,11 +1143,7 @@ class BaseProvider:
             {},
         ):
             for edge in page.edges:
-                if print_logs:
-                    for line in edge.node.content:
-                        print(line)
-                else:
-                    yield edge.node.content
+                yield edge.node.content
                 i += 1
                 if pages is not None and i > pages:
                     return
@@ -1552,11 +1549,23 @@ def build_blocking_provider_with_functions(
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
     for name, func in provider.__dict__.items():
-        if asyncio.iscoroutinefunction(func):
+        if (
+            asyncio.iscoroutinefunction(func)
+            or inspect.iscoroutine(func)
+            or inspect.iscoroutinefunction(func)
+        ):
 
             def closure(func):
-                def blocking_func(*args, **kwargs):
-                    return asyncio_run(func(*args, **kwargs))
+                def blocking_func(
+                    *args,
+                    target: Target | None = None,
+                    resources: Resources | None = None,
+                    tags: list[str] | None = None,
+                    restore: bool | None = None,
+                ):
+                    return asyncio_run(
+                        func(*args, target=target, resources=resources, tags=tags, restore=restore)
+                    )
 
                 return blocking_func
 
@@ -1569,11 +1578,52 @@ def build_blocking_provider_with_functions(
             blocking_versions[name] = blocking_func
 
     for name, func in BaseProvider.__dict__.items():
-        if asyncio.iscoroutinefunction(func):
+        if (
+            asyncio.iscoroutinefunction(func)
+            or inspect.iscoroutine(func)
+            or inspect.iscoroutinefunction(func)
+        ):
 
             def closure(func: Callable[..., Awaitable[T]]):
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
-                    return asyncio_run(func(provider, *args, **kwargs))
+                    r = asyncio_run(func(provider, *args, **kwargs))
+                    if isinstance(r, AsyncGenerator):
+                        res = []
+                        while True:
+                            try:
+                                res += [asyncio_run(anext(r))]
+                            except StopAsyncIteration:
+                                return res
+                    return r
+
+                return blocking_func
+
+            name = name if name in blockable_functions else f"{name}_blocking"
+            blocking_func = closure(func)
+            blocking_func.__name__ = f"{name}"
+            blocking_func.__doc__ = func.__doc__
+            blocking_func.__annotations__ = func.__annotations__
+
+            blocking_versions[name] = blocking_func
+
+    for name, func in BaseProvider.__dict__.items():
+        if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
+
+            def closure(func: Callable[..., Awaitable[T]]):
+                def blocking_func(*args: Any, **kwargs: Any) -> Any:
+                    r = func(provider, *args, **kwargs)
+                    if isinstance(r, AsyncGenerator):
+                        try:
+                            hn = asyncio_run(anext(r))
+                        except StopAsyncIteration:
+                            return
+                        while hn:
+                            yield hn
+                            try:
+                                hn = asyncio_run(anext(r))
+                            except StopAsyncIteration:
+                                return
+                    return r
 
                 return blocking_func
 
