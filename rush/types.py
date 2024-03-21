@@ -16,7 +16,7 @@ type Conformer = dict[str, Any]
 type Record = dict[str, Any]
 type EnumValue = str
 
-RushObjectTypes = bytes | Conformer | Record | list['RushObjectTypes'] | float
+RushObjectTypes = bytes | Conformer | Record | list["RushObjectTypes"] | float
 U = TypeVar("U", bytes, Conformer, Record, list[RushObjectTypes], float)
 
 
