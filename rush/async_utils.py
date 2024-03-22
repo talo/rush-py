@@ -25,5 +25,13 @@ def asyncio_run(coro: Coroutine[Any, Any, T]) -> T:
     """
     if LOOP.is_running():
         return asyncio.run_coroutine_threadsafe(coro, LOOP).result()
-    else:
+    elif asyncio.get_event_loop().is_running():
         return asyncio.create_task(coro)
+    else:
+        try:
+            return LOOP.run_until_complete(coro)
+        except RuntimeError:
+            start_background_loop(LOOP)
+            return asyncio.run_coroutine_threadsafe(coro, LOOP).result()
+        except Exception as e:
+            print(e)
