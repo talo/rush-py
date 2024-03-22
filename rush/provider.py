@@ -602,7 +602,9 @@ class BaseProvider:
     async def run(
         self,
         path: str,
-        args: "list[BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | Argument | ArgId | Path | IOBase | Any]",
+        args: """list[
+        BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | Argument | ArgId | Path | IOBase | Any
+        ]""",
         target: Target | None = None,
         resources: Resources | None = None,
         tags: list[str] | None = None,
