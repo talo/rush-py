@@ -1,14 +1,15 @@
-name: Integration tests
+name: Release Integration tests
 
+# only run when pr name contains release
 on:
   pull_request:
-    branches: [main]
+    branches: ["release/**"]
 
 env:
   NIXPKGS_ALLOW_UNFREE: 1
   RUSH_URL: "https://tengu.qdx.ai"
   RUSH_TOKEN: ${{ secrets.RUSH_TOKEN }}
-  RUSH_RESTORE_BY_DEFAULT: "True"
+  RUSH_RESTORE_BY_DEFAULT: "False"
 
 jobs:
   build:
@@ -39,8 +40,4 @@ jobs:
       - name: nix checks
         run: nix flake check --accept-flake-config --show-trace
       - name: nbdev checks
-        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --skip_file_glob "*async*"
-      - name: nbdev checks
-        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Tutorials/batch_run_protein_prep_async.ipynb
-      - name: nbdev checks
-        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Quicklstarts/batch_run_protein_prep_async-sample.ipynb
+        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print

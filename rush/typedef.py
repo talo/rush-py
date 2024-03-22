@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from __future__ import annotations
 
 import sys
@@ -18,35 +17,19 @@ T = TypeVar("T")
 
 
 if sys.version_info >= (3, 12):
-    from typing import Optional as _Optional  # noqa: F401
+    from .types import Conformer, EnumValue, Optional, Record, RushObject
 
-    # For type styling in docs
-    exec("type Optional[T] = _Optional[T]")
-    exec("type Conformer = dict[str, Any]")
-    exec("type Record = dict[str, Any]")
-    exec("type EnumValue = str")
 else:
     from typing import Optional
 
-    try:
-        from typing import TypeAliasType
-    except ImportError:
-        from typing_extensions import TypeAliasType
-    Conformer = TypeAliasType("Conformer", dict[str, Any])
-    Record = TypeAliasType("Record", dict[str, Any])
-    EnumValue = TypeAliasType("EnumValue", str)
+    from .legacy_types import Conformer, EnumValue, Record, RushObject
+
 
 U = TypeVar("U", bytes, Conformer, Record, list[Any], float)
 
 
 class _RushObject(Generic[U]):
     object: U | None = None
-
-
-if sys.version_info >= (3, 12):
-    exec("type RushObject[U] = _RushObject[Any]")
-else:
-    RushObject = TypeAliasType("RushObject", _RushObject[U], type_params=(U,))
 
 
 SCALARS = Literal[
@@ -242,7 +225,7 @@ class ScalarType(Generic[T], RushType[T]):
     def __init__(self, scalar: SCALARS | str):
         self.k = None
         self.t = scalar
-        if isinstance(self.t, str):
+        if self.t not in SCALAR_STRS:
             self.t = self.t.replace("$", "").lower()
         self.py_type = scalar_types_mapping.get(self.t)
         self.literal = scalar if not self.py_type else None
@@ -281,7 +264,7 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                 if isinstance(res["t"], dict):
                     return RecordKind({k: type_from_typedef(v) for k, v in res["t"].items()})
                 else:
-                    return RecordKind([type_from_typedef(v) for v in res["t"]])
+                    return RecordKind(tuple(type_from_typedef(v) for v in res["t"]))
             elif res["k"] == "array":
                 return ArrayKind(type_from_typedef(res["t"]))
             elif res["k"] == "tuple":

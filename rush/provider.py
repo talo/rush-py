@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+from collections.abc import AsyncGenerator
 import json
 import logging
 import math
@@ -10,16 +11,34 @@ import random
 import re
 import sys
 import time
+import threading
 from collections import Counter
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-from typing import Any, AsyncIterable, Generic, Iterable, Literal, Optional, Protocol, TypeVar, Union
+from typing import (
+    Any,
+    AsyncIterable,
+    Awaitable,
+    Callable,
+    Generic,
+    Iterable,
+    Literal,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
+import inspect
 
 import httpx
 from pydantic_core import to_jsonable_python
 
+from rush.graphql_client.exceptions import GraphQLClientGraphQLMultiError
+
+
+from .async_utils import start_background_loop, asyncio_run, LOOP
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
     ArgumentsMeAccountArguments,
@@ -29,7 +48,6 @@ from .graphql_client.arguments import (
 from .graphql_client.base_model import UNSET, UnsetType, Upload
 from .graphql_client.client import Client
 from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget
-from .graphql_client.exceptions import GraphQLClientGraphQLMultiError
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
@@ -46,27 +64,9 @@ from .graphql_client.run import RunRun
 from .typedef import SCALARS, build_typechecker, type_from_typedef
 
 if sys.version_info >= (3, 12):
-    exec("type Target = ModuleInstanceTarget | str")
-    exec("type Resources = ModuleInstanceResourcesInput | dict[str, Any]")
-    exec("ArgId = UUID")
-    exec("ModuleInstanceId = UUID")
+    from .types import ArgId, ModuleInstanceId, Resources, Target
 else:
-    try:
-        from typing import TypeAlias
-    except ImportError:
-        from typing_extensions import TypeAlias
-    try:
-        from typing import TypeAliasType
-    except ImportError:
-        from typing_extensions import TypeAliasType
-    ArgId: TypeAlias = UUID
-    ModuleInstanceId: TypeAlias = UUID
-    if sys.version_info >= (3, 10):
-        Target = TypeAliasType("Target", ModuleInstanceTarget | str)
-        Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput | dict[str, Any])
-    else:
-        Target = TypeAliasType("Target", Union[ModuleInstanceTarget, str])
-        Resources = TypeAliasType("Resources", Union[ModuleInstanceResourcesInput, dict[str, Any]])
+    from .legacy_types import ArgId, ModuleInstanceId, Resources, Target
 
 
 @dataclass
@@ -223,161 +223,13 @@ class BaseProvider:
     A class representing a provider for the Rush quantum chemistry workflow platform.
     """
 
-    class Arg(Generic[T]):
-        def __init__(
-            self,
-            provider: "BaseProvider | None",
-            id: UUID | None = None,
-            source: UUID | None = None,
-            value: T | None = None,
-            typeinfo: dict[str, Any] | SCALARS | None = None,
-        ):
-            self.provider = provider
-            self.id = id
-            self.source = source
-            self.status = ModuleInstanceStatus.CREATED
-            self.progress = ModuleInstanceFullProgress(n=0, n_max=0, n_expected=0, done=False)
-            self.value = value
-            self.typeinfo = typeinfo
-
-        def __repr__(self):
-            return f"Arg(id={self.id}, value={self.value})"
-
-        def __str__(self):
-            return f"Arg(id={self.id}, value={self.value})"
-
-        def __eq__(self, other: object) -> bool:
-            if not isinstance(other, Provider.Arg):
-                return NotImplemented
-            return self.id == other.id
-
-        async def info(self) -> ArgumentArgument:
-            async def get_remote_arg(retries: int):
-                if self.id is None:
-                    raise Exception("No ID provided")
-                if self.provider is None:
-                    raise Exception("No provider provided")
-                try:
-                    remote_arg = await self.provider.argument(self.id)
-                    self.typeinfo = remote_arg.typeinfo
-                    return remote_arg
-                except GraphQLClientGraphQLMultiError as e:
-                    if e.errors[0].message == "not found":
-                        if retries > 0:
-                            if self.source:
-                                module_instance = await self.provider.module_instance(self.source)
-                                if module_instance.status != self.status:
-                                    self.provider.logger.info(
-                                        f"Argument {self.id} is now {module_instance.status}"
-                                    )
-                                    self.status = module_instance.status
-                                if module_instance.status == ModuleInstanceStatus.RUNNING:
-                                    if module_instance.progress != self.progress:
-                                        print(f"Progress: {module_instance.progress}", end="\r")
-                            await asyncio.sleep(5)
-                        else:
-                            raise e
-                    else:
-                        self.provider.logger.error(e.errors)
-                        raise e
-
-            retries = 10
-            remote_arg = await get_remote_arg(retries)
-            while remote_arg is None:
-                retries -= 1
-                remote_arg = await get_remote_arg(retries)
-            return remote_arg
-
-        async def download(
-            self,
-            filename: str | None = None,
-            filepath: Path | None = None,
-            overwrite: bool = False,
-        ):
-            if self.id is None:
-                raise Exception("No ID provided")
-            if self.provider is None:
-                raise Exception("No provider provided")
-            await self.get()
-
-            if self.typeinfo:
-                if isinstance(self.typeinfo, dict) and (
-                    (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object")
-                    or (
-                        self.typeinfo["k"] == "optional"
-                        and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
-                    )
-                ):
-                    signed = "$" in json.dumps(self.typeinfo)
-                    return await self.provider.download_object(self.id, filename, filepath, overwrite, signed)
-                else:
-                    raise Exception("Cannot download non-object argument")
-            else:
-                raise Exception("Cannot download argument without typeinfo")
-
-        async def get(self) -> T:
-            """
-            Get the value of the argument.
-
-            This will wait until the argument is ready.
-
-            :return: The value of the argument.
-            """
-            if self.value is None or self.typeinfo is None:
-                if self.provider is None:
-                    raise Exception("No provider provided")
-                if self.id is None:
-                    raise Exception("No ID provided")
-                while self.value is None:
-                    try:
-                        remote_arg = await self.info()
-                        if remote_arg.rejected_at:
-                            if remote_arg.source:
-                                # get the failure reason by checking the source module instance
-                                module_instance = await self.provider.module_instance(remote_arg.source)
-                                raise Exception(
-                                    (
-                                        module_instance.failure_reason,
-                                        module_instance.failure_context,
-                                    )
-                                )
-                            raise Exception("Argument was rejected")
-                        else:
-                            self.value = remote_arg.value
-                            if self.value is None:
-                                if remote_arg.source or self.source:
-                                    module_instance = await self.provider.module_instance(
-                                        remote_arg.source or self.source
-                                    )
-                                    if module_instance.status != self.status:
-                                        self.provider.logger.info(
-                                            f"Argument {self.id} is now {module_instance.status}"
-                                        )
-                                        self.status = module_instance.status
-                                await asyncio.sleep(1)
-                    except GraphQLClientGraphQLMultiError as e:
-                        if e.errors[0].message == "not found":
-                            await asyncio.sleep(1)
-                        else:
-                            self.provider.logger.error(e.errors)
-                            raise e
-
-            # if typeinfo is a dict, check if it is an object, and if so, download it
-            if self.typeinfo and self.provider and self.id and isinstance(self.typeinfo, dict):
-                if (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object") or (
-                    self.typeinfo["k"] == "optional"
-                    and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
-                ):
-                    return (await self.provider.object(self.id)).url
-            return self.value
-
     def __init__(
         self,
         client: Client,
+        logger: logging.Logger,
         restore_by_default: bool = False,
         workspace: str | Path | None = None,
         batch_tags: list[str] | None = None,
-        logger: logging.Logger | None = None,
     ):
         """
         Initialize the RushProvider a graphql client.
@@ -387,30 +239,7 @@ class BaseProvider:
         self.client = client
         self.client.http_client.timeout = httpx.Timeout(60)
         self.module_paths: dict[str, str] = {}
-
-        if not logger:
-            self.logger = logging.getLogger("rush")
-            if len(self.logger.handlers) == 0:
-                stderr_handler = logging.StreamHandler()
-                stderr_handler.setLevel(logging.ERROR)
-                stderr_handler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-                )
-
-                stdout_handler = logging.StreamHandler(sys.stdout)
-                stdout_handler.setLevel(logging.INFO)
-                stdout_handler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-                )
-
-                # add filter to prevent errors from being logged twice
-                stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
-                self.logger.setLevel(logging.INFO)
-
-                self.logger.addHandler(stdout_handler)
-                self.logger.addHandler(stderr_handler)
-        else:
-            self.logger = logger
+        self.logger = logger
 
         if workspace:
             self.workspace: Path | None = Path(workspace)
@@ -685,13 +514,13 @@ class BaseProvider:
                         is_encoded = False
                         for chunk in r.iter_text():
                             if not first_chunk and not is_encoded:
-                                f.write(chunk)
+                                f.write(chunk.encode("utf-8"))
                                 continue
 
                             # handle json
                             if first_chunk:
                                 if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
-                                    f.write(chunk)
+                                    f.write(chunk.encode("utf-8"))
                                     first_chunk = False
                                     continue
                                 else:
@@ -733,10 +562,28 @@ class BaseProvider:
         :param filename: Json module version file
         """
         modules = None
+
+        async def get_latest_modules(modules: dict[str, str]):
+            async for page in await self.latest_modules():
+                for edge in page.edges:
+                    module = edge.node
+                    if module.name in modules:
+                        if module.path != modules[module.name]:
+                            self.logger.warning(
+                                f"""Module {module.name} has a different version on the server: {module.path}.
+                                Use `.update_modules()` to update the lock file"""
+                            )
+                    else:
+                        self.logger.warning(f"Module {module.path} is not in the lock file")
+
         if filepath.exists() and filepath.stat().st_size > 0:
             with open(filepath, "r") as f:
                 modules = json.load(f)
             self.module_paths = modules
+
+            # check against latest modules
+
+            asyncio_run(get_latest_modules(modules))
             return modules
         else:
             raise FileNotFoundError("Lock file not found")
@@ -755,7 +602,9 @@ class BaseProvider:
     async def run(
         self,
         path: str,
-        args: list[Arg[Any] | Argument | ArgId | Path | IOBase | Any],
+        args: """list[
+        BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | Argument | ArgId | Path | IOBase | Any
+        ]""",
         target: Target | None = None,
         resources: Resources | None = None,
         tags: list[str] | None = None,
@@ -793,9 +642,11 @@ class BaseProvider:
         storage_requirements = {"storage": 10 * 1024 * 1024}
 
         # TODO: less insane version of this
-        def gen_arg_dict(input: Provider.Arg[Any] | ArgId | UUID | Path | IOBase | Any) -> ArgumentInput:
+        def gen_arg_dict(
+            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | Path | IOBase | Any,
+        ) -> ArgumentInput:
             arg = ArgumentInput()
-            if isinstance(input, Provider.Arg):
+            if isinstance(input, BaseProvider.Arg) or isinstance(input, BaseProvider.BlockingArg):
                 if input.id is None:
                     arg.value = input.value
                 else:
@@ -964,8 +815,8 @@ class BaseProvider:
         :param names: The names of the modules.
         """
         ret = {}
-        module_pages = await self.latest_modules(names=names)
-        async for module_page in module_pages:
+        module_pages = [i async for i in await self.latest_modules(names=names)]
+        for module_page in module_pages:
             for edge in module_page.edges:
                 path = edge.node.path
                 name = get_name_from_path(edge.node.path)
@@ -1131,7 +982,12 @@ class BaseProvider:
                     run = await self.run(
                         path, list(args), target, resources, tags, out_tags=None, restore=restore
                     )
-                    return tuple(Provider.Arg(self, out.id, source=run.id) for out in run.outs)
+                    return tuple(
+                        (BaseProvider.BlockingArg if LOOP.is_running() else BaseProvider.Arg)(
+                            self, out.id, source=run.id
+                        )
+                        for out in run.outs
+                    )
 
                 runner.__name__ = name
 
@@ -1248,7 +1104,6 @@ class BaseProvider:
         after: str | None = None,
         before: str | None = None,
         pages: int | None = None,
-        print_logs: bool = True,
     ) -> AsyncIterable[str]:
         """
         Retrieve the stdout and stderr of a module instance.
@@ -1290,14 +1145,38 @@ class BaseProvider:
             {},
         ):
             for edge in page.edges:
-                if print_logs:
-                    for line in edge.node.content:
-                        print(line)
-                else:
-                    yield edge.node.content
+                yield edge.node.content
                 i += 1
                 if pages is not None and i > pages:
                     return
+
+    async def update_modules(self, names: list[str] | None = None, tags: list[str] | None = None):
+        """
+        Update the module paths in the lockfile.
+
+        :param names: Optional list of names to update.
+        :param tags: Optionally only upate modules with this tag.
+        """
+        if not self.config_dir:
+            raise Exception("No workspace provided")
+
+        if tags:
+            module_pages = await self.modules(tags=tags)
+            self.module_paths = {}
+            async for module_page in module_pages:
+                for edge in module_page.edges:
+                    path = edge.node.path
+                    name = get_name_from_path(edge.node.path)
+                    if names:
+                        if name in names and path:
+                            self.module_paths[name] = path
+                    else:
+                        self.module_paths[name] = path
+            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+        else:
+            paths = await self.get_latest_module_paths(names)
+            self.module_paths = paths
+            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
 
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -1337,6 +1216,192 @@ class BaseProvider:
 
         raise Exception("Module polling timed out")
 
+    class Arg(Generic[T]):
+        def __init__(
+            self,
+            provider: "BaseProvider | None",
+            id: UUID | None = None,
+            source: UUID | None = None,
+            value: T | None = None,
+            typeinfo: dict[str, Any] | SCALARS | None = None,
+        ):
+            self.provider = provider
+            self.id = id
+            self.source = source
+            self.status = ModuleInstanceStatus.CREATED
+            self.progress = ModuleInstanceFullProgress(n=0, n_max=0, n_expected=0, done=False)
+            self.value = value
+            self.typeinfo = typeinfo
+
+        def __repr__(self):
+            return f"Arg(id={self.id}, value={self.value})"
+
+        def __str__(self):
+            return f"Arg(id={self.id}, value={self.value})"
+
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, self.__class__):
+                return NotImplemented
+            return self.id == other.id
+
+        async def info(self) -> ArgumentArgument:
+            return await self._info()
+
+        async def _info(self) -> ArgumentArgument:
+            async def get_remote_arg(retries: int):
+                if self.id is None:
+                    raise Exception("No ID provided")
+                if self.provider is None:
+                    raise Exception("No provider provided")
+                try:
+                    remote_arg = await self.provider.argument(self.id)
+                    self.typeinfo = remote_arg.typeinfo
+                    return remote_arg
+                except GraphQLClientGraphQLMultiError as e:
+                    if e.errors[0].message == "not found":
+                        if retries > 0:
+                            if self.source:
+                                module_instance = await self.provider.module_instance(self.source)
+                                if module_instance.status != self.status:
+                                    self.provider.logger.info(
+                                        f"Argument {self.id} is now {module_instance.status}"
+                                    )
+                                    self.status = module_instance.status
+                                if module_instance.status == ModuleInstanceStatus.RUNNING:
+                                    if module_instance.progress != self.progress:
+                                        print(f"Progress: {module_instance.progress}", end="\r")
+                            await asyncio.sleep(5)
+                        else:
+                            raise e
+                    else:
+                        self.provider.logger.error(e.errors)
+                        raise e
+
+            retries = 10
+            remote_arg = await get_remote_arg(retries)
+            while remote_arg is None:
+                retries -= 1
+                remote_arg = await get_remote_arg(retries)
+            return remote_arg
+
+        async def download(
+            self,
+            filename: str | None = None,
+            filepath: Path | None = None,
+            overwrite: bool = False,
+        ):
+            return await self._download(filename, filepath, overwrite)
+
+        async def _download(
+            self,
+            filename: str | None = None,
+            filepath: Path | None = None,
+            overwrite: bool = False,
+        ):
+            if self.id is None:
+                raise Exception("No ID provided")
+            if self.provider is None:
+                raise Exception("No provider provided")
+            await self._get()
+
+            if self.typeinfo:
+                if isinstance(self.typeinfo, dict) and (
+                    (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object")
+                    or (
+                        self.typeinfo["k"] == "optional"
+                        and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
+                    )
+                ):
+                    signed = "$" in json.dumps(self.typeinfo)
+                    return await self.provider.download_object(self.id, filename, filepath, overwrite, signed)
+                else:
+                    raise Exception("Cannot download non-object argument")
+            else:
+                raise Exception("Cannot download argument without typeinfo")
+
+        async def get(self) -> T:
+            return await self._get()
+
+        async def _get(self) -> T:
+            """
+            Get the value of the argument.
+
+            This will wait until the argument is ready.
+
+            :return: The value of the argument.
+            """
+            if self.value is None or self.typeinfo is None:
+                if self.provider is None:
+                    raise Exception("No provider provided")
+                if self.id is None:
+                    raise Exception("No ID provided")
+                while self.value is None:
+                    try:
+                        remote_arg = await self._info()
+                        if remote_arg.rejected_at:
+                            if remote_arg.source:
+                                # get the failure reason by checking the source module instance
+                                module_instance = await self.provider.module_instance(remote_arg.source)
+                                raise Exception(
+                                    (
+                                        module_instance.failure_reason,
+                                        module_instance.failure_context,
+                                    )
+                                )
+                            raise Exception("Argument was rejected")
+                        else:
+                            self.value = remote_arg.value
+                            if self.value is None:
+                                source = remote_arg.source or self.source
+                                if source:
+                                    module_instance = await self.provider.module_instance(source)
+                                    if module_instance.status != self.status:
+                                        self.provider.logger.info(
+                                            f"Argument {self.id} is now {module_instance.status}"
+                                        )
+                                        self.status = module_instance.status
+                                await asyncio.sleep(1)
+                    except GraphQLClientGraphQLMultiError as e:
+                        if e.errors[0].message == "not found":
+                            await asyncio.sleep(1)
+                        else:
+                            self.provider.logger.error(e.errors)
+                            raise e
+
+            # if typeinfo is a dict, check if it is an object, and if so, download it
+            if self.typeinfo and self.provider and self.id and isinstance(self.typeinfo, dict):
+                if (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object") or (
+                    self.typeinfo["k"] == "optional"
+                    and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
+                ):
+                    return (await self.provider.object(self.id)).url
+            return self.value
+
+    class BlockingArg(Arg[T]):
+        def __init__(
+            self,
+            provider: "BaseProvider | None",
+            id: UUID | None = None,
+            source: UUID | None = None,
+            value: T | None = None,
+            typeinfo: dict[str, Any] | SCALARS | None = None,
+        ):
+            super().__init__(provider, id, source, value, typeinfo)
+
+        def get(self) -> T:
+            return asyncio_run(super().get())
+
+        def download(
+            self,
+            filename: str | None = None,
+            filepath: Path | None = None,
+            overwrite: bool = False,
+        ):
+            return asyncio_run(super().download(filename, filepath, overwrite))
+
+        def info(self) -> ArgumentArgument:
+            return asyncio_run(super().info())
+
 
 class Provider(BaseProvider):
     def __init__(
@@ -1346,7 +1411,7 @@ class Provider(BaseProvider):
         workspace: str | Path | bool | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
-        restore_by_default: bool = False,
+        restore_by_default: bool | None = None,
     ):
         """
         Initialize the RushProvider with a graphql client.
@@ -1363,6 +1428,39 @@ class Provider(BaseProvider):
         if workspace is False:
             workspace = None
 
+        if not logger:
+            logger = logging.getLogger("rush")
+            if len(logger.handlers) == 0:
+                stderr_handler = logging.StreamHandler()
+                stderr_handler.setLevel(logging.ERROR)
+                stderr_handler.setFormatter(
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                )
+
+                stdout_handler = logging.StreamHandler(sys.stdout)
+                stdout_handler.setLevel(logging.INFO)
+                stdout_handler.setFormatter(
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                )
+
+                # add filter to prevent errors from being logged twice
+                stdout_handler.addFilter(lambda record: record.levelno < logging.ERROR)
+                logger.setLevel(logging.INFO)
+
+                logger.addHandler(stdout_handler)
+                logger.addHandler(stderr_handler)
+
+        if os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
+            logger.info("Restoring by default via env")
+            restore_by_default = True
+        elif os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
+            logger.info("Not restoring by default via env")
+            restore_by_default = False
+
+        elif restore_by_default is None:
+            logger.info("Not restoring by default via default")
+            restore_by_default = False
+
         if access_token is None or url is None:
             # try to check the environment variables
 
@@ -1374,6 +1472,7 @@ class Provider(BaseProvider):
             if url is None:
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
+
             super().__init__(
                 client,
                 workspace=workspace,
@@ -1400,7 +1499,7 @@ async def build_provider_with_functions(
     module_names: list[str] | None = None,
     module_tags: list[str] | None = None,
     logger: logging.Logger | None = None,
-    restore_by_default: bool = False,
+    restore_by_default: bool | None = None,
 ) -> Provider:
     """
     Build a RushProvider with the given access token and url.
@@ -1416,4 +1515,126 @@ async def build_provider_with_functions(
     )
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
+    return provider
+
+
+def build_blocking_provider_with_functions(
+    workspace: str | Path | bool | None = None,
+    access_token: str | None = None,
+    url: str | None = None,
+    batch_tags: list[str] | None = None,
+    module_names: list[str] | None = None,
+    module_tags: list[str] | None = None,
+    logger: logging.Logger | None = None,
+    restore_by_default: bool | None = None,
+) -> Provider:
+    """
+    Build a RushProvider with the given access token and url.
+
+    :param access_token: The access token to use.
+    :param url: The url to use.
+    :param workspace: The workspace directory to use.
+    :param batch_tags: The tags that will be placed on all runs by default.
+    :return: The built RushProvider.
+    """
+    provider = Provider(
+        access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
+    )
+    if not LOOP.is_running():
+        _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
+        _LOOP_THREAD.start()
+
+    # functions that don't get called internally can be overridden with blocking versions
+    blockable_functions = ("nuke", "status", "logs", "upload", "retry", "tag")
+    built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
+    # for each async function in the provider, create a blocking version
+    blocking_versions: dict[str, Callable[..., Any]] = {}
+    for name, func in provider.__dict__.items():
+        if (
+            asyncio.iscoroutinefunction(func)
+            or inspect.iscoroutine(func)
+            or inspect.iscoroutinefunction(func)
+        ):
+
+            def closure(func):
+                def blocking_func(
+                    *args,
+                    target: Target | None = None,
+                    resources: Resources | None = None,
+                    tags: list[str] | None = None,
+                    restore: bool | None = None,
+                ):
+                    return asyncio_run(
+                        func(*args, target=target, resources=resources, tags=tags, restore=restore)
+                    )
+
+                return blocking_func
+
+            name = name if name in built_fns else f"{name}_blocking"
+            blocking_func = closure(func)
+            blocking_func.__name__ = f"{name}"
+            blocking_func.__doc__ = func.__doc__
+            blocking_func.__annotations__ = func.__annotations__
+
+            blocking_versions[name] = blocking_func
+
+    for name, func in BaseProvider.__dict__.items():
+        if (
+            asyncio.iscoroutinefunction(func)
+            or inspect.iscoroutine(func)
+            or inspect.iscoroutinefunction(func)
+        ):
+
+            def closure(func: Callable[..., Awaitable[T]]):
+                def blocking_func(*args: Any, **kwargs: Any) -> Any:
+                    r = asyncio_run(func(provider, *args, **kwargs))
+                    if isinstance(r, AsyncGenerator):
+                        res = []
+                        while True:
+                            try:
+                                res += [asyncio_run(anext(r))]
+                            except StopAsyncIteration:
+                                return res
+                    return r
+
+                return blocking_func
+
+            name = name if name in blockable_functions else f"{name}_blocking"
+            blocking_func = closure(func)
+            blocking_func.__name__ = f"{name}"
+            blocking_func.__doc__ = func.__doc__
+            blocking_func.__annotations__ = func.__annotations__
+
+            blocking_versions[name] = blocking_func
+
+    for name, func in BaseProvider.__dict__.items():
+        if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
+
+            def closure(func: Callable[..., Awaitable[T]]):
+                def blocking_func(*args: Any, **kwargs: Any) -> Any:
+                    r = func(provider, *args, **kwargs)
+                    if isinstance(r, AsyncGenerator):
+                        try:
+                            hn = asyncio_run(anext(r))
+                        except StopAsyncIteration:
+                            return
+                        while hn:
+                            yield hn
+                            try:
+                                hn = asyncio_run(anext(r))
+                            except StopAsyncIteration:
+                                return
+                    return r
+
+                return blocking_func
+
+            name = name if name in blockable_functions else f"{name}_blocking"
+            blocking_func = closure(func)
+            blocking_func.__name__ = f"{name}"
+            blocking_func.__doc__ = func.__doc__
+            blocking_func.__annotations__ = func.__annotations__
+
+            blocking_versions[name] = blocking_func
+
+    provider.__dict__.update(blocking_versions)
     return provider
