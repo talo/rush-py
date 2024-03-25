@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from io import BytesIO, StringIO
+from numbers import Number
 from pathlib import Path
 from typing import Any, Generic, Literal, TypeVar
 from uuid import UUID
@@ -241,7 +242,7 @@ class ScalarType(Generic[T], RushType[T]):
                 return (False, f"Expected {self.literal}, got {other}")
         elif not self.py_type:
             return (True, None)
-        elif isinstance(other, self.py_type):
+        elif isinstance(other, self.py_type) or (isinstance(other, Number) and self.py_type == float):
             return (True, None)
         else:
             return (False, f"Expected {self.py_type}, got {other}")
@@ -298,7 +299,7 @@ def build_typechecker(
             if not match[0]:
                 # if args are references, let the api check them
                 if "__dict__" in a.__dir__() and a.__dict__.get("id") or isinstance(a, UUID):
-                    return True
+                    continue
                 else:
                     raise Exception(f"Typecheck failed: {match[1]}")
 
