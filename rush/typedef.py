@@ -282,7 +282,7 @@ class ScalarType(Generic[T], RushType[T]):
                 return (False, f"Expected {self.literal}, got {other}")
         elif not self.py_type:
             return (True, None)
-        elif isinstance(other, self.py_type) or (isinstance(other, Number) and self.py_type == float):
+        elif isinstance(other, self.py_type) or (isinstance(other, Number) and self.py_type is float):
             return (True, None)
         else:
             return (False, f"Expected {self.py_type}, got {other}")
