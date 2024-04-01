@@ -34,7 +34,29 @@ class _RushObject(Generic[U]):
 
 
 SCALARS = Literal[
-    "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes"
+    "bool",
+    "u8",
+    "u16",
+    "u32",
+    "u64",
+    "i8",
+    "i16",
+    "i32",
+    "i64",
+    "f32",
+    "f64",
+    "string",
+    "bytes",
+    "a3m",
+    "gro",
+    "mdp",
+    "mol2",
+    "pdb",
+    "pdbqt",
+    "sdf",
+    "smi",
+    "trr",
+    "xtc",
 ]
 
 SCALAR_STRS: list[SCALARS] = [
@@ -51,8 +73,17 @@ SCALAR_STRS: list[SCALARS] = [
     "f64",
     "string",
     "bytes",
+    "a3m",
+    "gro",
+    "mdp",
+    "mol2",
+    "pdb",
+    "pdbqt",
+    "sdf",
+    "smi",
+    "trr",
+    "xtc",
 ]
-
 
 scalar_types_mapping: dict[str, type[Any]] = {
     "bool": bool,
@@ -68,8 +99,17 @@ scalar_types_mapping: dict[str, type[Any]] = {
     "f64": float,
     "string": str,
     "bytes": bytes,
+    "a3m": bytes,
+    "gro": bytes,
+    "mdp": bytes,
+    "mol2": bytes,
+    "pdb": bytes,
+    "pdbqt": bytes,
+    "sdf": bytes,
+    "smi": bytes,
+    "trr": bytes,
+    "xtc": bytes,
 }
-
 
 KINDS = Literal["array", "optional", "enum", "record", "tuple", "@"]
 
@@ -242,7 +282,7 @@ class ScalarType(Generic[T], RushType[T]):
                 return (False, f"Expected {self.literal}, got {other}")
         elif not self.py_type:
             return (True, None)
-        elif isinstance(other, self.py_type) or (isinstance(other, Number) and self.py_type == float):
+        elif isinstance(other, self.py_type) or (isinstance(other, Number) and self.py_type is float):
             return (True, None)
         else:
             return (False, f"Expected {self.py_type}, got {other}")
