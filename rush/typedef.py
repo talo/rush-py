@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from io import BytesIO, StringIO
+from numbers import Number
 from pathlib import Path
 from typing import Any, Generic, Literal, TypeVar
 from uuid import UUID
@@ -33,7 +34,29 @@ class _RushObject(Generic[U]):
 
 
 SCALARS = Literal[
-    "bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64", "string", "bytes"
+    "bool",
+    "u8",
+    "u16",
+    "u32",
+    "u64",
+    "i8",
+    "i16",
+    "i32",
+    "i64",
+    "f32",
+    "f64",
+    "string",
+    "bytes",
+    "a3m",
+    "gro",
+    "mdp",
+    "mol2",
+    "pdb",
+    "pdbqt",
+    "sdf",
+    "smi",
+    "trr",
+    "xtc",
 ]
 
 SCALAR_STRS: list[SCALARS] = [
@@ -50,8 +73,17 @@ SCALAR_STRS: list[SCALARS] = [
     "f64",
     "string",
     "bytes",
+    "a3m",
+    "gro",
+    "mdp",
+    "mol2",
+    "pdb",
+    "pdbqt",
+    "sdf",
+    "smi",
+    "trr",
+    "xtc",
 ]
-
 
 scalar_types_mapping: dict[str, type[Any]] = {
     "bool": bool,
@@ -67,8 +99,17 @@ scalar_types_mapping: dict[str, type[Any]] = {
     "f64": float,
     "string": str,
     "bytes": bytes,
+    "a3m": bytes,
+    "gro": bytes,
+    "mdp": bytes,
+    "mol2": bytes,
+    "pdb": bytes,
+    "pdbqt": bytes,
+    "sdf": bytes,
+    "smi": bytes,
+    "trr": bytes,
+    "xtc": bytes,
 }
-
 
 KINDS = Literal["array", "optional", "enum", "record", "tuple", "@"]
 
@@ -241,7 +282,7 @@ class ScalarType(Generic[T], RushType[T]):
                 return (False, f"Expected {self.literal}, got {other}")
         elif not self.py_type:
             return (True, None)
-        elif isinstance(other, self.py_type):
+        elif isinstance(other, self.py_type) or (isinstance(other, Number) and self.py_type is float):
             return (True, None)
         else:
             return (False, f"Expected {self.py_type}, got {other}")
@@ -298,7 +339,7 @@ def build_typechecker(
             if not match[0]:
                 # if args are references, let the api check them
                 if "__dict__" in a.__dir__() and a.__dict__.get("id") or isinstance(a, UUID):
-                    return True
+                    continue
                 else:
                     raise Exception(f"Typecheck failed: {match[1]}")
 
