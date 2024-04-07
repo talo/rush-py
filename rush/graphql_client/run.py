@@ -18,3 +18,7 @@ class RunRun(BaseModel):
 
 class RunRunOuts(BaseModel):
     id: UUID
+
+
+Run.model_rebuild()
+RunRun.model_rebuild()

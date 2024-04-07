@@ -29,3 +29,8 @@ class LatestModulesLatestModulesEdges(BaseModel):
 
 class LatestModulesLatestModulesEdgesNode(ModuleFull):
     pass
+
+
+LatestModules.model_rebuild()
+LatestModulesLatestModules.model_rebuild()
+LatestModulesLatestModulesEdges.model_rebuild()

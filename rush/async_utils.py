@@ -23,10 +23,20 @@ def asyncio_run(coro: Coroutine[Any, Any, T]) -> T:
     :param coro: A coroutine, typically an async method
     :param timeout: How many seconds we should wait for a result before raising an error
     """
+    try:
+        # FIXME: this is a hack to work around an annoying stall issue in Jupyter notebooks
+        __IPYTHON__
+        import nest_asyncio
+
+        nest_asyncio.apply()
+    except:
+        pass
+
     if LOOP.is_running():
         return asyncio.run_coroutine_threadsafe(coro, LOOP).result()
     elif asyncio.get_event_loop().is_running():
-        return asyncio.create_task(coro)
+        r = asyncio.run(coro)
+        return r
     else:
         try:
             return LOOP.run_until_complete(coro)

@@ -145,77 +145,8 @@ class PageInfoFull(BaseModel):
     end_cursor: Optional[str] = Field(alias="endCursor")
 
 
-class SimpleModuleInstanceCommon(BaseModel):
-    id: UUID
-    account_id: UUID
-    created_at: datetime
-    deleted_at: Optional[datetime]
-    queued_at: Optional[datetime]
-    admitted_at: Optional[datetime]
-    dispatched_at: Optional[datetime]
-    completed_at: Optional[datetime]
-    path: str
-    status: ModuleInstanceStatus
-    target: ModuleInstanceTarget
-    tags: Optional[List[str]]
-    failure_reason: Optional[ModuleFailureReason]
-    failure_context: Optional["SimpleModuleInstanceCommonFailureContext"]
-
-
-class SimpleModuleInstanceCommonFailureContext(BaseModel):
-    stdout: Optional[str]
-    stderr: Optional[str]
-    syserr: Optional[str]
-
-
-class SimpleModuleInstanceFull(SimpleModuleInstanceCommon):
-    ins: List["SimpleModuleInstanceFullIns"]
-    outs: List["SimpleModuleInstanceFullOuts"]
-    resources: Optional["SimpleModuleInstanceFullResources"]
-    progress: Optional["SimpleModuleInstanceFullProgress"]
-
-
-class SimpleModuleInstanceFullIns(BaseModel):
-    id: UUID
-    created_at: datetime
-    deleted_at: Optional[datetime]
-    rejected_at: Optional[datetime]
-    account_id: UUID
-    typeinfo: Any
-    value: Optional[Any]
-    tags: Optional[List[str]]
-
-
-class SimpleModuleInstanceFullOuts(BaseModel):
-    id: UUID
-    created_at: datetime
-    deleted_at: Optional[datetime]
-    rejected_at: Optional[datetime]
-    account_id: UUID
-    typeinfo: Any
-    value: Optional[Any]
-    tags: Optional[List[str]]
-
-
-class SimpleModuleInstanceFullResources(BaseModel):
-    gpus: Optional[int]
-    nodes: Optional[int]
-    mem: Optional[int]
-    storage: Optional[int]
-    walltime: Optional[int]
-
-
-class SimpleModuleInstanceFullProgress(BaseModel):
-    n: int
-    n_expected: int
-    n_max: int
-    done: bool
-
-
 ArgumentFull.model_rebuild()
 ModuleFull.model_rebuild()
 ModuleInstanceCommon.model_rebuild()
 ModuleInstanceFull.model_rebuild()
 PageInfoFull.model_rebuild()
-SimpleModuleInstanceCommon.model_rebuild()
-SimpleModuleInstanceFull.model_rebuild()

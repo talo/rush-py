@@ -36,6 +36,7 @@ import httpx
 from pydantic_core import to_jsonable_python
 
 from rush.graphql_client.exceptions import GraphQLClientGraphQLMultiError
+from rush.types import RushVirtualObject
 
 
 from .async_utils import start_background_loop, asyncio_run, LOOP
@@ -47,7 +48,7 @@ from .graphql_client.arguments import (
 )
 from .graphql_client.base_model import UNSET, UnsetType, Upload
 from .graphql_client.client import Client
-from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget
+from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
@@ -58,10 +59,10 @@ from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesPageInfo,
 )
 from .graphql_client.modules import ModulesModulesPageInfo
-from .graphql_client.object_contents import ObjectContentsObject
+from .graphql_client.object_contents import ObjectContentsObjectPath
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
-from .typedef import SCALARS, build_typechecker, type_from_typedef
+from .typedef import SCALARS, RushType, build_typechecker, type_from_typedef
 
 if sys.version_info >= (3, 12):
     from .types import ArgId, ModuleInstanceId, Resources, Target
@@ -502,7 +503,7 @@ class BaseProvider:
         if filepath:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
-            if obj and isinstance(obj, ObjectContentsObject):
+            if obj and isinstance(obj, ObjectContentsObjectPath):
                 json.dump(obj.contents, open(filepath, "w"))
             elif obj:
                 with httpx.stream(method="get", url=obj.url) as r:
@@ -643,7 +644,12 @@ class BaseProvider:
 
         # TODO: less insane version of this
         def gen_arg_dict(
-            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | Path | IOBase | Any,
+            input: BaseProvider.Arg[Any]
+            | BaseProvider.BlockingArg[Any]
+            | ArgId
+            | UUID
+            | RushVirtualObject
+            | Any,
         ) -> ArgumentInput:
             arg = ArgumentInput()
             if isinstance(input, BaseProvider.Arg) or isinstance(input, BaseProvider.BlockingArg):
@@ -653,19 +659,6 @@ class BaseProvider:
                     arg.id = input.id
             elif isinstance(input, ArgId):
                 arg.id = input
-            elif isinstance(input, Path):
-                storage_requirements["storage"] += input.stat().st_size
-                if input.name.endswith(".json"):
-                    with open(input, "r") as f:
-                        arg = ArgumentInput(value=json.load(f))
-                else:
-                    arg = ArgumentInput(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
-            elif isinstance(input, IOBase):
-                data = input.read()
-                # The only other case is bytes-like, i.e. isinstance(data, (bytes, bytearray))
-                if isinstance(data, str):
-                    data = data.encode("utf-8")
-                arg = ArgumentInput(value=base64.b64encode(data).decode("utf-8"))
             else:
                 arg = ArgumentInput(value=input)
             return arg
@@ -947,8 +940,6 @@ class BaseProvider:
             in_types = tuple(type_from_typedef(i) for i in module.ins)
             out_types = tuple(type_from_typedef(i) for i in module.outs)
 
-            typechecker = build_typechecker(*in_types)
-
             def random_target():
                 allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
                 if "NIX_SSH_3" in str(module.targets) or "NIX_SSH_3_GPU" in str(module.targets):
@@ -966,9 +957,12 @@ class BaseProvider:
             def closure(
                 name: str,
                 path: str,
-                typechecker: Any,
+                module_ins: list[Any],
                 default_resources: Resources | None,
             ):
+                in_types = tuple(type_from_typedef(i) for i in module_ins)
+                typechecker = build_typechecker(*in_types)
+
                 async def runner(
                     *args: Any,
                     target: Target | None = None,
@@ -976,6 +970,7 @@ class BaseProvider:
                     tags: list[str] | None = None,
                     restore: bool | None = None,
                 ):
+                    args = await self.upload_args(args, module_ins)
                     if target is None:
                         target = random_target()
                     typechecker(*args)
@@ -1051,10 +1046,33 @@ class BaseProvider:
 
                 return runner
 
-            runner = closure(name, path, typechecker, default_resources)
+            runner = closure(name, path, module.ins, default_resources)
             self.__setattr__(name, runner)
             ret[name] = runner
         return ret
+
+    async def upload_args(
+        self,
+        args: tuple[Any, ...],
+        in_types: list[Any],
+    ) -> tuple[Any, ...]:
+        """
+        Walk through input types and for any that are files, upload them.
+        Replace the file with the uploaded object in the arg list and return the list.
+
+        :param args: The arguments to be uploaded.
+        :param in_types: The types of the arguments.
+
+        :return: Arguments with files replaced with virtual objects.
+        """
+        newargs = []
+        for i, arg in enumerate(args):
+            if isinstance(arg, Path):
+                obj = await self.upload(arg, in_types[i])
+                newargs.append(obj.object)
+            else:
+                newargs.append(arg)
+        return tuple(newargs)
 
     async def retry(
         self,
@@ -1073,7 +1091,7 @@ class BaseProvider:
     async def upload(
         self,
         file: Path | str,
-        typeinfo: dict[str, Any],
+        typeinfo: dict[str, Any] | RushType[Any],
     ):
         """
         Upload an Object with typeinfo and store as an Argument.
@@ -1081,10 +1099,14 @@ class BaseProvider:
         :param file: The file to be uploaded.
         :param typeinfo: The typeinfo of the file.
         """
+        if isinstance(file, str):
+            file = Path(file)
         with open(file, "rb") as f:
-            return await self.client.upload_arg(
+            format = ObjectFormat.JSON if file.suffix == ".json" else ObjectFormat.BIN
+            return await self.client.upload_object(
                 typeinfo=typeinfo,
-                file=Upload(filename=f.name, content=f, content_type="application/octet-stream"),
+                format=format,
+                file=Upload(filename=f.name, content=f, content_type="application/text"),
             )
 
     async def module_instance(self, id: ModuleInstanceId) -> ModuleInstanceDetailsModuleInstance:
@@ -1540,12 +1562,12 @@ def build_blocking_provider_with_functions(
     provider = Provider(
         access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
     )
-    if not LOOP.is_running():
+    if not LOOP.is_running() and not asyncio.get_event_loop().is_running():
         _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
         _LOOP_THREAD.start()
 
     # functions that don't get called internally can be overridden with blocking versions
-    blockable_functions = ("nuke", "status", "logs", "upload", "retry", "tag")
+    blockable_functions = ("nuke", "status", "logs", "retry", "tag")
     built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
@@ -1556,7 +1578,7 @@ def build_blocking_provider_with_functions(
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closure(func):
+            def closure(func, n):
                 def blocking_func(
                     *args,
                     target: Target | None = None,
@@ -1571,7 +1593,7 @@ def build_blocking_provider_with_functions(
                 return blocking_func
 
             name = name if name in built_fns else f"{name}_blocking"
-            blocking_func = closure(func)
+            blocking_func = closure(func, name)
             blocking_func.__name__ = f"{name}"
             blocking_func.__doc__ = func.__doc__
             blocking_func.__annotations__ = func.__annotations__
@@ -1585,7 +1607,7 @@ def build_blocking_provider_with_functions(
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closure(func: Callable[..., Awaitable[T]]):
+            def closure(func: Callable[..., Awaitable[T]], n):
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     r = asyncio_run(func(provider, *args, **kwargs))
                     if isinstance(r, AsyncGenerator):
@@ -1600,7 +1622,7 @@ def build_blocking_provider_with_functions(
                 return blocking_func
 
             name = name if name in blockable_functions else f"{name}_blocking"
-            blocking_func = closure(func)
+            blocking_func = closure(func, name)
             blocking_func.__name__ = f"{name}"
             blocking_func.__doc__ = func.__doc__
             blocking_func.__annotations__ = func.__annotations__
@@ -1610,7 +1632,7 @@ def build_blocking_provider_with_functions(
     for name, func in BaseProvider.__dict__.items():
         if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
 
-            def closure(func: Callable[..., Awaitable[T]]):
+            def closure(func: Callable[..., Awaitable[T]], n):
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     r = func(provider, *args, **kwargs)
                     if isinstance(r, AsyncGenerator):
@@ -1629,7 +1651,7 @@ def build_blocking_provider_with_functions(
                 return blocking_func
 
             name = name if name in blockable_functions else f"{name}_blocking"
-            blocking_func = closure(func)
+            blocking_func = closure(func, name)
             blocking_func.__name__ = f"{name}"
             blocking_func.__doc__ = func.__doc__
             blocking_func.__annotations__ = func.__annotations__

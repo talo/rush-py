@@ -29,3 +29,8 @@ class ModulesModulesEdges(BaseModel):
 
 class ModulesModulesEdgesNode(ModuleFull):
     pass
+
+
+Modules.model_rebuild()
+ModulesModules.model_rebuild()
+ModulesModulesEdges.model_rebuild()

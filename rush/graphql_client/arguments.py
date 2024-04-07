@@ -37,3 +37,10 @@ class ArgumentsMeAccountArgumentsEdges(BaseModel):
 
 class ArgumentsMeAccountArgumentsEdgesNode(ArgumentFull):
     pass
+
+
+Arguments.model_rebuild()
+ArgumentsMe.model_rebuild()
+ArgumentsMeAccount.model_rebuild()
+ArgumentsMeAccountArguments.model_rebuild()
+ArgumentsMeAccountArgumentsEdges.model_rebuild()
