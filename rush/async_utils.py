@@ -25,11 +25,11 @@ def asyncio_run(coro: Coroutine[Any, Any, T]) -> T:
     """
     try:
         # FIXME: this is a hack to work around an annoying stall issue in Jupyter notebooks
-        __IPYTHON__
+        __IPYTHON__  # noqa: F821
         import nest_asyncio
 
         nest_asyncio.apply()
-    except:
+    except Exception:
         pass
 
     if LOOP.is_running():

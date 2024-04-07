@@ -36,7 +36,6 @@ import httpx
 from pydantic_core import to_jsonable_python
 
 from rush.graphql_client.exceptions import GraphQLClientGraphQLMultiError
-from rush.types import RushVirtualObject
 
 
 from .async_utils import start_background_loop, asyncio_run, LOOP
@@ -68,6 +67,12 @@ if sys.version_info >= (3, 12):
     from .types import ArgId, ModuleInstanceId, Resources, Target
 else:
     from .legacy_types import ArgId, ModuleInstanceId, Resources, Target
+
+
+class RushVirtualObject:
+    path: str
+    size: int
+    format: ObjectFormat
 
 
 @dataclass
@@ -937,7 +942,6 @@ class BaseProvider:
         for name, module in sorted(modules):
             path = module.path
 
-            in_types = tuple(type_from_typedef(i) for i in module.ins)
             out_types = tuple(type_from_typedef(i) for i in module.outs)
 
             def random_target():

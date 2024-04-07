@@ -2,7 +2,7 @@ from typing import Any, TypeVar
 from typing import Optional as _Optional
 from uuid import UUID
 
-from .graphql_client.enums import ModuleInstanceTarget, ObjectFormat
+from .graphql_client.enums import ModuleInstanceTarget
 from .graphql_client.input_types import ModuleInstanceResourcesInput
 
 type Target = ModuleInstanceTarget | str
@@ -25,9 +25,3 @@ class _RushObject[U]:
 
 
 type RushObject[U] = _RushObject[U]
-
-
-class RushVirtualObject:
-    path: str
-    size: int
-    format: ObjectFormat
