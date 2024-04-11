@@ -247,6 +247,8 @@ class BaseProvider:
         self.module_paths: dict[str, str] = {}
         self.logger = logger
 
+        self.__is_blocking__ = False
+
         if workspace:
             self.workspace: Path | None = Path(workspace)
             if not self.workspace.exists():
@@ -456,7 +458,7 @@ class BaseProvider:
             },
         )
 
-    async def object(self, id: ArgId):
+    async def object(self, path: UUID):
         """
         Retrieve an object from the database.
 
@@ -467,7 +469,7 @@ class BaseProvider:
         retries = 3
         while retries > 0:
             try:
-                return await self.client.object_url(id)
+                return await self.client.object_url(path)
             except Exception as e:
                 retries -= 1
                 if retries == 0:
@@ -477,11 +479,12 @@ class BaseProvider:
 
     async def download_object(
         self,
-        id: ArgId,
+        path: UUID,
         filename: str | None = None,
         filepath: Path | None = None,
         overwrite: bool = False,
         signed: bool = True,
+        decode: bool = False,
     ):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
@@ -490,13 +493,13 @@ class BaseProvider:
         :param filepath: Where to download the object.
         :param filename: Download to the workspace with this name under "objects".
         """
-        obj = (await self.object(id)) if signed else (await self.client.object_contents(id))
+        obj = (await self.object(path)) if signed else (await self.client.object_contents(path))
         if not obj:
             return None
 
         if filepath is None:
             if filename is None:
-                filename = str(id)
+                filename = str(path)
             if filename and self.workspace:
                 if not (self.workspace / "objects").exists():
                     (self.workspace / "objects").mkdir()
@@ -525,7 +528,7 @@ class BaseProvider:
 
                             # handle json
                             if first_chunk:
-                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
+                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{") or not decode:
                                     f.write(chunk.encode("utf-8"))
                                     first_chunk = False
                                     continue
@@ -982,7 +985,7 @@ class BaseProvider:
                         path, list(args), target, resources, tags, out_tags=None, restore=restore
                     )
                     return tuple(
-                        (BaseProvider.BlockingArg if LOOP.is_running() else BaseProvider.Arg)(
+                        (BaseProvider.BlockingArg if self.__is_blocking__ else BaseProvider.Arg)(
                             self, out.id, source=run.id
                         )
                         for out in run.outs
@@ -1294,7 +1297,10 @@ class BaseProvider:
                                     )
                                     self.status = module_instance.status
                                 if module_instance.status == ModuleInstanceStatus.RUNNING:
-                                    if module_instance.progress != self.progress:
+                                    if (
+                                        module_instance.progress
+                                        and module_instance.progress.n != self.progress.n
+                                    ):
                                         print(f"Progress: {module_instance.progress}", end="\r")
                             await asyncio.sleep(5)
                         else:
@@ -1339,7 +1345,10 @@ class BaseProvider:
                     )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
-                    return await self.provider.download_object(self.id, filename, filepath, overwrite, signed)
+                    decode = not (self.value and dict.get(self.value, "format") == "Bin")
+                    return await self.provider.download_object(
+                        self.value["path"], filename, filepath, overwrite, signed, decode
+                    )
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -1400,7 +1409,7 @@ class BaseProvider:
                     self.typeinfo["k"] == "optional"
                     and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
                 ):
-                    return (await self.provider.object(self.id)).url
+                    return (await self.provider.object(self.value["path"])).url
             return self.value
 
     class BlockingArg(Arg[T]):
@@ -1663,4 +1672,5 @@ def build_blocking_provider_with_functions(
             blocking_versions[name] = blocking_func
 
     provider.__dict__.update(blocking_versions)
+    provider.__is_blocking__ = True
     return provider
