@@ -1,10 +1,19 @@
 type Account {
   id: AccountId!
-  tier: AccountType!
-  config: JSON
   created_at: DateTime!
-
-  # Get a summary of resources utilization for the account
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tier: AccountTier!
+  config: AccountConfig
+  object_descriptor(id: ObjectDescriptorId!): ObjectDescriptor!
+  object_descriptors(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ObjectDescriptorFilter
+    sort_by: ObjectDescriptorSortBy
+  ): ObjectDescriptorConnection!
   resource_utilization(
     from: DateTime
     to: DateTime
@@ -57,91 +66,39 @@ type Account {
     order: OrderBy
     contains: String
   ): TagConnection!
-  entities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: EntityFilterBy
-    sort: EntitySortBy
-  ): EntityConnection!
-  experiments(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ExperimentFilterBy
-    sort: ExperimentSortBy
-  ): ExperimentConnection!
-  projects(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProjectFilterBy
-    sort: ProjectSortBy
-  ): ProjectConnection!
-  proteins(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinFilterBy
-    sort: ProteinSortBy
-  ): ProteinConnection!
-  protein_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinConformerFilterBy
-    sort: ProteinConformerSortBy
-  ): ProteinConformerConnection!
-  smols(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolFilterBy
-    sort: SmolSortBy
-  ): SmolConnection!
-  smol_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolConformerFilterBy
-    sort: SmolConformerSortBy
-  ): SmolConformerConnection!
-  smol_tautomers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolTautomerFilterBy
-    sort: SmolTautomerSortBy
-  ): SmolTautomerConnection!
-  structures(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: StructureFilterBy
-    sort: StructureSortBy
-  ): StructureConnection!
+}
+
+type AccountBucketConfig {
+  data_bucket: String!
+  log_bucket: String!
+  bucket_region: String!
+}
+
+input AccountBucketConfigInput {
+  data_bucket: String!
+  log_bucket: String!
+  bucket_region: String!
+}
+
+type AccountConfig {
+  config_account: AccountId
+  bucket_config: AccountBucketConfig
+}
+
+input AccountConfigInput {
+  config_account: AccountId
+  bucket_config: AccountBucketConfigInput
 }
 
 scalar AccountId
 
-enum AccountType {
+enum AccountTier {
   FREE
   PRO
   STARTUP
   ACADEMIC
   ENTERPRISE
 }
-
-scalar Alt
 
 type Argument {
   id: ArgumentId!
@@ -187,68 +144,19 @@ input ArgumentInput {
   value: JSON
 }
 
-scalar Bond
-
-input CreateExperimentInput {
-  name: String!
-  data: ExperimentDataInput!
-  project_id: UUID!
-  smol_id: UUID!
-  protein_id: UUID!
-  tags: [String!]!
-}
-
-input CreateProjectInput {
-  name: String!
-  tags: [String!]!
-}
-
-input CreateProteinConformerInput {
+input CreateProject {
+  account_id: AccountId!
   name: String
-  project_id: UUID!
-  protein_id: UUID!
-  structure_id: UUID!
-  tags: [String!]!
+  description: String
+  tags: [String!]
 }
 
-input CreateProteinInput {
-  name: String!
+input CreateProtein {
   sequence: String!
-  project_id: UUID!
-  protein_id: UUID
-  tags: [String!]!
-}
-
-input CreateSmolConformerInput {
+  project_id: ProjectId!
   name: String
-  smol_id: UUID!
-  smol_tautomer_id: UUID!
-  structure_id: UUID!
-  project_id: UUID!
-  tags: [String!]!
-}
-
-input CreateSmolInput {
-  name: String!
-  data: SmolDataInput!
-  project_id: UUID!
-  tags: [String!]!
-}
-
-input CreateSmolTautomerInput {
-  name: String
-  data: SmolTautomerDataInput!
-  smol_id: UUID!
-  project_id: UUID!
-  tags: [String!]!
-}
-
-input CreateStructureInput {
-  name: String!
-  topology: TopologyInput!
-  project_id: UUID!
-  trajectory_id: UUID
-  tags: [String!]!
+  description: String
+  tags: [String!]
 }
 
 # Implement the DateTime<Utc> scalar
@@ -263,249 +171,6 @@ input DateTimeFilter {
   ge: DateTime
   lt: DateTime
   le: DateTime
-}
-
-enum Element {
-  H
-  HE
-  LI
-  BE
-  B
-  C
-  N
-  O
-  F
-  NE
-  NA
-  MG
-  AL
-  SI
-  P
-  S
-  CL
-  AR
-  K
-  CA
-  SC
-  TI
-  V
-  CR
-  MN
-  FE
-  CO
-  NI
-  CU
-  ZN
-  GA
-  GE
-  AS
-  SE
-  BR
-  KR
-  RB
-  SR
-  Y
-  ZR
-  NB
-  MO
-  TC
-  RU
-  RH
-  PD
-  AG
-  CD
-  IN
-  SN
-  SB
-  TE
-  I
-  XE
-  CS
-  BA
-  LA
-  CE
-  PR
-  ND
-  PM
-  SM
-  EU
-  GD
-  TB
-  DY
-  HO
-  ER
-  TM
-  YB
-  LU
-  HF
-  TA
-  W
-  RE
-  OS
-  IR
-  PT
-  AU
-  HG
-  TL
-  PB
-  BI
-  PO
-  AT
-  RN
-  FR
-  RA
-  AC
-  TH
-  PA
-  U
-  NP
-  PU
-  AM
-  CM
-  BK
-  CF
-  ES
-  FM
-  MD
-  NO
-  LR
-  RF
-  DB
-  SG
-  BH
-  HS
-  MT
-  DS
-  RG
-  CN
-  NH
-  FL
-  MC
-  LV
-  TS
-  OG
-}
-
-type Entity {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: JSON
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type EntityConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [EntityEdge!]!
-
-  # A list of nodes.
-  nodes: [Entity!]!
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type EntityEdge {
-  # The item at the end of the edge
-  node: Entity!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input EntityFilterBy {
-  and: [EntityFilterBy!]
-  or: [EntityFilterBy!]
-  not: EntityFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-}
-
-scalar EntityId
-
-input EntitySortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
-
-type Experiment {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: ExperimentData
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type ExperimentConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ExperimentEdge!]!
-
-  # A list of nodes.
-  nodes: [Experiment!]!
-  totalCount: Int!
-}
-
-type ExperimentData {
-  name: String!
-  unit: String!
-  measure: String!
-  value: Float!
-  assay: String!
-}
-
-input ExperimentDataInput {
-  unit: String!
-  measure: String!
-  value: Float!
-  assay: String!
-}
-
-# An edge in a connection.
-type ExperimentEdge {
-  # The item at the end of the edge
-  node: Experiment!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input ExperimentFilterBy {
-  and: [ExperimentFilterBy!]
-  or: [ExperimentFilterBy!]
-  not: ExperimentFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-}
-
-input ExperimentSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
 }
 
 type GlobalStatus {
@@ -538,8 +203,19 @@ type GlobalStatusEdge {
 # A scalar that can represent any JSON value.
 scalar JSON
 
+input Jsonfilter {
+  eq: JsonobjectFilter
+  ne: JsonobjectFilter
+}
+
+input JsonobjectFilter {
+  key: String!
+  value: String!
+}
+
 type LogEntry {
   id: String!
+  part: Int!
   created_at: DateTime!
   content: [String!]!
 }
@@ -572,6 +248,14 @@ enum MemUnits {
   MB
   GB
   TB
+}
+
+input MetadataSortBy {
+  created_at: Order
+  updated_at: Order
+  deleted_at: Order
+  name: Order
+  description: Order
 }
 
 type Module {
@@ -732,6 +416,9 @@ type ModuleInstance {
 
   # Tags applied to the module instance
   tags: [String!]
+
+  # Runtime account that the module instance is configured to use
+  config_account: AccountId
   module: Module!
   stdout(
     after: String
@@ -982,6 +669,11 @@ type Mutation {
     argument: ArgumentId
     tags: [String!]!
   ): [String!]!
+  upload_object(
+    file: Upload!
+    typeinfo: JSON!
+    format: ObjectFormat!
+  ): ObjectDescriptor!
   upload_arg(
     typeinfo: JSON!
     tags: [String!]
@@ -1018,31 +710,87 @@ type Mutation {
     value: JSON!
   ): Argument!
   create_token: Token!
-  create_entity(entity: RawEntityInput!): Entity!
-  create_experiment(input: CreateExperimentInput!): Experiment!
-  create_project(input: CreateProjectInput!): Project!
-  create_protein(input: CreateProteinInput!): Protein!
-  create_protein_conformer(
-    input: CreateProteinConformerInput!
-  ): ProteinConformer!
-  create_smol(input: CreateSmolInput!): Smol!
-  create_smol_conformer(input: CreateSmolConformerInput!): SmolConformer!
-  create_smol_tautomer(input: CreateSmolTautomerInput!): SmolTautomer!
-  create_structure(input: CreateStructureInput!): Structure!
+  create_project(input: CreateProject!): Project!
+  create_protein(input: CreateProtein!): Protein!
+  update_account_config(
+    account_id: AccountId!
+    input: AccountConfigInput!
+  ): AccountConfig!
+  update_account_tier(
+    account_id: AccountId!
+    tier: AccountTier!
+  ): AccountConfig!
 }
 
 type Object {
-  id: ArgumentId!
+  id: ObjectDescriptorId!
+  contents: JSON!
+  url: String!
+}
+
+type ObjectDescriptor {
+  id: ObjectDescriptorId!
+  object: VirtualObject!
+  type_info: Type!
+  base_url: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
   name: String
-  created_at: DateTime!
-  deleted_at: DateTime
-  rejected_at: DateTime
-  resolved_at: DateTime
-  account_id: AccountId!
-  typeinfo: Type!
-  value: JSON
-  tags: [String!]
-  source: ModuleInstanceId
+  description: String
+  tags: [String!]!
+}
+
+type ObjectDescriptorConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ObjectDescriptorEdge!]!
+
+  # A list of nodes.
+  nodes: [ObjectDescriptor!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type ObjectDescriptorEdge {
+  # The item at the end of the edge
+  node: ObjectDescriptor!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input ObjectDescriptorFilter {
+  all: [ObjectDescriptorFilter!]
+  any: [ObjectDescriptorFilter!]
+  id: UuidFilter
+  object: Jsonfilter
+  base_url: StringFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeFilter
+  deleted_at: DateTimeFilter
+  name: StringFilter
+  description: StringFilter
+}
+
+scalar ObjectDescriptorId
+
+input ObjectDescriptorSortBy {
+  id: Order
+  base_url: Order
+  account_id: Order
+  metadata: MetadataSortBy
+}
+
+enum ObjectFormat {
+  JSON
+  BIN
+}
+
+type ObjectPath {
+  path: UUID!
   contents: JSON!
   url: String!
 }
@@ -1073,231 +821,29 @@ type PageInfo {
 }
 
 type Project {
-  id: EntityId!
+  id: ProjectId!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: ProjectData
-
-  # User-defined tags.
+  name: String
+  description: String
   tags: [String!]!
-  experiments(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ExperimentFilterBy
-    sort: ExperimentSortBy
-  ): ExperimentConnection!
-  proteins(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinFilterBy
-    sort: ProteinSortBy
-  ): ProteinConnection!
-  protein_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinConformerFilterBy
-    sort: ProteinConformerSortBy
-  ): ProteinConformerConnection!
-  smols(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolFilterBy
-    sort: SmolSortBy
-  ): SmolConnection!
-  smol_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolConformerFilterBy
-    sort: SmolConformerSortBy
-  ): SmolConformerConnection!
-  smol_tautomers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolTautomerFilterBy
-    sort: SmolTautomerSortBy
-  ): SmolTautomerConnection!
-  structures(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: StructureFilterBy
-    sort: StructureSortBy
-  ): StructureConnection!
 }
 
-type ProjectConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ProjectEdge!]!
-
-  # A list of nodes.
-  nodes: [Project!]!
-  totalCount: Int!
-}
-
-type ProjectData {
-  name: String!
-}
-
-# An edge in a connection.
-type ProjectEdge {
-  # The item at the end of the edge
-  node: Project!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input ProjectFilterBy {
-  and: [ProjectFilterBy!]
-  or: [ProjectFilterBy!]
-  not: ProjectFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-}
-
-input ProjectSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
+scalar ProjectId
 
 type Protein {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: ProteinData
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type ProteinConformer {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: ProteinConformerData
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type ProteinConformerConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ProteinConformerEdge!]!
-
-  # A list of nodes.
-  nodes: [ProteinConformer!]!
-  totalCount: Int!
-}
-
-type ProteinConformerData {
-  name: String
-}
-
-# An edge in a connection.
-type ProteinConformerEdge {
-  # The item at the end of the edge
-  node: ProteinConformer!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input ProteinConformerFilterBy {
-  and: [ProteinConformerFilterBy!]
-  or: [ProteinConformerFilterBy!]
-  not: ProteinConformerFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-}
-
-input ProteinConformerSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
-
-type ProteinConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ProteinEdge!]!
-
-  # A list of nodes.
-  nodes: [Protein!]!
-  totalCount: Int!
-}
-
-type ProteinData {
+  id: ProteinId!
   sequence: String!
-  name: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  name: String
+  description: String
+  tags: [String!]!
 }
 
-# An edge in a connection.
-type ProteinEdge {
-  # The item at the end of the edge
-  node: Protein!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input ProteinFilterBy {
-  and: [ProteinFilterBy!]
-  or: [ProteinFilterBy!]
-  not: ProteinFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-}
-
-input ProteinSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
+scalar ProteinId
 
 type Query {
   modules(
@@ -1357,24 +903,8 @@ type Query {
   module(id: ModuleId!): Module!
   module_instance(id: ModuleInstanceId!): ModuleInstance!
   argument(id: ArgumentId!): Argument!
-  object(id: ArgumentId!): Object
-  entity(id: UUID!): Entity
-  experiment(id: UUID!): Experiment
-  project(id: UUID!): Project
-  protein(id: UUID!): Protein
-  protein_conformer(id: UUID!): ProteinConformer
-  smol(id: UUID!): Smol
-  smol_conformer(id: UUID!): SmolConformer
-  smol_tautomer(id: UUID!): SmolTautomer
-  structure(id: UUID!): Structure
-}
-
-input RawEntityInput {
-  # System-defined data that is directly accessible to users.
-  data: JSON
-
-  # User-defined tags.
-  tags: [String!]!
+  object(id: ObjectDescriptorId!): Object!
+  object_path(path: UUID!): ObjectPath!
 }
 
 type ResourceUtilization {
@@ -1529,6 +1059,9 @@ type SimpleModuleInstance {
 
   # Tags applied to the module instance
   tags: [String!]
+
+  # Runtime account that the module instance is configured to use
+  config_account: AccountId
 }
 
 type SimpleModuleInstanceConnection {
@@ -1550,190 +1083,6 @@ type SimpleModuleInstanceEdge {
 
   # A cursor for use in pagination
   cursor: String!
-}
-
-type Smol {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: SmolData
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type SmolConformer {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: SmolConformerData
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type SmolConformerConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [SmolConformerEdge!]!
-
-  # A list of nodes.
-  nodes: [SmolConformer!]!
-  totalCount: Int!
-}
-
-type SmolConformerData {
-  name: String
-}
-
-# An edge in a connection.
-type SmolConformerEdge {
-  # The item at the end of the edge
-  node: SmolConformer!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input SmolConformerFilterBy {
-  and: [SmolConformerFilterBy!]
-  or: [SmolConformerFilterBy!]
-  not: SmolConformerFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-}
-
-input SmolConformerSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
-
-type SmolConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [SmolEdge!]!
-
-  # A list of nodes.
-  nodes: [Smol!]!
-  totalCount: Int!
-}
-
-type SmolData {
-  name: String!
-  smi: String
-  inchi: String!
-}
-
-input SmolDataInput {
-  smi: String
-  inchi: String!
-}
-
-# An edge in a connection.
-type SmolEdge {
-  # The item at the end of the edge
-  node: Smol!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input SmolFilterBy {
-  and: [SmolFilterBy!]
-  or: [SmolFilterBy!]
-  not: SmolFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-  smol_name: StringFilter
-}
-
-input SmolSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
-
-type SmolTautomer {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: SmolTautomerData
-
-  # User-defined tags.
-  tags: [String!]!
-}
-
-type SmolTautomerConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [SmolTautomerEdge!]!
-
-  # A list of nodes.
-  nodes: [SmolTautomer!]!
-  totalCount: Int!
-}
-
-type SmolTautomerData {
-  inchi: String!
-  name: String
-}
-
-input SmolTautomerDataInput {
-  inchi: String!
-}
-
-# An edge in a connection.
-type SmolTautomerEdge {
-  # The item at the end of the edge
-  node: SmolTautomer!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input SmolTautomerFilterBy {
-  and: [SmolTautomerFilterBy!]
-  or: [SmolTautomerFilterBy!]
-  not: SmolTautomerFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-}
-
-input SmolTautomerSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
 }
 
 type StatusByAccount {
@@ -1833,66 +1182,6 @@ input StringFilter {
   not_in: [String!]
 }
 
-type Structure {
-  id: EntityId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-
-  # System-defined data that is directly accessible to users.
-  data: StructureData
-
-  # User-defined tags.
-  tags: [String!]!
-  topology: Topology!
-  signed_url: String!
-}
-
-type StructureConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [StructureEdge!]!
-
-  # A list of nodes.
-  nodes: [Structure!]!
-  totalCount: Int!
-}
-
-type StructureData {
-  name: String!
-  topology: TopologyObject!
-}
-
-# An edge in a connection.
-type StructureEdge {
-  # The item at the end of the edge
-  node: Structure!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input StructureFilterBy {
-  and: [StructureFilterBy!]
-  or: [StructureFilterBy!]
-  not: StructureFilterBy
-  id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  tags: TagFilter
-  project_id: UuidFilter
-}
-
-input StructureSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-}
-
 type Subscription {
   stream(argumentId: ArgumentId!): JSON!
 }
@@ -1922,11 +1211,6 @@ type TagEdge {
 
   # A cursor for use in pagination
   cursor: String!
-}
-
-input TagFilter {
-  all: [String!]
-  any: [String!]
 }
 
 input TestCase {
@@ -1964,15 +1248,13 @@ type TokenEdge {
   cursor: String!
 }
 
-input TokenFilterBy {
-  and: [TokenFilterBy!]
-  or: [TokenFilterBy!]
-  not: TokenFilterBy
+input TokenFilter {
+  all: [TokenFilter!]
+  any: [TokenFilter!]
   id: UuidFilter
   created_at: DateTimeFilter
   updated_at: DateTimeFilter
   deleted_at: DateTimeFilter
-  tags: TagFilter
 }
 
 scalar TokenId
@@ -1982,194 +1264,7 @@ input TokenSortBy {
   created_at: Order
   updated_at: Order
   deleted_at: Order
-}
-
-# An structure-of-arrays based representation of coordinates, charges and bonds between atoms, with utilty functions to manipulate them.
-# # Example
-# ```
-# use qdx_common::{Bond, Topology, TopologyVersion};
-# use qdx_common::element::Element;
-# Topology {
-# version: Some(TopologyVersion::V1),
-# symbols: vec![Element::H, Element::O, Element::H],
-# geometry: vec![0.0,0.0,0.0,
-# 1.0,0.0,0.0,
-# 1.0,1.0,0.0],
-# connectivity: Some(vec![Bond(0,1,1), Bond(1,2,1)]),
-# formal_charges: Some(vec![0,0,0]),
-# fragments: Some(vec![vec![0,1,2]]),
-# fragment_formal_charges: Some(vec![0]),
-# fragment_partial_charges: Some(vec![0.0]),
-# fragment_multiplicities: Some(vec![1]),
-# ..Default::default()
-# };
-# /* JSON
-# {
-# "symbols": ["H", "O", "H"],
-# "geometry": [0.0,0.0,0.0,
-# 1.0,0.0,0.0,
-# 1.0,1.0,0.0],
-# "connectivity": [[0,1,1], [1,2,1]],
-# "charges": [0,0,0],
-# "fragments": [[0,1,2]],
-# "fragment_formal_charges": [0]
-# "fragment_partial_charges": [0]
-# "fragment_multiplicities": [1]
-# }
-# */
-# ```
-type Topology {
-  version: TopologyVersion
-
-  # Atomic symbols of elements
-  symbols: [Element!]!
-
-  # Flat vector of X,Y,Z coordinates for atoms in Angstroms
-  geometry: [Float!]!
-
-  # Contains the x, y, z components of initial atom velocities in Angstroms/ps
-  # V1 only
-  velocities: [Float!]
-
-  # Bonds between atoms
-  connectivity: [Bond!]
-
-  # Formal charges for each atom
-  # V0 version was atom_charges
-  formal_charges: [Int!]
-
-  # DEPRECATED please upgrade to V1 and use formal_charges instead
-  # Formal charges for each atom
-  atom_charges: [Int!]
-
-  # Contains the Mulliken partial charges for each of the atoms
-  partial_charges: [Float!]
-
-  # Mapping of atoms to their label
-  # V0 version was atom_labels
-  labels: [String!]
-
-  # DEPRECATED please upgrade to V1 and use labels instead
-  # Mapping of atoms to their label
-  atom_labels: [String!]
-
-  # A list of fragments, where each fragment is a list of atom indices
-  fragments: [[Int!]!]
-
-  # A list of sums of all atom formal charges for each fragment
-  # V0 version was fragment_charges
-  fragment_formal_charges: [Int!]
-
-  # DEPRECATED please upgrade to V1 and use fragment_formal_charges instead
-  # A list of sums of all atom formal charges for each fragment
-  fragment_charges: [Int!]
-
-  # A list of sums of all atom partial charges for each fragment
-  fragment_partial_charges: [Float!]
-
-  # A list of multiplicities for each fragment. Fragment multiplicity is a measure
-  # of the energy level of a fragment, and is related to the number of unpaired electrons within the fragment
-  fragment_multiplicities: [Int!]
-  alts: [Alt!]
-}
-
-# An structure-of-arrays based representation of coordinates, charges and bonds between atoms, with utilty functions to manipulate them.
-# # Example
-# ```
-# use qdx_common::{Bond, Topology, TopologyVersion};
-# use qdx_common::element::Element;
-# Topology {
-# version: Some(TopologyVersion::V1),
-# symbols: vec![Element::H, Element::O, Element::H],
-# geometry: vec![0.0,0.0,0.0,
-# 1.0,0.0,0.0,
-# 1.0,1.0,0.0],
-# connectivity: Some(vec![Bond(0,1,1), Bond(1,2,1)]),
-# formal_charges: Some(vec![0,0,0]),
-# fragments: Some(vec![vec![0,1,2]]),
-# fragment_formal_charges: Some(vec![0]),
-# fragment_partial_charges: Some(vec![0.0]),
-# fragment_multiplicities: Some(vec![1]),
-# ..Default::default()
-# };
-# /* JSON
-# {
-# "symbols": ["H", "O", "H"],
-# "geometry": [0.0,0.0,0.0,
-# 1.0,0.0,0.0,
-# 1.0,1.0,0.0],
-# "connectivity": [[0,1,1], [1,2,1]],
-# "charges": [0,0,0],
-# "fragments": [[0,1,2]],
-# "fragment_formal_charges": [0]
-# "fragment_partial_charges": [0]
-# "fragment_multiplicities": [1]
-# }
-# */
-# ```
-input TopologyInput {
-  version: TopologyVersion
-
-  # Atomic symbols of elements
-  symbols: [Element!]!
-
-  # Flat vector of X,Y,Z coordinates for atoms in Angstroms
-  geometry: [Float!]!
-
-  # Contains the x, y, z components of initial atom velocities in Angstroms/ps
-  # V1 only
-  velocities: [Float!]
-
-  # Bonds between atoms
-  connectivity: [Bond!]
-
-  # Formal charges for each atom
-  # V0 version was atom_charges
-  formal_charges: [Int!]
-
-  # DEPRECATED please upgrade to V1 and use formal_charges instead
-  # Formal charges for each atom
-  atom_charges: [Int!]
-
-  # Contains the Mulliken partial charges for each of the atoms
-  partial_charges: [Float!]
-
-  # Mapping of atoms to their label
-  # V0 version was atom_labels
-  labels: [String!]
-
-  # DEPRECATED please upgrade to V1 and use labels instead
-  # Mapping of atoms to their label
-  atom_labels: [String!]
-
-  # A list of fragments, where each fragment is a list of atom indices
-  fragments: [[Int!]!]
-
-  # A list of sums of all atom formal charges for each fragment
-  # V0 version was fragment_charges
-  fragment_formal_charges: [Int!]
-
-  # DEPRECATED please upgrade to V1 and use fragment_formal_charges instead
-  # A list of sums of all atom formal charges for each fragment
-  fragment_charges: [Int!]
-
-  # A list of sums of all atom partial charges for each fragment
-  fragment_partial_charges: [Float!]
-
-  # A list of multiplicities for each fragment. Fragment multiplicity is a measure
-  # of the energy level of a fragment, and is related to the number of unpaired electrons within the fragment
-  fragment_multiplicities: [Int!]
-  alts: [Alt!]
-}
-
-scalar TopologyObject
-
-enum TopologyVersion {
-  # Version prior to hermes v3
-  V0
-
-  # Hermes v3
-  V1
+  user_id: Order
 }
 
 scalar Type
@@ -2207,15 +1302,14 @@ type User {
   created_at: DateTime!
   updated_at: DateTime!
   deleted_at: DateTime
-  account_id: AccountId!
   account: Account
-  token(
+  tokens(
     after: String
     before: String
     first: Int
     last: Int
-    filter: TokenFilterBy
-    sort: TokenSortBy
+    filter: TokenFilter
+    sortBy: TokenSortBy
   ): TokenConnection!
 }
 
@@ -2225,4 +1319,10 @@ input UuidFilter {
   eq: UUID
   ne: UUID
   in: [UUID!]
+}
+
+type VirtualObject {
+  path: String!
+  size: Int!
+  format: ObjectFormat!
 }

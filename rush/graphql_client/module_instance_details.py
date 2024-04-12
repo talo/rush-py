@@ -57,3 +57,11 @@ class ModuleInstanceDetailsModuleInstanceStderrEdgesNode(BaseModel):
     id: str
     created_at: datetime
     content: List[str]
+
+
+ModuleInstanceDetails.model_rebuild()
+ModuleInstanceDetailsModuleInstance.model_rebuild()
+ModuleInstanceDetailsModuleInstanceStdout.model_rebuild()
+ModuleInstanceDetailsModuleInstanceStdoutEdges.model_rebuild()
+ModuleInstanceDetailsModuleInstanceStderr.model_rebuild()
+ModuleInstanceDetailsModuleInstanceStderrEdges.model_rebuild()

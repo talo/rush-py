@@ -12,3 +12,6 @@ class DeleteModuleInstance(BaseModel):
 
 class DeleteModuleInstanceDeleteModuleInstance(BaseModel):
     id: UUID
+
+
+DeleteModuleInstance.model_rebuild()
