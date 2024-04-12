@@ -5,8 +5,8 @@ website:
       - full-rush-py-explainer.ipynb
       - section: Quickstarts
         contents:
-          - Quickstarts/auto3d.ipynb
-          - Quickstarts/batch_run-protein-prep-sample.ipynb
+          - Quickstarts/auto3d-sample.ipynb
+          - Quickstarts/batch_run-protein_prep_async-sample.ipynb
           - Quickstarts/convert-sample.ipynb
           - Quickstarts/hermes_hartree_fock_energy_calculation-sample.ipynb
           - Quickstarts/ligand_bond_inference_and_partial_charge_calculation-sample.ipynb
@@ -14,12 +14,12 @@ website:
       - section: Tutorials
         contents:
           - Tutorials/auto3d_conformer_tautomer_generation.ipynb
-          - Tutorials/batch_run-protein-prep.ipynb
+          - Tutorials/batch_run_protein_prep_async.ipynb
           - Tutorials/convert.ipynb
-          - Tutorials/gmx_restart-sample.ipynb
+          - Tutorials/gmx_restart.ipynb
           - Tutorials/hermes_hartree_fock_energy_calculation.ipynb
           - Tutorials/ligand_bond_inference_and_partial_charge_calculation.ipynb
-          - Tutorials/protein-ligand-interactions.ipynb
+          - Tutorials/protein_ligand_interactions.ipynb
       - section: api
         contents:
           - api/doc.html
