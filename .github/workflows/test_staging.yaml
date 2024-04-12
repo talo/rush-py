@@ -5,11 +5,11 @@ on:
 env:
   NIXPKGS_ALLOW_UNFREE: 1
   RUSH_URL: "https://tengu-server-staging-edh4uref5a-as.a.run.app/"
-  RUSH_TOKEN: ${{ secrets.RUSH_STAGING_TOKEN }}
+  RUSH_TOKEN: ${{ secrets.TENGU_STAGING_TOKEN }}
   RUSH_RESTORE_BY_DEFAULT: "True"
 
 jobs:
-  build:
+  test_staging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
