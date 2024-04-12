@@ -6,6 +6,7 @@ from collections.abc import AsyncGenerator
 import json
 import logging
 import math
+import mimetypes
 import os
 import random
 import re
@@ -69,7 +70,7 @@ else:
     from .legacy_types import ArgId, ModuleInstanceId, Resources, Target
 
 
-class RushVirtualObject:
+class VirtualObject:
     path: str
     size: int
     format: ObjectFormat
@@ -652,12 +653,7 @@ class BaseProvider:
 
         # TODO: less insane version of this
         def gen_arg_dict(
-            input: BaseProvider.Arg[Any]
-            | BaseProvider.BlockingArg[Any]
-            | ArgId
-            | UUID
-            | RushVirtualObject
-            | Any,
+            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | VirtualObject | Any,
         ) -> ArgumentInput:
             arg = ArgumentInput()
             if isinstance(input, BaseProvider.Arg) or isinstance(input, BaseProvider.BlockingArg):
@@ -1110,10 +1106,11 @@ class BaseProvider:
             file = Path(file)
         with open(file, "rb") as f:
             format = ObjectFormat.JSON if file.suffix == ".json" else ObjectFormat.BIN
+            mimetype = mimetypes.guess_type(file)[0]
             return await self.client.upload_object(
                 typeinfo=typeinfo,
                 format=format,
-                file=Upload(filename=f.name, content=f, content_type="application/text"),
+                file=Upload(filename=f.name, content=f, content_type=mimetype or "text/plain"),
             )
 
     async def module_instance(self, id: ModuleInstanceId) -> ModuleInstanceDetailsModuleInstance:
@@ -1493,7 +1490,6 @@ class Provider(BaseProvider):
             restore_by_default = False
 
         elif restore_by_default is None:
-            logger.info("Not restoring by default via default")
             restore_by_default = False
 
         if access_token is None or url is None:

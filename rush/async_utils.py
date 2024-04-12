@@ -25,6 +25,8 @@ def asyncio_run(coro: Coroutine[Any, Any, T]) -> T:
     """
     try:
         # FIXME: this is a hack to work around an annoying stall issue in Jupyter notebooks
+        #        for some reason, run_coroutine_threadsafe hangs indefinitely when uploading files
+        #        inside the jupyter notebook. nest_asyncio allows us to just use LOOP.run_until_complete
         __IPYTHON__  # noqa: F821
         import nest_asyncio
 
