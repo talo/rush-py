@@ -37,17 +37,20 @@ client = rush.build_blocking_provider_with_functions()
 
 # 2.1 Prepare the protein
 prepared_protein_qdxf, prepared_protein_pdb = client.prepare_protein(
-    Path("1B39_A_nohet.pdb"), tags=["example_prep"]
+    Path("1B39_A_nohet.pdb"), None, None, tags=["example_prep"]
 )
 
 # 2.3 Return run values
 print(prepared_protein_qdxf.download(overwrite=True).open().read()[0:50], "...")
 ```
 
-    2024-03-21 14:31:29,560 - rush - INFO - Restoring by default via env
-    2024-03-21 14:31:30,540 - rush - INFO - Trying to restore job with tags: ['example_prep'] and path: github:talo/prepare_protein/947cdbc000031e192153a20a9b4a8fbb12279102#prepare_protein_tengu
-    2024-03-21 14:31:30,586 - rush - INFO - Restoring job from previous run with id ea02e2b4-06b1-4576-a1f9-0ecec22e537b
-    [{"amino_acid_insertion_codes": ["", "", "", "", " ...
+    2024-04-08 17:12:28,141 - rush - INFO - Not restoring by default via default
+    2024-04-08 17:12:29,451 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.RESOLVING
+    2024-04-08 17:12:40,388 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.ADMITTED
+    2024-04-08 17:12:44,734 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.DISPATCHED
+    2024-04-08 17:12:45,825 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.RUNNING
+    2024-04-08 17:12:59,570 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.AWAITING_UPLOAD
+    [{"topology": {"version": "V1", "symbols": ["N", " ...
 
 # 1) Setup
 
@@ -116,7 +119,7 @@ A folder called `.rush` will be created in your workspace directory
 client = rush.build_blocking_provider_with_functions(batch_tags=TAGS)
 ```
 
-    2024-03-21 14:31:32,815 - rush - INFO - Restoring by default via env
+    2024-04-08 17:13:26,467 - rush - INFO - Not restoring by default via default
 
 ## 1.4) Input selection
 
@@ -151,21 +154,29 @@ help(client.prepare_protein)
 
     Help on function prepare_protein in module rush.provider:
 
-    prepare_protein(*args: *tuple[RushObject[bytes]], target: 'Target | None' = None, resources: 'Resources | None' = None, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Record]], RushObject[bytes]]
+    prepare_protein(*args: *tuple[RushObject[bytes], Optional[float], Optional[EnumValue]], target: 'Target | None' = None, resources: 'Resources | None' = None, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Record]], RushObject[bytes]]
         Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.
 
         Module version:
-        `github:talo/prepare_protein/947cdbc000031e192153a20a9b4a8fbb12279102#prepare_protein_tengu`
+        `github:talo/prepare_protein/fbeca1ad893cd763b00dc275c43806c0edce03de#prepare_protein_tengu`
 
         QDX Type Description:
 
-            input_pdb: Object[@$Bytes]
+            input_pdb: Object[@$PDB];
+            ph: f32?;
+            naming_scheme: NamingScheme[Amber | Charmm]?
             ->
             output_qdxf: Object[[Conformer]];
-            output_pdb: Object[@$Bytes]
+            output_pdb: Object[@$PDB]
 
 
         :param input_pdb: An input protein as a file; one PDB file
+        :param ph: The ph for determining protonation states; 0-14
+        :param naming_scheme: \
+                        The force field naming scheme to use; \
+                        options are "amber" or "charmm"; \
+                        None produces RCSB/IUPAC standard naming\
+
         :return output_qdxf: An output protein a vec: one qdxf per model in pdb
         :return output_pdb: An output protein as a file: one PDB file
 
@@ -175,17 +186,16 @@ help(client.prepare_protein)
 # We set restore = True so that we can restore a previous run to the same path
 # with the same tags
 prepared_protein_qdxf, prepared_protein_pdb = client.prepare_protein(
-    PROTEIN_PDB_PATH,
+    PROTEIN_PDB_PATH, None, None
 )
 # This initially only has the id of your result; we will show how to fetch the
 # actual value later
 prepared_protein_qdxf
 ```
 
-    2024-03-21 14:31:36,354 - rush - INFO - Trying to restore job with tags: ['qdx', 'rush-py-quickstart', '1B39'] and path: github:talo/prepare_protein/947cdbc000031e192153a20a9b4a8fbb12279102#prepare_protein_tengu
-    2024-03-21 14:31:36,400 - rush - INFO - Restoring job from previous run with id d746634a-8fe8-437d-b468-4bb66f5f4a12
+    2024-04-08 17:13:29,649 - rush - INFO - Trying to restore job with tags: ['qdx', 'rush-py-quickstart', '1B39'] and path: github:talo/prepare_protein/fbeca1ad893cd763b00dc275c43806c0edce03de#prepare_protein_tengu
 
-    Arg(id=127ac5f6-1227-49f4-ad2b-45a08e6c64ca, value=None)
+    Arg(id=37deb248-97fe-443d-b243-36ba172ca7be, value=None)
 
 ## 2.1) Run statuses
 
@@ -196,7 +206,9 @@ statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs).
 client.status()
 ```
 
-    {}
+    {'8e8357a0-3c37-4c23-bf98-567db98d74df': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
+      'prepare_protein',
+      1)}
 
 ## 2.2) Run Values
 
@@ -209,9 +221,13 @@ protein_qdxf_info = prepared_protein_qdxf.get()
 protein_qdxf_info
 ```
 
-    Blocking get
+    2024-04-08 17:13:29,921 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.RESOLVING
+    2024-04-08 17:13:36,501 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.ADMITTED
+    2024-04-08 17:13:40,894 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.DISPATCHED
+    2024-04-08 17:13:43,225 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.RUNNING
+    2024-04-08 17:13:55,523 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.AWAITING_UPLOAD
 
-    'https://storage.googleapis.com/rush_store_default/af08031b-e871-45e2-a226-e8c7e1fd5719?x-goog-signature=0864503418ee439f8b34e2461b06c15c4e83be22a72b7acd977ed41c02da00915c749bd4f9145b4cec3553fed283ffee660f20b6f418df99ad4bad1c34f8edcdd1e337da2021ef8e0bfae9c8a7bc0b85729c605765e9512a2623f3dacdcaf079bf416a946881873a87f7fc17e3b54fe8651837aa2b47208ac9b9b42d5d8854d2214e2c7002f89d8b82a0ab3317da32aa5030a48590eda2e870bf23388ad4a77ce4a9c1602a1790248439ea8ceac3291824978332266fc39d548822b2f1dc93eb1ddbbcd326c312feac5bb24345cf0d4193657ea1d1e3bec3cb07fc858b924108aaea74415e12c861a355335ea8bc6507834bf42395d9e52c75846986b395ddd3&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20240321%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20240321T063139Z&x-goog-expires=3600&x-goog-signedheaders=host'
+    'https://storage.googleapis.com/qdx-store/4a4271de-5e14-4756-b115-9c034d7ab294?x-goog-signature=202cb9f86a4351fc30780d26713b4478012548544ff30ba6700f349ad1fcc63137dfb1d2db92fc9d39bc51ba9881c44b27e89e0781aec23d034ec61c4efe2c806b8d784d124863a37d16ce0df02880e272aa0d0dc8f6be23f7214f207183337eb80c9dd0d70757e2761d8f366eea997d066761fadd9ed33483aa8ec98e7fb00e62a78501fdbc2e1e3b9eb4f9e2374a68972937bcae562d114a7e705ca645cd7eb80e5df835c9e462aa34601c8e14691ad6bcbfafef751a7562d8ea3640e77e79f2bd2f6f3b2533df462e245fc4991729f44bee6aa7d9de31cb8a14615b37ba7950c40af54f5a9f146a1a1fb91b2a9f6692d1bca60a8fb2cecd98c2b33fdbd558&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20240408%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20240408T091417Z&x-goog-expires=3600&x-goog-signedheaders=host'
 
 ## 2.3) Downloads
 
@@ -245,5 +261,5 @@ with open(client.workspace / "objects" / "01_prepared_protein.pdb", "r") as f:
     print(f.readline(), "...")
 ```
 
-    REMARK   1 CREATED WITH OPENMM 8.0, 2024-02-29
+    REMARK   1 CREATED WITH OPENMM 8.0, 2024-04-08
      ...
