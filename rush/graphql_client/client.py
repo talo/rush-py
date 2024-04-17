@@ -57,7 +57,9 @@ def gql(q: str) -> str:
 
 
 class Client(AsyncBaseClient):
-    async def cancel_module_instance(self, module_instance_id: UUID, **kwargs: Any) -> UUID:
+    async def cancel_module_instance(
+        self, module_instance_id: UUID, **kwargs: Any
+    ) -> UUID:
         query = gql(
             """
             mutation cancel_module_instance($moduleInstanceId: ModuleInstanceId!) {
@@ -67,7 +69,10 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"moduleInstanceId": module_instance_id}
         response = await self.execute(
-            query=query, operation_name="cancel_module_instance", variables=variables, **kwargs
+            query=query,
+            operation_name="cancel_module_instance",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return CancelModuleInstance.model_validate(data).cancel
@@ -86,7 +91,10 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"moduleInstanceId": module_instance_id}
         response = await self.execute(
-            query=query, operation_name="delete_module_instance", variables=variables, **kwargs
+            query=query,
+            operation_name="delete_module_instance",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return DeleteModuleInstance.model_validate(data).delete_module_instance
@@ -103,7 +111,9 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"module": module}
-        response = await self.execute(query=query, operation_name="deploy", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="deploy", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Deploy.model_validate(data).deploy
 
@@ -213,7 +223,10 @@ class Client(AsyncBaseClient):
             "in_argument_ids": in_argument_ids,
         }
         response = await self.execute(
-            query=query, operation_name="module_instances", variables=variables, **kwargs
+            query=query,
+            operation_name="module_instances",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return ModuleInstances.model_validate(data).me
@@ -240,7 +253,9 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(query=query, operation_name="argument", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="argument", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Argument.model_validate(data).argument
 
@@ -314,7 +329,9 @@ class Client(AsyncBaseClient):
             "tags": tags,
             "resolved": resolved,
         }
-        response = await self.execute(query=query, operation_name="arguments", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="arguments", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Arguments.model_validate(data).me
 
@@ -492,7 +509,9 @@ class Client(AsyncBaseClient):
             "path": path,
             "tags": tags,
         }
-        response = await self.execute(query=query, operation_name="modules", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="modules", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Modules.model_validate(data).modules
 
@@ -623,12 +642,17 @@ class Client(AsyncBaseClient):
             "stdout_before": stdout_before,
         }
         response = await self.execute(
-            query=query, operation_name="module_instance_details", variables=variables, **kwargs
+            query=query,
+            operation_name="module_instance_details",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return ModuleInstanceDetails.model_validate(data).module_instance
 
-    async def module_instance_minimal(self, id: UUID, **kwargs: Any) -> ModuleInstanceMinimalModuleInstance:
+    async def module_instance_minimal(
+        self, id: UUID, **kwargs: Any
+    ) -> ModuleInstanceMinimalModuleInstance:
         query = gql(
             """
             query module_instance_minimal($id: ModuleInstanceId!) {
@@ -662,7 +686,10 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"id": id}
         response = await self.execute(
-            query=query, operation_name="module_instance_minimal", variables=variables, **kwargs
+            query=query,
+            operation_name="module_instance_minimal",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return ModuleInstanceMinimal.model_validate(data).module_instance
@@ -678,11 +705,15 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"path": path}
-        response = await self.execute(query=query, operation_name="object_url", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="object_url", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return ObjectUrl.model_validate(data).object_path
 
-    async def object_contents(self, path: Any, **kwargs: Any) -> ObjectContentsObjectPath:
+    async def object_contents(
+        self, path: Any, **kwargs: Any
+    ) -> ObjectContentsObjectPath:
         query = gql(
             """
             query object_contents($path: UUID!) {
@@ -720,7 +751,9 @@ class Client(AsyncBaseClient):
             "target": target,
             "resources": resources,
         }
-        response = await self.execute(query=query, operation_name="retry", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="retry", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Retry.model_validate(data).retry
 
@@ -738,7 +771,9 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"instance": instance}
-        response = await self.execute(query=query, operation_name="run", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="run", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Run.model_validate(data).run
 
@@ -768,7 +803,9 @@ class Client(AsyncBaseClient):
             "moduleId": module_id,
             "tags": tags,
         }
-        response = await self.execute(query=query, operation_name="tag", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="tag", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Tag.model_validate(data).tag
 
@@ -786,10 +823,15 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"utilization": utilization}
         response = await self.execute(
-            query=query, operation_name="track_utilization", variables=variables, **kwargs
+            query=query,
+            operation_name="track_utilization",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
-        return TrackUtilization.model_validate(data).track_module_instance_resource_utilization
+        return TrackUtilization.model_validate(
+            data
+        ).track_module_instance_resource_utilization
 
     async def untag(
         self,
@@ -817,7 +859,9 @@ class Client(AsyncBaseClient):
             "moduleId": module_id,
             "tags": tags,
         }
-        response = await self.execute(query=query, operation_name="untag", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="untag", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Untag.model_validate(data).untag
 
@@ -836,12 +880,17 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"moduleInstanceUpdate": module_instance_update}
         response = await self.execute(
-            query=query, operation_name="update_module_instance", variables=variables, **kwargs
+            query=query,
+            operation_name="update_module_instance",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return UpdateModuleInstance.model_validate(data).update_module_instance
 
-    async def upload_arg(self, typeinfo: Any, file: Upload, **kwargs: Any) -> UploadArgUploadArg:
+    async def upload_arg(
+        self, typeinfo: Any, file: Upload, **kwargs: Any
+    ) -> UploadArgUploadArg:
         query = gql(
             """
             mutation upload_arg($typeinfo: JSON!, $file: Upload!) {
@@ -853,7 +902,9 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"typeinfo": typeinfo, "file": file}
-        response = await self.execute(query=query, operation_name="upload_arg", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="upload_arg", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return UploadArg.model_validate(data).upload_arg
 

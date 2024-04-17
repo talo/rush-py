@@ -43,26 +43,26 @@ class ModuleInstanceStatus(str, Enum):
 
 
 class ModuleInstanceTarget(str, Enum):
-    NIX = "NIX"
+    TINY = "TINY"
     GADI = "GADI"
-    NIX_SSH = "NIX_SSH"
-    NIX_SSH_2 = "NIX_SSH_2"
-    NIX_SSH_3 = "NIX_SSH_3"
-    NIX_SSH_4 = "NIX_SSH_4"
+    BULLET = "BULLET"
+    BULLET_2 = "BULLET_2"
+    BULLET_3 = "BULLET_3"
+    BULLET_4 = "BULLET_4"
     SETONIX = "SETONIX"
     GADI_GPU = "GADI_GPU"
-    NIX_SSH_GPU = "NIX_SSH_GPU"
-    NIX_SSH_2_GPU = "NIX_SSH_2_GPU"
-    NIX_SSH_3_GPU = "NIX_SSH_3_GPU"
-    NIX_SSH_4_GPU = "NIX_SSH_4_GPU"
+    BULLET_GPU = "BULLET_GPU"
+    BULLET_2_GPU = "BULLET_2_GPU"
+    BULLET_3_GPU = "BULLET_3_GPU"
+    BULLET_4_GPU = "BULLET_4_GPU"
     SETONIX_GPU = "SETONIX_GPU"
     GADI_EXPRESS = "GADI_EXPRESS"
     SETONIX_EXPRESS = "SETONIX_EXPRESS"
 
 
 class ObjectFormat(str, Enum):
-    JSON = "JSON"
-    BIN = "BIN"
+    json = "json"
+    bin = "bin"
 
 
 class Order(str, Enum):

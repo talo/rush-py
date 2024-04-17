@@ -577,18 +577,18 @@ enum ModuleInstanceStatus {
 }
 
 enum ModuleInstanceTarget {
-  NIX
+  TINY
   GADI
-  NIX_SSH
-  NIX_SSH_2
-  NIX_SSH_3
-  NIX_SSH_4
+  BULLET
+  BULLET_2
+  BULLET_3
+  BULLET_4
   SETONIX
   GADI_GPU
-  NIX_SSH_GPU
-  NIX_SSH_2_GPU
-  NIX_SSH_3_GPU
-  NIX_SSH_4_GPU
+  BULLET_GPU
+  BULLET_2_GPU
+  BULLET_3_GPU
+  BULLET_4_GPU
   SETONIX_GPU
   GADI_EXPRESS
   SETONIX_EXPRESS
@@ -723,7 +723,7 @@ type Mutation {
 }
 
 type Object {
-  id: ObjectDescriptorId!
+  object_descriptor: ObjectDescriptor!
   contents: JSON!
   url: String!
 }
@@ -738,7 +738,7 @@ type ObjectDescriptor {
   deletedAt: DateTime
   name: String
   description: String
-  tags: [String!]!
+  tags: [String!]
 }
 
 type ObjectDescriptorConnection {
@@ -789,12 +789,6 @@ enum ObjectFormat {
   BIN
 }
 
-type ObjectPath {
-  path: UUID!
-  contents: JSON!
-  url: String!
-}
-
 enum Order {
   ASC
   DESC
@@ -827,7 +821,7 @@ type Project {
   deletedAt: DateTime
   name: String
   description: String
-  tags: [String!]!
+  tags: [String!]
 }
 
 scalar ProjectId
@@ -840,7 +834,7 @@ type Protein {
   deletedAt: DateTime
   name: String
   description: String
-  tags: [String!]!
+  tags: [String!]
 }
 
 scalar ProteinId
@@ -904,7 +898,7 @@ type Query {
   module_instance(id: ModuleInstanceId!): ModuleInstance!
   argument(id: ArgumentId!): Argument!
   object(id: ObjectDescriptorId!): Object!
-  object_path(path: UUID!): ObjectPath!
+  object_path(path: UUID!): Object!
 }
 
 type ResourceUtilization {

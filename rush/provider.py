@@ -944,9 +944,9 @@ class BaseProvider:
             out_types = tuple(type_from_typedef(i) for i in module.outs)
 
             def random_target():
-                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
-                if "NIX_SSH_3" in str(module.targets) or "NIX_SSH_3_GPU" in str(module.targets):
-                    allowed_default_targets.append("NIX_SSH_3")
+                allowed_default_targets = ["BULLET", "BULLET_2"]
+                if "BULLET_3" in str(module.targets) or "BULLET_3_GPU" in str(module.targets):
+                    allowed_default_targets.append("BULLET_3")
                 return random.choice(allowed_default_targets)
 
             default_resources = None
@@ -1105,7 +1105,7 @@ class BaseProvider:
         if isinstance(file, str):
             file = Path(file)
         with open(file, "rb") as f:
-            format = ObjectFormat.JSON if file.suffix == ".json" else ObjectFormat.BIN
+            format = ObjectFormat.json if file.suffix == ".json" else ObjectFormat.bin
             mimetype = mimetypes.guess_type(file)[0]
             return await self.client.upload_object(
                 typeinfo=typeinfo,
@@ -1342,7 +1342,7 @@ class BaseProvider:
                     )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
-                    decode = not (self.value and dict.get(self.value, "format") == "Bin")
+                    decode = not (self.value and dict.get(self.value, "format") == "bin")
                     return await self.provider.download_object(
                         self.value["path"], filename, filepath, overwrite, signed, decode
                     )
