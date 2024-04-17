@@ -25,9 +25,7 @@ class ModuleInstancesMeAccount(BaseModel):
 
 class ModuleInstancesMeAccountModuleInstances(BaseModel):
     edges: List["ModuleInstancesMeAccountModuleInstancesEdges"]
-    page_info: "ModuleInstancesMeAccountModuleInstancesPageInfo" = Field(
-        alias="pageInfo"
-    )
+    page_info: "ModuleInstancesMeAccountModuleInstancesPageInfo" = Field(alias="pageInfo")
 
 
 class ModuleInstancesMeAccountModuleInstancesEdges(BaseModel):
