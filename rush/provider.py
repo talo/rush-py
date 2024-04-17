@@ -255,16 +255,16 @@ class BaseProvider:
             if not self.workspace.exists():
                 raise Exception("Workspace directory does not exist")
             if (self.workspace / "rush.lock").exists():
-                self.config_dir: Path | None = self.workspace
+                self._config_dir: Path | None = self.workspace
             else:
-                self.config_dir = self.workspace / ".rush"
-                if not self.config_dir.exists():
-                    self.config_dir.mkdir()
+                self._config_dir = self.workspace / ".rush"
+                if not self._config_dir.exists():
+                    self._config_dir.mkdir()
 
             self.restore(workspace)
         else:
             self.workspace = None
-            self.config_dir = None
+            self._config_dir = None
 
         if not self.history:
             self.history = History(tags=batch_tags or [], instances=[])
@@ -326,29 +326,29 @@ class BaseProvider:
         self.workspace = Path(workspace)
 
         if (self.workspace / "rush.lock").exists():
-            self.config_dir = self.workspace
+            self._config_dir = self.workspace
         else:
-            self.config_dir = self.workspace / ".rush"
-            if not self.config_dir.exists():
-                self.config_dir.mkdir()
+            self._config_dir = self.workspace / ".rush"
+            if not self._config_dir.exists():
+                self._config_dir.mkdir()
         # read the workspace history file
         # if it exists, load the history
-        workspace_history = self.config_dir / "history.json"
+        workspace_history = self._config_dir / "history.json"
         if workspace_history.exists():
             self.history = self._load_history(workspace_history)
 
-        if (self.config_dir / "rush.lock").exists():
-            self.load_module_paths(self.config_dir / "rush.lock")
+        if (self._config_dir / "rush.lock").exists():
+            self.load_module_paths(self._config_dir / "rush.lock")
 
     def save(self, history_file: str | Path | None = None):
         """
         Save the workspace.
         """
-        if self.config_dir is None:
+        if self._config_dir is None:
             raise Exception("No workspace provided")
         if history_file is None:
-            history_file = self.config_dir / "history.json"
-        self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            history_file = self._config_dir / "history.json"
+        self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
         with open(history_file, "w") as f:
             json.dump(self.history, f, default=to_jsonable_python, indent=2)
 
@@ -901,7 +901,7 @@ class BaseProvider:
             module_paths = self.load_module_paths(lockfile)
             module_pages = self.get_modules_for_paths(list(module_paths.values()))
         else:
-            if self.config_dir:
+            if self._config_dir:
                 if self.module_paths.items():
                     # we have already loaded a lock via the workspace
                     module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
@@ -921,7 +921,7 @@ class BaseProvider:
                         paths = await self.get_latest_module_paths(names)
                         module_pages = self.get_modules_for_paths(list(paths.values()))
                         self.module_paths = paths
-                        self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+                        self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
             elif tags:
                 # no workspace, so up the user to lock it
                 module_pages = await self.modules(tags=tags)
@@ -1187,7 +1187,7 @@ class BaseProvider:
         :param names: Optional list of names to update.
         :param tags: Optionally only upate modules with this tag.
         """
-        if not self.config_dir:
+        if not self._config_dir:
             raise Exception("No workspace provided")
 
         if tags:
@@ -1202,11 +1202,11 @@ class BaseProvider:
                             self.module_paths[name] = path
                     else:
                         self.module_paths[name] = path
-            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
         else:
             paths = await self.get_latest_module_paths(names)
             self.module_paths = paths
-            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
 
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -1458,9 +1458,9 @@ class Provider(BaseProvider):
         :param batch_tags: The tags that will be placed on all runs by default.
         """
         if workspace is None:
-            workspace = os.getcwd()
+            workspace = Path(".")
         if workspace is True:
-            workspace = os.getcwd()
+            workspace = Path(".")
         if workspace is False:
             workspace = None
 
