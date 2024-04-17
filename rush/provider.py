@@ -520,6 +520,10 @@ class BaseProvider:
 
                     buf = ""
                     with open(filepath, "wb") as f:
+                        if not decode:
+                            for chunk in r.iter_bytes():
+                                f.write(chunk)
+                            return filepath
                         first_chunk = True
                         is_encoded = False
                         for chunk in r.iter_text():
@@ -529,7 +533,7 @@ class BaseProvider:
 
                             # handle json
                             if first_chunk:
-                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{") or not decode:
+                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
                                     f.write(chunk.encode("utf-8"))
                                     first_chunk = False
                                     continue
