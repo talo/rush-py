@@ -1303,6 +1303,8 @@ class BaseProvider:
                                         and module_instance.progress.n != self.progress.n
                                     ):
                                         print(f"Progress: {module_instance.progress}", end="\r")
+                                    else:
+                                        print("module running with no progress reported", end="\r")
                             await asyncio.sleep(5)
                         else:
                             raise e
@@ -1396,6 +1398,15 @@ class BaseProvider:
                                             f"Argument {self.id} is now {module_instance.status}"
                                         )
                                         self.status = module_instance.status
+
+                                    if module_instance.status == ModuleInstanceStatus.RUNNING:
+                                        if (
+                                            module_instance.progress
+                                            and module_instance.progress.n != self.progress.n
+                                        ):
+                                            print(f"Progress: {module_instance.progress}", end="\r")
+                                        else:
+                                            print("module running with no progress reported", end="\r")
                                 await asyncio.sleep(1)
                     except GraphQLClientGraphQLMultiError as e:
                         if e.errors[0].message == "not found":
