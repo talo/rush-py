@@ -597,7 +597,7 @@ class BaseProvider:
 
             # check against latest modules
 
-            asyncio_run(get_latest_modules(modules))
+            asyncio_run(get_latest_modules(modules), override="task")
             return modules
         else:
             raise FileNotFoundError("Lock file not found")
