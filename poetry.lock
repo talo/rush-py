@@ -2518,13 +2518,16 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qdx-py"
-version = "0.9.1"
+version = "0.9.2"
 description = ""
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "qdx_py-0.9.1-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:d70afa51cd807b0e30f91dfa7fe218daf86940d703f240f0387af3d467cc1e30"},
-    {file = "qdx_py-0.9.1.tar.gz", hash = "sha256:a121c4b1ed6c9a3cc32fabf8b97640811bfa8cee6ee3df2c683cd31708dea9eb"},
+    {file = "qdx_py-0.9.2-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:be367f2d74022ba0b75ed8099395a26f1842bf4f6b0ec8468ff77218599aafe0"},
+    {file = "qdx_py-0.9.2-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:6daae547f51591159e2c773cb7da051ff329aad815195c95590c63d34dde799c"},
+    {file = "qdx_py-0.9.2-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:5c0422f0cbe6ceeb2c1d19c5494dc7c496b7274c846ac6f759e27ff401385639"},
+    {file = "qdx_py-0.9.2-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:437a344ac7d7fe16de5f66010146e7e18e8ef4126d6df6b96cdf9e1590008520"},
+    {file = "qdx_py-0.9.2.tar.gz", hash = "sha256:0c17052cfeae853a8aa018d2e483b7352472cfa69777bbe4cb262a6f40507dee"},
 ]
 
 [[package]]
