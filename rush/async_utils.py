@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-from typing import Any, Coroutine, Literal, TypeVar
+from typing import Any, Coroutine, Literal, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -16,7 +16,7 @@ LOOP = asyncio.new_event_loop()
 __hack_applied__ = {"_": False}
 
 
-def asyncio_run(coro: Coroutine[Any, Any, T], override: Literal["task"] | None = None) -> T:
+def asyncio_run(coro: Coroutine[Any, Any, T], override: Union[Literal["task"], None] = None) -> T:
     """
     Runs the coroutine in an event loop running on a background thread,
     and blocks the current thread until it returns a result.
@@ -46,7 +46,8 @@ def asyncio_run(coro: Coroutine[Any, Any, T], override: Literal["task"] | None =
         pass
 
     if override == "task" and loop_running:
-        return asyncio.create_task(coro)
+        r: Any = asyncio.create_task(coro)
+        return r
 
     if LOOP.is_running():
         return asyncio.run_coroutine_threadsafe(coro, LOOP).result()
@@ -60,4 +61,4 @@ def asyncio_run(coro: Coroutine[Any, Any, T], override: Literal["task"] | None =
             start_background_loop(LOOP)
             return asyncio.run_coroutine_threadsafe(coro, LOOP).result()
         except Exception as e:
-            print(e)
+            raise e
