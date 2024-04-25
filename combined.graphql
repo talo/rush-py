@@ -10,31 +10,93 @@ mutation deploy($module: ModuleInput!) {
     path
   }
 }
-mutation create_entity($entity: RawEntityInput!) {
-  create_entity(entity: $entity) {
-    id
-  }
-}
-mutation create_experiment($experiment: CreateExperimentInput!) {
-  create_experiment(input: $experiment) {
-    id
-  }
-}
-mutation create_project($project: CreateProjectInput!) {
-  create_project(input: $project) {
-    id
-  }
-}
-mutation create_protein_conformer(
-  $protein_conformer: CreateProteinConformerInput!
+query module_instances(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $path: String
+  $name: String
+  $status: ModuleInstanceStatus
+  $tags: [String!]
+  $ids: [ModuleInstanceId!]
+  $in_argument_ids: [ArgumentId!]
 ) {
-  create_protein_conformer(input: $protein_conformer) {
-    id
-  }
-}
-mutation create_protein($protein: CreateProteinInput!) {
-  create_protein(input: $protein) {
-    id
+  me {
+    account {
+      module_instances(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        path: $path
+        status: $status
+        name: $name
+        tags: $tags
+        ids: $ids
+        in_arguments: $in_argument_ids
+      ) {
+        edges {
+          cursor
+          node {
+            id
+            account_id
+
+            created_at
+            deleted_at
+            queued_at
+            admitted_at
+            dispatched_at
+            completed_at
+
+            path
+            status
+            target
+            tags
+
+            ins {
+              id
+              created_at
+              deleted_at
+              rejected_at
+              account_id
+              typeinfo
+              value
+              tags
+            }
+            outs {
+              id
+              created_at
+              deleted_at
+              rejected_at
+              account_id
+              typeinfo
+              value
+              tags
+            }
+            resources {
+              gpus
+              nodes
+              mem
+              storage
+              walltime
+            }
+            progress {
+              n
+              n_expected
+              n_max
+              done
+            }
+          }
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          startCursor
+          endCursor
+        }
+      }
+    }
   }
 }
 # Common Fragments across all queries
@@ -223,29 +285,29 @@ fragment ModuleInstanceCommon on ModuleInstance {
   }
 }
 
-fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
-  id
-  account_id
+# fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
+#   id
+#   account_id
 
-  created_at
-  deleted_at
-  queued_at
-  admitted_at
-  dispatched_at
-  completed_at
+#   created_at
+#   deleted_at
+#   queued_at
+#   admitted_at
+#   dispatched_at
+#   completed_at
 
-  path
-  status
-  target
-  tags
+#   path
+#   status
+#   target
+#   tags
 
-  failure_reason
-  failure_context {
-    stdout
-    stderr
-    syserr
-  }
-}
+#   failure_reason
+#   failure_context {
+#     stdout
+#     stderr
+#     syserr
+#   }
+# }
 
 fragment ModuleInstanceFull on ModuleInstance {
   ...ModuleInstanceCommon
@@ -293,42 +355,42 @@ fragment ModuleInstanceFull on ModuleInstance {
   }
 }
 
-fragment SimpleModuleInstanceFull on SimpleModuleInstance {
-  ...SimpleModuleInstanceCommon
-  ins {
-    id
-    created_at
-    deleted_at
-    rejected_at
-    account_id
-    typeinfo
-    value
-    tags
-  }
-  outs {
-    id
-    created_at
-    deleted_at
-    rejected_at
-    account_id
-    typeinfo
-    value
-    tags
-  }
-  resources {
-    gpus
-    nodes
-    mem
-    storage
-    walltime
-  }
-  progress {
-    n
-    n_expected
-    n_max
-    done
-  }
-}
+# fragment SimpleModuleInstanceFull on SimpleModuleInstance {
+#   ...SimpleModuleInstanceCommon
+#   ins {
+#     id
+#     created_at
+#     deleted_at
+#     rejected_at
+#     account_id
+#     typeinfo
+#     value
+#     tags
+#   }
+#   outs {
+#     id
+#     created_at
+#     deleted_at
+#     rejected_at
+#     account_id
+#     typeinfo
+#     value
+#     tags
+#   }
+#   resources {
+#     gpus
+#     nodes
+#     mem
+#     storage
+#     walltime
+#   }
+#   progress {
+#     n
+#     n_expected
+#     n_max
+#     done
+#   }
+# }
 
 query module_instance_details(
   $id: ModuleInstanceId!
@@ -368,235 +430,21 @@ query module_instance_details(
   }
 }
 
-query module_instances(
-  $after: String
-  $before: String
-  $first: Int
-  $last: Int
-  $path: String
-  $name: String
-  $status: ModuleInstanceStatus
-  $tags: [String!]
-  $ids: [ModuleInstanceId!]
-  $in_argument_ids: [ArgumentId!]
-) {
-  me {
-    account {
-      module_instances(
-        first: $first
-        last: $last
-        after: $after
-        before: $before
-        path: $path
-        status: $status
-        name: $name
-        tags: $tags
-        ids: $ids
-        in_arguments: $in_argument_ids
-      ) {
-        edges {
-          cursor
-          node {
-            ...SimpleModuleInstanceFull
-          }
-        }
-        pageInfo {
-          ...PageInfoFull
-        }
-      }
-    }
-  }
-}
-
 query module_instance_minimal($id: ModuleInstanceId!) {
   module_instance(id: $id) {
     ...ModuleInstanceCommon
   }
 }
 
-query object_url($id: ArgumentId!) {
-  object(id: $id) {
+query object_url($path: UUID!) {
+  object_path(path: $path) {
     url
   }
 }
 
-query object_contents($id: ArgumentId!) {
-  object(id: $id) {
+query object_contents($path: UUID!) {
+  object_path(path: $path) {
     contents
-  }
-}
-
-## Raw Entity (v2)
-
-query entity($id: UUID!) {
-  entity(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data
-    tags
-  }
-}
-
-## Project
-
-query project($id: UUID!) {
-  project(id: $id) {
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-    }
-    tags
-    proteins {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-    protein_conformers {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-    smols {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-    smol_conformers {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-    smol_tautomers {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-  }
-}
-
-query protein($id: UUID!) {
-  protein(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-      sequence
-    }
-    tags
-  }
-}
-
-query protein_conformer($id: UUID!) {
-  protein_conformer(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-    }
-    tags
-  }
-}
-
-query smol($id: UUID!) {
-  smol(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-      inchi
-    }
-    tags
-  }
-}
-
-query smol_conformer($id: UUID!) {
-  smol_conformer(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-    }
-    tags
-  }
-}
-
-query smol_tautomer($id: UUID!) {
-  smol_tautomer(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-      inchi
-    }
-    tags
-  }
-}
-
-query structure($id: UUID!) {
-  structure(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-    }
-    topology {
-      symbols
-      geometry
-      connectivity
-      formal_charges
-      labels
-      partial_charges
-      fragments
-      fragment_formal_charges
-      fragment_partial_charges
-      velocities
-      alts
-    }
-    # signed_url
-    tags
-  }
-}
-
-query experiment($id: UUID!) {
-  experiment(id: $id) {
-    id
-    createdAt
-    updatedAt
-    deletedAt
-    data {
-      name
-      unit
-      measure
-      value
-      assay
-    }
-    tags
   }
 }
 # Retries a failed module instance
@@ -614,26 +462,6 @@ mutation run($instance: ModuleInstanceInput!) {
         id
         outs {id}
     }
-}
-mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
-  create_smol_conformer(input: $smol_conformer) {
-    id
-  }
-}
-mutation create_smol($smol: CreateSmolInput!) {
-  create_smol(input: $smol) {
-    id
-  }
-}
-mutation create_smol_tautomer($smol_tautomer: CreateSmolTautomerInput!) {
-  create_smol_tautomer(input: $smol_tautomer) {
-    id
-  }
-}
-mutation create_structure($structure: CreateStructureInput!) {
-  create_structure(input: $structure) {
-    id
-  }
 }
 mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
     tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
@@ -658,5 +486,20 @@ mutation upload_arg($typeinfo: JSON!, $file: Upload!) {
   upload_arg(typeinfo: $typeinfo, file: $file) {
     id
     value
+  }
+}
+
+mutation upload_object(
+  $file: Upload!
+  $typeinfo: JSON!
+  $format: ObjectFormat!
+) {
+  upload_object(file: $file, typeinfo: $typeinfo, format: $format) {
+    id
+    object {
+      path
+      size
+      format
+    }
   }
 }

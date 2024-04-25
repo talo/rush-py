@@ -1,0 +1,44 @@
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  NIXPKGS_ALLOW_UNFREE: 1
+  RUSH_URL: "https://tengu-server-staging-edh4uref5a-as.a.run.app/"
+  RUSH_TOKEN: ${{ secrets.TENGU_STAGING_TOKEN }}
+  RUSH_RESTORE_BY_DEFAULT: "True"
+
+jobs:
+  test_staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: |
+            ${{ secrets.QDX_COMMON_SSH }}
+      - uses: cachix/install-nix-action@v25
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GA_ACCESS_TOKEN }}
+            extra-substituters = file://${{ github.workspace }}/store-cache?trusted=true https://nixpkgs-unfree.cachix.org
+      - uses: cachix/cachix-action@v14
+        with:
+          name: qdx-api
+          authToken: "${{ secrets.QDX_CACHIX }}"
+          pushFilter: tarpaulin
+      - name: cachix
+        uses: actions/cache@v4
+        with:
+          path: store-cache
+          key: nix-store
+      - name: Run the Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v3
+      - name: nix checks
+        run: nix flake check --accept-flake-config --show-trace
+      - name: nbdev checks
+        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --skip_file_glob "*async*"
+      - name: nbdev checks
+        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Tutorials/batch_run_protein_prep_async.ipynb
+      - name: nbdev checks
+        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Quicklstarts/batch_run_protein_prep_async-sample.ipynb

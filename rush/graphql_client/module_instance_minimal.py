@@ -11,3 +11,6 @@ class ModuleInstanceMinimal(BaseModel):
 
 class ModuleInstanceMinimalModuleInstance(ModuleInstanceCommon):
     pass
+
+
+ModuleInstanceMinimal.model_rebuild()

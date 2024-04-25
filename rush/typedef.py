@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any, Generic, Literal, TypeVar
 from uuid import UUID
 
+from rush.graphql_client.upload_object import UploadObjectUploadObjectObject
+
 try:
     from typing import Unpack
 except ImportError:
@@ -199,7 +201,7 @@ class ArrayKind(Generic[T], RushType[T]):
         return list[self.t.to_python_type()]
 
     def matches(self, other: list[T] | Any) -> tuple[bool, str | None]:
-        if not (isinstance(other, list) or isinstance(other, tuple)):
+        if not isinstance(other, (list, tuple)):
             return (False, f"Expected list or tuple, got {type(other)}")
         for x in other:
             ok, reason = self.t.matches(x)
@@ -256,7 +258,7 @@ class ObjectKind(Generic[T], RushType[T]):
         return RushObject[self.t.to_python_type()]
 
     def matches(self, other: Path | StringIO | BytesIO | Any) -> tuple[bool, str | None]:
-        if isinstance(other, _RushObject) or isinstance(other, Path) or isinstance(other, StringIO):
+        if isinstance(other, (_RushObject, Path, StringIO, UploadObjectUploadObjectObject)):
             return (True, None)
         else:
             return (False, f"Expected Path, got {type(other)}")

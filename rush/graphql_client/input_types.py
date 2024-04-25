@@ -8,14 +8,18 @@ from uuid import UUID
 from pydantic import Field
 
 from .base_model import BaseModel
-from .enums import (
-    Element,
-    MemUnits,
-    ModuleInstanceStatus,
-    ModuleInstanceTarget,
-    Order,
-    TopologyVersion,
-)
+from .enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, Order
+
+
+class AccountBucketConfigInput(BaseModel):
+    data_bucket: str
+    log_bucket: str
+    bucket_region: str
+
+
+class AccountConfigInput(BaseModel):
+    config_account: Optional[UUID] = None
+    bucket_config: Optional["AccountBucketConfigInput"] = None
 
 
 class ArgumentInput(BaseModel):
@@ -25,66 +29,19 @@ class ArgumentInput(BaseModel):
     value: Optional[Any] = None
 
 
-class CreateExperimentInput(BaseModel):
-    name: str
-    data: "ExperimentDataInput"
-    project_id: Any
-    smol_id: Any
-    protein_id: Any
-    tags: List[str]
-
-
-class CreateProjectInput(BaseModel):
-    name: str
-    tags: List[str]
-
-
-class CreateProteinConformerInput(BaseModel):
+class CreateProject(BaseModel):
+    account_id: UUID
     name: Optional[str] = None
-    project_id: Any
-    protein_id: Any
-    structure_id: Any
-    tags: List[str]
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 
-class CreateProteinInput(BaseModel):
-    name: str
+class CreateProtein(BaseModel):
     sequence: str
     project_id: Any
-    protein_id: Optional[Any] = None
-    tags: List[str]
-
-
-class CreateSmolConformerInput(BaseModel):
     name: Optional[str] = None
-    smol_id: Any
-    smol_tautomer_id: Any
-    structure_id: Any
-    project_id: Any
-    tags: List[str]
-
-
-class CreateSmolInput(BaseModel):
-    name: str
-    data: "SmolDataInput"
-    project_id: Any
-    tags: List[str]
-
-
-class CreateSmolTautomerInput(BaseModel):
-    name: Optional[str] = None
-    data: "SmolTautomerDataInput"
-    smol_id: Any
-    project_id: Any
-    tags: List[str]
-
-
-class CreateStructureInput(BaseModel):
-    name: str
-    topology: "TopologyInput"
-    project_id: Any
-    trajectory_id: Optional[Any] = None
-    tags: List[str]
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 
 class DateTimeFilter(BaseModel):
@@ -96,48 +53,22 @@ class DateTimeFilter(BaseModel):
     le: Optional[datetime] = None
 
 
-class EntityFilterBy(BaseModel):
-    and_: Optional[List["EntityFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["EntityFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["EntityFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
+class Jsonfilter(BaseModel):
+    eq: Optional["JsonobjectFilter"] = None
+    ne: Optional["JsonobjectFilter"] = None
 
 
-class EntitySortBy(BaseModel):
-    id: Optional[Order] = None
+class JsonobjectFilter(BaseModel):
+    key: str
+    value: str
+
+
+class MetadataSortBy(BaseModel):
     created_at: Optional[Order] = None
     updated_at: Optional[Order] = None
     deleted_at: Optional[Order] = None
-
-
-class ExperimentDataInput(BaseModel):
-    unit: str
-    measure: str
-    value: float
-    assay: str
-
-
-class ExperimentFilterBy(BaseModel):
-    and_: Optional[List["ExperimentFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["ExperimentFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["ExperimentFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-
-
-class ExperimentSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
+    name: Optional[Order] = None
+    description: Optional[Order] = None
 
 
 class ModuleInput(BaseModel):
@@ -172,65 +103,24 @@ class ModuleInstanceResourcesInput(BaseModel):
     storage_mounts: Optional[List[str]] = None
 
 
-class ProjectFilterBy(BaseModel):
-    and_: Optional[List["ProjectFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["ProjectFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["ProjectFilterBy"] = Field(alias="not", default=None)
+class ObjectDescriptorFilter(BaseModel):
+    all: Optional[List["ObjectDescriptorFilter"]] = None
+    any: Optional[List["ObjectDescriptorFilter"]] = None
     id: Optional["UuidFilter"] = None
+    object: Optional["Jsonfilter"] = None
+    base_url: Optional["StringFilter"] = None
     created_at: Optional["DateTimeFilter"] = None
     updated_at: Optional["DateTimeFilter"] = None
     deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
+    name: Optional["StringFilter"] = None
+    description: Optional["StringFilter"] = None
 
 
-class ProjectSortBy(BaseModel):
+class ObjectDescriptorSortBy(BaseModel):
     id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-
-
-class ProteinConformerFilterBy(BaseModel):
-    and_: Optional[List["ProteinConformerFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["ProteinConformerFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["ProteinConformerFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-
-
-class ProteinConformerSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-
-
-class ProteinFilterBy(BaseModel):
-    and_: Optional[List["ProteinFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["ProteinFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["ProteinFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-
-
-class ProteinSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-
-
-class RawEntityInput(BaseModel):
-    data: Optional[Any] = None
-    tags: List[str]
+    base_url: Optional[Order] = None
+    account_id: Optional[Order] = None
+    metadata: Optional["MetadataSortBy"] = None
 
 
 class ResourceUtilizationInput(BaseModel):
@@ -242,73 +132,6 @@ class ResourceUtilizationInput(BaseModel):
     cputime: float
     inodes: float
     sus: Optional[int] = None
-
-
-class SmolConformerFilterBy(BaseModel):
-    and_: Optional[List["SmolConformerFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["SmolConformerFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["SmolConformerFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-
-
-class SmolConformerSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-
-
-class SmolDataInput(BaseModel):
-    smi: Optional[str] = None
-    inchi: str
-
-
-class SmolFilterBy(BaseModel):
-    and_: Optional[List["SmolFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["SmolFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["SmolFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-    smol_name: Optional["StringFilter"] = None
-
-
-class SmolSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-
-
-class SmolTautomerDataInput(BaseModel):
-    inchi: str
-
-
-class SmolTautomerFilterBy(BaseModel):
-    and_: Optional[List["SmolTautomerFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["SmolTautomerFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["SmolTautomerFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-
-
-class SmolTautomerSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
 
 
 class StringFilter(BaseModel):
@@ -323,30 +146,6 @@ class StringFilter(BaseModel):
     not_in: Optional[List[str]] = None
 
 
-class StructureFilterBy(BaseModel):
-    and_: Optional[List["StructureFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["StructureFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["StructureFilterBy"] = Field(alias="not", default=None)
-    id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-
-
-class StructureSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-
-
-class TagFilter(BaseModel):
-    all: Optional[List[str]] = None
-    any: Optional[List[str]] = None
-
-
 class TestCase(BaseModel):
     args: List["ArgumentInput"]
     target: ModuleInstanceTarget
@@ -354,15 +153,13 @@ class TestCase(BaseModel):
     tags: Optional[List[str]] = None
 
 
-class TokenFilterBy(BaseModel):
-    and_: Optional[List["TokenFilterBy"]] = Field(alias="and", default=None)
-    or_: Optional[List["TokenFilterBy"]] = Field(alias="or", default=None)
-    not_: Optional["TokenFilterBy"] = Field(alias="not", default=None)
+class TokenFilter(BaseModel):
+    all: Optional[List["TokenFilter"]] = None
+    any: Optional[List["TokenFilter"]] = None
     id: Optional["UuidFilter"] = None
     created_at: Optional["DateTimeFilter"] = None
     updated_at: Optional["DateTimeFilter"] = None
     deleted_at: Optional["DateTimeFilter"] = None
-    tags: Optional["TagFilter"] = None
 
 
 class TokenSortBy(BaseModel):
@@ -370,25 +167,7 @@ class TokenSortBy(BaseModel):
     created_at: Optional[Order] = None
     updated_at: Optional[Order] = None
     deleted_at: Optional[Order] = None
-
-
-class TopologyInput(BaseModel):
-    version: Optional[TopologyVersion] = None
-    symbols: List[Element]
-    geometry: List[float]
-    velocities: Optional[List[float]] = None
-    connectivity: Optional[List[Any]] = None
-    formal_charges: Optional[List[int]] = None
-    atom_charges: Optional[List[int]] = None
-    partial_charges: Optional[List[float]] = None
-    labels: Optional[List[str]] = None
-    atom_labels: Optional[List[str]] = None
-    fragments: Optional[List[List[int]]] = None
-    fragment_formal_charges: Optional[List[int]] = None
-    fragment_charges: Optional[List[int]] = None
-    fragment_partial_charges: Optional[List[float]] = None
-    fragment_multiplicities: Optional[List[int]] = None
-    alts: Optional[List[Any]] = None
+    user_id: Optional[Order] = None
 
 
 class TypeQuery(BaseModel):

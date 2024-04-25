@@ -6,6 +6,7 @@ from collections.abc import AsyncGenerator
 import json
 import logging
 import math
+import mimetypes
 import os
 import random
 import re
@@ -47,7 +48,7 @@ from .graphql_client.arguments import (
 )
 from .graphql_client.base_model import UNSET, UnsetType, Upload
 from .graphql_client.client import Client
-from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget
+from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
 from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
@@ -58,15 +59,21 @@ from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesPageInfo,
 )
 from .graphql_client.modules import ModulesModulesPageInfo
-from .graphql_client.object_contents import ObjectContentsObject
+from .graphql_client.object_contents import ObjectContentsObjectPath
 from .graphql_client.retry import RetryRetry
 from .graphql_client.run import RunRun
-from .typedef import SCALARS, build_typechecker, type_from_typedef
+from .typedef import SCALARS, RushType, build_typechecker, type_from_typedef
 
 if sys.version_info >= (3, 12):
     from .types import ArgId, ModuleInstanceId, Resources, Target
 else:
     from .legacy_types import ArgId, ModuleInstanceId, Resources, Target
+
+
+class VirtualObject:
+    path: str
+    size: int
+    format: ObjectFormat
 
 
 @dataclass
@@ -241,21 +248,23 @@ class BaseProvider:
         self.module_paths: dict[str, str] = {}
         self.logger = logger
 
+        self.__is_blocking__ = False
+
         if workspace:
             self.workspace: Path | None = Path(workspace)
             if not self.workspace.exists():
                 raise Exception("Workspace directory does not exist")
             if (self.workspace / "rush.lock").exists():
-                self.config_dir: Path | None = self.workspace
+                self._config_dir: Path | None = self.workspace
             else:
-                self.config_dir = self.workspace / ".rush"
-                if not self.config_dir.exists():
-                    self.config_dir.mkdir()
+                self._config_dir = self.workspace / ".rush"
+                if not self._config_dir.exists():
+                    self._config_dir.mkdir()
 
             self.restore(workspace)
         else:
             self.workspace = None
-            self.config_dir = None
+            self._config_dir = None
 
         if not self.history:
             self.history = History(tags=batch_tags or [], instances=[])
@@ -317,29 +326,29 @@ class BaseProvider:
         self.workspace = Path(workspace)
 
         if (self.workspace / "rush.lock").exists():
-            self.config_dir = self.workspace
+            self._config_dir = self.workspace
         else:
-            self.config_dir = self.workspace / ".rush"
-            if not self.config_dir.exists():
-                self.config_dir.mkdir()
+            self._config_dir = self.workspace / ".rush"
+            if not self._config_dir.exists():
+                self._config_dir.mkdir()
         # read the workspace history file
         # if it exists, load the history
-        workspace_history = self.config_dir / "history.json"
+        workspace_history = self._config_dir / "history.json"
         if workspace_history.exists():
             self.history = self._load_history(workspace_history)
 
-        if (self.config_dir / "rush.lock").exists():
-            self.load_module_paths(self.config_dir / "rush.lock")
+        if (self._config_dir / "rush.lock").exists():
+            self.load_module_paths(self._config_dir / "rush.lock")
 
     def save(self, history_file: str | Path | None = None):
         """
         Save the workspace.
         """
-        if self.config_dir is None:
+        if self._config_dir is None:
             raise Exception("No workspace provided")
         if history_file is None:
-            history_file = self.config_dir / "history.json"
-        self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            history_file = self._config_dir / "history.json"
+        self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
         with open(history_file, "w") as f:
             json.dump(self.history, f, default=to_jsonable_python, indent=2)
 
@@ -450,7 +459,7 @@ class BaseProvider:
             },
         )
 
-    async def object(self, id: ArgId):
+    async def object(self, path: UUID):
         """
         Retrieve an object from the database.
 
@@ -461,7 +470,7 @@ class BaseProvider:
         retries = 3
         while retries > 0:
             try:
-                return await self.client.object_url(id)
+                return await self.client.object_url(path)
             except Exception as e:
                 retries -= 1
                 if retries == 0:
@@ -471,11 +480,12 @@ class BaseProvider:
 
     async def download_object(
         self,
-        id: ArgId,
+        path: UUID,
         filename: str | None = None,
         filepath: Path | None = None,
         overwrite: bool = False,
         signed: bool = True,
+        decode: bool = False,
     ):
         """
         Retrieve an object from the store: a wrapper for object with simpler behavior.
@@ -484,13 +494,13 @@ class BaseProvider:
         :param filepath: Where to download the object.
         :param filename: Download to the workspace with this name under "objects".
         """
-        obj = (await self.object(id)) if signed else (await self.client.object_contents(id))
+        obj = (await self.object(path)) if signed else (await self.client.object_contents(path))
         if not obj:
             return None
 
         if filepath is None:
             if filename is None:
-                filename = str(id)
+                filename = str(path)
             if filename and self.workspace:
                 if not (self.workspace / "objects").exists():
                     (self.workspace / "objects").mkdir()
@@ -502,7 +512,7 @@ class BaseProvider:
         if filepath:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
-            if obj and isinstance(obj, ObjectContentsObject):
+            if obj and isinstance(obj, ObjectContentsObjectPath):
                 json.dump(obj.contents, open(filepath, "w"))
             elif obj:
                 with httpx.stream(method="get", url=obj.url) as r:
@@ -510,6 +520,10 @@ class BaseProvider:
 
                     buf = ""
                     with open(filepath, "wb") as f:
+                        if not decode:
+                            for chunk in r.iter_bytes():
+                                f.write(chunk)
+                            return filepath
                         first_chunk = True
                         is_encoded = False
                         for chunk in r.iter_text():
@@ -583,7 +597,7 @@ class BaseProvider:
 
             # check against latest modules
 
-            asyncio_run(get_latest_modules(modules))
+            asyncio_run(get_latest_modules(modules), override="task")
             return modules
         else:
             raise FileNotFoundError("Lock file not found")
@@ -643,7 +657,7 @@ class BaseProvider:
 
         # TODO: less insane version of this
         def gen_arg_dict(
-            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | Path | IOBase | Any,
+            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | VirtualObject | Any,
         ) -> ArgumentInput:
             arg = ArgumentInput()
             if isinstance(input, BaseProvider.Arg) or isinstance(input, BaseProvider.BlockingArg):
@@ -653,19 +667,6 @@ class BaseProvider:
                     arg.id = input.id
             elif isinstance(input, ArgId):
                 arg.id = input
-            elif isinstance(input, Path):
-                storage_requirements["storage"] += input.stat().st_size
-                if input.name.endswith(".json"):
-                    with open(input, "r") as f:
-                        arg = ArgumentInput(value=json.load(f))
-                else:
-                    arg = ArgumentInput(value=base64.b64encode(input.read_bytes()).decode("utf-8"))
-            elif isinstance(input, IOBase):
-                data = input.read()
-                # The only other case is bytes-like, i.e. isinstance(data, (bytes, bytearray))
-                if isinstance(data, str):
-                    data = data.encode("utf-8")
-                arg = ArgumentInput(value=base64.b64encode(data).decode("utf-8"))
             else:
                 arg = ArgumentInput(value=input)
             return arg
@@ -900,7 +901,7 @@ class BaseProvider:
             module_paths = self.load_module_paths(lockfile)
             module_pages = self.get_modules_for_paths(list(module_paths.values()))
         else:
-            if self.config_dir:
+            if self._config_dir:
                 if self.module_paths.items():
                     # we have already loaded a lock via the workspace
                     module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
@@ -920,7 +921,7 @@ class BaseProvider:
                         paths = await self.get_latest_module_paths(names)
                         module_pages = self.get_modules_for_paths(list(paths.values()))
                         self.module_paths = paths
-                        self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+                        self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
             elif tags:
                 # no workspace, so up the user to lock it
                 module_pages = await self.modules(tags=tags)
@@ -944,15 +945,12 @@ class BaseProvider:
         for name, module in sorted(modules):
             path = module.path
 
-            in_types = tuple(type_from_typedef(i) for i in module.ins)
             out_types = tuple(type_from_typedef(i) for i in module.outs)
 
-            typechecker = build_typechecker(*in_types)
-
             def random_target():
-                allowed_default_targets = ["NIX_SSH", "NIX_SSH_2"]
-                if "NIX_SSH_3" in str(module.targets) or "NIX_SSH_3_GPU" in str(module.targets):
-                    allowed_default_targets.append("NIX_SSH_3")
+                allowed_default_targets = ["BULLET", "BULLET_2"]
+                if "BULLET_3" in str(module.targets) or "BULLET_3_GPU" in str(module.targets):
+                    allowed_default_targets.append("BULLET_3")
                 return random.choice(allowed_default_targets)
 
             default_resources = None
@@ -966,9 +964,12 @@ class BaseProvider:
             def closure(
                 name: str,
                 path: str,
-                typechecker: Any,
+                module_ins: list[Any],
                 default_resources: Resources | None,
             ):
+                in_types = tuple(type_from_typedef(i) for i in module_ins)
+                typechecker = build_typechecker(*in_types)
+
                 async def runner(
                     *args: Any,
                     target: Target | None = None,
@@ -976,6 +977,7 @@ class BaseProvider:
                     tags: list[str] | None = None,
                     restore: bool | None = None,
                 ):
+                    args = await self.upload_args(args, module_ins)
                     if target is None:
                         target = random_target()
                     typechecker(*args)
@@ -983,7 +985,7 @@ class BaseProvider:
                         path, list(args), target, resources, tags, out_tags=None, restore=restore
                     )
                     return tuple(
-                        (BaseProvider.BlockingArg if LOOP.is_running() else BaseProvider.Arg)(
+                        (BaseProvider.BlockingArg if self.__is_blocking__ else BaseProvider.Arg)(
                             self, out.id, source=run.id
                         )
                         for out in run.outs
@@ -1051,10 +1053,33 @@ class BaseProvider:
 
                 return runner
 
-            runner = closure(name, path, typechecker, default_resources)
+            runner = closure(name, path, module.ins, default_resources)
             self.__setattr__(name, runner)
             ret[name] = runner
         return ret
+
+    async def upload_args(
+        self,
+        args: tuple[Any, ...],
+        in_types: list[Any],
+    ) -> tuple[Any, ...]:
+        """
+        Walk through input types and for any that are files, upload them.
+        Replace the file with the uploaded object in the arg list and return the list.
+
+        :param args: The arguments to be uploaded.
+        :param in_types: The types of the arguments.
+
+        :return: Arguments with files replaced with virtual objects.
+        """
+        newargs = []
+        for i, arg in enumerate(args):
+            if isinstance(arg, Path):
+                obj = await self.upload(arg, in_types[i])
+                newargs.append(obj.object)
+            else:
+                newargs.append(arg)
+        return tuple(newargs)
 
     async def retry(
         self,
@@ -1073,7 +1098,7 @@ class BaseProvider:
     async def upload(
         self,
         file: Path | str,
-        typeinfo: dict[str, Any],
+        typeinfo: dict[str, Any] | RushType[Any],
     ):
         """
         Upload an Object with typeinfo and store as an Argument.
@@ -1081,10 +1106,15 @@ class BaseProvider:
         :param file: The file to be uploaded.
         :param typeinfo: The typeinfo of the file.
         """
+        if isinstance(file, str):
+            file = Path(file)
         with open(file, "rb") as f:
-            return await self.client.upload_arg(
+            format = ObjectFormat.json if file.suffix == ".json" else ObjectFormat.bin
+            mimetype = mimetypes.guess_type(file)[0]
+            return await self.client.upload_object(
                 typeinfo=typeinfo,
-                file=Upload(filename=f.name, content=f, content_type="application/octet-stream"),
+                format=format,
+                file=Upload(filename=f.name, content=f, content_type=mimetype or "text/plain"),
             )
 
     async def module_instance(self, id: ModuleInstanceId) -> ModuleInstanceDetailsModuleInstance:
@@ -1157,7 +1187,7 @@ class BaseProvider:
         :param names: Optional list of names to update.
         :param tags: Optionally only upate modules with this tag.
         """
-        if not self.config_dir:
+        if not self._config_dir:
             raise Exception("No workspace provided")
 
         if tags:
@@ -1172,11 +1202,11 @@ class BaseProvider:
                             self.module_paths[name] = path
                     else:
                         self.module_paths[name] = path
-            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
         else:
             paths = await self.get_latest_module_paths(names)
             self.module_paths = paths
-            self.save_module_paths(self.module_paths, self.config_dir / "rush.lock")
+            self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
 
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -1268,8 +1298,13 @@ class BaseProvider:
                                     )
                                     self.status = module_instance.status
                                 if module_instance.status == ModuleInstanceStatus.RUNNING:
-                                    if module_instance.progress != self.progress:
+                                    if (
+                                        module_instance.progress
+                                        and module_instance.progress.n != self.progress.n
+                                    ):
                                         print(f"Progress: {module_instance.progress}", end="\r")
+                                    else:
+                                        print("module running with no progress reported", end="\r")
                             await asyncio.sleep(5)
                         else:
                             raise e
@@ -1313,7 +1348,10 @@ class BaseProvider:
                     )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
-                    return await self.provider.download_object(self.id, filename, filepath, overwrite, signed)
+                    decode = not (self.value and dict.get(self.value, "format") == "bin")
+                    return await self.provider.download_object(
+                        self.value["path"], filename, filepath, overwrite, signed, decode
+                    )
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -1360,6 +1398,15 @@ class BaseProvider:
                                             f"Argument {self.id} is now {module_instance.status}"
                                         )
                                         self.status = module_instance.status
+
+                                    if module_instance.status == ModuleInstanceStatus.RUNNING:
+                                        if (
+                                            module_instance.progress
+                                            and module_instance.progress.n != self.progress.n
+                                        ):
+                                            print(f"Progress: {module_instance.progress}", end="\r")
+                                        else:
+                                            print("module running with no progress reported", end="\r")
                                 await asyncio.sleep(1)
                     except GraphQLClientGraphQLMultiError as e:
                         if e.errors[0].message == "not found":
@@ -1374,7 +1421,7 @@ class BaseProvider:
                     self.typeinfo["k"] == "optional"
                     and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
                 ):
-                    return (await self.provider.object(self.id)).url
+                    return (await self.provider.object(self.value["path"])).url
             return self.value
 
     class BlockingArg(Arg[T]):
@@ -1422,9 +1469,9 @@ class Provider(BaseProvider):
         :param batch_tags: The tags that will be placed on all runs by default.
         """
         if workspace is None:
-            workspace = os.getcwd()
+            workspace = Path(".")
         if workspace is True:
-            workspace = os.getcwd()
+            workspace = Path(".")
         if workspace is False:
             workspace = None
 
@@ -1458,7 +1505,6 @@ class Provider(BaseProvider):
             restore_by_default = False
 
         elif restore_by_default is None:
-            logger.info("Not restoring by default via default")
             restore_by_default = False
 
         if access_token is None or url is None:
@@ -1540,12 +1586,12 @@ def build_blocking_provider_with_functions(
     provider = Provider(
         access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
     )
-    if not LOOP.is_running():
+    if not LOOP.is_running() and not asyncio.get_event_loop().is_running():
         _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
         _LOOP_THREAD.start()
 
     # functions that don't get called internally can be overridden with blocking versions
-    blockable_functions = ("nuke", "status", "logs", "upload", "retry", "tag")
+    blockable_functions = ("nuke", "status", "logs", "retry", "tag")
     built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
@@ -1556,7 +1602,7 @@ def build_blocking_provider_with_functions(
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closure(func):
+            def closure(func, n):
                 def blocking_func(
                     *args,
                     target: Target | None = None,
@@ -1571,7 +1617,7 @@ def build_blocking_provider_with_functions(
                 return blocking_func
 
             name = name if name in built_fns else f"{name}_blocking"
-            blocking_func = closure(func)
+            blocking_func = closure(func, name)
             blocking_func.__name__ = f"{name}"
             blocking_func.__doc__ = func.__doc__
             blocking_func.__annotations__ = func.__annotations__
@@ -1585,7 +1631,7 @@ def build_blocking_provider_with_functions(
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closure(func: Callable[..., Awaitable[T]]):
+            def closure(func: Callable[..., Awaitable[T]], n):
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     r = asyncio_run(func(provider, *args, **kwargs))
                     if isinstance(r, AsyncGenerator):
@@ -1600,7 +1646,7 @@ def build_blocking_provider_with_functions(
                 return blocking_func
 
             name = name if name in blockable_functions else f"{name}_blocking"
-            blocking_func = closure(func)
+            blocking_func = closure(func, name)
             blocking_func.__name__ = f"{name}"
             blocking_func.__doc__ = func.__doc__
             blocking_func.__annotations__ = func.__annotations__
@@ -1610,7 +1656,7 @@ def build_blocking_provider_with_functions(
     for name, func in BaseProvider.__dict__.items():
         if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
 
-            def closure(func: Callable[..., Awaitable[T]]):
+            def closure(func: Callable[..., Awaitable[T]], n):
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     r = func(provider, *args, **kwargs)
                     if isinstance(r, AsyncGenerator):
@@ -1629,7 +1675,7 @@ def build_blocking_provider_with_functions(
                 return blocking_func
 
             name = name if name in blockable_functions else f"{name}_blocking"
-            blocking_func = closure(func)
+            blocking_func = closure(func, name)
             blocking_func.__name__ = f"{name}"
             blocking_func.__doc__ = func.__doc__
             blocking_func.__annotations__ = func.__annotations__
@@ -1637,4 +1683,5 @@ def build_blocking_provider_with_functions(
             blocking_versions[name] = blocking_func
 
     provider.__dict__.update(blocking_versions)
+    provider.__is_blocking__ = True
     return provider
