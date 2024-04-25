@@ -4,7 +4,7 @@ version = "3.0.1"
 description = "Python SDK for interacting with the QDX Rush API and modules"
 authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"
-packages = [{include = "rush"}]
+packages = [{ include = "rush" }]
 documentation = "https://talo.github.io/rush-py"
 homepage = "https://rush.qdx.co"
 
@@ -23,7 +23,7 @@ nest-asyncio = "^1.6.0"
 
 [tool.poetry.group.dev.dependencies]
 ariadne-codegen = "0.13.0"
-black = {extras = ["jupyter"], version = "~=23.9.1"}
+black = { extras = ["jupyter"], version = "~=23.9.1" }
 flake8 = "~=6.1.0"
 isort = "~=5.12.0"
 jupyter-contrib-nbextensions = "^0.7.0"
@@ -31,7 +31,7 @@ jupyterlab = "^4.0.6"
 nbdev = "^2.3.12"
 notebook = "^7.0.7"
 parso = "^0.8.3"
-pdoc= "^14.4.0"
+pdoc = "^14.4.0"
 pip = "~=23.2.1"
 py3Dmol = "^2.0.4"
 pytest = "~=7.4.3"
@@ -39,6 +39,7 @@ pytest-xdist = "~=3.3.1"
 qdx-py = "^0.6.2"
 pickleshare = "^0.7.5"
 jupyterlab-lsp = "^5.1.0"
+rdkit = "^2023.9.5"
 
 [build-system]
 requires = ["poetry-core"]
@@ -60,8 +61,20 @@ ignore = ["D202", "D105"]
 match = "(?!test_).*.py"
 
 [tool.pyright]
-exclude = ["**/node_modules", "**/__pycache__", "**/*venv*", "result", "setup.py"]
-ignore = ["**/node_modules", "**/__pycache__", "**/*venv*", "result", "setup.py"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/*venv*",
+    "result",
+    "setup.py",
+]
+ignore = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/*venv*",
+    "result",
+    "setup.py",
+]
 reportIncompatibleMethodOverride = "none"
 reportIncompatibleVariableOverride = "none"
 reportMissingImports = true
