@@ -51,7 +51,6 @@ build-backend = "poetry.core.masonry.api"
 line-length = 110
 include = '\.pyi?$'
 
-
 [tool.isort]
 line_length = 110
 profile = "black"
@@ -128,3 +127,6 @@ type = "uuid.UUID"
 
 [tool.ariadne-codegen.scalars.ObjectDescriptorId]
 type = "uuid.UUID"
+
+[tool.poetry.extras]
+rdkit = ['rdkit']
