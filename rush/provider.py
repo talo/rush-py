@@ -2,19 +2,20 @@ from __future__ import annotations
 
 import asyncio
 import base64
-from collections.abc import AsyncGenerator
+import inspect
 import json
 import logging
 import math
-import os
 import random
 import re
 import sys
-import time
 import threading
+import time
 from collections import Counter
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from io import IOBase
+from os import environ
 from pathlib import Path
 from typing import (
     Any,
@@ -30,15 +31,13 @@ from typing import (
     Union,
 )
 from uuid import UUID
-import inspect
 
 import httpx
 from pydantic_core import to_jsonable_python
 
 from rush.graphql_client.exceptions import GraphQLClientGraphQLMultiError
 
-
-from .async_utils import start_background_loop, asyncio_run, LOOP
+from .async_utils import LOOP, asyncio_run, start_background_loop
 from .graphql_client.argument import Argument, ArgumentArgument
 from .graphql_client.arguments import (
     ArgumentsMeAccountArguments,
@@ -1521,10 +1520,10 @@ class Provider(BaseProvider):
                 logger.addHandler(stdout_handler)
                 logger.addHandler(stderr_handler)
 
-        if os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
+        if environ.get("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
             logger.info("Restoring by default via env")
             restore_by_default = True
-        elif os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
+        elif environ.get("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
             logger.info("Not restoring by default via env")
             restore_by_default = False
 
@@ -1535,12 +1534,12 @@ class Provider(BaseProvider):
             # try to check the environment variables
 
             if access_token is None:
-                access_token = os.environ.get("RUSH_TOKEN")
+                access_token = environ.get("RUSH_TOKEN")
                 if access_token is None:
                     raise Exception("No access token provided")
 
             if url is None:
-                url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
+                url = environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
             client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
 
             super().__init__(
