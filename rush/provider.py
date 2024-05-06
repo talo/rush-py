@@ -416,7 +416,7 @@ class BaseProvider:
             )
             page_info_res = result.page_info
             yield result or EmptyPage()
-            if len(result.edges) > 0:  # type: ignore
+            if len(result.edges) == 0:  # type: ignore
                 break
 
     async def argument(self, id: ArgId) -> ArgumentArgument:
