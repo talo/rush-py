@@ -1,4 +1,3 @@
-import asyncio
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,6 +30,8 @@ COLABFOLD_FOLD_RUN_CONFIG = {
     },
     "target": "GADI",
 }
+
+P2RANK_RUN_CONFIG = {}
 
 
 def read_fasta(filepath: Path) -> dict[str, str]:
@@ -68,43 +69,58 @@ def read_fasta(filepath: Path) -> dict[str, str]:
         return fasta_sequences
 
 
-async def main():
+def main():
     args = datargs.parse(Args)
 
-    client = await rush.build_provider_with_functions(
-        batch_tags=["paratus", "demo"],
+    # 1.0: Obtain input (FASTA)
+    fasta_name, fasta_sequence = next(iter(read_fasta(args.input_sequence).items()))
+    print(f"{fasta_name=}")
+    print(f"{fasta_sequence=}")
+    uniprot_id = fasta_name.split("|")[1]
+    print(f"{uniprot_id=}")
+
+    client = rush.build_blocking_provider_with_functions(
+        batch_tags=["paratus", "protocol", "druggability", uniprot_id],
         workspace=WORK_DIR,
+        restore_by_default=True,
     )
 
-    # 1.0: Obtain input (FASTA)
-    fasta_sequence = next(iter(read_fasta(args.input_sequence).values()))
-
     # 1.1: MSA
-    (msa_handle,) = await client.mmseqs2(
+    (msa_handle,) = client.mmseqs2(
         {"fasta": [fasta_sequence]},
-        restore=True,
         **COLABFOLD_SEARCH_RUN_CONFIG,
     )
 
     # 1.2: Produce 3D structure
-    (folded_conformers_handle,) = await client.colabfold_fold(
+    (folded_conformers_handle,) = client.colabfold_fold(
         msa_handle,
         **COLABFOLD_FOLD_RUN_CONFIG,
     )
-    await folded_conformers_handle.download()
 
     # 2.0: Evaluate pockets
-    p2rank_prediction_handle, pml_viz_handle = await client.p2rank(
+    p2rank_prediction_handle, pml_viz_handle = client.p2rank(
         folded_conformers_handle,
         use_alpha_config=True,
-        **COLABFOLD_FOLD_RUN_CONFIG,
+        **P2RANK_RUN_CONFIG,
     )
 
-    # 2.1: Show evaluation
-    p2rank_prediction = await p2rank_prediction_handle.get()
+    # 2.1: Download everything & show evaluation
+    msa_handle.download(
+        filename=f"{uniprot_id}_1.1_msa.tar.gz",
+    )
+    folded_conformers_handle.download(
+        filename=f"{uniprot_id}_1.2_conformer.tar.gz",
+    )
+    p2rank_prediction_handle.download(
+        filename=f"{uniprot_id}_2.0_pockets.tar.gz",
+    )
+    viz_path = pml_viz_handle.download(
+        filename=f"{uniprot_id}_2.0_viz.tar.gz",
+    )
+
+    p2rank_prediction = p2rank_prediction_handle.get()
     for pocket in p2rank_prediction["pockets"]:
         print(pocket)
-    viz_path = await pml_viz_handle.download()
     subprocess.run(["tar", "xzvf", viz_path, "-C", client.workspace], check=True)
 
 
@@ -114,4 +130,4 @@ class Args:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
