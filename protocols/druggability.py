@@ -1,4 +1,4 @@
-import subprocess
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -69,6 +69,11 @@ def read_fasta(filepath: Path) -> dict[str, str]:
         return fasta_sequences
 
 
+@dataclass
+class Args:
+    input_sequence: Path
+
+
 def main():
     args = datargs.parse(Args)
 
@@ -98,35 +103,28 @@ def main():
     )
 
     # 2.0: Evaluate pockets
-    p2rank_prediction_handle, pml_viz_handle = client.p2rank(
-        folded_conformers_handle,
-        use_alpha_config=True,
+    (folded_conformer_handle,) = client.pick_conformer(folded_conformers_handle, 0)
+    (p2rank_prediction_handle, pymol_viz_handle) = client.p2rank(
+        folded_conformer_handle,
+        True,
         **P2RANK_RUN_CONFIG,
     )
 
     # 2.1: Download everything & show evaluation
     msa_handle.download(
         filename=f"{uniprot_id}_1.1_msa.tar.gz",
+        overwrite=True,
     )
-    folded_conformers_handle.download(
-        filename=f"{uniprot_id}_1.2_conformer.tar.gz",
+    folded_conformer_handle.download(
+        filename=f"{uniprot_id}_1.2_conformer.json",
+        overwrite=True,
     )
-    p2rank_prediction_handle.download(
-        filename=f"{uniprot_id}_2.0_pockets.tar.gz",
+    with open(client.workspace / "objects" / f"{uniprot_id}_2.0_pocket_data.json", "w") as f:
+        json.dump(p2rank_prediction_handle.get(), f, indent=2)
+    pymol_viz_handle.download(
+        filename=f"{uniprot_id}_2.0_pocket_viz.tar.gz",
+        overwrite=True,
     )
-    viz_path = pml_viz_handle.download(
-        filename=f"{uniprot_id}_2.0_viz.tar.gz",
-    )
-
-    p2rank_prediction = p2rank_prediction_handle.get()
-    for pocket in p2rank_prediction["pockets"]:
-        print(pocket)
-    subprocess.run(["tar", "xzvf", viz_path, "-C", client.workspace], check=True)
-
-
-@dataclass
-class Args:
-    input_sequence: Path
 
 
 if __name__ == "__main__":
