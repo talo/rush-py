@@ -1208,6 +1208,8 @@ class BaseProvider:
             self.module_paths = paths
             self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
 
+        await self.get_module_functions(names=names, tags=tags)
+
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
         Delete a module instance with a given ID.
