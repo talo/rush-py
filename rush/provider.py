@@ -513,7 +513,7 @@ class BaseProvider:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
             if obj and isinstance(obj, ObjectContentsObjectPath):
-                json.dump(obj.contents, open(filepath, "w"))
+                json.dump(obj.contents, open(filepath, "w"), indent=2)
             elif obj:
                 with httpx.stream(method="get", url=obj.url) as r:
                     r.raise_for_status()
