@@ -10,8 +10,6 @@ import rush
 
 WORK_DIR = Path.cwd()
 
-INPUT_FASTA_FILENAME = "input.fasta"
-
 COLABFOLD_SEARCH_RUN_CONFIG = {
     "resources": {
         "gpus": 0,
@@ -120,7 +118,7 @@ def main():
         filename=f"{uniprot_id}_1.2_conformer.json",
         overwrite=True,
     )
-    with open(client.workspace / "objects" / f"{uniprot_id}_2.0_pocket_data.json", "w") as f:
+    with open(WORK_DIR / "objects" / f"{uniprot_id}_2.0_pocket_data.json", "w") as f:
         json.dump(p2rank_prediction_handle.get(), f, indent=2)
     pymol_viz_handle.download(
         filename=f"{uniprot_id}_2.0_pocket_viz.tar.gz",
