@@ -27,6 +27,7 @@ COLABFOLD_FOLD_RUN_CONFIG = {
     "resources": {
         "gpus": 1,
         "storage_mounts": ["gdata/if89"],
+        "walltime": 360,
     },
     "target": "GADI",
 }
