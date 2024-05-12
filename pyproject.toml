@@ -24,6 +24,7 @@ typing-extensions = "^4.9.0"
 websockets = "^12"
 
 [tool.poetry.group.dev.dependencies]
+numpy = "^1.26.4"
 ariadne-codegen = "0.13.0"
 black = { extras = ["jupyter"], version = "~=23.9.1" }
 flake8 = "~=6.1.0"

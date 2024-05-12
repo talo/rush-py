@@ -3383,4 +3383,4 @@ rdkit = []
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.13"
-content-hash = "ea3b05903e35b86ff97292a4fb2babab31c3a0b105d007e44b1fccd6ae2fcb10"
+content-hash = "42508c7401826984ce5349abcfc33e2f2a92177e731cc56916f3b22d5f22330a"
