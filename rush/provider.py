@@ -507,11 +507,14 @@ class BaseProvider:
                 filepath = self.workspace / "objects" / filename
 
                 if filepath.exists() and not overwrite:
-                    raise FileExistsError(f"File {filename} already exists in workspace")
+                    # warn user that file is being restored
+                    self.logger.warning(f"File {filename} already exists in workspace")
+                    return filepath
 
         if filepath:
             if filepath.exists() and not overwrite:
-                raise FileExistsError(f"File {filename} already exists in workspace")
+                self.logger.warning(f"File {filename} already exists in workspace")
+                return filepath
             if obj and isinstance(obj, ObjectContentsObjectPath):
                 json.dump(obj.contents, open(filepath, "w"), indent=2)
             elif obj:
