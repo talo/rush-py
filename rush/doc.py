@@ -1,7 +1,8 @@
 #!/usr/bin/env python3.12
 # flake8: noqa
-import asyncio
 from typing import Any as _Any
+
+from rush.async_utils import asyncio_run
 
 from . import provider, types
 
@@ -37,7 +38,7 @@ As an output argument, you can expect:
 """
 
 _x = provider.Provider()
-_fns = asyncio.run(_x.get_module_functions(tags=["rush-py-v3.0.0"]))
+_fns = asyncio_run(_x.get_module_functions(tags=["rush-py-v3.0.0"]))
 RushProvider = type(
     "RushProvider",
     (provider.Provider,),
