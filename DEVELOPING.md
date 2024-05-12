@@ -42,6 +42,8 @@ Step 3. Copy the queries from rush-client into `combined.graphql` - we try to ke
 
 Step 4. Run `ariadne-codegen` in an environment with it installed to update the deps
 
+Step 4.1. Add a backoff wrapper to the generated `async_base_client.execute` function # TODO: automate
+
 Step 5. Update the `rush/provider.py` to address any incompatibilities / add helpers for new features
 
 

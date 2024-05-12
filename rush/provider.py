@@ -416,7 +416,7 @@ class BaseProvider:
             )
             page_info_res = result.page_info
             yield result or EmptyPage()
-            if len(result.edges) > 0:  # type: ignore
+            if len(result.edges) == 0:  # type: ignore
                 break
 
     async def argument(self, id: ArgId) -> ArgumentArgument:
@@ -513,7 +513,7 @@ class BaseProvider:
             if filepath.exists() and not overwrite:
                 raise FileExistsError(f"File {filename} already exists in workspace")
             if obj and isinstance(obj, ObjectContentsObjectPath):
-                json.dump(obj.contents, open(filepath, "w"))
+                json.dump(obj.contents, open(filepath, "w"), indent=2)
             elif obj:
                 with httpx.stream(method="get", url=obj.url) as r:
                     r.raise_for_status()
@@ -1207,6 +1207,8 @@ class BaseProvider:
             paths = await self.get_latest_module_paths(names)
             self.module_paths = paths
             self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
+
+        await self.get_module_functions(names=names, tags=tags)
 
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
