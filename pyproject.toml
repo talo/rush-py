@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rush-py"
-version = "3.0.2"
+version = "3.0.3"
 description = "Python SDK for interacting with the QDX Rush API and modules"
 authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"
@@ -42,8 +42,7 @@ pytest-xdist = "~=3.3.1"
 qdx-py = ">0.6.2"
 pickleshare = "^0.7.5"
 jupyterlab-lsp = "^5.1.0"
-rdkit = "^2023.9.5"
-mpire = "^2.10.2"
+rdkit = "^2023.9.6"
 
 [build-system]
 requires = ["poetry-core"]
