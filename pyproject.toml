@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rush-py"
-version = "3.0.1"
+version = "3.0.2"
 description = "Python SDK for interacting with the QDX Rush API and modules"
 authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"
@@ -13,15 +13,18 @@ homepage = "https://rush.qdx.co"
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.13"
+
+aiofiles = "^23.2.1"
+backoff = "^2.2.1"
 httpx = "^0.26.0"
+nest-asyncio = "^1.6.0"
 pdb-tools = "^2.5.0"
 pydantic = "^2.6.0"
 typing-extensions = "^4.9.0"
 websockets = "^12"
-aiofiles = "^23.2.1"
-nest-asyncio = "^1.6.0"
 
 [tool.poetry.group.dev.dependencies]
+numpy = "^1.26.4"
 ariadne-codegen = "0.13.0"
 black = { extras = ["jupyter"], version = "~=23.9.1" }
 flake8 = "~=6.1.0"

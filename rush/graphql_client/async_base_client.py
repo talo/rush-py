@@ -5,6 +5,7 @@ import json
 from typing import IO, Any, AsyncIterator, Dict, List, Optional, Tuple, TypeVar, cast
 from uuid import uuid4
 
+import backoff
 import httpx
 from pydantic import BaseModel
 from pydantic_core import to_jsonable_python
@@ -90,6 +91,7 @@ class AsyncBaseClient:
     ) -> None:
         await self.http_client.aclose()
 
+    @backoff.on_exception(backoff.expo, (httpx.ReadTimeout, httpx.ConnectError), max_time=60)
     async def execute(
         self,
         query: str,
