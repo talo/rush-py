@@ -1596,7 +1596,7 @@ def build_blocking_provider_with_functions(
         _LOOP_THREAD.start()
 
     # functions that don't get called internally can be overridden with blocking versions
-    blockable_functions = ("nuke", "status", "logs", "retry", "tag")
+    blockable_functions = ("nuke", "status", "logs", "retry", "tag", "update_modules")
     built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
