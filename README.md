@@ -5,261 +5,283 @@
 
 # Quickstart
 
-This document will walk through executing jobs on the Rush platform, by
-demonstrating how to prepare a protein. For a comprehensive guide on the
-concepts and constructing a full workflow, see the [full rush-py
-explainer](https://talo.github.io/rush-py/full-rush-py-explainer.html)
-document.
+This guide will walk you through executing a basic job using Rush, by
+demonstrating how to generate 3D small molecule conformers. For a deeper
+dive and an example of a full end-to-end in silico protocol, see the
+[Comprehensive
+Guide](https://talo.github.io/rush-py/comprehensive_guide.html).
 
-First, install the following modules via pip—we require Python ≥ 3.9:
+# Install
 
-    pip install rush-py pdb-tools
+First, install the following modules via the command-line (we require
+Python ≥ 3.9):
 
-# 0) Code Sample
-
-See the detailed breakdown in sections.
-
-``` python
-# Get a pdb to work with - we use the pdb-tools cli here
-# but you can download directly from rcsb.org
-!pdb_fetch '1brs' | pdb_selchain -A | pdb_delhetatm > '1B39_A_nohet.pdb'
+``` bash
+pip install rush-py
 ```
 
+# Full Code
+
+One of the simplest things you can do with Rush is generate 3D small
+molecule conformers from SMILES using the Auto3D module. We will break
+down how to do this step-by-step, but lets start with the full code:
+
 ``` python
-# ...import the dependencies and set your configuration
-from pathlib import Path
 import rush
 
-os.environ["RUSH_TOKEN"] = YOUR_TOKEN
-
-# 1.3 Build your client
-client = rush.build_blocking_provider_with_functions()
-
-# 2.1 Prepare the protein
-prepared_protein_qdxf, prepared_protein_pdb = client.prepare_protein(
-    Path("1B39_A_nohet.pdb"), None, None, tags=["example_prep"]
+client = rush.build_blocking_provider_with_functions(
+    access_token=PUT_YOUR_TOKEN_HERE
 )
 
-# 2.3 Return run values
-print(prepared_protein_qdxf.download(overwrite=True).open().read()[0:50], "...")
+# setup an SMI file that contains the SMILES string of our ligand
+ligand_smi_filename = client.workspace / "ligand.smi"
+ligand_smi_filename.write_text("CN1C=NC2=C1C(=O)N(C(=O)N2C)C 1")
+
+# run Auto3D which will give us 3 conformers of our ligand
+# in the SDF format and the QDXF format
+ligand_sdf_handle, ligand_qdxf_handle = client.auto3d(
+    ligand_smi_filename,  # the filename that stores our ligand
+    "smi",  # the format of the file
+    {
+        "k": 3,  # number of conformers to generate
+        "use_gpu": True,  # use GPU for faster compute
+    },
+    tags=["your_job_name"],
+    resources={
+        "gpus": 1,  # the number of GPUs to use
+        "storage": 5,  # the amount of storage to use
+        "storage_units": "MB",  # the units of storage (here we are using megabytes)
+    },
+)
+
+# print the status of all jobs
+print(client.status())
+
+# download the results (this will block until the Auto3D job has completed)
+ligand_sdf = ligand_sdf_handle.download()
+ligand_qdxf = ligand_qdxf_handle.download()
+
+print(ligand_sdf)  # print the path to the downloaded SDF file
+
+print(
+    ligand_sdf.read_text()[0:100]
+)  # print the first 100 characters of the SDF version of the result
+print(
+    ligand_qdxf.read_text()[0:100]
+)  # print the first 100 characters of the the QDXF version of the result
 ```
 
-    2024-04-08 17:12:28,141 - rush - INFO - Not restoring by default via default
-    2024-04-08 17:12:29,451 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.RESOLVING
-    2024-04-08 17:12:40,388 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.ADMITTED
-    2024-04-08 17:12:44,734 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.DISPATCHED
-    2024-04-08 17:12:45,825 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.RUNNING
-    2024-04-08 17:12:59,570 - rush - INFO - Argument 10ef4d21-fac5-4962-973b-cf0f6e26d964 is now ModuleInstanceStatus.AWAITING_UPLOAD
-    [{"topology": {"version": "V1", "symbols": ["N", " ...
+    2024-05-13 15:13:32,737 - rush - INFO - Not restoring by default via env
+    {'26f07d72-bb16-4eb8-b23c-b620e5dd8182': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>, 'auto3d', 1)}
+    2024-05-13 15:13:35,962 - rush - INFO - Argument 0cd8539e-950b-41eb-b323-851560397cb1 is now ModuleInstanceStatus.RESOLVING
+    2024-05-13 15:13:37,212 - rush - INFO - Argument 0cd8539e-950b-41eb-b323-851560397cb1 is now ModuleInstanceStatus.ADMITTED
+    2024-05-13 15:13:49,235 - rush - INFO - Argument 0cd8539e-950b-41eb-b323-851560397cb1 is now ModuleInstanceStatus.DISPATCHED
+    2024-05-13 15:13:55,206 - rush - INFO - Argument 0cd8539e-950b-41eb-b323-851560397cb1 is now ModuleInstanceStatus.RUNNING
+    2024-05-13 15:14:28,548 - rush - INFO - Argument 0cd8539e-950b-41eb-b323-851560397cb1 is now ModuleInstanceStatus.AWAITING_UPLOAD
+    objects/8f0e078f-4920-426d-8e50-6f541ea795eb
+    1
+         RDKit          3D
 
-# 1) Setup
+     24 25  0  0  0  0  0  0  0  0999 V2000
+       -1.9595   -2.3573    0.7656 C  
+    [
+      {
+        "topology": {
+          "version": "V1",
+          "symbols": [
+            "C",
+            "N",
+            
 
-This is where we prepare the rush client, directories, and input data
-we’ll be working with.
+# Step-by-step
 
-## 1.0) Imports
+## Import the Rush Python library
+
+The first thing we do is import the `rush` Python library:
 
 ``` python
-import json
-from pathlib import Path
-
-from pdbtools import pdb_delhetatm, pdb_fetch, pdb_selchain
-
 import rush
 ```
 
-## 1.1) Credentials
+## Create a Rush client
 
-Retrieve your API token from the [Rush
-UI](https://rush.qdx.co/dashboard/settings).
+The next step is to create a client. This client will be used to
+interact with the Rush API. You will need to provide your Access Token
+to authenticate with the API. You can get your Access Token by signing
+up at <https://rush.qdx.co> and going into your account settings.
 
-You can either set the `RUSH_URL` and `RUSH_TOKEN` environment variables
-or provide them as variables to the client directly.
-
-To see how to set environment variables,
-[Wikipedia](https://en.wikipedia.org/wiki/Environment_variable) has an
-extensive article.
-
-``` python
-os.environ["RUSH_TOKEN"] = YOUR_TOKEN
-```
-
-## 1.2) Configuration
-
-Lets set some global variables that define our project. These are not
-required, but are good practice to help organize the jobs that will be
-persisted under your account.
-
-Make sure you create a unique set of tags for each run. Good practice is
-to have at least each of the experiment name and system name as a tag.
+Usually, you should store your Access Token somewhere safe and not
+hardcode it into your scripts (e.g. in a configuration file or
+environment variable). For the sake of this example, we will hardcode
+it:
 
 ``` python
-EXPERIMENT = "rush-py-quickstart"
-SYSTEM = "1B39"
-TAGS = ["qdx", EXPERIMENT, SYSTEM]
-```
-
-## 1.3) Build your client
-
-Get our client, which we’ll use for calling modules and generally for
-using the Rush API.
-
-As mentioned earlier, `url` and `access_token` are optional if you have
-set the env variables `RUSH_URL` and `RUSH_TOKEN` respectively.
-
-`batch_tags` will be applied to each run that is spawned by this client.
-
-A folder called `.rush` will be created in your workspace directory
-(defaults to the current working directory, can be overridden by passing
-`workspace=` to the provider builder).
-
-``` python
-# By using the `build_provider_with_functions` method,
-# we will also build helper functions calling each module
-client = rush.build_blocking_provider_with_functions(batch_tags=TAGS)
-```
-
-    2024-04-08 17:13:26,467 - rush - INFO - Not restoring by default via default
-
-## 1.4) Input selection
-
-Fetch a pdb from RCSB, stripping hetatoms and selecting a single chain
-to pass as input to the modules:
-
-``` python
-PROTEIN_PDB_PATH = client.workspace / f"{SYSTEM}_P.pdb"
-
-complex = list(pdb_fetch.fetch_structure(SYSTEM))
-protein = pdb_delhetatm.remove_hetatm(pdb_selchain.select_chain(complex, "A"))
-with open(PROTEIN_PDB_PATH, "w") as f:
-    for l in protein:
-        f.write(str(l))
-```
-
-# 2) Running Rush Modules
-
-You can view which modules are available, alongside their documentation,
-in the [API Documentation](https://talo.github.io/rush-py/api/).
-
-## 2.0) Prep the protein
-
-First we will run the protein preparation routine (using pdbfixer and
-pdb2pqr internally) to prepare the protein for a molecular dynamics
-simulation.
-
-``` python
-# we can check the arguments and outputs for prepare_protein with help()
-help(client.prepare_protein)
-```
-
-    Help on function prepare_protein in module rush.provider:
-
-    prepare_protein(*args: *tuple[RushObject[bytes], Optional[float], Optional[EnumValue]], target: 'Target | None' = None, resources: 'Resources | None' = None, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -> tuple[RushObject[list[Record]], RushObject[bytes]]
-        Prepare a PDB for downstream tasks: protonate, fill missing atoms, etc.
-
-        Module version:
-        `github:talo/prepare_protein/fbeca1ad893cd763b00dc275c43806c0edce03de#prepare_protein_tengu`
-
-        QDX Type Description:
-
-            input_pdb: Object[@$PDB];
-            ph: f32?;
-            naming_scheme: NamingScheme[Amber | Charmm]?
-            ->
-            output_qdxf: Object[[Conformer]];
-            output_pdb: Object[@$PDB]
-
-
-        :param input_pdb: An input protein as a file; one PDB file
-        :param ph: The ph for determining protonation states; 0-14
-        :param naming_scheme: \
-                        The force field naming scheme to use; \
-                        options are "amber" or "charmm"; \
-                        None produces RCSB/IUPAC standard naming\
-
-        :return output_qdxf: An output protein a vec: one qdxf per model in pdb
-        :return output_pdb: An output protein as a file: one PDB file
-
-``` python
-# Here we run the function, it will return a Provider.Arg which you can use to
-# fetch the results
-# We set restore = True so that we can restore a previous run to the same path
-# with the same tags
-prepared_protein_qdxf, prepared_protein_pdb = client.prepare_protein(
-    PROTEIN_PDB_PATH, None, None
+client = rush.build_blocking_provider_with_functions(
+    access_token=PUT_YOUR_TOKEN_HERE
 )
-# This initially only has the id of your result; we will show how to fetch the
-# actual value later
-prepared_protein_qdxf
 ```
 
-    2024-04-08 17:13:29,649 - rush - INFO - Trying to restore job with tags: ['qdx', 'rush-py-quickstart', '1B39'] and path: github:talo/prepare_protein/fbeca1ad893cd763b00dc275c43806c0edce03de#prepare_protein_tengu
+    2024-05-13 15:14:56,959 - rush - INFO - Not restoring by default via env
 
-    Arg(id=37deb248-97fe-443d-b243-36ba172ca7be, value=None)
+But specifying that we want a “blocking provider” we are telling Rush
+that whenever we interact with the API we want to wait for the response
+before continuing. This is useful for simple scripts that are not
+running lots of jobs in parallel.
 
-## 2.1) Run statuses
+## Create an example SMILES file
 
-This will show the status of all of your runs. You can also view run
-statuses on the [Rush UI](https://rush.qdx.co/dashboard/jobs).
+To run Auto3D we need to specify the SMILES strings for which we want 3D
+conformers to be generated. These SMILES strings must be stored in a
+`.smi` file. For this example, we will use a sample file that contains
+the SMILES strings for one simple small molecule:
 
 ``` python
-client.status()
+# setup an SMI file that contains the SMILES string of our ligand
+ligand_smi_filename = client.workspace / "ligand.smi"
+ligand_smi_filename.write_text("CN1C=NC2=C1C(=O)N(C(=O)N2C)C 1")
 ```
 
-    {'8e8357a0-3c37-4c23-bf98-567db98d74df': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>,
-      'prepare_protein',
-      1)}
+### A small note about workspaces
 
-## 2.2) Run Values
-
-This will return the “value” of the output from the function—for files
-you will recieve a url that you can download, otherwise you will recieve
-them as python types:
+By default, the `client.workspace` will be your current working
+directory, so after this code runs you should see a file in your current
+working directory called `"ligand.smi"`. If you want to specify a
+different workspace directory, you can do so by specifying the
+`workspace` argument when building the client:
 
 ``` python
-protein_qdxf_info = prepared_protein_qdxf.get()
-protein_qdxf_info
+# instead of creating a client with this code
+client = rush.build_blocking_provider_with_functions(
+    access_token=PUT_YOUR_TOKEN_HERE
+)
+
+# you can create a client with this code, and explicitly set the workspace
+client = rush.build_blocking_provider_with_functions(
+    access_token=PUT_YOUR_TOKEN_HERE,
+    workspace=PUT_YOUR_PREFERRED_WORKING_DIRECTORY_HERE,
+)
 ```
 
-    2024-04-08 17:13:29,921 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.RESOLVING
-    2024-04-08 17:13:36,501 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.ADMITTED
-    2024-04-08 17:13:40,894 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.DISPATCHED
-    2024-04-08 17:13:43,225 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.RUNNING
-    2024-04-08 17:13:55,523 - rush - INFO - Argument 37deb248-97fe-443d-b243-36ba172ca7be is now ModuleInstanceStatus.AWAITING_UPLOAD
+    2024-05-13 15:14:59,504 - rush - INFO - Not restoring by default via env
+    2024-05-13 15:15:02,393 - rush - INFO - Not restoring by default via env
 
-    'https://storage.googleapis.com/qdx-store/4a4271de-5e14-4756-b115-9c034d7ab294?x-goog-signature=202cb9f86a4351fc30780d26713b4478012548544ff30ba6700f349ad1fcc63137dfb1d2db92fc9d39bc51ba9881c44b27e89e0781aec23d034ec61c4efe2c806b8d784d124863a37d16ce0df02880e272aa0d0dc8f6be23f7214f207183337eb80c9dd0d70757e2761d8f366eea997d066761fadd9ed33483aa8ec98e7fb00e62a78501fdbc2e1e3b9eb4f9e2374a68972937bcae562d114a7e705ca645cd7eb80e5df835c9e462aa34601c8e14691ad6bcbfafef751a7562d8ea3640e77e79f2bd2f6f3b2533df462e245fc4991729f44bee6aa7d9de31cb8a14615b37ba7950c40af54f5a9f146a1a1fb91b2a9f6692d1bca60a8fb2cecd98c2b33fdbd558&x-goog-algorithm=GOOG4-RSA-SHA256&x-goog-credential=qdx-store-user%40humming-bird-321603.iam.gserviceaccount.com%2F20240408%2Fasia-southeast1%2Fstorage%2Fgoog4_request&x-goog-date=20240408T091417Z&x-goog-expires=3600&x-goog-signedheaders=host'
+## Run Auto3D
 
-## 2.3) Downloads
-
-We provide a utility to download files into your workspace, you can
-either provide a filename, which will be saved in
-`workspace/objects/[filename]`, or you can provide your own filepath
-which the client will use as-is:
+Now that we have our SMILES file, we can use it as input to run the
+Auto3D module. This will generate 3D conformers (in a variety of
+possible protonation states) for each SMILES string in the SMILES file:
 
 ``` python
-protein_qdxf_file = prepared_protein_qdxf.download(overwrite=True)
+# run Auto3D which will give us 3 conformers of our ligand
+# in the SDF format and the QDXF format
+ligand_sdf_handle, ligand_qdxf_handle = client.auto3d(
+    ligand_smi_filename,  # the filename that stores our ligand
+    "smi",  # the format of the file
+    {
+        "k": 3,  # number of conformers to generate
+        "use_gpu": True,  # use GPU for faster compute
+    },
+    tags=["your_job_name"],
+    resources={
+        "gpus": 1,  # the number of GPUs to use
+        "storage": 5,  # the amount of storage to use
+        "storage_units": "MB",  # the units of storage (here we are using megabytes)
+    },
+)
 ```
+
+### A small note about resources
+
+In addition to their module-specific inputs, all modules also accept the
+`resource=` parameter. This parameter specifies the computational
+resources that you want to use to run the module. In this example, we
+have asked Rush to run the Auto3D module using 1 GPU and 5 megabytes of
+storage space.
+
+## See the job status
+
+Calling `client.auto3d` will tell Rush to run a new Auto3D job. However,
+it will not wait for the job to complete before continuing. This is
+convenient, because sometimes jobs can take a long time to run, and we
+might have other code we want to run in the meantime. If we want to
+track the status of all of our jobs, we can use the `client.status`
+function:
 
 ``` python
-# qdxf files can be loaded as json
-with open(protein_qdxf_file) as f:
-    protein_qdxf_data = json.load(f)[0]
-protein_qdxf_data["amino_acid_seq"][:10]
+# print the status of all jobs
+print(client.status())
 ```
 
-    ['MET', 'GLU', 'ASN', 'PHE', 'GLN', 'LYS', 'VAL', 'GLU', 'LYS', 'ILE']
+    {'8f835ec6-beef-4db5-bd3a-f43dd30c5c8c': (<ModuleInstanceStatus.RESOLVING: 'RESOLVING'>, 'auto3d', 1), '26f07d72-bb16-4eb8-b23c-b620e5dd8182': (<ModuleInstanceStatus.COMPLETED: 'COMPLETED'>, 'auto3d', 1)}
+
+## Download the results
+
+After calling `client.auto3d`, we got back two handles:
+`ligand_sdf_handle` and `ligand_qdxf_handle`. These handles are
+references to the results of the Auto3D job. They are stored in Rush and
+we can access them from anywhere at any time. We can use these handles
+as inputs to other modules, we can download their contents, and we can
+even use them to check the status of the Auto3D job that we ran.
+
+For now, we simply download the results and print them out:
 
 ``` python
-prepared_protein_pdb.download(filename="01_prepared_protein.pdb", overwrite=True)
+# download the results (this will block until the Auto3D job has completed)
+ligand_sdf = ligand_sdf_handle.download()
+ligand_qdxf = ligand_qdxf_handle.download()
+
+print(ligand_sdf.read_text()[0:100])  # print the SDF version of the result
+print(ligand_qdxf.read_text()[0:100])  # print the QDXF version of the result
 ```
 
-    PosixPath('/home/machineer/qdx/rush-py-quickstart/objects/01_prepared_protein.pdb')
+    2024-05-13 15:15:05,826 - rush - INFO - Argument 2933987a-202a-48b5-a671-3ceb1d013f5e is now ModuleInstanceStatus.RESOLVING
+    2024-05-13 15:15:10,664 - rush - INFO - Argument 2933987a-202a-48b5-a671-3ceb1d013f5e is now ModuleInstanceStatus.ADMITTED
+    2024-05-13 15:15:22,517 - rush - INFO - Argument 2933987a-202a-48b5-a671-3ceb1d013f5e is now ModuleInstanceStatus.DISPATCHED
+    2024-05-13 15:15:28,547 - rush - INFO - Argument 2933987a-202a-48b5-a671-3ceb1d013f5e is now ModuleInstanceStatus.RUNNING
+    2024-05-13 15:16:00,749 - rush - INFO - Argument 2933987a-202a-48b5-a671-3ceb1d013f5e is now ModuleInstanceStatus.AWAITING_UPLOAD
+    1
+         RDKit          3D
 
-``` python
-# we can read our prepared protein pdb like this
-with open(client.workspace / "objects" / "01_prepared_protein.pdb", "r") as f:
-    print(f.readline(), "...")
-```
+     24 25  0  0  0  0  0  0  0  0999 V2000
+       -1.9595   -2.3573    0.7656 C  
+    [
+      {
+        "topology": {
+          "version": "V1",
+          "symbols": [
+            "C",
+            "N",
+            
 
-    REMARK   1 CREATED WITH OPENMM 8.0, 2024-04-08
-     ...
+If you want to find the actual files, they will be in the `objects`
+directory inside your `client.workspace` directory. Remember, by
+default, the `client.workspace` is the current working directory.
+
+### A note about handles
+
+For most things that we are interested in doing, we do not have to wait
+for the job created by `client.auto3d` to actually complete. We can
+start using `ligand_sdf_handle` and `ligand_qdxf_handle` straight away.
+For example, we could pass them as inputs to a molecular dynamics
+simulation job. This would tell Rush to automatically run the molecular
+dynamics simulation job as soon as the Auto3D job completes.
+
+However, the `download` function is kind of special and will explicitly
+block our program from continuing until the Auto3D job is complete. This
+is because `download` actually fetches the contents of the handles from
+Rush, and to do so it needs to be sure the contents actually exists.
+
+# Next steps
+
+In this quickstart, we generated 3D small molecule conformers from
+SMILES strings using the Auto3D module. We learned how to:
+
+1.  Create a client
+2.  Run the Auto3D module
+3.  Check the status of the job
+4.  Download the results
+
+Checkout our other quickstarts to see how to use other modules. For
+example, now that we have some 3D small molecule conformers, we can run
+molecular dynamics simulation, quantum energy calculations, quantum
+geometry optimizations, docking, and much more!
