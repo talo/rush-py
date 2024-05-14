@@ -38,6 +38,7 @@ As an output argument, you can expect:
 """
 
 _x = provider.Provider()
+_ = asyncio_run(_x.nuke())
 _fns = asyncio_run(_x.get_module_functions(tags=["rush-py-v3.0.0"]))
 RushProvider = type(
     "RushProvider",

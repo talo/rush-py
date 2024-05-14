@@ -933,7 +933,7 @@ class BaseProvider:
                 module_pages = await self.latest_modules(names=names)
 
         # so that our modules get constructed in sorted order for docs
-        modules: list[tuple[str, Any]] = []
+        modules: dict[str, Any] = {}
         async for module_page in module_pages:
             for edge in module_page.edges:
                 module = edge.node.__deepcopy__()
@@ -943,9 +943,10 @@ class BaseProvider:
                 # we have to filter by the names still, so do it here
                 if names and name not in names and tags:
                     continue
-                modules += [(name, module)]
+                modules[name] = module
 
-        for name, module in sorted(modules):
+        for name in sorted(modules.keys()):
+            module = modules[name]
             path = module.path
 
             out_types = tuple(type_from_typedef(i) for i in module.outs)
