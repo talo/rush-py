@@ -968,6 +968,7 @@ class BaseProvider:
                 name: str,
                 path: str,
                 module_ins: list[Any],
+                module_outs: list[Any],
                 default_resources: Resources | None,
             ):
                 in_types = tuple(type_from_typedef(i) for i in module_ins)
@@ -978,14 +979,17 @@ class BaseProvider:
                     target: Target | None = None,
                     resources: Resources | None = default_resources,
                     tags: list[str] | None = None,
+                    output_tags: list[list[str] | None] | None = None,
                     restore: bool | None = None,
                 ):
+                    if not output_tags and tags:
+                        output_tags = [tags] * len(module_outs)
                     args = await self.upload_args(args, module_ins)
                     if target is None:
                         target = random_target()
                     typechecker(*args)
                     run = await self.run(
-                        path, list(args), target, resources, tags, out_tags=None, restore=restore
+                        path, list(args), target, resources, tags, out_tags=output_tags, restore=restore
                     )
                     return tuple(
                         (BaseProvider.BlockingArg if self.__is_blocking__ else BaseProvider.Arg)(
@@ -1056,7 +1060,7 @@ class BaseProvider:
 
                 return runner
 
-            runner = closure(name, path, module.ins, default_resources)
+            runner = closure(name, path, module.ins, module.outs, default_resources)
             self.__setattr__(name, runner)
             ret[name] = runner
         return ret
