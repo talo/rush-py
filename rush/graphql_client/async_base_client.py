@@ -91,7 +91,9 @@ class AsyncBaseClient:
     ) -> None:
         await self.http_client.aclose()
 
-    @backoff.on_exception(backoff.expo, (httpx.ReadTimeout, httpx.ConnectError), max_time=60)
+    @backoff.on_exception(
+        backoff.expo, (httpx.ReadTimeout, httpx.ConnectError, httpx.PoolTimeout), max_time=300
+    )
     async def execute(
         self,
         query: str,
