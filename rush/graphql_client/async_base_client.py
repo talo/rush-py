@@ -73,7 +73,8 @@ class AsyncBaseClient:
     ) -> None:
         self.url = url
         self.headers = headers
-        self.http_client = http_client if http_client else httpx.AsyncClient(headers=headers)
+        timeout = httpx.Timeout(10.0, connect=30.0)
+        self.http_client = http_client if http_client else httpx.AsyncClient(headers=headers, timeout=timeout)
 
         self.ws_url = ws_url
         self.ws_headers = ws_headers or {}
@@ -92,7 +93,7 @@ class AsyncBaseClient:
         await self.http_client.aclose()
 
     @backoff.on_exception(
-        backoff.expo, (httpx.ReadTimeout, httpx.ConnectError, httpx.PoolTimeout), max_time=300
+        backoff.expo, (httpx.ReadTimeout, httpx.ConnectError, httpx.PoolTimeot, anyio.ReadError), max_time=300
     )
     async def execute(
         self,
