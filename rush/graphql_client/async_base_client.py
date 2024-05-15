@@ -73,7 +73,7 @@ class AsyncBaseClient:
     ) -> None:
         self.url = url
         self.headers = headers
-        timeout = httpx.Timeout(10.0, connect=30.0)
+        timeout = httpx.Timeout(20.0, connect=60.0)
         self.http_client = http_client if http_client else httpx.AsyncClient(headers=headers, timeout=timeout)
 
         self.ws_url = ws_url
