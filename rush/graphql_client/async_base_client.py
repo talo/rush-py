@@ -93,7 +93,16 @@ class AsyncBaseClient:
         await self.http_client.aclose()
 
     @backoff.on_exception(
-        backoff.expo, (httpx.ReadTimeout, httpx.ConnectError, httpx.PoolTimeot, anyio.BrokenResourceError, anyio.ClosedResourceError, anyio.EndOfStream), max_time=300
+        backoff.expo,
+        (
+            httpx.ReadTimeout,
+            httpx.ConnectError,
+            httpx.PoolTimeot,
+            anyio.BrokenResourceError,
+            anyio.ClosedResourceError,
+            anyio.EndOfStream,
+        ),
+        max_time=300,
     )
     async def execute(
         self,
