@@ -97,7 +97,7 @@ class AsyncBaseClient:
         (
             httpx.ReadTimeout,
             httpx.ConnectError,
-            httpx.PoolTimeot,
+            httpx.PoolTimeout,
             anyio.BrokenResourceError,
             anyio.ClosedResourceError,
             anyio.EndOfStream,
