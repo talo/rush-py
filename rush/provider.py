@@ -482,7 +482,7 @@ class BaseProvider:
         self,
         path: UUID,
         filename: str | None = None,
-        filepath: Path | None = None,
+        filepath: Path | str | None = None,
         overwrite: bool = False,
         signed: bool = True,
         decode: bool = False,
@@ -497,6 +497,9 @@ class BaseProvider:
         obj = (await self.object(path)) if signed else (await self.client.object_contents(path))
         if not obj:
             return None
+
+        if filepath and isinstance(filepath, str):
+            filepath = Path(filepath)
 
         if filepath is None:
             if filename is None:
@@ -1216,7 +1219,10 @@ class BaseProvider:
             self.module_paths = paths
             self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
 
-        await self.get_module_functions(names=names, tags=tags)
+        built_fns = await self.get_module_functions(names=names, tags=tags)
+
+        if self.__is_blocking__:
+            _make_blocking(self, built_fns)
 
     async def delete_module_instance(self, id: ModuleInstanceId):
         """
@@ -1574,35 +1580,9 @@ async def build_provider_with_functions(
     return provider
 
 
-def build_blocking_provider_with_functions(
-    workspace: str | Path | bool | None = None,
-    access_token: str | None = None,
-    url: str | None = None,
-    batch_tags: list[str] | None = None,
-    module_names: list[str] | None = None,
-    module_tags: list[str] | None = None,
-    logger: logging.Logger | None = None,
-    restore_by_default: bool | None = None,
-) -> Provider:
-    """
-    Build a RushProvider with the given access token and url.
-
-    :param access_token: The access token to use.
-    :param url: The url to use.
-    :param workspace: The workspace directory to use.
-    :param batch_tags: The tags that will be placed on all runs by default.
-    :return: The built RushProvider.
-    """
-    provider = Provider(
-        access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
-    )
-    if not LOOP.is_running() and not asyncio.get_event_loop().is_running():
-        _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
-        _LOOP_THREAD.start()
-
+def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner[Any]]):
     # functions that don't get called internally can be overridden with blocking versions
     blockable_functions = ("nuke", "status", "logs", "retry", "tag", "update_modules")
-    built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
     for name, func in provider.__dict__.items():
@@ -1694,4 +1674,35 @@ def build_blocking_provider_with_functions(
 
     provider.__dict__.update(blocking_versions)
     provider.__is_blocking__ = True
+
+
+def build_blocking_provider_with_functions(
+    workspace: str | Path | bool | None = None,
+    access_token: str | None = None,
+    url: str | None = None,
+    batch_tags: list[str] | None = None,
+    module_names: list[str] | None = None,
+    module_tags: list[str] | None = None,
+    logger: logging.Logger | None = None,
+    restore_by_default: bool | None = None,
+) -> Provider:
+    """
+    Build a RushProvider with the given access token and url.
+
+    :param access_token: The access token to use.
+    :param url: The url to use.
+    :param workspace: The workspace directory to use.
+    :param batch_tags: The tags that will be placed on all runs by default.
+    :return: The built RushProvider.
+    """
+    provider = Provider(
+        access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
+    )
+    if not LOOP.is_running() and not asyncio.get_event_loop().is_running():
+        _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
+        _LOOP_THREAD.start()
+
+    built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
+
+    _make_blocking(provider, built_fns)
     return provider
