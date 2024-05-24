@@ -11,10 +11,11 @@ import httpx
 
 import rush
 
+#### These are for UniProt information cross refs, etc. about the target
+
 
 @dataclass
 class CrossRefPDB:
-    database: str
     id: str
     method: str
     resolution: str
@@ -28,6 +29,9 @@ class UniprotData:
     sequence: str
     molecular_weight: int
     pdb_cross_refs: list[CrossRefPDB]
+
+
+#### These are for PDBe binding interaction data
 
 
 @dataclass
@@ -60,6 +64,37 @@ class BindingInteraction:
     target_seq_range: set[tuple[int, int] | int]
     # domain_name: str | None  # not always available
     interactors: list[Interactor]
+
+
+#### These are for PDBe binding interaction data
+
+
+@dataclass
+class PDBeBindingSiteAminoAcid:
+    amino_acid_name: str
+    chain_id: str
+    residue_number: int
+    author_chain_id: int
+    author_residue_number: int
+    author_insertion_code: int
+
+
+@dataclass
+class PDBeBindingSiteLigand:
+    residue_name: str
+    chain_id: str
+    residue_number: int
+    author_residue_number: int
+
+
+@dataclass
+class BindingSite:
+    pdb_id: str
+    site_id: str
+    target_seq_range: set[tuple[int, int] | int]
+    target_residues: list[PDBeBindingSiteAminoAcid]
+    ligands: list[PDBeBindingSiteLigand]
+    details: str
 
 
 # Parameters
@@ -98,6 +133,7 @@ def get_uniprot(target: str):
         "format": "json",
     }
     response = httpx.get("https://rest.uniprot.org/uniprotkb/stream", params=params)
+    print(response.url)
     response_json = response.json()
     uniprot_data = []
     for result in response_json["results"]:
@@ -115,9 +151,7 @@ def get_uniprot(target: str):
                     resolution += property["value"]
                 if property["key"] == "Chains":
                     chains += property["value"]
-            pdb_cross_refs.append(
-                CrossRefPDB(cross_ref_data["database"], cross_ref_data["id"], method, resolution, chains)
-            )
+            pdb_cross_refs.append(CrossRefPDB(cross_ref_data["id"], method, resolution, chains))
         uniprot_data.append(
             UniprotData(
                 result["entryType"],
@@ -137,9 +171,11 @@ def get_pdb(id: str):
     return str(gzip.decompress(response.content), "utf-8")
 
 
-def parse_range(x) -> list[tuple[int, int] | int]:
+def parse_range(range) -> list[tuple[int, int] | int]:
     result = []
-    for part in x.split(","):
+    if isinstance(range, int):
+        return [range]
+    for part in range.split(","):
         if "-" in part:
             a, b = part.split("-")
             a, b = int(a), int(b)
@@ -241,8 +277,58 @@ def get_binding_ixns_from_intact(target_id: str) -> list[BindingInteraction]:
     return binding_interactions
 
 
-def get_binding_ixns_from_pdbe(cross_refs: list[str]):
-    pass
+def get_binding_ixns_from_pdbe(pdb_cross_refs: list[str]):
+    # print(pdb_cross_refs)
+    binding_sites = []
+    for pdb_cross_ref_id in ["3RN2", "3RN5", "3VD8", "4O7Q", "6MB2", "7K3R"]:
+        # for pdb_cross_ref in pdb_cross_refs:
+        # pdb_cross_ref_id = pdb_cross_ref.id
+        response = httpx.get(f"https://www.ebi.ac.uk/pdbe/api/pdb/entry/binding_sites/{pdb_cross_ref_id}")
+        print(response.url)
+        response_json = response.json()
+        for pdb_id, binding_sites_data in response_json.items():
+            for binding_site_data in binding_sites_data:
+                binding_site_aas = []
+                for site_residue in binding_site_data["site_residues"]:
+                    # TODO: check the entity ID against the assembly, that it's a "polypeptide(L)"?
+                    if site_residue["entity_id"] == "1":
+                        binding_site_aas.append(
+                            PDBeBindingSiteAminoAcid(
+                                site_residue["chem_comp_id"],
+                                site_residue["chain_id"],
+                                site_residue["residue_number"],
+                                site_residue["struct_asym_id"],
+                                site_residue["author_residue_number"],
+                                site_residue["author_insertion_code"],
+                            )
+                        )
+                binding_site_ligs = []
+                for ligand_residue in binding_site_data["ligand_residues"]:
+                    # TODO: Check this against ligand REST query or assembly, that it's a "bound"?
+                    binding_site_ligs.append(
+                        PDBeBindingSiteLigand(
+                            ligand_residue["chem_comp_id"],
+                            ligand_residue["chain_id"],
+                            ligand_residue["residue_number"],
+                            ligand_residue["author_residue_number"],
+                        )
+                    )
+                binding_sites.append(
+                    BindingSite(
+                        pdb_id,
+                        binding_site_data["site_id"],
+                        set(
+                            sequence_range
+                            for binding_site_aa in binding_site_aas
+                            for sequence_range in parse_range(binding_site_aa.residue_number)
+                        ),
+                        binding_site_aas,
+                        binding_site_ligs,
+                        binding_site_data["details"],
+                    )
+                )
+
+    return binding_sites
 
 
 def read_fasta(filepath: Path) -> dict[str, str]:
