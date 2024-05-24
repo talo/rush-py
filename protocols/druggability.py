@@ -171,11 +171,11 @@ def get_pdb(id: str):
     return str(gzip.decompress(response.content), "utf-8")
 
 
-def parse_range(range) -> list[tuple[int, int] | int]:
+def parse_range(idx_range) -> list[tuple[int, int] | int]:
     result = []
-    if isinstance(range, int):
-        return [range]
-    for part in range.split(","):
+    if isinstance(idx_range, int):
+        return [idx_range]
+    for part in idx_range.split(","):
         if "-" in part:
             a, b = part.split("-")
             a, b = int(a), int(b)
@@ -243,9 +243,9 @@ def get_binding_ixns_from_intact(target_id: str) -> list[BindingInteraction]:
                                     participant["interactorRef"],
                                     feature["category"],
                                     [
-                                        range
+                                        sequence_range
                                         for sequence_data in feature["sequenceData"]
-                                        for range in parse_range(sequence_data["pos"])
+                                        for sequence_range in parse_range(sequence_data["pos"])
                                     ],
                                 )
                             )
@@ -277,12 +277,11 @@ def get_binding_ixns_from_intact(target_id: str) -> list[BindingInteraction]:
     return binding_interactions
 
 
-def get_binding_ixns_from_pdbe(pdb_cross_refs: list[str]):
-    # print(pdb_cross_refs)
+def get_binding_ixns_from_pdbe(pdb_cross_refs: list[str]) -> list[BindingSite]:
     binding_sites = []
-    for pdb_cross_ref_id in ["3RN2", "3RN5", "3VD8", "4O7Q", "6MB2", "7K3R"]:
-        # for pdb_cross_ref in pdb_cross_refs:
-        # pdb_cross_ref_id = pdb_cross_ref.id
+    # for pdb_cross_ref_id in ["3RN2", "3RN5", "3VD8", "4O7Q", "6MB2", "7K3R"]:
+    for pdb_cross_ref in pdb_cross_refs:
+        pdb_cross_ref_id = pdb_cross_ref.id
         response = httpx.get(f"https://www.ebi.ac.uk/pdbe/api/pdb/entry/binding_sites/{pdb_cross_ref_id}")
         print(response.url)
         response_json = response.json()
@@ -291,7 +290,7 @@ def get_binding_ixns_from_pdbe(pdb_cross_refs: list[str]):
                 binding_site_aas = []
                 for site_residue in binding_site_data["site_residues"]:
                     # TODO: check the entity ID against the assembly, that it's a "polypeptide(L)"?
-                    if site_residue["entity_id"] == "1":
+                    if site_residue["entity_id"] == 1:
                         binding_site_aas.append(
                             PDBeBindingSiteAminoAcid(
                                 site_residue["chem_comp_id"],
@@ -329,6 +328,71 @@ def get_binding_ixns_from_pdbe(pdb_cross_refs: list[str]):
                 )
 
     return binding_sites
+
+
+def compute_percent_overlapping(reference_range, query_range) -> float:
+    def expand_range(idx_range) -> list[float]:
+        expansion = []
+        for r in idx_range:
+            if isinstance(r, tuple):
+                expansion.extend(range(r[0], r[1] + 1))
+            elif isinstance(r, int):
+                expansion.append(r)
+        return expansion
+
+    reference_idxs = expand_range(reference_range)
+    query_idxs = expand_range(query_range)
+
+    if len(reference_idxs) == 0:
+        return 0.0
+
+    return sum(1 if query_idx in reference_idxs else 0 for query_idx in query_idxs) / len(reference_idxs)
+
+
+def compute_scores(region_of_interest, intact_binding_ixns, pdbe_binding_sites) -> tuple[float, float, float]:
+    # ligand <-> region of interest
+    lig_roi_score = 0.0
+    for binding_site in pdbe_binding_sites:
+        reference_seq_range = region_of_interest
+        query_seq_range = binding_site.target_seq_range
+        pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+        if pct_overlap > 0.0:
+            lig_roi_score += 1 + pct_overlap
+
+    # ligand <-> binding interaction regions (experimental)
+    lig_bixn_score = 0.0
+    for binding_site in pdbe_binding_sites:
+        for binding_ixn in intact_binding_ixns:
+            reference_seq_range = binding_ixn.target_seq_range
+            query_seq_range = binding_site.target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                lig_bixn_score += 1 + pct_overlap
+
+    # # ligand <-> binding interaction regions (predicted)
+    # lig_breg_score = 0.0
+    # for binding_site in pdbe_binding_sites:
+    #     for binding_region in p2rank_binding_regions:
+    #         reference_seq_range = binding_region.target_seq_range
+    #         query_seq_range = binding_site.target_seq_range
+    #         pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+    #         if pct_overlap > 0.0:
+    #             lig_breg_score += 1 + pct_overlap
+
+    # ligand <-> other ligands
+    lig_lig_score = 0.0
+    for i in range(len(pdbe_binding_sites)):
+        for j in range(i, len(pdbe_binding_sites)):
+            seq_range_i = pdbe_binding_sites[i].target_seq_range
+            seq_range_j = pdbe_binding_sites[j].target_seq_range
+            avg_pct_overlap = (
+                compute_percent_overlapping(seq_range_i, seq_range_j)
+                + compute_percent_overlapping(seq_range_i, seq_range_j)
+            ) / 2
+            if avg_pct_overlap > 0.0:
+                lig_lig_score += 1 + avg_pct_overlap
+
+    return (lig_roi_score, lig_bixn_score, lig_lig_score)
 
 
 def read_fasta(filepath: Path) -> dict[str, str]:
@@ -369,6 +433,7 @@ def read_fasta(filepath: Path) -> dict[str, str]:
 @dataclass
 class Args:
     target: str
+    region_of_interest: str | None
 
 
 def main():
@@ -466,11 +531,21 @@ def main():
 
     #### Binding site analysis
 
-    # 3.1: get IntAct data (mostly Protein - Protein, Protein - DNA/RNA, etc.)
-    _intact_binding_ixns = get_binding_ixns_from_intact(uniprot_id)
+    region_of_interest = set((0, len(uniprot_data.sequence)))
+    if args.region_of_interest:
+        region_of_interest = parse_range(args.region_of_interest)
 
-    # 3.2: get PDB binding site data (mostly Protein - Ligand/SMOL)
-    _pdb_binding_ixns = get_binding_ixns_from_pdbe(uniprot_data.pdb_cross_refs)
+    # 3.1: Get IntAct data (mostly Protein - Protein, Protein - DNA/RNA, etc.)
+    intact_binding_ixns = get_binding_ixns_from_intact(uniprot_id)
+    print(intact_binding_ixns)
+
+    # 3.2: Get PDB binding site data (mostly Protein - Ligand/SMOL)
+    pdbe_binding_sites = get_binding_ixns_from_pdbe(uniprot_data.pdb_cross_refs)
+    print(pdbe_binding_sites)
+
+    # # 3.3: Compute scores
+    scores = compute_scores(region_of_interest, intact_binding_ixns, pdbe_binding_sites)
+    print(scores)
 
 
 if __name__ == "__main__":
