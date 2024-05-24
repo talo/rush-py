@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 import gzip
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 import datargs
 import httpx
@@ -10,7 +13,7 @@ import rush
 
 
 @dataclass
-class CrossRef:
+class CrossRefPDB:
     database: str
     id: str
     method: str
@@ -24,7 +27,39 @@ class UniprotData:
     primary_accession: str
     sequence: str
     molecular_weight: int
-    cross_refs: list[CrossRef]
+    pdb_cross_refs: list[CrossRefPDB]
+
+
+@dataclass
+class IntActInteractorData:
+    type: Literal["Protein", "DNA", "RNA", "Ligand", "HOH", "Ion"]
+    identifier_db: str
+    identifier_id: str
+
+
+@dataclass
+class IntActInteractionData:
+    id: str  # by interactorRef
+    category: str
+    sequence_ranges: list[tuple[int, int] | int]
+
+
+@dataclass
+class Interactor:
+    type: Literal["Protein", "DNA", "RNA", "Ligand", "HOH", "Ion"]
+    identifier_db: str
+    identifier_id: str
+    category: str
+    sequence_ranges: list[tuple[int, int] | int]
+
+
+@dataclass
+class BindingInteraction:
+    interaction_id: str
+    target_id: str
+    target_seq_range: set[tuple[int, int] | int]
+    # domain_name: str | None  # not always available
+    interactors: list[Interactor]
 
 
 # Parameters
@@ -59,15 +94,17 @@ P2RANK_RUN_CONFIG = {}
 def get_uniprot(target: str):
     params = {
         "query": f"organism_name:Human AND reviewed:true AND gene:{target}",
-        "fields": "xref_pdb,sequence",
+        "fields": "sequence,xref_pdb,xref_intact",  # xref_pfam
         "format": "json",
     }
     response = httpx.get("https://rest.uniprot.org/uniprotkb/stream", params=params)
     response_json = response.json()
     uniprot_data = []
     for result in response_json["results"]:
-        cross_refs = []
+        pdb_cross_refs = []
         for cross_ref_data in result["uniProtKBCrossReferences"]:
+            if cross_ref_data["database"] != "PDB":
+                continue
             method = ""
             resolution = ""
             chains = ""
@@ -78,8 +115,8 @@ def get_uniprot(target: str):
                     resolution += property["value"]
                 if property["key"] == "Chains":
                     chains += property["value"]
-            cross_refs.append(
-                CrossRef(cross_ref_data["database"], cross_ref_data["id"], method, resolution, chains)
+            pdb_cross_refs.append(
+                CrossRefPDB(cross_ref_data["database"], cross_ref_data["id"], method, resolution, chains)
             )
         uniprot_data.append(
             UniprotData(
@@ -87,7 +124,7 @@ def get_uniprot(target: str):
                 result["primaryAccession"],
                 result["sequence"]["value"],
                 result["sequence"]["molWeight"],
-                cross_refs,
+                pdb_cross_refs,
             )
         )
     assert len(uniprot_data) == 1
@@ -98,6 +135,114 @@ def get_pdb(id: str):
     print(f"https://files.rcsb.org/download/{id}.pdb.gz")
     response = httpx.get(f"https://files.rcsb.org/download/{id}.pdb.gz", timeout=30.0)
     return str(gzip.decompress(response.content), "utf-8")
+
+
+def parse_range(x) -> list[tuple[int, int] | int]:
+    result = []
+    for part in x.split(","):
+        if "-" in part:
+            a, b = part.split("-")
+            a, b = int(a), int(b)
+            result.append((a, b))
+        else:
+            a = int(part)
+            result.append(a)
+    return result
+
+
+def get_binding_ixns_from_intact(target_id: str) -> list[BindingInteraction]:
+    params = {
+        "advancedSearch": "true",
+        "interactionTypesFilter": "direct interaction",
+        "interactorSpeciesFilter": "Homo sapiens",
+        "intraSpeciesFilter": "true",
+        "negativeFilter": "POSITIVE_ONLY",
+        "query": f"id:{target_id}",
+    }
+    response = httpx.post(
+        "https://www.ebi.ac.uk/intact/ws/interaction/findInteractionWithFacet", params=params
+    )
+    print(response.url)
+    response_json = response.json()
+    binding_interactions = []
+    for result in response_json["data"]["content"]:
+        response = httpx.get(
+            f"https://www.ebi.ac.uk/intact/ws/graph/export/interaction/{result['ac']}",
+            params={"format": "miJSON"},
+        )
+        print(response.url)
+        response_json = response.json()
+        interactors = {}
+        interaction_ids = {}
+        interaction_participants = {}
+        for obj in response_json["data"]:
+            # handle interactors
+            if obj["object"] == "interactor":
+                interactors[obj["id"]] = IntActInteractorData(
+                    obj["type"]["name"],
+                    obj["identifier"]["db"],
+                    obj["identifier"]["id"],
+                )
+
+            # handle interations
+            if obj["object"] == "interaction":
+                for participant in obj["participants"]:
+                    if "features" in participant:
+                        for feature in participant["features"]:
+                            if feature["category"] != "bindingSites":
+                                # skip non binding site features ("experimentalFeatures, ptms")
+                                continue
+
+                            # get a unique key for this logical interaction
+                            if "linkedFeatures" in feature:
+                                k = frozenset([feature["id"]] + feature["linkedFeatures"])
+                            else:
+                                k = frozenset([feature["id"]])
+
+                            if k not in interaction_ids:
+                                interaction_ids[k] = obj["id"]
+                                interaction_participants[k] = []
+                            interaction_participants[k].append(
+                                IntActInteractionData(
+                                    participant["interactorRef"],
+                                    feature["category"],
+                                    [
+                                        range
+                                        for sequence_data in feature["sequenceData"]
+                                        for range in parse_range(sequence_data["pos"])
+                                    ],
+                                )
+                            )
+
+        for k, interaction_id in interaction_ids.items():
+            binding_interactions.append(
+                BindingInteraction(
+                    interaction_id,
+                    target_id,
+                    target_seq_range=set(
+                        sequence_range
+                        for participant in interaction_participants[k]
+                        if participant.id == f"uniprotkb_{target_id}"
+                        for sequence_range in participant.sequence_ranges
+                    ),
+                    interactors=[
+                        Interactor(
+                            interactors[participant.id].type,
+                            interactors[participant.id].identifier_db,
+                            interactors[participant.id].identifier_id,
+                            participant.category,
+                            participant.sequence_ranges,
+                        )
+                        for participant in interaction_participants[k]
+                    ],
+                )
+            )
+
+    return binding_interactions
+
+
+def get_binding_ixns_from_pdbe(cross_refs: list[str]):
+    pass
 
 
 def read_fasta(filepath: Path) -> dict[str, str]:
@@ -142,6 +287,8 @@ class Args:
 
 def main():
     args = datargs.parse(Args)
+
+    #### Starting with UniProt seqs
 
     # 1.0: Obtain input (FASTA)
     uniprot_data = get_uniprot(args.target)
@@ -191,44 +338,75 @@ def main():
         overwrite=True,
     )
 
-    for cross_ref in uniprot_data.cross_refs:
+    #### Starting with cross-refs (i.e. PDB files)
+
+    for pdb_cross_ref in uniprot_data.pdb_cross_refs:
         # 1.2: Get 3D structure from cross-referenced data
-        pdb_path = WORK_DIR / "objects" / f"{uniprot_id}-{cross_ref.id}_1.2_structure.pdb"
+        pdb_path = WORK_DIR / "objects" / f"{uniprot_id}-{pdb_cross_ref.id}_1.2_structure.pdb"
         if not pdb_path.is_file():
-            pdb_path.write_text(get_pdb(cross_ref.id))
+            pdb_path.write_text(get_pdb(pdb_cross_ref.id))
 
         # 1.3: Clean up structure
         (prepared_structures_handle, _) = client.prepare_protein(
             pdb_path,
             None,
             None,
-            tags=[cross_ref.id],
+            tags=[pdb_cross_ref.id],
             **PREPARE_PROTEIN_RUN_CONFIG,
         )
         (prepared_structure_handle,) = client.pick_conformer(
-            prepared_structures_handle, 0, tags=[cross_ref.id]
+            prepared_structures_handle, 0, tags=[pdb_cross_ref.id]
         )
 
         # 2.0: Evaluate pockets
         (p2rank_prediction_handle, pymol_viz_handle) = client.p2rank(
             prepared_structure_handle,
             True,
-            tags=[cross_ref.id],
+            tags=[pdb_cross_ref.id],
             **P2RANK_RUN_CONFIG,
         )
 
         # 2.1: Download everything & show evaluation
         prepared_structure_handle.download(
-            filename=f"{uniprot_id}-{cross_ref.id}_1.3_prepared.json",
+            filename=f"{uniprot_id}-{pdb_cross_ref.id}_1.3_prepared.json",
             overwrite=True,
         )
-        with open(WORK_DIR / "objects" / f"{uniprot_id}-{cross_ref.id}_2.0_pocket_data.json", "w") as f:
+        with open(WORK_DIR / "objects" / f"{uniprot_id}-{pdb_cross_ref.id}_2.0_pocket_data.json", "w") as f:
             json.dump(p2rank_prediction_handle.get(), f, indent=2)
         pymol_viz_handle.download(
-            filename=f"{uniprot_id}-{cross_ref.id}_2.0_pocket_viz.tar.gz",
+            filename=f"{uniprot_id}-{pdb_cross_ref.id}_2.0_pocket_viz.tar.gz",
             overwrite=True,
         )
+
+    #### Binding site analysis
+
+    # 3.1: get IntAct data (mostly Protein - Protein, Protein - DNA/RNA, etc.)
+    _intact_binding_ixns = get_binding_ixns_from_intact(uniprot_id)
+
+    # 3.2: get PDB binding site data (mostly Protein - Ligand/SMOL)
+    _pdb_binding_ixns = get_binding_ixns_from_pdbe(uniprot_data.pdb_cross_refs)
 
 
 if __name__ == "__main__":
     main()
+
+
+# Next steps:
+#   x Uniprot + RCSB, don't filter the RCSB stuff
+#   - rank cross-refs based on quality; matching against sequence subsections, number of ligands, etc.
+#   - does p2rank give real binding sites,
+#       - identifies places part of binding interfaces p-p or p-l interaction?
+#   - run PLIP whenever ligands are present
+#   - frequently-occuring critical residues
+#   - "coherence" or "consistency" of binding sites; is the same place consistently found?
+#   - # binding sites
+#   - # binding sites part of relevant pathway
+#   - # of recurring critical residues
+#   - # check for occlusion by P-P interfaces or other unrelated binding
+#
+# Next:
+#   - Mutation simulations; wild-type vs mutant and doing a comparison
+#
+# Final output:
+#   - Rank or score of targets. No need for fancy viz or anything of specific tool outs.
+#   - Walter output: executive summary as if done by a comp chemist.
