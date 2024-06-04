@@ -61,6 +61,7 @@ class ModuleInstancesMeAccountModuleInstancesEdgesNodeIns(BaseModel):
     typeinfo: Any
     value: Optional[Any]
     tags: Optional[List[str]]
+    source: Optional[UUID]
 
 
 class ModuleInstancesMeAccountModuleInstancesEdgesNodeOuts(BaseModel):
@@ -72,6 +73,7 @@ class ModuleInstancesMeAccountModuleInstancesEdgesNodeOuts(BaseModel):
     typeinfo: Any
     value: Optional[Any]
     tags: Optional[List[str]]
+    source: Optional[UUID]
 
 
 class ModuleInstancesMeAccountModuleInstancesEdgesNodeResources(BaseModel):

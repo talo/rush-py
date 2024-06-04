@@ -7,8 +7,20 @@ from uuid import UUID
 from .argument import Argument, ArgumentArgument
 from .arguments import Arguments, ArgumentsMe
 from .async_base_client import AsyncBaseClient
-from .base_model import UNSET, UnsetType, Upload
+from .base_model import UNSET, UnsetType
 from .cancel_module_instance import CancelModuleInstance
+from .create_project import CreateProject, CreateProjectCreateProject
+from .create_protein import CreateProtein, CreateProteinCreateProtein
+from .create_protein_conformer import (
+    CreateProteinConformer,
+    CreateProteinConformerCreateProteinConformer,
+)
+from .create_smol import CreateSmol, CreateSmolCreateSmol
+from .create_smol_conformer import (
+    CreateSmolConformer,
+    CreateSmolConformerCreateSmolConformer,
+)
+from .create_structure import CreateStructure, CreateStructureCreateStructure
 from .delete_module_instance import (
     DeleteModuleInstance,
     DeleteModuleInstanceDeleteModuleInstance,
@@ -16,6 +28,12 @@ from .delete_module_instance import (
 from .deploy import Deploy, DeployDeploy
 from .enums import ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat, OrderBy
 from .input_types import (
+    CreateProjectInput,
+    CreateProteinConformerInput,
+    CreateProteinInput,
+    CreateSmolConformerInput,
+    CreateSmolInput,
+    CreateStructureInput,
     ModuleInput,
     ModuleInstanceInput,
     ModuleInstanceResourcesInput,
@@ -48,8 +66,7 @@ from .update_module_instance import (
     UpdateModuleInstance,
     UpdateModuleInstanceUpdateModuleInstance,
 )
-from .upload_arg import UploadArg, UploadArgUploadArg
-from .upload_object import UploadObject, UploadObjectUploadObject
+from .upload_large_object import UploadLargeObject, UploadLargeObjectUploadLargeObject
 
 
 def gql(q: str) -> str:
@@ -162,6 +179,7 @@ class Client(AsyncBaseClient):
                           typeinfo
                           value
                           tags
+                          source
                         }
                         outs {
                           id
@@ -172,6 +190,7 @@ class Client(AsyncBaseClient):
                           typeinfo
                           value
                           tags
+                          source
                         }
                         resources {
                           gpus
@@ -217,6 +236,59 @@ class Client(AsyncBaseClient):
         )
         data = self.get_data(response)
         return ModuleInstances.model_validate(data).me
+
+    async def create_project(self, project: CreateProjectInput, **kwargs: Any) -> CreateProjectCreateProject:
+        query = gql(
+            """
+            mutation create_project($project: CreateProjectInput!) {
+              create_project(input: $project) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project": project}
+        response = await self.execute(
+            query=query, operation_name="create_project", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateProject.model_validate(data).create_project
+
+    async def create_protein_conformer(
+        self, protein_conformer: CreateProteinConformerInput, **kwargs: Any
+    ) -> CreateProteinConformerCreateProteinConformer:
+        query = gql(
+            """
+            mutation create_protein_conformer($protein_conformer: CreateProteinConformerInput!) {
+              create_protein_conformer(input: $protein_conformer) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"protein_conformer": protein_conformer}
+        response = await self.execute(
+            query=query, operation_name="create_protein_conformer", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateProteinConformer.model_validate(data).create_protein_conformer
+
+    async def create_protein(self, protein: CreateProteinInput, **kwargs: Any) -> CreateProteinCreateProtein:
+        query = gql(
+            """
+            mutation create_protein($protein: CreateProteinInput!) {
+              create_protein(input: $protein) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"protein": protein}
+        response = await self.execute(
+            query=query, operation_name="create_protein", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateProtein.model_validate(data).create_protein
 
     async def argument(self, id: UUID, **kwargs: Any) -> ArgumentArgument:
         query = gql(
@@ -572,6 +644,7 @@ class Client(AsyncBaseClient):
                 typeinfo
                 value
                 tags
+                source
               }
               outs {
                 id
@@ -582,6 +655,7 @@ class Client(AsyncBaseClient):
                 typeinfo
                 value
                 tags
+                source
               }
               resources {
                 gpus
@@ -742,6 +816,61 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return Run.model_validate(data).run
 
+    async def create_smol_conformer(
+        self, smol_conformer: CreateSmolConformerInput, **kwargs: Any
+    ) -> CreateSmolConformerCreateSmolConformer:
+        query = gql(
+            """
+            mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+              create_smol_conformer(input: $smol_conformer) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol_conformer": smol_conformer}
+        response = await self.execute(
+            query=query, operation_name="create_smol_conformer", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateSmolConformer.model_validate(data).create_smol_conformer
+
+    async def create_smol(self, smol: CreateSmolInput, **kwargs: Any) -> CreateSmolCreateSmol:
+        query = gql(
+            """
+            mutation create_smol($smol: CreateSmolInput!) {
+              create_smol(input: $smol) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol": smol}
+        response = await self.execute(
+            query=query, operation_name="create_smol", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateSmol.model_validate(data).create_smol
+
+    async def create_structure(
+        self, structure: CreateStructureInput, **kwargs: Any
+    ) -> CreateStructureCreateStructure:
+        query = gql(
+            """
+            mutation create_structure($structure: CreateStructureInput!) {
+              create_structure(input: $structure) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"structure": structure}
+        response = await self.execute(
+            query=query, operation_name="create_structure", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateStructure.model_validate(data).create_structure
+
     async def tag(
         self,
         tags: List[str],
@@ -841,46 +970,33 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return UpdateModuleInstance.model_validate(data).update_module_instance
 
-    async def upload_arg(self, typeinfo: Any, file: Upload, **kwargs: Any) -> UploadArgUploadArg:
+    async def upload_large_object(
+        self, typeinfo: Any, format: ObjectFormat, **kwargs: Any
+    ) -> UploadLargeObjectUploadLargeObject:
         query = gql(
             """
-            mutation upload_arg($typeinfo: JSON!, $file: Upload!) {
-              upload_arg(typeinfo: $typeinfo, file: $file) {
-                id
-                value
-              }
-            }
-            """
-        )
-        variables: Dict[str, object] = {"typeinfo": typeinfo, "file": file}
-        response = await self.execute(query=query, operation_name="upload_arg", variables=variables, **kwargs)
-        data = self.get_data(response)
-        return UploadArg.model_validate(data).upload_arg
-
-    async def upload_object(
-        self, file: Upload, typeinfo: Any, format: ObjectFormat, **kwargs: Any
-    ) -> UploadObjectUploadObject:
-        query = gql(
-            """
-            mutation upload_object($file: Upload!, $typeinfo: JSON!, $format: ObjectFormat!) {
-              upload_object(file: $file, typeinfo: $typeinfo, format: $format) {
-                id
-                object {
-                  path
-                  size
-                  format
+            mutation upload_large_object($typeinfo: JSON!, $format: ObjectFormat!) {
+              upload_large_object(typeinfo: $typeinfo, format: $format) {
+                upload_url
+                descriptor {
+                  id
+                  name
+                  description
+                  type_info
+                  object {
+                    format
+                    size
+                    path
+                  }
+                  tags
                 }
               }
             }
             """
         )
-        variables: Dict[str, object] = {
-            "file": file,
-            "typeinfo": typeinfo,
-            "format": format,
-        }
+        variables: Dict[str, object] = {"typeinfo": typeinfo, "format": format}
         response = await self.execute(
-            query=query, operation_name="upload_object", variables=variables, **kwargs
+            query=query, operation_name="upload_large_object", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return UploadObject.model_validate(data).upload_object
+        return UploadLargeObject.model_validate(data).upload_large_object

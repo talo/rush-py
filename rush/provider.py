@@ -46,7 +46,7 @@ from .graphql_client.arguments import (
     ArgumentsMeAccountArgumentsEdgesNode,
     ArgumentsMeAccountArgumentsPageInfo,
 )
-from .graphql_client.base_model import UNSET, UnsetType, Upload
+from .graphql_client.base_model import UNSET, UnsetType
 from .graphql_client.client import Client
 from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
@@ -1121,12 +1121,19 @@ class BaseProvider:
             file = Path(file)
         with open(file, "rb") as f:
             format = ObjectFormat.json if file.suffix == ".json" else ObjectFormat.bin
-            mimetype = mimetypes.guess_type(file)[0]
-            return await self.client.upload_object(
+            # mimetype = mimetypes.guess_type(file)[0]
+            meta = await self.client.upload_large_object(
                 typeinfo=typeinfo,
                 format=format,
-                file=Upload(filename=f.name, content=f, content_type=mimetype or "text/plain"),
             )
+            # use upload url to PUT file to
+            httpx.put(
+                meta.upload_url,
+                data=f,
+                headers={"content-type": "application/octet-stream"},
+                timeout=httpx.Timeout(600),
+            )
+            return meta.descriptor
 
     async def module_instance(self, id: ModuleInstanceId) -> ModuleInstanceDetailsModuleInstance:
         """

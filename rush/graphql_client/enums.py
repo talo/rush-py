@@ -12,6 +12,11 @@ class AccountTier(str, Enum):
     ENTERPRISE = "ENTERPRISE"
 
 
+class DateTimeSort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 class MemUnits(str, Enum):
     B = "B"
     KB = "KB"
@@ -65,11 +70,28 @@ class ObjectFormat(str, Enum):
     bin = "bin"
 
 
-class Order(str, Enum):
-    ASC = "ASC"
-    DESC = "DESC"
-
-
 class OrderBy(str, Enum):
     ASC = "ASC"
     DESC = "DESC"
+
+
+class ProtocolStatus(str, Enum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    DONE = "DONE"
+    ERROR = "ERROR"
+
+
+class StringSort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class U64Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class UuidSort(str, Enum):
+    asc = "asc"
+    desc = "desc"

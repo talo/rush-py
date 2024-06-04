@@ -8,7 +8,17 @@ from uuid import UUID
 from pydantic import Field
 
 from .base_model import BaseModel
-from .enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, Order
+from .enums import (
+    DateTimeSort,
+    MemUnits,
+    ModuleInstanceStatus,
+    ModuleInstanceTarget,
+    ObjectFormat,
+    ProtocolStatus,
+    StringSort,
+    U64Sort,
+    UuidSort,
+)
 
 
 class AccountBucketConfigInput(BaseModel):
@@ -29,15 +39,60 @@ class ArgumentInput(BaseModel):
     value: Optional[Any] = None
 
 
-class CreateProject(BaseModel):
-    account_id: UUID
+class CreateProjectInput(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
 
 
-class CreateProtein(BaseModel):
+class CreateProteinConformerInput(BaseModel):
+    project_id: Any
+    protein_id: Any
+    structure_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateProteinInput(BaseModel):
     sequence: str
+    project_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateProtocolInput(BaseModel):
+    expr: Any
+    project_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateSmolConformerInput(BaseModel):
+    project_id: Any
+    smol_id: Any
+    structure_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateSmolInput(BaseModel):
+    smi: Optional[str] = None
+    inchi: Optional[str] = None
+    project_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateStructureInput(BaseModel):
+    rcsb_id: Optional[str] = None
+    topology: Any
+    residues: Any
+    chains: Any
     project_id: Any
     name: Optional[str] = None
     description: Optional[str] = None
@@ -53,22 +108,32 @@ class DateTimeFilter(BaseModel):
     le: Optional[datetime] = None
 
 
-class Jsonfilter(BaseModel):
-    eq: Optional["JsonobjectFilter"] = None
-    ne: Optional["JsonobjectFilter"] = None
+class I64Filter(BaseModel):
+    eq: Optional[int] = None
+    ne: Optional[int] = None
+    gt: Optional[int] = None
+    ge: Optional[int] = None
+    lt: Optional[int] = None
+    le: Optional[int] = None
 
 
-class JsonobjectFilter(BaseModel):
-    key: str
-    value: str
+class MetadataFilter(BaseModel):
+    all: Optional[List["MetadataFilter"]] = None
+    any: Optional[List["MetadataFilter"]] = None
+    created_at: Optional["DateTimeFilter"] = None
+    updated_at: Optional["DateTimeFilter"] = None
+    deleted_at: Optional["DateTimeFilter"] = None
+    name: Optional["StringFilter"] = None
+    description: Optional["StringFilter"] = None
+    tags: Optional["TagFilter"] = None
 
 
-class MetadataSortBy(BaseModel):
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-    name: Optional[Order] = None
-    description: Optional[Order] = None
+class MetadataSort(BaseModel):
+    created_at: Optional[DateTimeSort] = None
+    updated_at: Optional[DateTimeSort] = None
+    deleted_at: Optional[DateTimeSort] = None
+    name: Optional[StringSort] = None
+    description: Optional[StringSort] = None
 
 
 class ModuleInput(BaseModel):
@@ -107,20 +172,97 @@ class ObjectDescriptorFilter(BaseModel):
     all: Optional[List["ObjectDescriptorFilter"]] = None
     any: Optional[List["ObjectDescriptorFilter"]] = None
     id: Optional["UuidFilter"] = None
-    object: Optional["Jsonfilter"] = None
+    object: Optional["VirtualObjectFilter"] = None
     base_url: Optional["StringFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
-    name: Optional["StringFilter"] = None
-    description: Optional["StringFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
 
 
-class ObjectDescriptorSortBy(BaseModel):
-    id: Optional[Order] = None
-    base_url: Optional[Order] = None
-    account_id: Optional[Order] = None
-    metadata: Optional["MetadataSortBy"] = None
+class ObjectDescriptorSort(BaseModel):
+    id: Optional[UuidSort] = None
+    object: Optional["VirtualObjectSort"] = None
+    base_url: Optional[StringSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class ObjectFormatFilter(BaseModel):
+    eq: Optional[ObjectFormat] = None
+    ne: Optional[ObjectFormat] = None
+
+
+class ProjectFilter(BaseModel):
+    all: Optional[List["ProjectFilter"]] = None
+    any: Optional[List["ProjectFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class ProjectSort(BaseModel):
+    id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class ProteinConformerFilter(BaseModel):
+    all: Optional[List["ProteinConformerFilter"]] = None
+    any: Optional[List["ProteinConformerFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    protein_id: Optional["UuidFilter"] = None
+    structure_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class ProteinConformerSort(BaseModel):
+    id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    project_id: Optional[UuidSort] = None
+    protein_id: Optional[UuidSort] = None
+    structure_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class ProteinFilter(BaseModel):
+    all: Optional[List["ProteinFilter"]] = None
+    any: Optional[List["ProteinFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    sequence: Optional["StringFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class ProteinSort(BaseModel):
+    id: Optional[UuidSort] = None
+    sequence: Optional[StringSort] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class ProtocolFilter(BaseModel):
+    all: Optional[List["ProtocolFilter"]] = None
+    any: Optional[List["ProtocolFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    status: Optional["ProtocolStatusFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class ProtocolSort(BaseModel):
+    id: Optional[UuidSort] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class ProtocolStatusFilter(BaseModel):
+    eq: Optional[ProtocolStatus] = None
+    ne: Optional[ProtocolStatus] = None
 
 
 class ResourceUtilizationInput(BaseModel):
@@ -134,6 +276,46 @@ class ResourceUtilizationInput(BaseModel):
     sus: Optional[int] = None
 
 
+class SmolConformerFilter(BaseModel):
+    all: Optional[List["SmolConformerFilter"]] = None
+    any: Optional[List["SmolConformerFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    smol_id: Optional["UuidFilter"] = None
+    structure_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class SmolConformerSort(BaseModel):
+    id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    project_id: Optional[UuidSort] = None
+    smol_id: Optional[UuidSort] = None
+    structure_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class SmolFilter(BaseModel):
+    all: Optional[List["SmolFilter"]] = None
+    any: Optional[List["SmolFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    smi: Optional["StringFilter"] = None
+    inchi: Optional["StringFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class SmolSort(BaseModel):
+    id: Optional[UuidSort] = None
+    smi: Optional[StringSort] = None
+    inchi: Optional[StringSort] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
 class StringFilter(BaseModel):
     eq: Optional[str] = None
     ne: Optional[str] = None
@@ -143,7 +325,28 @@ class StringFilter(BaseModel):
     le: Optional[str] = None
     like: Optional[str] = None
     in_: Optional[List[str]] = Field(alias="in", default=None)
-    not_in: Optional[List[str]] = None
+
+
+class StructureFilter(BaseModel):
+    all: Optional[List["StructureFilter"]] = None
+    any: Optional[List["StructureFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    rcsb_id: Optional["StringFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class StructureSort(BaseModel):
+    id: Optional[UuidSort] = None
+    rcsb_id: Optional[StringSort] = None
+    account_id: Optional[UuidSort] = None
+    project_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class TagFilter(BaseModel):
+    in_: Optional[List[str]] = Field(alias="in", default=None)
 
 
 class TestCase(BaseModel):
@@ -160,14 +363,15 @@ class TokenFilter(BaseModel):
     created_at: Optional["DateTimeFilter"] = None
     updated_at: Optional["DateTimeFilter"] = None
     deleted_at: Optional["DateTimeFilter"] = None
+    user_id: Optional["UuidFilter"] = None
 
 
-class TokenSortBy(BaseModel):
-    id: Optional[Order] = None
-    created_at: Optional[Order] = None
-    updated_at: Optional[Order] = None
-    deleted_at: Optional[Order] = None
-    user_id: Optional[Order] = None
+class TokenSort(BaseModel):
+    id: Optional[UuidSort] = None
+    created_at: Optional[DateTimeSort] = None
+    updated_at: Optional[DateTimeSort] = None
+    deleted_at: Optional[DateTimeSort] = None
+    user_id: Optional[UuidSort] = None
 
 
 class TypeQuery(BaseModel):
@@ -190,3 +394,14 @@ class UuidFilter(BaseModel):
     eq: Optional[Any] = None
     ne: Optional[Any] = None
     in_: Optional[List[Any]] = Field(alias="in", default=None)
+
+
+class VirtualObjectFilter(BaseModel):
+    path: Optional["StringFilter"] = None
+    size: Optional["I64Filter"] = None
+    format: Optional["ObjectFormatFilter"] = None
+
+
+class VirtualObjectSort(BaseModel):
+    path: Optional[StringSort] = None
+    size: Optional[U64Sort] = None

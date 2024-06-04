@@ -100,6 +100,7 @@ class ModuleInstanceFullIns(BaseModel):
     typeinfo: Any
     value: Optional[Any]
     tags: Optional[List[str]]
+    source: Optional[UUID]
 
 
 class ModuleInstanceFullOuts(BaseModel):
@@ -111,6 +112,7 @@ class ModuleInstanceFullOuts(BaseModel):
     typeinfo: Any
     value: Optional[Any]
     tags: Optional[List[str]]
+    source: Optional[UUID]
 
 
 class ModuleInstanceFullResources(BaseModel):

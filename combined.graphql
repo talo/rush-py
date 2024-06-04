@@ -10,6 +10,10 @@ mutation deploy($module: ModuleInput!) {
     path
   }
 }
+# Query is standalone because the graphql-client POSTs all queries in the same file for each subquery
+# this queries fragments interacted badly with other queries, causing unexplained issues that will be resolved
+# by moving to cynic
+
 query module_instances(
   $after: String
   $before: String
@@ -63,6 +67,7 @@ query module_instances(
               typeinfo
               value
               tags
+              source
             }
             outs {
               id
@@ -73,6 +78,7 @@ query module_instances(
               typeinfo
               value
               tags
+              source
             }
             resources {
               gpus
@@ -97,6 +103,23 @@ query module_instances(
         }
       }
     }
+  }
+}
+mutation create_project($project: CreateProjectInput!) {
+  create_project(input: $project) {
+    id
+  }
+}
+mutation create_protein_conformer(
+  $protein_conformer: CreateProteinConformerInput!
+) {
+  create_protein_conformer(input: $protein_conformer) {
+    id
+  }
+}
+mutation create_protein($protein: CreateProteinInput!) {
+  create_protein(input: $protein) {
+    id
   }
 }
 # Common Fragments across all queries
@@ -285,30 +308,6 @@ fragment ModuleInstanceCommon on ModuleInstance {
   }
 }
 
-# fragment SimpleModuleInstanceCommon on SimpleModuleInstance {
-#   id
-#   account_id
-
-#   created_at
-#   deleted_at
-#   queued_at
-#   admitted_at
-#   dispatched_at
-#   completed_at
-
-#   path
-#   status
-#   target
-#   tags
-
-#   failure_reason
-#   failure_context {
-#     stdout
-#     stderr
-#     syserr
-#   }
-# }
-
 fragment ModuleInstanceFull on ModuleInstance {
   ...ModuleInstanceCommon
   ins {
@@ -320,6 +319,7 @@ fragment ModuleInstanceFull on ModuleInstance {
     typeinfo
     value
     tags
+    source
   }
   outs {
     id
@@ -330,6 +330,7 @@ fragment ModuleInstanceFull on ModuleInstance {
     typeinfo
     value
     tags
+    source
   }
   resources {
     gpus
@@ -354,43 +355,6 @@ fragment ModuleInstanceFull on ModuleInstance {
     sus
   }
 }
-
-# fragment SimpleModuleInstanceFull on SimpleModuleInstance {
-#   ...SimpleModuleInstanceCommon
-#   ins {
-#     id
-#     created_at
-#     deleted_at
-#     rejected_at
-#     account_id
-#     typeinfo
-#     value
-#     tags
-#   }
-#   outs {
-#     id
-#     created_at
-#     deleted_at
-#     rejected_at
-#     account_id
-#     typeinfo
-#     value
-#     tags
-#   }
-#   resources {
-#     gpus
-#     nodes
-#     mem
-#     storage
-#     walltime
-#   }
-#   progress {
-#     n
-#     n_expected
-#     n_max
-#     done
-#   }
-# }
 
 query module_instance_details(
   $id: ModuleInstanceId!
@@ -463,6 +427,21 @@ mutation run($instance: ModuleInstanceInput!) {
         outs {id}
     }
 }
+mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+  create_smol_conformer(input: $smol_conformer) {
+    id
+  }
+}
+mutation create_smol($smol: CreateSmolInput!) {
+  create_smol(input: $smol) {
+    id
+  }
+}
+mutation create_structure($structure: CreateStructureInput!) {
+  create_structure(input: $structure) {
+    id
+  }
+}
 mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
     tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
 }
@@ -482,24 +461,20 @@ mutation update_module_instance(
     status
   }
 }
-mutation upload_arg($typeinfo: JSON!, $file: Upload!) {
-  upload_arg(typeinfo: $typeinfo, file: $file) {
-    id
-    value
-  }
-}
-
-mutation upload_object(
-  $file: Upload!
-  $typeinfo: JSON!
-  $format: ObjectFormat!
-) {
-  upload_object(file: $file, typeinfo: $typeinfo, format: $format) {
-    id
-    object {
-      path
-      size
-      format
+mutation upload_large_object($typeinfo: JSON!, $format: ObjectFormat!) {
+  upload_large_object(typeinfo: $typeinfo, format: $format) {
+    upload_url
+    descriptor {
+      id
+      name
+      description
+      type_info
+      object {
+        format
+        size
+        path
+      }
+      tags
     }
   }
 }

@@ -12,8 +12,17 @@ type Account {
     first: Int
     last: Int
     filter: ObjectDescriptorFilter
-    sort_by: ObjectDescriptorSortBy
+    sort: ObjectDescriptorSort
   ): ObjectDescriptorConnection!
+  project(id: ProjectId!): Project!
+  projects(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProjectFilter
+    sort: ProjectSort
+  ): ProjectConnection!
   resource_utilization(
     from: DateTime
     to: DateTime
@@ -50,6 +59,7 @@ type Account {
     first: Int
     last: Int
     order: OrderBy
+    ids: [ArgumentId!]
     typeinfo: [Type!]
     typequery: [TypeQuery!]
     tags: [String!]
@@ -144,15 +154,60 @@ input ArgumentInput {
   value: JSON
 }
 
-input CreateProject {
-  account_id: AccountId!
+input CreateProjectInput {
   name: String
   description: String
   tags: [String!]
 }
 
-input CreateProtein {
+input CreateProteinConformerInput {
+  project_id: ProjectId!
+  protein_id: ProteinId!
+  structure_id: StructureId!
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateProteinInput {
   sequence: String!
+  project_id: ProjectId!
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateProtocolInput {
+  expr: JSON!
+  project_id: ProjectId!
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateSmolConformerInput {
+  project_id: ProjectId!
+  smol_id: SmolId!
+  structure_id: StructureId!
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateSmolInput {
+  smi: String
+  inchi: String
+  project_id: ProjectId!
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateStructureInput {
+  rcsb_id: String
+  topology: TypedVirtualObject!
+  residues: TypedVirtualObject!
+  chains: TypedVirtualObject!
   project_id: ProjectId!
   name: String
   description: String
@@ -171,6 +226,11 @@ input DateTimeFilter {
   ge: DateTime
   lt: DateTime
   le: DateTime
+}
+
+enum DateTimeSort {
+  asc
+  desc
 }
 
 type GlobalStatus {
@@ -200,18 +260,17 @@ type GlobalStatusEdge {
   cursor: String!
 }
 
+input I64Filter {
+  eq: Int
+  ne: Int
+  gt: Int
+  ge: Int
+  lt: Int
+  le: Int
+}
+
 # A scalar that can represent any JSON value.
 scalar JSON
-
-input Jsonfilter {
-  eq: JsonobjectFilter
-  ne: JsonobjectFilter
-}
-
-input JsonobjectFilter {
-  key: String!
-  value: String!
-}
 
 type LogEntry {
   id: String!
@@ -250,12 +309,23 @@ enum MemUnits {
   TB
 }
 
-input MetadataSortBy {
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-  name: Order
-  description: Order
+input MetadataFilter {
+  all: [MetadataFilter!]
+  any: [MetadataFilter!]
+  created_at: DateTimeFilter
+  updated_at: DateTimeFilter
+  deleted_at: DateTimeFilter
+  name: StringFilter
+  description: StringFilter
+  tags: TagFilter
+}
+
+input MetadataSort {
+  created_at: DateTimeSort
+  updated_at: DateTimeSort
+  deleted_at: DateTimeSort
+  name: StringSort
+  description: StringSort
 }
 
 type Module {
@@ -669,17 +739,15 @@ type Mutation {
     argument: ArgumentId
     tags: [String!]!
   ): [String!]!
+  upload_large_object(
+    typeinfo: JSON!
+    format: ObjectFormat!
+  ): ObjectDescriptorWithUploadUrl!
   upload_object(
     file: Upload!
     typeinfo: JSON!
     format: ObjectFormat!
   ): ObjectDescriptor!
-  upload_arg(
-    typeinfo: JSON!
-    tags: [String!]
-    file: Upload!
-    name: String
-  ): Argument!
 
   # Cancel a currently running instance, but don't delete it
   cancel(instance: ModuleInstanceId!): ModuleInstanceId!
@@ -691,6 +759,8 @@ type Mutation {
     target: ModuleInstanceTarget
     resources: ModuleInstanceResourcesInput
   ): SimpleModuleInstance!
+
+  # Run a module instance
   run(instance: ModuleInstanceInput!): SimpleModuleInstance!
 
   # An (admin) endpoint to update all attributes of a module instance.
@@ -710,16 +780,20 @@ type Mutation {
     value: JSON!
   ): Argument!
   create_token: Token!
-  create_project(input: CreateProject!): Project!
-  create_protein(input: CreateProtein!): Protein!
+  eval(input: CreateProtocolInput!): Protocol!
+  create_project(input: CreateProjectInput!): Project!
+  create_protein_conformer(
+    input: CreateProteinConformerInput!
+  ): ProteinConformer!
+  create_protein(input: CreateProteinInput!): Protein!
+  create_smol_conformer(input: CreateSmolConformerInput!): SmolConformer!
+  create_smol(input: CreateSmolInput!): Smol!
+  create_structure(input: CreateStructureInput!): Structure!
   update_account_config(
     account_id: AccountId!
     input: AccountConfigInput!
   ): AccountConfig!
-  update_account_tier(
-    account_id: AccountId!
-    tier: AccountTier!
-  ): AccountConfig!
+  update_account_tier(account_id: AccountId!, tier: AccountTier!): AccountTier!
 }
 
 type Object {
@@ -750,7 +824,7 @@ type ObjectDescriptorConnection {
 
   # A list of nodes.
   nodes: [ObjectDescriptor!]!
-  totalCount: Int!
+  total_count: Int!
 }
 
 # An edge in a connection.
@@ -766,32 +840,35 @@ input ObjectDescriptorFilter {
   all: [ObjectDescriptorFilter!]
   any: [ObjectDescriptorFilter!]
   id: UuidFilter
-  object: Jsonfilter
+  object: VirtualObjectFilter
   base_url: StringFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
-  name: StringFilter
-  description: StringFilter
+  account_id: UuidFilter
+  metadata: MetadataFilter
 }
 
 scalar ObjectDescriptorId
 
-input ObjectDescriptorSortBy {
-  id: Order
-  base_url: Order
-  account_id: Order
-  metadata: MetadataSortBy
+input ObjectDescriptorSort {
+  id: UuidSort
+  object: VirtualObjectSort
+  base_url: StringSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
+
+type ObjectDescriptorWithUploadUrl {
+  descriptor: ObjectDescriptor!
+  upload_url: String!
 }
 
 enum ObjectFormat {
-  JSON
-  BIN
+  json
+  bin
 }
 
-enum Order {
-  ASC
-  DESC
+input ObjectFormatFilter {
+  eq: ObjectFormat
+  ne: ObjectFormat
 }
 
 enum OrderBy {
@@ -822,9 +899,98 @@ type Project {
   name: String
   description: String
   tags: [String!]
+  protein_conformer(id: ProteinConformerId!): ProteinConformer!
+  protein_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProteinConformerFilter
+    sort_by: ProteinConformerSort
+  ): ProteinConformerConnection!
+  protein(id: ProteinId!): Protein!
+  proteins(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProteinFilter
+    sort_by: ProteinSort
+  ): ProteinConnection!
+  smol_conformer(id: SmolConformerId!): SmolConformer!
+  smol_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolConformerFilter
+    sort_by: SmolConformerSort
+  ): SmolConformerConnection!
+  smol(id: SmolId!): Smol!
+  smols(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolFilter
+    sort_by: SmolSort
+  ): SmolConnection!
+  structure(id: StructureId!): Structure!
+  protocol(id: ProtocolId!): Protocol!
+  protocols(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProtocolFilter
+    sort_by: ProtocolSort
+  ): ProtocolConnection!
+  structures(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: StructureFilter
+    sort_by: StructureSort
+  ): StructureConnection!
+}
+
+type ProjectConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ProjectEdge!]!
+
+  # A list of nodes.
+  nodes: [Project!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type ProjectEdge {
+  # The item at the end of the edge
+  node: Project!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input ProjectFilter {
+  all: [ProjectFilter!]
+  any: [ProjectFilter!]
+  id: UuidFilter
+  account_id: UuidFilter
+  metadata: MetadataFilter
 }
 
 scalar ProjectId
+
+input ProjectSort {
+  id: UuidSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
 
 type Protein {
   id: ProteinId!
@@ -835,9 +1001,175 @@ type Protein {
   name: String
   description: String
   tags: [String!]
+  protein_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProteinConformerFilter
+    sort_by: ProteinConformerSort
+  ): ProteinConformerConnection!
+}
+
+type ProteinConformer {
+  id: ProteinConformerId!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  name: String
+  description: String
+  tags: [String!]
+  structure: Structure!
+}
+
+type ProteinConformerConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ProteinConformerEdge!]!
+
+  # A list of nodes.
+  nodes: [ProteinConformer!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type ProteinConformerEdge {
+  # The item at the end of the edge
+  node: ProteinConformer!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input ProteinConformerFilter {
+  all: [ProteinConformerFilter!]
+  any: [ProteinConformerFilter!]
+  id: UuidFilter
+  account_id: UuidFilter
+  project_id: UuidFilter
+  protein_id: UuidFilter
+  structure_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar ProteinConformerId
+
+input ProteinConformerSort {
+  id: UuidSort
+  account_id: UuidSort
+  project_id: UuidSort
+  protein_id: UuidSort
+  structure_id: UuidSort
+  metadata: MetadataSort
+}
+
+type ProteinConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ProteinEdge!]!
+
+  # A list of nodes.
+  nodes: [Protein!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type ProteinEdge {
+  # The item at the end of the edge
+  node: Protein!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input ProteinFilter {
+  all: [ProteinFilter!]
+  any: [ProteinFilter!]
+  id: UuidFilter
+  sequence: StringFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  metadata: MetadataFilter
 }
 
 scalar ProteinId
+
+input ProteinSort {
+  id: UuidSort
+  sequence: StringSort
+  project_id: UuidSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
+
+type Protocol {
+  id: ProtocolId!
+  expr: JSON!
+  result: JSON
+  status: ProtocolStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  name: String
+  description: String
+  tags: [String!]
+}
+
+type ProtocolConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ProtocolEdge!]!
+
+  # A list of nodes.
+  nodes: [Protocol!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type ProtocolEdge {
+  # The item at the end of the edge
+  node: Protocol!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input ProtocolFilter {
+  all: [ProtocolFilter!]
+  any: [ProtocolFilter!]
+  id: UuidFilter
+  status: ProtocolStatusFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar ProtocolId
+
+input ProtocolSort {
+  id: UuidSort
+  project_id: UuidSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
+
+enum ProtocolStatus {
+  PENDING
+  RUNNING
+  DONE
+  ERROR
+}
+
+input ProtocolStatusFilter {
+  eq: ProtocolStatus
+  ne: ProtocolStatus
+}
 
 type Query {
   modules(
@@ -1079,6 +1411,123 @@ type SimpleModuleInstanceEdge {
   cursor: String!
 }
 
+type Smol {
+  id: SmolId!
+  smi: String
+  inchi: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  name: String
+  description: String
+  tags: [String!]
+  smol_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolConformerFilter
+    sort_by: SmolConformerSort
+  ): SmolConformerConnection!
+}
+
+type SmolConformer {
+  id: SmolConformerId!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  name: String
+  description: String
+  tags: [String!]
+  structure: Structure!
+}
+
+type SmolConformerConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [SmolConformerEdge!]!
+
+  # A list of nodes.
+  nodes: [SmolConformer!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type SmolConformerEdge {
+  # The item at the end of the edge
+  node: SmolConformer!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input SmolConformerFilter {
+  all: [SmolConformerFilter!]
+  any: [SmolConformerFilter!]
+  id: UuidFilter
+  account_id: UuidFilter
+  project_id: UuidFilter
+  smol_id: UuidFilter
+  structure_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar SmolConformerId
+
+input SmolConformerSort {
+  id: UuidSort
+  account_id: UuidSort
+  project_id: UuidSort
+  smol_id: UuidSort
+  structure_id: UuidSort
+  metadata: MetadataSort
+}
+
+type SmolConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [SmolEdge!]!
+
+  # A list of nodes.
+  nodes: [Smol!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type SmolEdge {
+  # The item at the end of the edge
+  node: Smol!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input SmolFilter {
+  all: [SmolFilter!]
+  any: [SmolFilter!]
+  id: UuidFilter
+  smi: StringFilter
+  inchi: StringFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar SmolId
+
+input SmolSort {
+  id: UuidSort
+  smi: StringSort
+  inchi: StringSort
+  project_id: UuidSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
+
 type StatusByAccount {
   created_at: DateTime!
   account_id: AccountId!
@@ -1173,7 +1622,66 @@ input StringFilter {
   le: String
   like: String
   in: [String!]
-  not_in: [String!]
+}
+
+enum StringSort {
+  asc
+  desc
+}
+
+type Structure {
+  id: StructureId!
+  rcsb_id: String
+  topology: TypedVirtualObject!
+  residues: TypedVirtualObject!
+  chains: TypedVirtualObject!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  name: String
+  description: String
+  tags: [String!]
+}
+
+type StructureConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [StructureEdge!]!
+
+  # A list of nodes.
+  nodes: [Structure!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type StructureEdge {
+  # The item at the end of the edge
+  node: Structure!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input StructureFilter {
+  all: [StructureFilter!]
+  any: [StructureFilter!]
+  id: UuidFilter
+  rcsb_id: StringFilter
+  account_id: UuidFilter
+  project_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar StructureId
+
+input StructureSort {
+  id: UuidSort
+  rcsb_id: StringSort
+  account_id: UuidSort
+  project_id: UuidSort
+  metadata: MetadataSort
 }
 
 type Subscription {
@@ -1207,6 +1715,10 @@ type TagEdge {
   cursor: String!
 }
 
+input TagFilter {
+  in: [String!]
+}
+
 input TestCase {
   args: [ArgumentInput!]!
   target: ModuleInstanceTarget!
@@ -1230,7 +1742,7 @@ type TokenConnection {
 
   # A list of nodes.
   nodes: [Token!]!
-  totalCount: Int!
+  total_count: Int!
 }
 
 # An edge in a connection.
@@ -1249,16 +1761,17 @@ input TokenFilter {
   created_at: DateTimeFilter
   updated_at: DateTimeFilter
   deleted_at: DateTimeFilter
+  user_id: UuidFilter
 }
 
 scalar TokenId
 
-input TokenSortBy {
-  id: Order
-  created_at: Order
-  updated_at: Order
-  deleted_at: Order
-  user_id: Order
+input TokenSort {
+  id: UuidSort
+  created_at: DateTimeSort
+  updated_at: DateTimeSort
+  deleted_at: DateTimeSort
+  user_id: UuidSort
 }
 
 scalar Type
@@ -1266,6 +1779,13 @@ scalar Type
 input TypeQuery {
   path: [String!]!
   query: JSON!
+}
+
+scalar TypedVirtualObject
+
+enum U64Sort {
+  asc
+  desc
 }
 
 # A UUID is a unique 128-bit number, stored as 16 octets. UUIDs are parsed as
@@ -1303,7 +1823,7 @@ type User {
     first: Int
     last: Int
     filter: TokenFilter
-    sortBy: TokenSortBy
+    sortBy: TokenSort
   ): TokenConnection!
 }
 
@@ -1315,8 +1835,24 @@ input UuidFilter {
   in: [UUID!]
 }
 
+enum UuidSort {
+  asc
+  desc
+}
+
 type VirtualObject {
   path: String!
   size: Int!
   format: ObjectFormat!
+}
+
+input VirtualObjectFilter {
+  path: StringFilter
+  size: I64Filter
+  format: ObjectFormatFilter
+}
+
+input VirtualObjectSort {
+  path: StringSort
+  size: U64Sort
 }
