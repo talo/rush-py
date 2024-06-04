@@ -219,8 +219,8 @@ def format_module_typedesc(typedesc_in: str) -> str:
     finalized_str = re.sub(r" +\|", " |", finalized_str)
     finalized_str = re.sub(r"\| +", "| ", finalized_str)
     # TODO: render object properly and remove this hack
-    finalized_str = re.sub(r" \{path: (.*?), size: (.*?)\}", r"[\1]", finalized_str)
-    finalized_str = re.sub(r" \{size: (.*?), path: (.*?)\}", r"[\2]", finalized_str)
+    finalized_str = re.sub(r" \{path: (.*?), size: (.*?)\ .*}", r"[\1]", finalized_str)
+    finalized_str = re.sub(r" \{size: (.*?), path: (.*?)\ .*}", r"[\2]", finalized_str)
 
     return finalized_str + "\n"
 

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from io import BytesIO, StringIO
 from numbers import Number
 from pathlib import Path
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, Tuple, TypeVar, Union
 from uuid import UUID
 
 from rush.graphql_client.upload_object import UploadObjectUploadObjectObject
@@ -113,7 +113,7 @@ scalar_types_mapping: dict[str, type[Any]] = {
     "xtc": bytes,
 }
 
-KINDS = Literal["array", "optional", "enum", "record", "tuple", "@"]
+KINDS = Literal["array", "fallible", "λ", "optional", "enum", "record", "tuple", "@"]
 
 
 @dataclass
@@ -248,6 +248,22 @@ class OptionalKind(Generic[T], RushType[T]):
             return self.t.matches(other)
 
 
+class FallibleKind(Generic[T], RushType[T]):
+    def __init__(self, fallible: RushType[T]):
+        self.k = "fallible"
+        self.t = fallible
+
+    def to_python_type(self) -> type[Any]:
+        return Tuple[Optional[self.t.to_python_type()], Optional[str]]
+
+    def matches(self, other: Tuple[Optional[T], Optional[str]] | Any) -> tuple[bool, str | None]:
+        if not isinstance(other, (list, tuple)):
+            return (False, f"Expected list or tuple, got {type(other)}")
+        # TODO: actually implement checking fallibles.
+        #       in most cases, users will unwrap before passing as arguments so this is low prio
+        return (True, None)
+
+
 class ObjectKind(Generic[T], RushType[T]):
     def __init__(self, object: RushType[T]):
         self.k = "record"
@@ -316,6 +332,10 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                 return OptionalKind(type_from_typedef(res["t"]))
             elif res["k"] == "@":
                 return type_from_typedef(res["t"])
+            elif res["k"] == "alias":
+                return type_from_typedef(res["t"])
+            elif res["k"] == "fallible":
+                return FallibleKind(type_from_typedef(res["t"]))
             else:
                 raise Exception(f"Unknown kind {res['k']}")
         else:
