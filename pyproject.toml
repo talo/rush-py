@@ -24,6 +24,7 @@ typing-extensions = "^4.9.0"
 websockets = "^12"
 
 [tool.poetry.group.dev.dependencies]
+numpy = "^1.26.4"
 ariadne-codegen = "0.13.0"
 black = { extras = ["jupyter"], version = "~=23.9.1" }
 flake8 = "~=6.1.0"
@@ -42,6 +43,7 @@ qdx-py = ">0.6.2"
 pickleshare = "^0.7.5"
 jupyterlab-lsp = "^5.1.0"
 rdkit = "^2023.9.6"
+mpire = "^2.10.2"
 
 [build-system]
 requires = ["poetry-core"]
@@ -52,7 +54,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 110
 include = '\.pyi?$'
-
 
 [tool.isort]
 line_length = 110
@@ -130,3 +131,6 @@ type = "uuid.UUID"
 
 [tool.ariadne-codegen.scalars.ObjectDescriptorId]
 type = "uuid.UUID"
+
+[tool.poetry.extras]
+rdkit = ['rdkit']

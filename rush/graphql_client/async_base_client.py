@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import backoff
 import httpx
+import anyio
 from pydantic import BaseModel
 from pydantic_core import to_jsonable_python
 
@@ -92,7 +93,16 @@ class AsyncBaseClient:
         await self.http_client.aclose()
 
     @backoff.on_exception(
-        backoff.expo, (httpx.ReadTimeout, httpx.ConnectError, httpx.PoolTimeout), max_time=300
+        backoff.expo,
+        (
+            httpx.ReadTimeout,
+            httpx.ConnectError,
+            httpx.PoolTimeout,
+            anyio.BrokenResourceError,
+            anyio.ClosedResourceError,
+            anyio.EndOfStream,
+        ),
+        max_time=300,
     )
     async def execute(
         self,
