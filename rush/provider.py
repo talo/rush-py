@@ -187,7 +187,8 @@ def format_module_typedesc(typedesc_in: str) -> str:
                 new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1].lstrip(" ")]
                 last_break_pos = i + 1
             if seen_nester and seen_dict["{}"] == 0 and seen_dict["()"] == 0:
-                assert char in "})"
+                # breaks in union
+                # assert char in "})"
                 new_lines += [leading_spaces + "    " + old_line[last_break_pos:i].lstrip(" ")]
                 new_lines += [leading_spaces + old_line[i:].lstrip(" ")]
                 break

@@ -114,7 +114,7 @@ scalar_types_mapping: dict[str, type[Any]] = {
     "xtc": bytes,
 }
 
-KINDS = Literal["array", "fallible", "λ", "optional", "enum", "record", "tuple", "@"]
+KINDS = Literal["array", "fallible", "λ", "optional", "enum", "record", "tuple", "@", "union"]
 
 
 @dataclass
@@ -178,6 +178,28 @@ class RecordKind(Generic[T], RushType[T]):
 
     def to_python_type(self) -> type[Record]:
         return Record
+
+    def matches(self, other: dict[str, Any] | Any) -> tuple[bool, str | None]:
+        if not isinstance(other, dict):
+            return (False, f"Expected dict, got {type(other)}")
+        for k, v in self.t.items():
+            if v.k == "optional" and k not in other:
+                return (True, None)
+            if k not in other and v.k != "optional":
+                return (False, f"Expected key {k} in dict")
+            ok, reason = v.matches(other[k])
+            if not ok:
+                return (False, reason)
+        return (True, None)
+
+
+class UnionKind(Generic[T], RushType[T]):
+    def __init__(self, record: dict[str, RushType[T]] | tuple[RushType[T]]):
+        self.k = "union"
+        self.t = record
+
+    def to_python_type(self) -> type[Union[Any, Any]]:
+        return Union
 
     def matches(self, other: dict[str, Any] | Any) -> tuple[bool, str | None]:
         if not isinstance(other, dict):
@@ -334,6 +356,11 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                     return RecordKind({k: type_from_typedef(v) for k, v in res["t"].items()})
                 else:
                     return RecordKind(tuple(type_from_typedef(v) for v in res["t"]))
+            elif res["k"] == "union":
+                if isinstance(res["t"], dict):
+                    return UnionKind({k: type_from_typedef(v) for k, v in res["t"].items()})
+                else:
+                    return UnionKind(tuple(type_from_typedef(list(v.items())[0]) for v in res["t"]))
             elif res["k"] == "array":
                 return ArrayKind(type_from_typedef(res["t"]))
             elif res["k"] == "tuple":
