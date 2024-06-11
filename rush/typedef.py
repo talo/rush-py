@@ -199,7 +199,7 @@ class UnionKind(Generic[T], RushType[T]):
         self.t = record
 
     def to_python_type(self) -> type[Union[Any, Any]]:
-        return Union
+        return Union[Any, Any]
 
     def matches(self, other: dict[str, Any] | Any) -> tuple[bool, str | None]:
         if not isinstance(other, dict):
