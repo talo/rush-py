@@ -6,7 +6,6 @@ from collections.abc import AsyncGenerator
 import json
 import logging
 import math
-import mimetypes
 import os
 import random
 import re
@@ -1122,6 +1121,7 @@ class BaseProvider:
             file = Path(file)
         with open(file, "rb") as f:
             format = ObjectFormat.json if file.suffix == ".json" else ObjectFormat.bin
+            # TODO: see if we can use this in the upload
             # mimetype = mimetypes.guess_type(file)[0]
             meta = await self.client.upload_large_object(
                 typeinfo=typeinfo,
