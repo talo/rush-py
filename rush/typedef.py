@@ -380,12 +380,12 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                 return type_from_typedef(res["t"])
             else:
                 raise Exception(f"Invalid typedef {res}")
-    elif isinstance(res, list):
+    elif isinstance(res, (list, tuple)):
         return TupleKind([type_from_typedef(x) for x in res])
     elif isinstance(res, str):  # type: ignore
         return ScalarType(res)
     else:
-        print("Bad type!")
+        print("Bad type!", res)
         return RushType(res)
 
 
