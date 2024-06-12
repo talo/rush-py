@@ -74,6 +74,7 @@ ignore = [
     "**/node_modules",
     "**/__pycache__",
     "**/*venv*",
+    "rush/graphql_client",
     "result",
     "setup.py",
 ]

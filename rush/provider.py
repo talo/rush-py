@@ -1706,9 +1706,15 @@ def build_blocking_provider_with_functions(
     provider = Provider(
         access_token, url, workspace, batch_tags, logger, restore_by_default=restore_by_default
     )
-    if not LOOP.is_running() and not asyncio.get_event_loop().is_running():
-        _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
-        _LOOP_THREAD.start()
+    if not LOOP.is_running():
+        try:
+            event_loop_running = asyncio.get_event_loop().is_running()
+        except RuntimeError:
+            event_loop_running = False
+
+        if not event_loop_running:
+            _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
+            _LOOP_THREAD.start()
 
     built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
 
