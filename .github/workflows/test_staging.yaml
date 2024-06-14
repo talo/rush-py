@@ -40,7 +40,9 @@ jobs:
         run: nix flake check --accept-flake-config --show-trace
       - name: nbdev checks
         run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --skip_file_glob "*async*"
-      - name: nbdev checks
+      - name: nbdev checks (protein prep)
         run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Tutorials/batch_run_protein_prep_async.ipynb
-      - name: nbdev checks
-        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Quicklstarts/batch_run_protein_prep_async-sample.ipynb
+      - name: nbdev checks (protein prep (sample))
+        run: export PYTHONPATH=$(pwd) && nix develop -c nbdev_test --do_print --path ./nbs/Quickstarts/batch_run_protein_prep_async-sample.ipynb
+      - name: nbdev checks (constrained docking)
+        run: export PYTHONPATH=$(pwd) && nix develop -c "nbdev_test --do_print --path ./nbs/Quickstarts/nbs/Tutorials/templated_docking_protocol-async.ipynb"

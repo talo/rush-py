@@ -67,9 +67,12 @@ jobs:
       - name: nbdev checks
         timeout-minutes: 130
         run: export PYTHONPATH=$(pwd) && nix develop -c "nbdev_test --do_print --skip_file_glob \"*async*\""
-      - name: nbdev checks
+      - name: nbdev checks (protein prep)
         timeout-minutes: 130
         run: export PYTHONPATH=$(pwd) && nix develop -c "nbdev_test --do_print --path ./nbs/Tutorials/batch_run_protein_prep_async.ipynb"
-      - name: nbdev checks
+      - name: nbdev checks (protein prep (sample))
         timeout-minutes: 130
-        run: export PYTHONPATH=$(pwd) && nix develop -c "nbdev_test --do_print --path ./nbs/Quicklstarts/batch_run_protein_prep_async-sample.ipynb"
+        run: export PYTHONPATH=$(pwd) && nix develop -c "nbdev_test --do_print --path ./nbs/Quickstarts/batch_run_protein_prep_async-sample.ipynb"
+      - name: nbdev checks (constrained docking)
+        timeout-minutes: 130
+        run: export PYTHONPATH=$(pwd) && nix develop -c "nbdev_test --do_print --path ./nbs/Quickstarts/nbs/Tutorials/templated_docking_protocol-async.ipynb"
