@@ -75,7 +75,7 @@ class OrderBy(str, Enum):
     DESC = "DESC"
 
 
-class ProtocolStatus(str, Enum):
+class RunStatus(str, Enum):
     PENDING = "PENDING"
     RUNNING = "RUNNING"
     DONE = "DONE"
@@ -85,6 +85,17 @@ class ProtocolStatus(str, Enum):
 class StringSort(str, Enum):
     asc = "asc"
     desc = "desc"
+
+
+class TaggedType(str, Enum):
+    structure = "structure"
+    protein = "protein"
+    protein_conformer = "protein_conformer"
+    smol = "smol"
+    smol_conformer = "smol_conformer"
+    run = "run"
+    module = "module"
+    module_instance = "module_instance"
 
 
 class U64Sort(str, Enum):

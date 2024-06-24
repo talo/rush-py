@@ -41,22 +41,22 @@ class ModuleFull(BaseModel):
 
 
 class ModuleFullResourceBounds(BaseModel):
-    gpu_min: int
-    gpu_max: int
-    gpu_hint: int
+    gpu_min: Optional[int]
+    gpu_max: Optional[int]
+    gpu_hint: Optional[int]
     gpu_mem_min: Optional[int]
     gpu_mem_max: Optional[int]
     gpu_mem_hint: Optional[int]
     cpu_min: Optional[int]
     cpu_max: Optional[int]
     cpu_hint: Optional[int]
-    node_min: int
-    node_max: int
-    node_hint: int
-    mem_min: int
-    mem_max: int
-    storage_min: int
-    storage_max: int
+    node_min: Optional[int]
+    node_max: Optional[int]
+    node_hint: Optional[int]
+    mem_min: Optional[int]
+    mem_max: Optional[int]
+    storage_min: Optional[int]
+    storage_max: Optional[int]
 
 
 class ModuleInstanceCommon(BaseModel):

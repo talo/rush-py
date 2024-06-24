@@ -963,9 +963,9 @@ class BaseProvider:
             default_resources = None
             if module.resource_bounds:
                 default_resources = {
-                    "storage": module.resource_bounds.storage_min + 10,
+                    "storage": (module.resource_bounds.storage_min or 0) + 10,
                     "storage_units": "MB",
-                    "gpus": module.resource_bounds.gpu_hint,
+                    "gpus": module.resource_bounds.gpu_hint or 0,
                 }
 
             def closure(

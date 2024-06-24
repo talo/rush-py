@@ -1,3 +1,7 @@
+# Indicates that an Input Object is a OneOf Input Object (and thus requires
+#                         exactly one of its field be provided)
+directive @oneOf on INPUT_OBJECT
+
 type Account {
   id: AccountId!
   created_at: DateTime!
@@ -52,7 +56,7 @@ type Account {
     order: OrderBy
     contains: String
     min_count: Int
-  ): TagConnection!
+  ): V1TagConnection!
   arguments(
     after: String
     before: String
@@ -75,7 +79,7 @@ type Account {
     last: Int
     order: OrderBy
     contains: String
-  ): TagConnection!
+  ): V1TagConnection!
 }
 
 type AccountBucketConfig {
@@ -177,9 +181,14 @@ input CreateProteinInput {
   tags: [String!]
 }
 
-input CreateProtocolInput {
-  expr: JSON!
+input CreateRun {
+  # Rex expression to run.
+  rex: String
+  expr: JSON
   project_id: ProjectId!
+
+  # Optional mapping of modules to their full path versions.
+  module_lock: JSONObject
   name: String
   description: String
   tags: [String!]
@@ -208,6 +217,17 @@ input CreateStructureInput {
   topology: TypedVirtualObject!
   residues: TypedVirtualObject!
   chains: TypedVirtualObject!
+  project_id: ProjectId!
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateTagInput {
+  key: String!
+  value: String
+  tagged_id: UUID!
+  tagged_type: TaggedType!
   project_id: ProjectId!
   name: String
   description: String
@@ -271,6 +291,9 @@ input I64Filter {
 
 # A scalar that can represent any JSON value.
 scalar JSON
+
+# A scalar that can represent any JSON Object value.
+scalar JSONObject
 
 type LogEntry {
   id: String!
@@ -367,7 +390,7 @@ type Module {
   targets: [ModuleInstanceTarget!]
 
   # Resource specification indicating bounds on the resources required by this module
-  resource_bounds: ModuleResourceBounds
+  resource_bounds: ResourceBounds
   typedesc: String!
 }
 
@@ -664,56 +687,6 @@ enum ModuleInstanceTarget {
   SETONIX_EXPRESS
 }
 
-type ModuleResourceBounds {
-  # number of gpus in node, 0 means no gpu required.
-  gpu_min: Int!
-
-  # max number of gpus in node that can used, 0 means no gpu support.
-  gpu_max: Int!
-
-  # optimal number of gpus in node
-  gpu_hint: Int!
-
-  # minimum gpu memory required in MB per gpu
-  gpu_mem_min: Int
-
-  # maxmimum memory that can be used in MB (None means no limit)
-  gpu_mem_max: Int
-
-  # optimal gpu memory in MB
-  gpu_mem_hint: Int
-
-  # minimum number of cpus required, should be > 0 if Some
-  cpu_min: Int
-
-  # maximum number of cpus that can be used, 0 means no limit
-  cpu_max: Int
-
-  # optimal number of cpus
-  cpu_hint: Int
-
-  # minimum node count
-  node_min: Int!
-
-  # maximum node count (e.g. maximum node parallelism)
-  node_max: Int!
-
-  # most optimal node count
-  node_hint: Int!
-
-  # Min RAM in MB
-  mem_min: Int!
-
-  # Max RAM in MB (0 means no limit)
-  mem_max: Int!
-
-  # in MB
-  storage_min: Int!
-
-  # in MB (0 means no limit)
-  storage_max: Int!
-}
-
 type Mutation {
   login(username: String!, password: String!): User
   deploy(module: ModuleInput!): SimpleModule!
@@ -780,8 +753,9 @@ type Mutation {
     value: JSON!
   ): Argument!
   create_token: Token!
-  eval(input: CreateProtocolInput!): Protocol!
+  eval(input: CreateRun!): Run!
   create_project(input: CreateProjectInput!): Project!
+  create_tag(input: CreateTagInput!): Tag!
   create_protein_conformer(
     input: CreateProteinConformerInput!
   ): ProteinConformer!
@@ -807,9 +781,9 @@ type ObjectDescriptor {
   object: VirtualObject!
   type_info: Type!
   base_url: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -893,9 +867,9 @@ type PageInfo {
 
 type Project {
   id: ProjectId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -936,15 +910,15 @@ type Project {
     sort_by: SmolSort
   ): SmolConnection!
   structure(id: StructureId!): Structure!
-  protocol(id: ProtocolId!): Protocol!
-  protocols(
+  run(id: RunId!): Run!
+  runs(
     after: String
     before: String
     first: Int
     last: Int
-    filter: ProtocolFilter
-    sort_by: ProtocolSort
-  ): ProtocolConnection!
+    filter: RunFilter
+    sort_by: RunSort
+  ): RunConnection!
   structures(
     after: String
     before: String
@@ -995,9 +969,9 @@ input ProjectSort {
 type Protein {
   id: ProteinId!
   sequence: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -1013,9 +987,9 @@ type Protein {
 
 type ProteinConformer {
   id: ProteinConformerId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -1106,71 +1080,6 @@ input ProteinSort {
   metadata: MetadataSort
 }
 
-type Protocol {
-  id: ProtocolId!
-  expr: JSON!
-  result: JSON
-  status: ProtocolStatus!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-  name: String
-  description: String
-  tags: [String!]
-}
-
-type ProtocolConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [ProtocolEdge!]!
-
-  # A list of nodes.
-  nodes: [Protocol!]!
-  total_count: Int!
-}
-
-# An edge in a connection.
-type ProtocolEdge {
-  # The item at the end of the edge
-  node: Protocol!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input ProtocolFilter {
-  all: [ProtocolFilter!]
-  any: [ProtocolFilter!]
-  id: UuidFilter
-  status: ProtocolStatusFilter
-  project_id: UuidFilter
-  account_id: UuidFilter
-  metadata: MetadataFilter
-}
-
-scalar ProtocolId
-
-input ProtocolSort {
-  id: UuidSort
-  project_id: UuidSort
-  account_id: UuidSort
-  metadata: MetadataSort
-}
-
-enum ProtocolStatus {
-  PENDING
-  RUNNING
-  DONE
-  ERROR
-}
-
-input ProtocolStatusFilter {
-  eq: ProtocolStatus
-  ne: ProtocolStatus
-}
-
 type Query {
   modules(
     after: String
@@ -1233,6 +1142,53 @@ type Query {
   object_path(path: UUID!): Object!
 }
 
+# Validation and hints to resources to use for an instance.
+type ResourceBounds {
+  # number of gpus in node, None means no gpu required.
+  gpu_min: Int
+
+  # max number of gpus in node that can used, 0 means no gpu support.
+  gpu_max: Int
+
+  # optimal number of gpus in node
+  gpu_hint: Int
+
+  # minimum gpu memory required in MB per gpu
+  gpu_mem_min: Int
+
+  # maxmimum memory that can be used in MB (None means no limit)
+  gpu_mem_max: Int
+
+  # optimal gpu memory in MB
+  gpu_mem_hint: Int
+
+  # minimum number of cpus required, should be > 0 if Some
+  cpu_min: Int
+
+  # maximum number of cpus that can be used, 0 means no limit
+  cpu_max: Int
+
+  # optimal number of cpus
+  cpu_hint: Int
+
+  # minimum node count
+  node_min: Int
+
+  # maximum node count (e.g. maximum node parallelism)
+  node_max: Int
+
+  # most optimal node count
+  node_hint: Int
+  mem_min: Int
+  mem_max: Int
+
+  # in MB
+  storage_min: Int
+
+  # in MB (0 means no limit)
+  storage_max: Int
+}
+
 type ResourceUtilization {
   id: ResourceUtilizationId!
   created_at: DateTime!
@@ -1274,6 +1230,73 @@ type ResourceUtilizationReport {
   cputime_avg: Float!
   inodes_total: Float!
   sus_total: Int
+}
+
+type Run {
+  id: RunId!
+  expr: JSON!
+  result: JSON
+  trace: JSON
+  module_lock: JSONObject!
+  status: RunStatus!
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  name: String
+  description: String
+  tags: [String!]
+}
+
+type RunConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [RunEdge!]!
+
+  # A list of nodes.
+  nodes: [Run!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type RunEdge {
+  # The item at the end of the edge
+  node: Run!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input RunFilter {
+  all: [RunFilter!]
+  any: [RunFilter!]
+  id: UuidFilter
+  status: RunStatusFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar RunId
+
+input RunSort {
+  id: UuidSort
+  project_id: UuidSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  DONE
+  ERROR
+}
+
+input RunStatusFilter {
+  eq: RunStatus
+  ne: RunStatus
 }
 
 # A module defines an interface to a program that can be run on a cluster.
@@ -1320,7 +1343,7 @@ type SimpleModule {
   targets: [ModuleInstanceTarget!]
 
   # Resource specification indicating bounds on the resources required by this module
-  resource_bounds: ModuleResourceBounds
+  resource_bounds: ResourceBounds
 }
 
 # A module instance is a single invocation of a module. It is created when a user submits a module
@@ -1415,9 +1438,9 @@ type Smol {
   id: SmolId!
   smi: String
   inchi: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -1433,9 +1456,9 @@ type Smol {
 
 type SmolConformer {
   id: SmolConformerId!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -1635,9 +1658,9 @@ type Structure {
   topology: TypedVirtualObject!
   residues: TypedVirtualObject!
   chains: TypedVirtualObject!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   name: String
   description: String
   tags: [String!]
@@ -1689,34 +1712,34 @@ type Subscription {
 }
 
 type Tag {
-  tag: String!
+  id: TagId!
+  key: String!
+  value: String
+  tagged_id: UUID!
+  tagged_type: TaggedType!
   created_at: DateTime!
-  count: Int!
-}
-
-type TagConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [TagEdge!]!
-
-  # A list of nodes.
-  nodes: [Tag!]!
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type TagEdge {
-  # The item at the end of the edge
-  node: Tag!
-
-  # A cursor for use in pagination
-  cursor: String!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  name: String
+  description: String
+  tags: [String!]
 }
 
 input TagFilter {
   in: [String!]
+}
+
+scalar TagId
+
+enum TaggedType {
+  structure
+  protein
+  protein_conformer
+  smol
+  smol_conformer
+  run
+  module
+  module_instance
 }
 
 input TestCase {
@@ -1816,7 +1839,7 @@ type User {
   created_at: DateTime!
   updated_at: DateTime!
   deleted_at: DateTime
-  account: Account
+  account: Account!
   tokens(
     after: String
     before: String
@@ -1838,6 +1861,33 @@ input UuidFilter {
 enum UuidSort {
   asc
   desc
+}
+
+type V1Tag {
+  tag: String!
+  created_at: DateTime!
+  count: Int!
+}
+
+type V1TagConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [V1TagEdge!]!
+
+  # A list of nodes.
+  nodes: [V1Tag!]!
+  totalCount: Int!
+}
+
+# An edge in a connection.
+type V1TagEdge {
+  # The item at the end of the edge
+  node: V1Tag!
+
+  # A cursor for use in pagination
+  cursor: String!
 }
 
 type VirtualObject {

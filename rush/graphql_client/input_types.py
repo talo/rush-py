@@ -14,8 +14,9 @@ from .enums import (
     ModuleInstanceStatus,
     ModuleInstanceTarget,
     ObjectFormat,
-    ProtocolStatus,
+    RunStatus,
     StringSort,
+    TaggedType,
     U64Sort,
     UuidSort,
 )
@@ -62,9 +63,11 @@ class CreateProteinInput(BaseModel):
     tags: Optional[List[str]] = None
 
 
-class CreateProtocolInput(BaseModel):
-    expr: Any
+class CreateRun(BaseModel):
+    rex: Optional[str] = None
+    expr: Optional[Any] = None
     project_id: Any
+    module_lock: Optional[Any] = None
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
@@ -93,6 +96,17 @@ class CreateStructureInput(BaseModel):
     topology: Any
     residues: Any
     chains: Any
+    project_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateTagInput(BaseModel):
+    key: str
+    value: Optional[str] = None
+    tagged_id: Any
+    tagged_type: TaggedType
     project_id: Any
     name: Optional[str] = None
     description: Optional[str] = None
@@ -243,28 +257,6 @@ class ProteinSort(BaseModel):
     metadata: Optional["MetadataSort"] = None
 
 
-class ProtocolFilter(BaseModel):
-    all: Optional[List["ProtocolFilter"]] = None
-    any: Optional[List["ProtocolFilter"]] = None
-    id: Optional["UuidFilter"] = None
-    status: Optional["ProtocolStatusFilter"] = None
-    project_id: Optional["UuidFilter"] = None
-    account_id: Optional["UuidFilter"] = None
-    metadata: Optional["MetadataFilter"] = None
-
-
-class ProtocolSort(BaseModel):
-    id: Optional[UuidSort] = None
-    project_id: Optional[UuidSort] = None
-    account_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
-
-
-class ProtocolStatusFilter(BaseModel):
-    eq: Optional[ProtocolStatus] = None
-    ne: Optional[ProtocolStatus] = None
-
-
 class ResourceUtilizationInput(BaseModel):
     module_instance_id: UUID = Field(alias="moduleInstanceId")
     gpu: Optional[float] = None
@@ -274,6 +266,28 @@ class ResourceUtilizationInput(BaseModel):
     cputime: float
     inodes: float
     sus: Optional[int] = None
+
+
+class RunFilter(BaseModel):
+    all: Optional[List["RunFilter"]] = None
+    any: Optional[List["RunFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    status: Optional["RunStatusFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class RunSort(BaseModel):
+    id: Optional[UuidSort] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class RunStatusFilter(BaseModel):
+    eq: Optional[RunStatus] = None
+    ne: Optional[RunStatus] = None
 
 
 class SmolConformerFilter(BaseModel):

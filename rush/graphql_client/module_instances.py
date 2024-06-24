@@ -16,7 +16,7 @@ class ModuleInstances(BaseModel):
 
 
 class ModuleInstancesMe(BaseModel):
-    account: Optional["ModuleInstancesMeAccount"]
+    account: "ModuleInstancesMeAccount"
 
 
 class ModuleInstancesMeAccount(BaseModel):
