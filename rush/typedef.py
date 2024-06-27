@@ -165,10 +165,10 @@ class EnumKind(Generic[T], RushType[T]):
             return (False, f"Unknown enum variant {other_key}")
         if isinstance(other, str):
             # FIXME: make case sensitive once enum serialization case bug is fixed
-            if any([x.lower() == other.lower() for x in self.literals]):
+            if any([x.lower().replace("_", "") == other.lower().replace("_", "") for x in self.literals]):
                 return (True, None)
 
-        return (False, f"Unknown enum variant {other}")
+        return (False, f"Unknown enum variant, not list or dict {other}")
 
 
 class RecordKind(Generic[T], RushType[T]):
@@ -204,14 +204,24 @@ class UnionKind(Generic[T], RushType[T]):
     def matches(self, other: dict[str, Any] | Any) -> tuple[bool, str | None]:
         if not isinstance(other, dict):
             return (False, f"Expected dict, got {type(other)}")
-        for k, v in self.t.items():
-            if v.k == "optional" and k not in other:
-                return (True, None)
-            if k not in other and v.k != "optional":
-                return (False, f"Expected key {k} in dict")
-            ok, reason = v.matches(other[k])
-            if not ok:
-                return (False, reason)
+        # handle tuple case
+        if (
+            len(other) == 1
+            and isinstance(list(other.values())[0], (list, tuple))
+            and isinstance(self.t, tuple)
+        ):
+            other = list(other.values())[0]
+            return self.t[0].matches(other)
+
+        if isinstance(self.t, dict):
+            for k, v in self.t.items():
+                if v.k == "optional" and k not in other:
+                    return (True, None)
+                if k not in other and v.k != "optional":
+                    return (False, f"Expected key {k} in dict")
+                ok, reason = v.matches(other[k])
+                if not ok:
+                    return (False, reason)
         return (True, None)
 
 
