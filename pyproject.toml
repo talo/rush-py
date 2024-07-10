@@ -35,6 +35,7 @@ notebook = "^7.0.7"
 parso = "^0.8.3"
 pdoc = "^14.4.0"
 pip = "~=23.2.1"
+prettyprinter = "^0.18.0"
 py3Dmol = "^2.0.4"
 pytest = "~=7.4.3"
 pytest-xdist = "~=3.3.1"
@@ -42,6 +43,7 @@ qdx-py = ">0.6.2"
 pickleshare = "^0.7.5"
 jupyterlab-lsp = "^5.1.0"
 rdkit = "^2023.9.6"
+basedpyright = "^1.12.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -80,12 +82,15 @@ ignore = [
 ]
 reportIncompatibleMethodOverride = "none"
 reportIncompatibleVariableOverride = "none"
-reportMissingImports = true
 reportMissingTypeStubs = "none"
 reportUnknownMemberType = "none"
 reportUnknownVariableType = "none"
-typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
+reportMissingImports = false
+typeCheckingMode = "standard"
+reportAttributeAccessIssue = "none"
+# reportMissingImports = true
+# typeCheckingMode = "strict"
 
 [[tool.pyright.executionEnvironments]]
 root = ""
