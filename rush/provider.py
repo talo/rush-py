@@ -619,6 +619,40 @@ class BaseProvider:
             json.dump(modules, f, indent=2)
         return filename
 
+    async def download_module_instance_output(
+        self,
+        instance_id: ModuleInstanceId,
+        folder_path: Path | str | None = None,
+        overwrite: bool = False,
+    ):
+        """
+        Download an output from a module instance.
+
+        :param instance_id: The ID of the module instance.
+        :param output_id: The ID of the output.
+        :param filename: Download to the workspace with this name under "objects".
+        :param filepath: Where to download the object.
+        """
+
+        if folder_path and isinstance(folder_path, str):
+            folder_path = Path(folder_path)
+        else:
+            folder_path = folder_path or (self.workspace or Path.cwd()) / f"outputs-{instance_id}"
+
+        if folder_path.exists():
+            if not overwrite:
+                self.logger.warning(f"Folder {folder_path} already exists in workspace")
+                return folder_path
+        else:
+            folder_path.mkdir(parents=True, exist_ok=overwrite)
+
+        instance = await self.module_instance(instance_id)
+        for obj in instance.outs:
+            if obj.value and isinstance(obj.value, dict) and "path" in obj.value:
+                await self.Arg(self, obj.id).download(filepath=folder_path / str(obj.id), overwrite=overwrite)
+
+        return folder_path
+
     async def run(
         self,
         path: str,
@@ -1089,6 +1123,12 @@ class BaseProvider:
                 obj = await self.upload(arg, in_types[i])
                 newargs.append(obj.object)
             else:
+                # if arg is a record, we need to check if any members are a path
+                if isinstance(arg, dict):
+                    for key, value in arg.items():
+                        if isinstance(value, Path):
+                            obj = await self.upload(value, in_types[i].members[key])
+                            arg[key] = obj.object
                 newargs.append(arg)
         return tuple(newargs)
 
@@ -1590,7 +1630,15 @@ async def build_provider_with_functions(
 
 def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner[Any]]):
     # functions that don't get called internally can be overridden with blocking versions
-    blockable_functions = ("nuke", "status", "logs", "retry", "tag", "update_modules")
+    blockable_functions = (
+        "nuke",
+        "status",
+        "logs",
+        "retry",
+        "tag",
+        "update_modules",
+        "download_module_instance_output",
+    )
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
     for name, func in provider.__dict__.items():

@@ -322,8 +322,23 @@ class ObjectKind(Generic[T], RushType[T]):
             return (False, f"Expected Path, got {type(other)}")
 
 
+class LiteralKind(Generic[T], RushType[T]):
+    def __init__(self, literal: T):
+        self.k = None
+        self.t = literal
+
+    def to_python_type(self) -> type[Any]:
+        return type(self.t)
+
+    def matches(self, other: T) -> tuple[bool, str | None]:
+        if other == self.t:
+            return (True, None)
+        else:
+            return (False, f"Expected {self.t}, got {other}")
+
+
 class ScalarType(Generic[T], RushType[T]):
-    def __init__(self, scalar: SCALARS | str):
+    def __init__(self, scalar: SCALARS | str | int):
         self.k = None
         self.t = scalar
         if self.t not in SCALAR_STRS:
@@ -349,6 +364,7 @@ class ScalarType(Generic[T], RushType[T]):
 
 
 def type_from_typedef(res: Any) -> RushType[Any]:
+    print(res)
     if isinstance(res, dict):
         if res.get("k"):
             if res["k"] == "enum":
@@ -394,6 +410,8 @@ def type_from_typedef(res: Any) -> RushType[Any]:
         return TupleKind([type_from_typedef(x) for x in res])
     elif isinstance(res, str):  # type: ignore
         return ScalarType(res)
+    elif isinstance(res, int):  # type: ignore
+        return LiteralKind(res)
     else:
         print("Bad type!", res)
         return RushType(res)
