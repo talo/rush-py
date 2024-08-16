@@ -364,7 +364,6 @@ class ScalarType(Generic[T], RushType[T]):
 
 
 def type_from_typedef(res: Any) -> RushType[Any]:
-    print(res)
     if isinstance(res, dict):
         if res.get("k"):
             if res["k"] == "enum":
