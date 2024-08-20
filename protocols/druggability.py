@@ -327,7 +327,7 @@ class BindingPocket:
     probability: float
 
 
-def get_binding_regions_from_p2rank(uniprot_id: str, probability_threshold: float) -> list[BindingPocket]:
+def get_binding_pockets_from_p2rank(uniprot_id: str, probability_threshold: float) -> list[BindingPocket]:
     with open(WORK_DIR / "objects" / f"{uniprot_id}_2.0_pocket_data.json") as f:
         p2rank_data = json.load(f)
 
@@ -485,56 +485,76 @@ class BindingSiteScore:
     site_seq_range: set[tuple[int, int] | int]
     site_center: tuple[float, float, float] | None
     site_probability: float | None
-    region_of_interest_overlap: float = 0.0
-    functional_domain_overlap: float = 0.0
-    predicted_site_overlap: float = 0.0
-    experimental_site_overlap: float = 0.0
+    region_of_interest_overlap: dict[str, float]
+    functional_domain_overlap: dict[str, float]
+    predicted_site_overlap: dict[str, float]
+    experimental_site_overlap: dict[str, float]
+    region_of_interest_overlap_total: float = 0.0
+    functional_domain_overlap_total: float = 0.0
+    predicted_site_overlap_total: float = 0.0
+    experimental_site_overlap_total: float = 0.0
 
 
 def compute_scores_v2(
     region_of_interest, intact_binding_ixns, p2rank_binding_pockets, pdbe_binding_sites
-) -> dict[str, BindingSiteScore]:
-    binding_site_score = {}
+) -> dict[str, BindingSiteScore | float]:
+    binding_site_scores = {}
+    binding_site_scores["total"] = 0.0
     for i, binding_site in enumerate(pdbe_binding_sites):
-        query_seq_range = binding_site.target_seq_range
-        if not query_seq_range:
+        reference_seq_range = binding_site.target_seq_range
+        if not reference_seq_range:
             continue
         k = f"{binding_site.pdb_id}_{binding_site.site_id}"
-        binding_site_score[k] = BindingSiteScore("PDB (experimental)", query_seq_range, None, None)
+        binding_site_scores[k] = BindingSiteScore(
+            "PDB (experimental)", reference_seq_range, None, None, {}, {}, {}, {}
+        )
 
         # ligand <-> region of interest
-        reference_seq_range = region_of_interest
+        query_seq_range = region_of_interest
         pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
         if pct_overlap > 0.0:
-            binding_site_score[k].region_of_interest_overlap += pct_overlap
+            k2 = "region_of_interest"
+            binding_site_scores[k].region_of_interest_overlap[k2] = pct_overlap
+            binding_site_scores[k].region_of_interest_overlap_total += pct_overlap
+            binding_site_scores["total"] += pct_overlap
 
         # ligand <-> binding interaction regions (experimental)
         for binding_ixn in intact_binding_ixns:
-            reference_seq_range = binding_ixn.target_seq_range
+            query_seq_range = binding_ixn.target_seq_range
             pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
             if pct_overlap > 0.0:
-                binding_site_score[k].functional_domain_overlap += pct_overlap
+                k2 = f"{binding_ixn.interaction_id}_{binding_ixn.interactors[0]["identifier_id"]}"
+                # Don't count the same exact data twice; TODO: improve this
+                if k2 in binding_site_scores[k].functional_domain_overlap:
+                    continue
+                binding_site_scores[k].functional_domain_overlap[k2] = pct_overlap
+                binding_site_scores[k].functional_domain_overlap_total += pct_overlap
+                binding_site_scores["total"] += pct_overlap
 
         # ligand <-> binding pockets (predicted)
-        for binding_region in p2rank_binding_pockets:
-            reference_seq_range = binding_region.target_seq_range
+        for binding_pocket in p2rank_binding_pockets:
+            query_seq_range = binding_pocket.target_seq_range
             pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
             if pct_overlap > 0.0:
-                binding_site_score[k].predicted_site_overlap += pct_overlap
+                c = binding_pocket.center
+                k2 = f"{binding_pocket.id}_{c[0]:.1f}_{c[1]:.1f}_{c[2]:.1f}"
+                binding_site_scores[k].predicted_site_overlap[k2] = pct_overlap
+                binding_site_scores[k].predicted_site_overlap_total += pct_overlap
+                binding_site_scores["total"] += pct_overlap
 
         # ligand <-> other ligands
         #
         # used = {}
-        k = f"{binding_site.pdb_id}_{binding_site.site_id}"
-        for j in range(i, len(pdbe_binding_sites)):
-            seq_range_i = pdbe_binding_sites[i].target_seq_range
-            seq_range_j = pdbe_binding_sites[j].target_seq_range
-            avg_pct_overlap = (
-                compute_percent_overlapping(seq_range_i, seq_range_j)
-                + compute_percent_overlapping(seq_range_i, seq_range_j)
-            ) / 2
-            if avg_pct_overlap > 0.0:
-                binding_site_score[k].experimental_site_overlap += avg_pct_overlap
+        for j in range(0, len(pdbe_binding_sites)):
+            if i == j:
+                continue
+            query_seq_range = pdbe_binding_sites[j].target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                k2 = f"{pdbe_binding_sites[j].pdb_id}_{pdbe_binding_sites[j].site_id}"
+                binding_site_scores[k].experimental_site_overlap[k2] = pct_overlap
+                binding_site_scores[k].experimental_site_overlap_total += pct_overlap
+                binding_site_scores["total"] += pct_overlap
                 # Use each identical pair only once
                 # k = tuple((
                 #     pdbe_binding_sites[i].pdb_id,
@@ -543,51 +563,67 @@ def compute_scores_v2(
                 #     frozenset(ligand.residue_name for ligand in pdbe_binding_sites[j].ligands),
                 # ))
                 # if k not in used:
-                #     used[k] = avg_pct_overlap
-                #     lig_lig_score += 1 + avg_pct_overlap
+                #     used[k] = pct_overlap
+                #     lig_lig_score += 1 + pct_overlap
                 # else:
                 #     print(f"reusing {k}!")
 
     for i, binding_site in enumerate(p2rank_binding_pockets):
-        query_seq_range = binding_site.target_seq_range
+        reference_seq_range = binding_site.target_seq_range
         c = binding_site.center
         k = f"{binding_site.id}_{c[0]:.1f}_{c[1]:.1f}_{c[2]:.1f}"
-        binding_site_score[k] = BindingSiteScore(
-            "P2Rank (predicted)", query_seq_range, binding_site.center, binding_site.probability
+        binding_site_scores[k] = BindingSiteScore(
+            "P2Rank (predicted)",
+            reference_seq_range,
+            binding_site.center,
+            binding_site.probability,
+            {},
+            {},
+            {},
+            {},
         )
 
         # ligand <-> region of interest
-        reference_seq_range = region_of_interest
+        query_seq_range = region_of_interest
         pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
         if pct_overlap > 0.0:
-            binding_site_score[k].region_of_interest_overlap += pct_overlap
+            k2 = "region_of_interest"
+            binding_site_scores[k].region_of_interest_overlap[k2] = pct_overlap
+            binding_site_scores[k].region_of_interest_overlap_total += pct_overlap
+            binding_site_scores["total"] += pct_overlap
 
         # ligand <-> binding interaction regions (experimental)
         for binding_ixn in intact_binding_ixns:
-            reference_seq_range = binding_ixn.target_seq_range
+            query_seq_range = binding_ixn.target_seq_range
             pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
             if pct_overlap > 0.0:
-                binding_site_score[k].functional_domain_overlap += pct_overlap
+                k2 = binding_ixn.interaction_id
+                binding_site_scores[k].functional_domain_overlap[k2] = pct_overlap
+                binding_site_scores[k].functional_domain_overlap_total += pct_overlap
+                binding_site_scores["total"] += pct_overlap
 
         # ligand <-> binding pockets (predicted)
-        for binding_region in p2rank_binding_pockets:
-            reference_seq_range = binding_region.target_seq_range
+        for binding_pocket in p2rank_binding_pockets:
+            query_seq_range = binding_pocket.target_seq_range
             pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
             if pct_overlap > 0.0:
-                binding_site_score[k].predicted_site_overlap += pct_overlap
+                c = binding_site.center
+                k2 = f"{binding_pocket.id}_{c[0]:.1f}_{c[1]:.1f}_{c[2]:.1f}"
+                binding_site_scores[k].predicted_site_overlap[k2] = pct_overlap
+                binding_site_scores[k].predicted_site_overlap_total += pct_overlap
+                binding_site_scores["total"] += pct_overlap
 
         # ligand <-> other ligands
         for j in range(i, len(pdbe_binding_sites)):
-            seq_range_i = pdbe_binding_sites[i].target_seq_range
-            seq_range_j = pdbe_binding_sites[j].target_seq_range
-            avg_pct_overlap = (
-                compute_percent_overlapping(seq_range_i, seq_range_j)
-                + compute_percent_overlapping(seq_range_i, seq_range_j)
-            ) / 2
-            if avg_pct_overlap > 0.0:
-                binding_site_score[k].experimental_site_overlap += avg_pct_overlap
+            query_seq_range = pdbe_binding_sites[j].target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                k2 = f"{pdbe_binding_sites[j].pdb_id}_{pdbe_binding_sites[j].site_id}"
+                binding_site_scores[k].experimental_site_overlap[k2] = pct_overlap
+                binding_site_scores[k].experimental_site_overlap_total += pct_overlap
+                binding_site_scores["total"] += pct_overlap
 
-    return binding_site_score
+    return binding_site_scores
 
 
 def read_fasta(filepath: Path) -> dict[str, str]:
@@ -732,7 +768,6 @@ def main():
     print(f"{uniprot_id=}")
     print(f"{uniprot_data.sequence=}")
 
-    """
     client = rush.build_blocking_provider_with_functions(
         batch_tags=["paratus", "protocol", "druggability", uniprot_data.primary_accession],
         workspace=WORK_DIR,
@@ -819,7 +854,6 @@ def main():
             filename=f"{uniprot_id}-{pdb_cross_ref.id}_2.0_pocket_viz.tar.gz",
             overwrite=True,
         )
-    """
 
     #### Binding site analysis
 
@@ -833,7 +867,7 @@ def main():
         json.dump(intact_binding_ixns, f, indent=2, cls=EnhancedJSONEncoder)
 
     # 3.0b: Parse P2Rank data (predicted potential binding pockets)
-    p2rank_pockets = get_binding_regions_from_p2rank(uniprot_id, probability_threshold=0.25)
+    p2rank_pockets = get_binding_pockets_from_p2rank(uniprot_id, probability_threshold=0.25)
     with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0b_p2rank_pockets.json", "w") as f:
         json.dump(p2rank_pockets, f, indent=2, cls=EnhancedJSONEncoder)
 
@@ -841,6 +875,46 @@ def main():
     pdbe_binding_sites = get_binding_sites_from_pdbe(uniprot_data.pdb_cross_refs)
     with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0c_pdbe_binding_sites.json", "w") as f:
         json.dump(pdbe_binding_sites, f, indent=2, cls=EnhancedJSONEncoder)
+
+    """
+    # Offline stuff
+    # uniprot_id = "P01275"
+    uniprot_id = "P43220"
+    region_of_interest = set((0, 463))
+    if args.region_of_interest:
+        region_of_interest = parse_range(args.region_of_interest)
+
+    with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0a_intact_binding_ixns.json", "r") as f:
+        intact_binding_ixns = json.load(f)
+        for i, v in enumerate(intact_binding_ixns):
+            print(v)
+            intact_binding_ixns[i] = BindingInteraction(
+                v["interaction_id"],
+                v["uniprot_id"],
+                v["target_seq_range"],
+                v["interactors"],
+            )
+    with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0b_p2rank_pockets.json", "r") as f:
+        p2rank_pockets = json.load(f)
+        for i, v in enumerate(p2rank_pockets):
+            p2rank_pockets[i] = BindingPocket(
+                v["id"],
+                v["target_seq_range"],
+                v["center"],
+                v["probability"],
+            )
+    with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0c_pdbe_binding_sites.json", "r") as f:
+        pdbe_binding_sites = json.load(f)
+        for i, v in enumerate(pdbe_binding_sites):
+            pdbe_binding_sites[i] = BindingSite(
+                v["pdb_id"],
+                v["site_id"],
+                v["target_seq_range"],
+                v["target_residues"],
+                v["ligands"],
+                v["details"],
+            )
+    """
 
     # 3.1: Compute scores
     score_dict = compute_scores_v2(
