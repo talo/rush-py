@@ -455,7 +455,7 @@ def compute_scores(
             seq_range_i = pdbe_binding_sites[i].target_seq_range
             seq_range_j = pdbe_binding_sites[j].target_seq_range
             avg_pct_overlap = (
-                compute_percent_overlapping(seq_range_i, seq_range_j)
+                compute_percent_overlapping(seq_range_j, seq_range_i)
                 + compute_percent_overlapping(seq_range_i, seq_range_j)
             ) / 2
             if avg_pct_overlap > 0.0:
