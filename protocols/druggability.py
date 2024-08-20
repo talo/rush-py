@@ -11,10 +11,10 @@ import datargs
 import httpx
 import prettyprinter
 
-import rush
+# import rush
 
-from blosum import BLOSUM62
-from paratus import QDX_AMISS_PATHOGENIC
+# from blosum import BLOSUM62
+# from paratus import ZAG_QDX_AMISS_PATHOGENIC
 # from prettyprinter import pprint
 
 prettyprinter.install_extras(exclude=["ipython", "django"])
@@ -73,7 +73,7 @@ AA_1TO3 = {
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if is_dataclass(o):
-            return dataclasses.asdict(o)
+            return dataclasses.asdict(o)  # type: ignore
         elif isinstance(o, set):
             return sorted(list(o))
         return super().default(o)
@@ -181,6 +181,7 @@ def get_uniprot(target: str):
         for cross_ref_data in result["uniProtKBCrossReferences"]:
             if cross_ref_data["database"] != "PDB":
                 continue
+            print(cross_ref_data)
             method = ""
             resolution = ""
             chains = ""
@@ -320,6 +321,7 @@ def get_binding_ixns_from_intact(uniprot_id: str) -> list[BindingInteraction]:
 
 @dataclass
 class BindingPocket:
+    id: int
     target_seq_range: set[tuple[int, int] | int]
     center: tuple[float, float, float]
     probability: float
@@ -331,11 +333,12 @@ def get_binding_regions_from_p2rank(uniprot_id: str, probability_threshold: floa
 
     return [
         BindingPocket(
+            i,
             {int(residue_id.split("_")[1]) for residue_id in pocket["residue_ids"]},
             (pocket["center_x"], pocket["center_y"], pocket["center_z"]),
             pocket["probability"],
         )
-        for pocket in p2rank_data["pockets"]
+        for i, pocket in enumerate(p2rank_data["pockets"])
         if pocket["probability"] >= probability_threshold
     ]
 
@@ -473,6 +476,120 @@ def compute_scores(
     return (lig_roi_score, lig_bixn_score, lig_bpocket_score, lig_lig_score)
 
 
+####
+
+
+@dataclass
+class BindingSiteScore:
+    source: Literal["P2Rank (predicted)", "PDB (experimental)"]
+    site_seq_range: set[tuple[int, int] | int]
+    site_center: tuple[float, float, float] | None
+    site_probability: float | None
+    region_of_interest_overlap: float = 0.0
+    functional_domain_overlap: float = 0.0
+    predicted_site_overlap: float = 0.0
+    experimental_site_overlap: float = 0.0
+
+
+def compute_scores_v2(
+    region_of_interest, intact_binding_ixns, p2rank_binding_pockets, pdbe_binding_sites
+) -> dict[str, BindingSiteScore]:
+    binding_site_score = {}
+    for i, binding_site in enumerate(pdbe_binding_sites):
+        query_seq_range = binding_site.target_seq_range
+        if not query_seq_range:
+            continue
+        k = f"{binding_site.pdb_id}_{binding_site.site_id}"
+        binding_site_score[k] = BindingSiteScore("PDB (experimental)", query_seq_range, None, None)
+
+        # ligand <-> region of interest
+        reference_seq_range = region_of_interest
+        pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+        if pct_overlap > 0.0:
+            binding_site_score[k].region_of_interest_overlap += pct_overlap
+
+        # ligand <-> binding interaction regions (experimental)
+        for binding_ixn in intact_binding_ixns:
+            reference_seq_range = binding_ixn.target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                binding_site_score[k].functional_domain_overlap += pct_overlap
+
+        # ligand <-> binding pockets (predicted)
+        for binding_region in p2rank_binding_pockets:
+            reference_seq_range = binding_region.target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                binding_site_score[k].predicted_site_overlap += pct_overlap
+
+        # ligand <-> other ligands
+        #
+        # used = {}
+        k = f"{binding_site.pdb_id}_{binding_site.site_id}"
+        for j in range(i, len(pdbe_binding_sites)):
+            seq_range_i = pdbe_binding_sites[i].target_seq_range
+            seq_range_j = pdbe_binding_sites[j].target_seq_range
+            avg_pct_overlap = (
+                compute_percent_overlapping(seq_range_i, seq_range_j)
+                + compute_percent_overlapping(seq_range_i, seq_range_j)
+            ) / 2
+            if avg_pct_overlap > 0.0:
+                binding_site_score[k].experimental_site_overlap += avg_pct_overlap
+                # Use each identical pair only once
+                # k = tuple((
+                #     pdbe_binding_sites[i].pdb_id,
+                #     frozenset(ligand.residue_name for ligand in pdbe_binding_sites[i].ligands),
+                #     pdbe_binding_sites[j].pdb_id,
+                #     frozenset(ligand.residue_name for ligand in pdbe_binding_sites[j].ligands),
+                # ))
+                # if k not in used:
+                #     used[k] = avg_pct_overlap
+                #     lig_lig_score += 1 + avg_pct_overlap
+                # else:
+                #     print(f"reusing {k}!")
+
+    for i, binding_site in enumerate(p2rank_binding_pockets):
+        query_seq_range = binding_site.target_seq_range
+        c = binding_site.center
+        k = f"{binding_site.id}_{c[0]:.1f}_{c[1]:.1f}_{c[2]:.1f}"
+        binding_site_score[k] = BindingSiteScore(
+            "P2Rank (predicted)", query_seq_range, binding_site.center, binding_site.probability
+        )
+
+        # ligand <-> region of interest
+        reference_seq_range = region_of_interest
+        pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+        if pct_overlap > 0.0:
+            binding_site_score[k].region_of_interest_overlap += pct_overlap
+
+        # ligand <-> binding interaction regions (experimental)
+        for binding_ixn in intact_binding_ixns:
+            reference_seq_range = binding_ixn.target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                binding_site_score[k].functional_domain_overlap += pct_overlap
+
+        # ligand <-> binding pockets (predicted)
+        for binding_region in p2rank_binding_pockets:
+            reference_seq_range = binding_region.target_seq_range
+            pct_overlap = compute_percent_overlapping(reference_seq_range, query_seq_range)
+            if pct_overlap > 0.0:
+                binding_site_score[k].predicted_site_overlap += pct_overlap
+
+        # ligand <-> other ligands
+        for j in range(i, len(pdbe_binding_sites)):
+            seq_range_i = pdbe_binding_sites[i].target_seq_range
+            seq_range_j = pdbe_binding_sites[j].target_seq_range
+            avg_pct_overlap = (
+                compute_percent_overlapping(seq_range_i, seq_range_j)
+                + compute_percent_overlapping(seq_range_i, seq_range_j)
+            ) / 2
+            if avg_pct_overlap > 0.0:
+                binding_site_score[k].experimental_site_overlap += avg_pct_overlap
+
+    return binding_site_score
+
+
 def read_fasta(filepath: Path) -> dict[str, str]:
     """Read a FASTA file. See:
     https://blast.ncbi.nlm.nih.gov/doc/blast-topics/queryinpanddatasel.html#accepted-input-formats
@@ -581,10 +698,10 @@ def main():
             #     == "MVRMVPVLLSLLLLLGPAVPQENQDGRYSLTYIYTGLSKHVEDVPAFQALGSLNDLQFFRYNSKDRKSQPMGLWRQVEGMEDWKQDSQLQKAREDIFMETLKDIVEYYNDSNGSHVLQGRFGCEIENNRSSGAFWKYYYDGKDYIEFNKEIPAWVPFDPAAQITKQKWEAEPVYVQRAKAYLEEECPATLRKYLKYSKNILDRQDPPSVVVTSHQAPGEKKKLKCLAYDFYPGKIDVHWTRAGEVQEPELRGDVLHNGNGTYQSWVVVAVPPQDTAPYSCHVQHSSLAQPLVVPWEAS"
             # ):
             #     print(aligned_index(seq["seq"], 157))
-            for residue_num in QDX_AMISS_PATHOGENIC.keys():
-                print(
-                    f"{raw_name},{unaligned_index(seq["seq"], residue_num - 1)},{seq["seq"][residue_num - 1]}"
-                )
+            # for residue_num in QDX_AMISS_PATHOGENIC.keys():
+            #     print(
+            #         f"{raw_name},{unaligned_index(seq["seq"], residue_num - 1)},{seq["seq"][residue_num - 1]}"
+            #     )
             # print(raw_name)
             # print(raw_seq)
             uniprot_data[raw_name] = UniprotData("", raw_name, raw_seq, seq["seq"], 0, [])
@@ -593,7 +710,7 @@ def main():
         # 1.0: Obtain input (FASTA)
         uniprot_data = get_uniprot(args.target)
 
-    print(len(uniprot_data))
+    # print(len(uniprot_data))
     # mAetAle1_1-291
     # mCynHor1_1-291
     # mArtInt1_1-290
@@ -603,18 +720,19 @@ def main():
     # mStuPar1_1-292
     # mUroCon1_1-293
     # mLopEvo1_1-293
-    uniprot_data = uniprot_data["pub_GRCh38_1-298"]
+    # uniprot_data = uniprot_data["pub_GRCh38_1-298"]
 
-    for residue_number, mutations in QDX_AMISS_PATHOGENIC.items():
-        for m in mutations:
-            w = uniprot_data.aligned_sequence[residue_number - 1]
-            if m != w:
-                print(f"{residue_number},{w},{m},{BLOSUM62[w][m]}")
+    # for residue_number, mutations in QDX_AMISS_PATHOGENIC.items():
+    #     for m in mutations:
+    #         w = uniprot_data.aligned_sequence[residue_number - 1]
+    #         if m != w:
+    #             print(f"{residue_number},{w},{m},{BLOSUM62[w][m]}")
 
     uniprot_id = uniprot_data.primary_accession
     print(f"{uniprot_id=}")
     print(f"{uniprot_data.sequence=}")
 
+    """
     client = rush.build_blocking_provider_with_functions(
         batch_tags=["paratus", "protocol", "druggability", uniprot_data.primary_accession],
         workspace=WORK_DIR,
@@ -661,9 +779,7 @@ def main():
         overwrite=True,
     )
 
-    """
     #### Starting with cross-refs (i.e. PDB files)
-
     for pdb_cross_ref in uniprot_data.pdb_cross_refs:
         if pdb_cross_ref.id == "3DLS":
             continue
@@ -684,7 +800,7 @@ def main():
             prepared_structures_handle, 0, tags=[pdb_cross_ref.id]
         )
 
-        # # 2.0: Evaluate pockets
+        # 2.0: Evaluate pockets
         (p2rank_prediction_handle, pymol_viz_handle) = client.p2rank(
             prepared_structure_handle,
             True,
@@ -703,12 +819,10 @@ def main():
             filename=f"{uniprot_id}-{pdb_cross_ref.id}_2.0_pocket_viz.tar.gz",
             overwrite=True,
         )
-
     """
 
     #### Binding site analysis
 
-    """
     region_of_interest = set((0, len(uniprot_data.sequence)))
     if args.region_of_interest:
         region_of_interest = parse_range(args.region_of_interest)
@@ -717,39 +831,38 @@ def main():
     intact_binding_ixns = get_binding_ixns_from_intact(uniprot_id)
     with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0a_intact_binding_ixns.json", "w") as f:
         json.dump(intact_binding_ixns, f, indent=2, cls=EnhancedJSONEncoder)
-    """
+
     # 3.0b: Parse P2Rank data (predicted potential binding pockets)
     p2rank_pockets = get_binding_regions_from_p2rank(uniprot_id, probability_threshold=0.25)
     with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0b_p2rank_pockets.json", "w") as f:
         json.dump(p2rank_pockets, f, indent=2, cls=EnhancedJSONEncoder)
-    """
+
     # 3.0c: Get PDB binding site data (mostly Protein - Ligand/SMOL)
     pdbe_binding_sites = get_binding_sites_from_pdbe(uniprot_data.pdb_cross_refs)
     with open(WORK_DIR / "objects" / f"{uniprot_id}_3.0c_pdbe_binding_sites.json", "w") as f:
         json.dump(pdbe_binding_sites, f, indent=2, cls=EnhancedJSONEncoder)
 
     # 3.1: Compute scores
-    roi_score, bixn_score, bpocket_score, bsite_score = compute_scores(
+    score_dict = compute_scores_v2(
         region_of_interest,
         intact_binding_ixns,
         p2rank_pockets,
         pdbe_binding_sites,
     )
-    score_dict = {
-        "region_of_interest_score": round(roi_score, 2),
-        "functional_domain_score": round(bixn_score, 2),
-        "binding_pocket_score": round(bpocket_score, 2),
-        "ligandability_score": round(bsite_score, 2),
-    }
-    print(json.dumps(score_dict, indent=2))
-    with open(WORK_DIR / "objects" / f"{uniprot_id}_3.1_druggability_score.json", "w") as f:
+    # score_dict = {
+    #     "region_of_interest_score": round(roi_score, 2),
+    #     "functional_domain_score": round(bixn_score, 2),
+    #     "binding_pocket_score": round(bpocket_score, 2),
+    #     "ligandability_score": round(bsite_score, 2),
+    # }
+    print(json.dumps(score_dict, indent=2, cls=EnhancedJSONEncoder))
+    with open(WORK_DIR / "objects" / f"{uniprot_id}_3.1_druggability_score_v2.json", "w") as f:
         json.dump(
             score_dict,
             f,
             indent=2,
             cls=EnhancedJSONEncoder,
         )
-    """
 
 
 if __name__ == "__main__":

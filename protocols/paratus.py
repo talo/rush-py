@@ -1,4 +1,4 @@
-TARGET_RESIDUES = [
+ZAG_TARGET_RESIDUES = [
     10,
     32,
     34,
@@ -39,13 +39,13 @@ TARGET_RESIDUES = [
     193,
 ]
 
-PARATUS_LIT = {
+ZAG_PARATUS_LIT = {
     155: ("S", "N"),
     171: ("S", "Y"),
     199: ("D", "Q"),
 }
 
-PARATUS_TOP07 = {
+ZAG_PARATUS_TOP07 = {
     60: ("K", "G"),
     63: ("E", "A"),
     87: ("R", "G"),
@@ -55,7 +55,7 @@ PARATUS_TOP07 = {
     322: ("S", "F"),
 }
 
-PARATUS_TOP12 = {
+ZAG_PARATUS_TOP12 = {
     115: ("E", "G"),
     201: ("A", "V", "K", "E"),
     299: ("G", "E"),
@@ -63,7 +63,7 @@ PARATUS_TOP12 = {
     316: ("T", "R", "K"),
 }
 
-PARATUS_TOP49 = {
+ZAG_PARATUS_TOP49 = {
     20: ("M", "T"),
     26: ("V", "F"),
     55: ("Y", "S"),
@@ -112,7 +112,7 @@ PARATUS_TOP49 = {
     322: ("S", "F"),
 }
 
-QDX_AMISS_PATHOGENIC = {
+ZAG_QDX_AMISS_PATHOGENIC = {
     68: ("F", "C"),
     70: ("A", "V", "I"),
     80: ("F", "L"),
@@ -137,27 +137,4 @@ QDX_AMISS_PATHOGENIC = {
     222: ("Y", "S"),
 }
 
-QDX_AMISS_PATHOGENIC = {
-    68: ("F", "C"),
-    70: ("A", "V", "I"),
-    80: ("F", "L"),
-    107: ("D", "L", "I"),
-    110: ("L", "T", "S"),
-    111: ("Q", "M"),
-    115: ("E", "K"),
-    117: ("I", "T"),
-    118: ("F", "I"),
-    128: ("Y", "L", "Q"),
-    158: ("L", "T"),
-    159: ("Q", "P"),
-    160: ("G", "E"),
-    162: ("F", "L", "V"),
-    163: ("G", "L"),
-    167: ("E", "W"),
-    178: ("Y", "T", "I", "V", "L"),
-    183: ("K", "W"),
-    188: ("F", "L"),
-    190: ("K", "S"),
-    219: ("A", "P"),
-    222: ("Y", "S"),
-}
+ZAG_ALIGNED_HUMAN_SEQ = "-------------------MVRMVPVLLSLLLLLGPAVPQENQDGR--YSLTYIYTGLSKHVEDVPAFQALGSLNDLQFFRYNSKDRKSQPMGLWRQVEGMEDWKQDSQLQKAREDIFMETLKDIVEYYNDSNG--------------------SHVLQGRFGCEIENNRSSGAFWKYYYDGKDYIEFNKEIPAWVPFDPAAQITKQKWEAEPVYVQRAKAYLEEECPATLRKYLKYSKNILDRQDPPSVVVTSHQAPGEKKKLKCLAYDFYPGKIDVHWTRAGEVQEPELRGDVLHNGNGTYQSWVVVAVPPQDTAP--YSCHVQHSSLAQPLVVPWEAS----------------"
