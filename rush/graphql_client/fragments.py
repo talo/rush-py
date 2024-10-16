@@ -24,11 +24,10 @@ class ArgumentFull(BaseModel):
 
 class ModuleFull(BaseModel):
     id: UUID
-    name: str
+    name: Optional[str]
     created_at: datetime
     deleted_at: Optional[datetime]
     path: str
-    usage: Optional[str]
     ins: List[Any]
     ins_usage: Optional[List[str]]
     outs: List[Any]
@@ -36,7 +35,7 @@ class ModuleFull(BaseModel):
     description: Optional[str]
     typedesc: str
     tags: Optional[List[str]]
-    targets: Optional[List[ModuleInstanceTarget]]
+    targets: List[ModuleInstanceTarget]
     resource_bounds: Optional["ModuleFullResourceBounds"]
 
 

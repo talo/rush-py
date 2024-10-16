@@ -20,7 +20,9 @@ class ModuleInstanceDetailsModuleInstance(ModuleInstanceFull):
 
 
 class ModuleInstanceDetailsModuleInstanceStdout(BaseModel):
-    page_info: "ModuleInstanceDetailsModuleInstanceStdoutPageInfo" = Field(alias="pageInfo")
+    page_info: "ModuleInstanceDetailsModuleInstanceStdoutPageInfo" = Field(
+        alias="pageInfo"
+    )
     edges: List["ModuleInstanceDetailsModuleInstanceStdoutEdges"]
 
 
@@ -40,7 +42,9 @@ class ModuleInstanceDetailsModuleInstanceStdoutEdgesNode(BaseModel):
 
 
 class ModuleInstanceDetailsModuleInstanceStderr(BaseModel):
-    page_info: "ModuleInstanceDetailsModuleInstanceStderrPageInfo" = Field(alias="pageInfo")
+    page_info: "ModuleInstanceDetailsModuleInstanceStderrPageInfo" = Field(
+        alias="pageInfo"
+    )
     edges: List["ModuleInstanceDetailsModuleInstanceStderrEdges"]
 
 

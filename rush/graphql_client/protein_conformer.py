@@ -4,23 +4,51 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import Field
-
 from .base_model import BaseModel
 
 
 class ProteinConformer(BaseModel):
-    protein_conformer: Optional["ProteinConformerProteinConformer"]
+    me: "ProteinConformerMe"
 
 
-class ProteinConformerProteinConformer(BaseModel):
+class ProteinConformerMe(BaseModel):
+    account: "ProteinConformerMeAccount"
+
+
+class ProteinConformerMeAccount(BaseModel):
+    project: "ProteinConformerMeAccountProject"
+
+
+class ProteinConformerMeAccountProject(BaseModel):
+    protein_conformer: "ProteinConformerMeAccountProjectProteinConformer"
+
+
+class ProteinConformerMeAccountProjectProteinConformer(BaseModel):
     id: Any
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    deleted_at: Optional[datetime] = Field(alias="deletedAt")
-    data: Optional["ProteinConformerProteinConformerData"]
-    tags: List[str]
-
-
-class ProteinConformerProteinConformerData(BaseModel):
+    residues: List[int]
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime]
     name: Optional[str]
+    description: Optional[str]
+    run_id: Optional[Any]
+    tags: Optional[List[str]]
+    structure: "ProteinConformerMeAccountProjectProteinConformerStructure"
+    protein: "ProteinConformerMeAccountProjectProteinConformerProtein"
+
+
+class ProteinConformerMeAccountProjectProteinConformerStructure(BaseModel):
+    id: Any
+    rcsb_id: Optional[str]
+
+
+class ProteinConformerMeAccountProjectProteinConformerProtein(BaseModel):
+    id: Any
+    sequence: str
+
+
+ProteinConformer.model_rebuild()
+ProteinConformerMe.model_rebuild()
+ProteinConformerMeAccount.model_rebuild()
+ProteinConformerMeAccountProject.model_rebuild()
+ProteinConformerMeAccountProjectProteinConformer.model_rebuild()

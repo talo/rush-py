@@ -4,87 +4,32 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import Field
-
 from .base_model import BaseModel
 
 
 class Project(BaseModel):
-    project: Optional["ProjectProject"]
+    me: "ProjectMe"
 
 
-class ProjectProject(BaseModel):
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    deleted_at: Optional[datetime] = Field(alias="deletedAt")
-    data: Optional["ProjectProjectData"]
-    tags: List[str]
-    proteins: "ProjectProjectProteins"
-    protein_conformers: "ProjectProjectProteinConformers"
-    smols: "ProjectProjectSmols"
-    smol_conformers: "ProjectProjectSmolConformers"
-    smol_tautomers: "ProjectProjectSmolTautomers"
+class ProjectMe(BaseModel):
+    account: "ProjectMeAccount"
 
 
-class ProjectProjectData(BaseModel):
-    name: str
+class ProjectMeAccount(BaseModel):
+    project: "ProjectMeAccountProject"
 
 
-class ProjectProjectProteins(BaseModel):
-    edges: List["ProjectProjectProteinsEdges"]
-
-
-class ProjectProjectProteinsEdges(BaseModel):
-    node: "ProjectProjectProteinsEdgesNode"
-
-
-class ProjectProjectProteinsEdgesNode(BaseModel):
+class ProjectMeAccountProject(BaseModel):
     id: Any
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime]
+    name: Optional[str]
+    description: Optional[str]
+    run_id: Optional[Any]
+    tags: Optional[List[str]]
 
 
-class ProjectProjectProteinConformers(BaseModel):
-    edges: List["ProjectProjectProteinConformersEdges"]
-
-
-class ProjectProjectProteinConformersEdges(BaseModel):
-    node: "ProjectProjectProteinConformersEdgesNode"
-
-
-class ProjectProjectProteinConformersEdgesNode(BaseModel):
-    id: Any
-
-
-class ProjectProjectSmols(BaseModel):
-    edges: List["ProjectProjectSmolsEdges"]
-
-
-class ProjectProjectSmolsEdges(BaseModel):
-    node: "ProjectProjectSmolsEdgesNode"
-
-
-class ProjectProjectSmolsEdgesNode(BaseModel):
-    id: Any
-
-
-class ProjectProjectSmolConformers(BaseModel):
-    edges: List["ProjectProjectSmolConformersEdges"]
-
-
-class ProjectProjectSmolConformersEdges(BaseModel):
-    node: "ProjectProjectSmolConformersEdgesNode"
-
-
-class ProjectProjectSmolConformersEdgesNode(BaseModel):
-    id: Any
-
-
-class ProjectProjectSmolTautomers(BaseModel):
-    edges: List["ProjectProjectSmolTautomersEdges"]
-
-
-class ProjectProjectSmolTautomersEdges(BaseModel):
-    node: "ProjectProjectSmolTautomersEdgesNode"
-
-
-class ProjectProjectSmolTautomersEdgesNode(BaseModel):
-    id: Any
+Project.model_rebuild()
+ProjectMe.model_rebuild()
+ProjectMeAccount.model_rebuild()

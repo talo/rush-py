@@ -4,23 +4,51 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import Field
-
 from .base_model import BaseModel
 
 
 class SmolConformer(BaseModel):
-    smol_conformer: Optional["SmolConformerSmolConformer"]
+    me: "SmolConformerMe"
 
 
-class SmolConformerSmolConformer(BaseModel):
+class SmolConformerMe(BaseModel):
+    account: "SmolConformerMeAccount"
+
+
+class SmolConformerMeAccount(BaseModel):
+    project: "SmolConformerMeAccountProject"
+
+
+class SmolConformerMeAccountProject(BaseModel):
+    smol_conformer: "SmolConformerMeAccountProjectSmolConformer"
+
+
+class SmolConformerMeAccountProjectSmolConformer(BaseModel):
     id: Any
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    deleted_at: Optional[datetime] = Field(alias="deletedAt")
-    data: Optional["SmolConformerSmolConformerData"]
-    tags: List[str]
-
-
-class SmolConformerSmolConformerData(BaseModel):
+    residues: List[int]
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime]
     name: Optional[str]
+    description: Optional[str]
+    run_id: Optional[Any]
+    tags: Optional[List[str]]
+    structure: "SmolConformerMeAccountProjectSmolConformerStructure"
+    smol: "SmolConformerMeAccountProjectSmolConformerSmol"
+
+
+class SmolConformerMeAccountProjectSmolConformerStructure(BaseModel):
+    id: Any
+    rcsb_id: Optional[str]
+
+
+class SmolConformerMeAccountProjectSmolConformerSmol(BaseModel):
+    id: Any
+    smi: Optional[str]
+
+
+SmolConformer.model_rebuild()
+SmolConformerMe.model_rebuild()
+SmolConformerMeAccount.model_rebuild()
+SmolConformerMeAccountProject.model_rebuild()
+SmolConformerMeAccountProjectSmolConformer.model_rebuild()

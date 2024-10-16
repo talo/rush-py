@@ -4,39 +4,41 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import Field
-
 from .base_model import BaseModel
-from .enums import Element
 
 
 class Structure(BaseModel):
-    structure: Optional["StructureStructure"]
+    me: "StructureMe"
 
 
-class StructureStructure(BaseModel):
+class StructureMe(BaseModel):
+    account: "StructureMeAccount"
+
+
+class StructureMeAccount(BaseModel):
+    project: "StructureMeAccountProject"
+
+
+class StructureMeAccountProject(BaseModel):
+    structure: "StructureMeAccountProjectStructure"
+
+
+class StructureMeAccountProjectStructure(BaseModel):
     id: Any
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    deleted_at: Optional[datetime] = Field(alias="deletedAt")
-    data: Optional["StructureStructureData"]
-    topology: "StructureStructureTopology"
-    tags: List[str]
+    rcsb_id: Optional[str]
+    topology: Any
+    residues: Any
+    chains: Any
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime]
+    name: Optional[str]
+    description: Optional[str]
+    run_id: Optional[Any]
+    tags: Optional[List[str]]
 
 
-class StructureStructureData(BaseModel):
-    name: str
-
-
-class StructureStructureTopology(BaseModel):
-    symbols: List[Element]
-    geometry: List[float]
-    connectivity: Optional[List[Any]]
-    formal_charges: Optional[List[int]]
-    labels: Optional[List[str]]
-    partial_charges: Optional[List[float]]
-    fragments: Optional[List[List[int]]]
-    fragment_formal_charges: Optional[List[int]]
-    fragment_partial_charges: Optional[List[float]]
-    velocities: Optional[List[float]]
-    alts: Optional[List[Any]]
+Structure.model_rebuild()
+StructureMe.model_rebuild()
+StructureMeAccount.model_rebuild()
+StructureMeAccountProject.model_rebuild()

@@ -12,7 +12,34 @@ class AccountTier(str, Enum):
     ENTERPRISE = "ENTERPRISE"
 
 
+class BindingSiteInteractionKind(str, Enum):
+    UNKNOWN = "UNKNOWN"
+    HYDROPHOBIC = "HYDROPHOBIC"
+    HYDROGEN_BOND = "HYDROGEN_BOND"
+    HALOGEN_BOND = "HALOGEN_BOND"
+    WATER_BRIDGE = "WATER_BRIDGE"
+    SALT_BRIDGE = "SALT_BRIDGE"
+    PI_STACK = "PI_STACK"
+    PI_CATION = "PI_CATION"
+    METAL_COMPLEX = "METAL_COMPLEX"
+
+
 class DateTimeSort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class F32Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class F64Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class I32Sort(str, Enum):
     asc = "asc"
     desc = "desc"
 
@@ -73,6 +100,12 @@ class ObjectFormat(str, Enum):
 class OrderBy(str, Enum):
     ASC = "ASC"
     DESC = "DESC"
+
+
+class PiStackKind(str, Enum):
+    UNKNOWN = "UNKNOWN"
+    P = "P"
+    T = "T"
 
 
 class RunStatus(str, Enum):

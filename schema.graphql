@@ -4,9 +4,25 @@ directive @oneOf on INPUT_OBJECT
 
 type Account {
   id: AccountId!
+
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
   updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   tier: AccountTier!
   config: AccountConfig
   object_descriptor(id: ObjectDescriptorId!): ObjectDescriptor!
@@ -36,18 +52,11 @@ type Account {
     before: String
     first: Int
     last: Int
-    order: OrderBy
-    path: String
-    name: String
-    status: ModuleInstanceStatus
-    target: ModuleInstanceTarget
-    tags: [String!]
-    ids: [ModuleInstanceId!]
-    deleted: Boolean
-    in_arguments: [ArgumentId!]
-  ): SimpleModuleInstanceConnection!
+    sort: ModuleInstanceSort
+    filter: ModuleInstanceFilter
+  ): ModuleInstanceConnection!
 
-  # Get all tags placed on module_instances
+  # DEPRECATED: Will return empty list, to be replaced by the tags endpoint in future
   module_instance_tags(
     after: String
     before: String
@@ -62,24 +71,9 @@ type Account {
     before: String
     first: Int
     last: Int
-    order: OrderBy
-    ids: [ArgumentId!]
-    typeinfo: [Type!]
-    typequery: [TypeQuery!]
-    tags: [String!]
-    resolved: Boolean
-    deleted: Boolean
+    sort: ArgumentSort
+    filter: ArgumentFilter
   ): ArgumentConnection!
-
-  # Get all tags placed on module_instances
-  argument_tags(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-    contains: String
-  ): V1TagConnection!
 }
 
 type AccountBucketConfig {
@@ -116,16 +110,31 @@ enum AccountTier {
 
 type Argument {
   id: ArgumentId!
-  name: String
-  created_at: DateTime!
-  deleted_at: DateTime
   rejected_at: DateTime
   resolved_at: DateTime
   account_id: AccountId!
   typeinfo: Type!
   value: JSON
-  tags: [String!]
   source: ModuleInstanceId
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
 }
 
 type ArgumentConnection {
@@ -137,7 +146,7 @@ type ArgumentConnection {
 
   # A list of nodes.
   nodes: [Argument!]!
-  totalCount: Int!
+  total_count: Int!
 }
 
 # An edge in a connection.
@@ -149,6 +158,17 @@ type ArgumentEdge {
   cursor: String!
 }
 
+input ArgumentFilter {
+  all: [ArgumentFilter!]
+  any: [ArgumentFilter!]
+  id: UuidFilter
+  rejected_at: DateTimeFilter
+  resolved_at: DateTimeFilter
+  account_id: UuidFilter
+  source: UuidFilter
+  metadata: MetadataFilter
+}
+
 scalar ArgumentId
 
 input ArgumentInput {
@@ -158,80 +178,856 @@ input ArgumentInput {
   value: JSON
 }
 
-input CreateProjectInput {
+input ArgumentSort {
+  id: UuidSort
+  rejected_at: DateTimeSort
+  resolved_at: DateTimeSort
+  account_id: UuidSort
+  metadata: MetadataSort
+}
+
+scalar AtomRef
+
+type BindingAffinity {
+  id: BindingAffinityId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  affinity: Float!
+  affinity_metric: String!
+  protein: Protein!
+  smol: Smol!
+  binding_pose_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseAffinityFilter
+    sort: BindingPoseAffinitySort
+  ): BindingPoseAffinityConnection!
+}
+
+type BindingAffinityConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingAffinityEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingAffinity!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingAffinityEdge {
+  # The item at the end of the edge
+  node: BindingAffinity!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingAffinityFilter {
+  all: [BindingAffinityFilter!]
+  any: [BindingAffinityFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  affinity: F64Filter
+  affinity_metric: StringFilter
+  protein_id: UuidFilter
+  smol_id: UuidFilter
+}
+
+scalar BindingAffinityId
+
+input BindingAffinitySort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  affinity: F64Sort
+  affinity_metric: StringSort
+  protein_id: UuidSort
+  smol_id: UuidSort
+}
+
+type BindingPoseAffinity {
+  id: BindingPoseAffinityId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  binding_affinity: BindingAffinity!
+  binding_pose_conformer: BindingPoseConformer!
+}
+
+type BindingPoseAffinityConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingPoseAffinityEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingPoseAffinity!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingPoseAffinityEdge {
+  # The item at the end of the edge
+  node: BindingPoseAffinity!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingPoseAffinityFilter {
+  all: [BindingPoseAffinityFilter!]
+  any: [BindingPoseAffinityFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  binding_affinity_id: UuidFilter
+  binding_pose_conformer_id: UuidFilter
+}
+
+scalar BindingPoseAffinityId
+
+input BindingPoseAffinitySort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  binding_affinity_id: UuidSort
+  binding_pose_conformer_id: UuidSort
+}
+
+type BindingPoseConformer {
+  id: BindingPoseConformerId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  smol_conformer: SmolConformer!
+  binding_site_conformer: BindingSiteConformer!
+  binding_pose_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseAffinityFilter
+    sort: BindingPoseAffinitySort
+  ): BindingPoseAffinityConnection!
+  binding_pose_conformer_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerInteractionsFilter
+    sort: BindingPoseConformerInteractionsSort
+  ): BindingPoseConformerInteractionsConnection!
+}
+
+type BindingPoseConformerConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingPoseConformerEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingPoseConformer!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingPoseConformerEdge {
+  # The item at the end of the edge
+  node: BindingPoseConformer!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingPoseConformerFilter {
+  all: [BindingPoseConformerFilter!]
+  any: [BindingPoseConformerFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  smol_conformer_id: UuidFilter
+  binding_site_conformer_id: UuidFilter
+}
+
+scalar BindingPoseConformerId
+
+type BindingPoseConformerInteractions {
+  id: BindingPoseConformerInteractionsId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  binding_pose_conformer: BindingPoseConformer!
+  binding_site_interactions: BindingSiteInteractions!
+}
+
+type BindingPoseConformerInteractionsConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingPoseConformerInteractionsEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingPoseConformerInteractions!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingPoseConformerInteractionsEdge {
+  # The item at the end of the edge
+  node: BindingPoseConformerInteractions!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingPoseConformerInteractionsFilter {
+  all: [BindingPoseConformerInteractionsFilter!]
+  any: [BindingPoseConformerInteractionsFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  binding_pose_conformer_id: UuidFilter
+  binding_site_interactions_id: UuidFilter
+}
+
+scalar BindingPoseConformerInteractionsId
+
+input BindingPoseConformerInteractionsSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  binding_pose_conformer_id: UuidSort
+  binding_site_interactions_id: UuidSort
+}
+
+input BindingPoseConformerSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  smol_conformer_id: UuidSort
+  binding_site_conformer_id: UuidSort
+}
+
+type BindingSiteBoundingBox {
+  min: Xyzf32!
+  max: Xyzf32!
+}
+
+input BindingSiteBoundingBoxInput {
+  min: Xyzf32!
+  max: Xyzf32!
+}
+
+type BindingSiteConformer {
+  id: BindingSiteConformerId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  bounding_box: BindingSiteBoundingBox!
+  surface_atoms: [Int!]
+  protein_conformer: ProteinConformer!
+  binding_pose_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerFilter
+    sort: BindingPoseConformerSort
+  ): BindingPoseConformerConnection!
+}
+
+type BindingSiteConformerConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingSiteConformerEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingSiteConformer!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingSiteConformerEdge {
+  # The item at the end of the edge
+  node: BindingSiteConformer!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingSiteConformerFilter {
+  all: [BindingSiteConformerFilter!]
+  any: [BindingSiteConformerFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  protein_conformer_id: UuidFilter
+}
+
+scalar BindingSiteConformerId
+
+type BindingSiteConformerPrediction {
+  id: BindingSiteConformerPredictionId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  score: Float!
+  probability: Float!
+  binding_site_conformer: BindingSiteConformer!
+  protein_conformer: ProteinConformer!
+}
+
+type BindingSiteConformerPredictionConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingSiteConformerPredictionEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingSiteConformerPrediction!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingSiteConformerPredictionEdge {
+  # The item at the end of the edge
+  node: BindingSiteConformerPrediction!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingSiteConformerPredictionFilter {
+  all: [BindingSiteConformerPredictionFilter!]
+  any: [BindingSiteConformerPredictionFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  score: F32Filter
+  probability: F32Filter
+  binding_site_conformer_id: UuidFilter
+  protein_conformer_id: UuidFilter
+}
+
+scalar BindingSiteConformerPredictionId
+
+input BindingSiteConformerPredictionSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  score: F32Sort
+  probability: F32Sort
+  binding_site_conformer_id: UuidSort
+  protein_conformer_id: UuidSort
+}
+
+input BindingSiteConformerSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  protein_conformer_id: UuidSort
+}
+
+type BindingSiteInteraction {
+  # Kind of interaction between the ligand and the receptor.
+  kind: BindingSiteInteractionKind!
+
+  # In pi-stacking interactions what kind of stacking is happening?
+  pi_stack_kind: PiStackKind
+
+  # The ligand in the `Assembly` that is interacting with the receptor.
+  ligand: ResidueRef!
+
+  # The atom in the ligand that is interacting with the receptor. Ignored
+  # for salt bridge and pi-interactions.
+  ligand_atom: AtomRef!
+
+  # The co-ordinates of the interaction in the ligand. Often this is the
+  # co-ordinate of the `ligand_atom` but it is sometimes different (for
+  # example, in pi-stacking interactions).
+  ligand_xyz: Xyzf32!
+
+  # The residue in the `Assembly` that is interacting with the ligand.
+  receptor_residue: ResidueRef!
+
+  # The atom in the receptor that is interacting with the ligand. Ignored
+  # for salt bridge and pi-interactions.
+  receptor_atom: AtomRef!
+
+  # The co-ordinates of the interaction in the receptor. Often this is the
+  # co-ordinate of the `receptor_atom` but it is sometimes different (for
+  # example, in pi-stacking interactions).
+  receptor_xyz: Xyzf32!
+
+  # In hydrogen bonds and water bridges is the receptor the hydrogen bond
+  # donor?
+  receptor_is_donor: Boolean!
+
+  # In pi-cation interactions is the receptor providing the charge?
+  receptor_is_charged: Boolean!
+
+  # In salt bridges is the receptor carrying the positive charge?
+  receptor_is_positively_charged: Boolean!
+}
+
+input BindingSiteInteractionInput {
+  # Kind of interaction between the ligand and the receptor.
+  kind: BindingSiteInteractionKind!
+
+  # In pi-stacking interactions what kind of stacking is happening?
+  pi_stack_kind: PiStackKind
+
+  # The ligand in the `Assembly` that is interacting with the receptor.
+  ligand: ResidueRef!
+
+  # The atom in the ligand that is interacting with the receptor. Ignored
+  # for salt bridge and pi-interactions.
+  ligand_atom: AtomRef!
+
+  # The co-ordinates of the interaction in the ligand. Often this is the
+  # co-ordinate of the `ligand_atom` but it is sometimes different (for
+  # example, in pi-stacking interactions).
+  ligand_xyz: Xyzf32!
+
+  # The residue in the `Assembly` that is interacting with the ligand.
+  receptor_residue: ResidueRef!
+
+  # The atom in the receptor that is interacting with the ligand. Ignored
+  # for salt bridge and pi-interactions.
+  receptor_atom: AtomRef!
+
+  # The co-ordinates of the interaction in the receptor. Often this is the
+  # co-ordinate of the `receptor_atom` but it is sometimes different (for
+  # example, in pi-stacking interactions).
+  receptor_xyz: Xyzf32!
+
+  # In hydrogen bonds and water bridges is the receptor the hydrogen bond
+  # donor?
+  receptor_is_donor: Boolean!
+
+  # In pi-cation interactions is the receptor providing the charge?
+  receptor_is_charged: Boolean!
+
+  # In salt bridges is the receptor carrying the positive charge?
+  receptor_is_positively_charged: Boolean!
+}
+
+enum BindingSiteInteractionKind {
+  UNKNOWN
+  HYDROPHOBIC
+  HYDROGEN_BOND
+  HALOGEN_BOND
+  WATER_BRIDGE
+  SALT_BRIDGE
+  PI_STACK
+  PI_CATION
+  METAL_COMPLEX
+}
+
+type BindingSiteInteractions {
+  id: BindingSiteInteractionsId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  residues: [Int!]!
+  interactions: [BindingSiteInteraction!]!
+  protein: Protein!
+  binding_pose_conformer_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerInteractionsFilter
+    sort: BindingPoseConformerInteractionsSort
+  ): BindingPoseConformerInteractionsConnection!
+}
+
+type BindingSiteInteractionsConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [BindingSiteInteractionsEdge!]!
+
+  # A list of nodes.
+  nodes: [BindingSiteInteractions!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type BindingSiteInteractionsEdge {
+  # The item at the end of the edge
+  node: BindingSiteInteractions!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input BindingSiteInteractionsFilter {
+  all: [BindingSiteInteractionsFilter!]
+  any: [BindingSiteInteractionsFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  protein_id: UuidFilter
+}
+
+scalar BindingSiteInteractionsId
+
+input BindingSiteInteractionsSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  protein_id: UuidSort
+}
+
+input CreateBindingAffinity {
   name: String
   description: String
   tags: [String!]
-}
-
-input CreateProteinConformerInput {
-  project_id: ProjectId!
+  affinity: Float!
+  affinity_metric: String!
   protein_id: ProteinId!
-  structure_id: StructureId!
+  smol_id: SmolId!
+  project_id: ProjectId!
+}
+
+input CreateBindingPoseAffinity {
+  name: String
+  description: String
+  tags: [String!]
+  binding_affinity_id: BindingAffinityId!
+  binding_pose_conformer_id: BindingPoseConformerId!
+  project_id: ProjectId!
+}
+
+input CreateBindingPoseConformer {
+  name: String
+  description: String
+  tags: [String!]
+  smol_conformer_id: SmolConformerId!
+  binding_site_conformer_id: BindingSiteConformerId!
+  project_id: ProjectId!
+}
+
+input CreateBindingPoseConformerInteractions {
+  name: String
+  description: String
+  tags: [String!]
+  binding_pose_conformer_id: BindingPoseConformerId!
+  binding_site_interactions_id: BindingSiteInteractionsId!
+  project_id: ProjectId!
+}
+
+input CreateBindingSiteConformer {
+  name: String
+  description: String
+  tags: [String!]
+  bounding_box: BindingSiteBoundingBoxInput!
+  surface_atoms: [Int!]
+  protein_conformer_id: ProteinConformerId!
+  project_id: ProjectId!
+}
+
+input CreateBindingSiteConformerPrediction {
+  name: String
+  description: String
+  tags: [String!]
+  score: Float!
+  probability: Float!
+  binding_site_conformer_id: BindingSiteConformerId!
+  protein_conformer_id: ProteinConformerId!
+  project_id: ProjectId!
+}
+
+input CreateBindingSiteInteractions {
+  name: String
+  description: String
+  tags: [String!]
+  residues: [Int!]!
+  interactions: [BindingSiteInteractionInput!]!
+  protein_id: ProteinId!
+  project_id: ProjectId!
+}
+
+input CreateMetadata {
   name: String
   description: String
   tags: [String!]
 }
 
-input CreateProteinInput {
+input CreateModule {
+  path: String!
+  tags: [String!]
+  tests: [TestCase!]!
+}
+
+input CreateModuleInstance {
+  path: String!
+  args: [ArgumentInput!]!
+  target: ModuleInstanceTarget
+  resources: ResourcesInput
+  status: ModuleInstanceStatus
+  metadata: CreateMetadata!
+  out_tags: [[String!]]
+}
+
+input CreateMultipleSequenceAlignment {
+  name: String
+  description: String
+  tags: [String!]
+  a_3m: TypedVirtualObject!
+  protein_id: ProteinId!
+  project_id: ProjectId!
+}
+
+input CreateProject {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input CreateProtein {
+  name: String
+  description: String
+  tags: [String!]
   sequence: String!
   project_id: ProjectId!
+}
+
+input CreateProteinConformer {
   name: String
   description: String
   tags: [String!]
+  residues: [Int!]!
+  protein_id: ProteinId!
+  structure_id: StructureId!
+  project_id: ProjectId!
+}
+
+input CreateResourceUtilization {
+  module_instance_id: ModuleInstanceId!
+  gpu: Float
+  mem: Float
+  storage: Float!
+  walltime: Float!
+  cputime: Float!
+  inodes: Float!
+  sus: Int
 }
 
 input CreateRun {
+  name: String
+  description: String
+  tags: [String!]
+
   # Rex expression to run.
-  rex: String
-  expr: JSON
-  project_id: ProjectId!
+  rex: String!
 
   # Optional mapping of modules to their full path versions.
   module_lock: JSONObject
-  name: String
-  description: String
-  tags: [String!]
-}
-
-input CreateSmolConformerInput {
   project_id: ProjectId!
-  smol_id: SmolId!
-  structure_id: StructureId!
+}
+
+input CreateSmol {
   name: String
   description: String
   tags: [String!]
-}
-
-input CreateSmolInput {
   smi: String
   inchi: String
+  data_blocks: [[String!]!]
   project_id: ProjectId!
+}
+
+input CreateSmolConformer {
   name: String
   description: String
   tags: [String!]
+  residues: [Int!]!
+  smol_id: SmolId!
+  structure_id: StructureId!
+  project_id: ProjectId!
 }
 
-input CreateStructureInput {
+input CreateSmolLibrary {
+  name: String
+  description: String
+  tags: [String!]
+  project_id: ProjectId!
+}
+
+input CreateSmolLibraryPartition {
+  name: String
+  description: String
+  tags: [String!]
+  part_idx: Int!
+  part_size: Int!
+  structures: TypedVirtualObject
+  smiles: TypedVirtualObject!
+  data_blocks: TypedVirtualObject!
+  smol_library_id: SmolLibraryId!
+  project_id: ProjectId!
+}
+
+input CreateStructure {
+  name: String
+  description: String
+  tags: [String!]
   rcsb_id: String
   topology: TypedVirtualObject!
   residues: TypedVirtualObject!
   chains: TypedVirtualObject!
   project_id: ProjectId!
+}
+
+input CreateTag {
   name: String
   description: String
   tags: [String!]
-}
-
-input CreateTagInput {
   key: String!
   value: String
   tagged_id: UUID!
   tagged_type: TaggedType!
   project_id: ProjectId!
-  name: String
-  description: String
-  tags: [String!]
 }
 
 # Implement the DateTime<Utc> scalar
@@ -240,6 +1036,7 @@ input CreateTagInput {
 scalar DateTime
 
 input DateTimeFilter {
+  is_null: Boolean
   eq: DateTime
   ne: DateTime
   gt: DateTime
@@ -253,31 +1050,46 @@ enum DateTimeSort {
   desc
 }
 
-type GlobalStatus {
-  created_at: DateTime!
-  status: ModuleInstanceStatus!
-  count: Int!
+input F32Filter {
+  eq: Float
+  ne: Float
+  gt: Float
+  ge: Float
+  lt: Float
+  le: Float
 }
 
-type GlobalStatusConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [GlobalStatusEdge!]!
-
-  # A list of nodes.
-  nodes: [GlobalStatus!]!
-  totalCount: Int!
+enum F32Sort {
+  asc
+  desc
 }
 
-# An edge in a connection.
-type GlobalStatusEdge {
-  # The item at the end of the edge
-  node: GlobalStatus!
+input F64Filter {
+  eq: Float
+  ne: Float
+  gt: Float
+  ge: Float
+  lt: Float
+  le: Float
+}
 
-  # A cursor for use in pagination
-  cursor: String!
+enum F64Sort {
+  asc
+  desc
+}
+
+input I32Filter {
+  eq: Int
+  ne: Int
+  gt: Int
+  ge: Int
+  lt: Int
+  le: Int
+}
+
+enum I32Sort {
+  asc
+  desc
 }
 
 input I64Filter {
@@ -298,7 +1110,25 @@ scalar JSONObject
 type LogEntry {
   id: String!
   part: Int!
+
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   content: [String!]!
 }
 
@@ -311,7 +1141,7 @@ type LogEntryConnection {
 
   # A list of nodes.
   nodes: [LogEntry!]!
-  totalCount: Int!
+  total_count: Int!
 }
 
 # An edge in a connection.
@@ -332,6 +1162,27 @@ enum MemUnits {
   TB
 }
 
+type Metadata {
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+}
+
 input MetadataFilter {
   all: [MetadataFilter!]
   any: [MetadataFilter!]
@@ -340,6 +1191,7 @@ input MetadataFilter {
   deleted_at: DateTimeFilter
   name: StringFilter
   description: StringFilter
+  run_id: UuidFilter
   tags: TagFilter
 }
 
@@ -351,34 +1203,21 @@ input MetadataSort {
   description: StringSort
 }
 
+# A module defines an interface to a program that can be run on a cluster.
+# It is a wrapper around a computational-chemistry program that defines well-typed inputs and outputs,
+# as well as resource requirements and documentation.
 type Module {
   # Unique identifier for module
   id: ModuleId!
-  created_at: DateTime!
-
-  # When the module was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
 
   # Path to module, used for resolving the module entrypoint
   path: String!
-
-  # Name of module, used for display + search purposes. Will strip _tengu / tengu_ from the path
-  name: String!
 
   # The types of the module's inputs
   ins: [Type!]!
 
   # The types of the module's outputs
   outs: [Type!]!
-
-  # Tags to apply to the module
-  tags: [String!]
-
-  # Description of module
-  description: String
-
-  # Usage instructions for module - NOTE: this is deprecated, use ins_usage and outs_usage instead
-  usage: String
 
   # Usage instructions for module inputs
   ins_usage: [String!]
@@ -387,10 +1226,29 @@ type Module {
   outs_usage: [String!]
 
   # Targets that this module can be dispatched to
-  targets: [ModuleInstanceTarget!]
+  targets: [ModuleInstanceTarget!]!
 
   # Resource specification indicating bounds on the resources required by this module
   resource_bounds: ResourceBounds
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   typedesc: String!
 }
 
@@ -403,7 +1261,7 @@ type ModuleConnection {
 
   # A list of nodes.
   nodes: [Module!]!
-  totalCount: Int!
+  total_count: Int!
 }
 
 # An edge in a connection.
@@ -441,38 +1299,32 @@ enum ModuleFailureReason {
   CORRUPTED
 }
 
-scalar ModuleId
-
-input ModuleInput {
-  path: String!
-  tags: [String!]
-  tests: [TestCase!]!
+input ModuleFailureReasonFilter {
+  eq: ModuleFailureReason
+  ne: ModuleFailureReason
 }
 
+input ModuleFilter {
+  all: [ModuleFilter!]
+  any: [ModuleFilter!]
+  id: UuidFilter
+  path: StringFilter
+  metadata: MetadataFilter
+}
+
+scalar ModuleId
+
+# A module instance is a single invocation of a module. It is created when a user submits a module
+# Can be thought of as a "job"
 type ModuleInstance {
   # Unique identifier for module instance
   id: ModuleInstanceId!
-
-  # When the module instance was created
-  created_at: DateTime!
-
-  # When the module instance was deleted, is used to determine if a module instance is soft-deleted
-  deleted_at: DateTime
 
   # Account that created the module instance
   account_id: AccountId!
 
   # Path to module, used for resolving the module entrypoint
   path: String!
-
-  # The arguments that will be passed to the module instance
-  ins: [Argument!]!
-
-  # The arguments that will be produced by the module instance
-  outs: [Argument!]!
-
-  # Name of the module instance
-  name: String
 
   # When the module entered the QUEUED state
   queued_at: DateTime
@@ -502,16 +1354,32 @@ type ModuleInstance {
   target: ModuleInstanceTarget!
 
   # Resources allocated to this module instance
-  resources: ModuleInstanceResources
+  resources: Resources
 
   # Progress of the module instance
-  progress: ModuleInstanceProgress
-
-  # Tags applied to the module instance
-  tags: [String!]
+  progress: ProgressEvent
 
   # Runtime account that the module instance is configured to use
   config_account: AccountId
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   module: Module!
   stdout(
     after: String
@@ -528,107 +1396,60 @@ type ModuleInstance {
     order: OrderBy
   ): LogEntryConnection!
   resource_utilization: ResourceUtilization
+  ins: [Argument!]!
+  outs: [Argument!]!
+}
+
+type ModuleInstanceConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [ModuleInstanceEdge!]!
+
+  # A list of nodes.
+  nodes: [ModuleInstance!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type ModuleInstanceEdge {
+  # The item at the end of the edge
+  node: ModuleInstance!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input ModuleInstanceFilter {
+  all: [ModuleInstanceFilter!]
+  any: [ModuleInstanceFilter!]
+  id: UuidFilter
+  account_id: UuidFilter
+  path: StringFilter
+  queued_at: DateTimeFilter
+  admitted_at: DateTimeFilter
+  dispatched_at: DateTimeFilter
+  run_at: DateTimeFilter
+  completed_at: DateTimeFilter
+  failure_reason: ModuleFailureReasonFilter
+  status: ModuleInstanceStatusFilter
+  target: ModuleInstanceTargetFilter
+  config_account: UuidFilter
+  metadata: MetadataFilter
 }
 
 scalar ModuleInstanceId
 
-input ModuleInstanceInput {
-  path: String!
-  args: [ArgumentInput!]!
-  name: String
-  target: ModuleInstanceTarget
-
-  # Resource specification
-  resources: ModuleInstanceResourcesInput
-
-  # Tags to place on the module instance
-  tags: [String!]
-
-  # Tags to apply to the outputs
-  out_tags: [[String!]]
-
-  # Tags to apply to the outputs
-  out_names: [String]
-
-  # Is this the final module intance in the pipeline?
-  end: Boolean
-}
-
-type ModuleInstanceProgress {
-  n: Int!
-  n_expected: Int!
-  n_max: Int!
-  done: Boolean!
-}
-
-type ModuleInstanceResources {
-  # Number of gpus to be allocated to job
-  gpus: Int
-
-  # Minimum amount of gpu memory required per gpu, denominate in gpu_mem_units
-  gpu_mem: Int
-
-  # Unit of gpu memory, defaults to B
-  gpu_mem_units: MemUnits
-
-  # Number of cpus to be allocated to job
-  cpus: Int
-
-  # Number of nodes to be allocated to job
-  nodes: Int
-
-  # Amount of RAM to be allocated to job, denominated in mem_units
-  mem: Int
-
-  # Units for RAM, defaults to B
-  mem_units: MemUnits
-
-  # Space to be allocated on the target denominated in storage_units, must be > the size of Object inputs.
-  # The runtime will ensure this amount of space is reserved on the target, so try to take the output
-  # size into account so that the target does not run out of space.
-  storage: Int
-
-  # Units for storage, defaults to B
-  storage_units: MemUnits
-
-  # walltime request in minutes - job will be killed if it exceeds this number
-  walltime: Int
-  storage_mounts: [String!]
-}
-
-input ModuleInstanceResourcesInput {
-  # Number of gpus to be allocated to job
-  gpus: Int
-
-  # Minimum amount of gpu memory required per gpu, denominate in gpu_mem_units
-  gpu_mem: Int
-
-  # Unit of gpu memory, defaults to B
-  gpu_mem_units: MemUnits
-
-  # Number of cpus to be allocated to job
-  cpus: Int
-
-  # Number of nodes to be allocated to job
-  nodes: Int
-
-  # Amount of RAM to be allocated to job, denominated in mem_units
-  mem: Int
-
-  # Units for RAM, defaults to B
-  mem_units: MemUnits
-
-  # Space to be allocated on the target denominated in storage_units, must be > the size of Object inputs.
-  # The runtime will ensure this amount of space is reserved on the target, so try to take the output
-  # size into account so that the target does not run out of space.
-  storage: Int
-
-  # Units for storage, defaults to B
-  storage_units: MemUnits
-
-  # walltime request in minutes - job will be killed if it exceeds this number
-  walltime: Int
-  storage_mounts: [String!]
+input ModuleInstanceSort {
+  id: UuidSort
+  path: StringSort
+  queued_at: DateTimeSort
+  admitted_at: DateTimeSort
+  dispatched_at: DateTimeSort
+  run_at: DateTimeSort
+  completed_at: DateTimeSort
+  metadata: MetadataSort
 }
 
 enum ModuleInstanceStatus {
@@ -669,6 +1490,11 @@ enum ModuleInstanceStatus {
   CANCELLED
 }
 
+input ModuleInstanceStatusFilter {
+  eq: ModuleInstanceStatus
+  ne: ModuleInstanceStatus
+}
+
 enum ModuleInstanceTarget {
   TINY
   GADI
@@ -687,19 +1513,89 @@ enum ModuleInstanceTarget {
   SETONIX_EXPRESS
 }
 
+input ModuleInstanceTargetFilter {
+  eq: ModuleInstanceTarget
+  ne: ModuleInstanceTarget
+}
+
+input ModuleSort {
+  id: UuidSort
+  path: StringSort
+  metadata: MetadataSort
+}
+
+type MultipleSequenceAlignment {
+  id: MultipleSequenceAlignmentId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  a_3m: TypedVirtualObject!
+  protein: Protein!
+}
+
+type MultipleSequenceAlignmentConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [MultipleSequenceAlignmentEdge!]!
+
+  # A list of nodes.
+  nodes: [MultipleSequenceAlignment!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type MultipleSequenceAlignmentEdge {
+  # The item at the end of the edge
+  node: MultipleSequenceAlignment!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input MultipleSequenceAlignmentFilter {
+  all: [MultipleSequenceAlignmentFilter!]
+  any: [MultipleSequenceAlignmentFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  protein_id: UuidFilter
+}
+
+scalar MultipleSequenceAlignmentId
+
+input MultipleSequenceAlignmentSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  protein_id: UuidSort
+}
+
 type Mutation {
   login(username: String!, password: String!): User
-  deploy(module: ModuleInput!): SimpleModule!
-  destroy(module: ModuleId!): SimpleModule!
-  delete_argument(arg_id: ArgumentId!): Argument!
-  delete_module_instance(module: ModuleInstanceId!): SimpleModuleInstance!
+  destroy(module: ModuleId!): Module!
+  delete_argument(arg_id: ArgumentId!): ArgumentId!
+  delete_module_instance(module: ModuleInstanceId!): ModuleInstance!
   delete_token(token_id: TokenId!): Token!
-  rename(
-    module: ModuleId
-    module_instance: ModuleInstanceId
-    argument: ArgumentId
-    name: String
-  ): [String!]!
   tag(
     module: ModuleId
     module_instance: ModuleInstanceId
@@ -712,9 +1608,19 @@ type Mutation {
     argument: ArgumentId
     tags: [String!]!
   ): [String!]!
+  run(instance: CreateModuleInstance!): ModuleInstance!
+
+  # If a module instance fails due to environment issues (eg. inputs and module are valid),
+  # this method can be used to retry the module instance.
+  retry(
+    instance: ModuleInstanceId!
+    target: ModuleInstanceTarget
+    resources: ResourcesInput
+  ): ModuleInstance!
   upload_large_object(
     typeinfo: JSON!
     format: ObjectFormat!
+    public: Boolean
   ): ObjectDescriptorWithUploadUrl!
   upload_object(
     file: Upload!
@@ -725,26 +1631,17 @@ type Mutation {
   # Cancel a currently running instance, but don't delete it
   cancel(instance: ModuleInstanceId!): ModuleInstanceId!
 
-  # If a module instance fails due to environment issues (eg. inputs and module are valid),
-  # this method can be used to retry the module instance.
-  retry(
-    instance: ModuleInstanceId!
-    target: ModuleInstanceTarget
-    resources: ModuleInstanceResourcesInput
-  ): SimpleModuleInstance!
-
-  # Run a module instance
-  run(instance: ModuleInstanceInput!): SimpleModuleInstance!
-
   # An (admin) endpoint to update all attributes of a module instance.
   # Only to be used in debug / rescue situations.
   update_module_instance(
-    instance_update: UpdateModuleInstanceInput!
-  ): SimpleModuleInstance!
+    instance_id: ModuleInstanceId!
+    instance_update: PatchModuleInstanceInput!
+    arguments_update: [ArgumentInput!]
+  ): ModuleInstance!
 
   # Track historical utilization
   track_module_instance_resource_utilization(
-    utilization: ResourceUtilizationInput!
+    utilization: CreateResourceUtilization!
   ): ResourceUtilization!
   create_argument(
     name: String
@@ -753,40 +1650,169 @@ type Mutation {
     value: JSON!
   ): Argument!
   create_token: Token!
+  deploy(module: CreateModule!): Module!
   eval(input: CreateRun!): Run!
-  create_project(input: CreateProjectInput!): Project!
-  create_tag(input: CreateTagInput!): Tag!
-  create_protein_conformer(
-    input: CreateProteinConformerInput!
-  ): ProteinConformer!
-  create_protein(input: CreateProteinInput!): Protein!
-  create_smol_conformer(input: CreateSmolConformerInput!): SmolConformer!
-  create_smol(input: CreateSmolInput!): Smol!
-  create_structure(input: CreateStructureInput!): Structure!
+  delete_run(run_id: RunId!): Run!
   update_account_config(
     account_id: AccountId!
     input: AccountConfigInput!
   ): AccountConfig!
   update_account_tier(account_id: AccountId!, tier: AccountTier!): AccountTier!
-}
-
-type Object {
-  object_descriptor: ObjectDescriptor!
-  contents: JSON!
-  url: String!
+  fetch_protein_dossier(project_id: ProjectId!, protein_name: String!): Protein!
+  create_binding_affinity(input: CreateBindingAffinity!): BindingAffinity!
+  delete_binding_affinity(
+    binding_affinity_id: BindingAffinityId!
+  ): BindingAffinity!
+  patch_binding_affinity(
+    binding_affinity_id: BindingAffinityId!
+    input: PatchBindingAffinity!
+  ): BindingAffinity!
+  create_binding_site_conformer(
+    input: CreateBindingSiteConformer!
+  ): BindingSiteConformer!
+  delete_binding_site_conformer(
+    binding_site_conformer_id: BindingSiteConformerId!
+  ): BindingSiteConformer!
+  patch_binding_site_conformer(
+    binding_site_conformer_id: BindingSiteConformerId!
+    input: PatchBindingSiteConformer!
+  ): BindingSiteConformer!
+  create_binding_site_conformer_prediction(
+    input: CreateBindingSiteConformerPrediction!
+  ): BindingSiteConformerPrediction!
+  delete_binding_site_conformer_prediction(
+    binding_site_conformer_prediction_id: BindingSiteConformerPredictionId!
+  ): BindingSiteConformerPrediction!
+  patch_binding_site_conformer_prediction(
+    binding_site_conformer_prediction_id: BindingSiteConformerPredictionId!
+    input: PatchBindingSiteConformerPrediction!
+  ): BindingSiteConformerPrediction!
+  create_binding_site_interactions(
+    input: CreateBindingSiteInteractions!
+  ): BindingSiteInteractions!
+  delete_binding_site_interactions(
+    binding_site_interactions_id: BindingSiteInteractionsId!
+  ): BindingSiteInteractions!
+  patch_binding_site_interactions(
+    binding_site_interactions_id: BindingSiteInteractionsId!
+    input: PatchBindingSiteInteractions!
+  ): BindingSiteInteractions!
+  create_binding_pose_affinity(
+    input: CreateBindingPoseAffinity!
+  ): BindingPoseAffinity!
+  delete_binding_pose_affinity(
+    binding_pose_affinity_id: BindingPoseAffinityId!
+  ): BindingPoseAffinity!
+  patch_binding_pose_affinity(
+    binding_pose_affinity_id: BindingPoseAffinityId!
+    input: PatchBindingPoseAffinity!
+  ): BindingPoseAffinity!
+  create_binding_pose_conformer(
+    input: CreateBindingPoseConformer!
+  ): BindingPoseConformer!
+  delete_binding_pose_conformer(
+    binding_pose_conformer_id: BindingPoseConformerId!
+  ): BindingPoseConformer!
+  patch_binding_pose_conformer(
+    binding_pose_conformer_id: BindingPoseConformerId!
+    input: PatchBindingPoseConformer!
+  ): BindingPoseConformer!
+  create_binding_pose_conformer_interactions(
+    input: CreateBindingPoseConformerInteractions!
+  ): BindingPoseConformerInteractions!
+  delete_binding_pose_conformer_interactions(
+    binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!
+  ): BindingPoseConformerInteractions!
+  patch_binding_pose_conformer_interactions(
+    binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!
+    input: PatchBindingPoseConformerInteractions!
+  ): BindingPoseConformerInteractions!
+  create_msa(
+    input: CreateMultipleSequenceAlignment!
+  ): MultipleSequenceAlignment!
+  delete_msa(
+    multiple_sequence_alignment_id: MultipleSequenceAlignmentId!
+  ): MultipleSequenceAlignment!
+  patch_msa(
+    multiple_sequence_alignment_id: MultipleSequenceAlignmentId!
+    input: PatchMultipleSequenceAlignment!
+  ): MultipleSequenceAlignment!
+  create_project(input: CreateProject!): Project!
+  delete_project(project_id: ProjectId!): Project!
+  patch_project(project_id: ProjectId!, input: PatchProject!): Project!
+  create_protein(input: CreateProtein!): Protein!
+  delete_protein(protein_id: ProteinId!): Protein!
+  patch_protein(protein_id: ProteinId!, input: PatchProtein!): Protein!
+  create_protein_conformer(input: CreateProteinConformer!): ProteinConformer!
+  delete_protein_conformer(
+    protein_conformer_id: ProteinConformerId!
+  ): ProteinConformer!
+  patch_protein_conformer(
+    protein_conformer_id: ProteinConformerId!
+    input: PatchProteinConformer!
+  ): ProteinConformer!
+  create_smol_conformer(input: CreateSmolConformer!): SmolConformer!
+  delete_smol_conformer(smol_conformer_id: SmolConformerId!): SmolConformer!
+  patch_smol_conformer(
+    smol_conformer_id: SmolConformerId!
+    input: PatchSmolConformer!
+  ): SmolConformer!
+  create_smol_library(input: CreateSmolLibrary!): SmolLibrary!
+  delete_smol_library(smol_library_id: SmolLibraryId!): SmolLibrary!
+  patch_smol_library(
+    smol_library_id: SmolLibraryId!
+    input: PatchSmolLibrary!
+  ): SmolLibrary!
+  create_smol_library_partition(
+    input: CreateSmolLibraryPartition!
+  ): SmolLibraryPartition!
+  delete_smol_library_partition(
+    smol_library_partition_id: SmolLibraryPartitionId!
+  ): SmolLibraryPartition!
+  patch_smol_library_partition(
+    smol_library_partition_id: SmolLibraryPartitionId!
+    input: PatchSmolLibraryPartition!
+  ): SmolLibraryPartition!
+  create_smol(input: CreateSmol!): Smol!
+  delete_smol(smol_id: SmolId!): Smol!
+  patch_smol(smol_id: SmolId!, input: PatchSmol!): Smol!
+  create_structure(input: CreateStructure!): Structure!
+  delete_structure(structure_id: StructureId!): Structure!
+  patch_structure(
+    structure_id: StructureId!
+    input: PatchStructure!
+  ): Structure!
+  create_tag(input: CreateTag!): Tag!
+  delete_tag(tag_id: TagId!): Tag!
+  patch_tag(tag_id: TagId!, input: PatchTag!): Tag!
 }
 
 type ObjectDescriptor {
   id: ObjectDescriptorId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   object: VirtualObject!
   type_info: Type!
   base_url: String!
-  created_at: DateTime!
-  updated_at: DateTime!
-  deleted_at: DateTime
-  name: String
-  description: String
-  tags: [String!]
+  contents: JSON!
+  url: String!
 }
 
 type ObjectDescriptorConnection {
@@ -814,20 +1840,19 @@ input ObjectDescriptorFilter {
   all: [ObjectDescriptorFilter!]
   any: [ObjectDescriptorFilter!]
   id: UuidFilter
+  metadata: MetadataFilter
   object: VirtualObjectFilter
   base_url: StringFilter
   account_id: UuidFilter
-  metadata: MetadataFilter
 }
 
 scalar ObjectDescriptorId
 
 input ObjectDescriptorSort {
   id: UuidSort
+  metadata: MetadataSort
   object: VirtualObjectSort
   base_url: StringSort
-  account_id: UuidSort
-  metadata: MetadataSort
 }
 
 type ObjectDescriptorWithUploadUrl {
@@ -865,67 +1890,311 @@ type PageInfo {
   endCursor: String
 }
 
-type Project {
-  id: ProjectId!
-  created_at: DateTime!
-  updated_at: DateTime!
-  deleted_at: DateTime
+input PatchBindingAffinity {
   name: String
   description: String
   tags: [String!]
+  affinity: Float
+  affinity_metric: String
+}
+
+input PatchBindingPoseAffinity {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input PatchBindingPoseConformer {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input PatchBindingPoseConformerInteractions {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input PatchBindingSiteConformer {
+  name: String
+  description: String
+  tags: [String!]
+  bounding_box: BindingSiteBoundingBoxInput
+  surface_atoms: [Int!]
+}
+
+input PatchBindingSiteConformerPrediction {
+  name: String
+  description: String
+  tags: [String!]
+  score: Float
+  probability: Float
+}
+
+input PatchBindingSiteInteractions {
+  name: String
+  description: String
+  tags: [String!]
+  residues: [Int!]
+  interactions: [BindingSiteInteractionInput!]
+}
+
+input PatchModuleInstanceInput {
+  path: String
+  args: [ArgumentInput!]
+  target: ModuleInstanceTarget
+  resources: ResourcesInput
+  status: ModuleInstanceStatus
+  metadata: CreateMetadata
+  out_tags: [[String!]]
+}
+
+input PatchMultipleSequenceAlignment {
+  name: String
+  description: String
+  tags: [String!]
+  a_3m: TypedVirtualObject
+}
+
+input PatchProject {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input PatchProtein {
+  name: String
+  description: String
+  tags: [String!]
+  sequence: String
+}
+
+input PatchProteinConformer {
+  name: String
+  description: String
+  tags: [String!]
+  residues: [Int!]
+}
+
+input PatchSmol {
+  name: String
+  description: String
+  tags: [String!]
+  smi: String
+  inchi: String
+  data_blocks: [[String!]!]
+}
+
+input PatchSmolConformer {
+  name: String
+  description: String
+  tags: [String!]
+  residues: [Int!]
+}
+
+input PatchSmolLibrary {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input PatchSmolLibraryPartition {
+  name: String
+  description: String
+  tags: [String!]
+  part_idx: Int
+  part_size: Int
+  structures: TypedVirtualObject
+  smiles: TypedVirtualObject
+  data_blocks: TypedVirtualObject
+}
+
+input PatchStructure {
+  name: String
+  description: String
+  tags: [String!]
+  rcsb_id: String
+  topology: TypedVirtualObject
+  residues: TypedVirtualObject
+  chains: TypedVirtualObject
+}
+
+input PatchTag {
+  name: String
+  description: String
+  tags: [String!]
+  key: String
+  value: String
+  tagged_id: UUID
+  tagged_type: TaggedType
+}
+
+enum PiStackKind {
+  UNKNOWN
+  P
+  T
+}
+
+type ProgressEvent {
+  n: Int!
+  n_expected: Int!
+  n_max: Int!
+  done: Boolean!
+}
+
+type Project {
+  id: ProjectId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  binding_affinity(id: BindingAffinityId!): BindingAffinity!
+  binding_pose_affinity(id: BindingPoseAffinityId!): BindingPoseAffinity!
+  binding_pose_conformer(id: BindingPoseConformerId!): BindingPoseConformer!
+  binding_pose_conformer_interaction(
+    id: BindingPoseConformerInteractionsId!
+  ): BindingPoseConformerInteractions!
+  binding_site_conformer(id: BindingSiteConformerId!): BindingSiteConformer!
+  binding_site_conformer_prediction(
+    id: BindingSiteConformerPredictionId!
+  ): BindingSiteConformerPrediction!
+  binding_site_interaction(
+    id: BindingSiteInteractionsId!
+  ): BindingSiteInteractions!
+  msa(id: MultipleSequenceAlignmentId!): MultipleSequenceAlignment!
+  protein(id: ProteinId!): Protein!
   protein_conformer(id: ProteinConformerId!): ProteinConformer!
-  protein_conformers(
+  run(id: RunId!): Run!
+  smol(id: SmolId!): Smol!
+  smol_conformer(id: SmolConformerId!): SmolConformer!
+  structure(id: StructureId!): Structure!
+  binding_affinities(
     after: String
     before: String
     first: Int
     last: Int
-    filter: ProteinConformerFilter
-    sort_by: ProteinConformerSort
-  ): ProteinConformerConnection!
-  protein(id: ProteinId!): Protein!
+    filter: BindingAffinityFilter
+    sort: BindingAffinitySort
+  ): BindingAffinityConnection!
+  binding_pose_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseAffinityFilter
+    sort: BindingPoseAffinitySort
+  ): BindingPoseAffinityConnection!
+  binding_pose_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerFilter
+    sort: BindingPoseConformerSort
+  ): BindingPoseConformerConnection!
+  binding_pose_conformer_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerInteractionsFilter
+    sort: BindingPoseConformerInteractionsSort
+  ): BindingPoseConformerInteractionsConnection!
+  binding_site_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteConformerFilter
+    sort: BindingSiteConformerSort
+  ): BindingSiteConformerConnection!
+  binding_site_conformer_predictions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteConformerPredictionFilter
+    sort: BindingSiteConformerPredictionSort
+  ): BindingSiteConformerPredictionConnection!
+  binding_site_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteInteractionsFilter
+    sort: BindingSiteInteractionsSort
+  ): BindingSiteInteractionsConnection!
+  msas(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: MultipleSequenceAlignmentFilter
+    sort: MultipleSequenceAlignmentSort
+  ): MultipleSequenceAlignmentConnection!
   proteins(
     after: String
     before: String
     first: Int
     last: Int
     filter: ProteinFilter
-    sort_by: ProteinSort
+    sort: ProteinSort
   ): ProteinConnection!
-  smol_conformer(id: SmolConformerId!): SmolConformer!
-  smol_conformers(
+  protein_conformers(
     after: String
     before: String
     first: Int
     last: Int
-    filter: SmolConformerFilter
-    sort_by: SmolConformerSort
-  ): SmolConformerConnection!
-  smol(id: SmolId!): Smol!
-  smols(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolFilter
-    sort_by: SmolSort
-  ): SmolConnection!
-  structure(id: StructureId!): Structure!
-  run(id: RunId!): Run!
+    filter: ProteinConformerFilter
+    sort: ProteinConformerSort
+  ): ProteinConformerConnection!
   runs(
     after: String
     before: String
     first: Int
     last: Int
     filter: RunFilter
-    sort_by: RunSort
+    sort: RunSort
   ): RunConnection!
+  smols(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolFilter
+    sort: SmolSort
+  ): SmolConnection!
+  smol_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolConformerFilter
+    sort: SmolConformerSort
+  ): SmolConformerConnection!
   structures(
     after: String
     before: String
     first: Int
     last: Int
     filter: StructureFilter
-    sort_by: StructureSort
+    sort: StructureSort
   ): StructureConnection!
 }
 
@@ -954,46 +2223,106 @@ input ProjectFilter {
   all: [ProjectFilter!]
   any: [ProjectFilter!]
   id: UuidFilter
-  account_id: UuidFilter
   metadata: MetadataFilter
+  account_id: UuidFilter
 }
 
 scalar ProjectId
 
 input ProjectSort {
   id: UuidSort
-  account_id: UuidSort
   metadata: MetadataSort
+  account_id: UuidSort
 }
 
 type Protein {
   id: ProteinId!
-  sequence: String!
+
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
   updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # User friendly name for the entity
   name: String
+
+  # User friendly description for the entity
   description: String
+  run_id: RunId
+
+  # User defined tags for the entity
   tags: [String!]
+  sequence: String!
+  msas(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: MultipleSequenceAlignmentFilter
+    sort: MultipleSequenceAlignmentSort
+  ): MultipleSequenceAlignmentConnection!
   protein_conformers(
     after: String
     before: String
     first: Int
     last: Int
     filter: ProteinConformerFilter
-    sort_by: ProteinConformerSort
+    sort: ProteinConformerSort
   ): ProteinConformerConnection!
+  binding_site_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteInteractionsFilter
+    sort: BindingSiteInteractionsSort
+  ): BindingSiteInteractionsConnection!
+  binding_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingAffinityFilter
+    sort: BindingAffinitySort
+  ): BindingAffinityConnection!
 }
 
 type ProteinConformer {
   id: ProteinConformerId!
+
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
   updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # User friendly name for the entity
   name: String
+
+  # User friendly description for the entity
   description: String
+  run_id: RunId
+
+  # User defined tags for the entity
   tags: [String!]
+  residues: [Int!]!
+  protein: Protein!
   structure: Structure!
+  binding_site_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteConformerFilter
+    sort: BindingSiteConformerSort
+  ): BindingSiteConformerConnection!
 }
 
 type ProteinConformerConnection {
@@ -1021,22 +2350,22 @@ input ProteinConformerFilter {
   all: [ProteinConformerFilter!]
   any: [ProteinConformerFilter!]
   id: UuidFilter
-  account_id: UuidFilter
+  metadata: MetadataFilter
   project_id: UuidFilter
+  account_id: UuidFilter
   protein_id: UuidFilter
   structure_id: UuidFilter
-  metadata: MetadataFilter
 }
 
 scalar ProteinConformerId
 
 input ProteinConformerSort {
   id: UuidSort
-  account_id: UuidSort
+  metadata: MetadataSort
   project_id: UuidSort
+  account_id: UuidSort
   protein_id: UuidSort
   structure_id: UuidSort
-  metadata: MetadataSort
 }
 
 type ProteinConnection {
@@ -1064,20 +2393,20 @@ input ProteinFilter {
   all: [ProteinFilter!]
   any: [ProteinFilter!]
   id: UuidFilter
-  sequence: StringFilter
+  metadata: MetadataFilter
   project_id: UuidFilter
   account_id: UuidFilter
-  metadata: MetadataFilter
+  sequence: StringFilter
 }
 
 scalar ProteinId
 
 input ProteinSort {
   id: UuidSort
-  sequence: StringSort
+  metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
-  metadata: MetadataSort
+  sequence: StringSort
 }
 
 type Query {
@@ -1086,61 +2415,34 @@ type Query {
     before: String
     first: Int
     last: Int
-    order: OrderBy
-    path: String
-    name: String
-    deleted: Boolean
-    tags: [String!]
+    sort: ModuleSort
+    filter: ModuleFilter
   ): ModuleConnection!
   latest_modules(
     after: String
     before: String
     first: Int
     last: Int
-    order: OrderBy
     names: [String!]
     targets: [ModuleInstanceTarget!]
   ): ModuleConnection!
   me: User!
-  status_by_name(
+  smol_libraries(
     after: String
     before: String
     first: Int
     last: Int
-    order: OrderBy
-  ): StatusByNameConnection!
-  status_by_name_and_account(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-  ): StatusByNameAndAccountConnection!
-  status_by_account(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-  ): StatusByAccountConnection!
-  global_status(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-  ): GlobalStatusConnection!
-  utilization_for_target(
-    target: ModuleInstanceTarget!
-    from: DateTime
-    to: DateTime
-  ): ResourceUtilizationReport!
+    sort: SmolLibrarySort
+  ): SmolLibraryConnection!
   module(id: ModuleId!): Module!
+  tiered_module_instances: [ModuleInstance!]!
   module_instance(id: ModuleInstanceId!): ModuleInstance!
   argument(id: ArgumentId!): Argument!
-  object(id: ObjectDescriptorId!): Object!
-  object_path(path: UUID!): Object!
+  object(id: ObjectDescriptorId!): ObjectDescriptor!
+  object_path(path: UUID!): ObjectDescriptor!
 }
+
+scalar ResidueRef
 
 # Validation and hints to resources to use for an instance.
 type ResourceBounds {
@@ -1191,7 +2493,6 @@ type ResourceBounds {
 
 type ResourceUtilization {
   id: ResourceUtilizationId!
-  created_at: DateTime!
   module_instance_id: ModuleInstanceId!
   target: ModuleInstanceTarget!
   gpu: Float
@@ -1201,20 +2502,29 @@ type ResourceUtilization {
   cputime: Float!
   inodes: Float!
   sus: Int
+  account_id: AccountId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
 }
 
 scalar ResourceUtilizationId
-
-input ResourceUtilizationInput {
-  moduleInstanceId: ModuleInstanceId!
-  gpu: Float
-  mem: Float
-  storage: Float!
-  walltime: Float!
-  cputime: Float!
-  inodes: Float!
-  sus: Int
-}
 
 type ResourceUtilizationReport {
   target: ModuleInstanceTarget!
@@ -1232,19 +2542,192 @@ type ResourceUtilizationReport {
   sus_total: Int
 }
 
+# Explicit resources required for an instance.
+# Will fall back to the hint value if not specified.
+type Resources {
+  gpus: Int
+  cpus: Int
+  nodes: Int
+
+  # RAM allocation
+  mem: Int
+
+  # Defaults to MB
+  mem_units: MemUnits
+  gpu_mem: Int
+  gpu_mem_units: MemUnits
+
+  # space to be allocated on the target, must be > the size of Object inputs
+  storage: Int
+
+  # Defaults to B
+  storage_units: MemUnits
+
+  # walltime request in minutes - job will be killed if it exceeds this number
+  walltime: Int
+
+  # additional storage directories on target to mount
+  storage_mounts: [String!]
+}
+
+# Explicit resources required for an instance.
+# Will fall back to the hint value if not specified.
+input ResourcesInput {
+  gpus: Int
+  cpus: Int
+  nodes: Int
+
+  # RAM allocation
+  mem: Int
+
+  # Defaults to MB
+  mem_units: MemUnits
+  gpu_mem: Int
+  gpu_mem_units: MemUnits
+
+  # space to be allocated on the target, must be > the size of Object inputs
+  storage: Int
+
+  # Defaults to B
+  storage_units: MemUnits
+
+  # walltime request in minutes - job will be killed if it exceeds this number
+  walltime: Int
+
+  # additional storage directories on target to mount
+  storage_mounts: [String!]
+}
+
 type Run {
   id: RunId!
-  expr: JSON!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  rex: String!
   result: JSON
   trace: JSON
   module_lock: JSONObject!
   status: RunStatus!
-  created_at: DateTime!
-  updated_at: DateTime!
-  deleted_at: DateTime
-  name: String
-  description: String
-  tags: [String!]
+  binding_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingAffinityFilter
+    sort: BindingAffinitySort
+  ): BindingAffinityConnection!
+  binding_pose_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseAffinityFilter
+    sort: BindingPoseAffinitySort
+  ): BindingPoseAffinityConnection!
+  binding_pose_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerFilter
+    sort: BindingPoseConformerSort
+  ): BindingPoseConformerConnection!
+  binding_pose_conformer_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerInteractionsFilter
+    sort: BindingPoseConformerInteractionsSort
+  ): BindingPoseConformerInteractionsConnection!
+  binding_site_interactions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteInteractionsFilter
+    sort: BindingSiteInteractionsSort
+  ): BindingSiteInteractionsConnection!
+  binding_site_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingSiteConformerFilter
+    sort: BindingSiteConformerSort
+  ): BindingSiteConformerConnection!
+  msas(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: MultipleSequenceAlignmentFilter
+    sort: MultipleSequenceAlignmentSort
+  ): MultipleSequenceAlignmentConnection!
+  proteins(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProteinFilter
+    sort: ProteinSort
+  ): ProteinConnection!
+  protein_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProteinConformerFilter
+    sort: ProteinConformerSort
+  ): ProteinConformerConnection!
+  smols(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolFilter
+    sort: SmolSort
+  ): SmolConnection!
+  smol_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolConformerFilter
+    sort: SmolConformerSort
+  ): SmolConformerConnection!
+  smol_libraries(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolLibraryFilter
+    sort: SmolLibrarySort
+  ): SmolLibraryConnection!
+  structures(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: StructureFilter
+    sort: StructureSort
+  ): StructureConnection!
 }
 
 type RunConnection {
@@ -1272,19 +2755,20 @@ input RunFilter {
   all: [RunFilter!]
   any: [RunFilter!]
   id: UuidFilter
+  metadata: MetadataFilter
+  rex: StringFilter
   status: RunStatusFilter
   project_id: UuidFilter
   account_id: UuidFilter
-  metadata: MetadataFilter
 }
 
 scalar RunId
 
 input RunSort {
   id: UuidSort
+  metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
-  metadata: MetadataSort
 }
 
 enum RunStatus {
@@ -1299,170 +2783,80 @@ input RunStatusFilter {
   ne: RunStatus
 }
 
-# A module defines an interface to a program that can be run on a cluster.
-# It is a wrapper around a computational-chemistry program that defines well-typed inputs and outputs,
-# as well as resource requirements and documentation.
-type SimpleModule {
-  # Unique identifier for module
-  id: ModuleId!
-
-  # When the module was created
-  created_at: DateTime!
-
-  # When the module was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # Path to module, used for resolving the module entrypoint
-  path: String!
-
-  # Name of module, used for display + search purposes. Will strip _tengu / tengu_ from the path
-  name: String!
-
-  # The types of the module's inputs
-  ins: [Type!]!
-
-  # The types of the module's outputs
-  outs: [Type!]!
-
-  # Tags to apply to the module
-  tags: [String!]
-
-  # Description of module
-  description: String
-
-  # Usage instructions for module - NOTE: this is deprecated, use ins_usage and outs_usage instead
-  usage: String
-
-  # Usage instructions for module inputs
-  ins_usage: [String!]
-
-  # Usage instructions for module outputs
-  outs_usage: [String!]
-
-  # Targets that this module can be dispatched to
-  targets: [ModuleInstanceTarget!]
-
-  # Resource specification indicating bounds on the resources required by this module
-  resource_bounds: ResourceBounds
-}
-
-# A module instance is a single invocation of a module. It is created when a user submits a module
-# Can be thought of as a "job"
-type SimpleModuleInstance {
-  # Unique identifier for module instance
-  id: ModuleInstanceId!
-
-  # When the module instance was created
-  created_at: DateTime!
-
-  # When the module instance was deleted, is used to determine if a module instance is soft-deleted
-  deleted_at: DateTime
-
-  # Account that created the module instance
-  account_id: AccountId!
-
-  # Path to module, used for resolving the module entrypoint
-  path: String!
-
-  # The arguments that will be passed to the module instance
-  ins: [Argument!]!
-
-  # The arguments that will be produced by the module instance
-  outs: [Argument!]!
-
-  # Name of the module instance
-  name: String
-
-  # When the module entered the QUEUED state
-  queued_at: DateTime
-
-  # When the module entered the ADMITTED state
-  admitted_at: DateTime
-
-  # When the module entered the DISPATCHED state
-  dispatched_at: DateTime
-
-  # When the module entered the RUNNING state
-  run_at: DateTime
-
-  # When the module entered the COMPLETED or FAILED state
-  completed_at: DateTime
-
-  # Module failure category
-  failure_reason: ModuleFailureReason
-
-  # Module failure context, useful for debugging
-  failure_context: ModuleFailureContext
-
-  # Current module instance status
-  status: ModuleInstanceStatus!
-
-  # Target that this module instance will be / is dispatched to
-  target: ModuleInstanceTarget!
-
-  # Resources allocated to this module instance
-  resources: ModuleInstanceResources
-
-  # Progress of the module instance
-  progress: ModuleInstanceProgress
-
-  # Tags applied to the module instance
-  tags: [String!]
-
-  # Runtime account that the module instance is configured to use
-  config_account: AccountId
-}
-
-type SimpleModuleInstanceConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [SimpleModuleInstanceEdge!]!
-
-  # A list of nodes.
-  nodes: [SimpleModuleInstance!]!
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type SimpleModuleInstanceEdge {
-  # The item at the end of the edge
-  node: SimpleModuleInstance!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
 type Smol {
   id: SmolId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   smi: String
   inchi: String
-  created_at: DateTime!
-  updated_at: DateTime!
-  deleted_at: DateTime
-  name: String
-  description: String
-  tags: [String!]
+  data_blocks: [[String!]!]
   smol_conformers(
     after: String
     before: String
     first: Int
     last: Int
     filter: SmolConformerFilter
-    sort_by: SmolConformerSort
+    sort: SmolConformerSort
   ): SmolConformerConnection!
+  binding_affinities(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingAffinityFilter
+    sort: BindingAffinitySort
+  ): BindingAffinityConnection!
 }
 
 type SmolConformer {
   id: SmolConformerId!
+
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
   updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # User friendly name for the entity
   name: String
+
+  # User friendly description for the entity
   description: String
+  run_id: RunId
+
+  # User defined tags for the entity
   tags: [String!]
+  residues: [Int!]!
+  smol: Smol!
   structure: Structure!
+  binding_pose_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: BindingPoseConformerFilter
+    sort: BindingPoseConformerSort
+  ): BindingPoseConformerConnection!
 }
 
 type SmolConformerConnection {
@@ -1490,22 +2884,22 @@ input SmolConformerFilter {
   all: [SmolConformerFilter!]
   any: [SmolConformerFilter!]
   id: UuidFilter
-  account_id: UuidFilter
+  metadata: MetadataFilter
   project_id: UuidFilter
+  account_id: UuidFilter
   smol_id: UuidFilter
   structure_id: UuidFilter
-  metadata: MetadataFilter
 }
 
 scalar SmolConformerId
 
 input SmolConformerSort {
   id: UuidSort
-  account_id: UuidSort
+  metadata: MetadataSort
   project_id: UuidSort
+  account_id: UuidSort
   smol_id: UuidSort
   structure_id: UuidSort
-  metadata: MetadataSort
 }
 
 type SmolConnection {
@@ -1533,107 +2927,167 @@ input SmolFilter {
   all: [SmolFilter!]
   any: [SmolFilter!]
   id: UuidFilter
-  smi: StringFilter
-  inchi: StringFilter
+  metadata: MetadataFilter
   project_id: UuidFilter
   account_id: UuidFilter
-  metadata: MetadataFilter
+  smi: StringFilter
+  inchi: StringFilter
 }
 
 scalar SmolId
 
-input SmolSort {
+type SmolLibrary {
+  id: SmolLibraryId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  partitions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolLibraryPartitionFilter
+    sort: SmolLibraryPartitionSort
+  ): SmolLibraryPartitionConnection!
+  size_hint: Int!
+}
+
+type SmolLibraryConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [SmolLibraryEdge!]!
+
+  # A list of nodes.
+  nodes: [SmolLibrary!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type SmolLibraryEdge {
+  # The item at the end of the edge
+  node: SmolLibrary!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input SmolLibraryFilter {
+  all: [SmolLibraryFilter!]
+  any: [SmolLibraryFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+}
+
+scalar SmolLibraryId
+
+type SmolLibraryPartition {
+  id: SmolLibraryPartitionId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  part_idx: Int!
+  part_size: Int!
+  structures: TypedVirtualObject
+  smiles: TypedVirtualObject!
+  data_blocks: TypedVirtualObject!
+  smol_library: SmolLibrary!
+}
+
+type SmolLibraryPartitionConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [SmolLibraryPartitionEdge!]!
+
+  # A list of nodes.
+  nodes: [SmolLibraryPartition!]!
+  total_count: Int!
+}
+
+# An edge in a connection.
+type SmolLibraryPartitionEdge {
+  # The item at the end of the edge
+  node: SmolLibraryPartition!
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+input SmolLibraryPartitionFilter {
+  all: [SmolLibraryPartitionFilter!]
+  any: [SmolLibraryPartitionFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  part_idx: I32Filter
+  part_size: I32Filter
+  smol_library_id: UuidFilter
+}
+
+scalar SmolLibraryPartitionId
+
+input SmolLibraryPartitionSort {
   id: UuidSort
-  smi: StringSort
-  inchi: StringSort
+  metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
+  part_idx: I32Sort
+  part_size: I32Sort
+  smol_library_id: UuidSort
+}
+
+input SmolLibrarySort {
+  id: UuidSort
   metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
 }
 
-type StatusByAccount {
-  created_at: DateTime!
-  account_id: AccountId!
-  status: ModuleInstanceStatus!
-  count: Int!
-}
-
-type StatusByAccountConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [StatusByAccountEdge!]!
-
-  # A list of nodes.
-  nodes: [StatusByAccount!]!
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type StatusByAccountEdge {
-  # The item at the end of the edge
-  node: StatusByAccount!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-type StatusByName {
-  created_at: DateTime!
-  name: String!
-  status: ModuleInstanceStatus!
-  count: Int!
-}
-
-type StatusByNameAndAccount {
-  created_at: DateTime!
-  name: String!
-  account_id: AccountId!
-  status: ModuleInstanceStatus!
-  count: Int!
-}
-
-type StatusByNameAndAccountConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [StatusByNameAndAccountEdge!]!
-
-  # A list of nodes.
-  nodes: [StatusByNameAndAccount!]!
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type StatusByNameAndAccountEdge {
-  # The item at the end of the edge
-  node: StatusByNameAndAccount!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-type StatusByNameConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [StatusByNameEdge!]!
-
-  # A list of nodes.
-  nodes: [StatusByName!]!
-  totalCount: Int!
-}
-
-# An edge in a connection.
-type StatusByNameEdge {
-  # The item at the end of the edge
-  node: StatusByName!
-
-  # A cursor for use in pagination
-  cursor: String!
+input SmolSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  smi: StringSort
+  inchi: StringSort
 }
 
 input StringFilter {
@@ -1654,16 +3108,45 @@ enum StringSort {
 
 type Structure {
   id: StructureId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   rcsb_id: String
   topology: TypedVirtualObject!
   residues: TypedVirtualObject!
   chains: TypedVirtualObject!
-  created_at: DateTime!
-  updated_at: DateTime!
-  deleted_at: DateTime
-  name: String
-  description: String
-  tags: [String!]
+  protein_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: ProteinConformerFilter
+    sort: ProteinConformerSort
+  ): ProteinConformerConnection!
+  smol_conformers(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    filter: SmolConformerFilter
+    sort: SmolConformerSort
+  ): SmolConformerConnection!
 }
 
 type StructureConnection {
@@ -1691,20 +3174,20 @@ input StructureFilter {
   all: [StructureFilter!]
   any: [StructureFilter!]
   id: UuidFilter
-  rcsb_id: StringFilter
-  account_id: UuidFilter
-  project_id: UuidFilter
   metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  rcsb_id: StringFilter
 }
 
 scalar StructureId
 
 input StructureSort {
   id: UuidSort
-  rcsb_id: StringSort
-  account_id: UuidSort
-  project_id: UuidSort
   metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  rcsb_id: StringSort
 }
 
 type Subscription {
@@ -1713,16 +3196,29 @@ type Subscription {
 
 type Tag {
   id: TagId!
+
+  # When the entity was created
+  created_at: DateTime!
+
+  # Last time the entity was updated
+  updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
+  deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   key: String!
   value: String
   tagged_id: UUID!
   tagged_type: TaggedType!
-  created_at: DateTime!
-  updated_at: DateTime!
-  deleted_at: DateTime
-  name: String
-  description: String
-  tags: [String!]
 }
 
 input TagFilter {
@@ -1745,15 +3241,30 @@ enum TaggedType {
 input TestCase {
   args: [ArgumentInput!]!
   target: ModuleInstanceTarget!
-  resources: ModuleInstanceResourcesInput
+  resources: ResourcesInput
   tags: [String!]
 }
 
 type Token {
-  id: TokenId!
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
   updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
+  id: TokenId!
 }
 
 type TokenConnection {
@@ -1780,29 +3291,20 @@ type TokenEdge {
 input TokenFilter {
   all: [TokenFilter!]
   any: [TokenFilter!]
+  metadata: MetadataFilter
   id: UuidFilter
-  created_at: DateTimeFilter
-  updated_at: DateTimeFilter
-  deleted_at: DateTimeFilter
   user_id: UuidFilter
 }
 
 scalar TokenId
 
 input TokenSort {
+  metadata: MetadataSort
   id: UuidSort
-  created_at: DateTimeSort
-  updated_at: DateTimeSort
-  deleted_at: DateTimeSort
   user_id: UuidSort
 }
 
 scalar Type
-
-input TypeQuery {
-  path: [String!]!
-  query: JSON!
-}
 
 scalar TypedVirtualObject
 
@@ -1821,24 +3323,29 @@ enum U64Sort {
 # * [RFC4122: A Universally Unique IDentifier (UUID) URN Namespace](http://tools.ietf.org/html/rfc4122)
 scalar UUID
 
-input UpdateModuleInstanceInput {
-  id: ModuleInstanceId!
-  path: String
-  ins: [ArgumentInput!]
-  outs: [ArgumentInput!]
-  target: ModuleInstanceTarget
-  status: ModuleInstanceStatus
-  resources: ModuleInstanceResourcesInput
-  tags: [String!]
-}
-
 scalar Upload
 
 type User {
   id: UserId!
+
+  # When the entity was created
   created_at: DateTime!
+
+  # Last time the entity was updated
   updated_at: DateTime!
+
+  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
+
+  # User friendly name for the entity
+  name: String
+
+  # User friendly description for the entity
+  description: String
+  run_id: RunId
+
+  # User defined tags for the entity
+  tags: [String!]
   account: Account!
   tokens(
     after: String
@@ -1846,13 +3353,14 @@ type User {
     first: Int
     last: Int
     filter: TokenFilter
-    sortBy: TokenSort
+    sort: TokenSort
   ): TokenConnection!
 }
 
 scalar UserId
 
 input UuidFilter {
+  is_null: Boolean
   eq: UUID
   ne: UUID
   in: [UUID!]
@@ -1865,7 +3373,7 @@ enum UuidSort {
 
 type V1Tag {
   tag: String!
-  created_at: DateTime!
+  metadata: Metadata!
   count: Int!
 }
 
@@ -1878,7 +3386,7 @@ type V1TagConnection {
 
   # A list of nodes.
   nodes: [V1Tag!]!
-  totalCount: Int!
+  total_count: Int!
 }
 
 # An edge in a connection.
@@ -1906,3 +3414,5 @@ input VirtualObjectSort {
   path: StringSort
   size: U64Sort
 }
+
+scalar Xyzf32

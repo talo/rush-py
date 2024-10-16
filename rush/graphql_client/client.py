@@ -8,7 +8,58 @@ from .argument import Argument, ArgumentArgument
 from .arguments import Arguments, ArgumentsMe
 from .async_base_client import AsyncBaseClient
 from .base_model import UNSET, UnsetType
+from .binding_affinities import BindingAffinities, BindingAffinitiesMe
+from .binding_affinity import BindingAffinity, BindingAffinityMe
+from .binding_pose_conformer import BindingPoseConformer, BindingPoseConformerMe
+from .binding_pose_conformer_interaction import (
+    BindingPoseConformerInteraction,
+    BindingPoseConformerInteractionMe,
+)
+from .binding_pose_conformer_interactions import (
+    BindingPoseConformerInteractions,
+    BindingPoseConformerInteractionsMe,
+)
+from .binding_pose_conformers import BindingPoseConformers, BindingPoseConformersMe
+from .binding_site_conformer import BindingSiteConformer, BindingSiteConformerMe
+from .binding_site_conformers import BindingSiteConformers, BindingSiteConformersMe
+from .binding_site_interaction import BindingSiteInteraction, BindingSiteInteractionMe
+from .binding_site_interactions import (
+    BindingSiteInteractions,
+    BindingSiteInteractionsMe,
+)
 from .cancel_module_instance import CancelModuleInstance
+from .create_binding_affinity import (
+    CreateBindingAffinity,
+    CreateBindingAffinityCreateBindingAffinity,
+)
+from .create_binding_pose_affinity import (
+    CreateBindingPoseAffinity,
+    CreateBindingPoseAffinityCreateBindingPoseAffinity,
+)
+from .create_binding_pose_conformer import (
+    CreateBindingPoseConformer,
+    CreateBindingPoseConformerCreateBindingPoseConformer,
+)
+from .create_binding_pose_conformer_interactions import (
+    CreateBindingPoseConformerInteractions,
+    CreateBindingPoseConformerInteractionsCreateBindingPoseConformerInteractions,
+)
+from .create_binding_site_conformer import (
+    CreateBindingSiteConformer,
+    CreateBindingSiteConformerCreateBindingSiteConformer,
+)
+from .create_binding_site_conformer_prediction import (
+    CreateBindingSiteConformerPrediction,
+    CreateBindingSiteConformerPredictionCreateBindingSiteConformerPrediction,
+)
+from .create_binding_site_interactions import (
+    CreateBindingSiteInteractions,
+    CreateBindingSiteInteractionsCreateBindingSiteInteractions,
+)
+from .create_multiple_sequence_alignment import (
+    CreateMultipleSequenceAlignment,
+    CreateMultipleSequenceAlignmentCreateMsa,
+)
 from .create_project import CreateProject, CreateProjectCreateProject
 from .create_protein import CreateProtein, CreateProteinCreateProtein
 from .create_protein_conformer import (
@@ -20,26 +71,49 @@ from .create_smol_conformer import (
     CreateSmolConformer,
     CreateSmolConformerCreateSmolConformer,
 )
+from .create_smol_library import CreateSmolLibrary, CreateSmolLibraryCreateSmolLibrary
+from .create_smol_library_partition import (
+    CreateSmolLibraryPartition,
+    CreateSmolLibraryPartitionCreateSmolLibraryPartition,
+)
 from .create_structure import CreateStructure, CreateStructureCreateStructure
+from .create_tag import CreateTag, CreateTagCreateTag
 from .delete_module_instance import (
     DeleteModuleInstance,
     DeleteModuleInstanceDeleteModuleInstance,
 )
 from .deploy import Deploy, DeployDeploy
-from .enums import ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat, OrderBy
+from .enums import AccountTier, ModuleInstanceTarget, ObjectFormat
 from .input_types import (
-    CreateProjectInput,
-    CreateProteinConformerInput,
-    CreateProteinInput,
-    CreateSmolConformerInput,
-    CreateSmolInput,
-    CreateStructureInput,
-    ModuleInput,
-    ModuleInstanceInput,
-    ModuleInstanceResourcesInput,
-    ResourceUtilizationInput,
-    TypeQuery,
-    UpdateModuleInstanceInput,
+    AccountConfigInput,
+    ArgumentFilter,
+    ArgumentInput,
+    CreateBindingAffinity,
+    CreateBindingPoseAffinity,
+    CreateBindingPoseConformer,
+    CreateBindingPoseConformerInteractions,
+    CreateBindingSiteConformer,
+    CreateBindingSiteConformerPrediction,
+    CreateBindingSiteInteractions,
+    CreateModule,
+    CreateModuleInstance,
+    CreateMultipleSequenceAlignment,
+    CreateProject,
+    CreateProtein,
+    CreateProteinConformer,
+    CreateResourceUtilization,
+    CreateSmol,
+    CreateSmolConformer,
+    CreateSmolLibrary,
+    CreateSmolLibraryPartition,
+    CreateStructure,
+    CreateTag,
+    ModuleFilter,
+    ModuleInstanceFilter,
+    ModuleInstanceSort,
+    PatchModuleInstanceInput,
+    ResourcesInput,
+    SmolLibrarySort,
 )
 from .latest_modules import LatestModules, LatestModulesLatestModules
 from .module_instance_details import (
@@ -52,16 +126,38 @@ from .module_instance_minimal import (
 )
 from .module_instances import ModuleInstances, ModuleInstancesMe
 from .modules import Modules, ModulesModules
+from .msa import Msa, MsaMe
+from .msas import Msas, MsasMe
 from .object_contents import ObjectContents, ObjectContentsObjectPath
 from .object_url import ObjectUrl, ObjectUrlObjectPath
+from .project import Project, ProjectMe
+from .projects import Projects, ProjectsMe
+from .protein import Protein, ProteinMe
+from .protein_conformer import ProteinConformer, ProteinConformerMe
+from .protein_conformers import ProteinConformers, ProteinConformersMe
+from .proteins import Proteins, ProteinsMe
 from .retry import Retry, RetryRetry
-from .run import Run, RunRun
+from .run import Run, RunMe
+from .run_module import RunModule, RunModuleRun
+from .runs import Runs, RunsMe
+from .smol import Smol, SmolMe
+from .smol_conformer import SmolConformer, SmolConformerMe
+from .smol_conformers import SmolConformers, SmolConformersMe
+from .smol_libraries import SmolLibraries, SmolLibrariesSmolLibraries
+from .smols import Smols, SmolsMe
+from .structure import Structure, StructureMe
+from .structures import Structures, StructuresMe
 from .tag import Tag
 from .track_utilization import (
     TrackUtilization,
     TrackUtilizationTrackModuleInstanceResourceUtilization,
 )
 from .untag import Untag
+from .update_account_config import (
+    UpdateAccountConfig,
+    UpdateAccountConfigUpdateAccountConfig,
+)
+from .update_account_tier import UpdateAccountTier
 from .update_module_instance import (
     UpdateModuleInstance,
     UpdateModuleInstanceUpdateModuleInstance,
@@ -74,7 +170,211 @@ def gql(q: str) -> str:
 
 
 class Client(AsyncBaseClient):
-    async def cancel_module_instance(self, module_instance_id: UUID, **kwargs: Any) -> UUID:
+    async def create_binding_affinity(
+        self, binding_affinity: CreateBindingAffinity, **kwargs: Any
+    ) -> CreateBindingAffinityCreateBindingAffinity:
+        query = gql(
+            """
+            mutation create_binding_affinity($binding_affinity: CreateBindingAffinity!) {
+              create_binding_affinity(input: $binding_affinity) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"binding_affinity": binding_affinity}
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_affinity",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingAffinity.model_validate(data).create_binding_affinity
+
+    async def create_binding_pose_affinity(
+        self, binding_pose_affinity: CreateBindingPoseAffinity, **kwargs: Any
+    ) -> CreateBindingPoseAffinityCreateBindingPoseAffinity:
+        query = gql(
+            """
+            mutation create_binding_pose_affinity($binding_pose_affinity: CreateBindingPoseAffinity!) {
+              create_binding_pose_affinity(input: $binding_pose_affinity) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"binding_pose_affinity": binding_pose_affinity}
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_pose_affinity",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingPoseAffinity.model_validate(
+            data
+        ).create_binding_pose_affinity
+
+    async def create_binding_pose_conformer(
+        self, binding_pose_conformer: CreateBindingPoseConformer, **kwargs: Any
+    ) -> CreateBindingPoseConformerCreateBindingPoseConformer:
+        query = gql(
+            """
+            mutation create_binding_pose_conformer($binding_pose_conformer: CreateBindingPoseConformer!) {
+              create_binding_pose_conformer(input: $binding_pose_conformer) {
+                id
+                name
+                description
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "binding_pose_conformer": binding_pose_conformer
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_pose_conformer",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingPoseConformer.model_validate(
+            data
+        ).create_binding_pose_conformer
+
+    async def create_binding_pose_conformer_interactions(
+        self,
+        binding_pose_conformer_interactions: CreateBindingPoseConformerInteractions,
+        **kwargs: Any
+    ) -> CreateBindingPoseConformerInteractionsCreateBindingPoseConformerInteractions:
+        query = gql(
+            """
+            mutation create_binding_pose_conformer_interactions($binding_pose_conformer_interactions: CreateBindingPoseConformerInteractions!) {
+              create_binding_pose_conformer_interactions(
+                input: $binding_pose_conformer_interactions
+              ) {
+                id
+                name
+                description
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "binding_pose_conformer_interactions": binding_pose_conformer_interactions
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_pose_conformer_interactions",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingPoseConformerInteractions.model_validate(
+            data
+        ).create_binding_pose_conformer_interactions
+
+    async def create_binding_site_conformer(
+        self, binding_site_conformer: CreateBindingSiteConformer, **kwargs: Any
+    ) -> CreateBindingSiteConformerCreateBindingSiteConformer:
+        query = gql(
+            """
+            mutation create_binding_site_conformer($binding_site_conformer: CreateBindingSiteConformer!) {
+              create_binding_site_conformer(input: $binding_site_conformer) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "binding_site_conformer": binding_site_conformer
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_site_conformer",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingSiteConformer.model_validate(
+            data
+        ).create_binding_site_conformer
+
+    async def create_binding_site_conformer_prediction(
+        self,
+        binding_site_conformer_prediction: CreateBindingSiteConformerPrediction,
+        **kwargs: Any
+    ) -> CreateBindingSiteConformerPredictionCreateBindingSiteConformerPrediction:
+        query = gql(
+            """
+            mutation create_binding_site_conformer_prediction($binding_site_conformer_prediction: CreateBindingSiteConformerPrediction!) {
+              create_binding_site_conformer_prediction(
+                input: $binding_site_conformer_prediction
+              ) {
+                id
+                score
+                probability
+                name
+                description
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "binding_site_conformer_prediction": binding_site_conformer_prediction
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_site_conformer_prediction",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingSiteConformerPrediction.model_validate(
+            data
+        ).create_binding_site_conformer_prediction
+
+    async def create_binding_site_interactions(
+        self, binding_site_interactions: CreateBindingSiteInteractions, **kwargs: Any
+    ) -> CreateBindingSiteInteractionsCreateBindingSiteInteractions:
+        query = gql(
+            """
+            mutation create_binding_site_interactions($binding_site_interactions: CreateBindingSiteInteractions!) {
+              create_binding_site_interactions(input: $binding_site_interactions) {
+                id
+                residues
+                interactions {
+                  kind
+                }
+                name
+                description
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "binding_site_interactions": binding_site_interactions
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="create_binding_site_interactions",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateBindingSiteInteractions.model_validate(
+            data
+        ).create_binding_site_interactions
+
+    async def cancel_module_instance(
+        self, module_instance_id: UUID, **kwargs: Any
+    ) -> UUID:
         query = gql(
             """
             mutation cancel_module_instance($moduleInstanceId: ModuleInstanceId!) {
@@ -84,10 +384,34 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"moduleInstanceId": module_instance_id}
         response = await self.execute(
-            query=query, operation_name="cancel_module_instance", variables=variables, **kwargs
+            query=query,
+            operation_name="cancel_module_instance",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return CancelModuleInstance.model_validate(data).cancel
+
+    async def create_project(
+        self, project: CreateProject, **kwargs: Any
+    ) -> CreateProjectCreateProject:
+        query = gql(
+            """
+            mutation create_project($project: CreateProject!) {
+              create_project(input: $project) {
+                id
+                name
+                description
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project": project}
+        response = await self.execute(
+            query=query, operation_name="create_project", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateProject.model_validate(data).create_project
 
     async def delete_module_instance(
         self, module_instance_id: UUID, **kwargs: Any
@@ -103,15 +427,18 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"moduleInstanceId": module_instance_id}
         response = await self.execute(
-            query=query, operation_name="delete_module_instance", variables=variables, **kwargs
+            query=query,
+            operation_name="delete_module_instance",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return DeleteModuleInstance.model_validate(data).delete_module_instance
 
-    async def deploy(self, module: ModuleInput, **kwargs: Any) -> DeployDeploy:
+    async def deploy(self, module: CreateModule, **kwargs: Any) -> DeployDeploy:
         query = gql(
             """
-            mutation deploy($module: ModuleInput!) {
+            mutation deploy($module: CreateModule!) {
               deploy(module: $module) {
                 id
                 path
@@ -120,7 +447,9 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"module": module}
-        response = await self.execute(query=query, operation_name="deploy", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="deploy", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Deploy.model_validate(data).deploy
 
@@ -130,17 +459,13 @@ class Client(AsyncBaseClient):
         before: Union[Optional[str], UnsetType] = UNSET,
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
-        path: Union[Optional[str], UnsetType] = UNSET,
-        name: Union[Optional[str], UnsetType] = UNSET,
-        status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
-        ids: Union[Optional[List[UUID]], UnsetType] = UNSET,
-        in_argument_ids: Union[Optional[List[UUID]], UnsetType] = UNSET,
+        sort: Union[Optional[ModuleInstanceSort], UnsetType] = UNSET,
+        filter: Union[Optional[ModuleInstanceFilter], UnsetType] = UNSET,
         **kwargs: Any
     ) -> ModuleInstancesMe:
         query = gql(
             """
-            query module_instances($after: String, $before: String, $first: Int, $last: Int, $path: String, $name: String, $status: ModuleInstanceStatus, $tags: [String!], $ids: [ModuleInstanceId!], $in_argument_ids: [ArgumentId!]) {
+            query module_instances($after: String, $before: String, $first: Int, $last: Int, $sort: ModuleInstanceSort, $filter: ModuleInstanceFilter) {
               me {
                 account {
                   module_instances(
@@ -148,12 +473,8 @@ class Client(AsyncBaseClient):
                     last: $last
                     after: $after
                     before: $before
-                    path: $path
-                    status: $status
-                    name: $name
-                    tags: $tags
-                    ids: $ids
-                    in_arguments: $in_argument_ids
+                    sort: $sort
+                    filter: $filter
                   ) {
                     edges {
                       cursor
@@ -224,59 +545,75 @@ class Client(AsyncBaseClient):
             "before": before,
             "first": first,
             "last": last,
-            "path": path,
-            "name": name,
-            "status": status,
-            "tags": tags,
-            "ids": ids,
-            "in_argument_ids": in_argument_ids,
+            "sort": sort,
+            "filter": filter,
         }
         response = await self.execute(
-            query=query, operation_name="module_instances", variables=variables, **kwargs
+            query=query,
+            operation_name="module_instances",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return ModuleInstances.model_validate(data).me
 
-    async def create_project(self, project: CreateProjectInput, **kwargs: Any) -> CreateProjectCreateProject:
+    async def create_multiple_sequence_alignment(
+        self, input: CreateMultipleSequenceAlignment, **kwargs: Any
+    ) -> CreateMultipleSequenceAlignmentCreateMsa:
         query = gql(
             """
-            mutation create_project($project: CreateProjectInput!) {
-              create_project(input: $project) {
+            mutation create_multiple_sequence_alignment($input: CreateMultipleSequenceAlignment!) {
+              create_msa(input: $input) {
                 id
+                name
+                description
+                tags
               }
             }
             """
         )
-        variables: Dict[str, object] = {"project": project}
+        variables: Dict[str, object] = {"input": input}
         response = await self.execute(
-            query=query, operation_name="create_project", variables=variables, **kwargs
+            query=query,
+            operation_name="create_multiple_sequence_alignment",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
-        return CreateProject.model_validate(data).create_project
+        return CreateMultipleSequenceAlignment.model_validate(data).create_msa
 
     async def create_protein_conformer(
-        self, protein_conformer: CreateProteinConformerInput, **kwargs: Any
+        self, protein_conformer: CreateProteinConformer, **kwargs: Any
     ) -> CreateProteinConformerCreateProteinConformer:
         query = gql(
             """
-            mutation create_protein_conformer($protein_conformer: CreateProteinConformerInput!) {
+            mutation create_protein_conformer($protein_conformer: CreateProteinConformer!) {
               create_protein_conformer(input: $protein_conformer) {
                 id
+                residues
+                name
+                description
+                tags
               }
             }
             """
         )
         variables: Dict[str, object] = {"protein_conformer": protein_conformer}
         response = await self.execute(
-            query=query, operation_name="create_protein_conformer", variables=variables, **kwargs
+            query=query,
+            operation_name="create_protein_conformer",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return CreateProteinConformer.model_validate(data).create_protein_conformer
 
-    async def create_protein(self, protein: CreateProteinInput, **kwargs: Any) -> CreateProteinCreateProtein:
+    async def create_protein(
+        self, protein: CreateProtein, **kwargs: Any
+    ) -> CreateProteinCreateProtein:
         query = gql(
             """
-            mutation create_protein($protein: CreateProteinInput!) {
+            mutation create_protein($protein: CreateProtein!) {
               create_protein(input: $protein) {
                 id
               }
@@ -312,7 +649,9 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(query=query, operation_name="argument", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="argument", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Argument.model_validate(data).argument
 
@@ -322,15 +661,12 @@ class Client(AsyncBaseClient):
         before: Union[Optional[str], UnsetType] = UNSET,
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
-        typeinfo: Union[Optional[List[Any]], UnsetType] = UNSET,
-        typequery: Union[Optional[List[TypeQuery]], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
-        resolved: Union[Optional[bool], UnsetType] = UNSET,
+        filter: Union[Optional[ArgumentFilter], UnsetType] = UNSET,
         **kwargs: Any
     ) -> ArgumentsMe:
         query = gql(
             """
-            query arguments($after: String, $before: String, $first: Int, $last: Int, $typeinfo: [Type!], $typequery: [TypeQuery!], $tags: [String!], $resolved: Boolean) {
+            query arguments($after: String, $before: String, $first: Int, $last: Int, $filter: ArgumentFilter) {
               me {
                 account {
                   arguments(
@@ -338,10 +674,7 @@ class Client(AsyncBaseClient):
                     last: $last
                     after: $after
                     before: $before
-                    typeinfo: $typeinfo
-                    typequery: $typequery
-                    tags: $tags
-                    resolved: $resolved
+                    filter: $filter
                   ) {
                     pageInfo {
                       ...PageInfoFull
@@ -381,12 +714,11 @@ class Client(AsyncBaseClient):
             "before": before,
             "first": first,
             "last": last,
-            "typeinfo": typeinfo,
-            "typequery": typequery,
-            "tags": tags,
-            "resolved": resolved,
+            "filter": filter,
         }
-        response = await self.execute(query=query, operation_name="arguments", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="arguments", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Arguments.model_validate(data).me
 
@@ -396,19 +728,17 @@ class Client(AsyncBaseClient):
         before: Union[Optional[str], UnsetType] = UNSET,
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
-        order: Union[Optional[OrderBy], UnsetType] = UNSET,
         names: Union[Optional[List[str]], UnsetType] = UNSET,
         **kwargs: Any
     ) -> LatestModulesLatestModules:
         query = gql(
             """
-            query latest_modules($after: String, $before: String, $first: Int, $last: Int, $order: OrderBy, $names: [String!]) {
+            query latest_modules($after: String, $before: String, $first: Int, $last: Int, $names: [String!]) {
               latest_modules(
                 after: $after
                 before: $before
                 first: $first
                 last: $last
-                order: $order
                 names: $names
               ) {
                 pageInfo {
@@ -429,7 +759,6 @@ class Client(AsyncBaseClient):
               created_at
               deleted_at
               path
-              usage
               ins
               ins_usage
               outs
@@ -471,7 +800,6 @@ class Client(AsyncBaseClient):
             "before": before,
             "first": first,
             "last": last,
-            "order": order,
             "names": names,
         }
         response = await self.execute(
@@ -486,20 +814,18 @@ class Client(AsyncBaseClient):
         before: Union[Optional[str], UnsetType] = UNSET,
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
-        path: Union[Optional[str], UnsetType] = UNSET,
-        tags: Union[Optional[List[str]], UnsetType] = UNSET,
+        filter: Union[Optional[ModuleFilter], UnsetType] = UNSET,
         **kwargs: Any
     ) -> ModulesModules:
         query = gql(
             """
-            query modules($after: String, $before: String, $first: Int, $last: Int, $path: String, $tags: [String!]) {
+            query modules($after: String, $before: String, $first: Int, $last: Int, $filter: ModuleFilter) {
               modules(
                 first: $first
                 last: $last
                 after: $after
                 before: $before
-                path: $path
-                tags: $tags
+                filter: $filter
               ) {
                 pageInfo {
                   ...PageInfoFull
@@ -519,7 +845,6 @@ class Client(AsyncBaseClient):
               created_at
               deleted_at
               path
-              usage
               ins
               ins_usage
               outs
@@ -561,10 +886,11 @@ class Client(AsyncBaseClient):
             "before": before,
             "first": first,
             "last": last,
-            "path": path,
-            "tags": tags,
+            "filter": filter,
         }
-        response = await self.execute(query=query, operation_name="modules", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="modules", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Modules.model_validate(data).modules
 
@@ -697,12 +1023,17 @@ class Client(AsyncBaseClient):
             "stdout_before": stdout_before,
         }
         response = await self.execute(
-            query=query, operation_name="module_instance_details", variables=variables, **kwargs
+            query=query,
+            operation_name="module_instance_details",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return ModuleInstanceDetails.model_validate(data).module_instance
 
-    async def module_instance_minimal(self, id: UUID, **kwargs: Any) -> ModuleInstanceMinimalModuleInstance:
+    async def module_instance_minimal(
+        self, id: UUID, **kwargs: Any
+    ) -> ModuleInstanceMinimalModuleInstance:
         query = gql(
             """
             query module_instance_minimal($id: ModuleInstanceId!) {
@@ -736,7 +1067,10 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"id": id}
         response = await self.execute(
-            query=query, operation_name="module_instance_minimal", variables=variables, **kwargs
+            query=query,
+            operation_name="module_instance_minimal",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return ModuleInstanceMinimal.model_validate(data).module_instance
@@ -752,11 +1086,15 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"path": path}
-        response = await self.execute(query=query, operation_name="object_url", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="object_url", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return ObjectUrl.model_validate(data).object_path
 
-    async def object_contents(self, path: Any, **kwargs: Any) -> ObjectContentsObjectPath:
+    async def object_contents(
+        self, path: Any, **kwargs: Any
+    ) -> ObjectContentsObjectPath:
         query = gql(
             """
             query object_contents($path: UUID!) {
@@ -773,16 +1111,1301 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return ObjectContents.model_validate(data).object_path
 
+    async def smol_libraries(
+        self,
+        after: Union[Optional[str], UnsetType] = UNSET,
+        before: Union[Optional[str], UnsetType] = UNSET,
+        first: Union[Optional[int], UnsetType] = UNSET,
+        last: Union[Optional[int], UnsetType] = UNSET,
+        sort: Union[Optional[SmolLibrarySort], UnsetType] = UNSET,
+        **kwargs: Any
+    ) -> SmolLibrariesSmolLibraries:
+        query = gql(
+            """
+            query smol_libraries($after: String, $before: String, $first: Int, $last: Int, $sort: SmolLibrarySort) {
+              smol_libraries(
+                after: $after
+                before: $before
+                first: $first
+                last: $last
+                sort: $sort
+              ) {
+                pageInfo {
+                  ...PageInfoFull
+                }
+                edges {
+                  cursor
+                  node {
+                    id
+                    name
+                    description
+                    created_at
+                    updated_at
+                    deleted_at
+                    tags
+                  }
+                }
+                total_count
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "after": after,
+            "before": before,
+            "first": first,
+            "last": last,
+            "sort": sort,
+        }
+        response = await self.execute(
+            query=query, operation_name="smol_libraries", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return SmolLibraries.model_validate(data).smol_libraries
+
+    async def project(self, project_id: Any, **kwargs: Any) -> ProjectMe:
+        query = gql(
+            """
+            query project($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    id
+                    created_at
+                    updated_at
+                    deleted_at
+                    name
+                    description
+                    run_id
+                    tags
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="project", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Project.model_validate(data).me
+
+    async def projects(self, **kwargs: Any) -> ProjectsMe:
+        query = gql(
+            """
+            query projects {
+              me {
+                account {
+                  projects {
+                    pageInfo {
+                      ...PageInfoFull
+                    }
+                    edges {
+                      cursor
+                      node {
+                        id
+                        created_at
+                        updated_at
+                        deleted_at
+                        name
+                        description
+                        run_id
+                        tags
+                      }
+                    }
+                    total_count
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {}
+        response = await self.execute(
+            query=query, operation_name="projects", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Projects.model_validate(data).me
+
+    async def run(self, project_id: Any, run_id: Any, **kwargs: Any) -> RunMe:
+        query = gql(
+            """
+            query run($project_id: ProjectId!, $run_id: RunId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    run(id: $run_id) {
+                      id
+                      rex
+                      result
+                      trace
+                      module_lock
+                      status
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "run_id": run_id}
+        response = await self.execute(
+            query=query, operation_name="run", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Run.model_validate(data).me
+
+    async def runs(self, project_id: Any, **kwargs: Any) -> RunsMe:
+        query = gql(
+            """
+            query runs($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    runs {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          rex
+                          result
+                          trace
+                          module_lock
+                          status
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="runs", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Runs.model_validate(data).me
+
+    async def protein(
+        self, project_id: Any, protein_id: Any, **kwargs: Any
+    ) -> ProteinMe:
+        query = gql(
+            """
+            query protein($project_id: ProjectId!, $protein_id: ProteinId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    protein(id: $protein_id) {
+                      id
+                      sequence
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "project_id": project_id,
+            "protein_id": protein_id,
+        }
+        response = await self.execute(
+            query=query, operation_name="protein", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Protein.model_validate(data).me
+
+    async def proteins(self, project_id: Any, **kwargs: Any) -> ProteinsMe:
+        query = gql(
+            """
+            query proteins($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    proteins {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          sequence
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="proteins", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Proteins.model_validate(data).me
+
+    async def smol(self, project_id: Any, smol_id: Any, **kwargs: Any) -> SmolMe:
+        query = gql(
+            """
+            query smol($project_id: ProjectId!, $smol_id: SmolId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    smol(id: $smol_id) {
+                      id
+                      smi
+                      inchi
+                      data_blocks
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "smol_id": smol_id}
+        response = await self.execute(
+            query=query, operation_name="smol", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Smol.model_validate(data).me
+
+    async def smols(self, project_id: Any, **kwargs: Any) -> SmolsMe:
+        query = gql(
+            """
+            query smols($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    smols {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          smi
+                          inchi
+                          data_blocks
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="smols", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Smols.model_validate(data).me
+
+    async def msa(self, project_id: Any, msa_id: Any, **kwargs: Any) -> MsaMe:
+        query = gql(
+            """
+            query msa($project_id: ProjectId!, $msa_id: MultipleSequenceAlignmentId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    msa(id: $msa_id) {
+                      id
+                      a_3m
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "msa_id": msa_id}
+        response = await self.execute(
+            query=query, operation_name="msa", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Msa.model_validate(data).me
+
+    async def msas(self, project_id: Any, **kwargs: Any) -> MsasMe:
+        query = gql(
+            """
+            query msas($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    msas {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          a_3m
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="msas", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Msas.model_validate(data).me
+
+    async def structure(
+        self, project_id: Any, structure_id: Any, **kwargs: Any
+    ) -> StructureMe:
+        query = gql(
+            """
+            query structure($project_id: ProjectId!, $structure_id: StructureId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    structure(id: $structure_id) {
+                      id
+                      rcsb_id
+                      topology
+                      residues
+                      chains
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "project_id": project_id,
+            "structure_id": structure_id,
+        }
+        response = await self.execute(
+            query=query, operation_name="structure", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Structure.model_validate(data).me
+
+    async def structures(self, project_id: Any, **kwargs: Any) -> StructuresMe:
+        query = gql(
+            """
+            query structures($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    structures {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          rcsb_id
+                          topology
+                          residues
+                          chains
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="structures", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Structures.model_validate(data).me
+
+    async def protein_conformer(
+        self, project_id: Any, conformer_id: Any, **kwargs: Any
+    ) -> ProteinConformerMe:
+        query = gql(
+            """
+            query protein_conformer($project_id: ProjectId!, $conformer_id: ProteinConformerId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    protein_conformer(id: $conformer_id) {
+                      id
+                      residues
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                      structure {
+                        id
+                        rcsb_id
+                      }
+                      protein {
+                        id
+                        sequence
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "project_id": project_id,
+            "conformer_id": conformer_id,
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="protein_conformer",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return ProteinConformer.model_validate(data).me
+
+    async def protein_conformers(
+        self, project_id: Any, **kwargs: Any
+    ) -> ProteinConformersMe:
+        query = gql(
+            """
+            query protein_conformers($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    protein_conformers {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          residues
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                          structure {
+                            id
+                            rcsb_id
+                          }
+                          protein {
+                            id
+                            sequence
+                          }
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query,
+            operation_name="protein_conformers",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return ProteinConformers.model_validate(data).me
+
+    async def smol_conformer(
+        self, project_id: Any, conformer_id: Any, **kwargs: Any
+    ) -> SmolConformerMe:
+        query = gql(
+            """
+            query smol_conformer($project_id: ProjectId!, $conformer_id: SmolConformerId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    smol_conformer(id: $conformer_id) {
+                      id
+                      residues
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                      structure {
+                        id
+                        rcsb_id
+                      }
+                      smol {
+                        id
+                        smi
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "project_id": project_id,
+            "conformer_id": conformer_id,
+        }
+        response = await self.execute(
+            query=query, operation_name="smol_conformer", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return SmolConformer.model_validate(data).me
+
+    async def smol_conformers(self, project_id: Any, **kwargs: Any) -> SmolConformersMe:
+        query = gql(
+            """
+            query smol_conformers($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    smol_conformers {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          residues
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                          structure {
+                            id
+                            rcsb_id
+                          }
+                          smol {
+                            id
+                            smi
+                          }
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query, operation_name="smol_conformers", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return SmolConformers.model_validate(data).me
+
+    async def binding_site_interaction(
+        self, project_id: Any, bsi_id: Any, **kwargs: Any
+    ) -> BindingSiteInteractionMe:
+        query = gql(
+            """
+            query binding_site_interaction($project_id: ProjectId!, $bsi_id: BindingSiteInteractionsId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_site_interaction(id: $bsi_id) {
+                      id
+                      residues
+                      interactions {
+                        kind
+                        pi_stack_kind
+                        ligand_atom
+                        receptor_atom
+                      }
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "bsi_id": bsi_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_site_interaction",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingSiteInteraction.model_validate(data).me
+
+    async def binding_site_interactions(
+        self, project_id: Any, **kwargs: Any
+    ) -> BindingSiteInteractionsMe:
+        query = gql(
+            """
+            query binding_site_interactions($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_site_interactions {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          residues
+                          interactions {
+                            kind
+                            pi_stack_kind
+                            ligand_atom
+                            receptor_atom
+                          }
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_site_interactions",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingSiteInteractions.model_validate(data).me
+
+    async def binding_site_conformer(
+        self, project_id: Any, bsc_id: Any, **kwargs: Any
+    ) -> BindingSiteConformerMe:
+        query = gql(
+            """
+            query binding_site_conformer($project_id: ProjectId!, $bsc_id: BindingSiteConformerId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_site_conformer(id: $bsc_id) {
+                      id
+                      bounding_box {
+                        min
+                        max
+                      }
+                      surface_atoms
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                      protein_conformer {
+                        id
+                        residues
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "bsc_id": bsc_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_site_conformer",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingSiteConformer.model_validate(data).me
+
+    async def binding_site_conformers(
+        self, project_id: Any, **kwargs: Any
+    ) -> BindingSiteConformersMe:
+        query = gql(
+            """
+            query binding_site_conformers($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_site_conformers {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          bounding_box {
+                            min
+                            max
+                          }
+                          surface_atoms
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                          protein_conformer {
+                            id
+                            residues
+                          }
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_site_conformers",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingSiteConformers.model_validate(data).me
+
+    async def binding_pose_conformer(
+        self, project_id: Any, bpc_id: Any, **kwargs: Any
+    ) -> BindingPoseConformerMe:
+        query = gql(
+            """
+            query binding_pose_conformer($project_id: ProjectId!, $bpc_id: BindingPoseConformerId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_pose_conformer(id: $bpc_id) {
+                      id
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                      smol_conformer {
+                        id
+                        residues
+                      }
+                      binding_site_conformer {
+                        id
+                        bounding_box {
+                          min
+                          max
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "bpc_id": bpc_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_pose_conformer",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingPoseConformer.model_validate(data).me
+
+    async def binding_pose_conformers(
+        self, project_id: Any, **kwargs: Any
+    ) -> BindingPoseConformersMe:
+        query = gql(
+            """
+            query binding_pose_conformers($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_pose_conformers {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                          smol_conformer {
+                            id
+                            residues
+                          }
+                          binding_site_conformer {
+                            id
+                            bounding_box {
+                              min
+                              max
+                            }
+                          }
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_pose_conformers",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingPoseConformers.model_validate(data).me
+
+    async def binding_affinity(
+        self, project_id: Any, ba_id: Any, **kwargs: Any
+    ) -> BindingAffinityMe:
+        query = gql(
+            """
+            query binding_affinity($project_id: ProjectId!, $ba_id: BindingAffinityId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_affinity(id: $ba_id) {
+                      id
+                      affinity
+                      affinity_metric
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                      protein {
+                        id
+                        sequence
+                      }
+                      smol {
+                        id
+                        smi
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "ba_id": ba_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_affinity",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingAffinity.model_validate(data).me
+
+    async def binding_affinities(
+        self, project_id: Any, **kwargs: Any
+    ) -> BindingAffinitiesMe:
+        query = gql(
+            """
+            query binding_affinities($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_affinities {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          affinity
+                          affinity_metric
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                          protein {
+                            id
+                            sequence
+                          }
+                          smol {
+                            id
+                            smi
+                          }
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_affinities",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingAffinities.model_validate(data).me
+
+    async def binding_pose_conformer_interaction(
+        self, project_id: Any, bpci_id: Any, **kwargs: Any
+    ) -> BindingPoseConformerInteractionMe:
+        query = gql(
+            """
+            query binding_pose_conformer_interaction($project_id: ProjectId!, $bpci_id: BindingPoseConformerInteractionsId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_pose_conformer_interaction(id: $bpci_id) {
+                      id
+                      created_at
+                      updated_at
+                      deleted_at
+                      name
+                      description
+                      run_id
+                      tags
+                      binding_pose_conformer {
+                        id
+                      }
+                      binding_site_interactions {
+                        id
+                        residues
+                        interactions {
+                          kind
+                          pi_stack_kind
+                          ligand_atom
+                          receptor_atom
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id, "bpci_id": bpci_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_pose_conformer_interaction",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingPoseConformerInteraction.model_validate(data).me
+
+    async def binding_pose_conformer_interactions(
+        self, project_id: Any, **kwargs: Any
+    ) -> BindingPoseConformerInteractionsMe:
+        query = gql(
+            """
+            query binding_pose_conformer_interactions($project_id: ProjectId!) {
+              me {
+                account {
+                  project(id: $project_id) {
+                    binding_pose_conformer_interactions {
+                      pageInfo {
+                        ...PageInfoFull
+                      }
+                      edges {
+                        cursor
+                        node {
+                          id
+                          created_at
+                          updated_at
+                          deleted_at
+                          name
+                          description
+                          run_id
+                          tags
+                          binding_pose_conformer {
+                            id
+                          }
+                          binding_site_interactions {
+                            id
+                            residues
+                            interactions {
+                              kind
+                              pi_stack_kind
+                              ligand_atom
+                              receptor_atom
+                            }
+                          }
+                        }
+                      }
+                      total_count
+                    }
+                  }
+                }
+              }
+            }
+
+            fragment PageInfoFull on PageInfo {
+              hasPreviousPage
+              hasNextPage
+              startCursor
+              endCursor
+            }
+            """
+        )
+        variables: Dict[str, object] = {"project_id": project_id}
+        response = await self.execute(
+            query=query,
+            operation_name="binding_pose_conformer_interactions",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return BindingPoseConformerInteractions.model_validate(data).me
+
     async def retry(
         self,
         instance: UUID,
         target: ModuleInstanceTarget,
-        resources: Union[Optional[ModuleInstanceResourcesInput], UnsetType] = UNSET,
+        resources: Union[Optional[ResourcesInput], UnsetType] = UNSET,
         **kwargs: Any
     ) -> RetryRetry:
         query = gql(
             """
-            mutation retry($instance: ModuleInstanceId!, $target: ModuleInstanceTarget!, $resources: ModuleInstanceResourcesInput) {
+            mutation retry($instance: ModuleInstanceId!, $target: ModuleInstanceTarget!, $resources: ResourcesInput) {
               retry(instance: $instance, target: $target, resources: $resources) {
                 id
               }
@@ -794,14 +2417,18 @@ class Client(AsyncBaseClient):
             "target": target,
             "resources": resources,
         }
-        response = await self.execute(query=query, operation_name="retry", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="retry", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Retry.model_validate(data).retry
 
-    async def run(self, instance: ModuleInstanceInput, **kwargs: Any) -> RunRun:
+    async def run_module(
+        self, instance: CreateModuleInstance, **kwargs: Any
+    ) -> RunModuleRun:
         query = gql(
             """
-            mutation run($instance: ModuleInstanceInput!) {
+            mutation run_module($instance: CreateModuleInstance!) {
               run(instance: $instance) {
                 id
                 outs {
@@ -812,33 +2439,44 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"instance": instance}
-        response = await self.execute(query=query, operation_name="run", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="run_module", variables=variables, **kwargs
+        )
         data = self.get_data(response)
-        return Run.model_validate(data).run
+        return RunModule.model_validate(data).run
 
     async def create_smol_conformer(
-        self, smol_conformer: CreateSmolConformerInput, **kwargs: Any
+        self, smol_conformer: CreateSmolConformer, **kwargs: Any
     ) -> CreateSmolConformerCreateSmolConformer:
         query = gql(
             """
-            mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
+            mutation create_smol_conformer($smol_conformer: CreateSmolConformer!) {
               create_smol_conformer(input: $smol_conformer) {
                 id
+                residues
+                name
+                description
+                tags
               }
             }
             """
         )
         variables: Dict[str, object] = {"smol_conformer": smol_conformer}
         response = await self.execute(
-            query=query, operation_name="create_smol_conformer", variables=variables, **kwargs
+            query=query,
+            operation_name="create_smol_conformer",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return CreateSmolConformer.model_validate(data).create_smol_conformer
 
-    async def create_smol(self, smol: CreateSmolInput, **kwargs: Any) -> CreateSmolCreateSmol:
+    async def create_smol(
+        self, smol: CreateSmol, **kwargs: Any
+    ) -> CreateSmolCreateSmol:
         query = gql(
             """
-            mutation create_smol($smol: CreateSmolInput!) {
+            mutation create_smol($smol: CreateSmol!) {
               create_smol(input: $smol) {
                 id
               }
@@ -852,12 +2490,60 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateSmol.model_validate(data).create_smol
 
+    async def create_smol_library(
+        self, smol_library: CreateSmolLibrary, **kwargs: Any
+    ) -> CreateSmolLibraryCreateSmolLibrary:
+        query = gql(
+            """
+            mutation create_smol_library($smol_library: CreateSmolLibrary!) {
+              create_smol_library(input: $smol_library) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"smol_library": smol_library}
+        response = await self.execute(
+            query=query,
+            operation_name="create_smol_library",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateSmolLibrary.model_validate(data).create_smol_library
+
+    async def create_smol_library_partition(
+        self, smol_library_partition: CreateSmolLibraryPartition, **kwargs: Any
+    ) -> CreateSmolLibraryPartitionCreateSmolLibraryPartition:
+        query = gql(
+            """
+            mutation create_smol_library_partition($smol_library_partition: CreateSmolLibraryPartition!) {
+              create_smol_library_partition(input: $smol_library_partition) {
+                id
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "smol_library_partition": smol_library_partition
+        }
+        response = await self.execute(
+            query=query,
+            operation_name="create_smol_library_partition",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateSmolLibraryPartition.model_validate(
+            data
+        ).create_smol_library_partition
+
     async def create_structure(
-        self, structure: CreateStructureInput, **kwargs: Any
+        self, structure: CreateStructure, **kwargs: Any
     ) -> CreateStructureCreateStructure:
         query = gql(
             """
-            mutation create_structure($structure: CreateStructureInput!) {
+            mutation create_structure($structure: CreateStructure!) {
               create_structure(input: $structure) {
                 id
               }
@@ -866,10 +2552,37 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"structure": structure}
         response = await self.execute(
-            query=query, operation_name="create_structure", variables=variables, **kwargs
+            query=query,
+            operation_name="create_structure",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return CreateStructure.model_validate(data).create_structure
+
+    async def create_tag(self, tag: CreateTag, **kwargs: Any) -> CreateTagCreateTag:
+        query = gql(
+            """
+            mutation create_tag($tag: CreateTag!) {
+              create_tag(input: $tag) {
+                id
+                key
+                value
+                tagged_id
+                tagged_type
+                name
+                description
+                tags
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"tag": tag}
+        response = await self.execute(
+            query=query, operation_name="create_tag", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateTag.model_validate(data).create_tag
 
     async def tag(
         self,
@@ -897,16 +2610,18 @@ class Client(AsyncBaseClient):
             "moduleId": module_id,
             "tags": tags,
         }
-        response = await self.execute(query=query, operation_name="tag", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="tag", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Tag.model_validate(data).tag
 
     async def track_utilization(
-        self, utilization: ResourceUtilizationInput, **kwargs: Any
+        self, utilization: CreateResourceUtilization, **kwargs: Any
     ) -> TrackUtilizationTrackModuleInstanceResourceUtilization:
         query = gql(
             """
-            mutation track_utilization($utilization: ResourceUtilizationInput!) {
+            mutation track_utilization($utilization: CreateResourceUtilization!) {
               track_module_instance_resource_utilization(utilization: $utilization) {
                 id
               }
@@ -915,10 +2630,15 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"utilization": utilization}
         response = await self.execute(
-            query=query, operation_name="track_utilization", variables=variables, **kwargs
+            query=query,
+            operation_name="track_utilization",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
-        return TrackUtilization.model_validate(data).track_module_instance_resource_utilization
+        return TrackUtilization.model_validate(
+            data
+        ).track_module_instance_resource_utilization
 
     async def untag(
         self,
@@ -946,37 +2666,105 @@ class Client(AsyncBaseClient):
             "moduleId": module_id,
             "tags": tags,
         }
-        response = await self.execute(query=query, operation_name="untag", variables=variables, **kwargs)
+        response = await self.execute(
+            query=query, operation_name="untag", variables=variables, **kwargs
+        )
         data = self.get_data(response)
         return Untag.model_validate(data).untag
 
+    async def update_account_config(
+        self, account_id: UUID, input: AccountConfigInput, **kwargs: Any
+    ) -> UpdateAccountConfigUpdateAccountConfig:
+        query = gql(
+            """
+            mutation update_account_config($account_id: AccountId!, $input: AccountConfigInput!) {
+              update_account_config(account_id: $account_id, input: $input) {
+                config_account
+                bucket_config {
+                  data_bucket
+                  log_bucket
+                  bucket_region
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"account_id": account_id, "input": input}
+        response = await self.execute(
+            query=query,
+            operation_name="update_account_config",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateAccountConfig.model_validate(data).update_account_config
+
+    async def update_account_tier(
+        self, account_id: UUID, tier: AccountTier, **kwargs: Any
+    ) -> AccountTier:
+        query = gql(
+            """
+            mutation update_account_tier($account_id: AccountId!, $tier: AccountTier!) {
+              update_account_tier(account_id: $account_id, tier: $tier)
+            }
+            """
+        )
+        variables: Dict[str, object] = {"account_id": account_id, "tier": tier}
+        response = await self.execute(
+            query=query,
+            operation_name="update_account_tier",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateAccountTier.model_validate(data).update_account_tier
+
     async def update_module_instance(
-        self, module_instance_update: UpdateModuleInstanceInput, **kwargs: Any
+        self,
+        id: UUID,
+        module_instance_update: PatchModuleInstanceInput,
+        arguments: Union[Optional[List[ArgumentInput]], UnsetType] = UNSET,
+        **kwargs: Any
     ) -> UpdateModuleInstanceUpdateModuleInstance:
         query = gql(
             """
-            mutation update_module_instance($moduleInstanceUpdate: UpdateModuleInstanceInput!) {
-              update_module_instance(instance_update: $moduleInstanceUpdate) {
+            mutation update_module_instance($id: ModuleInstanceId!, $moduleInstanceUpdate: PatchModuleInstanceInput!, $arguments: [ArgumentInput!]) {
+              update_module_instance(
+                arguments_update: $arguments
+                instance_id: $id
+                instance_update: $moduleInstanceUpdate
+              ) {
                 id
                 status
               }
             }
             """
         )
-        variables: Dict[str, object] = {"moduleInstanceUpdate": module_instance_update}
+        variables: Dict[str, object] = {
+            "id": id,
+            "moduleInstanceUpdate": module_instance_update,
+            "arguments": arguments,
+        }
         response = await self.execute(
-            query=query, operation_name="update_module_instance", variables=variables, **kwargs
+            query=query,
+            operation_name="update_module_instance",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return UpdateModuleInstance.model_validate(data).update_module_instance
 
     async def upload_large_object(
-        self, typeinfo: Any, format: ObjectFormat, **kwargs: Any
+        self,
+        typeinfo: Any,
+        format: ObjectFormat,
+        public: Union[Optional[bool], UnsetType] = UNSET,
+        **kwargs: Any
     ) -> UploadLargeObjectUploadLargeObject:
         query = gql(
             """
-            mutation upload_large_object($typeinfo: JSON!, $format: ObjectFormat!) {
-              upload_large_object(typeinfo: $typeinfo, format: $format) {
+            mutation upload_large_object($typeinfo: JSON!, $format: ObjectFormat!, $public: Boolean) {
+              upload_large_object(typeinfo: $typeinfo, format: $format, public: $public) {
                 upload_url
                 descriptor {
                   id
@@ -994,9 +2782,16 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {"typeinfo": typeinfo, "format": format}
+        variables: Dict[str, object] = {
+            "typeinfo": typeinfo,
+            "format": format,
+            "public": public,
+        }
         response = await self.execute(
-            query=query, operation_name="upload_large_object", variables=variables, **kwargs
+            query=query,
+            operation_name="upload_large_object",
+            variables=variables,
+            **kwargs
         )
         data = self.get_data(response)
         return UploadLargeObject.model_validate(data).upload_large_object

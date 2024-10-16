@@ -9,11 +9,17 @@ from pydantic import Field
 
 from .base_model import BaseModel
 from .enums import (
+    BindingSiteInteractionKind,
     DateTimeSort,
+    F32Sort,
+    F64Sort,
+    I32Sort,
     MemUnits,
+    ModuleFailureReason,
     ModuleInstanceStatus,
     ModuleInstanceTarget,
     ObjectFormat,
+    PiStackKind,
     RunStatus,
     StringSort,
     TaggedType,
@@ -33,6 +39,17 @@ class AccountConfigInput(BaseModel):
     bucket_config: Optional["AccountBucketConfigInput"] = None
 
 
+class ArgumentFilter(BaseModel):
+    all: Optional[List["ArgumentFilter"]] = None
+    any: Optional[List["ArgumentFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    rejected_at: Optional["DateTimeFilter"] = None
+    resolved_at: Optional["DateTimeFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    source: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
 class ArgumentInput(BaseModel):
     id: Optional[UUID] = None
     name: Optional[str] = None
@@ -40,86 +57,418 @@ class ArgumentInput(BaseModel):
     value: Optional[Any] = None
 
 
-class CreateProjectInput(BaseModel):
+class ArgumentSort(BaseModel):
+    id: Optional[UuidSort] = None
+    rejected_at: Optional[DateTimeSort] = None
+    resolved_at: Optional[DateTimeSort] = None
+    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class BindingAffinityFilter(BaseModel):
+    all: Optional[List["BindingAffinityFilter"]] = None
+    any: Optional[List["BindingAffinityFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    affinity: Optional["F64Filter"] = None
+    affinity_metric: Optional["StringFilter"] = None
+    protein_id: Optional["UuidFilter"] = None
+    smol_id: Optional["UuidFilter"] = None
+
+
+class BindingAffinitySort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    affinity: Optional[F64Sort] = None
+    affinity_metric: Optional[StringSort] = None
+    protein_id: Optional[UuidSort] = None
+    smol_id: Optional[UuidSort] = None
+
+
+class BindingPoseAffinityFilter(BaseModel):
+    all: Optional[List["BindingPoseAffinityFilter"]] = None
+    any: Optional[List["BindingPoseAffinityFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    binding_affinity_id: Optional["UuidFilter"] = None
+    binding_pose_conformer_id: Optional["UuidFilter"] = None
+
+
+class BindingPoseAffinitySort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    binding_affinity_id: Optional[UuidSort] = None
+    binding_pose_conformer_id: Optional[UuidSort] = None
+
+
+class BindingPoseConformerFilter(BaseModel):
+    all: Optional[List["BindingPoseConformerFilter"]] = None
+    any: Optional[List["BindingPoseConformerFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    smol_conformer_id: Optional["UuidFilter"] = None
+    binding_site_conformer_id: Optional["UuidFilter"] = None
+
+
+class BindingPoseConformerInteractionsFilter(BaseModel):
+    all: Optional[List["BindingPoseConformerInteractionsFilter"]] = None
+    any: Optional[List["BindingPoseConformerInteractionsFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    binding_pose_conformer_id: Optional["UuidFilter"] = None
+    binding_site_interactions_id: Optional["UuidFilter"] = None
+
+
+class BindingPoseConformerInteractionsSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    binding_pose_conformer_id: Optional[UuidSort] = None
+    binding_site_interactions_id: Optional[UuidSort] = None
+
+
+class BindingPoseConformerSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    smol_conformer_id: Optional[UuidSort] = None
+    binding_site_conformer_id: Optional[UuidSort] = None
+
+
+class BindingSiteBoundingBoxInput(BaseModel):
+    min: Any
+    max: Any
+
+
+class BindingSiteConformerFilter(BaseModel):
+    all: Optional[List["BindingSiteConformerFilter"]] = None
+    any: Optional[List["BindingSiteConformerFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    protein_conformer_id: Optional["UuidFilter"] = None
+
+
+class BindingSiteConformerPredictionFilter(BaseModel):
+    all: Optional[List["BindingSiteConformerPredictionFilter"]] = None
+    any: Optional[List["BindingSiteConformerPredictionFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    score: Optional["F32Filter"] = None
+    probability: Optional["F32Filter"] = None
+    binding_site_conformer_id: Optional["UuidFilter"] = None
+    protein_conformer_id: Optional["UuidFilter"] = None
+
+
+class BindingSiteConformerPredictionSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    score: Optional[F32Sort] = None
+    probability: Optional[F32Sort] = None
+    binding_site_conformer_id: Optional[UuidSort] = None
+    protein_conformer_id: Optional[UuidSort] = None
+
+
+class BindingSiteConformerSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    protein_conformer_id: Optional[UuidSort] = None
+
+
+class BindingSiteInteractionInput(BaseModel):
+    kind: BindingSiteInteractionKind
+    pi_stack_kind: Optional[PiStackKind] = None
+    ligand: Any
+    ligand_atom: Any
+    ligand_xyz: Any
+    receptor_residue: Any
+    receptor_atom: Any
+    receptor_xyz: Any
+    receptor_is_donor: bool
+    receptor_is_charged: bool
+    receptor_is_positively_charged: bool
+
+
+class BindingSiteInteractionsFilter(BaseModel):
+    all: Optional[List["BindingSiteInteractionsFilter"]] = None
+    any: Optional[List["BindingSiteInteractionsFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    protein_id: Optional["UuidFilter"] = None
+
+
+class BindingSiteInteractionsSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    protein_id: Optional[UuidSort] = None
+
+
+class CreateBindingAffinity(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
-
-
-class CreateProteinConformerInput(BaseModel):
-    project_id: Any
+    affinity: float
+    affinity_metric: str
     protein_id: Any
-    structure_id: Any
+    smol_id: Any
+    project_id: Any
+
+
+class CreateBindingPoseAffinity(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    binding_affinity_id: Any
+    binding_pose_conformer_id: Any
+    project_id: Any
+
+
+class CreateBindingPoseConformer(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    smol_conformer_id: Any
+    binding_site_conformer_id: Any
+    project_id: Any
+
+
+class CreateBindingPoseConformerInteractions(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    binding_pose_conformer_id: Any
+    binding_site_interactions_id: Any
+    project_id: Any
+
+
+class CreateBindingSiteConformer(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    bounding_box: "BindingSiteBoundingBoxInput"
+    surface_atoms: Optional[List[int]] = None
+    protein_conformer_id: Any
+    project_id: Any
+
+
+class CreateBindingSiteConformerPrediction(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    score: float
+    probability: float
+    binding_site_conformer_id: Any
+    protein_conformer_id: Any
+    project_id: Any
+
+
+class CreateBindingSiteInteractions(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    residues: List[int]
+    interactions: List["BindingSiteInteractionInput"]
+    protein_id: Any
+    project_id: Any
+
+
+class CreateMetadata(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
 
 
-class CreateProteinInput(BaseModel):
+class CreateModule(BaseModel):
+    path: str
+    tags: Optional[List[str]] = None
+    tests: List["TestCase"]
+
+
+class CreateModuleInstance(BaseModel):
+    path: str
+    args: List["ArgumentInput"]
+    target: Optional[ModuleInstanceTarget] = None
+    resources: Optional["ResourcesInput"] = None
+    status: Optional[ModuleInstanceStatus] = None
+    metadata: "CreateMetadata"
+    out_tags: Optional[List[Optional[List[str]]]] = None
+
+
+class CreateMultipleSequenceAlignment(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    a_3_m: Any = Field(alias="a_3m")
+    protein_id: Any
+    project_id: Any
+
+
+class CreateProject(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class CreateProtein(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
     sequence: str
     project_id: Any
+
+
+class CreateProteinConformer(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
+    residues: List[int]
+    protein_id: Any
+    structure_id: Any
+    project_id: Any
+
+
+class CreateResourceUtilization(BaseModel):
+    module_instance_id: UUID
+    gpu: Optional[float] = None
+    mem: Optional[float] = None
+    storage: float
+    walltime: float
+    cputime: float
+    inodes: float
+    sus: Optional[int] = None
 
 
 class CreateRun(BaseModel):
-    rex: Optional[str] = None
-    expr: Optional[Any] = None
-    project_id: Any
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    rex: str
     module_lock: Optional[Any] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
-
-
-class CreateSmolConformerInput(BaseModel):
     project_id: Any
-    smol_id: Any
-    structure_id: Any
+
+
+class CreateSmol(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
-
-
-class CreateSmolInput(BaseModel):
     smi: Optional[str] = None
     inchi: Optional[str] = None
+    data_blocks: Optional[List[List[str]]] = None
     project_id: Any
+
+
+class CreateSmolConformer(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
+    residues: List[int]
+    smol_id: Any
+    structure_id: Any
+    project_id: Any
 
 
-class CreateStructureInput(BaseModel):
+class CreateSmolLibrary(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    project_id: Any
+
+
+class CreateSmolLibraryPartition(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    part_idx: int
+    part_size: int
+    structures: Optional[Any] = None
+    smiles: Any
+    data_blocks: Any
+    smol_library_id: Any
+    project_id: Any
+
+
+class CreateStructure(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
     rcsb_id: Optional[str] = None
     topology: Any
     residues: Any
     chains: Any
     project_id: Any
+
+
+class CreateTag(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
-
-
-class CreateTagInput(BaseModel):
     key: str
     value: Optional[str] = None
     tagged_id: Any
     tagged_type: TaggedType
     project_id: Any
-    name: Optional[str] = None
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
 
 
 class DateTimeFilter(BaseModel):
+    is_null: Optional[bool] = None
     eq: Optional[datetime] = None
     ne: Optional[datetime] = None
     gt: Optional[datetime] = None
     ge: Optional[datetime] = None
     lt: Optional[datetime] = None
     le: Optional[datetime] = None
+
+
+class F32Filter(BaseModel):
+    eq: Optional[float] = None
+    ne: Optional[float] = None
+    gt: Optional[float] = None
+    ge: Optional[float] = None
+    lt: Optional[float] = None
+    le: Optional[float] = None
+
+
+class F64Filter(BaseModel):
+    eq: Optional[float] = None
+    ne: Optional[float] = None
+    gt: Optional[float] = None
+    ge: Optional[float] = None
+    lt: Optional[float] = None
+    le: Optional[float] = None
+
+
+class I32Filter(BaseModel):
+    eq: Optional[int] = None
+    ne: Optional[int] = None
+    gt: Optional[int] = None
+    ge: Optional[int] = None
+    lt: Optional[int] = None
+    le: Optional[int] = None
 
 
 class I64Filter(BaseModel):
@@ -139,6 +488,7 @@ class MetadataFilter(BaseModel):
     deleted_at: Optional["DateTimeFilter"] = None
     name: Optional["StringFilter"] = None
     description: Optional["StringFilter"] = None
+    run_id: Optional["UuidFilter"] = None
     tags: Optional["TagFilter"] = None
 
 
@@ -150,54 +500,97 @@ class MetadataSort(BaseModel):
     description: Optional[StringSort] = None
 
 
-class ModuleInput(BaseModel):
-    path: str
-    tags: Optional[List[str]] = None
-    tests: List["TestCase"]
+class ModuleFailureReasonFilter(BaseModel):
+    eq: Optional[ModuleFailureReason] = None
+    ne: Optional[ModuleFailureReason] = None
 
 
-class ModuleInstanceInput(BaseModel):
-    path: str
-    args: List["ArgumentInput"]
-    name: Optional[str] = None
-    target: Optional[ModuleInstanceTarget] = None
-    resources: Optional["ModuleInstanceResourcesInput"] = None
-    tags: Optional[List[str]] = None
-    out_tags: Optional[List[Optional[List[str]]]] = None
-    out_names: Optional[List[Optional[str]]] = None
-    end: Optional[bool] = None
+class ModuleFilter(BaseModel):
+    all: Optional[List["ModuleFilter"]] = None
+    any: Optional[List["ModuleFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    path: Optional["StringFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
 
 
-class ModuleInstanceResourcesInput(BaseModel):
-    gpus: Optional[int] = None
-    gpu_mem: Optional[int] = None
-    gpu_mem_units: Optional[MemUnits] = None
-    cpus: Optional[int] = None
-    nodes: Optional[int] = None
-    mem: Optional[int] = None
-    mem_units: Optional[MemUnits] = None
-    storage: Optional[int] = None
-    storage_units: Optional[MemUnits] = None
-    walltime: Optional[int] = None
-    storage_mounts: Optional[List[str]] = None
+class ModuleInstanceFilter(BaseModel):
+    all: Optional[List["ModuleInstanceFilter"]] = None
+    any: Optional[List["ModuleInstanceFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    path: Optional["StringFilter"] = None
+    queued_at: Optional["DateTimeFilter"] = None
+    admitted_at: Optional["DateTimeFilter"] = None
+    dispatched_at: Optional["DateTimeFilter"] = None
+    run_at: Optional["DateTimeFilter"] = None
+    completed_at: Optional["DateTimeFilter"] = None
+    failure_reason: Optional["ModuleFailureReasonFilter"] = None
+    status: Optional["ModuleInstanceStatusFilter"] = None
+    target: Optional["ModuleInstanceTargetFilter"] = None
+    config_account: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+
+
+class ModuleInstanceSort(BaseModel):
+    id: Optional[UuidSort] = None
+    path: Optional[StringSort] = None
+    queued_at: Optional[DateTimeSort] = None
+    admitted_at: Optional[DateTimeSort] = None
+    dispatched_at: Optional[DateTimeSort] = None
+    run_at: Optional[DateTimeSort] = None
+    completed_at: Optional[DateTimeSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class ModuleInstanceStatusFilter(BaseModel):
+    eq: Optional[ModuleInstanceStatus] = None
+    ne: Optional[ModuleInstanceStatus] = None
+
+
+class ModuleInstanceTargetFilter(BaseModel):
+    eq: Optional[ModuleInstanceTarget] = None
+    ne: Optional[ModuleInstanceTarget] = None
+
+
+class ModuleSort(BaseModel):
+    id: Optional[UuidSort] = None
+    path: Optional[StringSort] = None
+    metadata: Optional["MetadataSort"] = None
+
+
+class MultipleSequenceAlignmentFilter(BaseModel):
+    all: Optional[List["MultipleSequenceAlignmentFilter"]] = None
+    any: Optional[List["MultipleSequenceAlignmentFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    protein_id: Optional["UuidFilter"] = None
+
+
+class MultipleSequenceAlignmentSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    protein_id: Optional[UuidSort] = None
 
 
 class ObjectDescriptorFilter(BaseModel):
     all: Optional[List["ObjectDescriptorFilter"]] = None
     any: Optional[List["ObjectDescriptorFilter"]] = None
     id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
     object: Optional["VirtualObjectFilter"] = None
     base_url: Optional["StringFilter"] = None
     account_id: Optional["UuidFilter"] = None
-    metadata: Optional["MetadataFilter"] = None
 
 
 class ObjectDescriptorSort(BaseModel):
     id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
     object: Optional["VirtualObjectSort"] = None
     base_url: Optional[StringSort] = None
-    account_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
 
 
 class ObjectFormatFilter(BaseModel):
@@ -205,84 +598,228 @@ class ObjectFormatFilter(BaseModel):
     ne: Optional[ObjectFormat] = None
 
 
+class PatchBindingAffinity(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    affinity: Optional[float] = None
+    affinity_metric: Optional[str] = None
+
+
+class PatchBindingPoseAffinity(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class PatchBindingPoseConformer(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class PatchBindingPoseConformerInteractions(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class PatchBindingSiteConformer(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    bounding_box: Optional["BindingSiteBoundingBoxInput"] = None
+    surface_atoms: Optional[List[int]] = None
+
+
+class PatchBindingSiteConformerPrediction(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    score: Optional[float] = None
+    probability: Optional[float] = None
+
+
+class PatchBindingSiteInteractions(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    residues: Optional[List[int]] = None
+    interactions: Optional[List["BindingSiteInteractionInput"]] = None
+
+
+class PatchModuleInstanceInput(BaseModel):
+    path: Optional[str] = None
+    args: Optional[List["ArgumentInput"]] = None
+    target: Optional[ModuleInstanceTarget] = None
+    resources: Optional["ResourcesInput"] = None
+    status: Optional[ModuleInstanceStatus] = None
+    metadata: Optional["CreateMetadata"] = None
+    out_tags: Optional[List[Optional[List[str]]]] = None
+
+
+class PatchMultipleSequenceAlignment(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    a_3_m: Optional[Any] = Field(alias="a_3m", default=None)
+
+
+class PatchProject(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class PatchProtein(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    sequence: Optional[str] = None
+
+
+class PatchProteinConformer(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    residues: Optional[List[int]] = None
+
+
+class PatchSmol(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    smi: Optional[str] = None
+    inchi: Optional[str] = None
+    data_blocks: Optional[List[List[str]]] = None
+
+
+class PatchSmolConformer(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    residues: Optional[List[int]] = None
+
+
+class PatchSmolLibrary(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class PatchSmolLibraryPartition(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    part_idx: Optional[int] = None
+    part_size: Optional[int] = None
+    structures: Optional[Any] = None
+    smiles: Optional[Any] = None
+    data_blocks: Optional[Any] = None
+
+
+class PatchStructure(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    rcsb_id: Optional[str] = None
+    topology: Optional[Any] = None
+    residues: Optional[Any] = None
+    chains: Optional[Any] = None
+
+
+class PatchTag(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    key: Optional[str] = None
+    value: Optional[str] = None
+    tagged_id: Optional[Any] = None
+    tagged_type: Optional[TaggedType] = None
+
+
 class ProjectFilter(BaseModel):
     all: Optional[List["ProjectFilter"]] = None
     any: Optional[List["ProjectFilter"]] = None
     id: Optional["UuidFilter"] = None
-    account_id: Optional["UuidFilter"] = None
     metadata: Optional["MetadataFilter"] = None
+    account_id: Optional["UuidFilter"] = None
 
 
 class ProjectSort(BaseModel):
     id: Optional[UuidSort] = None
-    account_id: Optional[UuidSort] = None
     metadata: Optional["MetadataSort"] = None
+    account_id: Optional[UuidSort] = None
 
 
 class ProteinConformerFilter(BaseModel):
     all: Optional[List["ProteinConformerFilter"]] = None
     any: Optional[List["ProteinConformerFilter"]] = None
     id: Optional["UuidFilter"] = None
-    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
     protein_id: Optional["UuidFilter"] = None
     structure_id: Optional["UuidFilter"] = None
-    metadata: Optional["MetadataFilter"] = None
 
 
 class ProteinConformerSort(BaseModel):
     id: Optional[UuidSort] = None
-    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
     protein_id: Optional[UuidSort] = None
     structure_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
 
 
 class ProteinFilter(BaseModel):
     all: Optional[List["ProteinFilter"]] = None
     any: Optional[List["ProteinFilter"]] = None
     id: Optional["UuidFilter"] = None
-    sequence: Optional["StringFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
-    metadata: Optional["MetadataFilter"] = None
+    sequence: Optional["StringFilter"] = None
 
 
 class ProteinSort(BaseModel):
     id: Optional[UuidSort] = None
-    sequence: Optional[StringSort] = None
+    metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
+    sequence: Optional[StringSort] = None
 
 
-class ResourceUtilizationInput(BaseModel):
-    module_instance_id: UUID = Field(alias="moduleInstanceId")
-    gpu: Optional[float] = None
-    mem: Optional[float] = None
-    storage: float
-    walltime: float
-    cputime: float
-    inodes: float
-    sus: Optional[int] = None
+class ResourcesInput(BaseModel):
+    gpus: Optional[int] = None
+    cpus: Optional[int] = None
+    nodes: Optional[int] = None
+    mem: Optional[int] = None
+    mem_units: Optional[MemUnits] = None
+    gpu_mem: Optional[int] = None
+    gpu_mem_units: Optional[MemUnits] = None
+    storage: Optional[int] = None
+    storage_units: Optional[MemUnits] = None
+    walltime: Optional[int] = None
+    storage_mounts: Optional[List[str]] = None
 
 
 class RunFilter(BaseModel):
     all: Optional[List["RunFilter"]] = None
     any: Optional[List["RunFilter"]] = None
     id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    rex: Optional["StringFilter"] = None
     status: Optional["RunStatusFilter"] = None
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
-    metadata: Optional["MetadataFilter"] = None
 
 
 class RunSort(BaseModel):
     id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
 
 
 class RunStatusFilter(BaseModel):
@@ -294,40 +831,78 @@ class SmolConformerFilter(BaseModel):
     all: Optional[List["SmolConformerFilter"]] = None
     any: Optional[List["SmolConformerFilter"]] = None
     id: Optional["UuidFilter"] = None
-    account_id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
     smol_id: Optional["UuidFilter"] = None
     structure_id: Optional["UuidFilter"] = None
-    metadata: Optional["MetadataFilter"] = None
 
 
 class SmolConformerSort(BaseModel):
     id: Optional[UuidSort] = None
-    account_id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
     smol_id: Optional[UuidSort] = None
     structure_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
 
 
 class SmolFilter(BaseModel):
     all: Optional[List["SmolFilter"]] = None
     any: Optional[List["SmolFilter"]] = None
     id: Optional["UuidFilter"] = None
-    smi: Optional["StringFilter"] = None
-    inchi: Optional["StringFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
+    smi: Optional["StringFilter"] = None
+    inchi: Optional["StringFilter"] = None
+
+
+class SmolLibraryFilter(BaseModel):
+    all: Optional[List["SmolLibraryFilter"]] = None
+    any: Optional[List["SmolLibraryFilter"]] = None
+    id: Optional["UuidFilter"] = None
     metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+
+
+class SmolLibraryPartitionFilter(BaseModel):
+    all: Optional[List["SmolLibraryPartitionFilter"]] = None
+    any: Optional[List["SmolLibraryPartitionFilter"]] = None
+    id: Optional["UuidFilter"] = None
+    metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    part_idx: Optional["I32Filter"] = None
+    part_size: Optional["I32Filter"] = None
+    smol_library_id: Optional["UuidFilter"] = None
+
+
+class SmolLibraryPartitionSort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    part_idx: Optional[I32Sort] = None
+    part_size: Optional[I32Sort] = None
+    smol_library_id: Optional[UuidSort] = None
+
+
+class SmolLibrarySort(BaseModel):
+    id: Optional[UuidSort] = None
+    metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
 
 
 class SmolSort(BaseModel):
     id: Optional[UuidSort] = None
-    smi: Optional[StringSort] = None
-    inchi: Optional[StringSort] = None
+    metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
-    metadata: Optional["MetadataSort"] = None
+    smi: Optional[StringSort] = None
+    inchi: Optional[StringSort] = None
 
 
 class StringFilter(BaseModel):
@@ -345,18 +920,18 @@ class StructureFilter(BaseModel):
     all: Optional[List["StructureFilter"]] = None
     any: Optional[List["StructureFilter"]] = None
     id: Optional["UuidFilter"] = None
-    rcsb_id: Optional["StringFilter"] = None
-    account_id: Optional["UuidFilter"] = None
-    project_id: Optional["UuidFilter"] = None
     metadata: Optional["MetadataFilter"] = None
+    project_id: Optional["UuidFilter"] = None
+    account_id: Optional["UuidFilter"] = None
+    rcsb_id: Optional["StringFilter"] = None
 
 
 class StructureSort(BaseModel):
     id: Optional[UuidSort] = None
-    rcsb_id: Optional[StringSort] = None
-    account_id: Optional[UuidSort] = None
-    project_id: Optional[UuidSort] = None
     metadata: Optional["MetadataSort"] = None
+    project_id: Optional[UuidSort] = None
+    account_id: Optional[UuidSort] = None
+    rcsb_id: Optional[StringSort] = None
 
 
 class TagFilter(BaseModel):
@@ -366,45 +941,26 @@ class TagFilter(BaseModel):
 class TestCase(BaseModel):
     args: List["ArgumentInput"]
     target: ModuleInstanceTarget
-    resources: Optional["ModuleInstanceResourcesInput"] = None
+    resources: Optional["ResourcesInput"] = None
     tags: Optional[List[str]] = None
 
 
 class TokenFilter(BaseModel):
     all: Optional[List["TokenFilter"]] = None
     any: Optional[List["TokenFilter"]] = None
+    metadata: Optional["MetadataFilter"] = None
     id: Optional["UuidFilter"] = None
-    created_at: Optional["DateTimeFilter"] = None
-    updated_at: Optional["DateTimeFilter"] = None
-    deleted_at: Optional["DateTimeFilter"] = None
     user_id: Optional["UuidFilter"] = None
 
 
 class TokenSort(BaseModel):
+    metadata: Optional["MetadataSort"] = None
     id: Optional[UuidSort] = None
-    created_at: Optional[DateTimeSort] = None
-    updated_at: Optional[DateTimeSort] = None
-    deleted_at: Optional[DateTimeSort] = None
     user_id: Optional[UuidSort] = None
 
 
-class TypeQuery(BaseModel):
-    path: List[str]
-    query: Any
-
-
-class UpdateModuleInstanceInput(BaseModel):
-    id: UUID
-    path: Optional[str] = None
-    ins: Optional[List["ArgumentInput"]] = None
-    outs: Optional[List["ArgumentInput"]] = None
-    target: Optional[ModuleInstanceTarget] = None
-    status: Optional[ModuleInstanceStatus] = None
-    resources: Optional["ModuleInstanceResourcesInput"] = None
-    tags: Optional[List[str]] = None
-
-
 class UuidFilter(BaseModel):
+    is_null: Optional[bool] = None
     eq: Optional[Any] = None
     ne: Optional[Any] = None
     in_: Optional[List[Any]] = Field(alias="in", default=None)

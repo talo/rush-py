@@ -4,24 +4,40 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import Field
-
 from .base_model import BaseModel
 
 
 class Smol(BaseModel):
-    smol: Optional["SmolSmol"]
+    me: "SmolMe"
 
 
-class SmolSmol(BaseModel):
+class SmolMe(BaseModel):
+    account: "SmolMeAccount"
+
+
+class SmolMeAccount(BaseModel):
+    project: "SmolMeAccountProject"
+
+
+class SmolMeAccountProject(BaseModel):
+    smol: "SmolMeAccountProjectSmol"
+
+
+class SmolMeAccountProjectSmol(BaseModel):
     id: Any
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    deleted_at: Optional[datetime] = Field(alias="deletedAt")
-    data: Optional["SmolSmolData"]
-    tags: List[str]
+    smi: Optional[str]
+    inchi: Optional[str]
+    data_blocks: Optional[List[List[str]]]
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime]
+    name: Optional[str]
+    description: Optional[str]
+    run_id: Optional[Any]
+    tags: Optional[List[str]]
 
 
-class SmolSmolData(BaseModel):
-    name: str
-    inchi: str
+Smol.model_rebuild()
+SmolMe.model_rebuild()
+SmolMeAccount.model_rebuild()
+SmolMeAccountProject.model_rebuild()

@@ -23,7 +23,7 @@
       perSystem =
         { pkgs, ... }:
         {
-          poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
+          poetry2nix = poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
           poetryProjects.default = {
             projectDir = ./.;
             python = pkgs.python312;
@@ -61,7 +61,10 @@
             overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides (
               self: super: { pip = pkgs.python39Packages.pip; }
             );
-            extraPackages = [ pkgs.quarto ];
+            extraPackages = [
+              pkgs.quarto
+              pkgs.ipython
+            ];
             flake8Check.enable = false;
             pyrightCheck.enable = false;
           };

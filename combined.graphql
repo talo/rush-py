@@ -1,10 +1,91 @@
+mutation create_binding_affinity($binding_affinity: CreateBindingAffinity!) {
+  create_binding_affinity(input: $binding_affinity) {
+    id
+  }
+}
+mutation create_binding_pose_affinity(
+  $binding_pose_affinity: CreateBindingPoseAffinity!
+) {
+  create_binding_pose_affinity(input: $binding_pose_affinity) {
+    id
+  }
+}
+mutation create_binding_pose_conformer(
+  $binding_pose_conformer: CreateBindingPoseConformer!
+) {
+  create_binding_pose_conformer(input: $binding_pose_conformer) {
+    id
+    name
+    description
+    tags
+  }
+}
+mutation create_binding_pose_conformer_interactions(
+  $binding_pose_conformer_interactions: CreateBindingPoseConformerInteractions!
+) {
+  create_binding_pose_conformer_interactions(
+    input: $binding_pose_conformer_interactions
+  ) {
+    id
+    name
+    description
+    tags
+  }
+}
+mutation create_binding_site_conformer(
+  $binding_site_conformer: CreateBindingSiteConformer!
+) {
+  create_binding_site_conformer(input: $binding_site_conformer) {
+    id
+  }
+}
+mutation create_binding_site_conformer_prediction(
+  $binding_site_conformer_prediction: CreateBindingSiteConformerPrediction!
+) {
+  create_binding_site_conformer_prediction(
+    input: $binding_site_conformer_prediction
+  ) {
+    id
+    #binding_site_conformer
+    #protein_conformer
+    score
+    probability
+    #project_id
+    name
+    description
+    tags
+  }
+}
+mutation create_binding_site_interactions(
+  $binding_site_interactions: CreateBindingSiteInteractions!
+) {
+  create_binding_site_interactions(input: $binding_site_interactions) {
+    id
+    residues
+    interactions {
+      kind
+    }
+    name
+    description
+    tags
+  }
+}
 mutation cancel_module_instance($moduleInstanceId: ModuleInstanceId!) {
   cancel(instance: $moduleInstanceId)
 }
-mutation delete_module_instance($moduleInstanceId: ModuleInstanceId!) {
-    delete_module_instance(module: $moduleInstanceId) { id }
+mutation create_project($project: CreateProject!) {
+  create_project(input: $project) {
+    id
+    name
+    description
+  }
 }
-mutation deploy($module: ModuleInput!) {
+mutation delete_module_instance($moduleInstanceId: ModuleInstanceId!) {
+  delete_module_instance(module: $moduleInstanceId) {
+    id
+  }
+}
+mutation deploy($module: CreateModule!) {
   deploy(module: $module) {
     id
     path
@@ -19,12 +100,8 @@ query module_instances(
   $before: String
   $first: Int
   $last: Int
-  $path: String
-  $name: String
-  $status: ModuleInstanceStatus
-  $tags: [String!]
-  $ids: [ModuleInstanceId!]
-  $in_argument_ids: [ArgumentId!]
+  $sort: ModuleInstanceSort
+  $filter: ModuleInstanceFilter
 ) {
   me {
     account {
@@ -33,12 +110,8 @@ query module_instances(
         last: $last
         after: $after
         before: $before
-        path: $path
-        status: $status
-        name: $name
-        tags: $tags
-        ids: $ids
-        in_arguments: $in_argument_ids
+        sort: $sort
+        filter: $filter
       ) {
         edges {
           cursor
@@ -105,19 +178,26 @@ query module_instances(
     }
   }
 }
-mutation create_project($project: CreateProjectInput!) {
-  create_project(input: $project) {
+mutation create_multiple_sequence_alignment(
+  $input: CreateMultipleSequenceAlignment!
+) {
+  create_msa(input: $input) {
     id
+    name
+    description
+    tags
   }
 }
-mutation create_protein_conformer(
-  $protein_conformer: CreateProteinConformerInput!
-) {
+mutation create_protein_conformer($protein_conformer: CreateProteinConformer!) {
   create_protein_conformer(input: $protein_conformer) {
     id
+    residues
+    name
+    description
+    tags
   }
 }
-mutation create_protein($protein: CreateProteinInput!) {
+mutation create_protein($protein: CreateProtein!) {
   create_protein(input: $protein) {
     id
   }
@@ -153,10 +233,7 @@ query arguments(
   $before: String
   $first: Int
   $last: Int
-  $typeinfo: [Type!]
-  $typequery: [TypeQuery!]
-  $tags: [String!]
-  $resolved: Boolean
+  $filter: ArgumentFilter
 ) {
   me {
     account {
@@ -165,10 +242,7 @@ query arguments(
         last: $last
         after: $after
         before: $before
-        typeinfo: $typeinfo
-        typequery: $typequery
-        tags: $tags
-        resolved: $resolved
+        filter: $filter
       ) {
         pageInfo {
           ...PageInfoFull
@@ -192,7 +266,6 @@ fragment ModuleFull on Module {
   created_at
   deleted_at
   path
-  usage
   ins
   ins_usage
   outs
@@ -230,7 +303,6 @@ query latest_modules(
   $before: String
   $first: Int
   $last: Int
-  $order: OrderBy
   $names: [String!]
 ) {
   latest_modules(
@@ -238,7 +310,6 @@ query latest_modules(
     before: $before
     first: $first
     last: $last
-    order: $order
     names: $names
   ) {
     pageInfo {
@@ -258,16 +329,14 @@ query modules(
   $before: String
   $first: Int
   $last: Int
-  $path: String
-  $tags: [String!]
+  $filter: ModuleFilter
 ) {
   modules(
     first: $first
     last: $last
     after: $after
     before: $before
-    path: $path
-    tags: $tags
+    filter: $filter
   ) {
     pageInfo {
       ...PageInfoFull
@@ -411,58 +480,954 @@ query object_contents($path: UUID!) {
     contents
   }
 }
+
+query smol_libraries(
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+  $sort: SmolLibrarySort
+) {
+  smol_libraries(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    sort: $sort
+  ) {
+    pageInfo {
+      ...PageInfoFull
+    }
+    edges {
+      cursor
+      node {
+        id
+        name
+        description
+        created_at
+        updated_at
+        deleted_at
+        tags
+      }
+    }
+    total_count
+  }
+}
+query project($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        id
+        created_at
+        updated_at
+        deleted_at
+        name
+        description
+        run_id
+        tags
+      }
+    }
+  }
+}
+
+query projects {
+  me {
+    account {
+      projects {
+        pageInfo {
+          ...PageInfoFull
+        }
+        edges {
+          cursor
+          node {
+            id
+            created_at
+            updated_at
+            deleted_at
+            name
+            description
+            run_id
+            tags
+          }
+        }
+        total_count
+      }
+    }
+  }
+}
+
+query run($project_id: ProjectId!, $run_id: RunId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        run(id: $run_id) {
+          id
+          rex
+          result
+          trace
+          module_lock
+          status
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+        }
+      }
+    }
+  }
+}
+
+query runs($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        runs {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              rex
+              result
+              trace
+              module_lock
+              status
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query protein($project_id: ProjectId!, $protein_id: ProteinId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        protein(id: $protein_id) {
+          id
+          sequence
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+        }
+      }
+    }
+  }
+}
+
+query proteins($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        proteins {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              sequence
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query smol($project_id: ProjectId!, $smol_id: SmolId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        smol(id: $smol_id) {
+          id
+          smi
+          inchi
+          data_blocks
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+        }
+      }
+    }
+  }
+}
+
+query smols($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        smols {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              smi
+              inchi
+              data_blocks
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query msa($project_id: ProjectId!, $msa_id: MultipleSequenceAlignmentId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        msa(id: $msa_id) {
+          id
+          a_3m
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+        }
+      }
+    }
+  }
+}
+
+query msas($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        msas {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              a_3m
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query structure($project_id: ProjectId!, $structure_id: StructureId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        structure(id: $structure_id) {
+          id
+          rcsb_id
+          topology
+          residues
+          chains
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+        }
+      }
+    }
+  }
+}
+
+query structures($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        structures {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              rcsb_id
+              topology
+              residues
+              chains
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query protein_conformer(
+  $project_id: ProjectId!
+  $conformer_id: ProteinConformerId!
+) {
+  me {
+    account {
+      project(id: $project_id) {
+        protein_conformer(id: $conformer_id) {
+          id
+          residues
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+          structure {
+            id
+            rcsb_id
+          }
+          protein {
+            id
+            sequence
+          }
+        }
+      }
+    }
+  }
+}
+
+query protein_conformers($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        protein_conformers {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              residues
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+              structure {
+                id
+                rcsb_id
+              }
+              protein {
+                id
+                sequence
+              }
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query smol_conformer($project_id: ProjectId!, $conformer_id: SmolConformerId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        smol_conformer(id: $conformer_id) {
+          id
+          residues
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+          structure {
+            id
+            rcsb_id
+          }
+          smol {
+            id
+            smi
+          }
+        }
+      }
+    }
+  }
+}
+
+query smol_conformers($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        smol_conformers {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              residues
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+              structure {
+                id
+                rcsb_id
+              }
+              smol {
+                id
+                smi
+              }
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query binding_site_interaction(
+  $project_id: ProjectId!
+  $bsi_id: BindingSiteInteractionsId!
+) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_site_interaction(id: $bsi_id) {
+          id
+          residues
+          interactions {
+            kind
+            pi_stack_kind
+            ligand_atom
+            receptor_atom
+          }
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+        }
+      }
+    }
+  }
+}
+
+query binding_site_interactions($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_site_interactions {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              residues
+              interactions {
+                kind
+                pi_stack_kind
+                ligand_atom
+                receptor_atom
+              }
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query binding_site_conformer(
+  $project_id: ProjectId!
+  $bsc_id: BindingSiteConformerId!
+) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_site_conformer(id: $bsc_id) {
+          id
+          bounding_box {
+            min
+            max
+          }
+          surface_atoms
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+          protein_conformer {
+            id
+            residues
+          }
+        }
+      }
+    }
+  }
+}
+
+query binding_site_conformers($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_site_conformers {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              bounding_box {
+                min
+                max
+              }
+              surface_atoms
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+              protein_conformer {
+                id
+                residues
+              }
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query binding_pose_conformer(
+  $project_id: ProjectId!
+  $bpc_id: BindingPoseConformerId!
+) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_pose_conformer(id: $bpc_id) {
+          id
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+          smol_conformer {
+            id
+            residues
+          }
+          binding_site_conformer {
+            id
+            bounding_box {
+              min
+              max
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query binding_pose_conformers($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_pose_conformers {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+              smol_conformer {
+                id
+                residues
+              }
+              binding_site_conformer {
+                id
+                bounding_box {
+                  min
+                  max
+                }
+              }
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query binding_affinity($project_id: ProjectId!, $ba_id: BindingAffinityId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_affinity(id: $ba_id) {
+          id
+          affinity
+          affinity_metric
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+          protein {
+            id
+            sequence
+          }
+          smol {
+            id
+            smi
+          }
+        }
+      }
+    }
+  }
+}
+
+query binding_affinities($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_affinities {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              affinity
+              affinity_metric
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+              protein {
+                id
+                sequence
+              }
+              smol {
+                id
+                smi
+              }
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
+
+query binding_pose_conformer_interaction(
+  $project_id: ProjectId!
+  $bpci_id: BindingPoseConformerInteractionsId!
+) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_pose_conformer_interaction(id: $bpci_id) {
+          id
+          created_at
+          updated_at
+          deleted_at
+          name
+          description
+          run_id
+          tags
+          binding_pose_conformer {
+            id
+          }
+          binding_site_interactions {
+            id
+            residues
+            interactions {
+              kind
+              pi_stack_kind
+              ligand_atom
+              receptor_atom
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query binding_pose_conformer_interactions($project_id: ProjectId!) {
+  me {
+    account {
+      project(id: $project_id) {
+        binding_pose_conformer_interactions {
+          pageInfo {
+            ...PageInfoFull
+          }
+          edges {
+            cursor
+            node {
+              id
+              created_at
+              updated_at
+              deleted_at
+              name
+              description
+              run_id
+              tags
+              binding_pose_conformer {
+                id
+              }
+              binding_site_interactions {
+                id
+                residues
+                interactions {
+                  kind
+                  pi_stack_kind
+                  ligand_atom
+                  receptor_atom
+                }
+              }
+            }
+          }
+          total_count
+        }
+      }
+    }
+  }
+}
 # Retries a failed module instance
 mutation retry(
   $instance: ModuleInstanceId!
   $target: ModuleInstanceTarget!
-  $resources: ModuleInstanceResourcesInput
+  $resources: ResourcesInput
 ) {
   retry(instance: $instance, target: $target, resources: $resources) {
     id
   }
 }
-mutation run($instance: ModuleInstanceInput!) {
-    run(instance: $instance) {
-        id
-        outs {id}
-    }
-}
-mutation create_smol_conformer($smol_conformer: CreateSmolConformerInput!) {
-  create_smol_conformer(input: $smol_conformer) {
+mutation run_module($instance: CreateModuleInstance!) {
+  run(instance: $instance) {
     id
+    outs {
+      id
+    }
   }
 }
-mutation create_smol($smol: CreateSmolInput!) {
+mutation create_smol_conformer($smol_conformer: CreateSmolConformer!) {
+  create_smol_conformer(input: $smol_conformer) {
+    id
+    residues
+    name
+    description
+    tags
+  }
+}
+mutation create_smol($smol: CreateSmol!) {
   create_smol(input: $smol) {
     id
   }
 }
-mutation create_structure($structure: CreateStructureInput!) {
+mutation create_smol_library($smol_library: CreateSmolLibrary!) {
+  create_smol_library(input: $smol_library) {
+    id
+  }
+}
+
+mutation create_smol_library_partition(
+  $smol_library_partition: CreateSmolLibraryPartition!
+) {
+  create_smol_library_partition(input: $smol_library_partition) {
+    id
+  }
+}
+mutation create_structure($structure: CreateStructure!) {
   create_structure(input: $structure) {
     id
   }
 }
-mutation tag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
-    tag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+mutation create_tag($tag: CreateTag!) {
+  create_tag(input: $tag) {
+    id
+    key
+    value
+    tagged_id
+    tagged_type
+    name
+    description
+    tags
+  }
 }
-mutation track_utilization($utilization: ResourceUtilizationInput!) {
+
+mutation tag(
+  $moduleInstanceId: ModuleInstanceId
+  $argumentId: ArgumentId
+  $moduleId: ModuleId
+  $tags: [String!]!
+) {
+  tag(
+    module_instance: $moduleInstanceId
+    argument: $argumentId
+    module: $moduleId
+    tags: $tags
+  )
+}
+mutation track_utilization($utilization: CreateResourceUtilization!) {
   track_module_instance_resource_utilization(utilization: $utilization) {
     id
   }
 }
-mutation untag($moduleInstanceId: ModuleInstanceId, $argumentId: ArgumentId, $moduleId: ModuleId, $tags: [String!]!) {
-    untag(module_instance: $moduleInstanceId, argument: $argumentId, module: $moduleId, tags: $tags)
+mutation untag(
+  $moduleInstanceId: ModuleInstanceId
+  $argumentId: ArgumentId
+  $moduleId: ModuleId
+  $tags: [String!]!
+) {
+  untag(
+    module_instance: $moduleInstanceId
+    argument: $argumentId
+    module: $moduleId
+    tags: $tags
+  )
+}
+mutation update_account_config(
+  $account_id: AccountId!
+  $input: AccountConfigInput!
+) {
+  update_account_config(account_id: $account_id, input: $input) {
+    config_account
+    bucket_config {
+      data_bucket
+      log_bucket
+      bucket_region
+    }
+  }
+}
+mutation update_account_tier($account_id: AccountId!, $tier: AccountTier!) {
+  update_account_tier(account_id: $account_id, tier: $tier)
 }
 mutation update_module_instance(
-  $moduleInstanceUpdate: UpdateModuleInstanceInput!
+  $id: ModuleInstanceId!
+  $moduleInstanceUpdate: PatchModuleInstanceInput!
+  $arguments: [ArgumentInput!]
 ) {
-  update_module_instance(instance_update: $moduleInstanceUpdate) {
+  update_module_instance(
+    arguments_update: $arguments
+    instance_id: $id
+    instance_update: $moduleInstanceUpdate
+  ) {
     id
     status
   }
 }
-mutation upload_large_object($typeinfo: JSON!, $format: ObjectFormat!) {
-  upload_large_object(typeinfo: $typeinfo, format: $format) {
+mutation upload_large_object(
+  $typeinfo: JSON!
+  $format: ObjectFormat!
+  $public: Boolean
+) {
+  upload_large_object(typeinfo: $typeinfo, format: $format, public: $public) {
     upload_url
     descriptor {
       id

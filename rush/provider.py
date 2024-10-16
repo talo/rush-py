@@ -21,6 +21,8 @@ from typing import (
     AsyncIterable,
     Awaitable,
     Callable,
+    Coroutine,
+    Generator,
     Generic,
     Iterable,
     Literal,
@@ -49,18 +51,18 @@ from .graphql_client.base_model import UNSET, UnsetType
 from .graphql_client.client import Client
 from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
-from .graphql_client.input_types import ArgumentInput, ModuleInstanceInput, ModuleInstanceResourcesInput
+from .graphql_client.input_types import ArgumentInput, CreateMetadata, CreateModuleInstance, MetadataFilter, ModuleFilter, ModuleInstanceFilter, ModuleInstanceStatusFilter, ResourcesInput, StringFilter, TagFilter, UuidFilter
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
 from .graphql_client.module_instance_full import ModuleInstanceFullModuleInstance
 from .graphql_client.module_instances import (
     ModuleInstancesMeAccountModuleInstancesEdgesNode,
-    ModuleInstancesMeAccountModuleInstancesPageInfo,
 )
 from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.object_contents import ObjectContentsObjectPath
 from .graphql_client.retry import RetryRetry
-from .graphql_client.run import RunRun
+from .graphql_client.run_module import RunModuleRun
+from .graphql_client.input_types import CreateModuleInstance
 from .typedef import SCALARS, RushType, build_typechecker, type_from_typedef
 
 if sys.version_info >= (3, 12):
@@ -664,7 +666,7 @@ class BaseProvider:
         tags: list[str] | None = None,
         out_tags: list[list[str] | None] | None = None,
         restore: bool | None = None,
-    ) -> RunRun | ModuleInstanceFullModuleInstance:
+    ) -> RunModuleRun | ModuleInstanceFullModuleInstance:
         """
         Run a module with the given inputs and outputs.
         :param path: The path of the module.
@@ -687,7 +689,7 @@ class BaseProvider:
                     instance = edge.node
                     res.append(instance)
                     if len(res) > 1:
-                        self.logger.warn("Multiple module instances found with the same tags and path")
+                        self.logger.warning("Multiple module instances found with the same tags and path")
             if len(res) >= 1:
                 self.logger.info(f"Restoring job from previous run with id {res[0].id}")
                 return res[0]
@@ -714,7 +716,7 @@ class BaseProvider:
         arg_dicts = [gen_arg_dict(input) for input in args]
 
         if not resources:
-            resources = ModuleInstanceResourcesInput(
+            resources = ResourcesInput(
                 storage=max(
                     int(math.ceil(storage_requirements["storage"] / 1024 / 1024)),
                     100,
@@ -725,15 +727,15 @@ class BaseProvider:
         if isinstance(target, str):
             target = ModuleInstanceTarget(target)
         if isinstance(resources, dict):
-            resources = ModuleInstanceResourcesInput(**resources)
-        runres = await self.client.run(
-            ModuleInstanceInput(
+            resources = ResourcesInput(**resources)
+        runres = await self.client.run_module(
+            instance=CreateModuleInstance(
                 path=path,
                 args=arg_dicts,
                 target=target,
                 resources=resources,
-                tags=tags,
                 out_tags=out_tags,
+                metadata=CreateMetadata(tags = tags),
             )
         )
         if not self.history:
@@ -752,17 +754,16 @@ class BaseProvider:
 
     async def module_instances(
         self,
-        first: Union[Optional[int], UnsetType] = UNSET,
-        after: Union[Optional[str], UnsetType] = UNSET,
-        last: Union[Optional[int], UnsetType] = UNSET,
-        before: Union[Optional[str], UnsetType] = UNSET,
-        path: Union[Optional[str], UnsetType] = UNSET,
-        name: Union[Optional[str], UnsetType] = UNSET,
-        status: Union[Optional[ModuleInstanceStatus], UnsetType] = UNSET,
-        tags: Union[Optional[list[str]], UnsetType] = UNSET,
-        ids: Union[Optional[list[ModuleInstanceId]], UnsetType] = UNSET,
+        first: Optional[int] = None,
+        after: Optional[str] = None,
+        last: Optional[int] = None,
+        before: Optional[str] = None,
+        path: Optional[str] = None,
+        status: Optional[ModuleInstanceStatus] = None,
+        tags: Optional[list[str]] = None,
+        ids: Optional[list[ModuleInstanceId]] = None,
     ) -> AsyncIterable[
-        Page[ModuleInstanceFullModuleInstance, ModuleInstancesMeAccountModuleInstancesPageInfo]
+        Page[ModuleInstanceFullModuleInstance, PageInfoFull]
     ]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
@@ -772,7 +773,6 @@ class BaseProvider:
         :param last: Retrieve the last N module instances.
         :param before: Retrieve module instances before a certain cursor.
         :param path: Retrieve module instancees with for the given module path.
-        :param name: Retrieve module instancees with for the given module name.
         :param status: Retrieve module instancees with the specified status (CREATED, RUNNING, etc.).
         :param tags: Retrieve module instancees with the given list of tags.
         :return: A list of filtered module instancee.
@@ -785,7 +785,7 @@ class BaseProvider:
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
         ) -> Page[
-            ModuleInstancesMeAccountModuleInstancesEdgesNode, ModuleInstancesMeAccountModuleInstancesPageInfo
+            ModuleInstancesMeAccountModuleInstancesEdgesNode, PageInfoFull
         ]:
             res = await self.client.module_instances(
                 first=first, after=after, last=last, before=before, **kwargs
@@ -793,20 +793,47 @@ class BaseProvider:
             # FIXME: this passes in mypy but not in pyright
             return res.account.module_instances  # type: ignore
 
+        # construct filter like
+        # filters: list[ModuleFilter] = []
+        # tag_filter = TagFilter()
+        # if isinstance(path, str):
+        #     filters.append(ModuleFilter(path=StringFilter(eq = path)))
+        # if isinstance(tags, list):
+        #     tag_filter.in_ = tags
+        #     filters.append(ModuleFilter(metadata = MetadataFilter(tags=tag_filter)))
+
+        # module_filter = ModuleFilter(all=filters) if filters else None
+        filters: list[ModuleInstanceFilter] = []
+        if isinstance(path, str):
+            filters.append(ModuleInstanceFilter(path=StringFilter(eq=path)))
+        if isinstance(status, ModuleInstanceStatus):
+            filters.append(ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq = status)))
+        if isinstance(tags, list):
+            tag_filter = TagFilter()
+            tag_filter.in_ = tags
+            filters.append(ModuleInstanceFilter(metadata=MetadataFilter(tags=tag_filter)))
+        if isinstance(ids, list):
+            for id in ids:
+              filters.append(ModuleInstanceFilter(id=UuidFilter(eq=id)))
+
+
+        module_instance_filter = ModuleInstanceFilter(all=filters) if filters else None
+
         return self._query_with_pagination(
             return_paged,  # type: ignore
             PageVars(after=after, before=before, first=first, last=last),
-            {"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
+            {"filter": module_instance_filter}
+            #{"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
         )
 
     async def modules(
         self,
-        first: Union[Optional[int], UnsetType] = UNSET,
-        after: Union[Optional[str], UnsetType] = UNSET,
-        last: Union[Optional[int], UnsetType] = UNSET,
-        before: Union[Optional[str], UnsetType] = UNSET,
-        path: Union[Optional[str], UnsetType] = UNSET,
-        tags: Union[Optional[list[str]], UnsetType] = UNSET,
+        first: Optional[int] = None,
+        after: Optional[str] = None,
+        last: Optional[int] = None,
+        before: Optional[str] = None,
+        path: Optional[str] = None,
+        tags: Optional[list[str]] = None,
     ) -> AsyncIterable[Page[ModuleFull, ModulesModulesPageInfo]]:
         """
         Get all modules.
@@ -820,12 +847,21 @@ class BaseProvider:
         :param tags: Retrieve modules with the given list of tags.
         """
 
+        filters: list[ModuleFilter] = []
+        tag_filter = TagFilter()
+        if isinstance(path, str):
+            filters.append(ModuleFilter(path=StringFilter(eq = path)))
+        if isinstance(tags, list):
+            tag_filter.in_ = tags
+            filters.append(ModuleFilter(metadata = MetadataFilter(tags=tag_filter)))
+
+        module_filter = ModuleFilter(all=filters) if filters else None
+
         return self._query_with_pagination(
             self.client.modules,  # type: ignore
             PageVars(after=after, before=before, first=first, last=last),
             {
-                "path": path,
-                "tags": tags,
+                "filter": module_filter,
             },
         )
 
@@ -875,7 +911,7 @@ class BaseProvider:
             ms = await self.modules(path=path)
             mps = [m async for m in ms]
             if len(mps) != 1:
-                self.logger.warn(f"Found no modules for path {path} - remove your lockfile and try again")
+                self.logger.warning(f"Found no modules for path {path} - remove your lockfile and try again")
             else:
                 yield mps[0]
 
@@ -1007,8 +1043,8 @@ class BaseProvider:
                 path: str,
                 module_ins: list[Any],
                 module_outs: list[Any],
-                default_resources: Resources | None,
-            ):
+                default_resources: dict[str, Any] | None,
+            ) -> Callable[..., Coroutine[Any, Any, tuple[BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any], ...]]]:
                 in_types = tuple(type_from_typedef(i) for i in module_ins)
                 typechecker = build_typechecker(*in_types)
 
@@ -1072,11 +1108,6 @@ class BaseProvider:
                         + "`\n\nQDX Type Description:\n\n"
                         + format_module_typedesc(module.typedesc)
                         + "\n"
-                        + (
-                            module.usage.replace("\n\n\n", "\n\n").replace("\n", "  \n")
-                            if module.usage
-                            else ""
-                        )
                         + (ins_docs)
                         + (outs_docs)
                     )
@@ -1170,7 +1201,7 @@ class BaseProvider:
             # use upload url to PUT file to
             httpx.put(
                 meta.upload_url,
-                data=f,
+                content=f.read(),
                 headers={"content-type": "application/octet-stream"},
                 timeout=httpx.Timeout(600),
             )
@@ -1352,7 +1383,7 @@ class BaseProvider:
                     self.typeinfo = remote_arg.typeinfo
                     return remote_arg
                 except GraphQLClientGraphQLMultiError as e:
-                    if e.errors[0].message == "not found":
+                    if e.errors and e.errors[0].message == "not found":
                         if retries > 0:
                             if self.source:
                                 module_instance = await self.provider.module_instance(self.source)
@@ -1405,17 +1436,22 @@ class BaseProvider:
 
             if self.typeinfo:
                 if isinstance(self.typeinfo, dict) and (
-                    (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object")
+                    (self.typeinfo.get("k") == "record" and self.typeinfo.get("n") == "Object")
                     or (
-                        self.typeinfo["k"] == "optional"
-                        and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
+                        self.typeinfo.get("k") == "optional"
+                        and isinstance(self.typeinfo.get("t"), dict)
+                        and self.typeinfo["t"].get("k") == "record"
+                        and self.typeinfo["t"].get("n") == "Object"
                     )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
-                    decode = not (self.value and dict.get(self.value, "format") == "bin")
-                    return await self.provider.download_object(
-                        self.value["path"], filename, filepath, overwrite, signed, decode
-                    )
+                    decode = not (isinstance(self.value, dict) and self.value.get("format") == "bin")
+                    if isinstance(self.value, dict) and "path" in self.value:
+                        return await self.provider.download_object(
+                            self.value["path"], filename, filepath, overwrite, signed, decode
+                        )
+                    else:
+                        raise Exception("Invalid value format for object argument")
                 else:
                     raise Exception("Cannot download non-object argument")
             else:
@@ -1446,8 +1482,8 @@ class BaseProvider:
                                 module_instance = await self.provider.module_instance(remote_arg.source)
                                 raise Exception(
                                     (
-                                        module_instance.failure_reason,
-                                        module_instance.failure_context,
+                                        getattr(module_instance, 'failure_reason', None),
+                                        getattr(module_instance, 'failure_context', None),
                                     )
                                 )
                             raise Exception("Argument was rejected")
@@ -1473,19 +1509,23 @@ class BaseProvider:
                                             print("module running with no progress reported", end="\r")
                                 await asyncio.sleep(1)
                     except GraphQLClientGraphQLMultiError as e:
-                        if e.errors[0].message == "not found":
+                        if e.errors and e.errors[0].message == "not found":
                             await asyncio.sleep(1)
                         else:
                             self.provider.logger.error(e.errors)
                             raise e
 
             # if typeinfo is a dict, check if it is an object, and if so, download it
-            if self.typeinfo and self.provider and self.id and isinstance(self.typeinfo, dict):
-                if (self.typeinfo["k"] == "record" and self.typeinfo["n"] == "Object") or (
-                    self.typeinfo["k"] == "optional"
-                    and (self.typeinfo["t"]["k"] == "record" and self.typeinfo["t"]["n"] == "Object")
+            if isinstance(self.typeinfo, dict) and self.provider and self.id:
+                if (self.typeinfo.get("k") == "record" and self.typeinfo.get("n") == "Object") or (
+                    self.typeinfo.get("k") == "optional"
+                    and isinstance(self.typeinfo.get("t"), dict)
+                    and self.typeinfo["t"].get("k") == "record"
+                    and self.typeinfo["t"].get("n") == "Object"
                 ):
-                    return (await self.provider.object(self.value["path"])).url
+                    if isinstance(self.value, dict) and "path" in self.value:
+                        obj = await self.provider.object(self.value["path"])
+                        return obj.url if obj else None
             return self.value
 
     class BlockingArg(Arg[T]):
@@ -1648,14 +1688,14 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closure(func, n):
+            def closure(func: Callable[..., Awaitable[Any]], name: str):
                 def blocking_func(
-                    *args,
+                    *args: Any,
                     target: Target | None = None,
                     resources: Resources | None = None,
                     tags: list[str] | None = None,
                     restore: bool | None = None,
-                ):
+                ) -> Any:
                     return asyncio_run(
                         func(*args, target=target, resources=resources, tags=tags, restore=restore)
                     )
@@ -1677,14 +1717,14 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closure(func: Callable[..., Awaitable[T]], n):
+            def closure(func: Callable[..., Awaitable[Any]], name: str):
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     r = asyncio_run(func(provider, *args, **kwargs))
                     if isinstance(r, AsyncGenerator):
                         res = []
                         while True:
                             try:
-                                res += [asyncio_run(anext(r))]
+                                res.append(asyncio_run(anext(r)))
                             except StopAsyncIteration:
                                 return res
                     return r
@@ -1702,15 +1742,15 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
     for name, func in BaseProvider.__dict__.items():
         if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
 
-            def closure(func: Callable[..., Awaitable[T]], n):
-                def blocking_func(*args: Any, **kwargs: Any) -> Any:
+            def closure(func: Callable[..., AsyncGenerator[Any, None]], name: str):
+                def blocking_func(*args: Any, **kwargs: Any) -> Generator[Any, None, None]:
                     r = func(provider, *args, **kwargs)
                     if isinstance(r, AsyncGenerator):
                         try:
                             hn = asyncio_run(anext(r))
                         except StopAsyncIteration:
                             return
-                        while hn:
+                        while True:
                             yield hn
                             try:
                                 hn = asyncio_run(anext(r))

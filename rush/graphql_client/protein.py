@@ -4,24 +4,38 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import Field
-
 from .base_model import BaseModel
 
 
 class Protein(BaseModel):
-    protein: Optional["ProteinProtein"]
+    me: "ProteinMe"
 
 
-class ProteinProtein(BaseModel):
+class ProteinMe(BaseModel):
+    account: "ProteinMeAccount"
+
+
+class ProteinMeAccount(BaseModel):
+    project: "ProteinMeAccountProject"
+
+
+class ProteinMeAccountProject(BaseModel):
+    protein: "ProteinMeAccountProjectProtein"
+
+
+class ProteinMeAccountProjectProtein(BaseModel):
     id: Any
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    deleted_at: Optional[datetime] = Field(alias="deletedAt")
-    data: Optional["ProteinProteinData"]
-    tags: List[str]
-
-
-class ProteinProteinData(BaseModel):
-    name: str
     sequence: str
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime]
+    name: Optional[str]
+    description: Optional[str]
+    run_id: Optional[Any]
+    tags: Optional[List[str]]
+
+
+Protein.model_rebuild()
+ProteinMe.model_rebuild()
+ProteinMeAccount.model_rebuild()
+ProteinMeAccountProject.model_rebuild()
