@@ -167,6 +167,10 @@ class EnumKind(Generic[T], RushType[T]):
             # FIXME: make case sensitive once enum serialization case bug is fixed
             if any([x.lower().replace("_", "") == other.lower().replace("_", "") for x in self.literals]):
                 return (True, None)
+            if any(
+                [x.keys()[0].lower().replace("_", "").lower().replace("_", "") == other for x in self.tags]
+            ):
+                return (True, None)
 
         return (False, f"Unknown enum variant, not list or dict {other}")
 
