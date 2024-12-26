@@ -51,7 +51,19 @@ from .graphql_client.base_model import UNSET, UnsetType
 from .graphql_client.client import Client
 from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat
 from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
-from .graphql_client.input_types import ArgumentInput, CreateMetadata, CreateModuleInstance, MetadataFilter, ModuleFilter, ModuleInstanceFilter, ModuleInstanceStatusFilter, ResourcesInput, StringFilter, TagFilter, UuidFilter
+from .graphql_client.input_types import (
+    ArgumentInput,
+    CreateMetadata,
+    CreateModuleInstance,
+    MetadataFilter,
+    ModuleFilter,
+    ModuleInstanceFilter,
+    ModuleInstanceStatusFilter,
+    ResourcesInput,
+    StringFilter,
+    TagFilter,
+    UuidFilter,
+)
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
 from .graphql_client.module_instance_full import ModuleInstanceFullModuleInstance
@@ -735,7 +747,7 @@ class BaseProvider:
                 target=target,
                 resources=resources,
                 out_tags=out_tags,
-                metadata=CreateMetadata(tags = tags),
+                metadata=CreateMetadata(tags=tags),
             )
         )
         if not self.history:
@@ -762,9 +774,7 @@ class BaseProvider:
         status: Optional[ModuleInstanceStatus] = None,
         tags: Optional[list[str]] = None,
         ids: Optional[list[ModuleInstanceId]] = None,
-    ) -> AsyncIterable[
-        Page[ModuleInstanceFullModuleInstance, PageInfoFull]
-    ]:
+    ) -> AsyncIterable[Page[ModuleInstanceFullModuleInstance, PageInfoFull]]:
         """
         Retrieve a list of module instancees filtered by the given parameters.
 
@@ -784,9 +794,7 @@ class BaseProvider:
             first: Union[Optional[int], UnsetType] = UNSET,
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
-        ) -> Page[
-            ModuleInstancesMeAccountModuleInstancesEdgesNode, PageInfoFull
-        ]:
+        ) -> Page[ModuleInstancesMeAccountModuleInstancesEdgesNode, PageInfoFull]:
             res = await self.client.module_instances(
                 first=first, after=after, last=last, before=before, **kwargs
             )
@@ -807,15 +815,14 @@ class BaseProvider:
         if isinstance(path, str):
             filters.append(ModuleInstanceFilter(path=StringFilter(eq=path)))
         if isinstance(status, ModuleInstanceStatus):
-            filters.append(ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq = status)))
+            filters.append(ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq=status)))
         if isinstance(tags, list):
             tag_filter = TagFilter()
             tag_filter.in_ = tags
             filters.append(ModuleInstanceFilter(metadata=MetadataFilter(tags=tag_filter)))
         if isinstance(ids, list):
             for id in ids:
-              filters.append(ModuleInstanceFilter(id=UuidFilter(eq=id)))
-
+                filters.append(ModuleInstanceFilter(id=UuidFilter(eq=id)))
 
         module_instance_filter = ModuleInstanceFilter(all=filters) if filters else None
 
@@ -823,7 +830,7 @@ class BaseProvider:
             return_paged,  # type: ignore
             PageVars(after=after, before=before, first=first, last=last),
             {"filter": module_instance_filter}
-            #{"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
+            # {"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
         )
 
     async def modules(
@@ -850,10 +857,10 @@ class BaseProvider:
         filters: list[ModuleFilter] = []
         tag_filter = TagFilter()
         if isinstance(path, str):
-            filters.append(ModuleFilter(path=StringFilter(eq = path)))
+            filters.append(ModuleFilter(path=StringFilter(eq=path)))
         if isinstance(tags, list):
             tag_filter.in_ = tags
-            filters.append(ModuleFilter(metadata = MetadataFilter(tags=tag_filter)))
+            filters.append(ModuleFilter(metadata=MetadataFilter(tags=tag_filter)))
 
         module_filter = ModuleFilter(all=filters) if filters else None
 
@@ -1044,7 +1051,9 @@ class BaseProvider:
                 module_ins: list[Any],
                 module_outs: list[Any],
                 default_resources: dict[str, Any] | None,
-            ) -> Callable[..., Coroutine[Any, Any, tuple[BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any], ...]]]:
+            ) -> Callable[
+                ..., Coroutine[Any, Any, tuple[BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any], ...]]
+            ]:
                 in_types = tuple(type_from_typedef(i) for i in module_ins)
                 typechecker = build_typechecker(*in_types)
 
@@ -1160,6 +1169,11 @@ class BaseProvider:
                         if isinstance(value, Path):
                             obj = await self.upload(value, in_types[i].members[key])
                             arg[key] = obj.object
+                if isinstance(arg, list):
+                    for j, value in enumerate(arg):
+                        if isinstance(value, Path):
+                            obj = await self.upload(value, in_types[i]["t"])
+                            arg[j] = obj.object
                 newargs.append(arg)
         return tuple(newargs)
 
@@ -1443,9 +1457,17 @@ class BaseProvider:
                         and self.typeinfo["t"].get("k") == "record"
                         and self.typeinfo["t"].get("n") == "Object"
                     )
+                    or (
+                        self.typeinfo.get("k") == "fallible"
+                        and isinstance(self.typeinfo.get("t"), list)
+                        and self.typeinfo["t"][0].get("k") == "record"
+                        and self.typeinfo["t"][0].get("n") == "Object"
+                    )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
                     decode = not (isinstance(self.value, dict) and self.value.get("format") == "bin")
+                    if isinstance(self.value, dict) and "Ok" in self.value:
+                        self.value = self.value["Ok"]
                     if isinstance(self.value, dict) and "path" in self.value:
                         return await self.provider.download_object(
                             self.value["path"], filename, filepath, overwrite, signed, decode
@@ -1482,8 +1504,8 @@ class BaseProvider:
                                 module_instance = await self.provider.module_instance(remote_arg.source)
                                 raise Exception(
                                     (
-                                        getattr(module_instance, 'failure_reason', None),
-                                        getattr(module_instance, 'failure_context', None),
+                                        getattr(module_instance, "failure_reason", None),
+                                        getattr(module_instance, "failure_context", None),
                                     )
                                 )
                             raise Exception("Argument was rejected")
