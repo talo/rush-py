@@ -1,0 +1,118 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+fragment ModuleFull on Module {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    path
+    ins
+    ins_usage
+    outs
+    outs_usage
+    typedesc
+    targets
+    resource_bounds {
+        gpu_min
+        gpu_max
+        gpu_hint
+        gpu_mem_min
+        gpu_mem_max
+        gpu_mem_hint
+        cpu_min
+        cpu_max
+        cpu_hint
+        node_min
+        node_max
+        node_hint
+        mem_min
+        mem_max
+        storage_min
+        storage_max
+    }
+}
+
+query latest_modules(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $names: [String!]
+) {
+    latest_modules(
+        after: $after
+        before: $before
+        first: $first
+        last: $last
+        names: $names
+    ) {
+        pageInfo {
+            ...PageInfoFull
+        }
+        edges {
+            cursor
+            node {
+                ...ModuleFull
+            }
+        }
+    }
+}
+
+query modules(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $module_filter: ModuleFilter
+) {
+    modules(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        filter: $module_filter
+    ) {
+        pageInfo {
+            ...PageInfoFull
+        }
+        edges {
+            cursor
+            node {
+                ...ModuleFull
+            }
+        }
+    }
+}
+
+query module($id: ModuleId!) {
+    module(id: $id) {
+        ...ModuleFull
+    }
+}
+
+mutation deploy($module: CreateModule!) {
+    deploy(module: $module) {
+        ...ModuleFull
+    }
+}
+
+mutation destroy($moduleId: ModuleId!) {
+    destroy(module: $moduleId) {
+        id
+    }
+}
+
+mutation tag_module($moduleId: ModuleId, $tags: [String!]!) {
+    tag(module: $moduleId, tags: $tags)
+}
+
+mutation untag_module($moduleId: ModuleId, $tags: [String!]!) {
+    untag(module: $moduleId, tags: $tags)
+}

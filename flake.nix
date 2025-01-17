@@ -8,11 +8,10 @@
   };
 
   outputs =
-    inputs@{
-      flake-parts,
-      poetry2nix,
-      qdx-python-flake-parts,
-      ...
+    inputs@{ flake-parts
+    , poetry2nix
+    , qdx-python-flake-parts
+    , ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ qdx-python-flake-parts.flakeModule ];
@@ -30,7 +29,7 @@
             overrides = inputs.qdx-python-flake-parts.lib.withPoetryOverrides (
               self: super: { pip = pkgs.python312Packages.pip; }
             );
-            extraPackages = [ pkgs.quarto ];
+            extraPackages = [ pkgs.quarto pkgs.ruff ];
             blackCheck = {
               extraCmd = "black ./nbs --config pyproject.ipynb.toml --ipynb --check";
             };

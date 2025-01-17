@@ -1,79 +1,33 @@
-# Indicates that an Input Object is a OneOf Input Object (and thus requires
-#                         exactly one of its field be provided)
+"""
+Indicates that an Input Object is a OneOf Input Object (and thus requires
+                        exactly one of its field be provided)
+"""
 directive @oneOf on INPUT_OBJECT
 
-type Account {
+type Account implements Entity {
   id: AccountId!
-
-  # When the entity was created
   created_at: DateTime!
-
-  # Last time the entity was updated
   updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
   run_id: RunId
-
-  # User defined tags for the entity
   tags: [String!]
   tier: AccountTier!
   config: AccountConfig
+  source_run: Run
+  module_instance(id: ModuleInstanceId!): ModuleInstance!
   object_descriptor(id: ObjectDescriptorId!): ObjectDescriptor!
-  object_descriptors(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ObjectDescriptorFilter
-    sort: ObjectDescriptorSort
-  ): ObjectDescriptorConnection!
   project(id: ProjectId!): Project!
-  projects(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProjectFilter
-    sort: ProjectSort
-  ): ProjectConnection!
-  resource_utilization(
-    from: DateTime
-    to: DateTime
-  ): [ResourceUtilizationReport!]!
-  module_instances(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    sort: ModuleInstanceSort
-    filter: ModuleInstanceFilter
-  ): ModuleInstanceConnection!
-
-  # DEPRECATED: Will return empty list, to be replaced by the tags endpoint in future
-  module_instance_tags(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-    contains: String
-    min_count: Int
-  ): V1TagConnection!
-  arguments(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    sort: ArgumentSort
-    filter: ArgumentFilter
-  ): ArgumentConnection!
+  argument(id: ArgumentId!): Argument!
+  module_instances(after: String, before: String, first: Int, last: Int, filter: ModuleInstanceFilter, sort: ModuleInstanceSort): ModuleInstanceConnection!
+  arguments(after: String, before: String, first: Int, last: Int, filter: ArgumentFilter, sort: ArgumentSort): ArgumentConnection!
+  credits(after: String, before: String, first: Int, last: Int, filter: CreditFilter, sort: CreditSort): CreditConnection!
+  object_descriptors(after: String, before: String, first: Int, last: Int, filter: ObjectDescriptorFilter, sort: ObjectDescriptorSort): ObjectDescriptorConnection!
+  projects(after: String, before: String, first: Int, last: Int, filter: ProjectFilter, sort: ProjectSort): ProjectConnection!
+  credit_balance: CreditReport!
+  resource_utilization(from: DateTime, to: DateTime): [ResourceUtilizationReport!]!
+  module_instance_tags(after: String, before: String, first: Int, last: Int, order: OrderBy, contains: String, min_count: Int): V1TagConnection!
 }
 
 type AccountBucketConfig {
@@ -108,6 +62,31 @@ enum AccountTier {
   ENTERPRISE
 }
 
+"""
+The SAR models can predict any sort of ground truth value, i.e. "Activity"
+NOTE: async_graphql automatically converts enum values to SCREAMING_CAMEL_CASE,
+so e.g. in graphql you'll need to pass BINDING_AFFINITY, TOXICITY, or FUNCTIONAL.
+This doesn't affect the way the values are stored in the db, i.e. as lowercase.
+"""
+enum ActivityType {
+  BINDING_AFFINITY
+  TOXICITY
+  FUNCTIONAL
+}
+
+input ActivityTypeFilter {
+  eq: ActivityType
+  ne: ActivityType
+}
+
+type Answer {
+  content: [Content!]!
+}
+
+input AnswerInput {
+  content: [ContentInput!]!
+}
+
 type Argument {
   id: ArgumentId!
   rejected_at: DateTime
@@ -117,44 +96,46 @@ type Argument {
   value: JSON
   source: ModuleInstanceId
 
-  # When the entity was created
+  """When the entity was created"""
   created_at: DateTime!
 
-  # Last time the entity was updated
+  """Last time the entity was updated"""
   updated_at: DateTime!
 
-  # When the entity was deleted, is used to determine if a module is soft-deleted
+  """
+  When the entity was deleted, is used to determine if a module is soft-deleted
+  """
   deleted_at: DateTime
 
-  # User friendly name for the entity
+  """User friendly name for the entity"""
   name: String
 
-  # User friendly description for the entity
+  """User friendly description for the entity"""
   description: String
   run_id: RunId
 
-  # User defined tags for the entity
+  """User defined tags for the entity"""
   tags: [String!]
 }
 
 type ArgumentConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ArgumentEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Argument!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ArgumentEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Argument!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -188,59 +169,445 @@ input ArgumentSort {
 
 scalar AtomRef
 
-type BindingAffinity {
-  id: BindingAffinityId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
+type Benchmark implements Entity {
+  id: BenchmarkId!
+  evaluation_script: String
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
+  source_run: Run
+  data(after: String, before: String, first: Int, last: Int, filter: BenchmarkDataFilter, sort: BenchmarkDataSort): BenchmarkDataConnection!
+}
+
+type BenchmarkArg {
+  entity: BenchmarkEntityType!
+  id: UUID!
+}
+
+input BenchmarkArgInput {
+  entity: BenchmarkEntityType!
+  id: UUID!
+}
+
+type BenchmarkConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BenchmarkEdge!]!
+
+  """A list of nodes."""
+  nodes: [Benchmark!]!
+  total_count: Int!
+}
+
+type BenchmarkData implements Entity {
+  id: BenchmarkDataId!
+  inputs: [BenchmarkArg!]!
+  outputs: [BenchmarkArg!]!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  benchmark: Benchmark!
+  input_entities: [Entity!]!
+  output_entities: [Entity!]!
+}
+
+type BenchmarkDataConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BenchmarkDataEdge!]!
+
+  """A list of nodes."""
+  nodes: [BenchmarkData!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type BenchmarkDataEdge {
+  """The item at the end of the edge"""
+  node: BenchmarkData!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input BenchmarkDataFilter {
+  all: [BenchmarkDataFilter!]
+  any: [BenchmarkDataFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  benchmark_id: UuidFilter
+}
+
+scalar BenchmarkDataId
+
+input BenchmarkDataSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  benchmark_id: UuidSort
+}
+
+"""An edge in a connection."""
+type BenchmarkEdge {
+  """The item at the end of the edge"""
+  node: Benchmark!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+enum BenchmarkEntityType {
+  PROTEIN
+  PROTEIN_CONFORMER
+  SMOL
+  STRUCTURE
+  BINDING_AFFINITY
+}
+
+input BenchmarkFilter {
+  all: [BenchmarkFilter!]
+  any: [BenchmarkFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  evaluation_script: StringFilter
+}
+
+scalar BenchmarkId
+
+input BenchmarkSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+}
+
+type BenchmarkSubmission implements Entity {
+  id: BenchmarkSubmissionId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  benchmark: Benchmark!
+  scores(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionScoreFilter, sort: BenchmarkSubmissionScoreSort): BenchmarkSubmissionScoreConnection!
+  data(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionDataFilter, sort: BenchmarkSubmissionDataSort): BenchmarkSubmissionDataConnection!
+}
+
+type BenchmarkSubmissionConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BenchmarkSubmissionEdge!]!
+
+  """A list of nodes."""
+  nodes: [BenchmarkSubmission!]!
+  total_count: Int!
+}
+
+type BenchmarkSubmissionData implements Entity {
+  id: BenchmarkSubmissionDataId!
+  outputs: [BenchmarkArg!]!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  benchmark_data: BenchmarkData!
+  benchmark_submission: BenchmarkSubmission!
+  scores(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionDataScoreFilter, sort: BenchmarkSubmissionDataScoreSort): BenchmarkSubmissionDataScoreConnection!
+  output_entities: [Entity!]!
+}
+
+type BenchmarkSubmissionDataConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BenchmarkSubmissionDataEdge!]!
+
+  """A list of nodes."""
+  nodes: [BenchmarkSubmissionData!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type BenchmarkSubmissionDataEdge {
+  """The item at the end of the edge"""
+  node: BenchmarkSubmissionData!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input BenchmarkSubmissionDataFilter {
+  all: [BenchmarkSubmissionDataFilter!]
+  any: [BenchmarkSubmissionDataFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  benchmark_data_id: UuidFilter
+  benchmark_submission_id: UuidFilter
+}
+
+scalar BenchmarkSubmissionDataId
+
+type BenchmarkSubmissionDataScore {
+  id: BenchmarkSubmissionDataScoreId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  benchmark_submission_data: BenchmarkSubmissionData!
+}
+
+type BenchmarkSubmissionDataScoreConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BenchmarkSubmissionDataScoreEdge!]!
+
+  """A list of nodes."""
+  nodes: [BenchmarkSubmissionDataScore!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type BenchmarkSubmissionDataScoreEdge {
+  """The item at the end of the edge"""
+  node: BenchmarkSubmissionDataScore!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input BenchmarkSubmissionDataScoreFilter {
+  all: [BenchmarkSubmissionDataScoreFilter!]
+  any: [BenchmarkSubmissionDataScoreFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  benchmark_submission_data_id: UuidFilter
+}
+
+scalar BenchmarkSubmissionDataScoreId
+
+input BenchmarkSubmissionDataScoreSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  benchmark_submission_data_id: UuidSort
+}
+
+input BenchmarkSubmissionDataSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  benchmark_data_id: UuidSort
+  benchmark_submission_id: UuidSort
+}
+
+"""An edge in a connection."""
+type BenchmarkSubmissionEdge {
+  """The item at the end of the edge"""
+  node: BenchmarkSubmission!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input BenchmarkSubmissionFilter {
+  all: [BenchmarkSubmissionFilter!]
+  any: [BenchmarkSubmissionFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  benchmark_id: UuidFilter
+}
+
+scalar BenchmarkSubmissionId
+
+type BenchmarkSubmissionScore {
+  id: BenchmarkSubmissionScoreId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  benchmark_submission: BenchmarkSubmission!
+}
+
+type BenchmarkSubmissionScoreConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BenchmarkSubmissionScoreEdge!]!
+
+  """A list of nodes."""
+  nodes: [BenchmarkSubmissionScore!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type BenchmarkSubmissionScoreEdge {
+  """The item at the end of the edge"""
+  node: BenchmarkSubmissionScore!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input BenchmarkSubmissionScoreFilter {
+  all: [BenchmarkSubmissionScoreFilter!]
+  any: [BenchmarkSubmissionScoreFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  benchmark_submission_id: UuidFilter
+}
+
+scalar BenchmarkSubmissionScoreId
+
+input BenchmarkSubmissionScoreSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  benchmark_submission_id: UuidSort
+}
+
+input BenchmarkSubmissionSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  benchmark_id: UuidSort
+}
+
+type BindingAffinity implements Entity {
+  id: BindingAffinityId!
   affinity: Float!
   affinity_metric: String!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   protein: Protein!
   smol: Smol!
-  binding_pose_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseAffinityFilter
-    sort: BindingPoseAffinitySort
-  ): BindingPoseAffinityConnection!
+  binding_pose_affinities(after: String, before: String, first: Int, last: Int, filter: BindingPoseAffinityFilter, sort: BindingPoseAffinitySort): BindingPoseAffinityConnection!
+  binding_affinity_activities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityActivityFilter, sort: BindingAffinityActivitySort): BindingAffinityActivityConnection!
+}
+
+type BindingAffinityActivity implements Entity {
+  id: BindingAffinityActivityId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  sar_program: SarProgram!
+  binding_affinity: BindingAffinity!
+}
+
+type BindingAffinityActivityConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [BindingAffinityActivityEdge!]!
+
+  """A list of nodes."""
+  nodes: [BindingAffinityActivity!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type BindingAffinityActivityEdge {
+  """The item at the end of the edge"""
+  node: BindingAffinityActivity!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input BindingAffinityActivityFilter {
+  all: [BindingAffinityActivityFilter!]
+  any: [BindingAffinityActivityFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  sar_program_id: UuidFilter
+  binding_affinity_id: UuidFilter
+}
+
+scalar BindingAffinityActivityId
+
+input BindingAffinityActivitySort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  sar_program_id: UuidSort
+  binding_affinity_id: UuidSort
 }
 
 type BindingAffinityConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [BindingAffinityEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [BindingAffinity!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type BindingAffinityEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: BindingAffinity!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -270,49 +637,37 @@ input BindingAffinitySort {
   smol_id: UuidSort
 }
 
-type BindingPoseAffinity {
+type BindingPoseAffinity implements Entity {
   id: BindingPoseAffinityId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
+  source_run: Run
   binding_affinity: BindingAffinity!
   binding_pose_conformer: BindingPoseConformer!
 }
 
 type BindingPoseAffinityConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [BindingPoseAffinityEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [BindingPoseAffinity!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type BindingPoseAffinityEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: BindingPoseAffinity!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -338,65 +693,39 @@ input BindingPoseAffinitySort {
   binding_pose_conformer_id: UuidSort
 }
 
-type BindingPoseConformer {
+type BindingPoseConformer implements Entity {
   id: BindingPoseConformerId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
+  source_run: Run
   smol_conformer: SmolConformer!
   binding_site_conformer: BindingSiteConformer!
-  binding_pose_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseAffinityFilter
-    sort: BindingPoseAffinitySort
-  ): BindingPoseAffinityConnection!
-  binding_pose_conformer_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerInteractionsFilter
-    sort: BindingPoseConformerInteractionsSort
-  ): BindingPoseConformerInteractionsConnection!
+  binding_pose_affinities(after: String, before: String, first: Int, last: Int, filter: BindingPoseAffinityFilter, sort: BindingPoseAffinitySort): BindingPoseAffinityConnection!
+  binding_pose_conformer_interactions(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerInteractionsFilter, sort: BindingPoseConformerInteractionsSort): BindingPoseConformerInteractionsConnection!
 }
 
 type BindingPoseConformerConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [BindingPoseConformerEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [BindingPoseConformer!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type BindingPoseConformerEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: BindingPoseConformer!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -413,49 +742,37 @@ input BindingPoseConformerFilter {
 
 scalar BindingPoseConformerId
 
-type BindingPoseConformerInteractions {
+type BindingPoseConformerInteractions implements Entity {
   id: BindingPoseConformerInteractionsId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
+  source_run: Run
   binding_pose_conformer: BindingPoseConformer!
   binding_site_interactions: BindingSiteInteractions!
 }
 
 type BindingPoseConformerInteractionsConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [BindingPoseConformerInteractionsEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [BindingPoseConformerInteractions!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type BindingPoseConformerInteractionsEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: BindingPoseConformerInteractions!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -500,58 +817,41 @@ input BindingSiteBoundingBoxInput {
   max: Xyzf32!
 }
 
-type BindingSiteConformer {
+type BindingSiteConformer implements Entity {
   id: BindingSiteConformerId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   bounding_box: BindingSiteBoundingBox!
   surface_atoms: [Int!]
+  score: Float
+  probability: Float
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   protein_conformer: ProteinConformer!
-  binding_pose_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerFilter
-    sort: BindingPoseConformerSort
-  ): BindingPoseConformerConnection!
+  binding_pose_conformers(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerFilter, sort: BindingPoseConformerSort): BindingPoseConformerConnection!
 }
 
 type BindingSiteConformerConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [BindingSiteConformerEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [BindingSiteConformer!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type BindingSiteConformerEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: BindingSiteConformer!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -562,84 +862,12 @@ input BindingSiteConformerFilter {
   metadata: MetadataFilter
   project_id: UuidFilter
   account_id: UuidFilter
+  score: F32Filter
+  probability: F32Filter
   protein_conformer_id: UuidFilter
 }
 
 scalar BindingSiteConformerId
-
-type BindingSiteConformerPrediction {
-  id: BindingSiteConformerPredictionId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
-  score: Float!
-  probability: Float!
-  binding_site_conformer: BindingSiteConformer!
-  protein_conformer: ProteinConformer!
-}
-
-type BindingSiteConformerPredictionConnection {
-  # Information to aid in pagination.
-  pageInfo: PageInfo!
-
-  # A list of edges.
-  edges: [BindingSiteConformerPredictionEdge!]!
-
-  # A list of nodes.
-  nodes: [BindingSiteConformerPrediction!]!
-  total_count: Int!
-}
-
-# An edge in a connection.
-type BindingSiteConformerPredictionEdge {
-  # The item at the end of the edge
-  node: BindingSiteConformerPrediction!
-
-  # A cursor for use in pagination
-  cursor: String!
-}
-
-input BindingSiteConformerPredictionFilter {
-  all: [BindingSiteConformerPredictionFilter!]
-  any: [BindingSiteConformerPredictionFilter!]
-  id: UuidFilter
-  metadata: MetadataFilter
-  project_id: UuidFilter
-  account_id: UuidFilter
-  score: F32Filter
-  probability: F32Filter
-  binding_site_conformer_id: UuidFilter
-  protein_conformer_id: UuidFilter
-}
-
-scalar BindingSiteConformerPredictionId
-
-input BindingSiteConformerPredictionSort {
-  id: UuidSort
-  metadata: MetadataSort
-  project_id: UuidSort
-  account_id: UuidSort
-  score: F32Sort
-  probability: F32Sort
-  binding_site_conformer_id: UuidSort
-  protein_conformer_id: UuidSort
-}
 
 input BindingSiteConformerSort {
   id: UuidSort
@@ -650,86 +878,106 @@ input BindingSiteConformerSort {
 }
 
 type BindingSiteInteraction {
-  # Kind of interaction between the ligand and the receptor.
+  """Kind of interaction between the ligand and the receptor."""
   kind: BindingSiteInteractionKind!
 
-  # In pi-stacking interactions what kind of stacking is happening?
+  """In pi-stacking interactions what kind of stacking is happening?"""
   pi_stack_kind: PiStackKind
 
-  # The ligand in the `Assembly` that is interacting with the receptor.
+  """The ligand in the `Assembly` that is interacting with the receptor."""
   ligand: ResidueRef!
 
-  # The atom in the ligand that is interacting with the receptor. Ignored
-  # for salt bridge and pi-interactions.
+  """
+  The atom in the ligand that is interacting with the receptor. Ignored
+  for salt bridge and pi-interactions.
+  """
   ligand_atom: AtomRef!
 
-  # The co-ordinates of the interaction in the ligand. Often this is the
-  # co-ordinate of the `ligand_atom` but it is sometimes different (for
-  # example, in pi-stacking interactions).
+  """
+  The co-ordinates of the interaction in the ligand. Often this is the
+  co-ordinate of the `ligand_atom` but it is sometimes different (for
+  example, in pi-stacking interactions).
+  """
   ligand_xyz: Xyzf32!
 
-  # The residue in the `Assembly` that is interacting with the ligand.
+  """The residue in the `Assembly` that is interacting with the ligand."""
   receptor_residue: ResidueRef!
 
-  # The atom in the receptor that is interacting with the ligand. Ignored
-  # for salt bridge and pi-interactions.
+  """
+  The atom in the receptor that is interacting with the ligand. Ignored
+  for salt bridge and pi-interactions.
+  """
   receptor_atom: AtomRef!
 
-  # The co-ordinates of the interaction in the receptor. Often this is the
-  # co-ordinate of the `receptor_atom` but it is sometimes different (for
-  # example, in pi-stacking interactions).
+  """
+  The co-ordinates of the interaction in the receptor. Often this is the
+  co-ordinate of the `receptor_atom` but it is sometimes different (for
+  example, in pi-stacking interactions).
+  """
   receptor_xyz: Xyzf32!
 
-  # In hydrogen bonds and water bridges is the receptor the hydrogen bond
-  # donor?
+  """
+  In hydrogen bonds and water bridges is the receptor the hydrogen bond
+  donor?
+  """
   receptor_is_donor: Boolean!
 
-  # In pi-cation interactions is the receptor providing the charge?
+  """In pi-cation interactions is the receptor providing the charge?"""
   receptor_is_charged: Boolean!
 
-  # In salt bridges is the receptor carrying the positive charge?
+  """In salt bridges is the receptor carrying the positive charge?"""
   receptor_is_positively_charged: Boolean!
 }
 
 input BindingSiteInteractionInput {
-  # Kind of interaction between the ligand and the receptor.
+  """Kind of interaction between the ligand and the receptor."""
   kind: BindingSiteInteractionKind!
 
-  # In pi-stacking interactions what kind of stacking is happening?
+  """In pi-stacking interactions what kind of stacking is happening?"""
   pi_stack_kind: PiStackKind
 
-  # The ligand in the `Assembly` that is interacting with the receptor.
+  """The ligand in the `Assembly` that is interacting with the receptor."""
   ligand: ResidueRef!
 
-  # The atom in the ligand that is interacting with the receptor. Ignored
-  # for salt bridge and pi-interactions.
+  """
+  The atom in the ligand that is interacting with the receptor. Ignored
+  for salt bridge and pi-interactions.
+  """
   ligand_atom: AtomRef!
 
-  # The co-ordinates of the interaction in the ligand. Often this is the
-  # co-ordinate of the `ligand_atom` but it is sometimes different (for
-  # example, in pi-stacking interactions).
+  """
+  The co-ordinates of the interaction in the ligand. Often this is the
+  co-ordinate of the `ligand_atom` but it is sometimes different (for
+  example, in pi-stacking interactions).
+  """
   ligand_xyz: Xyzf32!
 
-  # The residue in the `Assembly` that is interacting with the ligand.
+  """The residue in the `Assembly` that is interacting with the ligand."""
   receptor_residue: ResidueRef!
 
-  # The atom in the receptor that is interacting with the ligand. Ignored
-  # for salt bridge and pi-interactions.
+  """
+  The atom in the receptor that is interacting with the ligand. Ignored
+  for salt bridge and pi-interactions.
+  """
   receptor_atom: AtomRef!
 
-  # The co-ordinates of the interaction in the receptor. Often this is the
-  # co-ordinate of the `receptor_atom` but it is sometimes different (for
-  # example, in pi-stacking interactions).
+  """
+  The co-ordinates of the interaction in the receptor. Often this is the
+  co-ordinate of the `receptor_atom` but it is sometimes different (for
+  example, in pi-stacking interactions).
+  """
   receptor_xyz: Xyzf32!
 
-  # In hydrogen bonds and water bridges is the receptor the hydrogen bond
-  # donor?
+  """
+  In hydrogen bonds and water bridges is the receptor the hydrogen bond
+  donor?
+  """
   receptor_is_donor: Boolean!
 
-  # In pi-cation interactions is the receptor providing the charge?
+  """In pi-cation interactions is the receptor providing the charge?"""
   receptor_is_charged: Boolean!
 
-  # In salt bridges is the receptor carrying the positive charge?
+  """In salt bridges is the receptor carrying the positive charge?"""
   receptor_is_positively_charged: Boolean!
 }
 
@@ -745,58 +993,39 @@ enum BindingSiteInteractionKind {
   METAL_COMPLEX
 }
 
-type BindingSiteInteractions {
+type BindingSiteInteractions implements Entity {
   id: BindingSiteInteractionsId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   residues: [Int!]!
   interactions: [BindingSiteInteraction!]!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   protein: Protein!
-  binding_pose_conformer_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerInteractionsFilter
-    sort: BindingPoseConformerInteractionsSort
-  ): BindingPoseConformerInteractionsConnection!
+  binding_pose_conformer_interactions(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerInteractionsFilter, sort: BindingPoseConformerInteractionsSort): BindingPoseConformerInteractionsConnection!
 }
 
 type BindingSiteInteractionsConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [BindingSiteInteractionsEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [BindingSiteInteractions!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type BindingSiteInteractionsEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: BindingSiteInteractions!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -820,6 +1049,108 @@ input BindingSiteInteractionsSort {
   protein_id: UuidSort
 }
 
+enum BoolFilter {
+  t
+  f
+}
+
+type Chat implements Entity {
+  id: ChatId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  messages(after: String, before: String, first: Int, last: Int, filter: MessageFilter, sort: MessageSort): MessageConnection!
+}
+
+type ChatConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ChatEdge!]!
+
+  """A list of nodes."""
+  nodes: [Chat!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type ChatEdge {
+  """The item at the end of the edge"""
+  node: Chat!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input ChatFilter {
+  all: [ChatFilter!]
+  any: [ChatFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+}
+
+scalar ChatId
+
+input ChatSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+}
+
+type Content {
+  data: String!
+  data_format: String!
+}
+
+input ContentInput {
+  data: String!
+  data_format: String!
+}
+
+input CreateBenchmark {
+  name: String
+  description: String
+  tags: [String!]
+  evaluation_script: String
+  project_id: ProjectId!
+}
+
+input CreateBenchmarkData {
+  name: String
+  description: String
+  tags: [String!]
+  inputs: [BenchmarkArgInput!]!
+  outputs: [BenchmarkArgInput!]!
+  benchmark_id: BenchmarkId!
+  project_id: ProjectId!
+}
+
+input CreateBenchmarkSubmission {
+  name: String
+  description: String
+  tags: [String!]
+  benchmark_id: BenchmarkId!
+  project_id: ProjectId!
+}
+
+input CreateBenchmarkSubmissionData {
+  name: String
+  description: String
+  tags: [String!]
+  outputs: [BenchmarkArgInput!]!
+  benchmark_data_id: BenchmarkDataId!
+  benchmark_submission_id: BenchmarkSubmissionId!
+  project_id: ProjectId!
+}
+
 input CreateBindingAffinity {
   name: String
   description: String
@@ -828,6 +1159,15 @@ input CreateBindingAffinity {
   affinity_metric: String!
   protein_id: ProteinId!
   smol_id: SmolId!
+  project_id: ProjectId!
+}
+
+input CreateBindingAffinityActivity {
+  name: String
+  description: String
+  tags: [String!]
+  sar_program_id: SarProgramId!
+  binding_affinity_id: BindingAffinityId!
   project_id: ProjectId!
 }
 
@@ -864,17 +1204,8 @@ input CreateBindingSiteConformer {
   tags: [String!]
   bounding_box: BindingSiteBoundingBoxInput!
   surface_atoms: [Int!]
-  protein_conformer_id: ProteinConformerId!
-  project_id: ProjectId!
-}
-
-input CreateBindingSiteConformerPrediction {
-  name: String
-  description: String
-  tags: [String!]
-  score: Float!
-  probability: Float!
-  binding_site_conformer_id: BindingSiteConformerId!
+  score: Float
+  probability: Float
   protein_conformer_id: ProteinConformerId!
   project_id: ProjectId!
 }
@@ -886,6 +1217,24 @@ input CreateBindingSiteInteractions {
   residues: [Int!]!
   interactions: [BindingSiteInteractionInput!]!
   protein_id: ProteinId!
+  project_id: ProjectId!
+}
+
+input CreateChat {
+  name: String
+  description: String
+  tags: [String!]
+  project_id: ProjectId!
+}
+
+input CreateMessage {
+  name: String
+  description: String
+  tags: [String!]
+  body: MessageBodyInput!
+  user_prompt_id: UUID
+  parent_id: UUID
+  chat_id: ChatId!
   project_id: ProjectId!
 }
 
@@ -909,6 +1258,7 @@ input CreateModuleInstance {
   status: ModuleInstanceStatus
   metadata: CreateMetadata!
   out_tags: [[String!]]
+  run_id: RunId
 }
 
 input CreateMultipleSequenceAlignment {
@@ -917,6 +1267,31 @@ input CreateMultipleSequenceAlignment {
   tags: [String!]
   a_3m: TypedVirtualObject!
   protein_id: ProteinId!
+  project_id: ProjectId!
+}
+
+input CreatePaper {
+  name: String
+  description: String
+  tags: [String!]
+  title: String!
+  doi: String!
+  h_index: Float
+  impact_factor: Float
+  authors: [String!]!
+  paper_abstract: String!
+  pdf: TypedVirtualObject
+  keywords: [String!]!
+  open_access: Boolean!
+  project_id: ProjectId!
+}
+
+input CreatePaperContent {
+  name: String
+  description: String
+  tags: [String!]
+  content: PaperContentInput!
+  paper_id: PaperId!
   project_id: ProjectId!
 }
 
@@ -960,11 +1335,28 @@ input CreateRun {
   description: String
   tags: [String!]
 
-  # Rex expression to run.
+  """Rex expression to run."""
   rex: String!
 
-  # Optional mapping of modules to their full path versions.
+  """Optional mapping of modules to their full path versions."""
   module_lock: JSONObject
+  project_id: ProjectId!
+}
+
+input CreateSarModel {
+  name: String
+  description: String
+  tags: [String!]
+  params: TypedVirtualObject!
+  activity_type: ActivityType!
+  sar_program_id: SarProgramId!
+  project_id: ProjectId!
+}
+
+input CreateSarProgram {
+  name: String
+  description: String
+  tags: [String!]
   project_id: ProjectId!
 }
 
@@ -1030,9 +1422,86 @@ input CreateTag {
   project_id: ProjectId!
 }
 
-# Implement the DateTime<Utc> scalar
-#
-# The input/output is a string in RFC3339 format.
+type Credit {
+  id: CreditId!
+  amount: Int!
+  module_instance_id: ModuleInstanceId
+  resource_utilization_id: ResourceUtilizationId
+
+  """When the entity was created"""
+  created_at: DateTime!
+
+  """Last time the entity was updated"""
+  updated_at: DateTime!
+
+  """
+  When the entity was deleted, is used to determine if a module is soft-deleted
+  """
+  deleted_at: DateTime
+
+  """User friendly name for the entity"""
+  name: String
+
+  """User friendly description for the entity"""
+  description: String
+  run_id: RunId
+
+  """User defined tags for the entity"""
+  tags: [String!]
+}
+
+type CreditConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [CreditEdge!]!
+
+  """A list of nodes."""
+  nodes: [Credit!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type CreditEdge {
+  """The item at the end of the edge"""
+  node: Credit!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input CreditFilter {
+  all: [CreditFilter!]
+  any: [CreditFilter!]
+  id: UuidFilter
+  account_id: UuidFilter
+  amount: I64Filter
+  stripe_event_id: StringFilter
+  module_instance_id: UuidFilter
+  resource_utilization_id: UuidFilter
+  metadata: MetadataFilter
+}
+
+scalar CreditId
+
+type CreditReport {
+  pending: Int!
+  finalized: Int!
+}
+
+input CreditSort {
+  id: UuidSort
+  account_id: UuidSort
+  amount: I64Sort
+  metadata: MetadataSort
+}
+
+"""
+Implement the DateTime<Utc> scalar
+
+The input/output is a string in RFC3339 format.
+"""
 scalar DateTime
 
 input DateTimeFilter {
@@ -1048,6 +1517,43 @@ input DateTimeFilter {
 enum DateTimeSort {
   asc
   desc
+}
+
+scalar Docs
+
+type Done {
+  ok: Boolean!
+}
+
+input DoneInput {
+  ok: Boolean!
+}
+
+type DossierStatus {
+  successes: [Protein!]!
+  errors: [ErrorOutput!]!
+}
+
+type Download {
+  content: [Content!]!
+}
+
+input DownloadInput {
+  content: [ContentInput!]!
+}
+
+interface Entity {
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+}
+
+type ErrorOutput {
+  message: String!
 }
 
 input F32Filter {
@@ -1078,6 +1584,14 @@ enum F64Sort {
   desc
 }
 
+type Figure {
+  data: TypedVirtualObject!
+}
+
+input FigureInput {
+  data: TypedVirtualObject!
+}
+
 input I32Filter {
   eq: Int
   ne: Int
@@ -1101,59 +1615,66 @@ input I64Filter {
   le: Int
 }
 
-# A scalar that can represent any JSON value.
+enum I64Sort {
+  asc
+  desc
+}
+
+"""A scalar that can represent any JSON value."""
 scalar JSON
 
-# A scalar that can represent any JSON Object value.
+"""A scalar that can represent any JSON Object value."""
 scalar JSONObject
 
 type LogEntry {
   id: String!
   part: Int!
 
-  # When the entity was created
+  """When the entity was created"""
   created_at: DateTime!
 
-  # Last time the entity was updated
+  """Last time the entity was updated"""
   updated_at: DateTime!
 
-  # When the entity was deleted, is used to determine if a module is soft-deleted
+  """
+  When the entity was deleted, is used to determine if a module is soft-deleted
+  """
   deleted_at: DateTime
 
-  # User friendly name for the entity
+  """User friendly name for the entity"""
   name: String
 
-  # User friendly description for the entity
+  """User friendly description for the entity"""
   description: String
   run_id: RunId
 
-  # User defined tags for the entity
+  """User defined tags for the entity"""
   tags: [String!]
   content: [String!]!
 }
 
 type LogEntryConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [LogEntryEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [LogEntry!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type LogEntryEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: LogEntry!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
-# Units for memory and storage
+"""Units for memory and storage"""
 enum MemUnits {
   B
   KB
@@ -1162,24 +1683,98 @@ enum MemUnits {
   TB
 }
 
+type Message implements Entity {
+  id: MessageId!
+  body: MessageBody!
+  user_prompt_id: UUID
+  parent_id: UUID
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  chat: Chat!
+}
+
+union MessageBody = UserPrompt | WalterPrompt | UseTools | Thought | Answer | Done | Download
+
+input MessageBodyInput {
+  userPrompt: UserPromptInput
+  walterPrompt: WalterPromptInput
+  useTools: UseToolsInput
+  thought: ThoughtInput
+  answer: AnswerInput
+  done: DoneInput
+  download: DownloadInput
+}
+
+type MessageConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [MessageEdge!]!
+
+  """A list of nodes."""
+  nodes: [Message!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type MessageEdge {
+  """The item at the end of the edge"""
+  node: Message!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input MessageFilter {
+  all: [MessageFilter!]
+  any: [MessageFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  user_prompt_id: UuidFilter
+  parent_id: UuidFilter
+  chat_id: UuidFilter
+}
+
+scalar MessageId
+
+input MessageSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  user_prompt_id: UuidSort
+  parent_id: UuidSort
+  chat_id: UuidSort
+}
+
 type Metadata {
-  # When the entity was created
+  """When the entity was created"""
   created_at: DateTime!
 
-  # Last time the entity was updated
+  """Last time the entity was updated"""
   updated_at: DateTime!
 
-  # When the entity was deleted, is used to determine if a module is soft-deleted
+  """
+  When the entity was deleted, is used to determine if a module is soft-deleted
+  """
   deleted_at: DateTime
 
-  # User friendly name for the entity
+  """User friendly name for the entity"""
   name: String
 
-  # User friendly description for the entity
+  """User friendly description for the entity"""
   description: String
   run_id: RunId
 
-  # User defined tags for the entity
+  """User defined tags for the entity"""
   tags: [String!]
 }
 
@@ -1203,73 +1798,72 @@ input MetadataSort {
   description: StringSort
 }
 
-# A module defines an interface to a program that can be run on a cluster.
-# It is a wrapper around a computational-chemistry program that defines well-typed inputs and outputs,
-# as well as resource requirements and documentation.
-type Module {
-  # Unique identifier for module
+"""
+A module defines an interface to a program that can be run on a cluster.
+It is a wrapper around a computational-chemistry program that defines well-typed inputs and outputs,
+as well as resource requirements and documentation.
+"""
+type Module implements Entity {
+  """Unique identifier for module"""
   id: ModuleId!
 
-  # Path to module, used for resolving the module entrypoint
+  """Path to module, used for resolving the module entrypoint"""
   path: String!
 
-  # The types of the module's inputs
+  """The types of the module's inputs"""
   ins: [Type!]!
 
-  # The types of the module's outputs
+  """The types of the module's outputs"""
   outs: [Type!]!
 
-  # Usage instructions for module inputs
+  """Docs for module inputs"""
+  ins_docs: Docs
+
+  """Docs for module outputs"""
+  outs_docs: Docs
+
+  """Usage instructions for module inputs"""
   ins_usage: [String!]
 
-  # Usage instructions for module outputs
+  """Usage instructions for module outputs"""
   outs_usage: [String!]
 
-  # Targets that this module can be dispatched to
+  """Targets that this module can be dispatched to"""
   targets: [ModuleInstanceTarget!]!
 
-  # Resource specification indicating bounds on the resources required by this module
+  """
+  Resource specification indicating bounds on the resources required by this module
+  """
   resource_bounds: ResourceBounds
-
-  # When the entity was created
   created_at: DateTime!
-
-  # Last time the entity was updated
   updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
   run_id: RunId
-
-  # User defined tags for the entity
   tags: [String!]
+  source_run: Run
   typedesc: String!
 }
 
 type ModuleConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ModuleEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Module!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ModuleEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Module!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -1280,23 +1874,26 @@ type ModuleFailureContext {
 }
 
 enum ModuleFailureReason {
-  # Module arguments failed to resolve
+  """Module arguments failed to resolve"""
   RESOLUTION
 
-  # Module failed to dispatch to a cluster
+  """Module failed to dispatch to a cluster"""
   DISPATCH
 
-  # Module failed during execution
+  """Module failed during execution"""
   RUN
 
-  # Module instance has not made any progress for a given timeout.
+  """Module instance has not made any progress for a given timeout."""
   STALLED
 
-  # Module instance can not be found on the cluster it was dispatched to.
+  """Module instance can not be found on the cluster it was dispatched to."""
   MISSING
 
-  # Module instance has been corrupted and does not have a valid status.
+  """Module instance has been corrupted and does not have a valid status."""
   CORRUPTED
+
+  """Module instance was does not have matching tracked credits."""
+  CREDITS
 }
 
 input ModuleFailureReasonFilter {
@@ -1314,110 +1911,88 @@ input ModuleFilter {
 
 scalar ModuleId
 
-# A module instance is a single invocation of a module. It is created when a user submits a module
-# Can be thought of as a "job"
-type ModuleInstance {
-  # Unique identifier for module instance
+"""
+A module instance is a single invocation of a module. It is created when a user submits a module
+Can be thought of as a "job"
+"""
+type ModuleInstance implements Entity {
+  """Unique identifier for module instance"""
   id: ModuleInstanceId!
 
-  # Account that created the module instance
+  """Account that created the module instance"""
   account_id: AccountId!
 
-  # Path to module, used for resolving the module entrypoint
+  """Path to module, used for resolving the module entrypoint"""
   path: String!
 
-  # When the module entered the QUEUED state
+  """When the module entered the QUEUED state"""
   queued_at: DateTime
 
-  # When the module entered the ADMITTED state
+  """When the module entered the ADMITTED state"""
   admitted_at: DateTime
 
-  # When the module entered the DISPATCHED state
+  """When the module entered the DISPATCHED state"""
   dispatched_at: DateTime
 
-  # When the module entered the RUNNING state
+  """When the module entered the RUNNING state"""
   run_at: DateTime
 
-  # When the module entered the COMPLETED or FAILED state
+  """When the module entered the COMPLETED or FAILED state"""
   completed_at: DateTime
 
-  # Module failure category
+  """Module failure category"""
   failure_reason: ModuleFailureReason
 
-  # Module failure context, useful for debugging
+  """Module failure context, useful for debugging"""
   failure_context: ModuleFailureContext
 
-  # Current module instance status
+  """Current module instance status"""
   status: ModuleInstanceStatus!
 
-  # Target that this module instance will be / is dispatched to
+  """Target that this module instance will be / is dispatched to"""
   target: ModuleInstanceTarget!
 
-  # Resources allocated to this module instance
+  """Resources allocated to this module instance"""
   resources: Resources
 
-  # Progress of the module instance
+  """Progress of the module instance"""
   progress: ProgressEvent
 
-  # Runtime account that the module instance is configured to use
+  """Runtime account that the module instance is configured to use"""
   config_account: AccountId
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
+  source_run: Run
   module: Module!
-  stdout(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-  ): LogEntryConnection!
-  stderr(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    order: OrderBy
-  ): LogEntryConnection!
+  stdout(after: String, before: String, first: Int, last: Int, order: OrderBy): LogEntryConnection!
+  stderr(after: String, before: String, first: Int, last: Int, order: OrderBy): LogEntryConnection!
   resource_utilization: ResourceUtilization
   ins: [Argument!]!
   outs: [Argument!]!
 }
 
 type ModuleInstanceConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ModuleInstanceEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [ModuleInstance!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ModuleInstanceEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: ModuleInstance!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -1453,40 +2028,50 @@ input ModuleInstanceSort {
 }
 
 enum ModuleInstanceStatus {
-  # Module instance has been created.
+  """Module instance has been created."""
   CREATED
 
-  # Module instance is waiting for its arguments to be resolved. It will be admitted once all of its
-  # dependencies have been resolved (meaning that the module instances that
-  # will produce these dependencies have completed).
+  """
+  Module instance is waiting for its arguments to be resolved. It will be admitted once all of its
+  dependencies have been resolved (meaning that the module instances that
+  will produce these dependencies have completed).
+  """
   RESOLVING
 
-  # Module instance has been admitted. It will be dispatched when a cluster
-  # becomes available.
+  """
+  Module instance has been admitted. It will be dispatched when a cluster
+  becomes available.
+  """
   ADMITTED
 
-  # Module instance has been dispatched to run on a cluster. This will run
-  # the module instance until it is done or until it yields.
+  """
+  Module instance has been dispatched to run on a cluster. This will run
+  the module instance until it is done or until it yields.
+  """
   DISPATCHED
 
-  # Module instance is queued on the cluster. It will start running once the cluster's internal
-  # queue launches it.
+  """
+  Module instance is queued on the cluster. It will start running once the cluster's internal
+  queue launches it.
+  """
   QUEUED
 
-  # Module instance is running and making progress on the cluster.
+  """Module instance is running and making progress on the cluster."""
   RUNNING
 
-  # Module has finished calculation, but result upload still pending.
-  # We can dispatch more jobs, but cannot complete the module instance until the upload is complete.
+  """
+  Module has finished calculation, but result upload still pending.
+  We can dispatch more jobs, but cannot complete the module instance until the upload is complete.
+  """
   AWAITING_UPLOAD
 
-  # Module instance has been run to completion.
+  """Module instance has been run to completion."""
   COMPLETED
 
-  # Module instance failed to run.
+  """Module instance failed to run."""
   FAILED
 
-  # Module instance was cancelled.
+  """Module instance was cancelled."""
   CANCELLED
 }
 
@@ -1524,49 +2109,37 @@ input ModuleSort {
   metadata: MetadataSort
 }
 
-type MultipleSequenceAlignment {
+type MultipleSequenceAlignment implements Entity {
   id: MultipleSequenceAlignmentId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   a_3m: TypedVirtualObject!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   protein: Protein!
 }
 
 type MultipleSequenceAlignmentConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [MultipleSequenceAlignmentEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [MultipleSequenceAlignment!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type MultipleSequenceAlignmentEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: MultipleSequenceAlignment!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -1592,151 +2165,103 @@ input MultipleSequenceAlignmentSort {
 
 type Mutation {
   login(username: String!, password: String!): User
+  redeem_voucher(voucher: String!): Int!
   destroy(module: ModuleId!): Module!
   delete_argument(arg_id: ArgumentId!): ArgumentId!
   delete_module_instance(module: ModuleInstanceId!): ModuleInstance!
   delete_token(token_id: TokenId!): Token!
-  tag(
-    module: ModuleId
-    module_instance: ModuleInstanceId
-    argument: ArgumentId
-    tags: [String!]!
-  ): [String!]!
-  untag(
-    module: ModuleId
-    module_instance: ModuleInstanceId
-    argument: ArgumentId
-    tags: [String!]!
-  ): [String!]!
+  tag(module: ModuleId, module_instance: ModuleInstanceId, argument: ArgumentId, tags: [String!]!): [String!]!
+  untag(module: ModuleId, module_instance: ModuleInstanceId, argument: ArgumentId, tags: [String!]!): [String!]!
+
+  """DEPRECATED: use `run_module_instance` instead"""
   run(instance: CreateModuleInstance!): ModuleInstance!
+  run_module_instance(instance: CreateModuleInstance!): ModuleInstance!
 
-  # If a module instance fails due to environment issues (eg. inputs and module are valid),
-  # this method can be used to retry the module instance.
-  retry(
-    instance: ModuleInstanceId!
-    target: ModuleInstanceTarget
-    resources: ResourcesInput
-  ): ModuleInstance!
-  upload_large_object(
-    typeinfo: JSON!
-    format: ObjectFormat!
-    public: Boolean
-  ): ObjectDescriptorWithUploadUrl!
-  upload_object(
-    file: Upload!
-    typeinfo: JSON!
-    format: ObjectFormat!
-  ): ObjectDescriptor!
+  """
+  If a module instance fails due to environment issues (eg. inputs and module are valid),
+  this method can be used to retry the module instance.
+  """
+  retry(instance: ModuleInstanceId!, target: ModuleInstanceTarget, resources: ResourcesInput): ModuleInstance!
+  upload_large_object(typeinfo: JSON!, format: ObjectFormat!, public: Boolean): ObjectDescriptorWithUploadUrl!
+  upload_object(file: Upload!, typeinfo: JSON!, format: ObjectFormat!): ObjectDescriptor!
 
-  # Cancel a currently running instance, but don't delete it
+  """Cancel a currently running instance, but don't delete it"""
   cancel(instance: ModuleInstanceId!): ModuleInstanceId!
 
-  # An (admin) endpoint to update all attributes of a module instance.
-  # Only to be used in debug / rescue situations.
-  update_module_instance(
-    instance_id: ModuleInstanceId!
-    instance_update: PatchModuleInstanceInput!
-    arguments_update: [ArgumentInput!]
-  ): ModuleInstance!
+  """
+  An (admin) endpoint to update all attributes of a module instance.
+  Only to be used in debug / rescue situations.
+  """
+  update_module_instance(instance_id: ModuleInstanceId!, instance_update: PatchModuleInstanceInput!, arguments_update: [ArgumentInput!]): ModuleInstance!
 
-  # Track historical utilization
-  track_module_instance_resource_utilization(
-    utilization: CreateResourceUtilization!
-  ): ResourceUtilization!
-  create_argument(
-    name: String
-    typeinfo: JSON!
-    tags: [String!]
-    value: JSON!
-  ): Argument!
+  """Track historical utilization"""
+  track_module_instance_resource_utilization(utilization: CreateResourceUtilization!): ResourceUtilization!
+  create_argument(name: String, typeinfo: JSON!, tags: [String!], value: JSON!): Argument!
   create_token: Token!
   deploy(module: CreateModule!): Module!
+
+  """Cancel a run"""
+  cancel_run(id: RunId!): Run!
+  run_benchmark(input: CreateRun!, benchmark_id: BenchmarkId!): BenchmarkSubmission!
   eval(input: CreateRun!): Run!
   delete_run(run_id: RunId!): Run!
-  update_account_config(
-    account_id: AccountId!
-    input: AccountConfigInput!
-  ): AccountConfig!
+  update_account_config(account_id: AccountId!, input: AccountConfigInput!): AccountConfig!
   update_account_tier(account_id: AccountId!, tier: AccountTier!): AccountTier!
-  fetch_protein_dossier(project_id: ProjectId!, protein_name: String!): Protein!
+  fetch_protein_dossier(project_id: ProjectId!, uniprot_accession: String, pdb_ids: [String!]): DossierStatus!
+  create_benchmark(input: CreateBenchmark!): Benchmark!
+  delete_benchmark(benchmark_id: BenchmarkId!): Benchmark!
+  patch_benchmark(benchmark_id: BenchmarkId!, input: PatchBenchmark!): Benchmark!
+  create_benchmark_data(input: CreateBenchmarkData!): BenchmarkData!
+  delete_benchmark_data(benchmark_data_id: BenchmarkDataId!): BenchmarkData!
+  patch_benchmark_data(benchmark_data_id: BenchmarkDataId!, input: PatchBenchmarkData!): BenchmarkData!
+  create_benchmark_submission(input: CreateBenchmarkSubmission!): BenchmarkSubmission!
+  delete_benchmark_submission(benchmark_submission_id: BenchmarkSubmissionId!): BenchmarkSubmission!
+  patch_benchmark_submission(benchmark_submission_id: BenchmarkSubmissionId!, input: PatchBenchmarkSubmission!): BenchmarkSubmission!
+  create_benchmark_submission_data(input: CreateBenchmarkSubmissionData!): BenchmarkSubmissionData!
+  delete_benchmark_submission_data(benchmark_submission_data_id: BenchmarkSubmissionDataId!): BenchmarkSubmissionData!
+  patch_benchmark_submission_data(benchmark_submission_data_id: BenchmarkSubmissionDataId!, input: PatchBenchmarkSubmissionData!): BenchmarkSubmissionData!
   create_binding_affinity(input: CreateBindingAffinity!): BindingAffinity!
-  delete_binding_affinity(
-    binding_affinity_id: BindingAffinityId!
-  ): BindingAffinity!
-  patch_binding_affinity(
-    binding_affinity_id: BindingAffinityId!
-    input: PatchBindingAffinity!
-  ): BindingAffinity!
-  create_binding_site_conformer(
-    input: CreateBindingSiteConformer!
-  ): BindingSiteConformer!
-  delete_binding_site_conformer(
-    binding_site_conformer_id: BindingSiteConformerId!
-  ): BindingSiteConformer!
-  patch_binding_site_conformer(
-    binding_site_conformer_id: BindingSiteConformerId!
-    input: PatchBindingSiteConformer!
-  ): BindingSiteConformer!
-  create_binding_site_conformer_prediction(
-    input: CreateBindingSiteConformerPrediction!
-  ): BindingSiteConformerPrediction!
-  delete_binding_site_conformer_prediction(
-    binding_site_conformer_prediction_id: BindingSiteConformerPredictionId!
-  ): BindingSiteConformerPrediction!
-  patch_binding_site_conformer_prediction(
-    binding_site_conformer_prediction_id: BindingSiteConformerPredictionId!
-    input: PatchBindingSiteConformerPrediction!
-  ): BindingSiteConformerPrediction!
-  create_binding_site_interactions(
-    input: CreateBindingSiteInteractions!
-  ): BindingSiteInteractions!
-  delete_binding_site_interactions(
-    binding_site_interactions_id: BindingSiteInteractionsId!
-  ): BindingSiteInteractions!
-  patch_binding_site_interactions(
-    binding_site_interactions_id: BindingSiteInteractionsId!
-    input: PatchBindingSiteInteractions!
-  ): BindingSiteInteractions!
-  create_binding_pose_affinity(
-    input: CreateBindingPoseAffinity!
-  ): BindingPoseAffinity!
-  delete_binding_pose_affinity(
-    binding_pose_affinity_id: BindingPoseAffinityId!
-  ): BindingPoseAffinity!
-  patch_binding_pose_affinity(
-    binding_pose_affinity_id: BindingPoseAffinityId!
-    input: PatchBindingPoseAffinity!
-  ): BindingPoseAffinity!
-  create_binding_pose_conformer(
-    input: CreateBindingPoseConformer!
-  ): BindingPoseConformer!
-  delete_binding_pose_conformer(
-    binding_pose_conformer_id: BindingPoseConformerId!
-  ): BindingPoseConformer!
-  patch_binding_pose_conformer(
-    binding_pose_conformer_id: BindingPoseConformerId!
-    input: PatchBindingPoseConformer!
-  ): BindingPoseConformer!
-  create_binding_pose_conformer_interactions(
-    input: CreateBindingPoseConformerInteractions!
-  ): BindingPoseConformerInteractions!
-  delete_binding_pose_conformer_interactions(
-    binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!
-  ): BindingPoseConformerInteractions!
-  patch_binding_pose_conformer_interactions(
-    binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!
-    input: PatchBindingPoseConformerInteractions!
-  ): BindingPoseConformerInteractions!
-  create_msa(
-    input: CreateMultipleSequenceAlignment!
-  ): MultipleSequenceAlignment!
-  delete_msa(
-    multiple_sequence_alignment_id: MultipleSequenceAlignmentId!
-  ): MultipleSequenceAlignment!
-  patch_msa(
-    multiple_sequence_alignment_id: MultipleSequenceAlignmentId!
-    input: PatchMultipleSequenceAlignment!
-  ): MultipleSequenceAlignment!
+  delete_binding_affinity(binding_affinity_id: BindingAffinityId!): BindingAffinity!
+  patch_binding_affinity(binding_affinity_id: BindingAffinityId!, input: PatchBindingAffinity!): BindingAffinity!
+  create_binding_site_conformer(input: CreateBindingSiteConformer!): BindingSiteConformer!
+  delete_binding_site_conformer(binding_site_conformer_id: BindingSiteConformerId!): BindingSiteConformer!
+  patch_binding_site_conformer(binding_site_conformer_id: BindingSiteConformerId!, input: PatchBindingSiteConformer!): BindingSiteConformer!
+  create_binding_site_interactions(input: CreateBindingSiteInteractions!): BindingSiteInteractions!
+  delete_binding_site_interactions(binding_site_interactions_id: BindingSiteInteractionsId!): BindingSiteInteractions!
+  patch_binding_site_interactions(binding_site_interactions_id: BindingSiteInteractionsId!, input: PatchBindingSiteInteractions!): BindingSiteInteractions!
+  create_binding_pose_affinity(input: CreateBindingPoseAffinity!): BindingPoseAffinity!
+  delete_binding_pose_affinity(binding_pose_affinity_id: BindingPoseAffinityId!): BindingPoseAffinity!
+  patch_binding_pose_affinity(binding_pose_affinity_id: BindingPoseAffinityId!, input: PatchBindingPoseAffinity!): BindingPoseAffinity!
+  create_binding_pose_conformer(input: CreateBindingPoseConformer!): BindingPoseConformer!
+  delete_binding_pose_conformer(binding_pose_conformer_id: BindingPoseConformerId!): BindingPoseConformer!
+  patch_binding_pose_conformer(binding_pose_conformer_id: BindingPoseConformerId!, input: PatchBindingPoseConformer!): BindingPoseConformer!
+  create_binding_pose_conformer_interactions(input: CreateBindingPoseConformerInteractions!): BindingPoseConformerInteractions!
+  delete_binding_pose_conformer_interactions(binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!): BindingPoseConformerInteractions!
+  patch_binding_pose_conformer_interactions(binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!, input: PatchBindingPoseConformerInteractions!): BindingPoseConformerInteractions!
+  create_chat(input: CreateChat!): Chat!
+  delete_chat(chat_id: ChatId!): Chat!
+  patch_chat(chat_id: ChatId!, input: PatchChat!): Chat!
+  create_message(input: CreateMessage!): Message!
+  delete_message(message_id: MessageId!): Message!
+  patch_message(message_id: MessageId!, input: PatchMessage!): Message!
+  create_msa(input: CreateMultipleSequenceAlignment!): MultipleSequenceAlignment!
+  delete_msa(multiple_sequence_alignment_id: MultipleSequenceAlignmentId!): MultipleSequenceAlignment!
+  patch_msa(multiple_sequence_alignment_id: MultipleSequenceAlignmentId!, input: PatchMultipleSequenceAlignment!): MultipleSequenceAlignment!
+  create_sar_program(input: CreateSarProgram!): SarProgram!
+  delete_sar_program(sar_program_id: SarProgramId!): SarProgram!
+  patch_sar_program(sar_program_id: SarProgramId!, input: PatchSarProgram!): SarProgram!
+  create_sar_model(input: CreateSarModel!): SarModel!
+  delete_sar_model(sar_model_id: SarModelId!): SarModel!
+  patch_sar_model(sar_model_id: SarModelId!, input: PatchSarModel!): SarModel!
+  create_binding_affinity_activity(input: CreateBindingAffinityActivity!): BindingAffinityActivity!
+  delete_binding_affinity_activity(binding_affinity_activity_id: BindingAffinityActivityId!): BindingAffinityActivity!
+  patch_binding_affinity_activity(binding_affinity_activity_id: BindingAffinityActivityId!, input: PatchBindingAffinityActivity!): BindingAffinityActivity!
+  create_paper(input: CreatePaper!): Paper!
+  delete_paper(paper_id: PaperId!): Paper!
+  patch_paper(paper_id: PaperId!, input: PatchPaper!): Paper!
+  create_paper_content(input: CreatePaperContent!): PaperContent!
+  delete_paper_content(paper_content_id: PaperContentId!): PaperContent!
+  patch_paper_content(paper_content_id: PaperContentId!, input: PatchPaperContent!): PaperContent!
   create_project(input: CreateProject!): Project!
   delete_project(project_id: ProjectId!): Project!
   patch_project(project_id: ProjectId!, input: PatchProject!): Project!
@@ -1744,44 +2269,23 @@ type Mutation {
   delete_protein(protein_id: ProteinId!): Protein!
   patch_protein(protein_id: ProteinId!, input: PatchProtein!): Protein!
   create_protein_conformer(input: CreateProteinConformer!): ProteinConformer!
-  delete_protein_conformer(
-    protein_conformer_id: ProteinConformerId!
-  ): ProteinConformer!
-  patch_protein_conformer(
-    protein_conformer_id: ProteinConformerId!
-    input: PatchProteinConformer!
-  ): ProteinConformer!
+  delete_protein_conformer(protein_conformer_id: ProteinConformerId!): ProteinConformer!
+  patch_protein_conformer(protein_conformer_id: ProteinConformerId!, input: PatchProteinConformer!): ProteinConformer!
   create_smol_conformer(input: CreateSmolConformer!): SmolConformer!
   delete_smol_conformer(smol_conformer_id: SmolConformerId!): SmolConformer!
-  patch_smol_conformer(
-    smol_conformer_id: SmolConformerId!
-    input: PatchSmolConformer!
-  ): SmolConformer!
+  patch_smol_conformer(smol_conformer_id: SmolConformerId!, input: PatchSmolConformer!): SmolConformer!
   create_smol_library(input: CreateSmolLibrary!): SmolLibrary!
   delete_smol_library(smol_library_id: SmolLibraryId!): SmolLibrary!
-  patch_smol_library(
-    smol_library_id: SmolLibraryId!
-    input: PatchSmolLibrary!
-  ): SmolLibrary!
-  create_smol_library_partition(
-    input: CreateSmolLibraryPartition!
-  ): SmolLibraryPartition!
-  delete_smol_library_partition(
-    smol_library_partition_id: SmolLibraryPartitionId!
-  ): SmolLibraryPartition!
-  patch_smol_library_partition(
-    smol_library_partition_id: SmolLibraryPartitionId!
-    input: PatchSmolLibraryPartition!
-  ): SmolLibraryPartition!
+  patch_smol_library(smol_library_id: SmolLibraryId!, input: PatchSmolLibrary!): SmolLibrary!
+  create_smol_library_partition(input: CreateSmolLibraryPartition!): SmolLibraryPartition!
+  delete_smol_library_partition(smol_library_partition_id: SmolLibraryPartitionId!): SmolLibraryPartition!
+  patch_smol_library_partition(smol_library_partition_id: SmolLibraryPartitionId!, input: PatchSmolLibraryPartition!): SmolLibraryPartition!
   create_smol(input: CreateSmol!): Smol!
   delete_smol(smol_id: SmolId!): Smol!
   patch_smol(smol_id: SmolId!, input: PatchSmol!): Smol!
   create_structure(input: CreateStructure!): Structure!
   delete_structure(structure_id: StructureId!): Structure!
-  patch_structure(
-    structure_id: StructureId!
-    input: PatchStructure!
-  ): Structure!
+  patch_structure(structure_id: StructureId!, input: PatchStructure!): Structure!
   create_tag(input: CreateTag!): Tag!
   delete_tag(tag_id: TagId!): Tag!
   patch_tag(tag_id: TagId!, input: PatchTag!): Tag!
@@ -1790,49 +2294,51 @@ type Mutation {
 type ObjectDescriptor {
   id: ObjectDescriptorId!
 
-  # When the entity was created
+  """When the entity was created"""
   created_at: DateTime!
 
-  # Last time the entity was updated
+  """Last time the entity was updated"""
   updated_at: DateTime!
 
-  # When the entity was deleted, is used to determine if a module is soft-deleted
+  """
+  When the entity was deleted, is used to determine if a module is soft-deleted
+  """
   deleted_at: DateTime
 
-  # User friendly name for the entity
+  """User friendly name for the entity"""
   name: String
 
-  # User friendly description for the entity
+  """User friendly description for the entity"""
   description: String
   run_id: RunId
 
-  # User defined tags for the entity
+  """User defined tags for the entity"""
   tags: [String!]
   object: VirtualObject!
   type_info: Type!
   base_url: String!
   contents: JSON!
-  url: String!
+  url: String
 }
 
 type ObjectDescriptorConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ObjectDescriptorEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [ObjectDescriptor!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ObjectDescriptorEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: ObjectDescriptor!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -1875,19 +2381,185 @@ enum OrderBy {
   DESC
 }
 
-# Information about pagination in a connection
+"""Information about pagination in a connection"""
 type PageInfo {
-  # When paginating backwards, are there more items?
+  """When paginating backwards, are there more items?"""
   hasPreviousPage: Boolean!
 
-  # When paginating forwards, are there more items?
+  """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
-  # When paginating backwards, the cursor to continue.
+  """When paginating backwards, the cursor to continue."""
   startCursor: String
 
-  # When paginating forwards, the cursor to continue.
+  """When paginating forwards, the cursor to continue."""
   endCursor: String
+}
+
+type Paper implements Entity {
+  id: PaperId!
+  title: String!
+  doi: String!
+  h_index: Float
+  impact_factor: Float
+  authors: [String!]!
+  paper_abstract: String!
+  pdf: TypedVirtualObject
+  keywords: [String!]!
+  open_access: Boolean!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  paper_contents(after: String, before: String, first: Int, last: Int, filter: PaperContentFilter, sort: PaperContentSort): PaperContentConnection!
+}
+
+type PaperConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PaperEdge!]!
+
+  """A list of nodes."""
+  nodes: [Paper!]!
+  total_count: Int!
+}
+
+type PaperContent implements Entity {
+  id: PaperContentId!
+  content: PaperContentType!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  paper: Paper!
+}
+
+type PaperContentConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PaperContentEdge!]!
+
+  """A list of nodes."""
+  nodes: [PaperContent!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type PaperContentEdge {
+  """The item at the end of the edge"""
+  node: PaperContent!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input PaperContentFilter {
+  all: [PaperContentFilter!]
+  any: [PaperContentFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  paper_id: UuidFilter
+}
+
+scalar PaperContentId
+
+input PaperContentInput {
+  figure: FigureInput
+  table: TableInput
+}
+
+input PaperContentSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  paper_id: UuidSort
+}
+
+union PaperContentType = Figure | Table
+
+"""An edge in a connection."""
+type PaperEdge {
+  """The item at the end of the edge"""
+  node: Paper!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input PaperFilter {
+  all: [PaperFilter!]
+  any: [PaperFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  title: StringFilter
+  doi: StringFilter
+  h_index: F32Filter
+  impact_factor: F32Filter
+  authors: TagFilter
+  paper_abstract: StringFilter
+  keywords: TagFilter
+  open_access: BoolFilter
+}
+
+scalar PaperId
+
+input PaperSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  title: StringSort
+  doi: StringSort
+  h_index: F32Sort
+  impact_factor: F32Sort
+  paper_abstract: StringSort
+}
+
+input PatchBenchmark {
+  name: String
+  description: String
+  tags: [String!]
+  evaluation_script: String
+}
+
+input PatchBenchmarkData {
+  name: String
+  description: String
+  tags: [String!]
+  inputs: [BenchmarkArgInput!]
+  outputs: [BenchmarkArgInput!]
+  benchmark_id: BenchmarkId
+}
+
+input PatchBenchmarkSubmission {
+  name: String
+  description: String
+  tags: [String!]
+  benchmark_id: BenchmarkId
+}
+
+input PatchBenchmarkSubmissionData {
+  name: String
+  description: String
+  tags: [String!]
+  outputs: [BenchmarkArgInput!]
+  benchmark_data_id: BenchmarkDataId
+  benchmark_submission_id: BenchmarkSubmissionId
 }
 
 input PatchBindingAffinity {
@@ -1896,24 +2568,40 @@ input PatchBindingAffinity {
   tags: [String!]
   affinity: Float
   affinity_metric: String
+  protein_id: ProteinId
+  smol_id: SmolId
+}
+
+input PatchBindingAffinityActivity {
+  name: String
+  description: String
+  tags: [String!]
+  sar_program_id: SarProgramId
+  binding_affinity_id: BindingAffinityId
 }
 
 input PatchBindingPoseAffinity {
   name: String
   description: String
   tags: [String!]
+  binding_affinity_id: BindingAffinityId
+  binding_pose_conformer_id: BindingPoseConformerId
 }
 
 input PatchBindingPoseConformer {
   name: String
   description: String
   tags: [String!]
+  smol_conformer_id: SmolConformerId
+  binding_site_conformer_id: BindingSiteConformerId
 }
 
 input PatchBindingPoseConformerInteractions {
   name: String
   description: String
   tags: [String!]
+  binding_pose_conformer_id: BindingPoseConformerId
+  binding_site_interactions_id: BindingSiteInteractionsId
 }
 
 input PatchBindingSiteConformer {
@@ -1922,14 +2610,9 @@ input PatchBindingSiteConformer {
   tags: [String!]
   bounding_box: BindingSiteBoundingBoxInput
   surface_atoms: [Int!]
-}
-
-input PatchBindingSiteConformerPrediction {
-  name: String
-  description: String
-  tags: [String!]
   score: Float
   probability: Float
+  protein_conformer_id: ProteinConformerId
 }
 
 input PatchBindingSiteInteractions {
@@ -1938,6 +2621,23 @@ input PatchBindingSiteInteractions {
   tags: [String!]
   residues: [Int!]
   interactions: [BindingSiteInteractionInput!]
+  protein_id: ProteinId
+}
+
+input PatchChat {
+  name: String
+  description: String
+  tags: [String!]
+}
+
+input PatchMessage {
+  name: String
+  description: String
+  tags: [String!]
+  body: MessageBodyInput
+  user_prompt_id: UUID
+  parent_id: UUID
+  chat_id: ChatId
 }
 
 input PatchModuleInstanceInput {
@@ -1948,6 +2648,7 @@ input PatchModuleInstanceInput {
   status: ModuleInstanceStatus
   metadata: CreateMetadata
   out_tags: [[String!]]
+  run_id: RunId
 }
 
 input PatchMultipleSequenceAlignment {
@@ -1955,6 +2656,30 @@ input PatchMultipleSequenceAlignment {
   description: String
   tags: [String!]
   a_3m: TypedVirtualObject
+  protein_id: ProteinId
+}
+
+input PatchPaper {
+  name: String
+  description: String
+  tags: [String!]
+  title: String
+  doi: String
+  h_index: Float
+  impact_factor: Float
+  authors: [String!]
+  paper_abstract: String
+  pdf: TypedVirtualObject
+  keywords: [String!]
+  open_access: Boolean
+}
+
+input PatchPaperContent {
+  name: String
+  description: String
+  tags: [String!]
+  content: PaperContentInput
+  paper_id: PaperId
 }
 
 input PatchProject {
@@ -1975,6 +2700,23 @@ input PatchProteinConformer {
   description: String
   tags: [String!]
   residues: [Int!]
+  protein_id: ProteinId
+  structure_id: StructureId
+}
+
+input PatchSarModel {
+  name: String
+  description: String
+  tags: [String!]
+  params: TypedVirtualObject
+  activity_type: ActivityType
+  sar_program_id: SarProgramId
+}
+
+input PatchSarProgram {
+  name: String
+  description: String
+  tags: [String!]
 }
 
 input PatchSmol {
@@ -1991,6 +2733,8 @@ input PatchSmolConformer {
   description: String
   tags: [String!]
   residues: [Int!]
+  smol_id: SmolId
+  structure_id: StructureId
 }
 
 input PatchSmolLibrary {
@@ -2008,6 +2752,7 @@ input PatchSmolLibraryPartition {
   structures: TypedVirtualObject
   smiles: TypedVirtualObject
   data_blocks: TypedVirtualObject
+  smol_library_id: SmolLibraryId
 }
 
 input PatchStructure {
@@ -2043,179 +2788,76 @@ type ProgressEvent {
   done: Boolean!
 }
 
-type Project {
+type Project implements Entity {
   id: ProjectId!
-
-  # When the entity was created
   created_at: DateTime!
-
-  # Last time the entity was updated
   updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
   run_id: RunId
-
-  # User defined tags for the entity
   tags: [String!]
+  source_run: Run
+  benchmark_submission(id: BenchmarkSubmissionId!): BenchmarkSubmission!
   binding_affinity(id: BindingAffinityId!): BindingAffinity!
+  binding_affinity_activity(id: BindingAffinityActivityId!): BindingAffinityActivity!
   binding_pose_affinity(id: BindingPoseAffinityId!): BindingPoseAffinity!
   binding_pose_conformer(id: BindingPoseConformerId!): BindingPoseConformer!
-  binding_pose_conformer_interaction(
-    id: BindingPoseConformerInteractionsId!
-  ): BindingPoseConformerInteractions!
+  binding_pose_conformer_interaction(id: BindingPoseConformerInteractionsId!): BindingPoseConformerInteractions!
   binding_site_conformer(id: BindingSiteConformerId!): BindingSiteConformer!
-  binding_site_conformer_prediction(
-    id: BindingSiteConformerPredictionId!
-  ): BindingSiteConformerPrediction!
-  binding_site_interaction(
-    id: BindingSiteInteractionsId!
-  ): BindingSiteInteractions!
+  binding_site_interaction(id: BindingSiteInteractionsId!): BindingSiteInteractions!
+  chat(id: ChatId!): Chat!
   msa(id: MultipleSequenceAlignmentId!): MultipleSequenceAlignment!
+  paper(id: PaperId!): Paper!
+  paper_content(id: PaperContentId!): PaperContent!
   protein(id: ProteinId!): Protein!
   protein_conformer(id: ProteinConformerId!): ProteinConformer!
   run(id: RunId!): Run!
+  sar_model(id: SarModelId!): SarModel!
+  sar_program(id: SarProgramId!): SarProgram!
   smol(id: SmolId!): Smol!
   smol_conformer(id: SmolConformerId!): SmolConformer!
   structure(id: StructureId!): Structure!
-  binding_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingAffinityFilter
-    sort: BindingAffinitySort
-  ): BindingAffinityConnection!
-  binding_pose_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseAffinityFilter
-    sort: BindingPoseAffinitySort
-  ): BindingPoseAffinityConnection!
-  binding_pose_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerFilter
-    sort: BindingPoseConformerSort
-  ): BindingPoseConformerConnection!
-  binding_pose_conformer_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerInteractionsFilter
-    sort: BindingPoseConformerInteractionsSort
-  ): BindingPoseConformerInteractionsConnection!
-  binding_site_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteConformerFilter
-    sort: BindingSiteConformerSort
-  ): BindingSiteConformerConnection!
-  binding_site_conformer_predictions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteConformerPredictionFilter
-    sort: BindingSiteConformerPredictionSort
-  ): BindingSiteConformerPredictionConnection!
-  binding_site_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteInteractionsFilter
-    sort: BindingSiteInteractionsSort
-  ): BindingSiteInteractionsConnection!
-  msas(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: MultipleSequenceAlignmentFilter
-    sort: MultipleSequenceAlignmentSort
-  ): MultipleSequenceAlignmentConnection!
-  proteins(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinFilter
-    sort: ProteinSort
-  ): ProteinConnection!
-  protein_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinConformerFilter
-    sort: ProteinConformerSort
-  ): ProteinConformerConnection!
-  runs(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: RunFilter
-    sort: RunSort
-  ): RunConnection!
-  smols(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolFilter
-    sort: SmolSort
-  ): SmolConnection!
-  smol_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolConformerFilter
-    sort: SmolConformerSort
-  ): SmolConformerConnection!
-  structures(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: StructureFilter
-    sort: StructureSort
-  ): StructureConnection!
+  benchmark_submissions(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionFilter, sort: BenchmarkSubmissionSort): BenchmarkSubmissionConnection!
+  binding_affinities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityFilter, sort: BindingAffinitySort): BindingAffinityConnection!
+  binding_affinity_activities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityActivityFilter, sort: BindingAffinityActivitySort): BindingAffinityActivityConnection!
+  binding_pose_affinities(after: String, before: String, first: Int, last: Int, filter: BindingPoseAffinityFilter, sort: BindingPoseAffinitySort): BindingPoseAffinityConnection!
+  binding_pose_conformers(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerFilter, sort: BindingPoseConformerSort): BindingPoseConformerConnection!
+  binding_pose_conformer_interactions(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerInteractionsFilter, sort: BindingPoseConformerInteractionsSort): BindingPoseConformerInteractionsConnection!
+  binding_site_conformers(after: String, before: String, first: Int, last: Int, filter: BindingSiteConformerFilter, sort: BindingSiteConformerSort): BindingSiteConformerConnection!
+  binding_site_interactions(after: String, before: String, first: Int, last: Int, filter: BindingSiteInteractionsFilter, sort: BindingSiteInteractionsSort): BindingSiteInteractionsConnection!
+  chats(after: String, before: String, first: Int, last: Int, filter: ChatFilter, sort: ChatSort): ChatConnection!
+  msas(after: String, before: String, first: Int, last: Int, filter: MultipleSequenceAlignmentFilter, sort: MultipleSequenceAlignmentSort): MultipleSequenceAlignmentConnection!
+  papers(after: String, before: String, first: Int, last: Int, filter: PaperFilter, sort: PaperSort): PaperConnection!
+  paper_contents(after: String, before: String, first: Int, last: Int, filter: PaperContentFilter, sort: PaperContentSort): PaperContentConnection!
+  proteins(after: String, before: String, first: Int, last: Int, filter: ProteinFilter, sort: ProteinSort): ProteinConnection!
+  protein_conformers(after: String, before: String, first: Int, last: Int, filter: ProteinConformerFilter, sort: ProteinConformerSort): ProteinConformerConnection!
+  runs(after: String, before: String, first: Int, last: Int, filter: RunFilter, sort: RunSort): RunConnection!
+  sar_models(after: String, before: String, first: Int, last: Int, filter: SarModelFilter, sort: SarModelSort): SarModelConnection!
+  sar_programs(after: String, before: String, first: Int, last: Int, filter: SarProgramFilter, sort: SarProgramSort): SarProgramConnection!
+  smols(after: String, before: String, first: Int, last: Int, filter: SmolFilter, sort: SmolSort): SmolConnection!
+  smol_conformers(after: String, before: String, first: Int, last: Int, filter: SmolConformerFilter, sort: SmolConformerSort): SmolConformerConnection!
+  structures(after: String, before: String, first: Int, last: Int, filter: StructureFilter, sort: StructureSort): StructureConnection!
 }
 
 type ProjectConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ProjectEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Project!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ProjectEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Project!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -2235,114 +2877,55 @@ input ProjectSort {
   account_id: UuidSort
 }
 
-type Protein {
+type Protein implements Entity {
   id: ProteinId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   sequence: String!
-  msas(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: MultipleSequenceAlignmentFilter
-    sort: MultipleSequenceAlignmentSort
-  ): MultipleSequenceAlignmentConnection!
-  protein_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinConformerFilter
-    sort: ProteinConformerSort
-  ): ProteinConformerConnection!
-  binding_site_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteInteractionsFilter
-    sort: BindingSiteInteractionsSort
-  ): BindingSiteInteractionsConnection!
-  binding_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingAffinityFilter
-    sort: BindingAffinitySort
-  ): BindingAffinityConnection!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  msas(after: String, before: String, first: Int, last: Int, filter: MultipleSequenceAlignmentFilter, sort: MultipleSequenceAlignmentSort): MultipleSequenceAlignmentConnection!
+  protein_conformers(after: String, before: String, first: Int, last: Int, filter: ProteinConformerFilter, sort: ProteinConformerSort): ProteinConformerConnection!
+  binding_site_interactions(after: String, before: String, first: Int, last: Int, filter: BindingSiteInteractionsFilter, sort: BindingSiteInteractionsSort): BindingSiteInteractionsConnection!
+  binding_affinities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityFilter, sort: BindingAffinitySort): BindingAffinityConnection!
 }
 
-type ProteinConformer {
+type ProteinConformer implements Entity {
   id: ProteinConformerId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   residues: [Int!]!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   protein: Protein!
   structure: Structure!
-  binding_site_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteConformerFilter
-    sort: BindingSiteConformerSort
-  ): BindingSiteConformerConnection!
+  binding_site_conformers(after: String, before: String, first: Int, last: Int, filter: BindingSiteConformerFilter, sort: BindingSiteConformerSort): BindingSiteConformerConnection!
 }
 
 type ProteinConformerConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ProteinConformerEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [ProteinConformer!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ProteinConformerEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: ProteinConformer!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -2369,23 +2952,23 @@ input ProteinConformerSort {
 }
 
 type ProteinConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [ProteinEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Protein!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type ProteinEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Protein!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -2410,32 +2993,14 @@ input ProteinSort {
 }
 
 type Query {
-  modules(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    sort: ModuleSort
-    filter: ModuleFilter
-  ): ModuleConnection!
-  latest_modules(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    names: [String!]
-    targets: [ModuleInstanceTarget!]
-  ): ModuleConnection!
+  modules(after: String, before: String, first: Int, last: Int, sort: ModuleSort, filter: ModuleFilter): ModuleConnection!
+  latest_modules(after: String, before: String, first: Int, last: Int, names: [String!], targets: [ModuleInstanceTarget!]): ModuleConnection!
   me: User!
-  smol_libraries(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    sort: SmolLibrarySort
-  ): SmolLibraryConnection!
+  benchmark(id: BenchmarkId!): Benchmark!
+  benchmarks(after: String, before: String, first: Int, last: Int, filter: BenchmarkFilter, sort: BenchmarkSort): BenchmarkConnection!
+  smol_library(id: SmolLibraryId!): SmolLibrary!
+  smol_libraries(after: String, before: String, first: Int, last: Int, sort: SmolLibrarySort): SmolLibraryConnection!
   module(id: ModuleId!): Module!
-  tiered_module_instances: [ModuleInstance!]!
   module_instance(id: ModuleInstanceId!): ModuleInstance!
   argument(id: ArgumentId!): Argument!
   object(id: ObjectDescriptorId!): ObjectDescriptor!
@@ -2444,53 +3009,54 @@ type Query {
 
 scalar ResidueRef
 
-# Validation and hints to resources to use for an instance.
+"""Validation and hints to resources to use for an instance."""
 type ResourceBounds {
-  # number of gpus in node, None means no gpu required.
+  """number of gpus in node, None means no gpu required."""
   gpu_min: Int
 
-  # max number of gpus in node that can used, 0 means no gpu support.
+  """max number of gpus in node that can used, 0 means no gpu support."""
   gpu_max: Int
 
-  # optimal number of gpus in node
+  """optimal number of gpus in node"""
   gpu_hint: Int
 
-  # minimum gpu memory required in MB per gpu
+  """minimum gpu memory required in MB per gpu"""
   gpu_mem_min: Int
 
-  # maxmimum memory that can be used in MB (None means no limit)
+  """maxmimum memory that can be used in MB (None means no limit)"""
   gpu_mem_max: Int
 
-  # optimal gpu memory in MB
+  """optimal gpu memory in MB"""
   gpu_mem_hint: Int
 
-  # minimum number of cpus required, should be > 0 if Some
+  """minimum number of cpus required, should be > 0 if Some"""
   cpu_min: Int
 
-  # maximum number of cpus that can be used, 0 means no limit
+  """maximum number of cpus that can be used, 0 means no limit"""
   cpu_max: Int
 
-  # optimal number of cpus
+  """optimal number of cpus"""
   cpu_hint: Int
 
-  # minimum node count
+  """minimum node count"""
   node_min: Int
 
-  # maximum node count (e.g. maximum node parallelism)
+  """maximum node count (e.g. maximum node parallelism)"""
   node_max: Int
 
-  # most optimal node count
+  """most optimal node count"""
   node_hint: Int
   mem_min: Int
   mem_max: Int
 
-  # in MB
+  """in MB"""
   storage_min: Int
 
-  # in MB (0 means no limit)
+  """in MB (0 means no limit)"""
   storage_max: Int
 }
 
+"""Resources used by a module invocation"""
 type ResourceUtilization {
   id: ResourceUtilizationId!
   module_instance_id: ModuleInstanceId!
@@ -2504,23 +3070,25 @@ type ResourceUtilization {
   sus: Int
   account_id: AccountId!
 
-  # When the entity was created
+  """When the entity was created"""
   created_at: DateTime!
 
-  # Last time the entity was updated
+  """Last time the entity was updated"""
   updated_at: DateTime!
 
-  # When the entity was deleted, is used to determine if a module is soft-deleted
+  """
+  When the entity was deleted, is used to determine if a module is soft-deleted
+  """
   deleted_at: DateTime
 
-  # User friendly name for the entity
+  """User friendly name for the entity"""
   name: String
 
-  # User friendly description for the entity
+  """User friendly description for the entity"""
   description: String
   run_id: RunId
 
-  # User defined tags for the entity
+  """User defined tags for the entity"""
   tags: [String!]
 }
 
@@ -2542,212 +3110,125 @@ type ResourceUtilizationReport {
   sus_total: Int
 }
 
-# Explicit resources required for an instance.
-# Will fall back to the hint value if not specified.
+"""
+Explicit resources required for an instance.
+Will fall back to the hint value if not specified.
+"""
 type Resources {
   gpus: Int
   cpus: Int
   nodes: Int
 
-  # RAM allocation
+  """RAM allocation"""
   mem: Int
 
-  # Defaults to MB
+  """Defaults to MB"""
   mem_units: MemUnits
   gpu_mem: Int
   gpu_mem_units: MemUnits
 
-  # space to be allocated on the target, must be > the size of Object inputs
+  """
+  space to be allocated on the target, must be > the size of Object inputs
+  """
   storage: Int
 
-  # Defaults to B
+  """Defaults to B"""
   storage_units: MemUnits
 
-  # walltime request in minutes - job will be killed if it exceeds this number
+  """
+  walltime request in minutes - job will be killed if it exceeds this number
+  """
   walltime: Int
 
-  # additional storage directories on target to mount
+  """additional storage directories on target to mount"""
   storage_mounts: [String!]
 }
 
-# Explicit resources required for an instance.
-# Will fall back to the hint value if not specified.
+"""
+Explicit resources required for an instance.
+Will fall back to the hint value if not specified.
+"""
 input ResourcesInput {
   gpus: Int
   cpus: Int
   nodes: Int
 
-  # RAM allocation
+  """RAM allocation"""
   mem: Int
 
-  # Defaults to MB
+  """Defaults to MB"""
   mem_units: MemUnits
   gpu_mem: Int
   gpu_mem_units: MemUnits
 
-  # space to be allocated on the target, must be > the size of Object inputs
+  """
+  space to be allocated on the target, must be > the size of Object inputs
+  """
   storage: Int
 
-  # Defaults to B
+  """Defaults to B"""
   storage_units: MemUnits
 
-  # walltime request in minutes - job will be killed if it exceeds this number
+  """
+  walltime request in minutes - job will be killed if it exceeds this number
+  """
   walltime: Int
 
-  # additional storage directories on target to mount
+  """additional storage directories on target to mount"""
   storage_mounts: [String!]
 }
 
-type Run {
+type Run implements Entity {
   id: RunId!
-
-  # When the entity was created
   created_at: DateTime!
-
-  # Last time the entity was updated
   updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
   run_id: RunId
-
-  # User defined tags for the entity
   tags: [String!]
   rex: String!
   result: JSON
   trace: JSON
   module_lock: JSONObject!
   status: RunStatus!
-  binding_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingAffinityFilter
-    sort: BindingAffinitySort
-  ): BindingAffinityConnection!
-  binding_pose_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseAffinityFilter
-    sort: BindingPoseAffinitySort
-  ): BindingPoseAffinityConnection!
-  binding_pose_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerFilter
-    sort: BindingPoseConformerSort
-  ): BindingPoseConformerConnection!
-  binding_pose_conformer_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerInteractionsFilter
-    sort: BindingPoseConformerInteractionsSort
-  ): BindingPoseConformerInteractionsConnection!
-  binding_site_interactions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteInteractionsFilter
-    sort: BindingSiteInteractionsSort
-  ): BindingSiteInteractionsConnection!
-  binding_site_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingSiteConformerFilter
-    sort: BindingSiteConformerSort
-  ): BindingSiteConformerConnection!
-  msas(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: MultipleSequenceAlignmentFilter
-    sort: MultipleSequenceAlignmentSort
-  ): MultipleSequenceAlignmentConnection!
-  proteins(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinFilter
-    sort: ProteinSort
-  ): ProteinConnection!
-  protein_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinConformerFilter
-    sort: ProteinConformerSort
-  ): ProteinConformerConnection!
-  smols(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolFilter
-    sort: SmolSort
-  ): SmolConnection!
-  smol_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolConformerFilter
-    sort: SmolConformerSort
-  ): SmolConformerConnection!
-  smol_libraries(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolLibraryFilter
-    sort: SmolLibrarySort
-  ): SmolLibraryConnection!
-  structures(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: StructureFilter
-    sort: StructureSort
-  ): StructureConnection!
+  source_run: Run
+  binding_affinities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityFilter, sort: BindingAffinitySort): BindingAffinityConnection!
+  binding_affinity_activities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityActivityFilter, sort: BindingAffinityActivitySort): BindingAffinityActivityConnection!
+  binding_pose_affinities(after: String, before: String, first: Int, last: Int, filter: BindingPoseAffinityFilter, sort: BindingPoseAffinitySort): BindingPoseAffinityConnection!
+  binding_pose_conformers(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerFilter, sort: BindingPoseConformerSort): BindingPoseConformerConnection!
+  binding_pose_conformer_interactions(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerInteractionsFilter, sort: BindingPoseConformerInteractionsSort): BindingPoseConformerInteractionsConnection!
+  binding_site_interactions(after: String, before: String, first: Int, last: Int, filter: BindingSiteInteractionsFilter, sort: BindingSiteInteractionsSort): BindingSiteInteractionsConnection!
+  binding_site_conformers(after: String, before: String, first: Int, last: Int, filter: BindingSiteConformerFilter, sort: BindingSiteConformerSort): BindingSiteConformerConnection!
+  msas(after: String, before: String, first: Int, last: Int, filter: MultipleSequenceAlignmentFilter, sort: MultipleSequenceAlignmentSort): MultipleSequenceAlignmentConnection!
+  proteins(after: String, before: String, first: Int, last: Int, filter: ProteinFilter, sort: ProteinSort): ProteinConnection!
+  protein_conformers(after: String, before: String, first: Int, last: Int, filter: ProteinConformerFilter, sort: ProteinConformerSort): ProteinConformerConnection!
+  sar_models(after: String, before: String, first: Int, last: Int, filter: SarModelFilter, sort: SarModelSort): SarModelConnection!
+  smols(after: String, before: String, first: Int, last: Int, filter: SmolFilter, sort: SmolSort): SmolConnection!
+  smol_conformers(after: String, before: String, first: Int, last: Int, filter: SmolConformerFilter, sort: SmolConformerSort): SmolConformerConnection!
+  smol_libraries(after: String, before: String, first: Int, last: Int, filter: SmolLibraryFilter, sort: SmolLibrarySort): SmolLibraryConnection!
+  structures(after: String, before: String, first: Int, last: Int, filter: StructureFilter, sort: StructureSort): StructureConnection!
+  module_instances(after: String, before: String, first: Int, last: Int, filter: ModuleInstanceFilter, sort: ModuleInstanceSort): ModuleInstanceConnection!
 }
 
 type RunConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [RunEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Run!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type RunEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Run!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -2776,6 +3257,7 @@ enum RunStatus {
   RUNNING
   DONE
   ERROR
+  CANCELLED
 }
 
 input RunStatusFilter {
@@ -2783,100 +3265,163 @@ input RunStatusFilter {
   ne: RunStatus
 }
 
-type Smol {
-  id: SmolId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
+type SarModel implements Entity {
+  id: SarModelId!
+  params: TypedVirtualObject!
+  activity_type: ActivityType!
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
+  source_run: Run
+  sar_program: SarProgram!
+}
+
+type SarModelConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [SarModelEdge!]!
+
+  """A list of nodes."""
+  nodes: [SarModel!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type SarModelEdge {
+  """The item at the end of the edge"""
+  node: SarModel!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input SarModelFilter {
+  all: [SarModelFilter!]
+  any: [SarModelFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+  activity_type: ActivityTypeFilter
+  sar_program_id: UuidFilter
+}
+
+scalar SarModelId
+
+input SarModelSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+  sar_program_id: UuidSort
+}
+
+type SarProgram implements Entity {
+  id: SarProgramId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  sar_models(after: String, before: String, first: Int, last: Int, filter: SarModelFilter, sort: SarModelSort): SarModelConnection!
+  binding_affinity_activities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityActivityFilter, sort: BindingAffinityActivitySort): BindingAffinityActivityConnection!
+}
+
+type SarProgramConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [SarProgramEdge!]!
+
+  """A list of nodes."""
+  nodes: [SarProgram!]!
+  total_count: Int!
+}
+
+"""An edge in a connection."""
+type SarProgramEdge {
+  """The item at the end of the edge"""
+  node: SarProgram!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input SarProgramFilter {
+  all: [SarProgramFilter!]
+  any: [SarProgramFilter!]
+  id: UuidFilter
+  metadata: MetadataFilter
+  project_id: UuidFilter
+  account_id: UuidFilter
+}
+
+scalar SarProgramId
+
+input SarProgramSort {
+  id: UuidSort
+  metadata: MetadataSort
+  project_id: UuidSort
+  account_id: UuidSort
+}
+
+type Smol implements Entity {
+  id: SmolId!
   smi: String
   inchi: String
   data_blocks: [[String!]!]
-  smol_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolConformerFilter
-    sort: SmolConformerSort
-  ): SmolConformerConnection!
-  binding_affinities(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingAffinityFilter
-    sort: BindingAffinitySort
-  ): BindingAffinityConnection!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  smol_conformers(after: String, before: String, first: Int, last: Int, filter: SmolConformerFilter, sort: SmolConformerSort): SmolConformerConnection!
+  binding_affinities(after: String, before: String, first: Int, last: Int, filter: BindingAffinityFilter, sort: BindingAffinitySort): BindingAffinityConnection!
 }
 
-type SmolConformer {
+type SmolConformer implements Entity {
   id: SmolConformerId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   residues: [Int!]!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   smol: Smol!
   structure: Structure!
-  binding_pose_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: BindingPoseConformerFilter
-    sort: BindingPoseConformerSort
-  ): BindingPoseConformerConnection!
+  binding_pose_conformers(after: String, before: String, first: Int, last: Int, filter: BindingPoseConformerFilter, sort: BindingPoseConformerSort): BindingPoseConformerConnection!
 }
 
 type SmolConformerConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [SmolConformerEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [SmolConformer!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type SmolConformerEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: SmolConformer!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -2903,23 +3448,23 @@ input SmolConformerSort {
 }
 
 type SmolConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [SmolEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Smol!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type SmolEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Smol!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -2936,56 +3481,37 @@ input SmolFilter {
 
 scalar SmolId
 
-type SmolLibrary {
+type SmolLibrary implements Entity {
   id: SmolLibraryId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
-  run_id: RunId
-
-  # User defined tags for the entity
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
   tags: [String!]
-  partitions(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolLibraryPartitionFilter
-    sort: SmolLibraryPartitionSort
-  ): SmolLibraryPartitionConnection!
+  source_run: Run
+  partitions(after: String, before: String, first: Int, last: Int, filter: SmolLibraryPartitionFilter, sort: SmolLibraryPartitionSort): SmolLibraryPartitionConnection!
   size_hint: Int!
 }
 
 type SmolLibraryConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [SmolLibraryEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [SmolLibrary!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type SmolLibraryEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: SmolLibrary!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -3000,53 +3526,41 @@ input SmolLibraryFilter {
 
 scalar SmolLibraryId
 
-type SmolLibraryPartition {
+type SmolLibraryPartition implements Entity {
   id: SmolLibraryPartitionId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   part_idx: Int!
   part_size: Int!
   structures: TypedVirtualObject
   smiles: TypedVirtualObject!
   data_blocks: TypedVirtualObject!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
   smol_library: SmolLibrary!
 }
 
 type SmolLibraryPartitionConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [SmolLibraryPartitionEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [SmolLibraryPartition!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type SmolLibraryPartitionEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: SmolLibraryPartition!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -3106,67 +3620,41 @@ enum StringSort {
   desc
 }
 
-type Structure {
+type Structure implements Entity {
   id: StructureId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   rcsb_id: String
   topology: TypedVirtualObject!
   residues: TypedVirtualObject!
   chains: TypedVirtualObject!
-  protein_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: ProteinConformerFilter
-    sort: ProteinConformerSort
-  ): ProteinConformerConnection!
-  smol_conformers(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: SmolConformerFilter
-    sort: SmolConformerSort
-  ): SmolConformerConnection!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
+  protein_conformers(after: String, before: String, first: Int, last: Int, filter: ProteinConformerFilter, sort: ProteinConformerSort): ProteinConformerConnection!
+  smol_conformers(after: String, before: String, first: Int, last: Int, filter: SmolConformerFilter, sort: SmolConformerSort): SmolConformerConnection!
 }
 
 type StructureConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [StructureEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Structure!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type StructureEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Structure!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -3191,34 +3679,31 @@ input StructureSort {
 }
 
 type Subscription {
+  chat(id: ChatId!): Message!
   stream(argumentId: ArgumentId!): JSON!
 }
 
-type Tag {
+type Table {
+  data: JSONObject!
+}
+
+input TableInput {
+  data: JSONObject!
+}
+
+type Tag implements Entity {
   id: TagId!
-
-  # When the entity was created
-  created_at: DateTime!
-
-  # Last time the entity was updated
-  updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
   key: String!
   value: String
   tagged_id: UUID!
   tagged_type: TaggedType!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
 }
 
 input TagFilter {
@@ -3245,46 +3730,43 @@ input TestCase {
   tags: [String!]
 }
 
-type Token {
-  # When the entity was created
-  created_at: DateTime!
+type Thought {
+  content: [Content!]!
+}
 
-  # Last time the entity was updated
-  updated_at: DateTime!
+input ThoughtInput {
+  content: [ContentInput!]!
+}
 
-  # When the entity was deleted, is used to determine if a module is soft-deleted
-  deleted_at: DateTime
-
-  # User friendly name for the entity
-  name: String
-
-  # User friendly description for the entity
-  description: String
-  run_id: RunId
-
-  # User defined tags for the entity
-  tags: [String!]
+type Token implements Entity {
   id: TokenId!
+  name: String
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  deleted_at: DateTime
+  tags: [String!]
+  source_run: Run
 }
 
 type TokenConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [TokenEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [Token!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type TokenEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: Token!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -3313,51 +3795,53 @@ enum U64Sort {
   desc
 }
 
-# A UUID is a unique 128-bit number, stored as 16 octets. UUIDs are parsed as
-# Strings within GraphQL. UUIDs are used to assign unique identifiers to
-# entities without requiring a central allocating authority.
-#
-# # References
-#
-# * [Wikipedia: Universally Unique Identifier](http://en.wikipedia.org/wiki/Universally_unique_identifier)
-# * [RFC4122: A Universally Unique IDentifier (UUID) URN Namespace](http://tools.ietf.org/html/rfc4122)
+"""
+A UUID is a unique 128-bit number, stored as 16 octets. UUIDs are parsed as
+Strings within GraphQL. UUIDs are used to assign unique identifiers to
+entities without requiring a central allocating authority.
+
+# References
+
+* [Wikipedia: Universally Unique Identifier](http://en.wikipedia.org/wiki/Universally_unique_identifier)
+* [RFC4122: A Universally Unique IDentifier (UUID) URN Namespace](http://tools.ietf.org/html/rfc4122)
+"""
 scalar UUID
 
 scalar Upload
 
-type User {
+type UseTools {
+  tool: String!
+  args: JSON!
+}
+
+input UseToolsInput {
+  tool: String!
+  args: JSON!
+}
+
+type User implements Entity {
   id: UserId!
-
-  # When the entity was created
   created_at: DateTime!
-
-  # Last time the entity was updated
   updated_at: DateTime!
-
-  # When the entity was deleted, is used to determine if a module is soft-deleted
   deleted_at: DateTime
-
-  # User friendly name for the entity
   name: String
-
-  # User friendly description for the entity
   description: String
   run_id: RunId
-
-  # User defined tags for the entity
   tags: [String!]
+  source_run: Run
   account: Account!
-  tokens(
-    after: String
-    before: String
-    first: Int
-    last: Int
-    filter: TokenFilter
-    sort: TokenSort
-  ): TokenConnection!
+  tokens(after: String, before: String, first: Int, last: Int, filter: TokenFilter, sort: TokenSort): TokenConnection!
 }
 
 scalar UserId
+
+type UserPrompt {
+  content: [Content!]!
+}
+
+input UserPromptInput {
+  content: [ContentInput!]!
+}
 
 input UuidFilter {
   is_null: Boolean
@@ -3378,23 +3862,23 @@ type V1Tag {
 }
 
 type V1TagConnection {
-  # Information to aid in pagination.
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  # A list of edges.
+  """A list of edges."""
   edges: [V1TagEdge!]!
 
-  # A list of nodes.
+  """A list of nodes."""
   nodes: [V1Tag!]!
   total_count: Int!
 }
 
-# An edge in a connection.
+"""An edge in a connection."""
 type V1TagEdge {
-  # The item at the end of the edge
+  """The item at the end of the edge"""
   node: V1Tag!
 
-  # A cursor for use in pagination
+  """A cursor for use in pagination"""
   cursor: String!
 }
 
@@ -3415,4 +3899,13 @@ input VirtualObjectSort {
   size: U64Sort
 }
 
+type WalterPrompt {
+  content: [Content!]!
+}
+
+input WalterPromptInput {
+  content: [ContentInput!]!
+}
+
 scalar Xyzf32
+

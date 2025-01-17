@@ -1,0 +1,217 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment ArgumentPartial on Argument {
+    id
+    created_at
+    updated_at
+    deleted_at
+    name
+    description
+    tags
+    rejected_at
+    account_id
+    typeinfo
+    value
+    source
+}
+
+fragment ModuleInstanceBase on ModuleInstance {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    account_id
+    queued_at
+    admitted_at
+    dispatched_at
+    completed_at
+    path
+    status
+    target
+    failure_reason
+    failure_context {
+        stdout
+        stderr
+        syserr
+    }
+}
+
+fragment ModuleInstanceFull on ModuleInstance {
+    ...ModuleInstanceBase
+    ins {
+        ...ArgumentPartial
+    }
+    outs {
+        ...ArgumentPartial
+    }
+    resources {
+        gpus
+        nodes
+        mem
+        storage
+        walltime
+    }
+    progress {
+        n
+        n_expected
+        n_max
+        done
+    }
+    resource_utilization {
+        gpu
+        mem
+        storage
+        walltime
+        cputime
+        inodes
+        sus
+    }
+}
+
+query module_instances(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $sort: ModuleInstanceSort
+    $filter: ModuleInstanceFilter
+) {
+    me {
+        account {
+            module_instances(
+                first: $first
+                last: $last
+                after: $after
+                before: $before
+                sort: $sort
+                filter: $filter
+            ) {
+                pageInfo {
+                    ...PageInfoFull
+                }
+                edges {
+                    cursor
+                    node {
+                        ...ModuleInstanceFull
+                    }
+                }
+            }
+        }
+    }
+}
+
+query module_instance_details(
+    $id: ModuleInstanceId!
+    $stderr_after: String
+    $stderr_before: String
+    $stdout_after: String
+    $stdout_before: String
+) {
+    module_instance(id: $id) {
+        ...ModuleInstanceFull
+        stdout(after: $stdout_after, before: $stdout_before) {
+            pageInfo {
+                ...PageInfoFull
+            }
+            edges {
+                cursor
+                node {
+                    id
+                    created_at
+                    content
+                }
+            }
+        }
+        stderr(after: $stderr_after, before: $stderr_before) {
+            pageInfo {
+                ...PageInfoFull
+            }
+            edges {
+                cursor
+                node {
+                    id
+                    created_at
+                    content
+                }
+            }
+        }
+    }
+}
+
+query module_instance_minimal($id: ModuleInstanceId!) {
+    module_instance(id: $id) {
+        ...ModuleInstanceBase
+    }
+}
+
+mutation run_module_instance($instance: CreateModuleInstance!) {
+    run_module_instance(instance: $instance) {
+        id
+        outs {
+            id
+        }
+    }
+}
+
+mutation retry(
+    $instance: ModuleInstanceId!
+    $target: ModuleInstanceTarget
+    $resources: ResourcesInput
+) {
+    retry(instance: $instance, target: $target, resources: $resources) {
+        id
+    }
+}
+
+mutation cancel_module_instance($module_instance_id: ModuleInstanceId!) {
+    cancel(instance: $module_instance_id)
+}
+
+mutation delete_module_instance($moduleInstanceId: ModuleInstanceId!) {
+    delete_module_instance(module: $moduleInstanceId) {
+        id
+    }
+}
+
+mutation update_module_instance(
+    $id: ModuleInstanceId!
+    $moduleInstanceUpdate: PatchModuleInstanceInput!
+    $arguments: [ArgumentInput!]
+) {
+    update_module_instance(
+        instance_id: $id
+        instance_update: $moduleInstanceUpdate
+        arguments_update: $arguments
+    ) {
+        id
+        status
+    }
+}
+
+mutation track_utilization($utilization: CreateResourceUtilization!) {
+    track_module_instance_resource_utilization(utilization: $utilization) {
+        id
+    }
+}
+
+mutation tag_module_instance(
+    $moduleInstanceId: ModuleInstanceId
+    $tags: [String!]!
+) {
+    tag(module_instance: $moduleInstanceId, tags: $tags)
+}
+
+mutation untag_module_instance(
+    $moduleInstanceId: ModuleInstanceId
+    $tags: [String!]!
+) {
+    untag(module_instance: $moduleInstanceId, tags: $tags)
+}

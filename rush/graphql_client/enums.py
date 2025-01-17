@@ -12,6 +12,20 @@ class AccountTier(str, Enum):
     ENTERPRISE = "ENTERPRISE"
 
 
+class ActivityType(str, Enum):
+    BINDING_AFFINITY = "BINDING_AFFINITY"
+    TOXICITY = "TOXICITY"
+    FUNCTIONAL = "FUNCTIONAL"
+
+
+class BenchmarkEntityType(str, Enum):
+    PROTEIN = "PROTEIN"
+    PROTEIN_CONFORMER = "PROTEIN_CONFORMER"
+    SMOL = "SMOL"
+    STRUCTURE = "STRUCTURE"
+    BINDING_AFFINITY = "BINDING_AFFINITY"
+
+
 class BindingSiteInteractionKind(str, Enum):
     UNKNOWN = "UNKNOWN"
     HYDROPHOBIC = "HYDROPHOBIC"
@@ -22,6 +36,11 @@ class BindingSiteInteractionKind(str, Enum):
     PI_STACK = "PI_STACK"
     PI_CATION = "PI_CATION"
     METAL_COMPLEX = "METAL_COMPLEX"
+
+
+class BoolFilter(str, Enum):
+    t = "t"
+    f = "f"
 
 
 class DateTimeSort(str, Enum):
@@ -44,6 +63,11 @@ class I32Sort(str, Enum):
     desc = "desc"
 
 
+class I64Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 class MemUnits(str, Enum):
     B = "B"
     KB = "KB"
@@ -59,6 +83,7 @@ class ModuleFailureReason(str, Enum):
     STALLED = "STALLED"
     MISSING = "MISSING"
     CORRUPTED = "CORRUPTED"
+    CREDITS = "CREDITS"
 
 
 class ModuleInstanceStatus(str, Enum):
@@ -113,6 +138,7 @@ class RunStatus(str, Enum):
     RUNNING = "RUNNING"
     DONE = "DONE"
     ERROR = "ERROR"
+    CANCELLED = "CANCELLED"
 
 
 class StringSort(str, Enum):

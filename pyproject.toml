@@ -36,13 +36,14 @@ parso = "^0.8.3"
 pdoc = "^14.4.0"
 pip = "~=23.2.1"
 py3Dmol = "^2.0.4"
-pytest = "~=7.4.3"
+pytest = "~=8.2"
 pytest-xdist = "~=3.3.1"
 qdx-py = ">0.6.2"
 pickleshare = "^0.7.5"
 #jupyterlab-lsp = "^5.1.0"
 rdkit = "^2024.3.5"
 #ipykernel = "^6.29.0"
+pytest-asyncio = "^0.25.2"
 
 [build-system]
 requires = ["poetry-core"]
@@ -78,6 +79,7 @@ ignore = [
     "rush/graphql_client",
     "result",
     "setup.py",
+    "utils",
 ]
 reportIncompatibleMethodOverride = "none"
 reportIncompatibleVariableOverride = "none"
@@ -99,6 +101,8 @@ root = "tests"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.setuptools]
 [tool.setuptools.packages]
@@ -108,9 +112,10 @@ where = [""]
 
 [tool.ariadne-codegen]
 schema_path = "schema.graphql"
-queries_path = "combined.graphql"
+queries_path = "gql"
 target_package_path = "./rush"
 plugins = ["ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"]
+skip_validation_rules = ["NoUnusedFragments", "UniqueFragmentNames"]
 
 [tool.ariadne-codegen.scalars.DateTime]
 type = "datetime.datetime"
