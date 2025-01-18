@@ -408,6 +408,9 @@ def type_from_typedef(res: Any) -> RushType[Any]:
         else:
             if res.get("t"):
                 return type_from_typedef(res["t"])
+            elif isinstance(res, dict):
+                # assuming typed enum
+                return EnumKind([{k: type_from_typedef(v)} for k, v in res.items()])
             else:
                 raise Exception(f"Invalid typedef {res}")
     elif isinstance(res, (list, tuple)):
