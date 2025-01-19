@@ -2,22 +2,21 @@ from __future__ import annotations
 
 import asyncio
 import base64
-from collections.abc import AsyncGenerator
+import inspect
 import json
 import logging
 import math
 import os
 import random
 import sys
-import time
 import threading
+import time
 from collections import Counter
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from io import IOBase
 from pathlib import Path
-
 from typing import (
-    cast,
     Any,
     AsyncIterable,
     Awaitable,
@@ -29,35 +28,54 @@ from typing import (
     Literal,
     Optional,
     Protocol,
-    TypeVar,
     Sequence,
+    TypeVar,
     Union,
+    cast,
 )
 from uuid import UUID
-import inspect
 
 import httpx
 from pydantic_core import to_jsonable_python
 
+from rush.graphql_client.benchmark import BenchmarkBenchmark
 
-
-from .async_utils import start_background_loop, asyncio_run, LOOP
+from .async_utils import LOOP, asyncio_run, start_background_loop
 from .graphql_client.argument import Argument, ArgumentArgument
-from .graphql_client.benchmarks import BenchmarksBenchmarksPageInfo
 from .graphql_client.arguments import (
     ArgumentsMeAccountArguments,
     ArgumentsMeAccountArgumentsEdgesNode,
     ArgumentsMeAccountArgumentsPageInfo,
 )
 from .graphql_client.base_model import UNSET, UnsetType
+from .graphql_client.benchmarks import (
+    BenchmarksBenchmarks,
+    BenchmarksBenchmarksEdgesNode,
+    BenchmarksBenchmarksPageInfo,
+)
 from .graphql_client.client import Client
-from .graphql_client.enums import MemUnits, ModuleInstanceStatus, ModuleInstanceTarget, ObjectFormat
-from .graphql_client.fragments import ModuleFull, ModuleInstanceFullProgress, PageInfoFull
+from .graphql_client.create_project import CreateProjectCreateProject
+from .graphql_client.enums import (
+    MemUnits,
+    ModuleInstanceStatus,
+    ModuleInstanceTarget,
+    ObjectFormat,
+)
+from .graphql_client.eval import EvalEval
+from .graphql_client.exceptions import GraphQLClientGraphQLMultiError
+from .graphql_client.fragments import (
+    ModuleFull,
+    ModuleInstanceFullProgress,
+    PageInfoFull,
+)
 from .graphql_client.input_types import (
     ArgumentInput,
-    CreateProject,
+    BenchmarkFilter,
     CreateMetadata,
     CreateModuleInstance,
+    CreateProject,
+    CreateRun,
+    DateTimeFilter,
     MetadataFilter,
     ModuleFilter,
     ModuleInstanceFilter,
@@ -67,15 +85,7 @@ from .graphql_client.input_types import (
     StringFilter,
     TagFilter,
     UuidFilter,
-    DateTimeFilter,
-    CreateRun
 )
-from .graphql_client.eval import EvalEval
-from .graphql_client.run_benchmark import RunBenchmarkRunBenchmark
-from .graphql_client.benchmarks import BenchmarksBenchmarks
-from .graphql_client.create_project import CreateProjectCreateProject
-from .graphql_client.exceptions import GraphQLClientGraphQLMultiError
-from .graphql_client.projects import ProjectsMeAccountProjects, ProjectsMeAccountProjectsEdgesNode, ProjectsMeAccountProjectsPageInfo
 from .graphql_client.latest_modules import LatestModulesLatestModulesPageInfo
 from .graphql_client.module_instance_details import ModuleInstanceDetailsModuleInstance
 from .graphql_client.module_instance_full import ModuleInstanceFullModuleInstance
@@ -84,10 +94,25 @@ from .graphql_client.module_instances import (
 )
 from .graphql_client.modules import ModulesModulesPageInfo
 from .graphql_client.object_contents import ObjectContentsObjectPath
+from .graphql_client.projects import (
+    ProjectsMeAccountProjects,
+    ProjectsMeAccountProjectsEdgesNode,
+    ProjectsMeAccountProjectsPageInfo,
+)
 from .graphql_client.retry import RetryRetry
-from .graphql_client.runs import RunsMeAccountProjectRunsEdgesNode, RunsMeAccountProjectRunsPageInfo
+from .graphql_client.run_benchmark import RunBenchmarkRunBenchmark
 from .graphql_client.run_module_instance import RunModuleInstanceRunModuleInstance
-from .typedef import SCALARS, RushType, build_typechecker, type_from_typedef, format_module_typedesc
+from .graphql_client.runs import (
+    RunsMeAccountProjectRunsEdgesNode,
+    RunsMeAccountProjectRunsPageInfo,
+)
+from .typedef import (
+    SCALARS,
+    RushType,
+    build_typechecker,
+    format_module_typedesc,
+    type_from_typedef,
+)
 
 if sys.version_info >= (3, 12):
     from .types import ArgId, ModuleInstanceId, Resources, Target
@@ -148,8 +173,8 @@ class ProjectPaged(
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any,
-    ) -> Page[T1, TPage]:
-        ...
+    ) -> Page[T1, TPage]: ...
+
 
 class Paged(
     Protocol[T1, TPage],
@@ -161,8 +186,7 @@ class Paged(
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any,
-    ) -> Page[T1, TPage]:
-        ...
+    ) -> Page[T1, TPage]: ...
 
 
 @dataclass
@@ -172,10 +196,13 @@ class PageVars:
     first: Union[Optional[int], UnsetType] = UNSET
     last: Union[Optional[int], UnsetType] = UNSET
 
+
 class EmptyPage(Generic[T1, TPage], Page[T1, TPage]):
     # skip the type checker for this class
     # since it is only used for the empty page
-    page_info: Any = PageInfoFull(hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None)
+    page_info: Any = PageInfoFull(
+        hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None
+    )
     edges: Sequence[Edge[T1]] = []
 
 
@@ -187,8 +214,7 @@ class RushModuleRunner(Protocol[TCo]):
         resources: Resources | None = None,
         tags: list[str] | None = None,
         restore: bool | None = False,
-    ) -> TCo:
-        ...
+    ) -> TCo: ...
 
 
 def get_name_from_path(path: str):
@@ -251,7 +277,10 @@ class BaseProvider:
             json_dict = json.load(f)
             return History(
                 tags=json_dict["tags"],
-                instances=[ModuleInstanceHistory(**instance) for instance in json_dict["instances"]],
+                instances=[
+                    ModuleInstanceHistory(**instance)
+                    for instance in json_dict["instances"]
+                ],
             )
 
     async def nuke(self, remote: bool = False, tags: bool = False):
@@ -355,17 +384,32 @@ class BaseProvider:
 
         if group_by == "id":
             return {
-                str(instance.id): (instance.status, get_name_from_path(instance.path), 1)
+                str(instance.id): (
+                    instance.status,
+                    get_name_from_path(instance.path),
+                    1,
+                )
                 for instance in instances
             }
 
         if group_by == "path":
-            c = Counter([(instance.status, get_name_from_path(instance.path)) for instance in instances])
-            return {f"{name} ({status})": (status, name, count) for (status, name), count in c.items()}
+            c = Counter(
+                [
+                    (instance.status, get_name_from_path(instance.path))
+                    for instance in instances
+                ]
+            )
+            return {
+                f"{name} ({status})": (status, name, count)
+                for (status, name), count in c.items()
+            }
 
         if group_by == "tag":
             c = Counter([(instance.status, instance.tags) for instance in instances])
-            return {f"{tag} ({status})": (status, "", count) for (status, tag), count in c.items()}
+            return {
+                f"{tag} ({status})": (status, "", count)
+                for (status, tag), count in c.items()
+            }
 
         raise Exception("Invalid group_by")
 
@@ -431,7 +475,9 @@ class BaseProvider:
         first: int | None = None,
         last: int | None = None,
         tags: list[str] | None = None,
-    ) -> AsyncIterable[Page[ArgumentsMeAccountArguments, ArgumentsMeAccountArgumentsPageInfo]]:
+    ) -> AsyncIterable[
+        Page[ArgumentsMeAccountArguments, ArgumentsMeAccountArgumentsPageInfo]
+    ]:
         """
         Retrieve a list of arguments.
         """
@@ -442,8 +488,12 @@ class BaseProvider:
             first: Union[Optional[int], UnsetType] = UNSET,
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
-        ) -> Page[ArgumentsMeAccountArgumentsEdgesNode, ArgumentsMeAccountArgumentsPageInfo]:
-            res = await self.client.arguments(first=first, after=after, last=last, before=before, **kwargs)
+        ) -> Page[
+            ArgumentsMeAccountArgumentsEdgesNode, ArgumentsMeAccountArgumentsPageInfo
+        ]:
+            res = await self.client.arguments(
+                first=first, after=after, last=last, before=before, **kwargs
+            )
             # The types for this pass in mypy, but not in pyright
             return res.account.arguments  # type: ignore
 
@@ -466,25 +516,39 @@ class BaseProvider:
         return self._query_with_pagination(
             self.client.benchmarks,
             PageVars(after=after, before=before, first=first, last=last),
-            {
-            },
+            {},
         )
+
+    async def benchmark(
+        self, id: str | None = None, name: str | None = None
+    ) -> BenchmarkBenchmark | BenchmarksBenchmarksEdgesNode:
+        if id:
+            return await self.client.benchmark(id)
+        if name:
+            return (
+                (
+                    await self.client.benchmarks(
+                        filter=BenchmarkFilter(
+                            metadata=MetadataFilter(name=StringFilter(eq=name))
+                        )
+                    )
+                )
+                .edges[0]
+                .node
+            )
+        else:
+            raise Exception("Please provide either an id or a name")
 
     async def create_project(
         self,
         name: str,
         description: str | None = None,
+        tags: list[str] | None = None,
     ) -> CreateProjectCreateProject:
-        input = CreateProject(
-            name=name,
-            description=description
-        )
+        input = CreateProject(name=name, description=description, tags=tags)
         return await self.client.create_project(input)
 
-    def set_project(
-        self,
-        project_id: str
-    ):
+    def set_project(self, project_id: str):
         self.project_id = project_id
 
     async def run_benchmark(
@@ -494,8 +558,10 @@ class BaseProvider:
         name: str | None = None,
     ) -> RunBenchmarkRunBenchmark:
         if not self.project_id:
-            raise Exception("Please set up a project first with client.create_project and client.set_project")
-        input = CreateRun(rex = rex_fn, name = name, project_id = self.project_id)
+            raise Exception(
+                "Please set up a project first with client.create_project and client.set_project"
+            )
+        input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
         return await self.client.run_benchmark(input, benchmark_id)
 
     async def eval_rex(
@@ -504,8 +570,10 @@ class BaseProvider:
         name: str | None = None,
     ) -> EvalEval:
         if not self.project_id:
-            raise Exception("Please set up a project first with client.create_project and client.set_project")
-        input = CreateRun(rex = rex_fn, name = name, project_id = self.project_id)
+            raise Exception(
+                "Please set up a project first with client.create_project and client.set_project"
+            )
+        input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
         return await self.client.eval(input)
 
     async def projects(
@@ -515,12 +583,16 @@ class BaseProvider:
         first: int | None = None,
         last: int | None = None,
         tags: list[str] | None = None,
-    ) -> AsyncIterable[Page[ProjectsMeAccountProjects, ProjectsMeAccountProjectsPageInfo]]:
+    ) -> AsyncIterable[
+        Page[ProjectsMeAccountProjects, ProjectsMeAccountProjectsPageInfo]
+    ]:
         """
         Retrieve a list of projects.
         """
 
-        filter = ProjectFilter(metadata = MetadataFilter(deleted_at = DateTimeFilter(is_null=True)))
+        filter = ProjectFilter(
+            metadata=MetadataFilter(deleted_at=DateTimeFilter(is_null=True))
+        )
 
         async def return_paged(
             after: Union[Optional[str], UnsetType] = UNSET,
@@ -528,8 +600,12 @@ class BaseProvider:
             first: Union[Optional[int], UnsetType] = UNSET,
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
-        ) -> Page[ProjectsMeAccountProjectsEdgesNode, ProjectsMeAccountProjectsPageInfo]:
-            res = await self.client.projects(first=first, after=after, last=last, before=before, **kwargs)
+        ) -> Page[
+            ProjectsMeAccountProjectsEdgesNode, ProjectsMeAccountProjectsPageInfo
+        ]:
+            res = await self.client.projects(
+                first=first, after=after, last=last, before=before, **kwargs
+            )
             # The types for this pass in mypy, but not in pyright
             return res.account.projects  # type: ignore
 
@@ -576,7 +652,11 @@ class BaseProvider:
         :param filepath: Where to download the object.
         :param filename: Download to the workspace with this name under "objects".
         """
-        obj = (await self.object(path)) if signed else (await self.client.object_contents(path))
+        obj = (
+            (await self.object(path))
+            if signed
+            else (await self.client.object_contents(path))
+        )
         if not obj:
             return None
 
@@ -621,7 +701,9 @@ class BaseProvider:
 
                             # handle json
                             if first_chunk:
-                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
+                                if len(chunk) > 0 and (
+                                    chunk[0] == "[" or chunk[0] == "{"
+                                ):
                                     f.write(chunk.encode("utf-8"))
                                     first_chunk = False
                                     continue
@@ -676,7 +758,9 @@ class BaseProvider:
                                 Use `.update_modules()` to update the lock file"""
                             )
                     else:
-                        self.logger.warning(f"Module {module.path} is not in the lock file")
+                        self.logger.warning(
+                            f"Module {module.path} is not in the lock file"
+                        )
 
         if filepath.exists() and filepath.stat().st_size > 0:
             with open(filepath, "r") as f:
@@ -719,7 +803,9 @@ class BaseProvider:
         if folder_path and isinstance(folder_path, str):
             folder_path = Path(folder_path)
         else:
-            folder_path = folder_path or (self.workspace or Path.cwd()) / f"outputs-{instance_id}"
+            folder_path = (
+                folder_path or (self.workspace or Path.cwd()) / f"outputs-{instance_id}"
+            )
 
         if folder_path.exists():
             if not overwrite:
@@ -731,7 +817,9 @@ class BaseProvider:
         instance = await self.module_instance(instance_id)
         for obj in instance.outs:
             if obj.value and isinstance(obj.value, dict) and "path" in obj.value:
-                await self.Arg(self, obj.id).download(filepath=folder_path / str(obj.id), overwrite=overwrite)
+                await self.Arg(self, obj.id).download(
+                    filepath=folder_path / str(obj.id), overwrite=overwrite
+                )
 
         return folder_path
 
@@ -746,7 +834,7 @@ class BaseProvider:
         tags: Sequence[str] | None = None,
         out_tags: Sequence[Sequence[str] | None] | None = None,
         restore: bool | None = None,
-        ) -> RunModuleInstanceRunModuleInstance | ModuleInstanceFullModuleInstance:
+    ) -> RunModuleInstanceRunModuleInstance | ModuleInstanceFullModuleInstance:
         """
         Run a module with the given inputs and outputs.
         :param path: The path of the module.
@@ -762,14 +850,18 @@ class BaseProvider:
 
         try_restore = restore if restore is not None else self.restore_by_default
         if try_restore:
-            self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
+            self.logger.info(
+                f"Trying to restore job with tags: {tags} and path: {path}"
+            )
             res: list[ModuleInstanceFullModuleInstance] = []
             async for page in await self.module_instances(tags=list(tags), path=path):
                 for edge in page.edges:
                     instance = edge.node
                     res.append(instance)
                     if len(res) > 1:
-                        self.logger.warning("Multiple module instances found with the same tags and path")
+                        self.logger.warning(
+                            "Multiple module instances found with the same tags and path"
+                        )
             if len(res) >= 1:
                 self.logger.info(f"Restoring job from previous run with id {res[0].id}")
                 return res[0]
@@ -779,10 +871,17 @@ class BaseProvider:
 
         # TODO: less insane version of this
         def gen_arg_dict(
-            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | VirtualObject | Any,
+            input: BaseProvider.Arg[Any]
+            | BaseProvider.BlockingArg[Any]
+            | ArgId
+            | UUID
+            | VirtualObject
+            | Any,
         ) -> ArgumentInput:
             arg = ArgumentInput()
-            if isinstance(input, BaseProvider.Arg) or isinstance(input, BaseProvider.BlockingArg):
+            if isinstance(input, BaseProvider.Arg) or isinstance(
+                input, BaseProvider.BlockingArg
+            ):
                 if input.id is None:
                     arg.value = input.value
                 else:
@@ -887,11 +986,15 @@ class BaseProvider:
         if isinstance(path, str):
             filters.append(ModuleInstanceFilter(path=StringFilter(eq=path)))
         if isinstance(status, ModuleInstanceStatus):
-            filters.append(ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq=status)))
+            filters.append(
+                ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq=status))
+            )
         if isinstance(tags, list):
             tag_filter = TagFilter()
             tag_filter.in_ = tags
-            filters.append(ModuleInstanceFilter(metadata=MetadataFilter(tags=tag_filter)))
+            filters.append(
+                ModuleInstanceFilter(metadata=MetadataFilter(tags=tag_filter))
+            )
         if isinstance(ids, list):
             for id in ids:
                 filters.append(ModuleInstanceFilter(id=UuidFilter(eq=id)))
@@ -901,7 +1004,7 @@ class BaseProvider:
         return self._query_with_pagination(
             return_paged,  # type: ignore
             PageVars(after=after, before=before, first=first, last=last),
-            {"filter": module_instance_filter}
+            {"filter": module_instance_filter},
             # {"path": path, "name": name, "status": status, "tags": tags, "ids": ids},
         )
 
@@ -964,12 +1067,17 @@ class BaseProvider:
             },
         )
 
-    async def runs(self) -> AsyncIterable[Page[RunsMeAccountProjectRunsEdgesNode, RunsMeAccountProjectRunsPageInfo]]:
+    async def runs(
+        self,
+    ) -> AsyncIterable[
+        Page[RunsMeAccountProjectRunsEdgesNode, RunsMeAccountProjectRunsPageInfo]
+    ]:
         """
         Retrieve a list of runs.
         """
         if not self.project_id:
             raise Exception("No project ID provided")
+
         async def return_paged(
             project_id: str,
             after: Union[Optional[str], UnsetType] = UNSET,
@@ -978,17 +1086,24 @@ class BaseProvider:
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
         ) -> Page[RunsMeAccountProjectRunsEdgesNode, RunsMeAccountProjectRunsPageInfo]:
-            res = await self.client.runs(project_id=project_id, first=first, after=after, last=last, before=before, **kwargs)
+            res = await self.client.runs(
+                project_id=project_id,
+                first=first,
+                after=after,
+                last=last,
+                before=before,
+                **kwargs,
+            )
             # The types for this pass in mypy, but not in pyright
-            return res.account.project.runs # type: ignore
+            return res.account.project.runs  # type: ignore
 
-        return self._project_query_with_pagination(return_paged,
-            UUID(self.project_id),
-            PageVars(),
-            {}
+        return self._project_query_with_pagination(
+            return_paged, UUID(self.project_id), PageVars(), {}
         )
 
-    async def get_latest_module_paths(self, names: list[str] | None = None) -> dict[str, str]:
+    async def get_latest_module_paths(
+        self, names: list[str] | None = None
+    ) -> dict[str, str]:
         """
         Get the latest module paths for a list of modules.
 
@@ -1014,10 +1129,11 @@ class BaseProvider:
             ms = await self.modules(path=path)
             mps = [m async for m in ms]
             if len(mps) != 1:
-                self.logger.warning(f"Found no modules for path {path} - remove your lockfile and try again")
+                self.logger.warning(
+                    f"Found no modules for path {path} - remove your lockfile and try again"
+                )
             else:
                 yield mps[0]
-
 
     async def tag(
         self,
@@ -1066,7 +1182,10 @@ class BaseProvider:
         )
 
     async def get_module_functions(
-        self, names: list[str] | None = None, tags: list[str] | None = None, lockfile: Path | None = None
+        self,
+        names: list[str] | None = None,
+        tags: list[str] | None = None,
+        lockfile: Path | None = None,
     ) -> dict[str, RushModuleRunner[Any]]:
         """
         Get a dictionary of module functions.
@@ -1084,7 +1203,9 @@ class BaseProvider:
             if self._config_dir:
                 if self.module_paths.items():
                     # we have already loaded a lock via the workspace
-                    module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
+                    module_pages = self.get_modules_for_paths(
+                        list(self.module_paths.values())
+                    )
                 else:
                     # lets load the latest paths and lock them
                     if tags:
@@ -1101,7 +1222,9 @@ class BaseProvider:
                         paths = await self.get_latest_module_paths(names)
                         module_pages = self.get_modules_for_paths(list(paths.values()))
                         self.module_paths = paths
-                        self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
+                        self.save_module_paths(
+                            self.module_paths, self._config_dir / "rush.lock"
+                        )
             elif tags:
                 # no workspace, so up the user to lock it
                 module_pages = await self.modules(tags=tags)
@@ -1130,7 +1253,9 @@ class BaseProvider:
 
             def random_target():
                 allowed_default_targets = ["BULLET", "BULLET_2"]
-                if "BULLET_3" in str(module.targets) or "BULLET_3_GPU" in str(module.targets):
+                if "BULLET_3" in str(module.targets) or "BULLET_3_GPU" in str(
+                    module.targets
+                ):
                     allowed_default_targets.append("BULLET_3")
                 return random.choice(allowed_default_targets)
 
@@ -1149,7 +1274,12 @@ class BaseProvider:
                 module_outs: list[Any],
                 default_resources: dict[str, Any] | None,
             ) -> Callable[
-                ..., Coroutine[Any, Any, tuple[BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any], ...]]
+                ...,
+                Coroutine[
+                    Any,
+                    Any,
+                    tuple[BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any], ...],
+                ],
             ]:
                 in_types = tuple(type_from_typedef(i) for i in module_ins)
                 typechecker = build_typechecker(*in_types)
@@ -1169,12 +1299,20 @@ class BaseProvider:
                         target = random_target()
                     typechecker(*args)
                     run = await self.run(
-                        path, list(args), target, resources, tags, out_tags=output_tags, restore=restore
+                        path,
+                        list(args),
+                        target,
+                        resources,
+                        tags,
+                        out_tags=output_tags,
+                        restore=restore,
                     )
                     return tuple(
-                        (BaseProvider.BlockingArg if self.__is_blocking__ else BaseProvider.Arg)(
-                            self, out.id, source=run.id
-                        )
+                        (
+                            BaseProvider.BlockingArg
+                            if self.__is_blocking__
+                            else BaseProvider.Arg
+                        )(self, out.id, source=run.id)
                         for out in run.outs
                     )
 
@@ -1186,7 +1324,10 @@ class BaseProvider:
                     for ins in module.ins_usage:
                         # replace the first non-markup colon on the first line with a semicolon,
                         # so the docs don't get rendered incorrectly
-                        ins_firstline, ins_rest = ins.split("\n")[0], "\n".join(ins.split("\n")[1:])
+                        ins_firstline, ins_rest = (
+                            ins.split("\n")[0],
+                            "\n".join(ins.split("\n")[1:]),
+                        )
                         ins_parts = ins_firstline.split(":")
                         if len(ins_parts) > 2:
                             ins = (
@@ -1224,14 +1365,18 @@ class BaseProvider:
                     exec(
                         "runner.__annotations__['args'] = (*tuple[*(t.to_python_type() for t in in_types)],)[0]"  # noqa: E501
                     )
-                    exec("runner.__annotations__['return'] = tuple[*(t.to_python_type() for t in out_types)]")
+                    exec(
+                        "runner.__annotations__['return'] = tuple[*(t.to_python_type() for t in out_types)]"
+                    )
                 else:
                     from typing_extensions import Unpack
 
                     runner.__annotations__["args"] = Unpack[
                         tuple[tuple(t.to_python_type() for t in in_types)]
                     ]
-                    runner.__annotations__["return"] = tuple[tuple(t.to_python_type() for t in out_types)]
+                    runner.__annotations__["return"] = tuple[
+                        tuple(t.to_python_type() for t in out_types)
+                    ]
 
                 return runner
 
@@ -1319,7 +1464,9 @@ class BaseProvider:
             )
             return meta.descriptor
 
-    async def module_instance(self, id: ModuleInstanceId) -> ModuleInstanceDetailsModuleInstance:
+    async def module_instance(
+        self, id: ModuleInstanceId
+    ) -> ModuleInstanceDetailsModuleInstance:
         """
         Retrieve a module instance by its ID.
 
@@ -1328,7 +1475,6 @@ class BaseProvider:
         :raises Exception: If the module instance is not found.
         """
         return await self.client.module_instance_details(id)
-
 
     async def logs(
         self,
@@ -1383,7 +1529,9 @@ class BaseProvider:
                 if pages is not None and i > pages:
                     return
 
-    async def update_modules(self, names: list[str] | None = None, tags: list[str] | None = None):
+    async def update_modules(
+        self, names: list[str] | None = None, tags: list[str] | None = None
+    ):
         """
         Update the module paths in the lockfile.
 
@@ -1476,7 +1624,9 @@ class BaseProvider:
             self.id = id
             self.source = source
             self.status = ModuleInstanceStatus.CREATED
-            self.progress = ModuleInstanceFullProgress(n=0, n_max=0, n_expected=0, done=False)
+            self.progress = ModuleInstanceFullProgress(
+                n=0, n_max=0, n_expected=0, done=False
+            )
             self.value = value
             self.typeinfo = typeinfo
 
@@ -1508,20 +1658,32 @@ class BaseProvider:
                     if e.errors and e.errors[0].message == "not found":
                         if retries > 0:
                             if self.source:
-                                module_instance = await self.provider.module_instance(self.source)
+                                module_instance = await self.provider.module_instance(
+                                    self.source
+                                )
                                 if module_instance.status != self.status:
                                     self.provider.logger.info(
                                         f"Argument {self.id} is now {module_instance.status}"
                                     )
                                     self.status = module_instance.status
-                                if module_instance.status == ModuleInstanceStatus.RUNNING:
+                                if (
+                                    module_instance.status
+                                    == ModuleInstanceStatus.RUNNING
+                                ):
                                     if (
                                         module_instance.progress
-                                        and module_instance.progress.n != self.progress.n
+                                        and module_instance.progress.n
+                                        != self.progress.n
                                     ):
-                                        print(f"Progress: {module_instance.progress}", end="\r")
+                                        print(
+                                            f"Progress: {module_instance.progress}",
+                                            end="\r",
+                                        )
                                     else:
-                                        print("module running with no progress reported", end="\r")
+                                        print(
+                                            "module running with no progress reported",
+                                            end="\r",
+                                        )
                             await asyncio.sleep(5)
                         else:
                             raise e
@@ -1558,7 +1720,10 @@ class BaseProvider:
 
             if self.typeinfo:
                 if isinstance(self.typeinfo, dict) and (
-                    (self.typeinfo.get("k") == "record" and self.typeinfo.get("n") == "Object")
+                    (
+                        self.typeinfo.get("k") == "record"
+                        and self.typeinfo.get("n") == "Object"
+                    )
                     or (
                         self.typeinfo.get("k") == "optional"
                         and isinstance(self.typeinfo.get("t"), dict)
@@ -1573,13 +1738,25 @@ class BaseProvider:
                     )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
-                    decode = not (isinstance(self.value, dict) and self.value.get("format") == "bin")
+                    decode = not (
+                        isinstance(self.value, dict)
+                        and self.value.get("format") == "bin"
+                    )
                     if isinstance(self.value, dict) and "Ok" in self.value:
                         self.value = self.value["Ok"]
                     if isinstance(self.value, dict) and "path" in self.value:
-                        path: str = self.value["path"] if isinstance(self.value["path"], str) else ""
+                        path: str = (
+                            self.value["path"]
+                            if isinstance(self.value["path"], str)
+                            else ""
+                        )
                         return await self.provider.download_object(
-                            UUID(hex=path), filename, filepath, overwrite, signed, decode
+                            UUID(hex=path),
+                            filename,
+                            filepath,
+                            overwrite,
+                            signed,
+                            decode,
                         )
                     else:
                         raise Exception("Invalid value format for object argument")
@@ -1610,11 +1787,17 @@ class BaseProvider:
                         if remote_arg.rejected_at:
                             if remote_arg.source:
                                 # get the failure reason by checking the source module instance
-                                module_instance = await self.provider.module_instance(remote_arg.source)
+                                module_instance = await self.provider.module_instance(
+                                    remote_arg.source
+                                )
                                 raise Exception(
                                     (
-                                        getattr(module_instance, "failure_reason", None),
-                                        getattr(module_instance, "failure_context", None),
+                                        getattr(
+                                            module_instance, "failure_reason", None
+                                        ),
+                                        getattr(
+                                            module_instance, "failure_context", None
+                                        ),
                                     )
                                 )
                             raise Exception("Argument was rejected")
@@ -1623,21 +1806,33 @@ class BaseProvider:
                             if self.value is None:
                                 source = remote_arg.source or self.source
                                 if source:
-                                    module_instance = await self.provider.module_instance(source)
+                                    module_instance = (
+                                        await self.provider.module_instance(source)
+                                    )
                                     if module_instance.status != self.status:
                                         self.provider.logger.info(
                                             f"Argument {self.id} is now {module_instance.status}"
                                         )
                                         self.status = module_instance.status
 
-                                    if module_instance.status == ModuleInstanceStatus.RUNNING:
+                                    if (
+                                        module_instance.status
+                                        == ModuleInstanceStatus.RUNNING
+                                    ):
                                         if (
                                             module_instance.progress
-                                            and module_instance.progress.n != self.progress.n
+                                            and module_instance.progress.n
+                                            != self.progress.n
                                         ):
-                                            print(f"Progress: {module_instance.progress}", end="\r")
+                                            print(
+                                                f"Progress: {module_instance.progress}",
+                                                end="\r",
+                                            )
                                         else:
-                                            print("module running with no progress reported", end="\r")
+                                            print(
+                                                "module running with no progress reported",
+                                                end="\r",
+                                            )
                                 await asyncio.sleep(1)
                     except GraphQLClientGraphQLMultiError as e:
                         if e.errors and e.errors[0].message == "not found":
@@ -1648,18 +1843,25 @@ class BaseProvider:
 
             # if typeinfo is a dict, check if it is an object, and if so, download it
             if isinstance(self.typeinfo, dict) and self.provider and self.id:
-                if (self.typeinfo.get("k") == "record" and self.typeinfo.get("n") == "Object") or (
+                if (
+                    self.typeinfo.get("k") == "record"
+                    and self.typeinfo.get("n") == "Object"
+                ) or (
                     self.typeinfo.get("k") == "optional"
                     and isinstance(self.typeinfo.get("t"), dict)
                     and self.typeinfo["t"].get("k") == "record"
                     and self.typeinfo["t"].get("n") == "Object"
                 ):
-                    if isinstance(self.value, dict) and "path" in self.value and isinstance(self.value["path"], str):
+                    if (
+                        isinstance(self.value, dict)
+                        and "path" in self.value
+                        and isinstance(self.value["path"], str)
+                    ):
                         obj = await self.provider.object(UUID(self.value["path"]))
                         if obj and obj.url:
                             return obj.url
                         raise Exception("Object not found")
-            return cast(T,self.value)
+            return cast(T, self.value)
 
     class BlockingArg(Arg[T]):
         def __init__(
@@ -1719,13 +1921,17 @@ class Provider(BaseProvider):
                 stderr_handler = logging.StreamHandler()
                 stderr_handler.setLevel(logging.ERROR)
                 stderr_handler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                    logging.Formatter(
+                        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                    )
                 )
 
                 stdout_handler = logging.StreamHandler(sys.stdout)
                 stdout_handler.setLevel(logging.INFO)
                 stdout_handler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                    logging.Formatter(
+                        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                    )
                 )
 
                 # add filter to prevent errors from being logged twice
@@ -1735,10 +1941,16 @@ class Provider(BaseProvider):
                 logger.addHandler(stdout_handler)
                 logger.addHandler(stderr_handler)
 
-        if os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
+        if (
+            os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True"
+            and restore_by_default is None
+        ):
             logger.info("Restoring by default via env")
             restore_by_default = True
-        elif os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
+        elif (
+            os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False"
+            and restore_by_default is None
+        ):
             logger.info("Not restoring by default via env")
             restore_by_default = False
 
@@ -1755,7 +1967,9 @@ class Provider(BaseProvider):
 
             if url is None:
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
-            client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
+            client = Client(
+                url=url, headers={"Authorization": f"bearer {access_token}"}
+            )
 
             super().__init__(
                 client,
@@ -1765,7 +1979,9 @@ class Provider(BaseProvider):
                 restore_by_default=restore_by_default,
             )
         else:
-            client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
+            client = Client(
+                url=url, headers={"Authorization": f"bearer {access_token}"}
+            )
             super().__init__(
                 client,
                 workspace=workspace,
@@ -1796,16 +2012,35 @@ async def build_provider_with_functions(
     :return: The built RushProvider.
     """
     provider = Provider(
-        access_token, url, workspace, project, batch_tags, logger, restore_by_default=restore_by_default
+        access_token,
+        url,
+        workspace,
+        project,
+        batch_tags,
+        logger,
+        restore_by_default=restore_by_default,
     )
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
+    # if the user didn't  specify a project, use or create the default project
+    if not project:
+        p = (await anext((await provider.projects(tags=["default"])))).edges[0]
+        if project:
+            provider.project_id = p.node.id
+        else:
+            provider.project_id = (
+                await provider.create_project("Default Project", tags=["default"])
+            ).id
+
     return provider
+
 
 TA = TypeVar("TA")
 
+
 async def wrap_coroutine(coro: Awaitable[TA]) -> TA:
     return await coro
+
 
 def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner[Any]]):
     # functions that don't get called internally can be overridden with blocking versions
@@ -1827,7 +2062,9 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closurea(func: Callable[..., Awaitable[TA]], name: str) -> Callable[..., TA]:
+            def closurea(
+                func: Callable[..., Awaitable[TA]], name: str
+            ) -> Callable[..., TA]:
                 def blocking_func(
                     *args: Any,
                     target: Target | None = None,
@@ -1837,7 +2074,13 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
                 ) -> Any:
                     return asyncio_run(
                         wrap_coroutine(
-                        func(*args, target=target, resources=resources, tags=tags, restore=restore)
+                            func(
+                                *args,
+                                target=target,
+                                resources=resources,
+                                tags=tags,
+                                restore=restore,
+                            )
                         )
                     )
 
@@ -1862,7 +2105,7 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
                 def blocking_func(*args: Any, **kwargs: Any) -> Any:
                     r = asyncio_run(wrap_coroutine(func(provider, *args, **kwargs)))
                     if isinstance(r, AsyncGenerator):
-                        r_a: AsyncGenerator[Any,Any] = r
+                        r_a: AsyncGenerator[Any, Any] = r
                         res = []
                         while True:
                             try:
@@ -1885,7 +2128,9 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
         if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
 
             def closurec(func: Callable[..., AsyncGenerator[Any, None]], name: str):
-                def blocking_func(*args: Any, **kwargs: Any) -> Generator[Any, None, None]:
+                def blocking_func(
+                    *args: Any, **kwargs: Any
+                ) -> Generator[Any, None, None]:
                     r = func(provider, *args, **kwargs)
                     try:
                         hn = asyncio_run(anext(r))
@@ -1934,7 +2179,13 @@ def build_blocking_provider_with_functions(
     :return: The built RushProvider.
     """
     provider = Provider(
-        access_token, url, workspace, project, batch_tags, logger, restore_by_default=restore_by_default
+        access_token,
+        url,
+        workspace,
+        project,
+        batch_tags,
+        logger,
+        restore_by_default=restore_by_default,
     )
     if not LOOP.is_running():
         try:
@@ -1943,10 +2194,28 @@ def build_blocking_provider_with_functions(
             event_loop_running = False
 
         if not event_loop_running:
-            _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
+            _LOOP_THREAD = threading.Thread(
+                target=start_background_loop, args=(LOOP,), daemon=True
+            )
             _LOOP_THREAD.start()
 
-    built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
+    built_fns = asyncio_run(
+        provider.get_module_functions(names=module_names, tags=module_tags)
+    )
 
     _make_blocking(provider, built_fns)
+
+    if not project:
+        p = asyncio_run(anext(asyncio_run(provider.projects(tags=["default"])))).edges[
+            0
+        ]
+        if project:
+            provider.project_id = p.node.id
+        else:
+            provider.project_id = (
+                asyncio_run(
+                    provider.create_project("Default Project", tags=["default"])
+                )
+            ).id
+
     return provider
