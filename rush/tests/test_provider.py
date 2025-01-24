@@ -33,7 +33,7 @@ async def project(provider: Provider):
 async def benchmark(
     provider: Provider,
 ) -> BenchmarksBenchmarksEdgesNode | BenchmarkBenchmark:
-    return await provider.benchmark(name="OpenFF Protein Ligand Benchmark")
+    return await provider.benchmark(name="OpenFF CDK2 Protein Ligand Benchmark")
     # return (await anext(await provider.benchmarks())).edges[0].node
 
 
@@ -42,7 +42,67 @@ async def benchmark_submission(
     provider: Provider,
     benchmark: BenchmarksBenchmarksEdgesNode,
 ) -> RunBenchmarkRunBenchmark:
-    return await provider.run_benchmark(benchmark.id, "\\i -> (outputs i)")
+    return await provider.run_benchmark(benchmark.id, "\\i -> (outputs i)", "echo submission")
+
+
+@pytest.fixture(scope="function")
+async def openff_real_benchmark_submission(
+    provider: Provider, benchmark: BenchmarksBenchmarksEdgesNode
+) -> RunBenchmarkRunBenchmark:
+    rex = """
+let
+    runspec = (RunSpec {
+            target = 'Bullet',
+            resources = Resources { storage = some 10, storage_units = (some "MB"), gpus = some 1 } }),
+    auto3d = \\smi -> (
+        let res = (get 0 (get "Ok" (get 0 (await (get 1 (auto3d_rex
+            runspec
+            { k = 1 }
+            [ smi ]
+        )))))) in
+        (
+            VirtualObject { path = get "path" (get 0 res), size = get "size" (get 0 res), format = "json" },
+            VirtualObject { path = get "path" (get 1 res), size = get "size" (get 1 res), format = "json" },
+        )
+    ),
+    gnina = \\prot_conf -> \\bounding_box -> \\smol_conf -> let res = ( gnina_rex
+      runspec
+      {}
+      [prot_conf]
+      [bounding_box]
+      smol_conf
+      []
+    ) in (get 0 (get 0 (get "Ok" (get 0 (await (get 1 res)))))),
+in
+\\input -> (
+   let
+     protein = (load (id (get 0 (inputs input))) 'ProteinConformer'),
+     smol_id = (id (get 1 (inputs input))),
+     smiles = (smi (load smol_id 'Smol')),
+     structure = load (structure_id protein) 'Structure',
+     smol_structure = auto3d smiles,
+     docked_structure = gnina
+       [ (topology structure), (residues structure), (chains structure) ]
+       ({ min = (0.0,0.0,0.0), max = (1.0,1.0,1.0)})
+       [smol_structure],
+    in
+    [BenchmarkArg {
+    entity = "BiningAffinity",
+    id = save (BindingAffinity {
+      affinity = list_min (map (get "affinity") (get "scores" docked_structure)),
+      affinity_metric = 'kcal/mol',
+      protein_id = (protein_id protein),
+      smol_id = smol_id,
+      metadata = (Metadata {
+        name = id input,
+        description = none,
+        tags = [(id input)]
+      })
+    }) }]
+)
+    """
+
+    return await provider.run_benchmark(benchmark.id, rex, "actual submission")
 
 
 @pytest.mark.asyncio
@@ -82,6 +142,11 @@ async def test_runs(provider: Provider, project: CreateProjectCreateProject):
 @pytest.mark.asyncio
 async def test_submit_benchmark(benchmark_submission: RunBenchmarkRunBenchmark):
     assert benchmark_submission is not None
+
+
+@pytest.mark.asyncio
+async def test_submit_openff_benchmark(openff_real_benchmark_submission: RunBenchmarkRunBenchmark):
+    assert openff_real_benchmark_submission is not None
 
 
 @pytest.mark.asyncio

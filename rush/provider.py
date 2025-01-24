@@ -173,7 +173,8 @@ class ProjectPaged(
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any,
-    ) -> Page[T1, TPage]: ...
+    ) -> Page[T1, TPage]:
+        ...
 
 
 class Paged(
@@ -186,7 +187,8 @@ class Paged(
         first: Union[Optional[int], UnsetType] = UNSET,
         last: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any,
-    ) -> Page[T1, TPage]: ...
+    ) -> Page[T1, TPage]:
+        ...
 
 
 @dataclass
@@ -200,9 +202,7 @@ class PageVars:
 class EmptyPage(Generic[T1, TPage], Page[T1, TPage]):
     # skip the type checker for this class
     # since it is only used for the empty page
-    page_info: Any = PageInfoFull(
-        hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None
-    )
+    page_info: Any = PageInfoFull(hasPreviousPage=False, hasNextPage=False, startCursor=None, endCursor=None)
     edges: Sequence[Edge[T1]] = []
 
 
@@ -214,7 +214,8 @@ class RushModuleRunner(Protocol[TCo]):
         resources: Resources | None = None,
         tags: list[str] | None = None,
         restore: bool | None = False,
-    ) -> TCo: ...
+    ) -> TCo:
+        ...
 
 
 def get_name_from_path(path: str):
@@ -277,10 +278,7 @@ class BaseProvider:
             json_dict = json.load(f)
             return History(
                 tags=json_dict["tags"],
-                instances=[
-                    ModuleInstanceHistory(**instance)
-                    for instance in json_dict["instances"]
-                ],
+                instances=[ModuleInstanceHistory(**instance) for instance in json_dict["instances"]],
             )
 
     async def nuke(self, remote: bool = False, tags: bool = False):
@@ -393,23 +391,12 @@ class BaseProvider:
             }
 
         if group_by == "path":
-            c = Counter(
-                [
-                    (instance.status, get_name_from_path(instance.path))
-                    for instance in instances
-                ]
-            )
-            return {
-                f"{name} ({status})": (status, name, count)
-                for (status, name), count in c.items()
-            }
+            c = Counter([(instance.status, get_name_from_path(instance.path)) for instance in instances])
+            return {f"{name} ({status})": (status, name, count) for (status, name), count in c.items()}
 
         if group_by == "tag":
             c = Counter([(instance.status, instance.tags) for instance in instances])
-            return {
-                f"{tag} ({status})": (status, "", count)
-                for (status, tag), count in c.items()
-            }
+            return {f"{tag} ({status})": (status, "", count) for (status, tag), count in c.items()}
 
         raise Exception("Invalid group_by")
 
@@ -475,9 +462,7 @@ class BaseProvider:
         first: int | None = None,
         last: int | None = None,
         tags: list[str] | None = None,
-    ) -> AsyncIterable[
-        Page[ArgumentsMeAccountArguments, ArgumentsMeAccountArgumentsPageInfo]
-    ]:
+    ) -> AsyncIterable[Page[ArgumentsMeAccountArguments, ArgumentsMeAccountArgumentsPageInfo]]:
         """
         Retrieve a list of arguments.
         """
@@ -488,12 +473,8 @@ class BaseProvider:
             first: Union[Optional[int], UnsetType] = UNSET,
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
-        ) -> Page[
-            ArgumentsMeAccountArgumentsEdgesNode, ArgumentsMeAccountArgumentsPageInfo
-        ]:
-            res = await self.client.arguments(
-                first=first, after=after, last=last, before=before, **kwargs
-            )
+        ) -> Page[ArgumentsMeAccountArgumentsEdgesNode, ArgumentsMeAccountArgumentsPageInfo]:
+            res = await self.client.arguments(first=first, after=after, last=last, before=before, **kwargs)
             # The types for this pass in mypy, but not in pyright
             return res.account.arguments  # type: ignore
 
@@ -528,9 +509,7 @@ class BaseProvider:
             return (
                 (
                     await self.client.benchmarks(
-                        filter=BenchmarkFilter(
-                            metadata=MetadataFilter(name=StringFilter(eq=name))
-                        )
+                        filter=BenchmarkFilter(metadata=MetadataFilter(name=StringFilter(eq=name)))
                     )
                 )
                 .edges[0]
@@ -558,9 +537,7 @@ class BaseProvider:
         name: str | None = None,
     ) -> RunBenchmarkRunBenchmark:
         if not self.project_id:
-            raise Exception(
-                "Please set up a project first with client.create_project and client.set_project"
-            )
+            raise Exception("Please set up a project first with client.create_project and client.set_project")
         input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
         return await self.client.run_benchmark(input, benchmark_id)
 
@@ -570,9 +547,7 @@ class BaseProvider:
         name: str | None = None,
     ) -> EvalEval:
         if not self.project_id:
-            raise Exception(
-                "Please set up a project first with client.create_project and client.set_project"
-            )
+            raise Exception("Please set up a project first with client.create_project and client.set_project")
         input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
         return await self.client.eval(input)
 
@@ -583,16 +558,17 @@ class BaseProvider:
         first: int | None = None,
         last: int | None = None,
         tags: list[str] | None = None,
-    ) -> AsyncIterable[
-        Page[ProjectsMeAccountProjects, ProjectsMeAccountProjectsPageInfo]
-    ]:
+    ) -> AsyncIterable[Page[ProjectsMeAccountProjects, ProjectsMeAccountProjectsPageInfo]]:
         """
         Retrieve a list of projects.
         """
 
-        filter = ProjectFilter(
-            metadata=MetadataFilter(deleted_at=DateTimeFilter(is_null=True))
-        )
+        filter = ProjectFilter(metadata=MetadataFilter(deleted_at=DateTimeFilter(is_null=True)))
+
+        if tags:
+            filter = ProjectFilter(
+                all=[filter, ProjectFilter(metadata=MetadataFilter(tags=TagFilter(in_=tags)))]
+            )
 
         async def return_paged(
             after: Union[Optional[str], UnsetType] = UNSET,
@@ -600,12 +576,8 @@ class BaseProvider:
             first: Union[Optional[int], UnsetType] = UNSET,
             last: Union[Optional[int], UnsetType] = UNSET,
             **kwargs: Any,
-        ) -> Page[
-            ProjectsMeAccountProjectsEdgesNode, ProjectsMeAccountProjectsPageInfo
-        ]:
-            res = await self.client.projects(
-                first=first, after=after, last=last, before=before, **kwargs
-            )
+        ) -> Page[ProjectsMeAccountProjectsEdgesNode, ProjectsMeAccountProjectsPageInfo]:
+            res = await self.client.projects(first=first, after=after, last=last, before=before, **kwargs)
             # The types for this pass in mypy, but not in pyright
             return res.account.projects  # type: ignore
 
@@ -652,11 +624,7 @@ class BaseProvider:
         :param filepath: Where to download the object.
         :param filename: Download to the workspace with this name under "objects".
         """
-        obj = (
-            (await self.object(path))
-            if signed
-            else (await self.client.object_contents(path))
-        )
+        obj = (await self.object(path)) if signed else (await self.client.object_contents(path))
         if not obj:
             return None
 
@@ -701,9 +669,7 @@ class BaseProvider:
 
                             # handle json
                             if first_chunk:
-                                if len(chunk) > 0 and (
-                                    chunk[0] == "[" or chunk[0] == "{"
-                                ):
+                                if len(chunk) > 0 and (chunk[0] == "[" or chunk[0] == "{"):
                                     f.write(chunk.encode("utf-8"))
                                     first_chunk = False
                                     continue
@@ -758,9 +724,7 @@ class BaseProvider:
                                 Use `.update_modules()` to update the lock file"""
                             )
                     else:
-                        self.logger.warning(
-                            f"Module {module.path} is not in the lock file"
-                        )
+                        self.logger.warning(f"Module {module.path} is not in the lock file")
 
         if filepath.exists() and filepath.stat().st_size > 0:
             with open(filepath, "r") as f:
@@ -803,9 +767,7 @@ class BaseProvider:
         if folder_path and isinstance(folder_path, str):
             folder_path = Path(folder_path)
         else:
-            folder_path = (
-                folder_path or (self.workspace or Path.cwd()) / f"outputs-{instance_id}"
-            )
+            folder_path = folder_path or (self.workspace or Path.cwd()) / f"outputs-{instance_id}"
 
         if folder_path.exists():
             if not overwrite:
@@ -817,9 +779,7 @@ class BaseProvider:
         instance = await self.module_instance(instance_id)
         for obj in instance.outs:
             if obj.value and isinstance(obj.value, dict) and "path" in obj.value:
-                await self.Arg(self, obj.id).download(
-                    filepath=folder_path / str(obj.id), overwrite=overwrite
-                )
+                await self.Arg(self, obj.id).download(filepath=folder_path / str(obj.id), overwrite=overwrite)
 
         return folder_path
 
@@ -850,18 +810,14 @@ class BaseProvider:
 
         try_restore = restore if restore is not None else self.restore_by_default
         if try_restore:
-            self.logger.info(
-                f"Trying to restore job with tags: {tags} and path: {path}"
-            )
+            self.logger.info(f"Trying to restore job with tags: {tags} and path: {path}")
             res: list[ModuleInstanceFullModuleInstance] = []
             async for page in await self.module_instances(tags=list(tags), path=path):
                 for edge in page.edges:
                     instance = edge.node
                     res.append(instance)
                     if len(res) > 1:
-                        self.logger.warning(
-                            "Multiple module instances found with the same tags and path"
-                        )
+                        self.logger.warning("Multiple module instances found with the same tags and path")
             if len(res) >= 1:
                 self.logger.info(f"Restoring job from previous run with id {res[0].id}")
                 return res[0]
@@ -871,17 +827,10 @@ class BaseProvider:
 
         # TODO: less insane version of this
         def gen_arg_dict(
-            input: BaseProvider.Arg[Any]
-            | BaseProvider.BlockingArg[Any]
-            | ArgId
-            | UUID
-            | VirtualObject
-            | Any,
+            input: BaseProvider.Arg[Any] | BaseProvider.BlockingArg[Any] | ArgId | UUID | VirtualObject | Any,
         ) -> ArgumentInput:
             arg = ArgumentInput()
-            if isinstance(input, BaseProvider.Arg) or isinstance(
-                input, BaseProvider.BlockingArg
-            ):
+            if isinstance(input, BaseProvider.Arg) or isinstance(input, BaseProvider.BlockingArg):
                 if input.id is None:
                     arg.value = input.value
                 else:
@@ -986,15 +935,11 @@ class BaseProvider:
         if isinstance(path, str):
             filters.append(ModuleInstanceFilter(path=StringFilter(eq=path)))
         if isinstance(status, ModuleInstanceStatus):
-            filters.append(
-                ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq=status))
-            )
+            filters.append(ModuleInstanceFilter(status=ModuleInstanceStatusFilter(eq=status)))
         if isinstance(tags, list):
             tag_filter = TagFilter()
             tag_filter.in_ = tags
-            filters.append(
-                ModuleInstanceFilter(metadata=MetadataFilter(tags=tag_filter))
-            )
+            filters.append(ModuleInstanceFilter(metadata=MetadataFilter(tags=tag_filter)))
         if isinstance(ids, list):
             for id in ids:
                 filters.append(ModuleInstanceFilter(id=UuidFilter(eq=id)))
@@ -1069,9 +1014,7 @@ class BaseProvider:
 
     async def runs(
         self,
-    ) -> AsyncIterable[
-        Page[RunsMeAccountProjectRunsEdgesNode, RunsMeAccountProjectRunsPageInfo]
-    ]:
+    ) -> AsyncIterable[Page[RunsMeAccountProjectRunsEdgesNode, RunsMeAccountProjectRunsPageInfo]]:
         """
         Retrieve a list of runs.
         """
@@ -1097,13 +1040,9 @@ class BaseProvider:
             # The types for this pass in mypy, but not in pyright
             return res.account.project.runs  # type: ignore
 
-        return self._project_query_with_pagination(
-            return_paged, UUID(self.project_id), PageVars(), {}
-        )
+        return self._project_query_with_pagination(return_paged, UUID(self.project_id), PageVars(), {})
 
-    async def get_latest_module_paths(
-        self, names: list[str] | None = None
-    ) -> dict[str, str]:
+    async def get_latest_module_paths(self, names: list[str] | None = None) -> dict[str, str]:
         """
         Get the latest module paths for a list of modules.
 
@@ -1129,9 +1068,7 @@ class BaseProvider:
             ms = await self.modules(path=path)
             mps = [m async for m in ms]
             if len(mps) != 1:
-                self.logger.warning(
-                    f"Found no modules for path {path} - remove your lockfile and try again"
-                )
+                self.logger.warning(f"Found no modules for path {path} - remove your lockfile and try again")
             else:
                 yield mps[0]
 
@@ -1203,9 +1140,7 @@ class BaseProvider:
             if self._config_dir:
                 if self.module_paths.items():
                     # we have already loaded a lock via the workspace
-                    module_pages = self.get_modules_for_paths(
-                        list(self.module_paths.values())
-                    )
+                    module_pages = self.get_modules_for_paths(list(self.module_paths.values()))
                 else:
                     # lets load the latest paths and lock them
                     if tags:
@@ -1222,9 +1157,7 @@ class BaseProvider:
                         paths = await self.get_latest_module_paths(names)
                         module_pages = self.get_modules_for_paths(list(paths.values()))
                         self.module_paths = paths
-                        self.save_module_paths(
-                            self.module_paths, self._config_dir / "rush.lock"
-                        )
+                        self.save_module_paths(self.module_paths, self._config_dir / "rush.lock")
             elif tags:
                 # no workspace, so up the user to lock it
                 module_pages = await self.modules(tags=tags)
@@ -1253,9 +1186,7 @@ class BaseProvider:
 
             def random_target():
                 allowed_default_targets = ["BULLET", "BULLET_2"]
-                if "BULLET_3" in str(module.targets) or "BULLET_3_GPU" in str(
-                    module.targets
-                ):
+                if "BULLET_3" in str(module.targets) or "BULLET_3_GPU" in str(module.targets):
                     allowed_default_targets.append("BULLET_3")
                 return random.choice(allowed_default_targets)
 
@@ -1308,11 +1239,9 @@ class BaseProvider:
                         restore=restore,
                     )
                     return tuple(
-                        (
-                            BaseProvider.BlockingArg
-                            if self.__is_blocking__
-                            else BaseProvider.Arg
-                        )(self, out.id, source=run.id)
+                        (BaseProvider.BlockingArg if self.__is_blocking__ else BaseProvider.Arg)(
+                            self, out.id, source=run.id
+                        )
                         for out in run.outs
                     )
 
@@ -1365,18 +1294,14 @@ class BaseProvider:
                     exec(
                         "runner.__annotations__['args'] = (*tuple[*(t.to_python_type() for t in in_types)],)[0]"  # noqa: E501
                     )
-                    exec(
-                        "runner.__annotations__['return'] = tuple[*(t.to_python_type() for t in out_types)]"
-                    )
+                    exec("runner.__annotations__['return'] = tuple[*(t.to_python_type() for t in out_types)]")
                 else:
                     from typing_extensions import Unpack
 
                     runner.__annotations__["args"] = Unpack[
                         tuple[tuple(t.to_python_type() for t in in_types)]
                     ]
-                    runner.__annotations__["return"] = tuple[
-                        tuple(t.to_python_type() for t in out_types)
-                    ]
+                    runner.__annotations__["return"] = tuple[tuple(t.to_python_type() for t in out_types)]
 
                 return runner
 
@@ -1464,9 +1389,7 @@ class BaseProvider:
             )
             return meta.descriptor
 
-    async def module_instance(
-        self, id: ModuleInstanceId
-    ) -> ModuleInstanceDetailsModuleInstance:
+    async def module_instance(self, id: ModuleInstanceId) -> ModuleInstanceDetailsModuleInstance:
         """
         Retrieve a module instance by its ID.
 
@@ -1529,9 +1452,7 @@ class BaseProvider:
                 if pages is not None and i > pages:
                     return
 
-    async def update_modules(
-        self, names: list[str] | None = None, tags: list[str] | None = None
-    ):
+    async def update_modules(self, names: list[str] | None = None, tags: list[str] | None = None):
         """
         Update the module paths in the lockfile.
 
@@ -1624,9 +1545,7 @@ class BaseProvider:
             self.id = id
             self.source = source
             self.status = ModuleInstanceStatus.CREATED
-            self.progress = ModuleInstanceFullProgress(
-                n=0, n_max=0, n_expected=0, done=False
-            )
+            self.progress = ModuleInstanceFullProgress(n=0, n_max=0, n_expected=0, done=False)
             self.value = value
             self.typeinfo = typeinfo
 
@@ -1658,22 +1577,16 @@ class BaseProvider:
                     if e.errors and e.errors[0].message == "not found":
                         if retries > 0:
                             if self.source:
-                                module_instance = await self.provider.module_instance(
-                                    self.source
-                                )
+                                module_instance = await self.provider.module_instance(self.source)
                                 if module_instance.status != self.status:
                                     self.provider.logger.info(
                                         f"Argument {self.id} is now {module_instance.status}"
                                     )
                                     self.status = module_instance.status
-                                if (
-                                    module_instance.status
-                                    == ModuleInstanceStatus.RUNNING
-                                ):
+                                if module_instance.status == ModuleInstanceStatus.RUNNING:
                                     if (
                                         module_instance.progress
-                                        and module_instance.progress.n
-                                        != self.progress.n
+                                        and module_instance.progress.n != self.progress.n
                                     ):
                                         print(
                                             f"Progress: {module_instance.progress}",
@@ -1720,10 +1633,7 @@ class BaseProvider:
 
             if self.typeinfo:
                 if isinstance(self.typeinfo, dict) and (
-                    (
-                        self.typeinfo.get("k") == "record"
-                        and self.typeinfo.get("n") == "Object"
-                    )
+                    (self.typeinfo.get("k") == "record" and self.typeinfo.get("n") == "Object")
                     or (
                         self.typeinfo.get("k") == "optional"
                         and isinstance(self.typeinfo.get("t"), dict)
@@ -1738,18 +1648,11 @@ class BaseProvider:
                     )
                 ):
                     signed = "$" in json.dumps(self.typeinfo)
-                    decode = not (
-                        isinstance(self.value, dict)
-                        and self.value.get("format") == "bin"
-                    )
+                    decode = not (isinstance(self.value, dict) and self.value.get("format") == "bin")
                     if isinstance(self.value, dict) and "Ok" in self.value:
                         self.value = self.value["Ok"]
                     if isinstance(self.value, dict) and "path" in self.value:
-                        path: str = (
-                            self.value["path"]
-                            if isinstance(self.value["path"], str)
-                            else ""
-                        )
+                        path: str = self.value["path"] if isinstance(self.value["path"], str) else ""
                         return await self.provider.download_object(
                             UUID(hex=path),
                             filename,
@@ -1787,17 +1690,11 @@ class BaseProvider:
                         if remote_arg.rejected_at:
                             if remote_arg.source:
                                 # get the failure reason by checking the source module instance
-                                module_instance = await self.provider.module_instance(
-                                    remote_arg.source
-                                )
+                                module_instance = await self.provider.module_instance(remote_arg.source)
                                 raise Exception(
                                     (
-                                        getattr(
-                                            module_instance, "failure_reason", None
-                                        ),
-                                        getattr(
-                                            module_instance, "failure_context", None
-                                        ),
+                                        getattr(module_instance, "failure_reason", None),
+                                        getattr(module_instance, "failure_context", None),
                                     )
                                 )
                             raise Exception("Argument was rejected")
@@ -1806,23 +1703,17 @@ class BaseProvider:
                             if self.value is None:
                                 source = remote_arg.source or self.source
                                 if source:
-                                    module_instance = (
-                                        await self.provider.module_instance(source)
-                                    )
+                                    module_instance = await self.provider.module_instance(source)
                                     if module_instance.status != self.status:
                                         self.provider.logger.info(
                                             f"Argument {self.id} is now {module_instance.status}"
                                         )
                                         self.status = module_instance.status
 
-                                    if (
-                                        module_instance.status
-                                        == ModuleInstanceStatus.RUNNING
-                                    ):
+                                    if module_instance.status == ModuleInstanceStatus.RUNNING:
                                         if (
                                             module_instance.progress
-                                            and module_instance.progress.n
-                                            != self.progress.n
+                                            and module_instance.progress.n != self.progress.n
                                         ):
                                             print(
                                                 f"Progress: {module_instance.progress}",
@@ -1843,10 +1734,7 @@ class BaseProvider:
 
             # if typeinfo is a dict, check if it is an object, and if so, download it
             if isinstance(self.typeinfo, dict) and self.provider and self.id:
-                if (
-                    self.typeinfo.get("k") == "record"
-                    and self.typeinfo.get("n") == "Object"
-                ) or (
+                if (self.typeinfo.get("k") == "record" and self.typeinfo.get("n") == "Object") or (
                     self.typeinfo.get("k") == "optional"
                     and isinstance(self.typeinfo.get("t"), dict)
                     and self.typeinfo["t"].get("k") == "record"
@@ -1921,17 +1809,13 @@ class Provider(BaseProvider):
                 stderr_handler = logging.StreamHandler()
                 stderr_handler.setLevel(logging.ERROR)
                 stderr_handler.setFormatter(
-                    logging.Formatter(
-                        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                    )
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
                 )
 
                 stdout_handler = logging.StreamHandler(sys.stdout)
                 stdout_handler.setLevel(logging.INFO)
                 stdout_handler.setFormatter(
-                    logging.Formatter(
-                        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                    )
+                    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
                 )
 
                 # add filter to prevent errors from being logged twice
@@ -1941,16 +1825,10 @@ class Provider(BaseProvider):
                 logger.addHandler(stdout_handler)
                 logger.addHandler(stderr_handler)
 
-        if (
-            os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True"
-            and restore_by_default is None
-        ):
+        if os.getenv("RUSH_RESTORE_BY_DEFAULT") == "True" and restore_by_default is None:
             logger.info("Restoring by default via env")
             restore_by_default = True
-        elif (
-            os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False"
-            and restore_by_default is None
-        ):
+        elif os.getenv("RUSH_RESTORE_BY_DEFAULT") == "False" and restore_by_default is None:
             logger.info("Not restoring by default via env")
             restore_by_default = False
 
@@ -1967,9 +1845,7 @@ class Provider(BaseProvider):
 
             if url is None:
                 url = os.environ.get("RUSH_URL") or "https://tengu.qdx.ai/"
-            client = Client(
-                url=url, headers={"Authorization": f"bearer {access_token}"}
-            )
+            client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
 
             super().__init__(
                 client,
@@ -1979,9 +1855,7 @@ class Provider(BaseProvider):
                 restore_by_default=restore_by_default,
             )
         else:
-            client = Client(
-                url=url, headers={"Authorization": f"bearer {access_token}"}
-            )
+            client = Client(url=url, headers={"Authorization": f"bearer {access_token}"})
             super().__init__(
                 client,
                 workspace=workspace,
@@ -2025,12 +1899,10 @@ async def build_provider_with_functions(
     # if the user didn't  specify a project, use or create the default project
     if not project:
         p = (await anext((await provider.projects(tags=["default"])))).edges[0]
-        if project:
+        if p:
             provider.project_id = p.node.id
         else:
-            provider.project_id = (
-                await provider.create_project("Default Project", tags=["default"])
-            ).id
+            provider.project_id = (await provider.create_project("Default Project", tags=["default"])).id
 
     return provider
 
@@ -2062,9 +1934,7 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
             or inspect.iscoroutinefunction(func)
         ):
 
-            def closurea(
-                func: Callable[..., Awaitable[TA]], name: str
-            ) -> Callable[..., TA]:
+            def closurea(func: Callable[..., Awaitable[TA]], name: str) -> Callable[..., TA]:
                 def blocking_func(
                     *args: Any,
                     target: Target | None = None,
@@ -2128,9 +1998,7 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
         if inspect.isasyncgenfunction(func) or inspect.isasyncgen(func):
 
             def closurec(func: Callable[..., AsyncGenerator[Any, None]], name: str):
-                def blocking_func(
-                    *args: Any, **kwargs: Any
-                ) -> Generator[Any, None, None]:
+                def blocking_func(*args: Any, **kwargs: Any) -> Generator[Any, None, None]:
                     r = func(provider, *args, **kwargs)
                     try:
                         hn = asyncio_run(anext(r))
@@ -2194,28 +2062,20 @@ def build_blocking_provider_with_functions(
             event_loop_running = False
 
         if not event_loop_running:
-            _LOOP_THREAD = threading.Thread(
-                target=start_background_loop, args=(LOOP,), daemon=True
-            )
+            _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
             _LOOP_THREAD.start()
 
-    built_fns = asyncio_run(
-        provider.get_module_functions(names=module_names, tags=module_tags)
-    )
+    built_fns = asyncio_run(provider.get_module_functions(names=module_names, tags=module_tags))
 
     _make_blocking(provider, built_fns)
 
     if not project:
-        p = asyncio_run(anext(asyncio_run(provider.projects(tags=["default"])))).edges[
-            0
-        ]
-        if project:
+        p = asyncio_run(anext(asyncio_run(provider.projects(tags=["default"])))).edges[0]
+        if p:
             provider.project_id = p.node.id
         else:
             provider.project_id = (
-                asyncio_run(
-                    provider.create_project("Default Project", tags=["default"])
-                )
+                asyncio_run(provider.create_project("Default Project", tags=["default"]))
             ).id
 
     return provider
