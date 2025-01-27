@@ -183,8 +183,21 @@ class BenchmarkSubmissionFields(BaseModel):
     updated_at: datetime
     deleted_at: Optional[datetime]
     tags: Optional[List[str]]
+    scores: "BenchmarkSubmissionFieldsScores"
     benchmark: "BenchmarkSubmissionFieldsBenchmark"
     data: "BenchmarkSubmissionFieldsData"
+    source_run: Optional["BenchmarkSubmissionFieldsSourceRun"]
+
+
+class BenchmarkSubmissionFieldsScores(BaseModel):
+    nodes: List["BenchmarkSubmissionFieldsScoresNodes"]
+
+
+class BenchmarkSubmissionFieldsScoresNodes(BaseModel):
+    id: Any
+    score: float
+    name: Optional[str]
+    tags: Optional[List[str]]
 
 
 class BenchmarkSubmissionFieldsBenchmark(BaseModel):
@@ -196,6 +209,22 @@ class BenchmarkSubmissionFieldsData(BaseModel):
 
 
 class BenchmarkSubmissionFieldsDataNodes(BaseModel):
+    id: Any
+    scores: "BenchmarkSubmissionFieldsDataNodesScores"
+
+
+class BenchmarkSubmissionFieldsDataNodesScores(BaseModel):
+    nodes: List["BenchmarkSubmissionFieldsDataNodesScoresNodes"]
+
+
+class BenchmarkSubmissionFieldsDataNodesScoresNodes(BaseModel):
+    id: Any
+    score: float
+    name: Optional[str]
+    tags: Optional[List[str]]
+
+
+class BenchmarkSubmissionFieldsSourceRun(BaseModel):
     id: Any
 
 

@@ -776,13 +776,32 @@ class Client(AsyncBaseClient):
               updated_at
               deleted_at
               tags
+              scores {
+                nodes {
+                  id
+                  score
+                  name
+                  tags
+                }
+              }
               benchmark {
                 id
               }
               data {
                 nodes {
                   id
+                  scores {
+                    nodes {
+                      id
+                      score
+                      name
+                      tags
+                    }
+                  }
                 }
+              }
+              source_run {
+                id
               }
             }
             """
@@ -846,13 +865,32 @@ class Client(AsyncBaseClient):
               updated_at
               deleted_at
               tags
+              scores {
+                nodes {
+                  id
+                  score
+                  name
+                  tags
+                }
+              }
               benchmark {
                 id
               }
               data {
                 nodes {
                   id
+                  scores {
+                    nodes {
+                      id
+                      score
+                      name
+                      tags
+                    }
+                  }
                 }
+              }
+              source_run {
+                id
               }
             }
 
@@ -3650,11 +3688,7 @@ class Client(AsyncBaseClient):
         response = await self.execute(
             query=query, operation_name="create_project", variables=variables, **kwargs
         )
-        print(response)
         data = self.get_data(response)
-        print(data)
-
-        from .create_project import CreateProject
         return CreateProject.model_validate(data).create_project
 
     async def delete_project(
@@ -4268,18 +4302,26 @@ class Client(AsyncBaseClient):
         return DeleteRun.model_validate(data).delete_run
 
     async def run_benchmark(
-        self, input: CreateRun, benchmark_id: Any, **kwargs: Any
+        self,
+        input: CreateRun,
+        benchmark_id: Any,
+        sample_pct: Union[Optional[float], UnsetType] = UNSET,
+        **kwargs: Any
     ) -> RunBenchmarkRunBenchmark:
         query = gql(
             """
-            mutation run_benchmark($input: CreateRun!, $benchmark_id: BenchmarkId!) {
-              run_benchmark(input: $input, benchmark_id: $benchmark_id) {
+            mutation run_benchmark($input: CreateRun!, $benchmark_id: BenchmarkId!, $sample_pct: Float) {
+              run_benchmark(input: $input, benchmark_id: $benchmark_id, sample: $sample_pct) {
                 id
               }
             }
             """
         )
-        variables: Dict[str, object] = {"input": input, "benchmark_id": benchmark_id}
+        variables: Dict[str, object] = {
+            "input": input,
+            "benchmark_id": benchmark_id,
+            "sample_pct": sample_pct,
+        }
         response = await self.execute(
             query=query, operation_name="run_benchmark", variables=variables, **kwargs
         )

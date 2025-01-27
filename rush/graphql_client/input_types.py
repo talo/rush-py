@@ -136,6 +136,7 @@ class BenchmarkSubmissionDataScoreFilter(BaseModel):
     metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
+    score: Optional["F64Filter"] = None
     benchmark_submission_data_id: Optional["UuidFilter"] = None
 
 
@@ -144,6 +145,7 @@ class BenchmarkSubmissionDataScoreSort(BaseModel):
     metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
+    score: Optional[F64Sort] = None
     benchmark_submission_data_id: Optional[UuidSort] = None
 
 
@@ -173,6 +175,7 @@ class BenchmarkSubmissionScoreFilter(BaseModel):
     metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
+    score: Optional["F64Filter"] = None
     benchmark_submission_id: Optional["UuidFilter"] = None
 
 
@@ -181,6 +184,7 @@ class BenchmarkSubmissionScoreSort(BaseModel):
     metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
+    score: Optional[F64Sort] = None
     benchmark_submission_id: Optional[UuidSort] = None
 
 
@@ -397,16 +401,6 @@ class CreateBenchmarkSubmission(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     benchmark_id: Any
-    project_id: Any
-
-
-class CreateBenchmarkSubmissionData(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
-    outputs: List["BenchmarkArgInput"]
-    benchmark_data_id: Any
-    benchmark_submission_id: Any
     project_id: Any
 
 
@@ -759,7 +753,7 @@ class MessageBodyInput(BaseModel):
     walter_prompt: Optional["WalterPromptInput"] = Field(
         alias="walterPrompt", default=None
     )
-    use_tools: Optional["UseToolsInput"] = Field(alias="useTools", default=None)
+    use_tool: Optional["UseToolInput"] = Field(alias="useTool", default=None)
     thought: Optional["ThoughtInput"] = None
     answer: Optional["AnswerInput"] = None
     done: Optional["DoneInput"] = None
@@ -979,15 +973,6 @@ class PatchBenchmarkSubmission(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     benchmark_id: Optional[Any] = None
-
-
-class PatchBenchmarkSubmissionData(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
-    outputs: Optional[List["BenchmarkArgInput"]] = None
-    benchmark_data_id: Optional[Any] = None
-    benchmark_submission_id: Optional[Any] = None
 
 
 class PatchBindingAffinity(BaseModel):
@@ -1467,7 +1452,7 @@ class TokenSort(BaseModel):
     user_id: Optional[UuidSort] = None
 
 
-class UseToolsInput(BaseModel):
+class UseToolInput(BaseModel):
     tool: str
     args: Any
 
@@ -1531,7 +1516,6 @@ BindingSiteInteractionsSort.model_rebuild()
 ChatFilter.model_rebuild()
 ChatSort.model_rebuild()
 CreateBenchmarkData.model_rebuild()
-CreateBenchmarkSubmissionData.model_rebuild()
 CreateBindingSiteConformer.model_rebuild()
 CreateBindingSiteInteractions.model_rebuild()
 CreateMessage.model_rebuild()
@@ -1559,7 +1543,6 @@ PaperContentSort.model_rebuild()
 PaperFilter.model_rebuild()
 PaperSort.model_rebuild()
 PatchBenchmarkData.model_rebuild()
-PatchBenchmarkSubmissionData.model_rebuild()
 PatchBindingSiteConformer.model_rebuild()
 PatchBindingSiteInteractions.model_rebuild()
 PatchMessage.model_rebuild()

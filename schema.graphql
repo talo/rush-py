@@ -180,6 +180,7 @@ type Benchmark implements Entity {
   tags: [String!]
   source_run: Run
   data(after: String, before: String, first: Int, last: Int, filter: BenchmarkDataFilter, sort: BenchmarkDataSort): BenchmarkDataConnection!
+  submissions(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionFilter): BenchmarkSubmissionConnection!
 }
 
 type BenchmarkArg {
@@ -375,6 +376,7 @@ scalar BenchmarkSubmissionDataId
 
 type BenchmarkSubmissionDataScore {
   id: BenchmarkSubmissionDataScoreId!
+  score: Float!
   name: String
   description: String
   created_at: DateTime!
@@ -413,6 +415,7 @@ input BenchmarkSubmissionDataScoreFilter {
   metadata: MetadataFilter
   project_id: UuidFilter
   account_id: UuidFilter
+  score: F64Filter
   benchmark_submission_data_id: UuidFilter
 }
 
@@ -423,6 +426,7 @@ input BenchmarkSubmissionDataScoreSort {
   metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
+  score: F64Sort
   benchmark_submission_data_id: UuidSort
 }
 
@@ -458,6 +462,7 @@ scalar BenchmarkSubmissionId
 
 type BenchmarkSubmissionScore {
   id: BenchmarkSubmissionScoreId!
+  score: Float!
   name: String
   description: String
   created_at: DateTime!
@@ -496,6 +501,7 @@ input BenchmarkSubmissionScoreFilter {
   metadata: MetadataFilter
   project_id: UuidFilter
   account_id: UuidFilter
+  score: F64Filter
   benchmark_submission_id: UuidFilter
 }
 
@@ -506,6 +512,7 @@ input BenchmarkSubmissionScoreSort {
   metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
+  score: F64Sort
   benchmark_submission_id: UuidSort
 }
 
@@ -1141,16 +1148,6 @@ input CreateBenchmarkSubmission {
   project_id: ProjectId!
 }
 
-input CreateBenchmarkSubmissionData {
-  name: String
-  description: String
-  tags: [String!]
-  outputs: [BenchmarkArgInput!]!
-  benchmark_data_id: BenchmarkDataId!
-  benchmark_submission_id: BenchmarkSubmissionId!
-  project_id: ProjectId!
-}
-
 input CreateBindingAffinity {
   name: String
   description: String
@@ -1698,12 +1695,12 @@ type Message implements Entity {
   chat: Chat!
 }
 
-union MessageBody = UserPrompt | WalterPrompt | UseTools | Thought | Answer | Done | Download
+union MessageBody = UserPrompt | WalterPrompt | UseTool | Thought | Answer | Done | Download
 
 input MessageBodyInput {
   userPrompt: UserPromptInput
   walterPrompt: WalterPromptInput
-  useTools: UseToolsInput
+  useTool: UseToolInput
   thought: ThoughtInput
   answer: AnswerInput
   done: DoneInput
@@ -2202,7 +2199,7 @@ type Mutation {
 
   """Cancel a run"""
   cancel_run(id: RunId!): Run!
-  run_benchmark(input: CreateRun!, benchmark_id: BenchmarkId!): BenchmarkSubmission!
+  run_benchmark(input: CreateRun!, benchmark_id: BenchmarkId!, sample: Float): BenchmarkSubmission!
   eval(input: CreateRun!): Run!
   delete_run(run_id: RunId!): Run!
   update_account_config(account_id: AccountId!, input: AccountConfigInput!): AccountConfig!
@@ -2217,9 +2214,6 @@ type Mutation {
   create_benchmark_submission(input: CreateBenchmarkSubmission!): BenchmarkSubmission!
   delete_benchmark_submission(benchmark_submission_id: BenchmarkSubmissionId!): BenchmarkSubmission!
   patch_benchmark_submission(benchmark_submission_id: BenchmarkSubmissionId!, input: PatchBenchmarkSubmission!): BenchmarkSubmission!
-  create_benchmark_submission_data(input: CreateBenchmarkSubmissionData!): BenchmarkSubmissionData!
-  delete_benchmark_submission_data(benchmark_submission_data_id: BenchmarkSubmissionDataId!): BenchmarkSubmissionData!
-  patch_benchmark_submission_data(benchmark_submission_data_id: BenchmarkSubmissionDataId!, input: PatchBenchmarkSubmissionData!): BenchmarkSubmissionData!
   create_binding_affinity(input: CreateBindingAffinity!): BindingAffinity!
   delete_binding_affinity(binding_affinity_id: BindingAffinityId!): BindingAffinity!
   patch_binding_affinity(binding_affinity_id: BindingAffinityId!, input: PatchBindingAffinity!): BindingAffinity!
@@ -2317,7 +2311,7 @@ type ObjectDescriptor {
   object: VirtualObject!
   type_info: Type!
   base_url: String!
-  contents: JSON!
+  contents: JSON
   url: String
 }
 
@@ -2551,15 +2545,6 @@ input PatchBenchmarkSubmission {
   description: String
   tags: [String!]
   benchmark_id: BenchmarkId
-}
-
-input PatchBenchmarkSubmissionData {
-  name: String
-  description: String
-  tags: [String!]
-  outputs: [BenchmarkArgInput!]
-  benchmark_data_id: BenchmarkDataId
-  benchmark_submission_id: BenchmarkSubmissionId
 }
 
 input PatchBindingAffinity {
@@ -3809,12 +3794,12 @@ scalar UUID
 
 scalar Upload
 
-type UseTools {
+type UseTool {
   tool: String!
   args: JSON!
 }
 
-input UseToolsInput {
+input UseToolInput {
   tool: String!
   args: JSON!
 }

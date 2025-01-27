@@ -50,13 +50,32 @@ fragment BenchmarkSubmissionFields on BenchmarkSubmission {
     updated_at
     deleted_at
     tags
+    scores {
+        nodes {
+            id
+            score
+            name
+            tags
+        }
+    }
     benchmark {
         id
     }
     data {
         nodes {
             id
+            scores {
+                nodes {
+                    id
+                    score
+                    name
+                    tags
+                }
+            }
         }
+    }
+    source_run {
+        id
     }
     #status
     #error

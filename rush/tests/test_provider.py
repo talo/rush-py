@@ -54,6 +54,9 @@ let
     runspec = (RunSpec {
             target = 'Bullet',
             resources = Resources { storage = some 10, storage_units = (some "MB"), gpus = some 1 } }),
+    runspec_nogpu = (RunSpec {
+            target = 'Bullet',
+            resources = Resources { storage = some 10, storage_units = (some "MB"), gpus = none } }),
     auto3d = \\smi -> (
         let res = (get 0 (get "Ok" (get 0 (await (get 1 (auto3d_rex
             runspec
@@ -64,6 +67,18 @@ let
             VirtualObject { path = get "path" (get 0 res), size = get "size" (get 0 res), format = "json" },
             VirtualObject { path = get "path" (get 1 res), size = get "size" (get 1 res), format = "json" },
         )
+    ),
+    p2rank = \\prot_conf -> (
+        (get "Ok"
+            (get 0
+            (await
+                (get
+                    1
+                    (p2rank_rex runspec_nogpu {} prot_conf)
+                )
+            )
+        )
+    )
     ),
     gnina = \\prot_conf -> \\bounding_box -> \\smol_conf -> let res = ( gnina_rex
       runspec
@@ -80,14 +95,16 @@ in
      smol_id = (id (get 1 (inputs input))),
      smiles = (smi (load smol_id 'Smol')),
      structure = load (structure_id protein) 'Structure',
+     trc = [ (topology structure), (residues structure), (chains structure) ],
+     bounding_box = get 0 (get 0 (p2rank trc)),
      smol_structure = auto3d smiles,
      docked_structure = gnina
-       [ (topology structure), (residues structure), (chains structure) ]
-       ({ min = (0.0,0.0,0.0), max = (1.0,1.0,1.0)})
+       trc
+       bounding_box
        [smol_structure],
     in
     [BenchmarkArg {
-    entity = "BiningAffinity",
+    entity = "BindingAffinity",
     id = save (BindingAffinity {
       affinity = list_min (map (get "affinity") (get "scores" docked_structure)),
       affinity_metric = 'kcal/mol',
@@ -102,7 +119,7 @@ in
 )
     """
 
-    return await provider.run_benchmark(benchmark.id, rex, "actual submission")
+    return await provider.run_benchmark(benchmark.id, rex, "actual submission", sample=0.2)
 
 
 @pytest.mark.asyncio

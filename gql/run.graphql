@@ -80,8 +80,16 @@ mutation delete_run($run_id: RunId!) {
     }
 }
 
-mutation run_benchmark($input: CreateRun!, $benchmark_id: BenchmarkId!) {
-    run_benchmark(input: $input, benchmark_id: $benchmark_id) {
+mutation run_benchmark(
+    $input: CreateRun!
+    $benchmark_id: BenchmarkId!
+    $sample_pct: Float
+) {
+    run_benchmark(
+        input: $input
+        benchmark_id: $benchmark_id
+        sample: $sample_pct
+    ) {
         id
     }
 }

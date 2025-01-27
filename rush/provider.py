@@ -535,11 +535,12 @@ class BaseProvider:
         benchmark_id: str,
         rex_fn: str,
         name: str | None = None,
+        sample: float | None = None,
     ) -> RunBenchmarkRunBenchmark:
         if not self.project_id:
             raise Exception("Please set up a project first with client.create_project and client.set_project")
         input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
-        return await self.client.run_benchmark(input, benchmark_id)
+        return await self.client.run_benchmark(input, benchmark_id, sample_pct=sample)
 
     async def eval_rex(
         self,
