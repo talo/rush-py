@@ -1,0 +1,98 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment RunFields on Run {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    rex
+    result
+    trace
+    module_lock
+    status
+}
+
+query run($project_id: ProjectId!, $run_id: RunId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                run(id: $run_id) {
+                    ...RunFields
+                }
+            }
+        }
+    }
+}
+
+query runs(
+    $project_id: ProjectId!
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: RunFilter
+    $sort: RunSort
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                runs(
+                    first: $first
+                    last: $last
+                    after: $after
+                    before: $before
+                    filter: $filter
+                    sort: $sort
+                ) {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...RunFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+mutation eval($input: CreateRun!) {
+    eval(input: $input) {
+        ...RunFields
+    }
+}
+
+mutation delete_run($run_id: RunId!) {
+    delete_run(run_id: $run_id) {
+        id
+    }
+}
+
+mutation run_benchmark(
+    $input: CreateRun!
+    $benchmark_id: BenchmarkId!
+    $sample_pct: Float
+) {
+    run_benchmark(
+        input: $input
+        benchmark_id: $benchmark_id
+        sample: $sample_pct
+    ) {
+        id
+        source_run {
+          id
+        }
+    }
+}

@@ -1,0 +1,80 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment MSAFields on MultipleSequenceAlignment {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    a_3m
+}
+
+query msa($project_id: ProjectId!, $msa_id: MultipleSequenceAlignmentId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                msa(id: $msa_id) {
+                    ...MSAFields
+                }
+            }
+        }
+    }
+}
+
+query msas($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                msas {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...MSAFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+mutation create_multiple_sequence_alignment(
+    $input: CreateMultipleSequenceAlignment!
+) {
+    create_msa(input: $input) {
+        ...MSAFields
+    }
+}
+
+mutation delete_msa(
+    $multiple_sequence_alignment_id: MultipleSequenceAlignmentId!
+) {
+    delete_msa(
+        multiple_sequence_alignment_id: $multiple_sequence_alignment_id
+    ) {
+        id
+    }
+}
+
+mutation patch_msa(
+    $multiple_sequence_alignment_id: MultipleSequenceAlignmentId!
+    $input: PatchMultipleSequenceAlignment!
+) {
+    patch_msa(
+        multiple_sequence_alignment_id: $multiple_sequence_alignment_id
+        input: $input
+    ) {
+        ...MSAFields
+    }
+}

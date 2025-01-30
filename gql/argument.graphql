@@ -1,0 +1,85 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment ArgumentPartial on Argument {
+    id
+    created_at
+    updated_at
+    deleted_at
+    name
+    description
+    tags
+    rejected_at
+    account_id
+    typeinfo
+    value
+    source
+}
+
+query argument($id: ArgumentId!) {
+    argument(id: $id) {
+        ...ArgumentPartial
+    }
+}
+
+query arguments(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: ArgumentFilter
+) {
+    me {
+        account {
+            arguments(
+                first: $first
+                last: $last
+                after: $after
+                before: $before
+                filter: $filter
+            ) {
+                pageInfo {
+                    ...PageInfoFull
+                }
+                edges {
+                    cursor
+                    node {
+                        ...ArgumentPartial
+                    }
+                }
+            }
+        }
+    }
+}
+
+mutation create_argument(
+    $name: String
+    $typeinfo: JSON!
+    $tags: [String!]
+    $value: JSON!
+) {
+    create_argument(
+        name: $name
+        typeinfo: $typeinfo
+        tags: $tags
+        value: $value
+    ) {
+        ...ArgumentPartial
+    }
+}
+
+mutation delete_argument($arg_id: ArgumentId!) {
+    delete_argument(arg_id: $arg_id)
+}
+
+mutation tag_argument($argumentId: ArgumentId, $tags: [String!]!) {
+    tag(argument: $argumentId, tags: $tags)
+}
+
+mutation untag_argument($argumentId: ArgumentId, $tags: [String!]!) {
+    untag(argument: $argumentId, tags: $tags)
+}

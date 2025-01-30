@@ -1,0 +1,75 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment ProjectFields on Project {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+}
+
+query project($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                ...ProjectFields
+            }
+        }
+    }
+}
+
+query projects(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: ProjectFilter
+) {
+    me {
+        account {
+            projects(
+                after: $after
+                before: $before
+                first: $first
+                last: $last
+                filter: $filter
+            ) {
+                pageInfo {
+                    ...PageInfoFull
+                }
+                edges {
+                    cursor
+                    node {
+                        ...ProjectFields
+                    }
+                }
+                total_count
+            }
+        }
+    }
+}
+
+mutation create_project($project: CreateProject!) {
+    create_project(input: $project) {
+        ...ProjectFields
+    }
+}
+
+mutation delete_project($id: ProjectId!) {
+    delete_project(project_id: $id) {
+        id
+    }
+}
+
+mutation patch_project($project_id: ProjectId!, $input: PatchProject!) {
+    patch_project(project_id: $project_id, input: $input) {
+        ...ProjectFields
+    }
+}

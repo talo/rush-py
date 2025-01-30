@@ -1,0 +1,250 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment BenchmarkFields on Benchmark {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+}
+
+fragment BenchmarkDataFields on BenchmarkData {
+    __typename
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    inputs {
+        __typename
+        id
+        entity
+    }
+    outputs {
+        __typename
+        entity
+        id
+    }
+    input_entities {
+        __typename
+    }
+    output_entities {
+        __typename
+    }
+}
+
+fragment BenchmarkSubmissionFields on BenchmarkSubmission {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    scores {
+        nodes {
+            id
+            score
+            name
+            tags
+        }
+    }
+    benchmark {
+        id
+    }
+    data {
+        nodes {
+            id
+            scores {
+                nodes {
+                    id
+                    score
+                    name
+                    tags
+                }
+            }
+        }
+    }
+    source_run {
+        id
+    }
+    #status
+    #error
+    #result
+}
+
+query benchmark($id: BenchmarkId!) {
+    benchmark(id: $id) {
+        ...BenchmarkFields
+    }
+}
+
+query benchmarks(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: BenchmarkFilter
+    $sort: BenchmarkSort
+) {
+    benchmarks(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        filter: $filter
+        sort: $sort
+    ) {
+        pageInfo {
+            ...PageInfoFull
+        }
+        edges {
+            cursor
+            node {
+                ...BenchmarkFields
+            }
+        }
+        total_count
+    }
+}
+
+query benchmark_data(
+    $id: BenchmarkId!
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: BenchmarkDataFilter
+    $sort: BenchmarkDataSort
+) {
+    benchmark(id: $id) {
+        data(
+            first: $first
+            last: $last
+            after: $after
+            before: $before
+            filter: $filter
+            sort: $sort
+        ) {
+            pageInfo {
+                ...PageInfoFull
+            }
+            edges {
+                cursor
+                node {
+                    ...BenchmarkDataFields
+                }
+            }
+            total_count
+        }
+    }
+}
+
+query benchmark_submission(
+    $id: BenchmarkSubmissionId!
+    $project_id: ProjectId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                benchmark_submission(id: $id) {
+                    ...BenchmarkSubmissionFields
+                }
+            }
+        }
+    }
+}
+
+query benchmark_submissions(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: BenchmarkSubmissionFilter
+    $sort: BenchmarkSubmissionSort
+    $project_id: ProjectId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                benchmark_submissions(
+                    first: $first
+                    last: $last
+                    after: $after
+                    before: $before
+                    filter: $filter
+                    sort: $sort
+                ) {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...BenchmarkSubmissionFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+mutation create_benchmark($benchmark_: CreateBenchmark!) {
+    create_benchmark(input: $benchmark_) {
+        ...BenchmarkFields
+    }
+}
+
+mutation delete_benchmark($id: BenchmarkId!) {
+    delete_benchmark(benchmark_id: $id) {
+        id
+    }
+}
+
+mutation patch_benchmark($id: BenchmarkId!, $input: PatchBenchmark!) {
+    patch_benchmark(benchmark_id: $id, input: $input) {
+        ...BenchmarkFields
+    }
+}
+
+mutation create_benchmark_data($benchmark_data: CreateBenchmarkData!) {
+    create_benchmark_data(input: $benchmark_data) {
+        ...BenchmarkDataFields
+    }
+}
+
+mutation delete_benchmark_data($benchmark_data_id: BenchmarkDataId!) {
+    delete_benchmark_data(benchmark_data_id: $benchmark_data_id) {
+        id
+    }
+}
+
+mutation patch_benchmark_data(
+    $benchmark_data_id: BenchmarkDataId!
+    $input: PatchBenchmarkData!
+) {
+    patch_benchmark_data(benchmark_data_id: $benchmark_data_id, input: $input) {
+        ...BenchmarkDataFields
+    }
+}
+
+mutation delete_benchmark_submission(
+    $benchmark_submission_id: BenchmarkSubmissionId!
+) {
+    delete_benchmark_submission(
+        benchmark_submission_id: $benchmark_submission_id
+    ) {
+        id
+    }
+}

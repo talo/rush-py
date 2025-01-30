@@ -1,0 +1,147 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment ProteinFields on Protein {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    sequence
+}
+
+fragment ProteinConformerFields on ProteinConformer {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    residues
+    structure {
+        id
+        rcsb_id
+    }
+    protein {
+        id
+        sequence
+    }
+}
+
+query protein($project_id: ProjectId!, $protein_id: ProteinId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                protein(id: $protein_id) {
+                    ...ProteinFields
+                }
+            }
+        }
+    }
+}
+
+query proteins($project_id: ProjectId!, $filter: ProteinFilter) {
+    me {
+        account {
+            project(id: $project_id) {
+                proteins(filter: $filter) {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...ProteinFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+query protein_conformer(
+    $project_id: ProjectId!
+    $conformer_id: ProteinConformerId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                protein_conformer(id: $conformer_id) {
+                    ...ProteinConformerFields
+                }
+            }
+        }
+    }
+}
+
+query protein_conformers($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                protein_conformers {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...ProteinConformerFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+mutation create_protein($protein: CreateProtein!) {
+    create_protein(input: $protein) {
+        ...ProteinFields
+    }
+}
+
+mutation delete_protein($protein_id: ProteinId!) {
+    delete_protein(protein_id: $protein_id) {
+        id
+    }
+}
+
+mutation patch_protein($protein_id: ProteinId!, $input: PatchProtein!) {
+    patch_protein(protein_id: $protein_id, input: $input) {
+        ...ProteinFields
+    }
+}
+
+mutation create_protein_conformer($protein_conformer: CreateProteinConformer!) {
+    create_protein_conformer(input: $protein_conformer) {
+        ...ProteinConformerFields
+    }
+}
+
+mutation delete_protein_conformer($protein_conformer_id: ProteinConformerId!) {
+    delete_protein_conformer(protein_conformer_id: $protein_conformer_id) {
+        id
+    }
+}
+
+mutation patch_protein_conformer(
+    $protein_conformer_id: ProteinConformerId!
+    $input: PatchProteinConformer!
+) {
+    patch_protein_conformer(
+        protein_conformer_id: $protein_conformer_id
+        input: $input
+    ) {
+        ...ProteinConformerFields
+    }
+}

@@ -1,0 +1,71 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment StructureFields on Structure {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    rcsb_id
+    topology
+    residues
+    chains
+}
+
+query structure($project_id: ProjectId!, $structure_id: StructureId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                structure(id: $structure_id) {
+                    ...StructureFields
+                }
+            }
+        }
+    }
+}
+
+query structures($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                structures {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...StructureFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+mutation create_structure($structure: CreateStructure!) {
+    create_structure(input: $structure) {
+        ...StructureFields
+    }
+}
+
+mutation delete_structure($structure_id: StructureId!) {
+    delete_structure(structure_id: $structure_id) {
+        id
+    }
+}
+
+mutation patch_structure($structure_id: StructureId!, $input: PatchStructure!) {
+    patch_structure(structure_id: $structure_id, input: $input) {
+        ...StructureFields
+    }
+}

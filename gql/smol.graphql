@@ -1,0 +1,158 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment SmolFields on Smol {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    smi
+    inchi
+    data_blocks
+}
+
+fragment SmolConformerFields on SmolConformer {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    residues
+    structure {
+        id
+        rcsb_id
+    }
+    smol {
+        id
+        smi
+    }
+}
+
+query smol($project_id: ProjectId!, $smol_id: SmolId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                smol(id: $smol_id) {
+                    ...SmolFields
+                }
+            }
+        }
+    }
+}
+
+query smols(
+    $project_id: ProjectId!
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $filter: SmolFilter
+    $sort: SmolSort
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                smols(
+                    first: $first
+                    last: $last
+                    after: $after
+                    before: $before
+                    filter: $filter
+                    sort: $sort
+                ) {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...SmolFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+query smol_conformer($project_id: ProjectId!, $conformer_id: SmolConformerId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                smol_conformer(id: $conformer_id) {
+                    ...SmolConformerFields
+                }
+            }
+        }
+    }
+}
+
+query smol_conformers($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                smol_conformers {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...SmolConformerFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+mutation create_smol($smol: CreateSmol!) {
+    create_smol(input: $smol) {
+        ...SmolFields
+    }
+}
+
+mutation delete_smol($smol_id: SmolId!) {
+    delete_smol(smol_id: $smol_id) {
+        id
+    }
+}
+
+mutation patch_smol($smol_id: SmolId!, $input: PatchSmol!) {
+    patch_smol(smol_id: $smol_id, input: $input) {
+        ...SmolFields
+    }
+}
+
+mutation create_smol_conformer($smol_conformer: CreateSmolConformer!) {
+    create_smol_conformer(input: $smol_conformer) {
+        ...SmolConformerFields
+    }
+}
+
+mutation delete_smol_conformer($smol_conformer_id: SmolConformerId!) {
+    delete_smol_conformer(smol_conformer_id: $smol_conformer_id) {
+        id
+    }
+}
+
+mutation patch_smol_conformer(
+    $smol_conformer_id: SmolConformerId!
+    $input: PatchSmolConformer!
+) {
+    patch_smol_conformer(smol_conformer_id: $smol_conformer_id, input: $input) {
+        ...SmolConformerFields
+    }
+}
