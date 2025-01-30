@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "rush-py"
-version = "3.0.4"
-description = "Python SDK for interacting with the QDX Rush API and modules"
+version = "5.0.0"
+description = "Python SDK for interacting with the Rush API and modules"
 authors = ["Ryan Swart <ryan.swart@qdx.co>", "Sean Laguna <sean.laguna@qdx.co>"]
 readme = "README.md"
 packages = [{ include = "rush" }]
@@ -12,7 +12,7 @@ homepage = "https://rush.qdx.co"
 # rush = "rush.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.13"
+python = "^3.11,<3.13"
 
 aiofiles = "^23.2.1"
 backoff = "^2.2.1"
@@ -28,20 +28,22 @@ ariadne-codegen = "0.13.0"
 black = { extras = ["jupyter"], version = "~=23.9.1" }
 flake8 = "~=6.1.0"
 isort = "~=5.12.0"
-jupyter-contrib-nbextensions = "^0.7.0"
-jupyterlab = "^4.0.6"
-nbdev = "^2.3.12"
-notebook = "^7.0.7"
+#jupyter-contrib-nbextensions = "^0.7.0"
+jupyter = "^1.1.1"
+nbdev = "^2.3.29"
+notebook = "^7.2.2"
 parso = "^0.8.3"
 pdoc = "^14.4.0"
 pip = "~=23.2.1"
 py3Dmol = "^2.0.4"
-pytest = "~=7.4.3"
+pytest = "~=8.2"
 pytest-xdist = "~=3.3.1"
 qdx-py = ">0.6.2"
 pickleshare = "^0.7.5"
-jupyterlab-lsp = "^5.1.0"
-rdkit = "^2023.9.6"
+#jupyterlab-lsp = "^5.1.0"
+rdkit = "^2024.3.5"
+#ipykernel = "^6.29.0"
+pytest-asyncio = "^0.25.2"
 
 [build-system]
 requires = ["poetry-core"]
@@ -74,8 +76,10 @@ ignore = [
     "**/node_modules",
     "**/__pycache__",
     "**/*venv*",
+    "rush/graphql_client",
     "result",
     "setup.py",
+    "utils",
 ]
 reportIncompatibleMethodOverride = "none"
 reportIncompatibleVariableOverride = "none"
@@ -97,6 +101,8 @@ root = "tests"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.setuptools]
 [tool.setuptools.packages]
@@ -106,9 +112,10 @@ where = [""]
 
 [tool.ariadne-codegen]
 schema_path = "schema.graphql"
-queries_path = "combined.graphql"
+queries_path = "gql"
 target_package_path = "./rush"
 plugins = ["ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"]
+skip_validation_rules = ["NoUnusedFragments", "UniqueFragmentNames"]
 
 [tool.ariadne-codegen.scalars.DateTime]
 type = "datetime.datetime"

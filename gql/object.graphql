@@ -1,0 +1,65 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment ObjectFields on ObjectDescriptor {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    object {
+        format
+        size
+        path
+    }
+    type_info
+    base_url
+    url
+}
+
+query object_url($path: UUID!) {
+    object_path(path: $path) {
+        url
+    }
+}
+
+query object_contents($path: UUID!) {
+    object_path(path: $path) {
+        contents
+    }
+}
+
+query object($id: ObjectDescriptorId!) {
+    object(id: $id) {
+        ...ObjectFields
+    }
+}
+
+mutation upload_object(
+    $file: Upload!
+    $typeinfo: JSON!
+    $format: ObjectFormat!
+) {
+    upload_object(file: $file, typeinfo: $typeinfo, format: $format) {
+        ...ObjectFields
+    }
+}
+
+mutation upload_large_object(
+    $typeinfo: JSON!
+    $format: ObjectFormat!
+    $public: Boolean
+) {
+    upload_large_object(typeinfo: $typeinfo, format: $format, public: $public) {
+        upload_url
+        descriptor {
+            ...ObjectFields
+        }
+    }
+}

@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import re
 import sys
 from dataclasses import dataclass
 from io import BytesIO, StringIO
 from numbers import Number
 from pathlib import Path
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, Tuple, TypeVar, Union
 from uuid import UUID
 
-from rush.graphql_client.upload_object import UploadObjectUploadObjectObject
+from rush.graphql_client.upload_large_object import UploadLargeObjectUploadLargeObjectDescriptor
 
 try:
     from typing import Unpack
@@ -113,7 +114,7 @@ scalar_types_mapping: dict[str, type[Any]] = {
     "xtc": bytes,
 }
 
-KINDS = Literal["array", "optional", "enum", "record", "tuple", "@"]
+KINDS = Literal["array", "fallible", "λ", "optional", "enum", "record", "tuple", "@", "union"]
 
 
 @dataclass
@@ -164,10 +165,16 @@ class EnumKind(Generic[T], RushType[T]):
             return (False, f"Unknown enum variant {other_key}")
         if isinstance(other, str):
             # FIXME: make case sensitive once enum serialization case bug is fixed
-            if any([x.lower() == other.lower() for x in self.literals]):
+            if any([x.lower().replace("_", "") == other.lower().replace("_", "") for x in self.literals]):
                 return (True, None)
-
-        return (False, f"Unknown enum variant {other}")
+            if any(
+                [
+                    list(x.keys())[0].lower().replace("_", "") == other.lower().replace("_", "")
+                    for x in self.tags
+                ]
+            ):
+                return (True, None)
+        return (False, f"Unknown enum variant, not list or dict {other}")
 
 
 class RecordKind(Generic[T], RushType[T]):
@@ -189,6 +196,38 @@ class RecordKind(Generic[T], RushType[T]):
             ok, reason = v.matches(other[k])
             if not ok:
                 return (False, reason)
+        return (True, None)
+
+
+class UnionKind(Generic[T], RushType[T]):
+    def __init__(self, record: dict[str, RushType[T]] | tuple[RushType[T]]):
+        self.k = "union"
+        self.t = record
+
+    def to_python_type(self) -> type[Union[Any, Any]]:
+        return Union[Any, Any]
+
+    def matches(self, other: dict[str, Any] | Any) -> tuple[bool, str | None]:
+        if not isinstance(other, dict):
+            return (False, f"Expected dict, got {type(other)}")
+        # handle tuple case
+        if (
+            len(other) == 1
+            and isinstance(list(other.values())[0], (list, tuple))
+            and isinstance(self.t, tuple)
+        ):
+            other = list(other.values())[0]
+            return self.t[0].matches(other)
+
+        if isinstance(self.t, dict):
+            for k, v in self.t.items():
+                if v.k == "optional" and k not in other:
+                    return (True, None)
+                if k not in other and v.k != "optional":
+                    return (False, f"Expected key {k} in dict")
+                ok, reason = v.matches(other[k])
+                if not ok:
+                    return (False, reason)
         return (True, None)
 
 
@@ -248,6 +287,22 @@ class OptionalKind(Generic[T], RushType[T]):
             return self.t.matches(other)
 
 
+class FallibleKind(Generic[T], RushType[T]):
+    def __init__(self, fallible: RushType[T]):
+        self.k = "fallible"
+        self.t = fallible
+
+    def to_python_type(self) -> type[Any]:
+        return Tuple[Optional[self.t.to_python_type()], Optional[str]]
+
+    def matches(self, other: Tuple[Optional[T], Optional[str]] | Any) -> tuple[bool, str | None]:
+        if not isinstance(other, (list, tuple)):
+            return (False, f"Expected list or tuple, got {type(other)}")
+        # TODO: actually implement checking fallibles.
+        #       in most cases, users will unwrap before passing as arguments so this is low prio
+        return (True, None)
+
+
 class ObjectKind(Generic[T], RushType[T]):
     def __init__(self, object: RushType[T]):
         self.k = "record"
@@ -258,19 +313,42 @@ class ObjectKind(Generic[T], RushType[T]):
         return RushObject[self.t.to_python_type()]
 
     def matches(self, other: Path | StringIO | BytesIO | Any) -> tuple[bool, str | None]:
-        if isinstance(other, (_RushObject, Path, StringIO, UploadObjectUploadObjectObject)):
+        if isinstance(
+            other,
+            (
+                _RushObject,
+                Path,
+                StringIO,
+                UploadLargeObjectUploadLargeObjectDescriptor,
+            ),
+        ):
             return (True, None)
         else:
             return (False, f"Expected Path, got {type(other)}")
 
 
+class LiteralKind(Generic[T], RushType[T]):
+    def __init__(self, literal: T):
+        self.k = None
+        self.t = literal
+
+    def to_python_type(self) -> type[Any]:
+        return type(self.t)
+
+    def matches(self, other: T) -> tuple[bool, str | None]:
+        if other == self.t:
+            return (True, None)
+        else:
+            return (False, f"Expected {self.t}, got {other}")
+
+
 class ScalarType(Generic[T], RushType[T]):
-    def __init__(self, scalar: SCALARS | str):
+    def __init__(self, scalar: SCALARS | str | int):
         self.k = None
         self.t = scalar
-        if self.t not in SCALAR_STRS:
+        if self.t not in SCALAR_STRS and not isinstance(self.t, int):
             self.t = self.t.replace("$", "").lower()
-        self.py_type = scalar_types_mapping.get(self.t)
+        self.py_type = scalar_types_mapping.get(self.t) if isinstance(self.t, str) else int
         self.literal = scalar if not self.py_type else None
 
     def to_python_type(self) -> type[Any] | None:
@@ -308,6 +386,11 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                     return RecordKind({k: type_from_typedef(v) for k, v in res["t"].items()})
                 else:
                     return RecordKind(tuple(type_from_typedef(v) for v in res["t"]))
+            elif res["k"] == "union":
+                if isinstance(res["t"], dict):
+                    return UnionKind({k: type_from_typedef(v) for k, v in res["t"].items()})
+                else:
+                    return UnionKind(tuple(type_from_typedef(list(v.items())[0]) for v in res["t"]))
             elif res["k"] == "array":
                 return ArrayKind(type_from_typedef(res["t"]))
             elif res["k"] == "tuple":
@@ -316,19 +399,25 @@ def type_from_typedef(res: Any) -> RushType[Any]:
                 return OptionalKind(type_from_typedef(res["t"]))
             elif res["k"] == "@":
                 return type_from_typedef(res["t"])
+            elif res["k"] == "alias":
+                return type_from_typedef(res["t"])
+            elif res["k"] == "fallible":
+                return FallibleKind(type_from_typedef(res["t"]))
             else:
                 raise Exception(f"Unknown kind {res['k']}")
         else:
             if res.get("t"):
                 return type_from_typedef(res["t"])
-            else:
-                raise Exception(f"Invalid typedef {res}")
-    elif isinstance(res, list):
+            else:  # assuming typed enum
+                return EnumKind([{k: type_from_typedef(v)} for k, v in res.items()])
+    elif isinstance(res, (list, tuple)):
         return TupleKind([type_from_typedef(x) for x in res])
     elif isinstance(res, str):  # type: ignore
         return ScalarType(res)
+    elif isinstance(res, int):  # type: ignore
+        return LiteralKind(res)
     else:
-        print("Bad type!")
+        print("Bad type!", res)
         return RushType(res)
 
 
@@ -346,3 +435,72 @@ def build_typechecker(
                     raise Exception(f"Typecheck failed: {match[1]}")
 
     return built
+
+
+def format_module_typedesc(typedesc_in: str) -> str:
+    def format_typedesc_line(old_line: str) -> list[str]:
+        new_lines = []
+        seen_nester = False
+        nester_char = None
+        seen_dict = {"{}": 0, "()": 0}
+        last_break_pos = None
+        good_nesting_level = False
+        leading_spaces = " " * (len(old_line) - len(old_line.lstrip(" ")))
+        for i, char in enumerate(old_line):
+            if char in "{(":
+                if not seen_nester:
+                    seen_nester = True
+                    nester_char = char
+                    new_lines += [old_line[: i + 1]]
+                    last_break_pos = i + 1
+                seen_dict["{}" if char in "{}" else "()"] += 1
+            if char in "})":
+                seen_dict["{}" if char in "{}" else "()"] -= 1
+            if seen_nester:
+                if nester_char == "{":
+                    good_nesting_level = seen_dict["{}"] == 1 and seen_dict["()"] == 0
+                elif nester_char == "(":
+                    good_nesting_level = seen_dict["()"] == 1 and seen_dict["{}"] == 0
+                else:
+                    print("ERROR!")
+            if seen_nester and good_nesting_level and char == ",":
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos : i + 1].lstrip(" ")]
+                last_break_pos = i + 1
+            if seen_nester and seen_dict["{}"] == 0 and seen_dict["()"] == 0:
+                # breaks in union
+                # assert char in "})"
+                new_lines += [leading_spaces + "    " + old_line[last_break_pos:i].lstrip(" ")]
+                new_lines += [leading_spaces + old_line[i:].lstrip(" ")]
+                break
+        return new_lines
+
+    old_lines = typedesc_in.replace(";", ";\n").replace("-> ", "\n->\n").split("\n")
+    old_lines = ["    " + line.strip() for line in old_lines]
+    some_line_too_long = True
+    new_lines: list[str] = []
+    while some_line_too_long:
+        some_line_too_long = False
+        new_lines = []
+        for line in old_lines:
+            if len(line) > 88:
+                some_line_too_long = True
+                new_lines += format_typedesc_line(line)
+            else:
+                new_lines += [line]
+        old_lines = new_lines
+
+    new_lines = [
+        line.replace("{", " {").replace(",", ", ").replace(":", ": ").replace("|", " | ")
+        for line in new_lines
+    ]
+
+    finalized_str = "\n".join([line.rstrip() for line in new_lines])
+    finalized_str = re.sub(r", +", ", ", finalized_str)
+    finalized_str = re.sub(r": +", ": ", finalized_str)
+    finalized_str = re.sub(r" +\|", " |", finalized_str)
+    finalized_str = re.sub(r"\| +", "| ", finalized_str)
+    # TODO: render object properly and remove this hack
+    finalized_str = re.sub(r" \{path: (.*?), size: (.*?)\ .*}", r"[\1]", finalized_str)
+    finalized_str = re.sub(r" \{size: (.*?), path: (.*?)\ .*}", r"[\2]", finalized_str)
+
+    return finalized_str + "\n"

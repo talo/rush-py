@@ -1,0 +1,147 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment SmolLibraryFields on SmolLibrary {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    size_hint
+}
+
+fragment SmolLibraryPartitionFields on SmolLibraryPartition {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    part_idx
+    part_size
+    structures
+    smiles
+    data_blocks
+}
+
+query smol_library($id: SmolLibraryId!) {
+    smol_library(id: $id) {
+        ...SmolLibraryFields
+    }
+}
+
+query smol_libraries(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    #$filter: SmolLibraryFilter
+    $sort: SmolLibrarySort
+) {
+    smol_libraries(
+        first: $first
+        last: $last
+        after: $after
+        before: $before
+        #filter: $filter
+        sort: $sort
+    ) {
+        pageInfo {
+            ...PageInfoFull
+        }
+        edges {
+            cursor
+            node {
+                ...SmolLibraryFields
+            }
+        }
+        total_count
+    }
+}
+
+query smol_library_partitions(
+    $id: SmolLibraryId!
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    #$filter: SmolLibraryPartitionFilter
+    $sort: SmolLibraryPartitionSort
+) {
+    smol_library(id: $id) {
+        partitions(
+            first: $first
+            last: $last
+            after: $after
+            before: $before
+            #filter: $filter
+            sort: $sort
+        ) {
+            pageInfo {
+                ...PageInfoFull
+            }
+            edges {
+                cursor
+                node {
+                    ...SmolLibraryPartitionFields
+                }
+            }
+            total_count
+        }
+    }
+}
+
+mutation create_smol_library($smol_library: CreateSmolLibrary!) {
+    create_smol_library(input: $smol_library) {
+        ...SmolLibraryFields
+    }
+}
+
+mutation delete_smol_library($id: SmolLibraryId!) {
+    delete_smol_library(smol_library_id: $id) {
+        id
+    }
+}
+
+mutation patch_smol_library($id: SmolLibraryId!, $input: PatchSmolLibrary!) {
+    patch_smol_library(smol_library_id: $id, input: $input) {
+        ...SmolLibraryFields
+    }
+}
+
+mutation create_smol_library_partition(
+    $smol_library_partition: CreateSmolLibraryPartition!
+) {
+    create_smol_library_partition(input: $smol_library_partition) {
+        ...SmolLibraryPartitionFields
+    }
+}
+
+mutation delete_smol_library_partition(
+    $smol_library_partition_id: SmolLibraryPartitionId!
+) {
+    delete_smol_library_partition(
+        smol_library_partition_id: $smol_library_partition_id
+    ) {
+        id
+    }
+}
+
+mutation patch_smol_library_partition(
+    $smol_library_partition_id: SmolLibraryPartitionId!
+    $input: PatchSmolLibraryPartition!
+) {
+    patch_smol_library_partition(
+        smol_library_partition_id: $smol_library_partition_id
+        input: $input
+    ) {
+        ...SmolLibraryPartitionFields
+    }
+}

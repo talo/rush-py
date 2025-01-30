@@ -1,0 +1,449 @@
+fragment PageInfoFull on PageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+}
+
+fragment BindingAffinityFields on BindingAffinity {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    affinity
+    affinity_metric
+    protein {
+        id
+        sequence
+    }
+    smol {
+        id
+        smi
+    }
+}
+
+fragment BindingSiteConformerFields on BindingSiteConformer {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    bounding_box {
+        min
+        max
+    }
+    surface_atoms
+    protein_conformer {
+        id
+        residues
+    }
+}
+
+fragment BindingPoseConformerFields on BindingPoseConformer {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    smol_conformer {
+        id
+        residues
+    }
+    binding_site_conformer {
+        id
+        bounding_box {
+            min
+            max
+        }
+    }
+}
+
+fragment BindingPoseAffinityFields on BindingPoseAffinity {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+}
+
+fragment BindingSiteInteractionFields on BindingSiteInteractions {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    residues
+    interactions {
+        kind
+        pi_stack_kind
+        ligand_atom
+        receptor_atom
+    }
+}
+
+fragment BindingPoseConformerInteractionFields on BindingPoseConformerInteractions {
+    id
+    name
+    description
+    created_at
+    updated_at
+    deleted_at
+    tags
+    binding_pose_conformer {
+        id
+    }
+    binding_site_interactions {
+        id
+        residues
+        interactions {
+            kind
+            pi_stack_kind
+            ligand_atom
+            receptor_atom
+        }
+    }
+}
+
+# Queries
+query binding_affinity($project_id: ProjectId!, $ba_id: BindingAffinityId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_affinity(id: $ba_id) {
+                    ...BindingAffinityFields
+                }
+            }
+        }
+    }
+}
+
+query binding_affinities($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_affinities {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...BindingAffinityFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+query binding_site_conformer(
+    $project_id: ProjectId!
+    $bsc_id: BindingSiteConformerId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_site_conformer(id: $bsc_id) {
+                    ...BindingSiteConformerFields
+                }
+            }
+        }
+    }
+}
+
+query binding_site_conformers($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_site_conformers {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...BindingSiteConformerFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+query binding_pose_conformer(
+    $project_id: ProjectId!
+    $bpc_id: BindingPoseConformerId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_pose_conformer(id: $bpc_id) {
+                    ...BindingPoseConformerFields
+                }
+            }
+        }
+    }
+}
+
+query binding_pose_conformers($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_pose_conformers {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...BindingPoseConformerFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+query binding_site_interaction(
+    $project_id: ProjectId!
+    $bsi_id: BindingSiteInteractionsId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_site_interaction(id: $bsi_id) {
+                    ...BindingSiteInteractionFields
+                }
+            }
+        }
+    }
+}
+
+query binding_site_interactions($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_site_interactions {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...BindingSiteInteractionFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+query binding_pose_conformer_interaction(
+    $project_id: ProjectId!
+    $bpci_id: BindingPoseConformerInteractionsId!
+) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_pose_conformer_interaction(id: $bpci_id) {
+                    ...BindingPoseConformerInteractionFields
+                }
+            }
+        }
+    }
+}
+
+query binding_pose_conformer_interactions($project_id: ProjectId!) {
+    me {
+        account {
+            project(id: $project_id) {
+                binding_pose_conformer_interactions {
+                    pageInfo {
+                        ...PageInfoFull
+                    }
+                    edges {
+                        cursor
+                        node {
+                            ...BindingPoseConformerInteractionFields
+                        }
+                    }
+                    total_count
+                }
+            }
+        }
+    }
+}
+
+# Mutations
+mutation create_binding_affinity($binding_affinity: CreateBindingAffinity!) {
+    create_binding_affinity(input: $binding_affinity) {
+        ...BindingAffinityFields
+    }
+}
+
+mutation delete_binding_affinity($binding_affinity_id: BindingAffinityId!) {
+    delete_binding_affinity(binding_affinity_id: $binding_affinity_id) {
+        id
+    }
+}
+
+mutation patch_binding_affinity(
+    $binding_affinity_id: BindingAffinityId!
+    $input: PatchBindingAffinity!
+) {
+    patch_binding_affinity(
+        binding_affinity_id: $binding_affinity_id
+        input: $input
+    ) {
+        ...BindingAffinityFields
+    }
+}
+
+mutation create_binding_site_conformer(
+    $binding_site_conformer: CreateBindingSiteConformer!
+) {
+    create_binding_site_conformer(input: $binding_site_conformer) {
+        ...BindingSiteConformerFields
+    }
+}
+
+mutation delete_binding_site_conformer(
+    $binding_site_conformer_id: BindingSiteConformerId!
+) {
+    delete_binding_site_conformer(
+        binding_site_conformer_id: $binding_site_conformer_id
+    ) {
+        id
+    }
+}
+
+mutation patch_binding_site_conformer(
+    $binding_site_conformer_id: BindingSiteConformerId!
+    $input: PatchBindingSiteConformer!
+) {
+    patch_binding_site_conformer(
+        binding_site_conformer_id: $binding_site_conformer_id
+        input: $input
+    ) {
+        ...BindingSiteConformerFields
+    }
+}
+
+mutation create_binding_pose_conformer(
+    $binding_pose_conformer: CreateBindingPoseConformer!
+) {
+    create_binding_pose_conformer(input: $binding_pose_conformer) {
+        ...BindingPoseConformerFields
+    }
+}
+
+mutation delete_binding_pose_conformer(
+    $binding_pose_conformer_id: BindingPoseConformerId!
+) {
+    delete_binding_pose_conformer(
+        binding_pose_conformer_id: $binding_pose_conformer_id
+    ) {
+        id
+    }
+}
+
+mutation patch_binding_pose_conformer(
+    $binding_pose_conformer_id: BindingPoseConformerId!
+    $input: PatchBindingPoseConformer!
+) {
+    patch_binding_pose_conformer(
+        binding_pose_conformer_id: $binding_pose_conformer_id
+        input: $input
+    ) {
+        ...BindingPoseConformerFields
+    }
+}
+
+mutation create_binding_pose_affinity(
+    $binding_pose_affinity: CreateBindingPoseAffinity!
+) {
+    create_binding_pose_affinity(input: $binding_pose_affinity) {
+        ...BindingPoseAffinityFields
+    }
+}
+
+mutation create_binding_site_interactions(
+    $binding_site_interactions: CreateBindingSiteInteractions!
+) {
+    create_binding_site_interactions(input: $binding_site_interactions) {
+        ...BindingSiteInteractionFields
+    }
+}
+
+mutation delete_binding_site_interactions(
+    $binding_site_interactions_id: BindingSiteInteractionsId!
+) {
+    delete_binding_site_interactions(
+        binding_site_interactions_id: $binding_site_interactions_id
+    ) {
+        id
+    }
+}
+
+mutation patch_binding_site_interactions(
+    $binding_site_interactions_id: BindingSiteInteractionsId!
+    $input: PatchBindingSiteInteractions!
+) {
+    patch_binding_site_interactions(
+        binding_site_interactions_id: $binding_site_interactions_id
+        input: $input
+    ) {
+        ...BindingSiteInteractionFields
+    }
+}
+
+mutation create_binding_pose_conformer_interactions(
+    $binding_pose_conformer_interactions: CreateBindingPoseConformerInteractions!
+) {
+    create_binding_pose_conformer_interactions(
+        input: $binding_pose_conformer_interactions
+    ) {
+        ...BindingPoseConformerInteractionFields
+    }
+}
+
+mutation delete_binding_pose_conformer_interactions(
+    $binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!
+) {
+    delete_binding_pose_conformer_interactions(
+        binding_pose_conformer_interactions_id: $binding_pose_conformer_interactions_id
+    ) {
+        id
+    }
+}
+
+mutation patch_binding_pose_conformer_interactions(
+    $binding_pose_conformer_interactions_id: BindingPoseConformerInteractionsId!
+    $input: PatchBindingPoseConformerInteractions!
+) {
+    patch_binding_pose_conformer_interactions(
+        binding_pose_conformer_interactions_id: $binding_pose_conformer_interactions_id
+        input: $input
+    ) {
+        ...BindingPoseConformerInteractionFields
+    }
+}

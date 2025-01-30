@@ -38,7 +38,7 @@ class LocalProvider:
         with open(file, "rb") as f:
             return Arg(None, value=base64.b64encode(f.read()).decode("utf-8"))
 
-    def resolve_arg(self, arg: Arg, retries: int = 0) -> Any:
+    def resolve_arg[T](self, arg: Arg[T], retries: int = 0) -> Any:
         """
         Resolve a module path to a local path.
         :param path: The path to resolve.

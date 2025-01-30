@@ -3,6 +3,7 @@ website:
     contents:
       - index.ipynb
       - 01_comprehensive_guide.ipynb
+      - 02_benchmarking.ipynb
       - section: Quickstarts
         contents:
           - Quickstarts/02_auto3d.ipynb
@@ -10,6 +11,7 @@ website:
           - Quickstarts/05_gromacs.ipynb
           - Quickstarts/batch_run-protein_prep_async-sample.ipynb
           - Quickstarts/convert-sample.ipynb
+          - Quickstarts/exess_rex.ipynb
           - Quickstarts/hermes_hartree_fock_energy_calculation-sample.ipynb
           - Quickstarts/protein-ligand-interactions-sample.ipynb
       - section: Tutorials

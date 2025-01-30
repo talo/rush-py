@@ -3,10 +3,10 @@ from typing import Optional as _Optional
 from uuid import UUID
 
 from .graphql_client.enums import ModuleInstanceTarget
-from .graphql_client.input_types import ModuleInstanceResourcesInput
+from .graphql_client.input_types import ResourcesInput
 
 type Target = ModuleInstanceTarget | str
-type Resources = ModuleInstanceResourcesInput | dict[str, Any]
+type Resources = ResourcesInput | dict[str, Any]
 ArgId = UUID
 ModuleInstanceId = UUID
 

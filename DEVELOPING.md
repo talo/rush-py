@@ -26,6 +26,10 @@ Add development dependencies to the dev group
 If you want to run notebooks locally, you need to run
 `export PYTHONPATH=$(pwd)`
 
+## Running tests
+Also needs the PYTHONPATH modification above, as well as a `RUSH_URL` (if targeting staging) and `RUSH_TOKEN` set
+`pytest ./rush`
+
 ## Updating Graphql queries/mutations
 
 We auto-generate client functions from the Rush graphql schema.

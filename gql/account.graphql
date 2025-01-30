@@ -1,0 +1,33 @@
+fragment AccountFields on Account {
+  id
+  name
+  description
+  created_at
+  updated_at
+  deleted_at
+  tags
+  tier
+  config {
+    config_account
+    bucket_config {
+      data_bucket
+      log_bucket
+      bucket_region
+    }
+  }
+}
+
+mutation update_account_config($account_id: AccountId!, $input: AccountConfigInput!) {
+  update_account_config(account_id: $account_id, input: $input) {
+    config_account
+    bucket_config {
+      data_bucket
+      log_bucket
+      bucket_region
+    }
+  }
+}
+
+mutation update_account_tier($account_id: AccountId!, $tier: AccountTier!) {
+  update_account_tier(account_id: $account_id, tier: $tier)
+}

@@ -5,7 +5,7 @@ from typing import Any, Generic, TypeVar, Union
 from uuid import UUID
 
 from .graphql_client.enums import ModuleInstanceTarget
-from .graphql_client.input_types import ModuleInstanceResourcesInput
+from .graphql_client.input_types import ResourcesInput
 
 try:
     from typing import TypeAlias
@@ -19,7 +19,7 @@ except ImportError:
 
 if sys.version_info >= (3, 10):
     Target = TypeAliasType("Target", ModuleInstanceTarget | str)
-    Resources = TypeAliasType("Resources", ModuleInstanceResourcesInput | dict[str, Any])
+    Resources = TypeAliasType("Resources", ResourcesInput | dict[str, Any])
 else:
     Target = TypeAliasType("Target", Union[ModuleInstanceTarget, str])
     Resources = TypeAliasType("Resources", Union[ModuleInstanceResourcesInput, dict[str, Any]])

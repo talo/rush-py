@@ -12,6 +12,62 @@ class AccountTier(str, Enum):
     ENTERPRISE = "ENTERPRISE"
 
 
+class ActivityType(str, Enum):
+    BINDING_AFFINITY = "BINDING_AFFINITY"
+    TOXICITY = "TOXICITY"
+    FUNCTIONAL = "FUNCTIONAL"
+
+
+class BenchmarkEntityType(str, Enum):
+    PROTEIN = "PROTEIN"
+    PROTEIN_CONFORMER = "PROTEIN_CONFORMER"
+    SMOL = "SMOL"
+    STRUCTURE = "STRUCTURE"
+    BINDING_AFFINITY = "BINDING_AFFINITY"
+
+
+class BindingSiteInteractionKind(str, Enum):
+    UNKNOWN = "UNKNOWN"
+    HYDROPHOBIC = "HYDROPHOBIC"
+    HYDROGEN_BOND = "HYDROGEN_BOND"
+    HALOGEN_BOND = "HALOGEN_BOND"
+    WATER_BRIDGE = "WATER_BRIDGE"
+    SALT_BRIDGE = "SALT_BRIDGE"
+    PI_STACK = "PI_STACK"
+    PI_CATION = "PI_CATION"
+    METAL_COMPLEX = "METAL_COMPLEX"
+
+
+class BoolFilter(str, Enum):
+    t = "t"
+    f = "f"
+
+
+class DateTimeSort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class F32Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class F64Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class I32Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class I64Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 class MemUnits(str, Enum):
     B = "B"
     KB = "KB"
@@ -27,6 +83,7 @@ class ModuleFailureReason(str, Enum):
     STALLED = "STALLED"
     MISSING = "MISSING"
     CORRUPTED = "CORRUPTED"
+    CREDITS = "CREDITS"
 
 
 class ModuleInstanceStatus(str, Enum):
@@ -65,11 +122,46 @@ class ObjectFormat(str, Enum):
     bin = "bin"
 
 
-class Order(str, Enum):
-    ASC = "ASC"
-    DESC = "DESC"
-
-
 class OrderBy(str, Enum):
     ASC = "ASC"
     DESC = "DESC"
+
+
+class PiStackKind(str, Enum):
+    UNKNOWN = "UNKNOWN"
+    P = "P"
+    T = "T"
+
+
+class RunStatus(str, Enum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    DONE = "DONE"
+    ERROR = "ERROR"
+    CANCELLED = "CANCELLED"
+
+
+class StringSort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class TaggedType(str, Enum):
+    structure = "structure"
+    protein = "protein"
+    protein_conformer = "protein_conformer"
+    smol = "smol"
+    smol_conformer = "smol_conformer"
+    run = "run"
+    module = "module"
+    module_instance = "module_instance"
+
+
+class U64Sort(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class UuidSort(str, Enum):
+    asc = "asc"
+    desc = "desc"

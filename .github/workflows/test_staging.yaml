@@ -1,3 +1,5 @@
+name: Staging Integration tests
+
 on:
   pull_request:
     branches: [main]
