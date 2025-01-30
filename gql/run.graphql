@@ -91,5 +91,8 @@ mutation run_benchmark(
         sample: $sample_pct
     ) {
         id
+        source_run {
+          id
+        }
     }
 }

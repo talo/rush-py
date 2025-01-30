@@ -657,7 +657,11 @@ from .proteins import (
 )
 from .retry import Retry, RetryRetry
 from .run import Run, RunMe, RunMeAccount, RunMeAccountProject, RunMeAccountProjectRun
-from .run_benchmark import RunBenchmark, RunBenchmarkRunBenchmark
+from .run_benchmark import (
+    RunBenchmark,
+    RunBenchmarkRunBenchmark,
+    RunBenchmarkRunBenchmarkSourceRun,
+)
 from .run_module_instance import (
     RunModuleInstance,
     RunModuleInstanceRunModuleInstance,
@@ -1304,6 +1308,7 @@ __all__ = [
     "Run",
     "RunBenchmark",
     "RunBenchmarkRunBenchmark",
+    "RunBenchmarkRunBenchmarkSourceRun",
     "RunFields",
     "RunFilter",
     "RunMe",

@@ -222,6 +222,12 @@ def get_name_from_path(path: str):
     return path.split("#")[-1].replace("_tengu", "").replace("tengu_", "")
 
 
+UI_URL_MAP = {
+    "https://tengu-server-staging-edh4uref5a-as.a.run.app": "https://rush-qdx-2-staging.web.app",
+    "https://tengu.qdx.ai": "https://rush.cloud",
+}
+
+
 class BaseProvider:
     """
     A class representing a provider for the Rush quantum chemistry workflow platform.
@@ -540,7 +546,13 @@ class BaseProvider:
         if not self.project_id:
             raise Exception("Please set up a project first with client.create_project and client.set_project")
         input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
-        return await self.client.run_benchmark(input, benchmark_id, sample_pct=sample)
+        res = await self.client.run_benchmark(input, benchmark_id, sample_pct=sample)
+        if res.id:
+            ui_url = UI_URL_MAP[self.client.url.strip("/")]
+            print(
+                f"View your submission at {ui_url}/project/{self.project_id}/runs?selectedRunId={res.source_run.id}"
+            )
+        return res
 
     async def eval_rex(
         self,

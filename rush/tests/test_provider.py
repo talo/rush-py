@@ -138,7 +138,7 @@ in
         }]
     """
 
-    return await provider.run_benchmark(benchmark.id, rex, "actual submission", sample=0.2)
+    return await provider.run_benchmark(benchmark.id, rex, "actual submission")  # , sample=0.2)
 
 
 @pytest.mark.asyncio

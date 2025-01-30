@@ -4313,6 +4313,9 @@ class Client(AsyncBaseClient):
             mutation run_benchmark($input: CreateRun!, $benchmark_id: BenchmarkId!, $sample_pct: Float) {
               run_benchmark(input: $input, benchmark_id: $benchmark_id, sample: $sample_pct) {
                 id
+                source_run {
+                  id
+                }
               }
             }
             """
