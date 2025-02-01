@@ -226,6 +226,8 @@ class BenchmarkSubmissionFieldsDataNodesScoresNodes(BaseModel):
 
 class BenchmarkSubmissionFieldsSourceRun(BaseModel):
     id: Any
+    status: RunStatus
+    result: Optional[Any]
 
 
 class BindingAffinityFields(BaseModel):

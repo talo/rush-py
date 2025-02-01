@@ -177,6 +177,7 @@ class BenchmarkSubmissionScoreFilter(BaseModel):
     account_id: Optional["UuidFilter"] = None
     score: Optional["F64Filter"] = None
     benchmark_submission_id: Optional["UuidFilter"] = None
+    benchmark_id: Optional["UuidFilter"] = None
 
 
 class BenchmarkSubmissionScoreSort(BaseModel):
@@ -186,6 +187,7 @@ class BenchmarkSubmissionScoreSort(BaseModel):
     account_id: Optional[UuidSort] = None
     score: Optional[F64Sort] = None
     benchmark_submission_id: Optional[UuidSort] = None
+    benchmark_id: Optional[UuidSort] = None
 
 
 class BenchmarkSubmissionSort(BaseModel):
@@ -559,6 +561,7 @@ class CreateProtein(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     sequence: str
+    uniprot_id: Optional[str] = None
     project_id: Any
 
 
@@ -567,6 +570,7 @@ class CreateProteinConformer(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     residues: List[int]
+    pdb_id: Optional[str] = None
     protein_id: Any
     structure_id: Any
     project_id: Any
@@ -754,6 +758,7 @@ class MessageBodyInput(BaseModel):
         alias="walterPrompt", default=None
     )
     use_tool: Optional["UseToolInput"] = Field(alias="useTool", default=None)
+    set_tools: Optional["SetToolsInput"] = Field(alias="setTools", default=None)
     thought: Optional["ThoughtInput"] = None
     answer: Optional["AnswerInput"] = None
     done: Optional["DoneInput"] = None
@@ -1106,6 +1111,7 @@ class PatchProtein(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     sequence: Optional[str] = None
+    uniprot_id: Optional[str] = None
 
 
 class PatchProteinConformer(BaseModel):
@@ -1113,6 +1119,7 @@ class PatchProteinConformer(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     residues: Optional[List[int]] = None
+    pdb_id: Optional[str] = None
     protein_id: Optional[Any] = None
     structure_id: Optional[Any] = None
 
@@ -1209,6 +1216,7 @@ class ProteinConformerFilter(BaseModel):
     metadata: Optional["MetadataFilter"] = None
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
+    pdb_id: Optional["StringFilter"] = None
     protein_id: Optional["UuidFilter"] = None
     structure_id: Optional["UuidFilter"] = None
 
@@ -1218,6 +1226,7 @@ class ProteinConformerSort(BaseModel):
     metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
+    pdb_id: Optional[StringSort] = None
     protein_id: Optional[UuidSort] = None
     structure_id: Optional[UuidSort] = None
 
@@ -1230,6 +1239,7 @@ class ProteinFilter(BaseModel):
     project_id: Optional["UuidFilter"] = None
     account_id: Optional["UuidFilter"] = None
     sequence: Optional["StringFilter"] = None
+    uniprot_id: Optional["StringFilter"] = None
 
 
 class ProteinSort(BaseModel):
@@ -1238,6 +1248,7 @@ class ProteinSort(BaseModel):
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
     sequence: Optional[StringSort] = None
+    uniprot_id: Optional[StringSort] = None
 
 
 class ResourcesInput(BaseModel):
@@ -1310,6 +1321,10 @@ class SarProgramSort(BaseModel):
     metadata: Optional["MetadataSort"] = None
     project_id: Optional[UuidSort] = None
     account_id: Optional[UuidSort] = None
+
+
+class SetToolsInput(BaseModel):
+    tools: List["ToolDefinitionInput"]
 
 
 class SmolConformerFilter(BaseModel):
@@ -1452,6 +1467,21 @@ class TokenSort(BaseModel):
     user_id: Optional[UuidSort] = None
 
 
+class ToolDefinitionInput(BaseModel):
+    name: str
+    description: str
+    call_tool_examples: List[str]
+    parameters: List["ToolParameterInput"]
+    note: str
+
+
+class ToolParameterInput(BaseModel):
+    name: str
+    type_name: str
+    description: str
+    examples: List[str]
+
+
 class UseToolInput(BaseModel):
     tool: str
     args: Any
@@ -1560,6 +1590,7 @@ SarModelFilter.model_rebuild()
 SarModelSort.model_rebuild()
 SarProgramFilter.model_rebuild()
 SarProgramSort.model_rebuild()
+SetToolsInput.model_rebuild()
 SmolConformerFilter.model_rebuild()
 SmolConformerSort.model_rebuild()
 SmolFilter.model_rebuild()
@@ -1574,6 +1605,7 @@ TestCase.model_rebuild()
 ThoughtInput.model_rebuild()
 TokenFilter.model_rebuild()
 TokenSort.model_rebuild()
+ToolDefinitionInput.model_rebuild()
 UserPromptInput.model_rebuild()
 VirtualObjectFilter.model_rebuild()
 WalterPromptInput.model_rebuild()

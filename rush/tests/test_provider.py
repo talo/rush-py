@@ -33,8 +33,7 @@ async def project(provider: Provider):
 async def benchmark(
     provider: Provider,
 ) -> BenchmarksBenchmarksEdgesNode | BenchmarkBenchmark:
-    return await provider.benchmark(name="OpenFF CDK2 Protein Ligand Benchmark")
-    # return (await anext(await provider.benchmarks())).edges[0].node
+    return await provider.benchmark(name="OpenFF CDK2 RMSD17 Benchmark")
 
 
 @pytest.fixture(scope="function")
@@ -42,7 +41,13 @@ async def benchmark_submission(
     provider: Provider,
     benchmark: BenchmarksBenchmarksEdgesNode,
 ) -> RunBenchmarkRunBenchmark:
-    return await provider.run_benchmark(benchmark.id, "\\i -> (outputs i)", "echo submission")
+    return await provider.run_benchmark(
+        benchmark.id,
+        "\\i -> (outputs i)",
+        "echo submission",
+        # sample=0.2,
+        with_outs=True,
+    )
 
 
 @pytest.fixture(scope="function")
@@ -101,8 +106,8 @@ let
 in
 \\input ->
     let
-        protein = load (id (get 0 (inputs input))) 'ProteinConformer',
-        smol_id = id (get 1 (inputs input)),
+        protein = load (id (get 0 input)) 'ProteinConformer',
+        smol_id = id (get 1 input),
         smiles = smi (load smol_id 'Smol'),
 
         structure = load (structure_id protein) 'Structure',
@@ -181,7 +186,32 @@ async def test_submit_benchmark(benchmark_submission: RunBenchmarkRunBenchmark):
 
 
 @pytest.mark.asyncio
-async def test_submit_openff_benchmark(openff_real_benchmark_submission: RunBenchmarkRunBenchmark):
+async def test_benchmark_submissions(provider: Provider, benchmark_submission: RunBenchmarkRunBenchmark):
+    submissions = await provider.benchmark_submissions()
+    ss = []
+    async for submission_page in submissions:
+        for s in submission_page.edges:
+            ss.append(s)
+    assert len(ss) > 0
+
+
+@pytest.mark.asyncio
+async def test_poll_benchmark_submission(
+    provider: Provider,
+    benchmark_submission: RunBenchmarkRunBenchmark,
+):
+    submission = await provider.poll_benchmark_submission(benchmark_submission.id)
+    assert submission is not None
+    assert submission.source_run.status == "DONE"
+    # wait another 60 seconds for eval to finish
+    submission = await provider.poll_benchmark_submission(benchmark_submission.id, with_scores=True)
+    assert len(submission.scores.nodes) > 0
+
+
+@pytest.mark.asyncio
+async def test_submit_openff_benchmark(
+    openff_real_benchmark_submission: RunBenchmarkRunBenchmark,
+):
     assert openff_real_benchmark_submission is not None
 
 

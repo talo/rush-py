@@ -38,7 +38,9 @@ from uuid import UUID
 import httpx
 from pydantic_core import to_jsonable_python
 
-from rush.graphql_client.benchmark import BenchmarkBenchmark
+from rush.graphql_client.benchmark_submission import (
+    BenchmarkSubmissionMeAccountProjectBenchmarkSubmission,
+)
 
 from .async_utils import LOOP, asyncio_run, start_background_loop
 from .graphql_client.argument import Argument, ArgumentArgument
@@ -48,6 +50,11 @@ from .graphql_client.arguments import (
     ArgumentsMeAccountArgumentsPageInfo,
 )
 from .graphql_client.base_model import UNSET, UnsetType
+from .graphql_client.benchmark import BenchmarkBenchmark
+from .graphql_client.benchmark_submissions import (
+    BenchmarkSubmissionsMeAccountProjectBenchmarkSubmissionsEdgesNode,
+    BenchmarkSubmissionsMeAccountProjectBenchmarkSubmissionsPageInfo,
+)
 from .graphql_client.benchmarks import (
     BenchmarksBenchmarks,
     BenchmarksBenchmarksEdgesNode,
@@ -524,6 +531,70 @@ class BaseProvider:
         else:
             raise Exception("Please provide either an id or a name")
 
+    async def benchmark_submissions(
+        self,
+    ) -> AsyncIterable[
+        Page[
+            BenchmarkSubmissionsMeAccountProjectBenchmarkSubmissionsEdgesNode,
+            BenchmarkSubmissionsMeAccountProjectBenchmarkSubmissionsPageInfo,
+        ]
+    ]:
+        """
+        Retrieve a list of runs.
+        """
+        if not self.project_id:
+            raise Exception("No project ID provided")
+
+        async def return_paged(
+            project_id: str,
+            after: Union[Optional[str], UnsetType] = UNSET,
+            before: Union[Optional[str], UnsetType] = UNSET,
+            first: Union[Optional[int], UnsetType] = UNSET,
+            last: Union[Optional[int], UnsetType] = UNSET,
+            **kwargs: Any,
+        ) -> Page[
+            BenchmarkSubmissionsMeAccountProjectBenchmarkSubmissionsEdgesNode,
+            BenchmarkSubmissionsMeAccountProjectBenchmarkSubmissionsPageInfo,
+        ]:
+            res = await self.client.benchmark_submissions(
+                project_id=project_id,
+                first=first,
+                after=after,
+                last=last,
+                before=before,
+                **kwargs,
+            )
+            # The types for this pass in mypy, but not in pyright
+            return res.account.project.benchmark_submissions  # type: ignore
+
+        return self._project_query_with_pagination(return_paged, UUID(self.project_id), PageVars(), {})
+
+    async def benchmark_submission(
+        self,
+        benchmark_submission_id: str,
+    ) -> BenchmarkSubmissionMeAccountProjectBenchmarkSubmission:
+        return (
+            await self.client.benchmark_submission(project_id=self.project_id, id=benchmark_submission_id)
+        ).account.project.benchmark_submission
+
+    async def poll_benchmark_submission(
+        self,
+        benchmark_submission_id: str,
+        with_scores: bool = False,
+    ) -> BenchmarkSubmissionMeAccountProjectBenchmarkSubmission:
+        submission = await self.benchmark_submission(benchmark_submission_id)
+        while submission.source_run and submission.source_run.status not in [
+            "DONE",
+            "ERROR",
+        ]:
+            await asyncio.sleep(5)
+            submission = await self.benchmark_submission(benchmark_submission_id)
+        if with_scores:
+            while not submission.scores.nodes:
+                await asyncio.sleep(5)
+                submission = await self.benchmark_submission(benchmark_submission_id)
+        return submission
+
     async def create_project(
         self,
         name: str,
@@ -542,11 +613,12 @@ class BaseProvider:
         rex_fn: str,
         name: str | None = None,
         sample: float | None = None,
+        with_outs: bool | None = None,
     ) -> RunBenchmarkRunBenchmark:
         if not self.project_id:
             raise Exception("Please set up a project first with client.create_project and client.set_project")
         input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
-        res = await self.client.run_benchmark(input, benchmark_id, sample_pct=sample)
+        res = await self.client.run_benchmark(input, benchmark_id, sample_pct=sample, with_outs=with_outs)
         if res.id:
             ui_url = UI_URL_MAP[self.client.url.strip("/")]
             print(
@@ -580,7 +652,10 @@ class BaseProvider:
 
         if tags:
             filter = ProjectFilter(
-                all=[filter, ProjectFilter(metadata=MetadataFilter(tags=TagFilter(in_=tags)))]
+                all=[
+                    filter,
+                    ProjectFilter(metadata=MetadataFilter(tags=TagFilter(in_=tags))),
+                ]
             )
 
         async def return_paged(
@@ -1796,7 +1871,7 @@ class Provider(BaseProvider):
         access_token: str | None = None,
         url: str | None = None,
         workspace: str | Path | bool | None = None,
-        project: str | None = None,
+        project: UUID | None = None,
         batch_tags: list[str] | None = None,
         logger: logging.Logger | None = None,
         restore_by_default: bool | None = None,
@@ -1865,6 +1940,7 @@ class Provider(BaseProvider):
                 workspace=workspace,
                 batch_tags=batch_tags,
                 logger=logger,
+                project_id=project,
                 restore_by_default=restore_by_default,
             )
         else:
@@ -1874,6 +1950,7 @@ class Provider(BaseProvider):
                 workspace=workspace,
                 batch_tags=batch_tags,
                 logger=logger,
+                project_id=project,
                 restore_by_default=restore_by_default,
             )
 
@@ -1902,7 +1979,7 @@ async def build_provider_with_functions(
         access_token,
         url,
         workspace,
-        project,
+        UUID(project) if project else None,
         batch_tags,
         logger,
         restore_by_default=restore_by_default,
@@ -1911,9 +1988,9 @@ async def build_provider_with_functions(
     await provider.get_module_functions(names=module_names, tags=module_tags)
     # if the user didn't  specify a project, use or create the default project
     if not project:
-        p = (await anext((await provider.projects(tags=["default"])))).edges[0]
-        if p:
-            provider.project_id = p.node.id
+        p = await anext((await provider.projects(tags=["default"])))
+        if p and len(p.edges) > 0:
+            provider.project_id = p.edges[0].node.id
         else:
             provider.project_id = (await provider.create_project("Default Project", tags=["default"])).id
 
@@ -2063,7 +2140,7 @@ def build_blocking_provider_with_functions(
         access_token,
         url,
         workspace,
-        project,
+        UUID(project) if project else None,
         batch_tags,
         logger,
         restore_by_default=restore_by_default,
@@ -2083,9 +2160,9 @@ def build_blocking_provider_with_functions(
     _make_blocking(provider, built_fns)
 
     if not project:
-        p = asyncio_run(anext(asyncio_run(provider.projects(tags=["default"])))).edges[0]
-        if p:
-            provider.project_id = p.node.id
+        p = asyncio_run(anext(asyncio_run(provider.projects(tags=["default"]))))
+        if p and len(p.edges) > 0:
+            provider.project_id = p.edges[0].node.id
         else:
             provider.project_id = (
                 asyncio_run(provider.create_project("Default Project", tags=["default"]))

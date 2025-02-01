@@ -180,7 +180,8 @@ type Benchmark implements Entity {
   tags: [String!]
   source_run: Run
   data(after: String, before: String, first: Int, last: Int, filter: BenchmarkDataFilter, sort: BenchmarkDataSort): BenchmarkDataConnection!
-  submissions(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionFilter): BenchmarkSubmissionConnection!
+  scores(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionScoreFilter, sort: BenchmarkSubmissionScoreSort): BenchmarkSubmissionScoreConnection!
+  submissions(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionFilter, sort: BenchmarkSubmissionSort): BenchmarkSubmissionConnection!
 }
 
 type BenchmarkArg {
@@ -275,6 +276,7 @@ enum BenchmarkEntityType {
   PROTEIN
   PROTEIN_CONFORMER
   SMOL
+  SMOL_CONFORMER
   STRUCTURE
   BINDING_AFFINITY
 }
@@ -310,6 +312,8 @@ type BenchmarkSubmission implements Entity {
   benchmark: Benchmark!
   scores(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionScoreFilter, sort: BenchmarkSubmissionScoreSort): BenchmarkSubmissionScoreConnection!
   data(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionDataFilter, sort: BenchmarkSubmissionDataSort): BenchmarkSubmissionDataConnection!
+  account_id: String!
+  account_name: String!
 }
 
 type BenchmarkSubmissionConnection {
@@ -471,6 +475,9 @@ type BenchmarkSubmissionScore {
   tags: [String!]
   source_run: Run
   benchmark_submission: BenchmarkSubmission!
+  benchmark: Benchmark!
+  account_id: String!
+  account_name: String!
 }
 
 type BenchmarkSubmissionScoreConnection {
@@ -503,6 +510,7 @@ input BenchmarkSubmissionScoreFilter {
   account_id: UuidFilter
   score: F64Filter
   benchmark_submission_id: UuidFilter
+  benchmark_id: UuidFilter
 }
 
 scalar BenchmarkSubmissionScoreId
@@ -514,6 +522,7 @@ input BenchmarkSubmissionScoreSort {
   account_id: UuidSort
   score: F64Sort
   benchmark_submission_id: UuidSort
+  benchmark_id: UuidSort
 }
 
 input BenchmarkSubmissionSort {
@@ -1303,6 +1312,7 @@ input CreateProtein {
   description: String
   tags: [String!]
   sequence: String!
+  uniprot_id: String
   project_id: ProjectId!
 }
 
@@ -1311,6 +1321,7 @@ input CreateProteinConformer {
   description: String
   tags: [String!]
   residues: [Int!]!
+  pdb_id: String
   protein_id: ProteinId!
   structure_id: StructureId!
   project_id: ProjectId!
@@ -1695,12 +1706,13 @@ type Message implements Entity {
   chat: Chat!
 }
 
-union MessageBody = UserPrompt | WalterPrompt | UseTool | Thought | Answer | Done | Download
+union MessageBody = UserPrompt | WalterPrompt | UseTool | SetTools | Thought | Answer | Done | Download
 
 input MessageBodyInput {
   userPrompt: UserPromptInput
   walterPrompt: WalterPromptInput
   useTool: UseToolInput
+  setTools: SetToolsInput
   thought: ThoughtInput
   answer: AnswerInput
   done: DoneInput
@@ -2199,7 +2211,7 @@ type Mutation {
 
   """Cancel a run"""
   cancel_run(id: RunId!): Run!
-  run_benchmark(input: CreateRun!, benchmark_id: BenchmarkId!, sample: Float): BenchmarkSubmission!
+  run_benchmark(input: CreateRun!, benchmark_id: BenchmarkId!, sample: Float, with_outs: Boolean): BenchmarkSubmission!
   eval(input: CreateRun!): Run!
   delete_run(run_id: RunId!): Run!
   update_account_config(account_id: AccountId!, input: AccountConfigInput!): AccountConfig!
@@ -2678,6 +2690,7 @@ input PatchProtein {
   description: String
   tags: [String!]
   sequence: String
+  uniprot_id: String
 }
 
 input PatchProteinConformer {
@@ -2685,6 +2698,7 @@ input PatchProteinConformer {
   description: String
   tags: [String!]
   residues: [Int!]
+  pdb_id: String
   protein_id: ProteinId
   structure_id: StructureId
 }
@@ -2865,6 +2879,7 @@ input ProjectSort {
 type Protein implements Entity {
   id: ProteinId!
   sequence: String!
+  uniprot_id: String
   name: String
   description: String
   created_at: DateTime!
@@ -2881,6 +2896,7 @@ type Protein implements Entity {
 type ProteinConformer implements Entity {
   id: ProteinConformerId!
   residues: [Int!]!
+  pdb_id: String
   name: String
   description: String
   created_at: DateTime!
@@ -2921,6 +2937,7 @@ input ProteinConformerFilter {
   metadata: MetadataFilter
   project_id: UuidFilter
   account_id: UuidFilter
+  pdb_id: StringFilter
   protein_id: UuidFilter
   structure_id: UuidFilter
 }
@@ -2932,6 +2949,7 @@ input ProteinConformerSort {
   metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
+  pdb_id: StringSort
   protein_id: UuidSort
   structure_id: UuidSort
 }
@@ -2965,6 +2983,7 @@ input ProteinFilter {
   project_id: UuidFilter
   account_id: UuidFilter
   sequence: StringFilter
+  uniprot_id: StringFilter
 }
 
 scalar ProteinId
@@ -2975,6 +2994,7 @@ input ProteinSort {
   project_id: UuidSort
   account_id: UuidSort
   sequence: StringSort
+  uniprot_id: StringSort
 }
 
 type Query {
@@ -3172,7 +3192,6 @@ type Run implements Entity {
   description: String
   run_id: RunId
   tags: [String!]
-  rex: String!
   result: JSON
   trace: JSON
   module_lock: JSONObject!
@@ -3194,6 +3213,8 @@ type Run implements Entity {
   smol_libraries(after: String, before: String, first: Int, last: Int, filter: SmolLibraryFilter, sort: SmolLibrarySort): SmolLibraryConnection!
   structures(after: String, before: String, first: Int, last: Int, filter: StructureFilter, sort: StructureSort): StructureConnection!
   module_instances(after: String, before: String, first: Int, last: Int, filter: ModuleInstanceFilter, sort: ModuleInstanceSort): ModuleInstanceConnection!
+  benchmark_submission_scores(after: String, before: String, first: Int, last: Int, filter: BenchmarkSubmissionScoreFilter, sort: BenchmarkSubmissionScoreSort): BenchmarkSubmissionScoreConnection!
+  rex: String!
 }
 
 type RunConnection {
@@ -3356,6 +3377,14 @@ input SarProgramSort {
   metadata: MetadataSort
   project_id: UuidSort
   account_id: UuidSort
+}
+
+type SetTools {
+  tools: [ToolDefinition!]!
+}
+
+input SetToolsInput {
+  tools: [ToolDefinitionInput!]!
 }
 
 type Smol implements Entity {
@@ -3769,6 +3798,36 @@ input TokenSort {
   metadata: MetadataSort
   id: UuidSort
   user_id: UuidSort
+}
+
+type ToolDefinition {
+  name: String!
+  description: String!
+  call_tool_examples: [String!]!
+  parameters: [ToolParameter!]!
+  note: String!
+}
+
+input ToolDefinitionInput {
+  name: String!
+  description: String!
+  call_tool_examples: [String!]!
+  parameters: [ToolParameterInput!]!
+  note: String!
+}
+
+type ToolParameter {
+  name: String!
+  type_name: String!
+  description: String!
+  examples: [String!]!
+}
+
+input ToolParameterInput {
+  name: String!
+  type_name: String!
+  description: String!
+  examples: [String!]!
 }
 
 scalar Type

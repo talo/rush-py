@@ -341,17 +341,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"account_id": account_id, "input": input}
         response = await self.execute(
-            query=query,
-            operation_name="update_account_config",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="update_account_config", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UpdateAccountConfig.model_validate(data).update_account_config
 
-    async def update_account_tier(
-        self, account_id: UUID, tier: AccountTier, **kwargs: Any
-    ) -> AccountTier:
+    async def update_account_tier(self, account_id: UUID, tier: AccountTier, **kwargs: Any) -> AccountTier:
         query = gql(
             """
             mutation update_account_tier($account_id: AccountId!, $tier: AccountTier!) {
@@ -361,10 +356,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"account_id": account_id, "tier": tier}
         response = await self.execute(
-            query=query,
-            operation_name="update_account_tier",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="update_account_tier", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UpdateAccountTier.model_validate(data).update_account_tier
@@ -395,9 +387,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(
-            query=query, operation_name="argument", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="argument", variables=variables, **kwargs)
         data = self.get_data(response)
         return Argument.model_validate(data).argument
 
@@ -466,9 +456,7 @@ class Client(AsyncBaseClient):
             "last": last,
             "filter": filter,
         }
-        response = await self.execute(
-            query=query, operation_name="arguments", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="arguments", variables=variables, **kwargs)
         data = self.get_data(response)
         return Arguments.model_validate(data).me
 
@@ -532,10 +520,7 @@ class Client(AsyncBaseClient):
         return DeleteArgument.model_validate(data).delete_argument
 
     async def tag_argument(
-        self,
-        tags: List[str],
-        argument_id: Union[Optional[UUID], UnsetType] = UNSET,
-        **kwargs: Any
+        self, tags: List[str], argument_id: Union[Optional[UUID], UnsetType] = UNSET, **kwargs: Any
     ) -> List[str]:
         query = gql(
             """
@@ -552,10 +537,7 @@ class Client(AsyncBaseClient):
         return TagArgument.model_validate(data).tag
 
     async def untag_argument(
-        self,
-        tags: List[str],
-        argument_id: Union[Optional[UUID], UnsetType] = UNSET,
-        **kwargs: Any
+        self, tags: List[str], argument_id: Union[Optional[UUID], UnsetType] = UNSET, **kwargs: Any
     ) -> List[str]:
         query = gql(
             """
@@ -592,9 +574,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(
-            query=query, operation_name="benchmark", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="benchmark", variables=variables, **kwargs)
         data = self.get_data(response)
         return Benchmark.model_validate(data).benchmark
 
@@ -658,9 +638,7 @@ class Client(AsyncBaseClient):
             "filter": filter,
             "sort": sort,
         }
-        response = await self.execute(
-            query=query, operation_name="benchmarks", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="benchmarks", variables=variables, **kwargs)
         data = self.get_data(response)
         return Benchmarks.model_validate(data).benchmarks
 
@@ -751,9 +729,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return BenchmarkData.model_validate(data).benchmark
 
-    async def benchmark_submission(
-        self, id: Any, project_id: Any, **kwargs: Any
-    ) -> BenchmarkSubmissionMe:
+    async def benchmark_submission(self, id: Any, project_id: Any, **kwargs: Any) -> BenchmarkSubmissionMe:
         query = gql(
             """
             query benchmark_submission($id: BenchmarkSubmissionId!, $project_id: ProjectId!) {
@@ -802,16 +778,15 @@ class Client(AsyncBaseClient):
               }
               source_run {
                 id
+                status
+                result
               }
             }
             """
         )
         variables: Dict[str, object] = {"id": id, "project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="benchmark_submission",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="benchmark_submission", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BenchmarkSubmission.model_validate(data).me
@@ -891,6 +866,8 @@ class Client(AsyncBaseClient):
               }
               source_run {
                 id
+                status
+                result
               }
             }
 
@@ -912,10 +889,7 @@ class Client(AsyncBaseClient):
             "project_id": project_id,
         }
         response = await self.execute(
-            query=query,
-            operation_name="benchmark_submissions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="benchmark_submissions", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BenchmarkSubmissions.model_validate(data).me
@@ -944,17 +918,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"benchmark_": benchmark}
         response = await self.execute(
-            query=query,
-            operation_name="create_benchmark",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_benchmark", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateBenchmark.model_validate(data).create_benchmark
 
-    async def delete_benchmark(
-        self, id: Any, **kwargs: Any
-    ) -> DeleteBenchmarkDeleteBenchmark:
+    async def delete_benchmark(self, id: Any, **kwargs: Any) -> DeleteBenchmarkDeleteBenchmark:
         query = gql(
             """
             mutation delete_benchmark($id: BenchmarkId!) {
@@ -966,10 +935,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"id": id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_benchmark",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_benchmark", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteBenchmark.model_validate(data).delete_benchmark
@@ -1044,10 +1010,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"benchmark_data": benchmark_data}
         response = await self.execute(
-            query=query,
-            operation_name="create_benchmark_data",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_benchmark_data", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateBenchmarkData.model_validate(data).create_benchmark_data
@@ -1066,10 +1029,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"benchmark_data_id": benchmark_data_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_benchmark_data",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_benchmark_data", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteBenchmarkData.model_validate(data).delete_benchmark_data
@@ -1118,10 +1078,7 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_benchmark_data",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_benchmark_data", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return PatchBenchmarkData.model_validate(data).patch_benchmark_data
@@ -1138,23 +1095,14 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "benchmark_submission_id": benchmark_submission_id
-        }
+        variables: Dict[str, object] = {"benchmark_submission_id": benchmark_submission_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_benchmark_submission",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_benchmark_submission", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return DeleteBenchmarkSubmission.model_validate(
-            data
-        ).delete_benchmark_submission
+        return DeleteBenchmarkSubmission.model_validate(data).delete_benchmark_submission
 
-    async def binding_affinity(
-        self, project_id: Any, ba_id: Any, **kwargs: Any
-    ) -> BindingAffinityMe:
+    async def binding_affinity(self, project_id: Any, ba_id: Any, **kwargs: Any) -> BindingAffinityMe:
         query = gql(
             """
             query binding_affinity($project_id: ProjectId!, $ba_id: BindingAffinityId!) {
@@ -1192,17 +1140,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id, "ba_id": ba_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_affinity",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_affinity", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingAffinity.model_validate(data).me
 
-    async def binding_affinities(
-        self, project_id: Any, **kwargs: Any
-    ) -> BindingAffinitiesMe:
+    async def binding_affinities(self, project_id: Any, **kwargs: Any) -> BindingAffinitiesMe:
         query = gql(
             """
             query binding_affinities($project_id: ProjectId!) {
@@ -1256,10 +1199,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_affinities",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_affinities", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingAffinities.model_validate(data).me
@@ -1303,17 +1243,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id, "bsc_id": bsc_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_site_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_site_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingSiteConformer.model_validate(data).me
 
-    async def binding_site_conformers(
-        self, project_id: Any, **kwargs: Any
-    ) -> BindingSiteConformersMe:
+    async def binding_site_conformers(self, project_id: Any, **kwargs: Any) -> BindingSiteConformersMe:
         query = gql(
             """
             query binding_site_conformers($project_id: ProjectId!) {
@@ -1366,10 +1301,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_site_conformers",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_site_conformers", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingSiteConformers.model_validate(data).me
@@ -1415,17 +1347,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id, "bpc_id": bpc_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_pose_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_pose_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingPoseConformer.model_validate(data).me
 
-    async def binding_pose_conformers(
-        self, project_id: Any, **kwargs: Any
-    ) -> BindingPoseConformersMe:
+    async def binding_pose_conformers(self, project_id: Any, **kwargs: Any) -> BindingPoseConformersMe:
         query = gql(
             """
             query binding_pose_conformers($project_id: ProjectId!) {
@@ -1480,10 +1407,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_pose_conformers",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_pose_conformers", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingPoseConformers.model_validate(data).me
@@ -1525,17 +1449,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id, "bsi_id": bsi_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_site_interaction",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_site_interaction", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingSiteInteraction.model_validate(data).me
 
-    async def binding_site_interactions(
-        self, project_id: Any, **kwargs: Any
-    ) -> BindingSiteInteractionsMe:
+    async def binding_site_interactions(self, project_id: Any, **kwargs: Any) -> BindingSiteInteractionsMe:
         query = gql(
             """
             query binding_site_interactions($project_id: ProjectId!) {
@@ -1586,10 +1505,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_site_interactions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_site_interactions", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingSiteInteractions.model_validate(data).me
@@ -1637,10 +1553,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id, "bpci_id": bpci_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_pose_conformer_interaction",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_pose_conformer_interaction", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingPoseConformerInteraction.model_validate(data).me
@@ -1704,10 +1617,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="binding_pose_conformer_interactions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="binding_pose_conformer_interactions", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return BindingPoseConformerInteractions.model_validate(data).me
@@ -1746,10 +1656,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"binding_affinity": binding_affinity}
         response = await self.execute(
-            query=query,
-            operation_name="create_binding_affinity",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_binding_affinity", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateBindingAffinity.model_validate(data).create_binding_affinity
@@ -1768,10 +1675,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"binding_affinity_id": binding_affinity_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_binding_affinity",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_binding_affinity", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteBindingAffinity.model_validate(data).delete_binding_affinity
@@ -1813,10 +1717,7 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_binding_affinity",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_binding_affinity", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return PatchBindingAffinity.model_validate(data).patch_binding_affinity
@@ -1852,19 +1753,12 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "binding_site_conformer": binding_site_conformer
-        }
+        variables: Dict[str, object] = {"binding_site_conformer": binding_site_conformer}
         response = await self.execute(
-            query=query,
-            operation_name="create_binding_site_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_binding_site_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return CreateBindingSiteConformer.model_validate(
-            data
-        ).create_binding_site_conformer
+        return CreateBindingSiteConformer.model_validate(data).create_binding_site_conformer
 
     async def delete_binding_site_conformer(
         self, binding_site_conformer_id: Any, **kwargs: Any
@@ -1880,25 +1774,15 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "binding_site_conformer_id": binding_site_conformer_id
-        }
+        variables: Dict[str, object] = {"binding_site_conformer_id": binding_site_conformer_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_binding_site_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_binding_site_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return DeleteBindingSiteConformer.model_validate(
-            data
-        ).delete_binding_site_conformer
+        return DeleteBindingSiteConformer.model_validate(data).delete_binding_site_conformer
 
     async def patch_binding_site_conformer(
-        self,
-        binding_site_conformer_id: Any,
-        input: PatchBindingSiteConformer,
-        **kwargs: Any
+        self, binding_site_conformer_id: Any, input: PatchBindingSiteConformer, **kwargs: Any
     ) -> PatchBindingSiteConformerPatchBindingSiteConformer:
         query = gql(
             """
@@ -1936,15 +1820,10 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_binding_site_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_binding_site_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return PatchBindingSiteConformer.model_validate(
-            data
-        ).patch_binding_site_conformer
+        return PatchBindingSiteConformer.model_validate(data).patch_binding_site_conformer
 
     async def create_binding_pose_conformer(
         self, binding_pose_conformer: CreateBindingPoseConformer, **kwargs: Any
@@ -1979,19 +1858,12 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "binding_pose_conformer": binding_pose_conformer
-        }
+        variables: Dict[str, object] = {"binding_pose_conformer": binding_pose_conformer}
         response = await self.execute(
-            query=query,
-            operation_name="create_binding_pose_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_binding_pose_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return CreateBindingPoseConformer.model_validate(
-            data
-        ).create_binding_pose_conformer
+        return CreateBindingPoseConformer.model_validate(data).create_binding_pose_conformer
 
     async def delete_binding_pose_conformer(
         self, binding_pose_conformer_id: Any, **kwargs: Any
@@ -2007,25 +1879,15 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "binding_pose_conformer_id": binding_pose_conformer_id
-        }
+        variables: Dict[str, object] = {"binding_pose_conformer_id": binding_pose_conformer_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_binding_pose_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_binding_pose_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return DeleteBindingPoseConformer.model_validate(
-            data
-        ).delete_binding_pose_conformer
+        return DeleteBindingPoseConformer.model_validate(data).delete_binding_pose_conformer
 
     async def patch_binding_pose_conformer(
-        self,
-        binding_pose_conformer_id: Any,
-        input: PatchBindingPoseConformer,
-        **kwargs: Any
+        self, binding_pose_conformer_id: Any, input: PatchBindingPoseConformer, **kwargs: Any
     ) -> PatchBindingPoseConformerPatchBindingPoseConformer:
         query = gql(
             """
@@ -2065,15 +1927,10 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_binding_pose_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_binding_pose_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return PatchBindingPoseConformer.model_validate(
-            data
-        ).patch_binding_pose_conformer
+        return PatchBindingPoseConformer.model_validate(data).patch_binding_pose_conformer
 
     async def create_binding_pose_affinity(
         self, binding_pose_affinity: CreateBindingPoseAffinity, **kwargs: Any
@@ -2099,15 +1956,10 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"binding_pose_affinity": binding_pose_affinity}
         response = await self.execute(
-            query=query,
-            operation_name="create_binding_pose_affinity",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_binding_pose_affinity", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return CreateBindingPoseAffinity.model_validate(
-            data
-        ).create_binding_pose_affinity
+        return CreateBindingPoseAffinity.model_validate(data).create_binding_pose_affinity
 
     async def create_binding_site_interactions(
         self, binding_site_interactions: CreateBindingSiteInteractions, **kwargs: Any
@@ -2138,19 +1990,12 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "binding_site_interactions": binding_site_interactions
-        }
+        variables: Dict[str, object] = {"binding_site_interactions": binding_site_interactions}
         response = await self.execute(
-            query=query,
-            operation_name="create_binding_site_interactions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_binding_site_interactions", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return CreateBindingSiteInteractions.model_validate(
-            data
-        ).create_binding_site_interactions
+        return CreateBindingSiteInteractions.model_validate(data).create_binding_site_interactions
 
     async def delete_binding_site_interactions(
         self, binding_site_interactions_id: Any, **kwargs: Any
@@ -2166,25 +2011,15 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "binding_site_interactions_id": binding_site_interactions_id
-        }
+        variables: Dict[str, object] = {"binding_site_interactions_id": binding_site_interactions_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_binding_site_interactions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_binding_site_interactions", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return DeleteBindingSiteInteractions.model_validate(
-            data
-        ).delete_binding_site_interactions
+        return DeleteBindingSiteInteractions.model_validate(data).delete_binding_site_interactions
 
     async def patch_binding_site_interactions(
-        self,
-        binding_site_interactions_id: Any,
-        input: PatchBindingSiteInteractions,
-        **kwargs: Any
+        self, binding_site_interactions_id: Any, input: PatchBindingSiteInteractions, **kwargs: Any
     ) -> PatchBindingSiteInteractionsPatchBindingSiteInteractions:
         query = gql(
             """
@@ -2220,20 +2055,13 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_binding_site_interactions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_binding_site_interactions", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return PatchBindingSiteInteractions.model_validate(
-            data
-        ).patch_binding_site_interactions
+        return PatchBindingSiteInteractions.model_validate(data).patch_binding_site_interactions
 
     async def create_binding_pose_conformer_interactions(
-        self,
-        binding_pose_conformer_interactions: CreateBindingPoseConformerInteractions,
-        **kwargs: Any
+        self, binding_pose_conformer_interactions: CreateBindingPoseConformerInteractions, **kwargs: Any
     ) -> CreateBindingPoseConformerInteractionsCreateBindingPoseConformerInteractions:
         query = gql(
             """
@@ -2492,10 +2320,7 @@ class Client(AsyncBaseClient):
             "filter": filter,
         }
         response = await self.execute(
-            query=query,
-            operation_name="module_instances",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="module_instances", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return ModuleInstances.model_validate(data).me
@@ -2630,17 +2455,12 @@ class Client(AsyncBaseClient):
             "stdout_before": stdout_before,
         }
         response = await self.execute(
-            query=query,
-            operation_name="module_instance_details",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="module_instance_details", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return ModuleInstanceDetails.model_validate(data).module_instance
 
-    async def module_instance_minimal(
-        self, id: UUID, **kwargs: Any
-    ) -> ModuleInstanceMinimalModuleInstance:
+    async def module_instance_minimal(self, id: UUID, **kwargs: Any) -> ModuleInstanceMinimalModuleInstance:
         query = gql(
             """
             query module_instance_minimal($id: ModuleInstanceId!) {
@@ -2676,10 +2496,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"id": id}
         response = await self.execute(
-            query=query,
-            operation_name="module_instance_minimal",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="module_instance_minimal", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return ModuleInstanceMinimal.model_validate(data).module_instance
@@ -2701,10 +2518,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"instance": instance}
         response = await self.execute(
-            query=query,
-            operation_name="run_module_instance",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="run_module_instance", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return RunModuleInstance.model_validate(data).run_module_instance
@@ -2730,15 +2544,11 @@ class Client(AsyncBaseClient):
             "target": target,
             "resources": resources,
         }
-        response = await self.execute(
-            query=query, operation_name="retry", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="retry", variables=variables, **kwargs)
         data = self.get_data(response)
         return Retry.model_validate(data).retry
 
-    async def cancel_module_instance(
-        self, module_instance_id: UUID, **kwargs: Any
-    ) -> UUID:
+    async def cancel_module_instance(self, module_instance_id: UUID, **kwargs: Any) -> UUID:
         query = gql(
             """
             mutation cancel_module_instance($module_instance_id: ModuleInstanceId!) {
@@ -2748,10 +2558,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"module_instance_id": module_instance_id}
         response = await self.execute(
-            query=query,
-            operation_name="cancel_module_instance",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="cancel_module_instance", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CancelModuleInstance.model_validate(data).cancel
@@ -2770,10 +2577,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"moduleInstanceId": module_instance_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_module_instance",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_module_instance", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteModuleInstance.model_validate(data).delete_module_instance
@@ -2805,10 +2609,7 @@ class Client(AsyncBaseClient):
             "arguments": arguments,
         }
         response = await self.execute(
-            query=query,
-            operation_name="update_module_instance",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="update_module_instance", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UpdateModuleInstance.model_validate(data).update_module_instance
@@ -2827,21 +2628,13 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"utilization": utilization}
         response = await self.execute(
-            query=query,
-            operation_name="track_utilization",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="track_utilization", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return TrackUtilization.model_validate(
-            data
-        ).track_module_instance_resource_utilization
+        return TrackUtilization.model_validate(data).track_module_instance_resource_utilization
 
     async def tag_module_instance(
-        self,
-        tags: List[str],
-        module_instance_id: Union[Optional[UUID], UnsetType] = UNSET,
-        **kwargs: Any
+        self, tags: List[str], module_instance_id: Union[Optional[UUID], UnsetType] = UNSET, **kwargs: Any
     ) -> List[str]:
         query = gql(
             """
@@ -2855,19 +2648,13 @@ class Client(AsyncBaseClient):
             "tags": tags,
         }
         response = await self.execute(
-            query=query,
-            operation_name="tag_module_instance",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="tag_module_instance", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return TagModuleInstance.model_validate(data).tag
 
     async def untag_module_instance(
-        self,
-        tags: List[str],
-        module_instance_id: Union[Optional[UUID], UnsetType] = UNSET,
-        **kwargs: Any
+        self, tags: List[str], module_instance_id: Union[Optional[UUID], UnsetType] = UNSET, **kwargs: Any
     ) -> List[str]:
         query = gql(
             """
@@ -2881,10 +2668,7 @@ class Client(AsyncBaseClient):
             "tags": tags,
         }
         response = await self.execute(
-            query=query,
-            operation_name="untag_module_instance",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="untag_module_instance", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UntagModuleInstance.model_validate(data).untag
@@ -3057,9 +2841,7 @@ class Client(AsyncBaseClient):
             "last": last,
             "module_filter": module_filter,
         }
-        response = await self.execute(
-            query=query, operation_name="modules", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="modules", variables=variables, **kwargs)
         data = self.get_data(response)
         return Modules.model_validate(data).modules
 
@@ -3109,9 +2891,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(
-            query=query, operation_name="module", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="module", variables=variables, **kwargs)
         data = self.get_data(response)
         return Module.model_validate(data).module
 
@@ -3161,9 +2941,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"module": module}
-        response = await self.execute(
-            query=query, operation_name="deploy", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="deploy", variables=variables, **kwargs)
         data = self.get_data(response)
         return Deploy.model_validate(data).deploy
 
@@ -3178,17 +2956,12 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"moduleId": module_id}
-        response = await self.execute(
-            query=query, operation_name="destroy", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="destroy", variables=variables, **kwargs)
         data = self.get_data(response)
         return Destroy.model_validate(data).destroy
 
     async def tag_module(
-        self,
-        tags: List[str],
-        module_id: Union[Optional[UUID], UnsetType] = UNSET,
-        **kwargs: Any
+        self, tags: List[str], module_id: Union[Optional[UUID], UnsetType] = UNSET, **kwargs: Any
     ) -> List[str]:
         query = gql(
             """
@@ -3198,17 +2971,12 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"moduleId": module_id, "tags": tags}
-        response = await self.execute(
-            query=query, operation_name="tag_module", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="tag_module", variables=variables, **kwargs)
         data = self.get_data(response)
         return TagModule.model_validate(data).tag
 
     async def untag_module(
-        self,
-        tags: List[str],
-        module_id: Union[Optional[UUID], UnsetType] = UNSET,
-        **kwargs: Any
+        self, tags: List[str], module_id: Union[Optional[UUID], UnsetType] = UNSET, **kwargs: Any
     ) -> List[str]:
         query = gql(
             """
@@ -3252,9 +3020,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id, "msa_id": msa_id}
-        response = await self.execute(
-            query=query, operation_name="msa", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="msa", variables=variables, **kwargs)
         data = self.get_data(response)
         return Msa.model_validate(data).me
 
@@ -3302,9 +3068,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id}
-        response = await self.execute(
-            query=query, operation_name="msas", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="msas", variables=variables, **kwargs)
         data = self.get_data(response)
         return Msas.model_validate(data).me
 
@@ -3333,17 +3097,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"input": input}
         response = await self.execute(
-            query=query,
-            operation_name="create_multiple_sequence_alignment",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_multiple_sequence_alignment", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateMultipleSequenceAlignment.model_validate(data).create_msa
 
-    async def delete_msa(
-        self, multiple_sequence_alignment_id: Any, **kwargs: Any
-    ) -> DeleteMsaDeleteMsa:
+    async def delete_msa(self, multiple_sequence_alignment_id: Any, **kwargs: Any) -> DeleteMsaDeleteMsa:
         query = gql(
             """
             mutation delete_msa($multiple_sequence_alignment_id: MultipleSequenceAlignmentId!) {
@@ -3353,20 +3112,13 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "multiple_sequence_alignment_id": multiple_sequence_alignment_id
-        }
-        response = await self.execute(
-            query=query, operation_name="delete_msa", variables=variables, **kwargs
-        )
+        variables: Dict[str, object] = {"multiple_sequence_alignment_id": multiple_sequence_alignment_id}
+        response = await self.execute(query=query, operation_name="delete_msa", variables=variables, **kwargs)
         data = self.get_data(response)
         return DeleteMsa.model_validate(data).delete_msa
 
     async def patch_msa(
-        self,
-        multiple_sequence_alignment_id: Any,
-        input: PatchMultipleSequenceAlignment,
-        **kwargs: Any
+        self, multiple_sequence_alignment_id: Any, input: PatchMultipleSequenceAlignment, **kwargs: Any
     ) -> PatchMsaPatchMsa:
         query = gql(
             """
@@ -3395,9 +3147,7 @@ class Client(AsyncBaseClient):
             "multiple_sequence_alignment_id": multiple_sequence_alignment_id,
             "input": input,
         }
-        response = await self.execute(
-            query=query, operation_name="patch_msa", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="patch_msa", variables=variables, **kwargs)
         data = self.get_data(response)
         return PatchMsa.model_validate(data).patch_msa
 
@@ -3412,15 +3162,11 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"path": path}
-        response = await self.execute(
-            query=query, operation_name="object_url", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="object_url", variables=variables, **kwargs)
         data = self.get_data(response)
         return ObjectUrl.model_validate(data).object_path
 
-    async def object_contents(
-        self, path: Any, **kwargs: Any
-    ) -> ObjectContentsObjectPath:
+    async def object_contents(self, path: Any, **kwargs: Any) -> ObjectContentsObjectPath:
         query = gql(
             """
             query object_contents($path: UUID!) {
@@ -3466,9 +3212,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"id": id}
-        response = await self.execute(
-            query=query, operation_name="object", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="object", variables=variables, **kwargs)
         data = self.get_data(response)
         return Object.model_validate(data).object
 
@@ -3556,10 +3300,7 @@ class Client(AsyncBaseClient):
             "public": public,
         }
         response = await self.execute(
-            query=query,
-            operation_name="upload_large_object",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="upload_large_object", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return UploadLargeObject.model_validate(data).upload_large_object
@@ -3589,9 +3330,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id}
-        response = await self.execute(
-            query=query, operation_name="project", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="project", variables=variables, **kwargs)
         data = self.get_data(response)
         return Project.model_validate(data).me
 
@@ -3656,15 +3395,11 @@ class Client(AsyncBaseClient):
             "last": last,
             "filter": filter,
         }
-        response = await self.execute(
-            query=query, operation_name="projects", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="projects", variables=variables, **kwargs)
         data = self.get_data(response)
         return Projects.model_validate(data).me
 
-    async def create_project(
-        self, project: CreateProject, **kwargs: Any
-    ) -> CreateProjectCreateProject:
+    async def create_project(self, project: CreateProject, **kwargs: Any) -> CreateProjectCreateProject:
         query = gql(
             """
             mutation create_project($project: CreateProject!) {
@@ -3689,11 +3424,11 @@ class Client(AsyncBaseClient):
             query=query, operation_name="create_project", variables=variables, **kwargs
         )
         data = self.get_data(response)
+        from .create_project import CreateProject
+
         return CreateProject.model_validate(data).create_project
 
-    async def delete_project(
-        self, id: Any, **kwargs: Any
-    ) -> DeleteProjectDeleteProject:
+    async def delete_project(self, id: Any, **kwargs: Any) -> DeleteProjectDeleteProject:
         query = gql(
             """
             mutation delete_project($id: ProjectId!) {
@@ -3739,9 +3474,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return PatchProject.model_validate(data).patch_project
 
-    async def protein(
-        self, project_id: Any, protein_id: Any, **kwargs: Any
-    ) -> ProteinMe:
+    async def protein(self, project_id: Any, protein_id: Any, **kwargs: Any) -> ProteinMe:
         query = gql(
             """
             query protein($project_id: ProjectId!, $protein_id: ProteinId!) {
@@ -3772,17 +3505,12 @@ class Client(AsyncBaseClient):
             "project_id": project_id,
             "protein_id": protein_id,
         }
-        response = await self.execute(
-            query=query, operation_name="protein", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="protein", variables=variables, **kwargs)
         data = self.get_data(response)
         return Protein.model_validate(data).me
 
     async def proteins(
-        self,
-        project_id: Any,
-        filter: Union[Optional[ProteinFilter], UnsetType] = UNSET,
-        **kwargs: Any
+        self, project_id: Any, filter: Union[Optional[ProteinFilter], UnsetType] = UNSET, **kwargs: Any
     ) -> ProteinsMe:
         query = gql(
             """
@@ -3827,9 +3555,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id, "filter": filter}
-        response = await self.execute(
-            query=query, operation_name="proteins", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="proteins", variables=variables, **kwargs)
         data = self.get_data(response)
         return Proteins.model_validate(data).me
 
@@ -3875,17 +3601,12 @@ class Client(AsyncBaseClient):
             "conformer_id": conformer_id,
         }
         response = await self.execute(
-            query=query,
-            operation_name="protein_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="protein_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return ProteinConformer.model_validate(data).me
 
-    async def protein_conformers(
-        self, project_id: Any, **kwargs: Any
-    ) -> ProteinConformersMe:
+    async def protein_conformers(self, project_id: Any, **kwargs: Any) -> ProteinConformersMe:
         query = gql(
             """
             query protein_conformers($project_id: ProjectId!) {
@@ -3938,17 +3659,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"project_id": project_id}
         response = await self.execute(
-            query=query,
-            operation_name="protein_conformers",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="protein_conformers", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return ProteinConformers.model_validate(data).me
 
-    async def create_protein(
-        self, protein: CreateProtein, **kwargs: Any
-    ) -> CreateProteinCreateProtein:
+    async def create_protein(self, protein: CreateProtein, **kwargs: Any) -> CreateProteinCreateProtein:
         query = gql(
             """
             mutation create_protein($protein: CreateProtein!) {
@@ -3976,9 +3692,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateProtein.model_validate(data).create_protein
 
-    async def delete_protein(
-        self, protein_id: Any, **kwargs: Any
-    ) -> DeleteProteinDeleteProtein:
+    async def delete_protein(self, protein_id: Any, **kwargs: Any) -> DeleteProteinDeleteProtein:
         query = gql(
             """
             mutation delete_protein($protein_id: ProteinId!) {
@@ -4058,10 +3772,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"protein_conformer": protein_conformer}
         response = await self.execute(
-            query=query,
-            operation_name="create_protein_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_protein_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateProteinConformer.model_validate(data).create_protein_conformer
@@ -4080,10 +3791,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"protein_conformer_id": protein_conformer_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_protein_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_protein_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteProteinConformer.model_validate(data).delete_protein_conformer
@@ -4127,10 +3835,7 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_protein_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_protein_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return PatchProteinConformer.model_validate(data).patch_protein_conformer
@@ -4167,9 +3872,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id, "run_id": run_id}
-        response = await self.execute(
-            query=query, operation_name="run", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="run", variables=variables, **kwargs)
         data = self.get_data(response)
         return Run.model_validate(data).me
 
@@ -4246,9 +3949,7 @@ class Client(AsyncBaseClient):
             "filter": filter,
             "sort": sort,
         }
-        response = await self.execute(
-            query=query, operation_name="runs", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="runs", variables=variables, **kwargs)
         data = self.get_data(response)
         return Runs.model_validate(data).me
 
@@ -4278,9 +3979,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"input": input}
-        response = await self.execute(
-            query=query, operation_name="eval", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="eval", variables=variables, **kwargs)
         data = self.get_data(response)
         return Eval.model_validate(data).eval
 
@@ -4295,9 +3994,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"run_id": run_id}
-        response = await self.execute(
-            query=query, operation_name="delete_run", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="delete_run", variables=variables, **kwargs)
         data = self.get_data(response)
         return DeleteRun.model_validate(data).delete_run
 
@@ -4306,12 +4003,18 @@ class Client(AsyncBaseClient):
         input: CreateRun,
         benchmark_id: Any,
         sample_pct: Union[Optional[float], UnsetType] = UNSET,
+        with_outs: Union[Optional[bool], UnsetType] = UNSET,
         **kwargs: Any
     ) -> RunBenchmarkRunBenchmark:
         query = gql(
             """
-            mutation run_benchmark($input: CreateRun!, $benchmark_id: BenchmarkId!, $sample_pct: Float) {
-              run_benchmark(input: $input, benchmark_id: $benchmark_id, sample: $sample_pct) {
+            mutation run_benchmark($input: CreateRun!, $benchmark_id: BenchmarkId!, $sample_pct: Float, $with_outs: Boolean) {
+              run_benchmark(
+                input: $input
+                benchmark_id: $benchmark_id
+                sample: $sample_pct
+                with_outs: $with_outs
+              ) {
                 id
                 source_run {
                   id
@@ -4324,6 +4027,7 @@ class Client(AsyncBaseClient):
             "input": input,
             "benchmark_id": benchmark_id,
             "sample_pct": sample_pct,
+            "with_outs": with_outs,
         }
         response = await self.execute(
             query=query, operation_name="run_benchmark", variables=variables, **kwargs
@@ -4490,10 +4194,7 @@ class Client(AsyncBaseClient):
             "sort": sort,
         }
         response = await self.execute(
-            query=query,
-            operation_name="smol_library_partitions",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="smol_library_partitions", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return SmolLibraryPartitions.model_validate(data).smol_library
@@ -4523,17 +4224,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"smol_library": smol_library}
         response = await self.execute(
-            query=query,
-            operation_name="create_smol_library",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_smol_library", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateSmolLibrary.model_validate(data).create_smol_library
 
-    async def delete_smol_library(
-        self, id: Any, **kwargs: Any
-    ) -> DeleteSmolLibraryDeleteSmolLibrary:
+    async def delete_smol_library(self, id: Any, **kwargs: Any) -> DeleteSmolLibraryDeleteSmolLibrary:
         query = gql(
             """
             mutation delete_smol_library($id: SmolLibraryId!) {
@@ -4545,10 +4241,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"id": id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_smol_library",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_smol_library", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteSmolLibrary.model_validate(data).delete_smol_library
@@ -4578,10 +4271,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"id": id, "input": input}
         response = await self.execute(
-            query=query,
-            operation_name="patch_smol_library",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_smol_library", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return PatchSmolLibrary.model_validate(data).patch_smol_library
@@ -4613,19 +4303,12 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "smol_library_partition": smol_library_partition
-        }
+        variables: Dict[str, object] = {"smol_library_partition": smol_library_partition}
         response = await self.execute(
-            query=query,
-            operation_name="create_smol_library_partition",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_smol_library_partition", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return CreateSmolLibraryPartition.model_validate(
-            data
-        ).create_smol_library_partition
+        return CreateSmolLibraryPartition.model_validate(data).create_smol_library_partition
 
     async def delete_smol_library_partition(
         self, smol_library_partition_id: Any, **kwargs: Any
@@ -4641,25 +4324,15 @@ class Client(AsyncBaseClient):
             }
             """
         )
-        variables: Dict[str, object] = {
-            "smol_library_partition_id": smol_library_partition_id
-        }
+        variables: Dict[str, object] = {"smol_library_partition_id": smol_library_partition_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_smol_library_partition",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_smol_library_partition", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return DeleteSmolLibraryPartition.model_validate(
-            data
-        ).delete_smol_library_partition
+        return DeleteSmolLibraryPartition.model_validate(data).delete_smol_library_partition
 
     async def patch_smol_library_partition(
-        self,
-        smol_library_partition_id: Any,
-        input: PatchSmolLibraryPartition,
-        **kwargs: Any
+        self, smol_library_partition_id: Any, input: PatchSmolLibraryPartition, **kwargs: Any
     ) -> PatchSmolLibraryPartitionPatchSmolLibraryPartition:
         query = gql(
             """
@@ -4693,15 +4366,10 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_smol_library_partition",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_smol_library_partition", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return PatchSmolLibraryPartition.model_validate(
-            data
-        ).patch_smol_library_partition
+        return PatchSmolLibraryPartition.model_validate(data).patch_smol_library_partition
 
     async def smol(self, project_id: Any, smol_id: Any, **kwargs: Any) -> SmolMe:
         query = gql(
@@ -4733,9 +4401,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id, "smol_id": smol_id}
-        response = await self.execute(
-            query=query, operation_name="smol", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="smol", variables=variables, **kwargs)
         data = self.get_data(response)
         return Smol.model_validate(data).me
 
@@ -4810,15 +4476,11 @@ class Client(AsyncBaseClient):
             "filter": filter,
             "sort": sort,
         }
-        response = await self.execute(
-            query=query, operation_name="smols", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="smols", variables=variables, **kwargs)
         data = self.get_data(response)
         return Smols.model_validate(data).me
 
-    async def smol_conformer(
-        self, project_id: Any, conformer_id: Any, **kwargs: Any
-    ) -> SmolConformerMe:
+    async def smol_conformer(self, project_id: Any, conformer_id: Any, **kwargs: Any) -> SmolConformerMe:
         query = gql(
             """
             query smol_conformer($project_id: ProjectId!, $conformer_id: SmolConformerId!) {
@@ -4921,9 +4583,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return SmolConformers.model_validate(data).me
 
-    async def create_smol(
-        self, smol: CreateSmol, **kwargs: Any
-    ) -> CreateSmolCreateSmol:
+    async def create_smol(self, smol: CreateSmol, **kwargs: Any) -> CreateSmolCreateSmol:
         query = gql(
             """
             mutation create_smol($smol: CreateSmol!) {
@@ -4970,9 +4630,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return DeleteSmol.model_validate(data).delete_smol
 
-    async def patch_smol(
-        self, smol_id: Any, input: PatchSmol, **kwargs: Any
-    ) -> PatchSmolPatchSmol:
+    async def patch_smol(self, smol_id: Any, input: PatchSmol, **kwargs: Any) -> PatchSmolPatchSmol:
         query = gql(
             """
             mutation patch_smol($smol_id: SmolId!, $input: PatchSmol!) {
@@ -4996,9 +4654,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"smol_id": smol_id, "input": input}
-        response = await self.execute(
-            query=query, operation_name="patch_smol", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="patch_smol", variables=variables, **kwargs)
         data = self.get_data(response)
         return PatchSmol.model_validate(data).patch_smol
 
@@ -5035,10 +4691,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"smol_conformer": smol_conformer}
         response = await self.execute(
-            query=query,
-            operation_name="create_smol_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_smol_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateSmolConformer.model_validate(data).create_smol_conformer
@@ -5057,10 +4710,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"smol_conformer_id": smol_conformer_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_smol_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_smol_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteSmolConformer.model_validate(data).delete_smol_conformer
@@ -5101,17 +4751,12 @@ class Client(AsyncBaseClient):
             "input": input,
         }
         response = await self.execute(
-            query=query,
-            operation_name="patch_smol_conformer",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="patch_smol_conformer", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return PatchSmolConformer.model_validate(data).patch_smol_conformer
 
-    async def structure(
-        self, project_id: Any, structure_id: Any, **kwargs: Any
-    ) -> StructureMe:
+    async def structure(self, project_id: Any, structure_id: Any, **kwargs: Any) -> StructureMe:
         query = gql(
             """
             query structure($project_id: ProjectId!, $structure_id: StructureId!) {
@@ -5145,9 +4790,7 @@ class Client(AsyncBaseClient):
             "project_id": project_id,
             "structure_id": structure_id,
         }
-        response = await self.execute(
-            query=query, operation_name="structure", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="structure", variables=variables, **kwargs)
         data = self.get_data(response)
         return Structure.model_validate(data).me
 
@@ -5198,9 +4841,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"project_id": project_id}
-        response = await self.execute(
-            query=query, operation_name="structures", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="structures", variables=variables, **kwargs)
         data = self.get_data(response)
         return Structures.model_validate(data).me
 
@@ -5232,17 +4873,12 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"structure": structure}
         response = await self.execute(
-            query=query,
-            operation_name="create_structure",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="create_structure", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return CreateStructure.model_validate(data).create_structure
 
-    async def delete_structure(
-        self, structure_id: Any, **kwargs: Any
-    ) -> DeleteStructureDeleteStructure:
+    async def delete_structure(self, structure_id: Any, **kwargs: Any) -> DeleteStructureDeleteStructure:
         query = gql(
             """
             mutation delete_structure($structure_id: StructureId!) {
@@ -5254,10 +4890,7 @@ class Client(AsyncBaseClient):
         )
         variables: Dict[str, object] = {"structure_id": structure_id}
         response = await self.execute(
-            query=query,
-            operation_name="delete_structure",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="delete_structure", variables=variables, **kwargs
         )
         data = self.get_data(response)
         return DeleteStructure.model_validate(data).delete_structure
@@ -5320,9 +4953,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"tag": tag}
-        response = await self.execute(
-            query=query, operation_name="create_tag", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="create_tag", variables=variables, **kwargs)
         data = self.get_data(response)
         return CreateTag.model_validate(data).create_tag
 
@@ -5337,15 +4968,11 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"tag_id": tag_id}
-        response = await self.execute(
-            query=query, operation_name="delete_tag", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="delete_tag", variables=variables, **kwargs)
         data = self.get_data(response)
         return DeleteTag.model_validate(data).delete_tag
 
-    async def patch_tag(
-        self, tag_id: Any, input: PatchTag, **kwargs: Any
-    ) -> PatchTagPatchTag:
+    async def patch_tag(self, tag_id: Any, input: PatchTag, **kwargs: Any) -> PatchTagPatchTag:
         query = gql(
             """
             mutation patch_tag($tag_id: TagId!, $input: PatchTag!) {
@@ -5370,9 +4997,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"tag_id": tag_id, "input": input}
-        response = await self.execute(
-            query=query, operation_name="patch_tag", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="patch_tag", variables=variables, **kwargs)
         data = self.get_data(response)
         return PatchTag.model_validate(data).patch_tag
 
@@ -5401,15 +5026,11 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {}
-        response = await self.execute(
-            query=query, operation_name="me", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="me", variables=variables, **kwargs)
         data = self.get_data(response)
         return Me.model_validate(data).me
 
-    async def login(
-        self, username: str, password: str, **kwargs: Any
-    ) -> Optional[LoginLogin]:
+    async def login(self, username: str, password: str, **kwargs: Any) -> Optional[LoginLogin]:
         query = gql(
             """
             mutation login($username: String!, $password: String!) {
@@ -5434,9 +5055,7 @@ class Client(AsyncBaseClient):
             """
         )
         variables: Dict[str, object] = {"username": username, "password": password}
-        response = await self.execute(
-            query=query, operation_name="login", variables=variables, **kwargs
-        )
+        response = await self.execute(query=query, operation_name="login", variables=variables, **kwargs)
         data = self.get_data(response)
         return Login.model_validate(data).login
 
@@ -5467,9 +5086,7 @@ class Client(AsyncBaseClient):
         data = self.get_data(response)
         return CreateToken.model_validate(data).create_token
 
-    async def delete_token(
-        self, token_id: Any, **kwargs: Any
-    ) -> DeleteTokenDeleteToken:
+    async def delete_token(self, token_id: Any, **kwargs: Any) -> DeleteTokenDeleteToken:
         query = gql(
             """
             mutation delete_token($token_id: TokenId!) {

@@ -84,11 +84,13 @@ mutation run_benchmark(
     $input: CreateRun!
     $benchmark_id: BenchmarkId!
     $sample_pct: Float
+    $with_outs: Boolean
 ) {
     run_benchmark(
         input: $input
         benchmark_id: $benchmark_id
         sample: $sample_pct
+        with_outs: $with_outs
     ) {
         id
         source_run {
