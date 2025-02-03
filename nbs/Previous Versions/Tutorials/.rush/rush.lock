@@ -1,0 +1,20 @@
+{
+  "auto3d": "github:talo/tengu-auto3d/c6580afb3151d8d37ff767d9b644816bd713174d#auto3d_tengu",
+  "auto3d_rex": "github:talo/tengu-auto3d/b84d723e1127164636f30d41f3a17260e6bb6769#auto3d_rex",
+  "delay": "github:talo/tengu-module-example/a7c51fcdebc777e57862b95f42d6c2b2e7dc7c70#delay",
+  "echo": "github:talo/tengu-module-example/a7c51fcdebc777e57862b95f42d6c2b2e7dc7c70#tengu_echo",
+  "exess_rex": "github:talo/tengu-exess/8591a73c9033d59256e0f2c43520f8901ecc8350#exess_rex",
+  "ffgen_rex": "github:talo/tengu-ffgen/756d0046b37242ac224d93277fd120c4c8144bf0#ffgen_rex",
+  "gnina_rex": "github:talo/tengu-gnina/b3dd707702a91c75b0c68131e820a353bf5b2e06#gnina_rex",
+  "hermes_energy": "github:talo/tengu-hermes/5bbaae00e81af1255858f3a1a7ff201b1bd7623b#hermes_energy",
+  "mm_cpp_rex": "github:talo/mm-framework/651a75d6cc4050bc1f90a2d2164df07c604c1d03#mm_cpp_rex",
+  "nnff_rex": "github:talo/nnff/914ac8aba89128f3bca7e7e39bcf8f5ee06e2ec8#nnff_rex",
+  "p2rank_rex": "github:talo/tengu-p2rank/1ee084e33626c0ad85a65df82fdfe15469788fb9#p2rank_rex",
+  "plip": "github:talo/tengu-plip/53dfd6735f7f3581ad6fa14407e858885e8c15fa#plip_tengu",
+  "plip_rex": "github:talo/tengu-plip/41c6ef6eec735933e52497e5eebf25a18bcc0443#plip_rex",
+  "prepare_protein_rex": "github:talo/tengu-prepare-protein/04b0336535101f9933827eb0800dc25ca3df121b#prepare_protein_rex",
+  "qsartuna_predict_rex": "github:talo/tengu-qsartuna/e5cb77552e4d9fff78a261fc6664b4040b019fc0#qsartuna_predict_rex",
+  "qsartuna_train_rex": "github:talo/tengu-qsartuna/5686c8e0ad44159a1a7245bf86d02e3994ad2cd6#qsartuna_train_rex",
+  "spam": "github:talo/tengu-module-example/a7c51fcdebc777e57862b95f42d6c2b2e7dc7c70#spam",
+  "virtual_screen_rex": "github:talo/tengu-virtualscreen/d3b7c412c68d4f3d7d2a67f5bf836f085d37851c#tengu_virtual_screen_rex"
+}

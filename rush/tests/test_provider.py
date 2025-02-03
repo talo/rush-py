@@ -33,7 +33,7 @@ async def project(provider: Provider):
 async def benchmark(
     provider: Provider,
 ) -> BenchmarksBenchmarksEdgesNode | BenchmarkBenchmark:
-    return await provider.benchmark(name="OpenFF CDK2 RMSD17 Benchmark")
+    return await provider.benchmark(name="OpenFF Protein-Ligand Binding Benchmark")
 
 
 @pytest.fixture(scope="function")
