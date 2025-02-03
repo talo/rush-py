@@ -76,6 +76,8 @@ fragment BenchmarkSubmissionFields on BenchmarkSubmission {
     }
     source_run {
         id
+        status
+        result
     }
     #status
     #error
