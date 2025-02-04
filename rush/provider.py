@@ -1620,6 +1620,14 @@ class BaseProvider:
 
         raise Exception("Module polling timed out")
 
+    async def set_default_project(self):
+        if not self.project_id:
+            p = await anext((await self.projects(tags=["default"])))
+            if p and len(p.edges) > 0:
+                self.project_id = p.edges[0].node.id
+            else:
+                self.project_id = (await self.create_project("Default Project", tags=["default"])).id
+
     class Arg(Generic[T]):
         def __init__(
             self,
@@ -1987,12 +1995,7 @@ async def build_provider_with_functions(
 
     await provider.get_module_functions(names=module_names, tags=module_tags)
     # if the user didn't  specify a project, use or create the default project
-    if not project:
-        p = await anext((await provider.projects(tags=["default"])))
-        if p and len(p.edges) > 0:
-            provider.project_id = p.edges[0].node.id
-        else:
-            provider.project_id = (await provider.create_project("Default Project", tags=["default"])).id
+    await provider.set_default_project()
 
     return provider
 
@@ -2014,6 +2017,8 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
         "tag",
         "update_modules",
         "download_module_instance_output",
+        "run_benchmark",
+        "benchmark"
     )
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
@@ -2159,13 +2164,51 @@ def build_blocking_provider_with_functions(
 
     _make_blocking(provider, built_fns)
 
-    if not project:
-        p = asyncio_run(anext(asyncio_run(provider.projects(tags=["default"]))))
-        if p and len(p.edges) > 0:
-            provider.project_id = p.edges[0].node.id
-        else:
-            provider.project_id = (
-                asyncio_run(provider.create_project("Default Project", tags=["default"]))
-            ).id
+    asyncio_run(provider.set_default_project())
+
+    return provider
+
+def build_blocking_provider(
+    workspace: str | Path | bool | None = None,
+    access_token: str | None = None,
+    url: str | None = None,
+    batch_tags: list[str] | None = None,
+    project: str | None = None,
+    module_names: list[str] | None = None,
+    module_tags: list[str] | None = None,
+    logger: logging.Logger | None = None,
+    restore_by_default: bool | None = None,
+) -> Provider:
+    """
+    Build a RushProvider with the given access token and url.
+
+    :param access_token: The access token to use.
+    :param url: The url to use.
+    :param workspace: The workspace directory to use.
+    :param batch_tags: The tags that will be placed on all runs by default.
+    :return: The built RushProvider.
+    """
+    provider = Provider(
+        access_token,
+        url,
+        workspace,
+        UUID(project) if project else None,
+        batch_tags,
+        logger,
+        restore_by_default=restore_by_default,
+    )
+    if not LOOP.is_running():
+        try:
+            event_loop_running = asyncio.get_event_loop().is_running()
+        except RuntimeError:
+            event_loop_running = False
+
+        if not event_loop_running:
+            _LOOP_THREAD = threading.Thread(target=start_background_loop, args=(LOOP,), daemon=True)
+            _LOOP_THREAD.start()
+
+    asyncio_run(provider.set_default_project())
+
+    _make_blocking(provider, {})
 
     return provider
