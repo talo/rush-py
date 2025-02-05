@@ -2,6 +2,14 @@ website:
   sidebar:
     contents:
       - index.ipynb
+      - 01_prepare_protein.ipynb
+      - 02_rxdock.ipynb
+      - section: Hackathon
+        contents:
+          - Hackathon/01_Basics.ipynb
+          - Hackathon/02_Run_Spec.ipynb
+          - Hackathon/03_Benchmarks.ipynb
+          - Hackathon/04_Language_Ref.ipynb
       - section: Previous Versions
         contents:
           - Previous Versions/01_comprehensive_guide.ipynb
