@@ -10,6 +10,7 @@ website:
           - Hackathon/02_Run_Spec.ipynb
           - Hackathon/03_Benchmarks.ipynb
           - Hackathon/04_Language_Ref.ipynb
+          - Hackathon/05_Types_Builtins_And_Utilities.ipynb
       - section: Previous Versions
         contents:
           - Previous Versions/01_comprehensive_guide.ipynb
