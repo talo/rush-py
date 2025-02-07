@@ -10,6 +10,13 @@ website:
           - Hackathon/04_Language_Ref.ipynb
           - Hackathon/05_Types_Builtins_And_Utilities.ipynb
           - Hackathon/06_Entities.ipynb
+      - section: Modules
+        contents:
+          - Modules/01_auto3d.ipynb
+          - Modules/02_p2rank.ipynb
+          - Modules/03_gnina.ipynb
+          - Modules/04_prepare_protein.ipynb
+          - Modules/06_dojo.ipynb
       - section: Previous Versions
         contents:
           - Previous Versions/01_comprehensive_guide.ipynb
@@ -37,12 +44,3 @@ website:
         contents:
           - api/doc.html
         href: api/index.html
-      - section: modules
-        contents:
-          - modules/00_modules.ipynb
-          - modules/01_auto3d.ipynb
-          - modules/02_p2rank.ipynb
-          - modules/03_gnina.ipynb
-          - modules/04_prepare_protein.ipynb
-          - modules/05_rxdock.ipynb
-          - modules/06_dojo.ipynb
