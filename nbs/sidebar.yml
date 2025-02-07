@@ -2,8 +2,6 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - 01_prepare_protein.ipynb
-      - 02_rxdock.ipynb
       - section: Hackathon
         contents:
           - Hackathon/01_Basics.ipynb
@@ -11,6 +9,7 @@ website:
           - Hackathon/03_Benchmarks.ipynb
           - Hackathon/04_Language_Ref.ipynb
           - Hackathon/05_Types_Builtins_And_Utilities.ipynb
+          - Hackathon/06_Entities.ipynb
       - section: Previous Versions
         contents:
           - Previous Versions/01_comprehensive_guide.ipynb
@@ -38,3 +37,12 @@ website:
         contents:
           - api/doc.html
         href: api/index.html
+      - section: modules
+        contents:
+          - modules/00_modules.ipynb
+          - modules/01_auto3d.ipynb
+          - modules/02_p2rank.ipynb
+          - modules/03_gnina.ipynb
+          - modules/04_prepare_protein.ipynb
+          - modules/05_rxdock.ipynb
+          - modules/06_dojo.ipynb
