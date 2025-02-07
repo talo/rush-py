@@ -16,6 +16,7 @@ website:
           - Modules/02_p2rank.ipynb
           - Modules/03_gnina.ipynb
           - Modules/04_prepare_protein.ipynb
+          - Modules/05_rxdock.ipynb
           - Modules/06_dojo.ipynb
       - section: Previous Versions
         contents:

@@ -41,6 +41,7 @@ from pydantic_core import to_jsonable_python
 from rush.graphql_client.benchmark_submission import (
     BenchmarkSubmissionMeAccountProjectBenchmarkSubmission,
 )
+from rush.graphql_client.run import RunMeAccountProjectRun
 
 from .async_utils import LOOP, asyncio_run, start_background_loop
 from .graphql_client.argument import Argument, ArgumentArgument
@@ -630,11 +631,37 @@ class BaseProvider:
         self,
         rex_fn: str,
         name: str | None = None,
+        wait_for_result: bool | None = None
     ) -> EvalEval:
         if not self.project_id:
             raise Exception("Please set up a project first with client.create_project and client.set_project")
         input = CreateRun(rex=rex_fn, name=name, project_id=self.project_id)
-        return await self.client.eval(input)
+        res = await self.client.eval(input)
+        if res.id:
+            ui_url = UI_URL_MAP[self.client.url.strip("/")]
+            print(
+                f"View your submission at {ui_url}/project/{self.project_id}/runs?selectedRunId={res.id}"
+            )
+        if wait_for_result:
+            return (await self.poll_run(res.id)).result
+        return res
+
+    async def poll_run(
+        self,
+        run_id: str,
+    ) -> RunMeAccountProjectRun:
+        run = await self.rex_run(run_id)
+        while run.status not in ["DONE", "ERROR"]:
+            await asyncio.sleep(5)
+            run = await self.rex_run(run_id)
+        return run
+
+    # get a rex run
+    async def rex_run(
+        self,
+        run_id: str,
+    ) -> RunMeAccountProjectRun:
+        return (await self.client.run(self.project_id, run_id)).account.project.run
 
     async def projects(
         self,
@@ -2018,7 +2045,8 @@ def _make_blocking(provider: BaseProvider, built_fns: dict[str, RushModuleRunner
         "update_modules",
         "download_module_instance_output",
         "run_benchmark",
-        "benchmark"
+        "benchmark",
+        "eval_rex"
     )
     # for each async function in the provider, create a blocking version
     blocking_versions: dict[str, Callable[..., Any]] = {}
