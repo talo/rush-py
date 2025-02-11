@@ -45,7 +45,6 @@ async def benchmark_submission(
         benchmark.id,
         "\\i -> (outputs i)",
         "echo submission",
-        sample=0.2,
         with_outs=True,
     )
 
@@ -56,28 +55,10 @@ async def openff_real_benchmark_submission(
 ) -> RunBenchmarkRunBenchmark:
     rex = """
 let
-    runspec = RunSpec {
-        target = 'Bullet',
-        resources = Resources {
-            storage = some 10,
-            storage_units = some "MB",
-            gpus = some 1
-        }
-    },
-
-    runspec_nogpu = RunSpec {
-        target = 'Bullet',
-        resources = Resources {
-            storage = some 10,
-            storage_units = some "MB",
-            gpus = none
-        }
-    },
-
     auto3d = \\smi ->
         let
             result = get 0 (get "Ok" (get 0 (await (get 1 (
-                auto3d_rex runspec { k = 1 } [smi]
+                auto3d_rex default_runspec_gpu { k = 1 } [smi]
             ))))),
             make_virtual_object = \\index ->
                 VirtualObject {
@@ -91,14 +72,14 @@ let
     p2rank = \\prot_conf ->
         let
             result = get 0 (await (get 1 (
-                p2rank_rex runspec_nogpu {} prot_conf
+                p2rank_rex default_runspec {} prot_conf
             )))
         in
             get "Ok" result,
 
     gnina = \\prot_conf -> \\bounding_box -> \\smol_conf ->
         let
-            result = gnina_rex runspec {} [prot_conf] [bounding_box] smol_conf [],
+            result = gnina_rex default_runspec {} [prot_conf] [bounding_box] smol_conf [],
             processed = get 0 (get "Ok" (get 0 (await (get 1 result))))
         in
             get 0 processed
@@ -131,9 +112,9 @@ in
             protein_id = protein_id protein,
             smol_id = smol_id,
             metadata = Metadata {
-                name = id input,
+                name = "",
                 description = none,
-                tags = [id input]
+                tags = []
             }
         }
     in
