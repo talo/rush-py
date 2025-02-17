@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d – rush-py</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-f3968336e263a40fc9d0504b17590479.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../../styles.scss">
+<meta property="og:title" content="Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d – rush-py">
+<meta property="og:description" content="Python SDK for interacting with the QDX Rush API and modules">
+<meta property="og:site_name" content="rush-py">
+<meta name="twitter:title" content="Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d – rush-py">
+<meta name="twitter:description" content="Python SDK for interacting with the QDX Rush API and modules">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../assets/img/logo.png" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">rush-py</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://talo.github.io/rush-py/api"> 
+<span class="menu-text">API Docs</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../Previous Versions/index.html">Previous Versions</a></li><li class="breadcrumb-item"><a href="../../Previous Versions/Tutorials/auto3d_conformer_tautomer_generation.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../../Previous Versions/Tutorials/auto3d_conformer_tautomer_generation.html">Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">rush-py</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Hackathon</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Hackathon/basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rex language basics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Hackathon/run_spec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Run Specifications</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Hackathon/benchmarks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Benchmarks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Hackathon/language_ref.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Hackathon/types_builtins_and_utilities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types, Built-in Functions, and Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Hackathon/entities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rush Entities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modules</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/auto3d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Auto3d</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/p2rank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2Rank</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/gnina.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNINA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/prepare_protein.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prepare Protein</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/rxdock.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RxDock</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Modules/dojo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dojo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../Previous Versions/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Previous Versions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/comprehensive_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comprehensive Guide</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Quickstarts</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/auto3d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Auto3D</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/gnina.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Docking with Gnina</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/gromacs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simulations with GROMACS</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/batch_run-protein_prep_async-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">prepare_protein — Run a batch protein preperation in parallel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/convert-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convert — Run a simple conversion of a PDB to the QDXF format</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/exess_rex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PLIP — Protein ligand interaction profiling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/hermes_hartree_fock_energy_calculation-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hermes — Run a basic Hartree-Fock energy calculation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Quickstarts/protein-ligand-interactions-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PLIP — Protein ligand interaction profiling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/auto3d_conformer_tautomer_generation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/batch_run_protein_prep_async.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">prepare_protein — Run a batch protein preperation in parallel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/colabfold_mmseqs2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MMseqs2 and Colabfold — sequence to 3D protein structure prediction using AlphaFold</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/convert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convert — Run a simple conversion of a PDB to the QDXF format</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/gmx_restart.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GROMACS Resume - Start a long GROMACS run that times out, and resume it</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/hermes_hartree_fock_energy_calculation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hermes — Run a basic Hartree-Fock energy calculation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../Previous Versions/Tutorials/protein_ligand_interactions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PLIP — Protein ligand interaction profiling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../api/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">api</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#complete-example" id="toc-complete-example" class="nav-link active" data-scroll-target="#complete-example">0) Complete example</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">1) Setup</a>
+  <ul class="collapse">
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports">1.0) Imports</a></li>
+  <li><a href="#configuration" id="toc-configuration" class="nav-link" data-scroll-target="#configuration">1.1) Configuration</a></li>
+  <li><a href="#build-your-client" id="toc-build-your-client" class="nav-link" data-scroll-target="#build-your-client">1.2) Build your client</a></li>
+  </ul></li>
+  <li><a href="#preparation" id="toc-preparation" class="nav-link" data-scroll-target="#preparation">2) Preparation</a></li>
+  <li><a href="#quantum-energy-calculation" id="toc-quantum-energy-calculation" class="nav-link" data-scroll-target="#quantum-energy-calculation">3) Quantum energy calculation</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/talo/rush-py/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../Previous Versions/index.html">Previous Versions</a></li><li class="breadcrumb-item"><a href="../../Previous Versions/Tutorials/auto3d_conformer_tautomer_generation.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../../Previous Versions/Tutorials/auto3d_conformer_tautomer_generation.html">Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>In this notebook, we’ll perform a hermes energy calculation on a ligand derived from a smiles string</p>
+<section id="complete-example" class="level1">
+<h1>0) Complete example</h1>
+<p>See the <a href="../../Quickstarts/auto3d_conformer_tautomer_generation-sample.ipynb">sample notebook</a> for a complete demonstration.</p>
+</section>
+<section id="setup" class="level1">
+<h1>1) Setup</h1>
+<section id="imports" class="level2">
+<h2 class="anchored" data-anchor-id="imports">1.0) Imports</h2>
+<div id="de35042a-572b-4c97-9ed2-96d192ae59cd" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tarfile</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pdbtools <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> py3Dmol</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> rush</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="configuration" class="level2">
+<h2 class="anchored" data-anchor-id="configuration">1.1) Configuration</h2>
+<div id="1e25927d-d93d-4380-8e02-a025530504bb" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>EXPERIMENT <span class="op">=</span> <span class="st">"tengu-py-auto3d_hermes"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>LIGAND_SMILES <span class="op">=</span> <span class="st">"CC(=O)OC1=CC=CC=C1C(=O)O "</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>LIGAND <span class="op">=</span> <span class="st">"ASPRIN"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>TAGS <span class="op">=</span> [<span class="st">"qdx"</span>, EXPERIMENT, LIGAND]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="build-your-client" class="level2">
+<h2 class="anchored" data-anchor-id="build-your-client">1.2) Build your client</h2>
+<div id="c588f092-d7db-4128-b21f-8f5cfa00f65b" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get our client, for calling modules and using the rush API</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> rush.build_blocking_provider_with_functions(batch_tags<span class="op">=</span>TAGS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="preparation" class="level1">
+<h1>2) Preparation</h1>
+<p>We want to convert our raw files into prepared qdxfs, with correct charges and missing residues filled</p>
+<div id="60cd0e23-f6ea-434c-9593-799c8ae4204c" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">help</span>(client.auto3d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Help on function auto3d in module rush.provider:
+
+auto3d(*args: *tuple[RushObject[bytes], str, Record], target: 'Target | None' = None, resources: 'Resources | None' = None, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -&gt; tuple[RushObject[bytes], RushObject[list[Record]]]
+    Generate 3D conformers from SMILES strings and other inputs
+
+    Module version:
+    `github:talo/tengu-auto3d/19d66c0f29a1c204b0149af0000983874675a272#auto3d_tengu`
+
+    QDX Type Description:
+
+        molecule_file: Object[@$Bytes];
+        molecule_file_type: string;
+        options: Auto3dOptions {
+            optimizing_engine: Auto3dOptimizingEngines[ANI2x | ANI2xt | AIMNET]?,
+            enumerate_isomer: bool?,
+            batchsize_atoms: u32?,
+            max_confs: u32?,
+            use_gpu: bool?,
+            enumerate_tautomer: bool?,
+            verbose: bool?,
+            memory: u32?,
+            patience: u32?,
+            capacity: u32?,
+            gpu_idx: [u32]?,
+            k: i32?,
+            opt_steps: u32?,
+            window: f32?,
+            mpi_np: u32?,
+            job_name: string?,
+            threshold: f32?,
+            convergence_threshold: f32?
+        }
+        -&gt;
+        conformer_sdf: Object {format: ObjectFormat[json | bin]?, path: @$SDF, size: u32};
+        conformers: Object[[Conformer]]
+
+
+    :param molecule_file: The input molecules as a file; either one SMILES string per line, or an SDF
+    :param molecule_file_type: The string 'smi' or 'sdf', depending on the input type
+    :param options: A dict with options to pass; see auto3d docs for details
+    :return conformer_sdf: A sdf file containing the ligand(s)'s conformers
+    :return conformers: A vec of qdxf conformers
+</code></pre>
+</div>
+</div>
+<div id="1d8f5da1-9bf1-499b-86be-94327de03353" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ligand_path <span class="op">=</span> client.workspace <span class="op">/</span> <span class="st">"aspirin.smiles"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(ligand_path, <span class="st">"w"</span>) <span class="im">as</span> ligand_file:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>LIGAND_SMILES<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>LIGAND_SMILES<span class="sc">}</span><span class="ss">"</span>, <span class="bu">file</span><span class="op">=</span>ligand_file)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>(conformer_sdf, conformer_qdxf) <span class="op">=</span> client.auto3d(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    ligand_path,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"smi"</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"k"</span>: <span class="dv">5</span>, <span class="st">"use_gpu"</span>: <span class="va">True</span>},</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    resources<span class="op">=</span>{<span class="st">"gpus"</span>: <span class="dv">1</span>, <span class="st">"storage"</span>: <span class="st">"5"</span>, <span class="st">"storage_units"</span>: <span class="st">"GB"</span>},</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>datetime<span class="sc">.</span>now()<span class="sc">.</span>time()<span class="sc">}</span><span class="ss"> | Running ligand preparation!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>17:26:40.429981 | Running ligand preparation!</code></pre>
+</div>
+</div>
+<div id="fd5b5747-7c8e-4be6-806e-d153727508c0" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>conformer_qdxf.source</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>UUID('7fbbd6f9-2b3c-4a45-9e07-51f557eb801b')</code></pre>
+</div>
+</div>
+<div id="25809836-bb56-4b3b-bb71-3d61159f10b5" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>conformer_sdf.value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="7b43c296-425b-4c97-adbb-55db9288b01c" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    conformer_sdf.download(filename<span class="op">=</span><span class="st">"01_prepared_ligand.sdf"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">FileExistsError</span>:</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># we will raise an error if you try to overwrite an existing file; you can</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># force the file to overwrite by passing an absolute filepath instead</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">pass</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2024-05-07 17:26:40,721 - rush - INFO - Argument 62e4339b-546a-4335-9ca8-52df95c64768 is now ModuleInstanceStatus.RESOLVING
+2024-05-07 17:26:44,258 - rush - INFO - Argument 62e4339b-546a-4335-9ca8-52df95c64768 is now ModuleInstanceStatus.ADMITTED
+2024-05-07 17:26:47,782 - rush - INFO - Argument 62e4339b-546a-4335-9ca8-52df95c64768 is now ModuleInstanceStatus.DISPATCHED
+2024-05-07 17:26:49,010 - rush - INFO - Argument 62e4339b-546a-4335-9ca8-52df95c64768 is now ModuleInstanceStatus.RUNNING
+2024-05-07 17:27:24,581 - rush - INFO - Argument 62e4339b-546a-4335-9ca8-52df95c64768 is now ModuleInstanceStatus.AWAITING_UPLOAD</code></pre>
+</div>
+</div>
+<p>You should visualize your prepared ligand to spot check any issues</p>
+<div id="df1c95e9-59e2-48a9-a478-b6efb638fbe0" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>view <span class="op">=</span> py3Dmol.view()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(client.workspace <span class="op">/</span> <span class="st">"objects"</span> <span class="op">/</span> <span class="st">"01_prepared_ligand.sdf"</span>, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    view.addModel(f.read(), <span class="st">"sdf"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    view.setStyle({<span class="st">"stick"</span>: {}})</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    view.zoomTo()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    view.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="3dmolviewer_17150740570923462" style="position: relative; width: 640px; height: 480px;">
+        <p id="3dmolwarning_17150740570923462" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
+        </div>
+<script>
+
+var loadScriptAsync = function(uri){
+  return new Promise((resolve, reject) => {
+    //this is to ignore the existence of requirejs amd
+    var savedexports, savedmodule;
+    if (typeof exports !== 'undefined') savedexports = exports;
+    else exports = {}
+    if (typeof module !== 'undefined') savedmodule = module;
+    else module = {}
+
+    var tag = document.createElement('script');
+    tag.src = uri;
+    tag.async = true;
+    tag.onload = () => {
+        exports = savedexports;
+        module = savedmodule;
+        resolve();
+    };
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+});
+};
+
+if(typeof $3Dmolpromise === 'undefined') {
+$3Dmolpromise = null;
+  $3Dmolpromise = loadScriptAsync('https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js');
+}
+
+var viewer_17150740570923462 = null;
+var warn = document.getElementById("3dmolwarning_17150740570923462");
+if(warn) {
+    warn.parentNode.removeChild(warn);
+}
+$3Dmolpromise.then(function() {
+viewer_17150740570923462 = $3Dmol.createViewer(document.getElementById("3dmolviewer_17150740570923462"),{backgroundColor:"white"});
+viewer_17150740570923462.zoomTo();
+    viewer_17150740570923462.addModel("CC(=O)OC1=CC=CC=C1C(=O)O\n     RDKit          3D\n\n 21 21  0  0  0  0  0  0  0  0999 V2000\n    3.3787    0.4985   -0.2050 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.0682    0.1100    0.3990 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.7280    0.2615    1.5341 O   0  0  0  0  0  0  0  0  0  0  0  0\n    1.2682   -0.4801   -0.5451 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.0529   -0.6836   -0.2097 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.4564   -1.9869    0.0166 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.7813   -2.2554    0.3117 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.7032   -1.2207    0.3831 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.2934    0.0789    0.1495 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.9642    0.3714   -0.1557 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.5396    1.7706   -0.4298 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.5485    2.1271   -0.8016 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.5379    2.6566   -0.2262 O   0  0  0  0  0  0  0  0  0  0  0  0\n    4.0837    0.7310    0.5851 H   0  0  0  0  0  0  0  0  0  0  0  0\n    3.7569   -0.2997   -0.8377 H   0  0  0  0  0  0  0  0  0  0  0  0\n    3.2208    1.3786   -0.8246 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.2771   -2.7773   -0.0357 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.0886   -3.2748    0.4922 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.7372   -1.4217    0.6194 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.0029    0.8886    0.2045 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.1729    3.5275   -0.4243 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0\n  2  3  2  0\n  2  4  1  0\n  4  5  1  0\n  5  6  2  0\n  6  7  1  0\n  7  8  2  0\n  8  9  1  0\n  9 10  2  0\n 10 11  1  0\n 11 12  2  0\n 11 13  1  0\n 10  5  1  0\n  1 14  1  0\n  1 15  1  0\n  1 16  1  0\n  6 17  1  0\n  7 18  1  0\n  8 19  1  0\n  9 20  1  0\n 13 21  1  0\nM  END\n>  <ID>  (1) \nCC(=O)OC1=CC=CC=C1C(=O)O_0_24\n\n>  <E_tot>  (1) \n-649.1534615206007\n\n>  <fmax>  (1) \n0.0018965064082294703\n\n>  <Converged>  (1) \nTrue\n\n>  <E_rel(kcal/mol)>  (1) \n0.0\n\n$$$$\nCC(=O)OC1=CC=CC=C1C(=O)O\n     RDKit          3D\n\n 21 21  0  0  0  0  0  0  0  0999 V2000\n   -3.4033    0.2818   -0.1908 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.0729   -0.1280    0.3529 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.7579   -0.1997    1.5029 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.2202   -0.4422   -0.6742 O   0  0  0  0  0  0  0  0  0  0  0  0\n    0.1100   -0.6148   -0.3591 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6179   -1.8988   -0.4378 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.9578   -2.1259   -0.1770 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.7904   -1.0697    0.1648 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.2768    0.2120    0.2346 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.9312    0.4645   -0.0312 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.3968    1.8521    0.0158 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.7022    2.2052   -0.3260 O   0  0  0  0  0  0  0  0  0  0  0  0\n    1.3043    2.7338    0.4866 O   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.2966    1.2580   -0.6586 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.7361   -0.4228   -0.9485 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.1202    0.3398    0.6202 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.0469   -2.7084   -0.6983 H   0  0  0  0  0  0  0  0  0  0  0  0\n    2.3466   -3.1317   -0.2356 H   0  0  0  0  0  0  0  0  0  0  0  0\n    3.8352   -1.2402    0.3761 H   0  0  0  0  0  0  0  0  0  0  0  0\n    2.9164    1.0381    0.5006 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.8732    3.5969    0.4824 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0\n  2  3  2  0\n  2  4  1  0\n  4  5  1  0\n  5  6  2  0\n  6  7  1  0\n  7  8  2  0\n  8  9  1  0\n  9 10  2  0\n 10 11  1  0\n 11 12  2  0\n 11 13  1  0\n 10  5  1  0\n  1 14  1  0\n  1 15  1  0\n  1 16  1  0\n  6 17  1  0\n  7 18  1  0\n  8 19  1  0\n  9 20  1  0\n 13 21  1  0\nM  END\n>  <ID>  (2) \nCC(=O)OC1=CC=CC=C1C(=O)O_0_6\n\n>  <E_tot>  (2) \n-649.1534603657176\n\n>  <fmax>  (2) \n0.0028993531595915556\n\n>  <Converged>  (2) \nTrue\n\n>  <E_rel(kcal/mol)>  (2) \n0.0007247000962815054\n\n$$$$\n","sdf");
+    viewer_17150740570923462.setStyle({"stick": {}});
+    viewer_17150740570923462.zoomTo();
+viewer_17150740570923462.render();
+});
+</script>
+</div>
+</div>
+</section>
+<section id="quantum-energy-calculation" class="level1">
+<h1>3) Quantum energy calculation</h1>
+<p>Finally, we submit our fragmented protein for quantum energy calculation, with custom configuration.</p>
+<div id="f61f6890-a2b5-4015-8c6a-c0b244ae88e3" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">help</span>(client.hermes_energy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Help on function hermes_energy in module rush.provider:
+
+hermes_energy(*args: *tuple[RushObject[Record], Record, Optional[Record], Optional[Record], Optional[Record], Optional[Record]], target: 'Target | None' = None, resources: 'Resources | None' = None, tags: 'list[str] | None' = None, restore: 'bool | None' = None) -&gt; tuple[RushObject[Record]]
+    Runs a HERMES energy calculation given a topology, and optionally model and keyword configurations.
+    Will use the default model and keywords if none are provided
+
+    Module version:
+    `github:talo/tengu-prelude/3d11b61a2092fbec721966ffa99743f8bfabe6c2#hermes_energy`
+
+    QDX Type Description:
+
+        input: Object[Conformer];
+        system: System {
+            teams_per_node: u32?,
+            oversubscribe_gpus: bool?,
+            gpus_per_team: u32?,
+            max_gpu_memory_mb: u32?
+        };
+        model: Model {
+            basis: string,
+            force_cartesian_basis_sets: bool?,
+            standard_orientation: string?,
+            aux_basis: string?
+        }?;
+        scf keywords: SCF {
+            max_diis_history_length: u32?,
+            convergence_threshold: f64?,
+            batch_size: u32?,
+            max_iters: u32?,
+            density_threshold: f64?,
+            convergence_metric: string?,
+            density_basis_set_projection_fallback_enabled: bool?,
+            use_ri: bool?
+        }?;
+        frag keywords: Frag {
+            reference_fragment: u32?,
+            cutoff_type: CutoffType[Centroid | ClosestPair]?,
+            level: FragLevel[Monomer | Dimer | Trimer | Tetramer],
+            included_fragments: [u32]?,
+            cutoffs: FragCutoffs {tetramer: f64?, dimer: f64?, trimer: f64?}?
+        }?;
+        guess keywords: Guess {
+            ssfd_scf_keywords: GuessSCF {
+                density_basis_set_projection_fallback_enabled: bool?,
+                use_ri: bool?,
+                max_iters: u32?,
+                convergence_threshold: f64?,
+                convergence_metric: ConvergenceMetric[Energy | DIIS | Density]?,
+                batch_size: u32?,
+                max_diis_history_length: u32?,
+                density_threshold: f64?
+            }?,
+            bsp_scf_keywords: SCF {
+                density_basis_set_projection_fallback_enabled: bool?,
+                convergence_metric: string?,
+                convergence_threshold: f64?,
+                max_iters: u32?,
+                batch_size: u32?,
+                use_ri: bool?,
+                max_diis_history_length: u32?,
+                density_threshold: f64?
+            }?,
+            ssfd_target_size: u32?,
+            bsp: bool?,
+            ssfd_only_converge_in_bsp_basis: bool?,
+            smd: bool?,
+            ssfd: bool?,
+            bsp_basis: string?
+        }?
+        -&gt;
+        energy: Object {
+            size: u32,
+            format: ObjectFormat[json | bin]?,
+            path: @QMMBE {
+                reference_fragment: u32?,
+                expanded_hf_gradients: [f64]?,
+                expanded_mp2_gradients: [f64]?,
+                expanded_density: Tensorf64 {
+                    data: [f64],
+                    shape: [u32],
+                    kind: TensorKind[Dense | SquareSymmetric | LowerTriangular]
+                }?,
+                expanded_mp2_os_correction: f64?,
+                expanded_mp2_ss_correction: f64?,
+                distance_metric: CutoffType[Centroid | ClosestPair]?,
+                nmers: [[Nmer {
+                    delta_mp2_os_correction: f64?,
+                    delta_hf_energy: f64?,
+                    mulliken_charges: [f64]?,
+                    h_caps: [u32]?,
+                    hf_gradients: [f64]?,
+                    coeffs_initial: Tensorf64 {
+                        kind: TensorKind[Dense | SquareSymmetric | LowerTriangular],
+                        shape: [u32],
+                        data: [f64]
+                    }?,
+                    mp2_gradients: [f64]?,
+                    hf_energy: f64?,
+                    fragment_distance: f64?,
+                    mp2_os_correction: f64?,
+                    mp2_ss_correction: f64?,
+                    delta_mp2_ss_correction: f64?,
+                    overlap: Tensorf64 {
+                        shape: [u32],
+                        kind: TensorKind[Dense | SquareSymmetric | LowerTriangular],
+                        data: [f64]
+                    }?,
+                    h_core: Tensorf64 {
+                        data: [f64],
+                        kind: TensorKind[Dense | SquareSymmetric | LowerTriangular],
+                        shape: [u32]
+                    }?,
+                    num_iters: u32,
+                    bond_orders: [[f64]]?,
+                    fragments: [u32],
+                    fock: Tensorf64 {
+                        data: [f64],
+                        kind: TensorKind[Dense | SquareSymmetric | LowerTriangular],
+                        shape: [u32]
+                    }?,
+                    num_basis_fns: u32,
+                    density: Tensorf64 {
+                        data: [f64],
+                        shape: [u32],
+                        kind: TensorKind[Dense | SquareSymmetric | LowerTriangular]
+                    }?,
+                    molecular_orbital_energies: [f64]?,
+                    coeffs_final: Tensorf64 {
+                        shape: [u32],
+                        data: [f64],
+                        kind: TensorKind[Dense | SquareSymmetric | LowerTriangular]
+                    }?
+                }]],
+                expanded_hf_energy: f64?
+            }
+        }
+
+
+    :param input: Conformer with topology
+    :param system: system resources configuration
+    :param model: Optional Model configuration
+    :param scf keywords: Optional Self Consistent Field configuration
+    :param frag keywords: Optional Fragmentation configuration
+    :param guess keywords: Optional initial guess configuration
+    :return energy: energy results
+</code></pre>
+</div>
+</div>
+<div id="d049185e-f584-41c7-a52f-01cef8c68c15" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>HERMES_RESOURCES <span class="op">=</span> {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gpus"</span>: <span class="dv">1</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"storage"</span>: <span class="dv">100</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"storage_units"</span>: <span class="st">"MB"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"walltime"</span>: <span class="dv">60</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="904cf300-232d-4e4d-8b14-24b628445f02" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(conformer,) <span class="op">=</span> client.pick_conformer(conformer_qdxf, <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="921a889d-07e7-4b70-9962-59839a4a133d" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>conformer_out <span class="op">=</span> json.load(<span class="bu">open</span>(conformer.download(overwrite<span class="op">=</span><span class="va">True</span>), <span class="st">"r"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2024-05-07 17:27:37,403 - rush - INFO - Argument eacda067-1323-4558-9762-54379137272e is now ModuleInstanceStatus.RESOLVING
+2024-05-07 17:27:40,897 - rush - INFO - Argument eacda067-1323-4558-9762-54379137272e is now ModuleInstanceStatus.ADMITTED
+2024-05-07 17:27:45,595 - rush - INFO - Argument eacda067-1323-4558-9762-54379137272e is now ModuleInstanceStatus.DISPATCHED
+2024-05-07 17:27:46,748 - rush - INFO - Argument eacda067-1323-4558-9762-54379137272e is now ModuleInstanceStatus.AWAITING_UPLOAD</code></pre>
+</div>
+</div>
+<div id="ff8b364e-e19b-4784-b720-85b2edd36d23" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(hermes_energy,) <span class="op">=</span> client.hermes_energy(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    conformer,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    {},</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"method"</span>: <span class="st">"RestrictedRIMP2"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"basis"</span>: <span class="st">"cc-pVDZ"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"aux_basis"</span>: <span class="st">"cc-pVDZ-RIFIT"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"force_cartesian_basis_sets"</span>: <span class="va">True</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"standard_orientation"</span>: <span class="st">"FullSystem"</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">None</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="va">None</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="va">None</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    resources<span class="op">=</span>HERMES_RESOURCES,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="85a80c21-81cf-4176-80af-4c86434ee967" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>json.load(hermes_energy.download().<span class="bu">open</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2024-05-07 17:27:59,001 - rush - INFO - Argument 1c0384f2-f487-4125-896f-17e294544dd9 is now ModuleInstanceStatus.RESOLVING
+2024-05-07 17:28:01,352 - rush - INFO - Argument 1c0384f2-f487-4125-896f-17e294544dd9 is now ModuleInstanceStatus.ADMITTED
+2024-05-07 17:28:03,722 - rush - INFO - Argument 1c0384f2-f487-4125-896f-17e294544dd9 is now ModuleInstanceStatus.DISPATCHED
+2024-05-07 17:28:04,951 - rush - INFO - Argument 1c0384f2-f487-4125-896f-17e294544dd9 is now ModuleInstanceStatus.RUNNING
+2024-05-07 17:28:17,103 - rush - INFO - Argument 1c0384f2-f487-4125-896f-17e294544dd9 is now ModuleInstanceStatus.AWAITING_UPLOAD</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>{'method': 'RestrictedRIMP2',
+ 'distance_metric': None,
+ 'nmers': [[{'fragments': [0],
+    'density': None,
+    'fock': None,
+    'overlap': None,
+    'h_core': None,
+    'coeffs_initial': None,
+    'coeffs_final': None,
+    'molecular_orbital_energies': None,
+    'hf_gradients': None,
+    'mp2_gradients': None,
+    'hf_energy': -645.0202122381007,
+    'mp2_ss_correction': -0.5339090219971997,
+    'mp2_os_correction': -1.4322158086920598,
+    'delta_hf_energy': None,
+    'delta_mp2_ss_correction': None,
+    'delta_mp2_os_correction': None,
+    'mulliken_charges': None,
+    'fragment_distance': None,
+    'bond_orders': None,
+    'h_caps': None,
+    'num_iters': 9,
+    'num_basis_fns': 235}]],
+ 'reference_fragment': None,
+ 'expanded_hf_energy': -645.0202122381007,
+ 'expanded_mp2_ss_correction': -0.5339090219971997,
+ 'expanded_mp2_os_correction': -1.4322158086920598,
+ 'expanded_density': None,
+ 'expanded_hf_gradients': None,
+ 'expanded_mp2_gradients': None}</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/talo\.github\.io\/rush-py");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/talo/rush-py/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,2697 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Dojo – rush-py</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-86daaaaad7353f9cc0c554efc1dd6d94.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f3968336e263a40fc9d0504b17590479.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.scss">
+<meta property="og:title" content="Dojo – rush-py">
+<meta property="og:description" content="Python SDK for interacting with the QDX Rush API and modules">
+<meta property="og:site_name" content="rush-py">
+<meta name="twitter:title" content="Dojo – rush-py">
+<meta name="twitter:description" content="Python SDK for interacting with the QDX Rush API and modules">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/img/logo.png" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">rush-py</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://talo.github.io/rush-py/api"> 
+<span class="menu-text">API Docs</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../Modules/intro.html">Modules</a></li><li class="breadcrumb-item"><a href="../Modules/dojo.html">Dojo</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">rush-py</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Hackathon</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Hackathon/basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rex language basics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Hackathon/run_spec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Run Specifications</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Hackathon/benchmarks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Benchmarks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Hackathon/language_ref.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Hackathon/types_builtins_and_utilities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types, Built-in Functions, and Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Hackathon/entities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rush Entities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modules</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/auto3d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Auto3d</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/p2rank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">P2Rank</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/gnina.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GNINA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/prepare_protein.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prepare Protein</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/rxdock.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RxDock</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Modules/dojo.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Dojo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../Previous Versions/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Previous Versions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/comprehensive_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comprehensive Guide</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Quickstarts</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/auto3d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Auto3D</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/gnina.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Docking with Gnina</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/gromacs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simulations with GROMACS</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/batch_run-protein_prep_async-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">prepare_protein — Run a batch protein preperation in parallel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/convert-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convert — Run a simple conversion of a PDB to the QDXF format</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/exess_rex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PLIP — Protein ligand interaction profiling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/hermes_hartree_fock_energy_calculation-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hermes — Run a basic Hartree-Fock energy calculation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Quickstarts/protein-ligand-interactions-sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PLIP — Protein ligand interaction profiling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/auto3d_conformer_tautomer_generation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Run a basic Hermes Hartree-Fock energy calculation on ligand conformers from Auto3d</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/batch_run_protein_prep_async.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">prepare_protein — Run a batch protein preperation in parallel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/colabfold_mmseqs2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MMseqs2 and Colabfold — sequence to 3D protein structure prediction using AlphaFold</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/convert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convert — Run a simple conversion of a PDB to the QDXF format</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/gmx_restart.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GROMACS Resume - Start a long GROMACS run that times out, and resume it</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/hermes_hartree_fock_energy_calculation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hermes — Run a basic Hartree-Fock energy calculation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../Previous Versions/Tutorials/protein_ligand_interactions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PLIP — Protein ligand interaction profiling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../api/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">api</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#module-specification" id="toc-module-specification" class="nav-link active" data-scroll-target="#module-specification">Module Specification</a>
+  <ul class="collapse">
+  <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
+  <li><a href="#outputs" id="toc-outputs" class="nav-link" data-scroll-target="#outputs">Outputs</a></li>
+  </ul></li>
+  <li><a href="#options" id="toc-options" class="nav-link" data-scroll-target="#options">Options</a>
+  <ul class="collapse">
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
+  <li><a href="#qmregion" id="toc-qmregion" class="nav-link" data-scroll-target="#qmregion">QMRegion</a></li>
+  <li><a href="#qmregionentry" id="toc-qmregionentry" class="nav-link" data-scroll-target="#qmregionentry">QMRegionEntry</a></li>
+  <li><a href="#simulation" id="toc-simulation" class="nav-link" data-scroll-target="#simulation">Simulation</a></li>
+  <li><a href="#boxvectors" id="toc-boxvectors" class="nav-link" data-scroll-target="#boxvectors">BoxVectors</a></li>
+  <li><a href="#simulation-stage" id="toc-simulation-stage" class="nav-link" data-scroll-target="#simulation-stage">Simulation Stage</a></li>
+  <li><a href="#minimisationparameters" id="toc-minimisationparameters" class="nav-link" data-scroll-target="#minimisationparameters">MinimisationParameters</a></li>
+  <li><a href="#nvtparameters" id="toc-nvtparameters" class="nav-link" data-scroll-target="#nvtparameters">NvtParameters</a></li>
+  <li><a href="#nptparameters" id="toc-nptparameters" class="nav-link" data-scroll-target="#nptparameters">NptParameters</a></li>
+  <li><a href="#solvationparameters" id="toc-solvationparameters" class="nav-link" data-scroll-target="#solvationparameters">SolvationParameters</a></li>
+  <li><a href="#metadynamics" id="toc-metadynamics" class="nav-link" data-scroll-target="#metadynamics">Metadynamics</a></li>
+  <li><a href="#mtdheight" id="toc-mtdheight" class="nav-link" data-scroll-target="#mtdheight">MTDHeight</a></li>
+  <li><a href="#constant" id="toc-constant" class="nav-link" data-scroll-target="#constant">Constant</a></li>
+  <li><a href="#welltempered" id="toc-welltempered" class="nav-link" data-scroll-target="#welltempered">WellTempered</a></li>
+  <li><a href="#mtdcvparameters" id="toc-mtdcvparameters" class="nav-link" data-scroll-target="#mtdcvparameters">MTDCVParameters</a></li>
+  <li><a href="#cv" id="toc-cv" class="nav-link" data-scroll-target="#cv">CV</a></li>
+  <li><a href="#bond" id="toc-bond" class="nav-link" data-scroll-target="#bond">Bond</a></li>
+  <li><a href="#dihedral" id="toc-dihedral" class="nav-link" data-scroll-target="#dihedral">Dihedral</a></li>
+  <li><a href="#centroid" id="toc-centroid" class="nav-link" data-scroll-target="#centroid">Centroid</a></li>
+  <li><a href="#indices" id="toc-indices" class="nav-link" data-scroll-target="#indices">Indices</a></li>
+  <li><a href="#residues" id="toc-residues" class="nav-link" data-scroll-target="#residues">Residues</a></li>
+  <li><a href="#files" id="toc-files" class="nav-link" data-scroll-target="#files">Files</a></li>
+  <li><a href="#rmsd" id="toc-rmsd" class="nav-link" data-scroll-target="#rmsd">RMSD</a></li>
+  <li><a href="#biaspotential" id="toc-biaspotential" class="nav-link" data-scroll-target="#biaspotential">BiasPotential</a></li>
+  <li><a href="#bondlinearparameters" id="toc-bondlinearparameters" class="nav-link" data-scroll-target="#bondlinearparameters">BondLinearParameters</a></li>
+  <li><a href="#rmsdexpparameters" id="toc-rmsdexpparameters" class="nav-link" data-scroll-target="#rmsdexpparameters">RmsdExpParameters</a></li>
+  <li><a href="#movingharmonicbondparameters" id="toc-movingharmonicbondparameters" class="nav-link" data-scroll-target="#movingharmonicbondparameters">MovingHarmonicBondParameters</a></li>
+  <li><a href="#harmoniccvparameters" id="toc-harmoniccvparameters" class="nav-link" data-scroll-target="#harmoniccvparameters">HarmonicCVParameters</a></li>
+  <li><a href="#biasschedule" id="toc-biasschedule" class="nav-link" data-scroll-target="#biasschedule">BiasSchedule</a></li>
+  <li><a href="#trigger" id="toc-trigger" class="nav-link" data-scroll-target="#trigger">Trigger</a></li>
+  <li><a href="#terminationcondition" id="toc-terminationcondition" class="nav-link" data-scroll-target="#terminationcondition">TerminationCondition</a></li>
+  <li><a href="#frames" id="toc-frames" class="nav-link" data-scroll-target="#frames">Frames</a></li>
+  <li><a href="#trajectory" id="toc-trajectory" class="nav-link" data-scroll-target="#trajectory">Trajectory</a></li>
+  <li><a href="#residuespecification" id="toc-residuespecification" class="nav-link" data-scroll-target="#residuespecification">ResidueSpecification</a></li>
+  <li><a href="#qdxfexport" id="toc-qdxfexport" class="nav-link" data-scroll-target="#qdxfexport">QDXFExport</a></li>
+  </ul></li>
+  <li><a href="#function-usage" id="toc-function-usage" class="nav-link" data-scroll-target="#function-usage">Function Usage</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/talo/rush-py/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../Modules/intro.html">Modules</a></li><li class="breadcrumb-item"><a href="../Modules/dojo.html">Dojo</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Dojo</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="module-specification" class="level2">
+<h2 class="anchored" data-anchor-id="module-specification">Module Specification</h2>
+<p>The module takes an <code>dict</code> of module-specific options, a <code>[TRObject]</code> representing the molecules to include in the simulation, and an <code>[Object&lt;XML&gt;]</code> that corresponds to additional force field parameters used for simulating smols accurately. These XML files can be generated using the ffgen module.</p>
+<section id="inputs" class="level3">
+<h3 class="anchored" data-anchor-id="inputs">Inputs</h3>
+<ul>
+<li>options: <code>dict</code></li>
+<li>trcs: <code>[TRObject]</code></li>
+<li>force_fields: <code>[Object&lt;XML&gt;]</code> - one for each smol appearing in the input TRCObjects</li>
+</ul>
+</section>
+<section id="outputs" class="level3">
+<h3 class="anchored" data-anchor-id="outputs">Outputs</h3>
+<ul>
+<li>final_frame_trc: <code>[TRObject]</code> - representing the state of each input on the simulation’s final frame</li>
+<li>frames: <code>Object&lt;[dict]&gt;</code> - stores the requested data for the output frames of the simulation as per the configuration</li>
+</ul>
+</section>
+</section>
+<section id="options" class="level2">
+<h2 class="anchored" data-anchor-id="options">Options</h2>
+<p>Dojo has a lot of options!</p>
+<p>The following documents the structure of the config dict along with what each field represents and possible default values.</p>
+<p>This markdown file is broken down into sections, one for each non-trivial type defined. Within a section for a given type, there will be a schematic description of the structure of the type, followed by a description of each of the fields. In the description of the fields, there will be given its name, type, default value (if any) and a short description. The type can either be a basic type (<code>int</code>, <code>float</code>, <code>bool</code>, <code>list&lt;T&gt;</code>) or a non-trivial type, in which case the name of the type will be written in CamelCase and will have a corresponding section in this file. If a default for a field is given, no value need be provided for this field, and if none is provided it will assume the value of the default.</p>
+<p>Any parameters marked with an asterisk (*) are either unused, unimplemented, broken, or not relevant when called as a module.</p>
+<section id="parameters" class="level3">
+<h3 class="anchored" data-anchor-id="parameters">Parameters</h3>
+<p>The top level structure that is passed to Dojo.</p>
+<pre><code>Parameters
+ ├ num_gpus
+ ├ single_frame_serialise
+ ├ nonbonded_method
+ ├ nonbonded_cutoff_nm
+ ├ constraints
+ ├ remove_cm_motion
+ ├ generate_ff_indices
+ ├ force_fields
+ ├ qm_region
+ │ ├ engine
+ │ └ regions
+ ├ qm_cutoff_distance_ang
+ ├ simulation
+ │ ├ step_size_ps
+ │ ├ periodic_box_vectors_nm
+ │ │ ├ v1
+ │ │ ├ v2
+ │ │ └ v3
+ │ └ stages
+ ├ implicit_solvent
+ ├ solvation
+ ├ metadynamics
+ ├ bias_potentials
+ ├ bias_schedule
+ │ ├ active_potentials
+ │ └ triggers
+ ├ termination_condition
+ │ ├ tail_steps
+ │ └ bonds
+ ├ frames
+ │ ├ start
+ │ ├ stop
+ │ └ interval
+ ├ trajectory
+ │ ├ interval
+ │ ├ minimisation
+ │ ├ forces
+ │ ├ info
+ │ ├ windowed
+ │ ├ window_size
+ │ └ residues
+ ├ save_final_trcs
+ ├ save_final_velocities
+ └ qdxf_export</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 16%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>num_gpus*</td>
+<td>int</td>
+<td>1</td>
+<td>Number of GPUs to use for the calculation. When called as a module, this is ignored; please use the Resources struct instead.</td>
+</tr>
+<tr class="even">
+<td>single_frame_serialise*</td>
+<td>bool</td>
+<td>false</td>
+<td>Save the positions and forces of the initial system in a special format. Not currently wired up to the module.</td>
+</tr>
+<tr class="odd">
+<td>nonbonded_method</td>
+<td>string</td>
+<td>“NoCutoff”</td>
+<td>Which cutoff method to use for nonbonded forces. Options are “NoCutoff”, “CutoffNonPeriodic”, “CutoffPeriodic”, “Ewald”, “PME”, “LJPME”.</td>
+</tr>
+<tr class="even">
+<td>nonbonded_cutoff_nm</td>
+<td>float</td>
+<td>1.0</td>
+<td>Cutoff for the nonbonded forces, in nm.</td>
+</tr>
+<tr class="odd">
+<td>constraints</td>
+<td>string</td>
+<td>“None”</td>
+<td>Which constraints to use. Options are “None”, “HBonds”, “AllBonds”, “HAngles”.</td>
+</tr>
+<tr class="even">
+<td>remove_cm_motion</td>
+<td>bool</td>
+<td>true</td>
+<td>Whether or not to remove the centre of mass motion.</td>
+</tr>
+<tr class="odd">
+<td>generate_ff_indices*</td>
+<td>list&lt;int&gt;</td>
+<td>[]</td>
+<td>Which input files to generate FF parameters for. Currently not supported.</td>
+</tr>
+<tr class="even">
+<td>force_fields</td>
+<td>list&lt;string&gt;</td>
+<td>[ “Ff14sb”, “Tip3pStandard” ]</td>
+<td>Which force fields to use for the simulation. Options are “Ff14sb”, “Tip3pStandard” and “Custom”.</td>
+</tr>
+<tr class="odd">
+<td>qm_region</td>
+<td>QMRegion</td>
+<td>{ “engine”: “None”, “regions”: [] }</td>
+<td>Definition of the QM region.</td>
+</tr>
+<tr class="even">
+<td>qm_cutoff_distance_ang</td>
+<td>float</td>
+<td>0.0</td>
+<td>All residues within this distance of the QM region will also be added to the QM region. Units of angstroms.</td>
+</tr>
+<tr class="odd">
+<td>simulation</td>
+<td>Simulation</td>
+<td></td>
+<td>Definition of the simulation.</td>
+</tr>
+<tr class="even">
+<td>implicit_solvent*</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether or not to use an implicit solvent. Currently not working.</td>
+</tr>
+<tr class="odd">
+<td>solvation</td>
+<td>SolvationParameters</td>
+<td>null</td>
+<td>Definition of the solvation for the system.</td>
+</tr>
+<tr class="even">
+<td>metadynamics</td>
+<td>list&lt;Metadynamics&gt;</td>
+<td>[]</td>
+<td>Definition of any metadynamics used for the simulation.</td>
+</tr>
+<tr class="odd">
+<td>bias_potentials</td>
+<td>list&lt;BiasPotential&gt;</td>
+<td>[]</td>
+<td>List of bias potentials to use in the simulation.</td>
+</tr>
+<tr class="even">
+<td>bias_schedule</td>
+<td>BiasSchedule</td>
+<td>null</td>
+<td>Definition of the schedule for the bias potentials.</td>
+</tr>
+<tr class="odd">
+<td>termination_condition</td>
+<td>TerminationCondition</td>
+<td>null</td>
+<td>Definition of the termination condition for the simulation.</td>
+</tr>
+<tr class="even">
+<td>frames*</td>
+<td>Frames</td>
+<td>null</td>
+<td>Definition of output frames. Currently unused.</td>
+</tr>
+<tr class="odd">
+<td>trajectory</td>
+<td>Trajectory</td>
+<td>null</td>
+<td>Definition of the output trajectory. This trajectory is the main result obtained from running the module.</td>
+</tr>
+<tr class="even">
+<td>save_final_trcs*</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether or not to save the structures that are the final geometry of the simulation. Currently not output by the module, even if set.</td>
+</tr>
+<tr class="odd">
+<td>save_final_velocities*</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether or not to save the velocities in the outputs generated if <code>save_final_trcs</code> is enabled.</td>
+</tr>
+<tr class="even">
+<td>qdxf_export*</td>
+<td>QDXFExport</td>
+<td>null</td>
+<td>Whether or not to save outputs that can be used as inputs to PBSA calculations. Currently not output by the module, even if set.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="qmregion" class="level3">
+<h3 class="anchored" data-anchor-id="qmregion">QMRegion</h3>
+<p>A description of how the QM region is evaluated and which parts of the system are included in the QM region for QM/MM simulations.</p>
+<pre><code>QMRegion
+ ├ engine
+ └ regions</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 13%">
+<col style="width: 5%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>engine</td>
+<td>string</td>
+<td></td>
+<td>Which engine to use for the QM calculations. Options are “None”, “QChem”, “Xtb”, “Exess”. Currently only “Xtb” is supported.</td>
+</tr>
+<tr class="even">
+<td>regions</td>
+<td>list&lt;QMRegionEntry&gt;</td>
+<td></td>
+<td>Which parts of the system are included in the QM region.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="qmregionentry" class="level3">
+<h3 class="anchored" data-anchor-id="qmregionentry">QMRegionEntry</h3>
+<p>A description of which parts of the system constitute the QM region.</p>
+<pre><code>QMRegionEntry
+ ├ file_index
+ └ residues</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 12%">
+<col style="width: 8%">
+<col style="width: 66%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>file_index</td>
+<td>int</td>
+<td></td>
+<td>Index of the file supplied to Dojo, starting from 0.</td>
+</tr>
+<tr class="even">
+<td>residues</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>List of residue indices for the QM residues. Indices start from 0.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="simulation" class="level3">
+<h3 class="anchored" data-anchor-id="simulation">Simulation</h3>
+<p>The parameters for the simulation. At the top level ther are parameters that apply to the whole simulation, and then the sequence of simulation stages that are to occur</p>
+<pre><code>Simulation
+ ├ step_size_ps
+ ├ periodic_box_vectors_nm
+ │ ├ v1
+ │ ├ v2
+ │ └ v3
+ └ stages</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 8%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>step_size_ps</td>
+<td>float</td>
+<td></td>
+<td>The step size to use for dynamics, in ps.</td>
+</tr>
+<tr class="even">
+<td>periodic_box_vectors_nm</td>
+<td>BoxVectors</td>
+<td>null</td>
+<td>Vectors to use for periodic boundary conditions.</td>
+</tr>
+<tr class="odd">
+<td>stages</td>
+<td>list&lt;SimulationStage&gt;</td>
+<td></td>
+<td>Sequence of simulation stages.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="boxvectors" class="level3">
+<h3 class="anchored" data-anchor-id="boxvectors">BoxVectors</h3>
+<p>Collection of three vectors defining a box.</p>
+<pre><code>BoxVectors
+ ├ v1
+ ├ v2
+ └ v3</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 15%">
+<col style="width: 9%">
+<col style="width: 69%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>v1</td>
+<td>list&lt;float&gt;</td>
+<td></td>
+<td>First vector. Expected to have exactly 3 coordinates in the list.</td>
+</tr>
+<tr class="even">
+<td>v2</td>
+<td>list&lt;float&gt;</td>
+<td></td>
+<td>Second vector. Expected to have exactly 3 coordinates in the list.</td>
+</tr>
+<tr class="odd">
+<td>v3</td>
+<td>list&lt;float&gt;</td>
+<td></td>
+<td>Third vector. Expected to have exactly 3 coordinates in the list.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="simulation-stage" class="level3">
+<h3 class="anchored" data-anchor-id="simulation-stage">Simulation Stage</h3>
+<p>Description of an individual stage of the simulation.</p>
+<p>This type represents a discrimated union, and so only one of the fields may be present.</p>
+<pre><code>SimulationStage
+ ├ Minimisation
+ ├ Nvt
+ └ Npt</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 27%">
+<col style="width: 10%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Minimisation</td>
+<td>MinimisationParameters</td>
+<td></td>
+<td>Parameters for a minimisation stage.</td>
+</tr>
+<tr class="even">
+<td>Nvt</td>
+<td>NvtParameters</td>
+<td></td>
+<td>Parameters for an NVT ensemble stage.</td>
+</tr>
+<tr class="odd">
+<td>Npt</td>
+<td>NptParameters</td>
+<td></td>
+<td>Parameters for an NPT ensemble stage.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="minimisationparameters" class="level3">
+<h3 class="anchored" data-anchor-id="minimisationparameters">MinimisationParameters</h3>
+<p>System minimisation stage.</p>
+<pre><code>MinimisationParameters
+ ├ qm_minimisation_technique
+ ├ max_iterations
+ ├ err_tol_kj_per_mol_per_nm
+ └ use_bias</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 88%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>qm_minimisation_technique</td>
+<td>string</td>
+<td>“None”</td>
+<td>Minimisation technique to use when there is a QM region present. Options are “None”, “Dynamics” and “Bfgs”. “Bfgs” is the BFGS gradient descent algorithm. “Dynamics” is an approximate technique that propagates dynamics, scaling the velocities down at each step. If “None” is selected and the system has a QM region, there will be an error</td>
+</tr>
+<tr class="even">
+<td>max_iterations</td>
+<td>int</td>
+<td>0</td>
+<td>Maximum number of iterations to run for minimisation. A value of 0 means that it will iterate until the err tolerance is met. If there is a QM region behaviour is uncertain.</td>
+</tr>
+<tr class="odd">
+<td>err_tol_kj_per_mol_per_nm</td>
+<td>float</td>
+<td>10.0</td>
+<td>Error tolerance for the RMSD of forces in the system that will trigger the end of minimisation. Units are kJ/mol/nm. May not actually be wired up to the module properly.</td>
+</tr>
+<tr class="even">
+<td>use_bias</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether or not to include bias potentials during the minimisation.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="nvtparameters" class="level3">
+<h3 class="anchored" data-anchor-id="nvtparameters">NvtParameters</h3>
+<p>NVT ensemble stage.</p>
+<pre><code>NvtParameters
+ ├ temperature_kelvin
+ ├ steps
+ ├ starting_temperature_kelvin
+ └ temperature_step</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 2%">
+<col style="width: 24%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>temperature_kelvin</td>
+<td>float</td>
+<td></td>
+<td>Temperature at which to run the dynamics, in Kelvin.</td>
+</tr>
+<tr class="even">
+<td>steps</td>
+<td>int</td>
+<td></td>
+<td>Number of steps to run the stage for.</td>
+</tr>
+<tr class="odd">
+<td>starting_temperature_kelvin</td>
+<td>float</td>
+<td><code>temperature_kelvin</code></td>
+<td>Starting temperature for a gradual temperature increase. If set equal to <code>temperature_kelvin</code>, temperature will stay constant during this stage.</td>
+</tr>
+<tr class="even">
+<td>temperature_step</td>
+<td>float</td>
+<td><code>0.1 * (temperature_kelvin - starting_temperature_kelvin)</code></td>
+<td>How much to change the thermostat at each step of the gradual increase.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="nptparameters" class="level3">
+<h3 class="anchored" data-anchor-id="nptparameters">NptParameters</h3>
+<p>NPT ensemble stage.</p>
+<pre><code>NptParameters
+ ├ temperature_kelvin
+ ├ pressure_atm
+ └ steps</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 7%">
+<col style="width: 9%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>temperature_kelvin</td>
+<td>float</td>
+<td></td>
+<td>Temperature at which to run the dynamics, in Kelvin.</td>
+</tr>
+<tr class="even">
+<td>pressure_atm</td>
+<td>float</td>
+<td></td>
+<td>Pressure at which to run the dynamics, in atmospheres.</td>
+</tr>
+<tr class="odd">
+<td>steps</td>
+<td>int</td>
+<td></td>
+<td>Number of steps to run the stage for.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="solvationparameters" class="level3">
+<h3 class="anchored" data-anchor-id="solvationparameters">SolvationParameters</h3>
+<p>Description for solvent added to the system.</p>
+<p>This type represents a discrimated union, and so only one of the fields may be present.</p>
+<pre><code>BoxSizeNm
+ ├ BoxSizeNm
+ ├ BoxVectorsNm
+ ├ PaddingNm
+ └ NumAdded</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 13%">
+<col style="width: 7%">
+<col style="width: 66%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BoxSizeNm</td>
+<td>list&lt;float&gt;</td>
+<td></td>
+<td>Dimensions of the final solvent box, in nm. Not current supported.</td>
+</tr>
+<tr class="even">
+<td>BoxVectorsNm</td>
+<td>BoxVectors</td>
+<td></td>
+<td>List of vectors describing the solvent box, in nm. Not current supported.</td>
+</tr>
+<tr class="odd">
+<td>PaddingNm</td>
+<td>float</td>
+<td></td>
+<td>Solvent padding to add around the system, in nm.</td>
+</tr>
+<tr class="even">
+<td>NumAdded</td>
+<td>int</td>
+<td></td>
+<td>Number of solvent atoms to add. Not current supported.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="metadynamics" class="level3">
+<h3 class="anchored" data-anchor-id="metadynamics">Metadynamics</h3>
+<p>Description of metadynamics that will be used during the simulation.</p>
+<pre><code>Metadynamics
+ ├ bias_period
+ ├ exp_sigma
+ ├ height
+ ├ csv_output
+ └ cvs</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 12%">
+<col style="width: 4%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>bias_period</td>
+<td>int</td>
+<td></td>
+<td>Number of steps between adding exponentials to the bias potential.</td>
+</tr>
+<tr class="even">
+<td>exp_sigma</td>
+<td>float</td>
+<td></td>
+<td>Sigma for the exponential functions that are added to the bias, where the exponential functions have the form form <code>h * exp(-0.5 * x^2 / sigma)</code>.</td>
+</tr>
+<tr class="odd">
+<td>height</td>
+<td>MTDHeight</td>
+<td></td>
+<td>Height of the exponential functions added to the bias potential.</td>
+</tr>
+<tr class="even">
+<td>csv_output</td>
+<td>string</td>
+<td>null</td>
+<td>Filename for the CSV formatted representation of the final bias potential at the end of the simulation. Not currently wired up to the module.</td>
+</tr>
+<tr class="odd">
+<td>cvs</td>
+<td>list&lt;MTDCVParameters&gt;</td>
+<td></td>
+<td>List of collective variables used to define the metadynamics.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="mtdheight" class="level3">
+<h3 class="anchored" data-anchor-id="mtdheight">MTDHeight</h3>
+<p>Definition of the height of the exponential functions that are added to the bias potential during metadynamics.</p>
+<p>This type represents a discrimated union, and so only one of the fields may be present.</p>
+<pre><code>MTDHeight
+ ├ Constant
+ └ WellTempered</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Constant</td>
+<td>Constant</td>
+<td></td>
+<td>Parameters for a constant height exponential.</td>
+</tr>
+<tr class="even">
+<td>WellTempered</td>
+<td>WellTempered</td>
+<td></td>
+<td>Parameters for an adaptive height exponential.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="constant" class="level3">
+<h3 class="anchored" data-anchor-id="constant">Constant</h3>
+<p>Exponential height that is a fixed constant.</p>
+<pre><code>Constant
+ └ height</code></pre>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>height</td>
+<td>float</td>
+<td></td>
+<td>Height of each exponential to be added.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="welltempered" class="level3">
+<h3 class="anchored" data-anchor-id="welltempered">WellTempered</h3>
+<p>Adaptive exponential height based on the well tempered metadynamics protocol.</p>
+<pre><code>MTDHeight
+ ├ delta_t
+ └ initial_deposition_rate</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 7%">
+<col style="width: 9%">
+<col style="width: 55%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>delta_t</td>
+<td>float</td>
+<td></td>
+<td>Delta T parameter from the paper.</td>
+</tr>
+<tr class="even">
+<td>initial_deposition_rate</td>
+<td>float</td>
+<td></td>
+<td>Initial deposition rate parameter from the paper.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="mtdcvparameters" class="level3">
+<h3 class="anchored" data-anchor-id="mtdcvparameters">MTDCVParameters</h3>
+<p>Parameters for a given collective variable.</p>
+<pre><code>MTDCVParameters
+ ├ num_samples
+ ├ min
+ ├ max
+ └ variable</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 7%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>num_samples</td>
+<td>int</td>
+<td></td>
+<td>Number of sample points in the discretised representation of the bias potential.</td>
+</tr>
+<tr class="even">
+<td>min</td>
+<td>float</td>
+<td></td>
+<td>Minimum of the range of the CV.</td>
+</tr>
+<tr class="odd">
+<td>max</td>
+<td>float</td>
+<td></td>
+<td>Maximum of the range of the CV.</td>
+</tr>
+<tr class="even">
+<td>variable</td>
+<td>CV</td>
+<td></td>
+<td>Description of the CV.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cv" class="level3">
+<h3 class="anchored" data-anchor-id="cv">CV</h3>
+<p>Definition of a collective variable (CV).</p>
+<p>This type represents a discrimated union, and so only one of the fields may be present.</p>
+<pre><code>CV
+ ├ Bond
+ ├ Dihedral
+ ├ Centroid
+ └ RMSD</code></pre>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bond</td>
+<td>Bond</td>
+<td></td>
+<td>Bond length CV.</td>
+</tr>
+<tr class="even">
+<td>Dihedral</td>
+<td>Dihedral</td>
+<td></td>
+<td>Dihedral angle CV.</td>
+</tr>
+<tr class="odd">
+<td>Centroid</td>
+<td>Centroid</td>
+<td></td>
+<td>Centroid distance CV.</td>
+</tr>
+<tr class="even">
+<td>RMSD</td>
+<td>RMSD</td>
+<td></td>
+<td>RMSD CV.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="bond" class="level3">
+<h3 class="anchored" data-anchor-id="bond">Bond</h3>
+<p>Bond between two atoms.</p>
+<pre><code>Bond
+ ├ index1
+ └ index2</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 68%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index1</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the bond.</td>
+</tr>
+<tr class="even">
+<td>index2</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the second atom defining the bond.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dihedral" class="level3">
+<h3 class="anchored" data-anchor-id="dihedral">Dihedral</h3>
+<p>Dihedral angle CV.</p>
+<pre><code>Dihedral
+ ├ index1
+ ├ index2
+ ├ index3
+ └ index4</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index1</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the dihedral.</td>
+</tr>
+<tr class="even">
+<td>index2</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the second atom defining the dihedral.</td>
+</tr>
+<tr class="odd">
+<td>index3</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the third atom defining the dihedral.</td>
+</tr>
+<tr class="even">
+<td>index4</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the fourth atom defining the dihedral.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="centroid" class="level3">
+<h3 class="anchored" data-anchor-id="centroid">Centroid</h3>
+<p>Centroid distance CV.</p>
+<p>This type represents a discrimated union, and so only one of the fields may be present.</p>
+<pre><code>Centroid
+ ├ Indices
+ ├ Residues
+ └ Files</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 12%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Indices</td>
+<td>Indices</td>
+<td></td>
+<td>Centroid distance based on atom indices.</td>
+</tr>
+<tr class="even">
+<td>Residues</td>
+<td>Residues</td>
+<td></td>
+<td>Centroid distance based on residues.</td>
+</tr>
+<tr class="odd">
+<td>Files</td>
+<td>Files</td>
+<td></td>
+<td>Centroid distance based on files.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="indices" class="level3">
+<h3 class="anchored" data-anchor-id="indices">Indices</h3>
+<p>Atom index based definition of a centroid distance.</p>
+<pre><code>Indices
+ ├ group1
+ └ group2</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 17%">
+<col style="width: 12%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Descriptions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>group1</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>Atom indices defining the first centroid.</td>
+</tr>
+<tr class="even">
+<td>group2</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>Atom indices defining the second centroid.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="residues" class="level3">
+<h3 class="anchored" data-anchor-id="residues">Residues</h3>
+<p>Residue based definition of a centroid distance.</p>
+<pre><code>Residues
+ ├ file_index1
+ ├ residues1
+ ├ file_index2
+ └ residues2</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 8%">
+<col style="width: 66%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>file_index1</td>
+<td>int</td>
+<td></td>
+<td>Index of the file containing the residues for the first centroid.</td>
+</tr>
+<tr class="even">
+<td>residues1</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>List of residues defining the first centroid.</td>
+</tr>
+<tr class="odd">
+<td>file_index2</td>
+<td>int</td>
+<td></td>
+<td>Index of the file containing the residues for the second centroid.</td>
+</tr>
+<tr class="even">
+<td>residues2</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>List of residues defining the second centroid.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="files" class="level3">
+<h3 class="anchored" data-anchor-id="files">Files</h3>
+<p>File based definition of a centroid distance.</p>
+<pre><code>Residues
+ ├ file1
+ └ file2</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 9%">
+<col style="width: 77%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>file1</td>
+<td>int</td>
+<td></td>
+<td>Index of the file that contains the atoms that define the first centroid.</td>
+</tr>
+<tr class="even">
+<td>file2</td>
+<td>int</td>
+<td></td>
+<td>Index of the file that contains the atoms that define the second centroid.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rmsd" class="level3">
+<h3 class="anchored" data-anchor-id="rmsd">RMSD</h3>
+<p>RMSD CV.</p>
+<pre><code>RMSD
+ ├ reference_positions
+ └ atom_indices</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>reference_positions</td>
+<td>list&lt;float&gt;</td>
+<td></td>
+<td>The reference positions from which to measure the RMSD, as a flat list of coordinates x1, y1, z1, x2, y2, z2, …</td>
+</tr>
+<tr class="even">
+<td>atom_indices</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>The atom indices used to measure the RMSD. The length of the reference positions list should be exactly 3 times the length of this list.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="biaspotential" class="level3">
+<h3 class="anchored" data-anchor-id="biaspotential">BiasPotential</h3>
+<p>Description of an external bias potential used in the simulation dynamics.</p>
+<p>This type represents a discrimated union, and so only one of the fields may be present.</p>
+<pre><code>BiasPotential
+ ├ BondLinear
+ ├ RmsdExp
+ ├ MovingBondHarmonic
+ └ HarmonicCv</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 25%">
+<col style="width: 7%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BondLinear</td>
+<td>BondLinearParameters</td>
+<td></td>
+<td>Linear bond length based force parameters.</td>
+</tr>
+<tr class="even">
+<td>RmsdExp</td>
+<td>RmsdExpParameters</td>
+<td></td>
+<td>Exponential RMSD based force parameters.</td>
+</tr>
+<tr class="odd">
+<td>MovingBondHarmonic</td>
+<td>MovingBondHarmonicParameters</td>
+<td></td>
+<td>Harmonic bond length force that moves at a constant speed</td>
+</tr>
+<tr class="even">
+<td>HarmonicCv</td>
+<td>HarmonicCVParameters</td>
+<td></td>
+<td>Harmonic force that is defined on a given CV</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="bondlinearparameters" class="level3">
+<h3 class="anchored" data-anchor-id="bondlinearparameters">BondLinearParameters</h3>
+<p>Parameters for a linear force based on a bond distance.</p>
+<pre><code>BondLinearParameters
+ ├ index1
+ ├ index2
+ ├ slope
+ └ offset</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 9%">
+<col style="width: 74%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index1</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the bond length.</td>
+</tr>
+<tr class="even">
+<td>index2</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the bond length.</td>
+</tr>
+<tr class="odd">
+<td>slope</td>
+<td>float</td>
+<td></td>
+<td>Slope of the linear potential, i.e.&nbsp;<code>k</code> in <code>k * (distance - offset)</code>.</td>
+</tr>
+<tr class="even">
+<td>offset</td>
+<td>float</td>
+<td></td>
+<td>Offset of the linear potential.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rmsdexpparameters" class="level3">
+<h3 class="anchored" data-anchor-id="rmsdexpparameters">RmsdExpParameters</h3>
+<p>Parameters for a force equal to the exponential of the RMSD between a subset of atoms and a reference set of positions.</p>
+<pre><code>RmsdExpParameters
+ ├ reference_positions
+ ├ atom_indices
+ ├ height
+ ├ sigma
+ └ offset</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>reference_positions</td>
+<td>list&lt;float&gt;</td>
+<td></td>
+<td>The reference positions from which to measure the RMSD, as a flat list of coordinates x1, y1, z1, x2, y2, z2, …</td>
+</tr>
+<tr class="even">
+<td>atom_indices</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>The atom indices used to measure the RMSD. The length of the reference positions list should be exactly 3 times the length of this list.</td>
+</tr>
+<tr class="odd">
+<td>height</td>
+<td>float</td>
+<td></td>
+<td>Height parameter of the exponential function, i.e.&nbsp;<code>h</code> in the formula <code>h * exp(-0.5 * (rmsd - offset)^2 / sigma)</code>.</td>
+</tr>
+<tr class="even">
+<td>sigma</td>
+<td>float</td>
+<td></td>
+<td>Sigma parameter of the exponential function.</td>
+</tr>
+<tr class="odd">
+<td>offset</td>
+<td>float</td>
+<td></td>
+<td>Offset parameter of the exponential function.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="movingharmonicbondparameters" class="level3">
+<h3 class="anchored" data-anchor-id="movingharmonicbondparameters">MovingHarmonicBondParameters</h3>
+<p>Parameters for a harmonic force based on a bond length that moves at a constant speed between to given lengths.</p>
+<pre><code>MovingHarmonicBondParameters
+ ├ index1
+ ├ index2
+ ├ k
+ ├ initial_offset_nm
+ ├ final_offset_nm
+ ├ resolution_nm
+ └ rate_nm_per_ps</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 81%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index1</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the bond length.</td>
+</tr>
+<tr class="even">
+<td>index2</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the bond length.</td>
+</tr>
+<tr class="odd">
+<td>k</td>
+<td>float</td>
+<td></td>
+<td>Slope of the potential, i.e.&nbsp;<code>k</code> in <code>k * (distance - offset)^2</code>.</td>
+</tr>
+<tr class="even">
+<td>initial_offset_nm</td>
+<td>float</td>
+<td>null</td>
+<td>Initial offset of the potential. If not provided it will be set to the current bond length at the time when the bias potential becomes active.</td>
+</tr>
+<tr class="odd">
+<td>final_offset_nm</td>
+<td>float</td>
+<td>null</td>
+<td>Final offset of the potential. If not provided it will be set to an estimate of the covalent bond length of the two atoms defined by <code>index1</code> and <code>index2</code>.</td>
+</tr>
+<tr class="even">
+<td>resolution_nm</td>
+<td>float</td>
+<td>0.01</td>
+<td>The resolution at which to update the offset.</td>
+</tr>
+<tr class="odd">
+<td>rate_nm_per_ps</td>
+<td>float</td>
+<td></td>
+<td>The speed at which the offset will “move”.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="harmoniccvparameters" class="level3">
+<h3 class="anchored" data-anchor-id="harmoniccvparameters">HarmonicCVParameters</h3>
+<p>Parameters for a harmonic force that is defined by and acts upon a given collective variable.</p>
+<pre><code>HarmonicCVParameters
+ ├ k
+ ├ offset
+ └ cv</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 73%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>k</td>
+<td>float</td>
+<td></td>
+<td>Slope of the potential, i.e.&nbsp;<code>k</code> in <code>k * (cv_value - offset)^2</code>.</td>
+</tr>
+<tr class="even">
+<td>offset</td>
+<td>float</td>
+<td></td>
+<td>Offset for the potential.</td>
+</tr>
+<tr class="odd">
+<td>cv</td>
+<td>CV</td>
+<td></td>
+<td>The collective variable that defines the force.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="biasschedule" class="level3">
+<h3 class="anchored" data-anchor-id="biasschedule">BiasSchedule</h3>
+<p>Schedule for when in the simulation to activate and deactivate the bias potentials defined in the parameters.</p>
+<pre><code>RmsdExpParameters
+ ├ active_potentials
+ └ triggers</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 2%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>active_potentials</td>
+<td>list&lt;list&lt;int&gt;&gt;</td>
+<td></td>
+<td>The length of this list is the number of separate phases in the simulation. Each list it contains is the indices of the bias potentials that are active during this phase (all other bias potentials will be turned off). Indices start at 0 and correspond to the order that they appear in the parameters file.</td>
+</tr>
+<tr class="even">
+<td>triggers</td>
+<td>list&lt;list&lt;Trigger&gt;&gt;</td>
+<td></td>
+<td>Each item of this list is a condition that once met will advance the bias schedule to the next phase. Therefore this should have length one less than the length of the <code>active_potentials</code> list. Each list it contains is a list of trigger conditions.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trigger" class="level3">
+<h3 class="anchored" data-anchor-id="trigger">Trigger</h3>
+<p>Trigger bond condition between two atoms.</p>
+<pre><code>Trigger
+ ├ index1
+ ├ index2
+ └ broken</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 6%">
+<col style="width: 9%">
+<col style="width: 76%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index1</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the first atom defining the bond.</td>
+</tr>
+<tr class="even">
+<td>index2</td>
+<td>int</td>
+<td></td>
+<td>Atom index of the second atom defining the bond.</td>
+</tr>
+<tr class="odd">
+<td>broken</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether the condition is defined by breaking instead of forming the bond.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="terminationcondition" class="level3">
+<h3 class="anchored" data-anchor-id="terminationcondition">TerminationCondition</h3>
+<p>Description of if and when to terminate the simulation early.</p>
+<pre><code>TerminationCondition
+ ├ tail_steps
+ └ bonds</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 7%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>tail_steps</td>
+<td>int</td>
+<td>100</td>
+<td>For how many steps to continue simulating after the termination condition has been met.</td>
+</tr>
+<tr class="even">
+<td>bonds</td>
+<td>list&lt;Trigger&gt;</td>
+<td></td>
+<td>The bonds defining the termination condition.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="frames" class="level3">
+<h3 class="anchored" data-anchor-id="frames">Frames</h3>
+<p>Definition of which frames to save from the simulation and what information is contained in the frames. Currently unused.</p>
+<pre><code>Frames
+ ├ start
+ ├ stop
+ └ interval</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>start</td>
+<td>int</td>
+<td></td>
+<td>First step to start recording.</td>
+</tr>
+<tr class="even">
+<td>stop</td>
+<td>int</td>
+<td></td>
+<td>Last step to record.</td>
+</tr>
+<tr class="odd">
+<td>interval</td>
+<td>int</td>
+<td></td>
+<td>The interval between steps at which to record.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trajectory" class="level3">
+<h3 class="anchored" data-anchor-id="trajectory">Trajectory</h3>
+<p>Description of the trajectory, in xyz format, that will be recorded from the simulation.</p>
+<pre><code>Trajectory
+ ├ interval
+ ├ minimisation
+ ├ forces
+ ├ info
+ ├ windowed
+ ├ window_size
+ └ residues</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 17%">
+<col style="width: 5%">
+<col style="width: 68%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>interval</td>
+<td>int</td>
+<td>1</td>
+<td>Number of steps between recorded xyz frames.</td>
+</tr>
+<tr class="even">
+<td>minimisation</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether or not to include the the minimisation frames in the trajectory. Does nothing for classical minimisation.</td>
+</tr>
+<tr class="odd">
+<td>forces</td>
+<td>string</td>
+<td>“None”</td>
+<td>What forces to record in the xyz frames, if any. Options are “None”, “Dynamics”, “Bias”, “Mtd”.</td>
+</tr>
+<tr class="even">
+<td>info</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether to include the step number and system energy in the comment line in the xyz frames.</td>
+</tr>
+<tr class="odd">
+<td>windowed</td>
+<td>bool</td>
+<td>false</td>
+<td>Whether to only record windows around the trigger conditions in the bias schedule, if present.</td>
+</tr>
+<tr class="even">
+<td>window_size</td>
+<td>int</td>
+<td>200</td>
+<td>Size of windows that are recorded (centred on when the frame that the condition triggered).</td>
+</tr>
+<tr class="odd">
+<td>residues</td>
+<td>list&lt;ResidueSpecification&gt;</td>
+<td>[]</td>
+<td>Which specific residues to record. If empty, the whole system is recorded.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="residuespecification" class="level3">
+<h3 class="anchored" data-anchor-id="residuespecification">ResidueSpecification</h3>
+<p>Specification of a subset of residues from an input file.</p>
+<pre><code>ResidueSpecification
+ ├ file_index
+ └ residues</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 15%">
+<col style="width: 10%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>file_index</td>
+<td>int</td>
+<td></td>
+<td>Index of the input file that the residues are in.</td>
+</tr>
+<tr class="even">
+<td>residues</td>
+<td>list&lt;int&gt;</td>
+<td></td>
+<td>Indices of the residues in the input file.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="qdxfexport" class="level3">
+<h3 class="anchored" data-anchor-id="qdxfexport">QDXFExport</h3>
+<p>Parameters for exporting information that can be used as inputs for PBSA calculations.</p>
+<pre><code>QDXFExport
+ └ interval</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 68%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>interval</td>
+<td>int</td>
+<td></td>
+<td>Number of steps between frames that will be recorded.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="function-usage" class="level2">
+<h2 class="anchored" data-anchor-id="function-usage">Function Usage</h2>
+<div class="sourceCode" id="cb36"><pre class="sourceCode haskell code-with-copy"><code class="sourceCode haskell"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    options <span class="ot">=</span> {</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>        simulation <span class="ot">=</span> {</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>            step_size_ps <span class="ot">=</span> <span class="fl">0.001</span>,</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>            stages <span class="ot">=</span> [</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>                {</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">Nvt</span> <span class="ot">=</span> {</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>                        temperature_kelvin <span class="ot">=</span> <span class="dv">300</span>,</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>                        steps <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>                    }</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>                }</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>        trajectory <span class="ot">=</span> {</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>            interval <span class="ot">=</span> <span class="dv">100</span>,</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>            info <span class="ot">=</span> true</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>    dojo <span class="ot">=</span> \protein_trc <span class="ot">-&gt;</span> dojo_rex_s default_runspec options [protein_trc] []</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a><span class="kw">in</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    \protein_trc <span class="ot">-&gt;</span> dojo protein_trc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/talo\.github\.io\/rush-py");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/talo/rush-py/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
