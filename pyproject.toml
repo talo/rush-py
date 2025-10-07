@@ -1,0 +1,52 @@
+[project]
+name = "rush-py2"
+version = "0.1.0"
+description = "Simple python interfaces for Rush modules"
+readme = "README.md"
+requires-python = ">= 3.12"
+authors = [
+  { name = "Sean Laguna", email = "seanlaguna@qdx.co" },
+]
+dependencies = [
+  "cyclopts~=3.16",
+  "gql~=4.0",
+  "h5py~=3.14",
+  "requests~=2.32",
+  "requests_toolbelt~=1.0",
+  "zstandard~=0.23",
+]
+
+[project.scripts]
+rush-exess-chelpg = "rush_py2.exess:run_chelpg"
+rush-exess-energy = "rush_py2.exess:run_energy"
+rush-exess-interaction-energy = "rush_py2.exess:run_interaction_energy"
+rush-exess-qmmm = "rush_py2.exess:run_qmmm"
+
+[tool.pyright]
+exclude = [
+  "**/node_modules",
+  "**/__pycache__",
+  "**/*venv*",
+  "result",
+  "setup.py",
+]
+ignore = [
+  "**/node_modules",
+  "**/__pycache__",
+  "**/*venv*",
+  "result",
+  "setup.py",
+]
+reportIncompatibleMethodOverride = "none"
+reportIncompatibleVariableOverride = "none"
+reportMissingTypeStubs = "none"
+reportUnknownMemberType = "none"
+reportUnknownVariableType = "none"
+useLibraryCodeForTypes = true
+typeCheckingMode = "standard"
+reportAttributeAccessIssue = "none"
+
+[build-system]
+requires = ["hatchling >= 1.27"]
+build-backend = "hatchling.build"
+
