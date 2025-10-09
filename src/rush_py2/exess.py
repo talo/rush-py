@@ -337,9 +337,7 @@ def energy(
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
     # Run rex
-    rex = Template(
-        """
-let
+    rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
@@ -401,8 +399,7 @@ let
       None
 in
   exess "$topology_vobj_path"
-"""
-    ).substitute(
+""").substitute(
         runspec=runspec.substitute(
             target=f"Some ModuleInstanceTarget::{target}" if target else "None"
         ),
@@ -454,9 +451,7 @@ def interaction_energy(
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
     # Run rex
-    rex = Template(
-        """
-let
+    rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
@@ -518,8 +513,7 @@ let
       None
 in
   exess "$topology_vobj_path"
-"""
-    ).substitute(
+""").substitute(
         runspec=runspec.substitute(
             target=f"Some ModuleInstanceTarget::{target}" if target else "None"
         ),
@@ -564,9 +558,7 @@ def chelpg(
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
     # Run rex
-    rex = Template(
-        """
-let
+    rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
@@ -663,8 +655,7 @@ let
       None
 in
   exess "$topology_vobj_path"
-"""
-    ).substitute(
+""").substitute(
         runspec=runspec.substitute(
             target=f"Some ModuleInstanceTarget::{target}" if target else "None"
         ),
@@ -729,9 +720,7 @@ def qmmm(
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
     # Run rex
-    rex = Template(
-        """
-let
+    rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
@@ -810,8 +799,7 @@ let
       None
 in
   exess "$topology_vobj_path"
-"""
-    ).substitute(
+""").substitute(
         runspec=runspec.substitute(
             target=f"Some ModuleInstanceTarget::{target}" if target else "None"
         ),
@@ -878,29 +866,14 @@ def run_qmmm():
 if __name__ == "__main__":
     i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
 
-    o = energy(
-        i_folder / "tyk2_ejm_31_t.json",
-        target="Gadi",
-    )
+    # o = energy(i_folder / "thrombin_1c_t.json")
+    # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 1)
+    # o = chelpg(i_folder / "tyk2_ejm_31_t.json")
+    o = qmmm(i_folder / "tyk2_ejm_31_t.json", n_timesteps=100)
+
     print(o)
 
-    # o = interaction_energy(
-    #     i_folder / "tyk2_ejm_31_t.json",
-    #     1,
-    # )
-    # print(o)
-
-    # o = chelpg(
-    #     i_folder / "tyk2_ejm_31_t.json",
-    # )
-    # print(o)
-
-    # o = qmmm(
-    #     i_folder / "tyk2_ejm_31_t.json",
-    #     n_timesteps=100
-    # )
-
-    # TODO:
-    #  - trace for failure
-    #  - stdout, stderr
-    #  - other module instance info?
+# TODO:
+#  - trace for failure
+#  - stdout, stderr
+#  - other module instance info?
