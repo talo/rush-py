@@ -3,6 +3,7 @@ import json
 import tarfile
 import time
 from io import BytesIO
+from os import getenv
 from pathlib import Path
 from string import Template
 from typing import Literal
@@ -18,8 +19,8 @@ from gql.transport.requests import RequestsHTTPTransport
 GRAPHQL_ENDPOINT = (
     "https://tengu-server-staging-seaography-720805281970.asia-southeast1.run.app"
 )
-API_KEY = "1f6904ca-a882-4ca0-b3f8-e0ca610317bf"
-PROJECT_ID = "1dfc23a2-2ecf-44a0-b111-c9b8a573c98e"
+API_KEY = getenv("RUSH_TOKEN")
+PROJECT_ID = getenv("RUSH_PROJECT")
 MODULE_LOCK = {
     "exess_rex": "github:talo/tengu-exess/9ccfa0a22d6395a34e03121b68fd7c4661722650#exess_rex",
 }
