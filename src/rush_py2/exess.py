@@ -211,6 +211,43 @@ def download_object(path):
     raise Exception(f"Object at path {path} has neither contents nor URL")
 
 
+def get_module_instance(run_id):
+    query = gql(
+        """
+query GetModuleInstances($run_id: TextFilterInput!) {
+    module_instances(filters: {run_id: $run_id}) {
+        nodes {
+            created_at
+            admitted_at
+            dispatched_at
+            queued_at
+            run_at
+            completed_at
+            deleted_at
+            progress {
+                n
+                n_expected
+                n_max
+                done
+            }
+            status
+            failure_reason
+            failure_context {
+                stdout
+                stderr
+                syserr
+            }
+        }
+    }
+}
+"""
+    )
+    query.variable_values = {"run_id": {"eq": run_id}}
+
+    result = client.execute(query)
+    return result["module_instances"]["nodes"]
+
+
 def fetch_results(run_id):
     query = gql(
         """
@@ -273,6 +310,9 @@ def submit_rex(project_id: str, rex: str):
         result = client.execute(query)
         status = result["run"]["status"]
         print(f"Status: {status}")
+        module_instances = get_module_instance(run_id)
+        if module_instances:
+            print(f"Module status: {module_instances[0]}")
 
         if status == "done" or status == "error" or status == "cancelled":
             return fetch_results(run_id)
