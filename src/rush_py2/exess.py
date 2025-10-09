@@ -793,7 +793,7 @@ def qmmm(
             }),
           }),
         },
-        driver = exess_rex::Driver::Dynamics,
+        driver = exess_rex::Driver::QMMM,
       })
       [ (obj_j topology) ]
       None
