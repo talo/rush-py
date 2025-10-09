@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import tarfile
 import time
 from io import BytesIO
@@ -37,6 +38,23 @@ client = Client(
     ),
 )
 
+runspec = Template("""RunSpec {
+        resources = Resources {
+          walltime = None,
+          storage = Some 10,
+          storage_units = Some MemUnits::MB,
+          storage_mounts = None,
+          cpus = None,
+          mem = None,
+          mem_units = None,
+          gpus = Some 1,
+          gpu_mem = None,
+          gpu_mem_units = None,
+          nodes = None,
+          internet_access = None,
+        },
+        target = $target
+      }""")
 
 INITIAL_POLL_INTERVAL = 0.5
 MAX_POLL_INTERVAL = 30
@@ -95,6 +113,19 @@ type FragmentLevelT = Literal[
     "Trimer",
     "Tetramer",
 ]
+
+
+def clean_dict(d):
+    if isinstance(d, dict):
+        return {k: clean_dict(v) for k, v in d.items() if v is not None}
+    elif isinstance(d, list):
+        return [clean_dict(v) for v in d]
+    else:
+        return d
+
+
+def optional_str(v: str | int | float | list[int] | bool | None):
+    return f"Some {v}" if v else "None"
 
 
 def upload_object(project_id, filepath):
@@ -260,6 +291,7 @@ def energy(
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
     tetramer_cutoff: float = 10.0,
+    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -272,7 +304,7 @@ let
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      default_runspec_gpu
+      ($runspec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -331,6 +363,9 @@ in
   exess "$topology_vobj_path"
 """
     ).substitute(
+        runspec=runspec.substitute(
+            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
         basis=basis,
         aux_basis=aux_basis,
@@ -348,10 +383,12 @@ in
         print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = download_object(qm_output_vobj["path"])
-            with open(f"{qm_output_vobj['path']}.json", "wb") as f:
-                f.write(qm_output_json)
-            return qm_output_vobj["path"]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
+            return qm_output_json["qmmbe"]["expanded_hf_energy"]
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 
@@ -371,6 +408,7 @@ def interaction_energy(
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
     tetramer_cutoff: float = 10.0,
+    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -383,7 +421,7 @@ let
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      default_runspec_gpu
+      ($runspec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -442,6 +480,9 @@ in
   exess "$topology_vobj_path"
 """
     ).substitute(
+        runspec=runspec.substitute(
+            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
         reference_fragment=reference_fragment,
         basis=basis,
@@ -460,10 +501,12 @@ in
         print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = download_object(qm_output_vobj["path"])
-            with open(f"{qm_output_vobj['path']}.json", "wb") as f:
-                f.write(qm_output_json)
-            return qm_output_vobj["path"]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
+            return qm_output_json["qmmbe"]["expanded_hf_energy"]
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 
@@ -475,6 +518,7 @@ in
 
 def chelpg(
     topology_path: Path,
+    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -487,7 +531,7 @@ let
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      default_runspec_gpu
+      ($runspec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -581,6 +625,9 @@ in
   exess "$topology_vobj_path"
 """
     ).substitute(
+        runspec=runspec.substitute(
+            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
     )
     result = None
@@ -590,6 +637,12 @@ in
         print(f"Status: {result['status']}")
         print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
+            qm_output_vobj = result["result"]["Ok"][0]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
             qm_output_vobj = result["result"]["Ok"][1]
             qm_output = download_object(qm_output_vobj["path"])
             decompressed = zstd.ZstdDecompressor().decompress(
@@ -607,10 +660,6 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}")
-
-
-def optional_str(v: str | int | float | list[int] | bool | None):
-    return f"Some {v}" if v else "None"
 
 
 def qmmm(
@@ -634,6 +683,7 @@ def qmmm(
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
     tetramer_cutoff: float = 10.0,
+    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -646,7 +696,7 @@ let
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      default_runspec_gpu
+      ($runspec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -714,7 +764,7 @@ let
             }),
           }),
         },
-        driver = exess_rex::Driver::Energy,
+        driver = exess_rex::Driver::Dynamics,
       })
       [ (obj_j topology) ]
       None
@@ -722,6 +772,9 @@ in
   exess "$topology_vobj_path"
 """
     ).substitute(
+        runspec=runspec.substitute(
+            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
         basis=basis,
         aux_basis=aux_basis,
@@ -751,10 +804,12 @@ in
         print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = download_object(qm_output_vobj["path"])
-            with open(f"{qm_output_vobj['path']}.json", "wb") as f:
-                f.write(qm_output_json)
-            return qm_output_vobj["path"]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
+            return qm_output_json
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 
@@ -781,25 +836,28 @@ def run_qmmm():
 
 
 if __name__ == "__main__":
-    i = Path.cwd() / "i"
+    i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
 
-    # output_path = run_exess_energy(
-    #     i / "tyk2_ejm_31_t.json",
-    # )
+    o = energy(
+        i_folder / "tyk2_ejm_31_t.json",
+        target="Gadi",
+    )
+    print(o)
 
-    # output_path = run_exess_interaction_energy(
-    #     i / "tyk2_ejm_31_t.json",
+    # o = interaction_energy(
+    #     i_folder / "tyk2_ejm_31_t.json",
     #     1,
     # )
+    # print(o)
 
-    # charges = run_exess_chelpg(
-    #     i / "tyk2_ejm_31_t.json",
+    # o = chelpg(
+    #     i_folder / "tyk2_ejm_31_t.json",
     # )
-    # print(charges)
+    # print(o)
 
-    # output_path = run_exess_qmmm(
-    #     i / "tyk2_ejm_31_t.json",
-    #     n_timesteps=100,
+    # o = qmmm(
+    #     i_folder / "tyk2_ejm_31_t.json",
+    #     n_timesteps=100
     # )
 
     # TODO:
