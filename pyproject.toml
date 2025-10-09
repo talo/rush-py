@@ -16,6 +16,12 @@ dependencies = [
   "zstandard~=0.23",
 ]
 
+[dependency-groups]
+dev = [
+  "basedpyright",
+  "ruff",
+]
+
 [project.scripts]
 rush-exess-chelpg = "rush_py2.exess:run_chelpg"
 rush-exess-energy = "rush_py2.exess:run_energy"
@@ -47,6 +53,5 @@ typeCheckingMode = "standard"
 reportAttributeAccessIssue = "none"
 
 [build-system]
-requires = ["hatchling >= 1.27"]
-build-backend = "hatchling.build"
-
+requires = ["uv_build~=0.8"]
+build-backend = "uv_build"
