@@ -6,7 +6,8 @@ import sys
 # Add src to path so we can import rush_py2
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from rush_py2.convert import from_mmcif, to_json
+from rush_py2.convert.mmcif import from_mmcif
+from rush_py2.convert.json import to_json
 
 
 def normalize_json(obj):
