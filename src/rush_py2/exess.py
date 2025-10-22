@@ -14,6 +14,7 @@ from gql.transport.exceptions import TransportQueryError
 from rush_py2.client import (
     PROJECT_ID,
     download_object,
+    print_run_trace,
     runspec,
     submit_rex,
     upload_object,
@@ -194,6 +195,8 @@ in
             return out_path
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
+        elif result["status"] == "error":
+            print_run_trace(result)
 
     except TransportQueryError as e:
         if e.errors:
@@ -307,6 +310,8 @@ in
             return out_path
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
+        elif result["status"] == "error":
+            print_run_trace(result)
 
     except TransportQueryError as e:
         if e.errors:
@@ -455,6 +460,8 @@ in
             return (out_path, chelpg)
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
+        elif result["status"] == "error":
+            print_run_trace(result)
 
     except TransportQueryError as e:
         if e.errors:
@@ -625,6 +632,8 @@ in
             return out_path
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
+        elif result["status"] == "error":
+            print_run_trace(result)
 
     except TransportQueryError as e:
         if e.errors:
