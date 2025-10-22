@@ -72,6 +72,10 @@ type FragmentLevelT = Literal[
     "Tetramer",
 ]
 
+type GradientMethodT = Literal["Analytical", "Numerical"]
+
+type TargetT = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
+
 
 def clean_dict(d):
     if isinstance(d, dict):
@@ -82,8 +86,8 @@ def clean_dict(d):
         return d
 
 
-def optional_str(v: str | int | float | list[int] | bool | None):
-    return f"Some {v}" if v else "None"
+def optional_str(v: str | int | float | list[int] | bool | None) -> str:
+    return f"Some {v}" if v is not None else "None"
 
 
 def energy(
@@ -95,7 +99,7 @@ def energy(
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
     tetramer_cutoff: float = 10.0,
-    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
+    target: TargetT | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -179,17 +183,15 @@ in
     result = None
     try:
         result = submit_rex(PROJECT_ID, rex)
-        print(f"Run ID: {result['id']}")
-        print(f"Status: {result['status']}")
-        print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
-            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+            out_path = f"{qm_output_vobj['path']}.json"
+            with open(out_path, "w") as f:
                 json.dump(clean_dict(qm_output_json), f, indent=2)
-            return qm_output_json["qmmbe"]["expanded_hf_energy"]
+            return out_path
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 
@@ -209,7 +211,7 @@ def interaction_energy(
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
     tetramer_cutoff: float = 10.0,
-    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
+    target: TargetT | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -294,17 +296,15 @@ in
     result = None
     try:
         result = submit_rex(PROJECT_ID, rex)
-        print(f"Run ID: {result['id']}")
-        print(f"Status: {result['status']}")
-        print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
-            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+            out_path = f"{qm_output_vobj['path']}.json"
+            with open(out_path, "w") as f:
                 json.dump(clean_dict(qm_output_json), f, indent=2)
-            return qm_output_json["qmmbe"]["expanded_hf_energy"]
+            return out_path
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 
@@ -316,7 +316,7 @@ in
 
 def chelpg(
     topology_path: Path,
-    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
+    target: TargetT | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -428,15 +428,13 @@ in
     result = None
     try:
         result = submit_rex(PROJECT_ID, rex)
-        print(f"Run ID: {result['id']}")
-        print(f"Status: {result['status']}")
-        print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
-            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+            out_path = f"{qm_output_vobj['path']}.json"
+            with open(out_path, "w") as f:
                 json.dump(clean_dict(qm_output_json), f, indent=2)
             qm_output_vobj = result["result"]["Ok"][1]
             qm_output = download_object(qm_output_vobj["path"])
@@ -447,7 +445,7 @@ in
                 hdf5_f = tar.extractfile(tar.getnames()[1])
                 with h5py.File(hdf5_f, "r") as f:
                     chelpg = [float(x) for x in f["monomers/0/chelpg_charges"]]  # pyright: ignore[reportGeneralTypeIssues]
-            return chelpg
+            return (out_path, chelpg)
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 
@@ -478,7 +476,7 @@ def qmmm(
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
     tetramer_cutoff: float = 10.0,
-    target: Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"] | None = None,
+    target: TargetT | None = None,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -591,17 +589,15 @@ in
     result = None
     try:
         result = submit_rex(PROJECT_ID, rex)
-        print(f"Run ID: {result['id']}")
-        print(f"Status: {result['status']}")
-        print(f"Result: {result['result']}")
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"][0]
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
-            with open(f"{qm_output_vobj['path']}.json", "w") as f:
+            out_path = f"{qm_output_vobj['path']}.json"
+            with open(out_path, "w") as f:
                 json.dump(clean_dict(qm_output_json), f, indent=2)
-            return qm_output_json
+            return out_path
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
 

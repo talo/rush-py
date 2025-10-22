@@ -1,5 +1,6 @@
 import time
 from os import getenv
+from pathlib import Path
 from string import Template
 
 import requests
@@ -12,29 +13,23 @@ BACKOFF_FACTOR = 1.5
 MAX_WAIT_TIME = 3600
 
 
-GRAPHQL_ENDPOINT = (
-    "https://tengu-server-staging-seaography-720805281970.asia-southeast1.run.app"
+GRAPHQL_ENDPOINT = getenv(
+    "RUSH_ENDPOINT",
+    "https://tengu-server-staging-seaography-720805281970.asia-southeast1.run.app",
 )
-API_KEY = getenv("RUSH_TOKEN") or ""
-PROJECT_ID = getenv("RUSH_PROJECT") or ""
+
+API_KEY = getenv("RUSH_TOKEN")
+PROJECT_ID = getenv("RUSH_PROJECT")
 MODULE_LOCK = {
     "exess_rex": "github:talo/tengu-exess/9ccfa0a22d6395a34e03121b68fd7c4661722650#exess_rex",
 }
 
-if API_KEY == "":
+if not API_KEY:
     raise Exception("RUSH_TOKEN must be set")
 
-if PROJECT_ID == "":
+if not PROJECT_ID:
     raise Exception("RUSH_PROJECT must be set")
 
-# GRAPHQL_ENDPOINT = (
-#     "https://tengu-server-prod-seaography-720805281970.asia-southeast1.run.app"
-# )
-# API_KEY = "6b5428a1-ca95-4b0d-8c6a-d6a197b36f13"
-# PROJECT_ID = "ba9a5fc0-24dc-4a51-a755-95a6b432c39f"
-# MODULE_LOCK = {
-#     "exess_rex": "github:talo/tengu-exess/66b121b25545069355d813c0305508e5b63251fb#exess_rex",
-# }
 client = Client(
     transport=RequestsHTTPTransport(
         url=GRAPHQL_ENDPOINT,
@@ -61,7 +56,7 @@ runspec = Template("""RunSpec {
       }""")
 
 
-def upload_object(project_id, filepath):
+def upload_object(project_id, filepath: Path | str):
     mutation = gql(
         """
         mutation UploadObject($file: Upload!, $typeinfo: Json!, $format: ObjectFormat!, $project_id: String) {
@@ -78,6 +73,8 @@ def upload_object(project_id, filepath):
         }
      """
     )
+    if isinstance(filepath, str):
+        filepath = Path(filepath)
     with filepath.open(mode="rb") as f:
         if filepath.suffix == ".json":
             mutation.variable_values = {
@@ -109,7 +106,6 @@ def upload_object(project_id, filepath):
         result = client.execute(mutation, upload_files=True)
 
     obj = result["upload_object"]["object"]
-    print(f"Object uploaded: {obj}")
     return obj
 
 
@@ -207,6 +203,7 @@ def submit_rex(project_id: str, rex: str):
             eval(input: $input) {
                 id
                 status
+                created_at
             }
         }
     """
@@ -222,7 +219,8 @@ def submit_rex(project_id: str, rex: str):
 
     result = client.execute(mutation)
     run_id = result["eval"]["id"]
-    print(f"Run submitted with ID: {run_id}")
+    created_at = result["eval"]["created_at"].split(".")[0]
+    print(f"Run submitted @ {created_at} with ID: {run_id}")
 
     query = gql(
         """
@@ -237,19 +235,44 @@ def submit_rex(project_id: str, rex: str):
 
     start_time = time.time()
     poll_interval = INITIAL_POLL_INTERVAL
+    last_status = None
     while time.time() - start_time < MAX_WAIT_TIME:
         time.sleep(poll_interval)
 
         result = client.execute(query)
         status = result["run"]["status"]
-        print(f"Status: {status}")
         module_instances = get_module_instance(run_id)
         if module_instances:
-            print(f"Module status: {module_instances[0]}")
+            curr_status = module_instances[0]["status"]
+            if curr_status == "running":
+                curr_status = "run"
+            if (
+                curr_status
+                in [
+                    "admitted",
+                    "dispatched",
+                    "queued",
+                    "run",
+                    "completed",
+                    "deleted",
+                ]
+                and curr_status != last_status
+            ):
+                curr_status_time = module_instances[0][f"{curr_status}_at"].split(".")[
+                    0
+                ]
+                print(f"• {curr_status:11} @ {curr_status_time}")
+                poll_interval = INITIAL_POLL_INTERVAL
+                last_status = curr_status
+            poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
+        else:
+            poll_interval = min(poll_interval * BACKOFF_FACTOR, 2)
 
-        if status == "done" or status == "error" or status == "cancelled":
+        if status in ["done", "error", "cancelled"]:
+            if not last_status:
+                print("Restored already-completed run")
             return fetch_results(run_id)
 
         poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
 
-    raise Exception(f"Timeout: Run did not complete within {MAX_WAIT_TIME} seconds")
+    raise Exception(f"Run timed out: did not complete within {MAX_WAIT_TIME} seconds")
