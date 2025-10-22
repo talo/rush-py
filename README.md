@@ -2,7 +2,7 @@
 
 ## Project setup
 
-You can use this project using `pip` + `venv`, or `uv`. Reach out if you need guidance.
+You can use this project using `pip` + `venv`, or `uv`. Reach out if you'd like support for a different workflow!
 
 ### With `pip` + `venv`
 ```bash
@@ -21,35 +21,35 @@ uv venv
 source .venv/bin/activate
 pip install -e .
 
-# Can also run directly (pass -h or --help for usage info); no need to enter the venv or run pip install!
-uv run rush-exess-energy -h
-uv run rush-exess-interaction-energy -h
-uv run rush-exess-chelpg -h
-uv run rush-exess-qmmm -h
+# Run directly (pass -h/--help for usage); no need to enter the venv or run pip install!
+uv run rush-exess-energy [...]
+uv run rush-exess-interaction-energy [...]
+uv run rush-exess-chelpg [...]
+uv run rush-exess-qmmm [...]
 ```
 
 ## Rush setup
 
 Use environment variables to configure access:
-- `RUSH_ENDPOINT`: Use this to choose between staging and prod; if omitted, defaults to staging
 - `RUSH_TOKEN`: Put your token's value here
 - `RUSH_PROJECT`: Put your project's UUID value here; can find it in the URL once selecting a project in the Rush UI
+- `RUSH_ENDPOINT`: Use this to choose between staging and prod; if omitted, defaults to staging
 
 ## Usage
 
 ```python
 from rush_py2 import exess
 
-# Put the path to your Topology object here; can use pathlib.Path too if you like type safety
+# Can use pathlib.Path too if you like type safety
 topology_path = "./thrombin_1c_t.json"
 
-# for energy, the only mandatory argument is the Topology
+# For energy, the only mandatory argument is the Topology
 output_path = exess.energy(topology_path)
 
-# for interaction_energy, second argument is reference fragment
+# For interaction_energy, second argument is reference fragment
 output_path = exess.interaction_energy(topology_path, 1)
 
-# for chelpg, charges extracted from hdf5 and returned as a list
+# For chelpg, charges extracted from hdf5 and additionally returned as a list
 output_path, charges = exess.chelpg(topology_path)
 
 # QMMM requires Residues too
