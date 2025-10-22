@@ -452,7 +452,6 @@ in
                 with h5py.File(hdf5_f, "r") as f:
                     frag_indices = [int(x) for x in f["monomers"].keys()]
                     for frag_idx in sorted(frag_indices):
-                        print(frag_idx)
                         # pyright: ignore[reportGeneralTypeIssues]
                         chelpg += [
                             float(x) for x in f[f"monomers/{frag_idx}/chelpg_charges"]
