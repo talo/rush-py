@@ -457,21 +457,26 @@ in
 
 def qmmm(
     topology_path: Path,
+    residues_path: Path,
     n_timesteps: int,
     dt_ps: float = 0.002,
+    gradient_finite_difference_step_size: float | None = None,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
     qm_fragments: list[int] | None = None,
     err_tol_kj_per_mol_nm: float = 10.0,
     max_iterations: int = 0,
-    trajectory_format: Literal["XYZ", "xyz", "JSON", "json"] | None = None,
     interval: int | None = None,
     start: int | None = None,
     end: int | None = None,
     include_waters: int | None = None,
+    fixed_atoms: list[int] | None = None,
+    free_atoms: list[int] | None = None,
+    fixed_fragments: list[int] | None = None,
+    free_fragments: list[int] | None = None,
     method: MethodT = "RestrictedHF",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
+    basis: BasisT = "STO-3G",
+    aux_basis: AuxBasisT | None = None,
     fragment_level: FragmentLevelT = "Monomer",
     dimer_cutoff: float = 100.0,
     trimer_cutoff: float = 25.0,
@@ -480,36 +485,36 @@ def qmmm(
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
+    residues_vobj = upload_object(PROJECT_ID, residues_path)
 
     # Run rex
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
-    exess_rex_s
+  exess = λ topology residues →
+    exess_qmmm_rex_s
       ($runspec)
-      (exess_rex::ExessParams {
+      (exess_qmmm_rex::QMMMParams {
         schema_version = "0.2.0",
-        external_charges = None,
-        model = exess_rex::Model {
-          method = exess_rex::Method::$method,
+        model = Some (exess_qmmm_rex::Model {
+          method = exess_qmmm_rex::Method::$method,
           basis = "$basis",
-          aux_basis = Some "$aux_basis",
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
+          aux_basis = $maybe_aux_basis,
+          standard_orientation = Some exess_qmmm_rex::StandardOrientation::FullSystem,
           force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
+        }),
+        system = Some (exess_qmmm_rex::System {
           oversubscribe_gpus = None,
           teams_per_node = None,
           gpus_per_team = None,
           max_gpu_memory_mb = None,
-        },
-        keywords = exess_rex::Keywords {
+        }),
+        keywords = exess_qmmm_rex::Keywords {
           scf = None,
           ks = None,
           rtat = None,
-          frag = Some (exess_rex::FragKeywords {
-            cutoffs = Some (exess_rex::FragmentCutoffs {
+          frag = Some (exess_qmmm_rex::FragKeywords {
+            cutoffs = Some (exess_qmmm_rex::FragmentCutoffs {
               dimer = Some $dimer_cutoff,
               trimer = Some $trimer_cutoff,
               tetramer = Some $tetramer_cutoff,
@@ -520,7 +525,7 @@ def qmmm(
             }),
             cutoff_type = None,
             distance_metric = None,
-            level = exess_rex::FragmentLevel::$fragment_level,
+            level = exess_qmmm_rex::FragmentLevel::$fragment_level,
             included_fragments = None,
             reference_fragment = None,
             enable_speed = None,
@@ -535,62 +540,75 @@ def qmmm(
           force_field = None,
           optimization = None,
           hessian = None,
-          gradient = None,
-          qmmm = Some (exess_rex::QMMMKeywords {
+          gradient = Some (exess_qmmm_rex::GradientKeywords {
+            finite_difference_step_size = $maybe_gradient_finite_difference_step_size,
+            method = Some exess_qmmm_rex::DerivativesMethod::Analytical,
+          }),
+          qmmm = Some (exess_qmmm_rex::QMMMKeywords {
             n_timesteps = $n_timesteps,
             dt_ps = $dt_ps,
             temperature_kelvin = $temperature_kelvin,
             pressure_atm = $maybe_pressure_atm,
             qm_fragments = $qm_fragments,
-            minimisation = Some (exess_rex::ClassicalMinimisation {
-              err_tol_kj_per_mol_nm = $err_tol_kj_per_mol_nm,
-              max_iterations = $max_iterations,
-            }),
-            trajectory = Some (exess_rex::MDTrajectory {
-              format = $maybe_format,
+            minimisation = None,
+            trajectory = Some (exess_qmmm_rex::MDTrajectory {
+              format = None,
               interval = $maybe_interval,
               start = $maybe_start,
               end = $maybe_end,
               include_waters = $maybe_include_waters,
             }),
+            restraints = Some (exess_qmmm_rex::MDRestraints {
+              fixed_atoms = $maybe_fixed_atoms,
+              free_atoms = $maybe_free_atoms,
+              fixed_fragments = $maybe_fixed_fragments,
+              free_fragments = $maybe_free_fragments,
+              fix_heavy = None,
+            }),
           }),
         },
-        driver = exess_rex::Driver::QMMM,
       })
-      [ (obj_j topology) ]
-      None
+      (obj_j topology)
+      (Some (obj_j residues))
 in
-  exess "$topology_vobj_path"
+  exess "$topology_vobj_path" "$residues_vobj_path"
 """).substitute(
         runspec=runspec.substitute(
             target=f"Some ModuleInstanceTarget::{target}" if target else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
+        residues_vobj_path=residues_vobj["path"],
         basis=basis,
-        aux_basis=aux_basis,
+        maybe_aux_basis=optional_str(aux_basis),
         method=method,
         fragment_level=fragment_level,
         dimer_cutoff=dimer_cutoff,
         trimer_cutoff=trimer_cutoff,
         tetramer_cutoff=tetramer_cutoff,
+        maybe_gradient_finite_difference_step_size=optional_str(
+            gradient_finite_difference_step_size
+        ),
         n_timesteps=n_timesteps,
         dt_ps=dt_ps,
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
-        qm_fragments=qm_fragments or [],
+        qm_fragments=qm_fragments if qm_fragments is not None else [],
         err_tol_kj_per_mol_nm=err_tol_kj_per_mol_nm,
         max_iterations=max_iterations,
-        maybe_format=optional_str(trajectory_format),
         maybe_interval=optional_str(interval),
         maybe_start=optional_str(start),
         maybe_end=optional_str(end),
         maybe_include_waters=optional_str(include_waters),
+        maybe_fixed_atoms=optional_str(fixed_atoms),
+        maybe_free_atoms=optional_str(free_atoms),
+        maybe_fixed_fragments=optional_str(fixed_fragments),
+        maybe_free_fragments=optional_str(free_fragments),
     )
     result = None
     try:
         result = submit_rex(PROJECT_ID, rex)
         if "Ok" in result["result"]:
-            qm_output_vobj = result["result"]["Ok"][0]
+            qm_output_vobj = result["result"]["Ok"]
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
@@ -629,11 +647,21 @@ if __name__ == "__main__":
     # o = energy(i_folder / "thrombin_1c_t.json")
     # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 1)
     # o = chelpg(i_folder / "tyk2_ejm_31_t.json")
-    o = qmmm(i_folder / "tyk2_ejm_31_t.json", n_timesteps=100)
-
-    print(o)
+    o = qmmm(
+        "6a5j_t.json",
+        "6a5j_r.json",
+        n_timesteps=504,
+        qm_fragments=[],
+        free_atoms=[0],
+    )
+    print(f"Output: {o}")
 
 # TODO:
 #  - trace for failure
 #  - stdout, stderr
 #  - other module instance info?
+#  - qmmm minimisation config:
+#    minimisation = Some (exess_rex::ClassicalMinimisation {
+#      err_tol_kj_per_mol_nm = $err_tol_kj_per_mol_nm,
+#      max_iterations = $max_iterations,
+#    }),
