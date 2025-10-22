@@ -11,8 +11,13 @@ import h5py
 import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
-from rush_py2.client import PROJECT_ID, download_object, runspec, submit_rex, upload_object
-
+from rush_py2.client import (
+    PROJECT_ID,
+    download_object,
+    runspec,
+    submit_rex,
+    upload_object,
+)
 
 type MethodT = Literal[
     "RestrictedHF",

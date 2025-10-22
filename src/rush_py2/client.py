@@ -1,18 +1,9 @@
-import json
-import tarfile
 import time
-from io import BytesIO
 from os import getenv
-from pathlib import Path
 from string import Template
-from typing import Literal
 
-import cyclopts
-import h5py
 import requests
-import zstandard as zstd
 from gql import Client, FileVar, gql
-from gql.transport.exceptions import TransportQueryError
 from gql.transport.requests import RequestsHTTPTransport
 
 INITIAL_POLL_INTERVAL = 0.5
@@ -68,7 +59,8 @@ runspec = Template("""RunSpec {
         },
         target = $target
       }""")
-      
+
+
 def upload_object(project_id, filepath):
     mutation = gql(
         """
