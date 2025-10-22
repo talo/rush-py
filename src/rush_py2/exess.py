@@ -91,7 +91,7 @@ def optional_str(v: str | int | float | list[int] | bool | None) -> str:
 
 
 def energy(
-    topology_path: Path,
+    topology_path: Path | str,
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
@@ -202,7 +202,7 @@ in
 
 
 def interaction_energy(
-    topology_path: Path,
+    topology_path: Path | str,
     reference_fragment: int,
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
@@ -315,7 +315,7 @@ in
 
 
 def chelpg(
-    topology_path: Path,
+    topology_path: Path | str,
     target: TargetT | None = None,
 ):
     # Upload inputs
@@ -456,8 +456,8 @@ in
 
 
 def qmmm(
-    topology_path: Path,
-    residues_path: Path,
+    topology_path: Path | str,
+    residues_path: Path | str,
     n_timesteps: int,
     dt_ps: float = 0.002,
     gradient_finite_difference_step_size: float | None = None,

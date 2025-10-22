@@ -141,55 +141,17 @@ def download_object(path):
     raise Exception(f"Object at path {path} has neither contents nor URL")
 
 
-def get_module_instance(run_id):
-    query = gql(
-        """
-query GetModuleInstances($run_id: TextFilterInput!) {
-    module_instances(filters: {run_id: $run_id}) {
-        nodes {
-            created_at
-            admitted_at
-            dispatched_at
-            queued_at
-            run_at
-            completed_at
-            deleted_at
-            progress {
-                n
-                n_expected
-                n_max
-                done
-            }
-            status
-            failure_reason
-            failure_context {
-                stdout
-                stderr
-                syserr
-            }
-        }
-    }
-}
-"""
-    )
-    query.variable_values = {"run_id": {"eq": run_id}}
-
-    result = client.execute(query)
-    return result["module_instances"]["nodes"]
-
-
 def fetch_results(run_id):
     query = gql(
         """
-query GetResults($id: String!) {
-    run(id: $id) {
-        id
-        status
-        result
-        stdout
-    }
-}
-"""
+        query GetResults($id: String!) {
+            run(id: $id) {
+                status
+                result
+                trace
+            }
+        }
+    """
     )
     query.variable_values = {"id": run_id}
 
@@ -228,6 +190,24 @@ def submit_rex(project_id: str, rex: str):
         query GetStatus($id: String!) {
             run(id: $id) {
                 status
+                module_instances {
+                    nodes {
+                        created_at
+                        admitted_at
+                        dispatched_at
+                        queued_at
+                        run_at
+                        completed_at
+                        deleted_at
+                        status
+                        failure_reason
+                        failure_context {
+                            stdout
+                            stderr
+                            syserr
+                        }
+                    }
+                }
             }
         }
     """
@@ -242,7 +222,7 @@ def submit_rex(project_id: str, rex: str):
 
         result = client.execute(query)
         status = result["run"]["status"]
-        module_instances = get_module_instance(run_id)
+        module_instances = result["run"]["module_instances"]["nodes"]
         if module_instances:
             curr_status = module_instances[0]["status"]
             if curr_status == "running":
