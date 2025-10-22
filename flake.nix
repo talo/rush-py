@@ -1,54 +1,37 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pyproject-nix = {
-      url = "github:nix-community/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs = {
-        pyproject-nix.follows = "pyproject-nix";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-    pyproject-build-systems = {
-      url = "github:pyproject-nix/build-system-pkgs";
-      inputs = {
-        uv2nix.follows = "uv2nix";
-        pyproject-nix.follows = "pyproject-nix";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-    uv2nix_hammer_overrides = {
-      url = "github:TyberiusPrime/uv2nix_hammer_overrides";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
-    };
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    uv2nix-parts.url = "path:/home/machineer/repos/qdx/uv2nix-parts";
+    uv2nix-parts.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
-    inputs@{ ... }:
-    let
-      system = "x86_64-linux";
-
-      pkgs = inputs.nixpkgs.legacyPackages.${system};
-
-      helpers = import ./helpers.nix {
-        inherit pkgs;
-        inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
-      };
-      name = "rush-py2";
-    in
-    {
-      packages.${system} = rec {
-        rush-py2 = helpers.mkUv2nixApplication { inherit name; };
-        default = rush-py2;
-      };
-      devShells.${system} = rec {
-        rush-py2 = helpers.mkUv2nixShell { inherit name; };
-        default = rush-py2;
-        uv = pkgs.mkShell { packages = [ pkgs.uv ]; };
-      };
+    inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [ inputs.uv2nix-parts.flakeModule ];
+      systems = [ "x86_64-linux" ];
+      perSystem =
+        {
+          self',
+          pkgs,
+          config,
+          ...
+        }:
+        let
+          name = "rush-py2";
+          workspaceRoot = ./.;
+        in
+        {
+          packages = {
+            rush-py2 = config.uv2nix-parts.mkApplication { inherit name workspaceRoot; };
+            default = self'.packages.rush-py2;
+          };
+          devShells = {
+            rush-py2 = config.uv2nix-parts.mkShell { inherit name workspaceRoot; };
+            default = self'.devShells.rush-py2;
+            uv = pkgs.mkShell { packages = [ pkgs.uv ]; };
+          };
+        };
     };
 }
