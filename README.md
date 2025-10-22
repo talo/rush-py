@@ -17,15 +17,24 @@ pip install -e .
 ```bash
 git clone git@github.com:talo/rush-py2.git
 cd rush-py2
-uv venv
+uv sync
 source .venv/bin/activate
-pip install -e .
 
-# Run directly (pass -h/--help for usage); no need to enter the venv or run pip install!
+# Run directly (pass -h/--help for usage info); no need to enter the venv
 uv run rush-exess-energy [...]
 uv run rush-exess-interaction-energy [...]
 uv run rush-exess-chelpg [...]
 uv run rush-exess-qmmm [...]
+```
+
+### Using in your project
+
+Add to your `pyproject.toml`:
+```toml
+[project]
+dependencies = [
+    "rush-py2 @ git+ssh://git@github.com/talo/rush_py2.git",
+]
 ```
 
 ## Rush setup
