@@ -163,26 +163,26 @@ def fetch_results(run_id):
 def print_run_trace(result):
     print(f"Error: {result['result']}")
 
+    trace = result["trace"]
     trace = re.sub(
         r"\\u\{([0-9a-fA-F]+)\}",
         lambda m: chr(int(m.group(1), 16)),
-        result["trace"],
+        trace,
     )
     trace = trace.replace("\\n", "\n")
-
-    # Now fix the UTF-8 encoding issue: encode as latin-1 then decode as UTF-8
+    trace = trace.replace('\\"', '"')
     try:
         trace = trace.encode("latin-1").decode("utf-8")
     except (UnicodeDecodeError, UnicodeEncodeError):
         pass
 
-    stdout_match = re.search(r'stdout: Some\("(.+?)"\)', trace, re.DOTALL)
+    stdout_match = re.search(r'stdout: Some\("(.*?)"\)', trace, re.DOTALL)
     if stdout_match:
         stdout_content = stdout_match.group(1)
         print("stdout:")
         for line in stdout_content.split("\n"):
             print(f"  {line}")
-    stderr_match = re.search(r'stderr: Some\("(.+?)"\)', trace, re.DOTALL)
+    stderr_match = re.search(r'stderr: Some\("(.*?)"\)', trace, re.DOTALL)
     if stderr_match:
         stderr_content = stderr_match.group(1)
         print("stderr:")
