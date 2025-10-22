@@ -443,8 +443,15 @@ in
             )
             with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
                 hdf5_f = tar.extractfile(tar.getnames()[1])
+                chelpg = []
                 with h5py.File(hdf5_f, "r") as f:
-                    chelpg = [float(x) for x in f["monomers/0/chelpg_charges"]]  # pyright: ignore[reportGeneralTypeIssues]
+                    frag_indices = [int(x) for x in f["monomers"].keys()]
+                    for frag_idx in sorted(frag_indices):
+                        print(frag_idx)
+                        # pyright: ignore[reportGeneralTypeIssues]
+                        chelpg += [
+                            float(x) for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+                        ]
             return (out_path, chelpg)
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
