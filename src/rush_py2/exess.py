@@ -601,17 +601,8 @@ if __name__ == "__main__":
     i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
 
     o = energy(
-        i_folder / "tyk2_ejm_31_t.json",
-        "RestrictedRIMP2",
-        "6-31G**",
-        "6-31G**-RIFIT",
-        FragKeywords(
-            level="Dimer",
-            dimer_cutoff="25.0",
-        ),
-        RunSpec(
-            target="Bullet2",
-        ),
+        "6a5j_t.json",
+        run_spec=RunSpec(target="Bullet"),
     )
     # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 94)
     # o = chelpg(i_folder / "tyk2_ejm_31_t.json")

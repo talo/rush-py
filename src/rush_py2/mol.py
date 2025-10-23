@@ -7,12 +7,10 @@ This module provides Python classes for molecular structures:
 - Topology, Residues, Chains, and TRC structures
 """
 
-from __future__ import annotations
-
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Self, Tuple, Union
 
 
 class Element(IntEnum):
@@ -57,7 +55,7 @@ class Element(IntEnum):
     Kr = 36
 
     @classmethod
-    def from_str(cls, symbol: str) -> Element:
+    def from_str(cls, symbol: str) -> Self:
         """Parse element from string symbol."""
         # First try the symbol as-is (for proper case like "Fe")
         try:
