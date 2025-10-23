@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import tarfile
+from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 from string import Template
@@ -11,14 +12,15 @@ import h5py
 import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
-from rush_py2.client import (
+from .client import (
     PROJECT_ID,
+    RunSpec,
     download_object,
     print_run_trace,
-    runspec,
     submit_rex,
     upload_object,
 )
+from .utils import clean_dict, optional_str
 
 type MethodT = Literal[
     "RestrictedHF",
@@ -73,22 +75,40 @@ type FragmentLevelT = Literal[
     "Tetramer",
 ]
 
-type GradientMethodT = Literal["Analytical", "Numerical"]
 
-type TargetT = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
+@dataclass
+class FragKeywords:
+    level: FragmentLevelT = "Monomer"
+    dimer_cutoff: float = 100.0
+    trimer_cutoff: float = 25.0
+    tetramer_cutoff: float = 10.0
 
-
-def clean_dict(d):
-    if isinstance(d, dict):
-        return {k: clean_dict(v) for k, v in d.items() if v is not None}
-    elif isinstance(d, list):
-        return [clean_dict(v) for v in d]
-    else:
-        return d
-
-
-def optional_str(v: str | int | float | list[int] | bool | None) -> str:
-    return f"Some {v}" if v is not None else "None"
+    def to_rex(self, reference_fragment: int | None = None):
+        return Template(
+            """Some (exess_rex::FragKeywords {
+            cutoffs = Some (exess_rex::FragmentCutoffs {
+              dimer = Some $dimer_cutoff,
+              trimer = Some $trimer_cutoff,
+              tetramer = Some $tetramer_cutoff,
+              pentamer = None,
+              hexamer = None,
+              heptamer = None,
+              octamer = None,
+            }),
+            cutoff_type = None,
+            distance_metric = None,
+            level = exess_rex::FragmentLevel::$level,
+            included_fragments = None,
+            reference_fragment = $reference_fragment,
+            enable_speed = None,
+          })"""
+        ).substitute(
+            dimer_cutoff=self.dimer_cutoff,
+            trimer_cutoff=self.trimer_cutoff,
+            tetramer_cutoff=self.tetramer_cutoff,
+            level=self.level,
+            reference_fragment=optional_str(reference_fragment),
+        )
 
 
 def energy(
@@ -96,11 +116,8 @@ def energy(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
-    fragment_level: FragmentLevelT = "Monomer",
-    dimer_cutoff: float = 100.0,
-    trimer_cutoff: float = 25.0,
-    tetramer_cutoff: float = 10.0,
-    target: TargetT | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -111,7 +128,7 @@ def energy(
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      ($runspec)
+      ($run_spec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -132,23 +149,7 @@ def energy(
           scf = None,
           ks = None,
           rtat = None,
-          frag = Some (exess_rex::FragKeywords {
-            cutoffs = Some (exess_rex::FragmentCutoffs {
-              dimer = Some $dimer_cutoff,
-              trimer = Some $trimer_cutoff,
-              tetramer = Some $tetramer_cutoff,
-              pentamer = None,
-              hexamer = None, 
-              heptamer = None,
-              octamer = None,
-            }),
-            cutoff_type = None,
-            distance_metric = None,
-            level = exess_rex::FragmentLevel::$fragment_level,
-            included_fragments = None,
-            reference_fragment = None,
-            enable_speed = None,
-          }),
+          frag = $frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -169,17 +170,12 @@ def energy(
 in
   exess "$topology_vobj_path"
 """).substitute(
-        runspec=runspec.substitute(
-            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
-        ),
-        topology_vobj_path=topology_vobj["path"],
+        run_spec=run_spec.to_rex(),
+        method=method,
         basis=basis,
         aux_basis=aux_basis,
-        method=method,
-        fragment_level=fragment_level,
-        dimer_cutoff=dimer_cutoff,
-        trimer_cutoff=trimer_cutoff,
-        tetramer_cutoff=tetramer_cutoff,
+        frag_keywords=frag_keywords.to_rex(),
+        topology_vobj_path=topology_vobj["path"],
     )
     result = None
     try:
@@ -210,11 +206,8 @@ def interaction_energy(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
-    fragment_level: FragmentLevelT = "Dimer",
-    dimer_cutoff: float = 100.0,
-    trimer_cutoff: float = 25.0,
-    tetramer_cutoff: float = 10.0,
-    target: TargetT | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -225,7 +218,7 @@ def interaction_energy(
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      ($runspec)
+      ($run_spec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -246,23 +239,7 @@ def interaction_energy(
           scf = None,
           ks = None,
           rtat = None,
-          frag = Some (exess_rex::FragKeywords {
-            cutoffs = Some (exess_rex::FragmentCutoffs {
-              dimer = Some $dimer_cutoff,
-              trimer = Some $trimer_cutoff,
-              tetramer = Some $tetramer_cutoff,
-              pentamer = None,
-              hexamer = None, 
-              heptamer = None,
-              octamer = None,
-            }),
-            cutoff_type = None,
-            distance_metric = None,
-            level = exess_rex::FragmentLevel::$fragment_level,
-            included_fragments = None,
-            reference_fragment = Some $reference_fragment,
-            enable_speed = None,
-          }),
+          frag = $frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -283,18 +260,12 @@ def interaction_energy(
 in
   exess "$topology_vobj_path"
 """).substitute(
-        runspec=runspec.substitute(
-            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
-        ),
-        topology_vobj_path=topology_vobj["path"],
-        reference_fragment=reference_fragment,
+        run_spec=run_spec.to_rex(),
+        method=method,
         basis=basis,
         aux_basis=aux_basis,
-        method=method,
-        fragment_level=fragment_level,
-        dimer_cutoff=dimer_cutoff,
-        trimer_cutoff=trimer_cutoff,
-        tetramer_cutoff=tetramer_cutoff,
+        frag_keywords=frag_keywords.to_rex(reference_fragment),
+        topology_vobj_path=topology_vobj["path"],
     )
     result = None
     try:
@@ -321,7 +292,7 @@ in
 
 def chelpg(
     topology_path: Path | str,
-    target: TargetT | None = None,
+    run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -332,7 +303,7 @@ def chelpg(
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
     exess_rex_s
-      ($runspec)
+      ($run_spec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
@@ -425,9 +396,7 @@ def chelpg(
 in
   exess "$topology_vobj_path"
 """).substitute(
-        runspec=runspec.substitute(
-            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
-        ),
+        run_spec=run_spec.to_rex(),
         topology_vobj_path=topology_vobj["path"],
     )
     result = None
@@ -477,8 +446,6 @@ def qmmm(
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
     qm_fragments: list[int] | None = None,
-    err_tol_kj_per_mol_nm: float = 10.0,
-    max_iterations: int = 0,
     interval: int | None = None,
     start: int | None = None,
     end: int | None = None,
@@ -490,11 +457,8 @@ def qmmm(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "STO-3G",
     aux_basis: AuxBasisT | None = None,
-    fragment_level: FragmentLevelT = "Monomer",
-    dimer_cutoff: float = 100.0,
-    trimer_cutoff: float = 25.0,
-    tetramer_cutoff: float = 10.0,
-    target: TargetT | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -506,7 +470,7 @@ def qmmm(
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology residues →
     exess_qmmm_rex_s
-      ($runspec)
+      ($run_spec)
       (exess_qmmm_rex::QMMMParams {
         schema_version = "0.2.0",
         model = Some (exess_qmmm_rex::Model {
@@ -526,23 +490,7 @@ def qmmm(
           scf = None,
           ks = None,
           rtat = None,
-          frag = Some (exess_qmmm_rex::FragKeywords {
-            cutoffs = Some (exess_qmmm_rex::FragmentCutoffs {
-              dimer = Some $dimer_cutoff,
-              trimer = Some $trimer_cutoff,
-              tetramer = Some $tetramer_cutoff,
-              pentamer = None,
-              hexamer = None, 
-              heptamer = None,
-              octamer = None,
-            }),
-            cutoff_type = None,
-            distance_metric = None,
-            level = exess_qmmm_rex::FragmentLevel::$fragment_level,
-            included_fragments = None,
-            reference_fragment = None,
-            enable_speed = None,
-          }),
+          frag = $frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -586,18 +534,11 @@ def qmmm(
 in
   exess "$topology_vobj_path" "$residues_vobj_path"
 """).substitute(
-        runspec=runspec.substitute(
-            target=f"Some ModuleInstanceTarget::{target}" if target else "None"
-        ),
-        topology_vobj_path=topology_vobj["path"],
-        residues_vobj_path=residues_vobj["path"],
+        run_spec=run_spec.to_rex(),
+        method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
-        method=method,
-        fragment_level=fragment_level,
-        dimer_cutoff=dimer_cutoff,
-        trimer_cutoff=trimer_cutoff,
-        tetramer_cutoff=tetramer_cutoff,
+        frag_keywords=frag_keywords.to_rex(),
         maybe_gradient_finite_difference_step_size=optional_str(
             gradient_finite_difference_step_size
         ),
@@ -606,8 +547,6 @@ in
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
         qm_fragments=qm_fragments if qm_fragments is not None else [],
-        err_tol_kj_per_mol_nm=err_tol_kj_per_mol_nm,
-        max_iterations=max_iterations,
         maybe_interval=optional_str(interval),
         maybe_start=optional_str(start),
         maybe_end=optional_str(end),
@@ -616,6 +555,8 @@ in
         maybe_free_atoms=optional_str(free_atoms),
         maybe_fixed_fragments=optional_str(fixed_fragments),
         maybe_free_fragments=optional_str(free_fragments),
+        topology_vobj_path=topology_vobj["path"],
+        residues_vobj_path=residues_vobj["path"],
     )
     result = None
     try:
@@ -659,16 +600,28 @@ def run_qmmm():
 if __name__ == "__main__":
     i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
 
-    # o = energy(i_folder / "thrombin_1c_t.json")
-    # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 1)
-    # o = chelpg(i_folder / "tyk2_ejm_31_t.json")
-    o = qmmm(
-        "6a5j_t.json",
-        "6a5j_r.json",
-        n_timesteps=504,
-        qm_fragments=[],
-        free_atoms=[0],
+    o = energy(
+        i_folder / "tyk2_ejm_31_t.json",
+        "RestrictedRIMP2",
+        "6-31G**",
+        "6-31G**-RIFIT",
+        FragKeywords(
+            level="Dimer",
+            dimer_cutoff="25.0",
+        ),
+        RunSpec(
+            target="Bullet2",
+        ),
     )
+    # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 94)
+    # o = chelpg(i_folder / "tyk2_ejm_31_t.json")
+    # o = qmmm(
+    #     "6a5j_t.json",
+    #     "6a5j_r.json",
+    #     n_timesteps=500,
+    #     qm_fragments=[],
+    #     free_atoms=[0],
+    # )
     print(f"Output: {o}")
 
 # TODO:

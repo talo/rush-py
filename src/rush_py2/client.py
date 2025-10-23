@@ -1,12 +1,16 @@
 import re
 import time
+from dataclasses import dataclass
 from os import getenv
 from pathlib import Path
 from string import Template
+from typing import Literal
 
 import requests
 from gql import Client, FileVar, gql
 from gql.transport.requests import RequestsHTTPTransport
+
+from .utils import optional_str
 
 INITIAL_POLL_INTERVAL = 0.5
 MAX_POLL_INTERVAL = 30
@@ -39,23 +43,49 @@ client = Client(
     ),
 )
 
-runspec = Template("""RunSpec {
+type TargetT = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
+
+type StorageUnitT = Literal["KB", "MB", "GB"]
+
+
+@dataclass
+class RunSpec:
+    target: TargetT = None
+    walltime: str | None = None
+    storage: int | None = 10
+    storage_units: StorageUnitT | None = "MB"
+    cpus: int | None = None
+    gpus: int | None = 1
+    nodes: int | None = None
+
+    def to_rex(self):
+        return Template(
+            """RunSpec {
         resources = Resources {
-          walltime = None,
-          storage = Some 10,
-          storage_units = Some MemUnits::MB,
+          walltime = $walltime,
+          storage = $storage,
+          storage_units = $storage_units,
           storage_mounts = None,
-          cpus = None,
+          cpus = $cpus,
           mem = None,
           mem_units = None,
-          gpus = Some 1,
+          gpus = $gpus,
           gpu_mem = None,
           gpu_mem_units = None,
-          nodes = None,
+          nodes = $nodes,
           internet_access = None,
         },
         target = $target
-      }""")
+      }"""
+        ).substitute(
+            walltime=optional_str(self.walltime),
+            target=optional_str(self.target, "ModuleInstanceTarget::"),
+            storage=optional_str(self.storage),
+            storage_units=optional_str(self.storage_units, "MemUnits::"),
+            cpus=optional_str(self.cpus),
+            gpus=optional_str(self.gpus),
+            nodes=optional_str(self.nodes),
+        )
 
 
 def upload_object(project_id, filepath: Path | str):
