@@ -111,6 +111,56 @@ class FragKeywords:
         )
 
 
+@dataclass
+class Trajectory:
+    interval: int | None = None
+    start: int | None = None
+    end: int | None = None
+    include_waters: int | None = None
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_qmmm_rex::MDTrajectory {
+              format = None,
+              interval = $maybe_interval,
+              start = $maybe_start,
+              end = $maybe_end,
+              include_waters = $maybe_include_waters,
+            })"""
+        ).substitute(
+            maybe_interval=optional_str(self.interval),
+            maybe_start=optional_str(self.start),
+            maybe_end=optional_str(self.end),
+            maybe_include_waters=optional_str(self.include_waters),
+        )
+
+
+@dataclass
+class Restraints:
+    fixed_atoms: list[int] | None = None
+    free_atoms: list[int] | None = None
+    fixed_fragments: list[int] | None = None
+    free_fragments: list[int] | None = None
+    fix_heavy: bool | None = None
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_qmmm_rex::MDRestraints {
+              fixed_atoms = $maybe_fixed_atoms,
+              free_atoms = $maybe_free_atoms,
+              fixed_fragments = $maybe_fixed_fragments,
+              free_fragments = $maybe_free_fragments,
+              fix_heavy = $maybe_fix_heavy,
+            })"""
+        ).substitute(
+            maybe_fixed_atoms=optional_str(self.fixed_atoms),
+            maybe_free_atoms=optional_str(self.free_atoms),
+            maybe_fixed_fragments=optional_str(self.fixed_fragments),
+            maybe_free_fragments=optional_str(self.free_fragments),
+            maybe_fix_heavy=optional_str(self.fix_heavy),
+        )
+
+
 def energy(
     topology_path: Path | str,
     method: MethodT = "RestrictedHF",
@@ -441,19 +491,13 @@ def qmmm(
     topology_path: Path | str,
     residues_path: Path | str,
     n_timesteps: int,
-    dt_ps: float = 0.002,
-    gradient_finite_difference_step_size: float | None = None,
+    dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
     qm_fragments: list[int] | None = None,
-    interval: int | None = None,
-    start: int | None = None,
-    end: int | None = None,
-    include_waters: int | None = None,
-    fixed_atoms: list[int] | None = None,
-    free_atoms: list[int] | None = None,
-    fixed_fragments: list[int] | None = None,
-    free_fragments: list[int] | None = None,
+    restraints: Restraints | None = None,
+    trajectory: Trajectory = Trajectory(),
+    gradient_finite_difference_step_size: float | None = None,
     method: MethodT = "RestrictedHF",
     basis: BasisT = "STO-3G",
     aux_basis: AuxBasisT | None = None,
@@ -512,20 +556,8 @@ def qmmm(
             pressure_atm = $maybe_pressure_atm,
             qm_fragments = $qm_fragments,
             minimisation = None,
-            trajectory = Some (exess_qmmm_rex::MDTrajectory {
-              format = None,
-              interval = $maybe_interval,
-              start = $maybe_start,
-              end = $maybe_end,
-              include_waters = $maybe_include_waters,
-            }),
-            restraints = Some (exess_qmmm_rex::MDRestraints {
-              fixed_atoms = $maybe_fixed_atoms,
-              free_atoms = $maybe_free_atoms,
-              fixed_fragments = $maybe_fixed_fragments,
-              free_fragments = $maybe_free_fragments,
-              fix_heavy = None,
-            }),
+            trajectory = $trajectory,
+            restraints = $restraints,
           }),
         },
       })
@@ -547,14 +579,8 @@ in
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
         qm_fragments=qm_fragments if qm_fragments is not None else [],
-        maybe_interval=optional_str(interval),
-        maybe_start=optional_str(start),
-        maybe_end=optional_str(end),
-        maybe_include_waters=optional_str(include_waters),
-        maybe_fixed_atoms=optional_str(fixed_atoms),
-        maybe_free_atoms=optional_str(free_atoms),
-        maybe_fixed_fragments=optional_str(fixed_fragments),
-        maybe_free_fragments=optional_str(free_fragments),
+        trajectory=trajectory.to_rex(),
+        restraints=restraints.to_rex() if restraints is not None else "None",
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
     )
