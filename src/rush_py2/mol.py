@@ -381,7 +381,7 @@ class Topology:
 
         return near_atoms
 
-    def extend(self, other: "Topology") -> None:
+    def extend(self, other: Self) -> None:
         """Extend this topology with atoms from another topology."""
         offset = len(self.symbols)
 
@@ -665,7 +665,7 @@ class Residues:
         """Get indices of non-amino acid residues."""
         return [i for i in range(len(self.seqs)) if not self.is_amino_acid(i)]
 
-    def extend(self, other: "Residues") -> None:
+    def extend(self, other: Self) -> None:
         """Extend this residues collection with another."""
         # Calculate atom offset for renumbering
         offset = sum(len(residue.atoms) for residue in self.residues)
@@ -758,7 +758,7 @@ class Chains:
         # Basic validation - more complex checks could be added
         pass
 
-    def extend(self, other: "Chains") -> None:
+    def extend(self, other: Self) -> None:
         """Extend this chains collection with another."""
         # Calculate residue offset
         residue_offset = sum(len(chain.residues) for chain in self.chains)
@@ -878,7 +878,7 @@ class TRC:
         if len(residue_set) != len(self.residues.residues):
             raise ValueError("Not all residues are assigned to chains")
 
-    def extend(self, other: "TRC") -> None:
+    def extend(self, other: Self) -> None:
         """Extend this TRC with another TRC."""
         self.topology.extend(other.topology)
         self.residues.extend(other.residues)
