@@ -33,7 +33,7 @@ Add to your `pyproject.toml`:
 ```toml
 [project]
 dependencies = [
-    "rush-py2 @ git+ssh://git@github.com/talo/rush_py2.git",
+    "rush-py2 @ git+ssh://git@github.com/talo/rush-py2.git",
 ]
 ```
 
