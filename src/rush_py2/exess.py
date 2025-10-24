@@ -20,7 +20,7 @@ from .client import (
     submit_rex,
     upload_object,
 )
-from .utils import clean_dict, optional_str
+from .utils import bool_to_str, clean_dict, float_to_str, optional_str
 
 type MethodT = Literal[
     "RestrictedHF",
@@ -68,6 +68,10 @@ type AuxBasisT = Literal[
     "cc-pVTZ-RIFIT",
 ]
 
+type ConvergenceMetricT = Literal["Energy", "DIIS", "Density"]
+
+type FockBuildTypeT = Literal["HGP", "UM09", "RI"]
+
 type FragmentLevelT = Literal[
     "Monomer",
     "Dimer",
@@ -75,39 +79,136 @@ type FragmentLevelT = Literal[
     "Tetramer",
 ]
 
+type CutoffTypeT = Literal["Centroid", "ClosestPair"]
+
+
+@dataclass
+class SCFKeywords:
+    max_iters: int = 50
+    max_diis_history_length: int = 8
+    batch_size: int = 2560
+    convergence_metric: ConvergenceMetricT = "DIIS"
+    convergence_threshold: float = 1e-6
+    density_threshold: float = 1e-10
+    gradient_screening_threshold: float = 1e-10
+    bf_cutoff_threshold: float | None = None
+    density_basis_set_projection_fallback_enabled: bool | None = None
+    use_ri: bool = False
+    store_ri_b_on_host: bool = False
+    compress_ri_b: bool = False
+    homo_lumo_guess_rotation_angle: float | None = None
+    fock_build_type: FockBuildTypeT = "HGP"
+    exchange_screening_threshold: float = 1e-5
+    group_shared_exponents: bool = False
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_rex::SCFKeywords {
+            max_iters = Some $max_iters,
+            max_diis_history_length = Some $max_diis_history_length,
+            batch_size = Some $batch_size,
+            convergence_metric = Some exess_rex::ConvergenceMetric::$convergence_metric,
+            convergence_threshold = Some $convergence_threshold,
+            density_threshold = Some $density_threshold,
+            gradient_screening_threshold = Some $gradient_screening_threshold,
+            bf_cutoff_threshold = $maybe_bf_cutoff_threshold,
+            density_basis_set_projection_fallback_enabled = $maybe_density_basis_set_projection_fallback_enabled,
+            use_ri = Some $use_ri,
+            store_ri_b_on_host = Some $store_ri_b_on_host,
+            compress_ri_b = Some $compress_ri_b,
+            homo_lumo_guess_rotation_angle = $maybe_homo_lumo_guess_rotation_angle,
+            fock_build_type = Some exess_rex::FockBuildType::$fock_build_type,
+            exchange_screening_threshold = Some $exchange_screening_threshold,
+            group_shared_exponents = Some $group_shared_exponents,
+          })"""
+        ).substitute(
+            max_iters=self.max_iters,
+            max_diis_history_length=self.max_diis_history_length,
+            batch_size=self.batch_size,
+            convergence_metric=self.convergence_metric,
+            convergence_threshold=float_to_str(self.convergence_threshold),
+            density_threshold=float_to_str(self.density_threshold),
+            gradient_screening_threshold=float_to_str(
+                self.gradient_screening_threshold
+            ),
+            maybe_bf_cutoff_threshold=optional_str(self.bf_cutoff_threshold),
+            maybe_density_basis_set_projection_fallback_enabled=optional_str(
+                self.density_basis_set_projection_fallback_enabled
+            ),
+            use_ri=bool_to_str(self.use_ri),
+            store_ri_b_on_host=bool_to_str(self.store_ri_b_on_host),
+            compress_ri_b=bool_to_str(self.compress_ri_b),
+            maybe_homo_lumo_guess_rotation_angle=optional_str(
+                self.homo_lumo_guess_rotation_angle
+            ),
+            fock_build_type=self.fock_build_type,
+            exchange_screening_threshold=float_to_str(
+                self.exchange_screening_threshold
+            ),
+            group_shared_exponents=bool_to_str(self.group_shared_exponents),
+        )
+
 
 @dataclass
 class FragKeywords:
-    level: FragmentLevelT = "Monomer"
-    dimer_cutoff: float = 100.0
-    trimer_cutoff: float = 25.0
-    tetramer_cutoff: float = 10.0
+    level: FragmentLevelT = "Dimer"
+    dimer_cutoff: float | None = None
+    trimer_cutoff: float | None = None
+    tetramer_cutoff: float | None = None
+    cutoff_type: CutoffTypeT | None = None
+
+    def __post_init__(self):
+        if self.level == "Monomer":
+            self.dimer_cutoff = 100.0
+            self.trimer_cutoff = None
+            self.tetramer_cutoff = None
+            self.cutoff_type = None
+        if self.level == "Dimer" and self.dimer_cutoff is None:
+            self.dimer_cutoff = 100.0
+            self.trimer_cutoff = None
+            self.tetramer_cutoff = None
+        if self.level == "Trimer":
+            if self.dimer_cutoff is None:
+                self.dimer_cutoff = 100.0
+            if self.trimer_cutoff is None:
+                self.trimer_cutoff = 25.0
+            self.tetramer_cutoff = None
+        if self.level == "Tetramer":
+            if self.dimer_cutoff is None:
+                self.dimer_cutoff = 100.0
+            if self.trimer_cutoff is None:
+                self.trimer_cutoff = 25.0
+            if self.tetramer_cutoff is None:
+                self.tetramer_cutoff = 10.0
 
     def to_rex(self, reference_fragment: int | None = None):
         return Template(
             """Some (exess_rex::FragKeywords {
             cutoffs = Some (exess_rex::FragmentCutoffs {
-              dimer = Some $dimer_cutoff,
-              trimer = Some $trimer_cutoff,
-              tetramer = Some $tetramer_cutoff,
+              dimer = $dimer_cutoff,
+              trimer = $trimer_cutoff,
+              tetramer = $tetramer_cutoff,
               pentamer = None,
               hexamer = None,
               heptamer = None,
               octamer = None,
             }),
-            cutoff_type = None,
+            cutoff_type = $maybe_cutoff_type,
             distance_metric = None,
             level = exess_rex::FragmentLevel::$level,
             included_fragments = None,
-            reference_fragment = $reference_fragment,
+            reference_fragment = $maybe_reference_fragment,
             enable_speed = None,
           })"""
         ).substitute(
-            dimer_cutoff=self.dimer_cutoff,
-            trimer_cutoff=self.trimer_cutoff,
-            tetramer_cutoff=self.tetramer_cutoff,
+            dimer_cutoff=optional_str(self.dimer_cutoff),
+            trimer_cutoff=optional_str(self.trimer_cutoff),
+            tetramer_cutoff=optional_str(self.tetramer_cutoff),
+            maybe_cutoff_type=optional_str(
+                self.cutoff_type, "exess_rex::FragmentDistanceMethod::"
+            ),
             level=self.level,
-            reference_fragment=optional_str(reference_fragment),
+            maybe_reference_fragment=optional_str(reference_fragment),
         )
 
 
@@ -166,7 +267,8 @@ def energy(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
-    frag_keywords: FragKeywords = FragKeywords(),
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
@@ -196,7 +298,7 @@ def energy(
           max_gpu_memory_mb = None,
         },
         keywords = exess_rex::Keywords {
-          scf = None,
+          scf = $scf_keywords,
           ks = None,
           rtat = None,
           frag = $frag_keywords,
@@ -224,7 +326,8 @@ in
         method=method,
         basis=basis,
         aux_basis=aux_basis,
-        frag_keywords=frag_keywords.to_rex(),
+        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
+        frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         topology_vobj_path=topology_vobj["path"],
     )
     result = None
@@ -256,6 +359,7 @@ def interaction_energy(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
+    scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
 ):
@@ -286,7 +390,7 @@ def interaction_energy(
           max_gpu_memory_mb = None,
         },
         keywords = exess_rex::Keywords {
-          scf = None,
+          scf = $scf_keywords,
           ks = None,
           rtat = None,
           frag = $frag_keywords,
@@ -314,6 +418,7 @@ in
         method=method,
         basis=basis,
         aux_basis=aux_basis,
+        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
@@ -371,35 +476,10 @@ def chelpg(
           max_gpu_memory_mb = None,
         },
         keywords = exess_rex::Keywords {
-          scf = Some (exess_rex::SCFKeywords {
-            max_iters = Some 50,
-            max_diis_history_length = Some 12,
-            batch_size = Some 2560,
-            convergence_metric = Some exess_rex::ConvergenceMetric::DIIS,
-            convergence_threshold = Some 0.00000001,
-            density_threshold = Some 0.0000000001,
-            gradient_screening_threshold = Some 0.0000000001,
-            bf_cutoff_threshold = None,
-            density_basis_set_projection_fallback_enabled = None,
-            use_ri = Some false,
-            store_ri_b_on_host = Some false,
-            compress_ri_b = Some false,
-            homo_lumo_guess_rotation_angle = None,
-            fock_build_type = Some exess_rex::FockBuildType::HGP,
-            exchange_screening_threshold = Some 0.00001,
-            group_shared_exponents = Some false,
-          }),
+          scf = $scf_keywords,
           ks = None,
           rtat = None,
-          frag = Some (exess_rex::FragKeywords {
-            cutoffs = None,
-            cutoff_type = None,
-            distance_metric = None,
-            level = exess_rex::FragmentLevel::Monomer,
-            included_fragments = None,
-            reference_fragment = None,
-            enable_speed = None,
-          }),
+          frag = $frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -447,6 +527,10 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
+        scf_keywords=SCFKeywords(
+            max_diis_history_length=12, convergence_threshold=1e-8
+        ).to_rex(),
+        frag_keywords=FragKeywords(level="Monomer").to_rex(),
         topology_vobj_path=topology_vobj["path"],
     )
     result = None
@@ -501,7 +585,8 @@ def qmmm(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "STO-3G",
     aux_basis: AuxBasisT | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
@@ -531,7 +616,7 @@ def qmmm(
           max_gpu_memory_mb = None,
         }),
         keywords = exess_qmmm_rex::Keywords {
-          scf = None,
+          scf = $scf_keywords,
           ks = None,
           rtat = None,
           frag = $frag_keywords,
@@ -570,7 +655,8 @@ in
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
-        frag_keywords=frag_keywords.to_rex(),
+        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
+        frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         maybe_gradient_finite_difference_step_size=optional_str(
             gradient_finite_difference_step_size
         ),

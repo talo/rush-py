@@ -1,7 +1,23 @@
+from decimal import Decimal
+
+
+def float_to_str(v: float) -> str:
+    return f"{Decimal(str(v)):f}"
+
+
+def bool_to_str(v: float) -> str:
+    return f"{str(v).lower()}"
+
+
 def optional_str(
     v: str | int | float | list[int] | bool | None,
     prefix: str = "",
 ) -> str:
+    if isinstance(v, float):
+        v = float_to_str(v)
+    elif isinstance(v, bool):
+        v = bool_to_str(v)
+
     return f"Some {prefix}{v}" if v is not None else "None"
 
 
