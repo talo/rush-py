@@ -26,8 +26,9 @@ GRAPHQL_ENDPOINT = getenv(
 API_KEY = getenv("RUSH_TOKEN")
 PROJECT_ID = getenv("RUSH_PROJECT")
 MODULE_LOCK = {
-    "exess_rex": "github:talo/tengu-exess/a9acae4238d680a17528e470346fde65e1016046#exess_rex",
-    "exess_qmmm_rex": "github:talo/tengu-exess/4035bb1e9bdb29040bd9675909c89984474b9c7c#exess_qmmm_rex",
+    "exess_rex": "github:talo/tengu-exess/561ffc58bb71b4454b9ada839867cf9f6730d685#exess_rex",
+    "exess_qmmm_rex": "github:talo/tengu-exess/561ffc58bb71b4454b9ada839867cf9f6730d685#exess_qmmm_rex",
+    "exess_geo_opt_rex": "github:talo/tengu-exess/25586c8f53986cfc49967cfbcef207091c95ff3f#exess_geo_opt_rex",
 }
 
 if not API_KEY:

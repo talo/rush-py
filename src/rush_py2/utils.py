@@ -21,6 +21,10 @@ def optional_str(
     return f"Some {prefix}{v}" if v is not None else "None"
 
 
+def optional_nested(v):
+    v.to_rex() if v is not None else "None"
+
+
 def clean_dict(d):
     if isinstance(d, dict):
         return {k: clean_dict(v) for k, v in d.items() if v is not None}

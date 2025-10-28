@@ -20,7 +20,7 @@ from .client import (
     submit_rex,
     upload_object,
 )
-from .utils import bool_to_str, clean_dict, float_to_str, optional_str
+from .utils import bool_to_str, clean_dict, float_to_str, optional_nested, optional_str
 
 type MethodT = Literal[
     "RestrictedHF",
@@ -675,6 +675,224 @@ in
         result = submit_rex(PROJECT_ID, rex)
         if "Ok" in result["result"]:
             qm_output_vobj = result["result"]["Ok"]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            out_path = f"{qm_output_vobj['path']}.json"
+            with open(out_path, "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
+            return out_path
+        elif "Err" in result["result"]:
+            print(f"Error: {result['result']['Err']}")
+        elif result["status"] == "error":
+            print_run_trace(result)
+
+    except TransportQueryError as e:
+        if e.errors:
+            for error in e.errors:
+                print(f"Error: {error['message']}")
+
+
+@dataclass
+class OptimizationConvergenceCriteria:
+    metric: str | None = None
+    gradient_threshold: float | None = None
+    delta_energy_threshold: float | None = None
+    step_component_threshold: float | None = None
+
+    def to_rex(self, reference_fragment: int | None = None):
+        return Template(
+            """Some (exess_rex::OptimizationConvergenceCriteria {
+            metric = $maybe_metric,
+            gradient_threshold = $maybe_gradient_threshold,
+            delta_energy_threshold = $maybe_delta_energy_threshold,
+            step_component_threshold = $maybe_step_component_threshold,
+          })"""
+        ).substitute(
+            maybe_metric=optional_str(self.metric),
+            maybe_gradient_threshold=optional_str(self.gradient_threshold),
+            maybe_delta_energy_threshold=optional_str(self.delta_energy_threshold),
+            maybe_step_component_threshold=optional_str(self.step_component_threshold),
+        )
+
+
+type CoordinateSystemT = Literal["Cartesian", "NaturalInternal", "DelocalisedInternal"]
+
+type HessianGuessTypeT = Literal["Identity", "ScaledIdentity", "Schlegel", "Lindh"]
+
+type OptimizationAlgorithmTypeT = Literal[
+    "EigenvectorFollowing", "TrustRegionAugmentedHessian"
+]
+
+
+@dataclass
+class TrustRegionKeywords:
+    initial_radius: float | None = None
+    max_radius: float | None = None
+    min_radius: float | None = None
+    increase_factor: float | None = None
+    decrease_factor: float | None = None
+    constrict_factor: float | None = None
+    increase_threshold: float | None = None
+    decrease_threshold: float | None = None
+    rejection_threshold: float | None = None
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_rex::TrustRegionKeywords {
+            initial_radius = $maybe_initial_radius,
+            max_radius = $maybe_max_radius,
+            min_radius = $maybe_min_radius,
+            increase_factor = $maybe_increase_factor,
+            decrease_factor = $maybe_decrease_factor,
+            constrict_factor = $maybe_constrict_factor,
+            increase_threshold = $maybe_increase_threshold,
+            decrease_threshold = $maybe_decrease_threshold,
+            rejection_threshold = $maybe_rejection_threshold,
+          })"""
+        ).substitute(
+            maybe_initial_radius=optional_str(self.initial_radius),
+            maybe_max_radius=optional_str(self.max_radius),
+            maybe_min_radius=optional_str(self.min_radius),
+            maybe_increase_factor=optional_str(self.increase_factor),
+            maybe_decrease_factor=optional_str(self.decrease_factor),
+            maybe_constrict_factor=optional_str(self.constrict_factor),
+            maybe_increase_threshold=optional_str(self.increase_threshold),
+            maybe_decrease_threshold=optional_str(self.decrease_threshold),
+            maybe_rejection_threshold=optional_str(self.rejection_threshold),
+        )
+
+
+@dataclass
+class OptimizationKeywords:
+    convergence_criteria: OptimizationConvergenceCriteria | None = None
+    optimiser_reset_interval: int | None = None
+    coordinate_system: CoordinateSystemT | None = None
+    constraints: list[list[int]] | None = None
+    hessian_guess: HessianGuessTypeT | None = None
+    algorithm: OptimizationAlgorithmTypeT | None = None
+    frozen_distance_slippage_tolerance_angstroms: float | None = None
+    frozen_angle_slippage_tolerance_degrees: float | None = None
+    trust_region_keywords: TrustRegionKeywords | None = None
+
+    def to_rex(self, max_iters):
+        return Template(
+            """Some (exess_rex::OptimizationKeywords {
+            max_iters = $max_iters,
+            convergence_criteria = $maybe_convergence_criteria,
+            optimiser_reset_interval = $maybe_optimiser_reset_interval,
+            coordinate_system = $maybe_coordinate_system,
+            constraints = $maybe_constraints,
+            hessian_guess = $maybe_hessian_guess,
+            algorithm = $maybe_algorithm,
+            frozen_distance_slippage_tolerance_angstroms = $maybe_frozen_distance_slippage_tolerance_angstroms,
+            frozen_angle_slippage_tolerance_degrees = $maybe_frozen_angle_slippage_tolerance_degrees,
+            trust_region_keywords = $maybe_trust_region_keywords,
+          })"""
+        ).substitute(
+            max_iters=max_iters,
+            maybe_convergence_criteria=optional_nested(self.convergence_criteria),
+            maybe_optimiser_reset_interval=optional_str(self.optimiser_reset_interval),
+            maybe_coordinate_system=optional_str(
+                self.coordinate_system, "exess_rex::CoordinateSystem"
+            ),
+            # maybe_constraints=optional_list(
+            #     self.constraints,
+            #     lambda constraint: f"vec![{', '.join(f'exess_rex::AtomRef ({atom})' for atom in constraint)}]",
+            # ),
+            maybe_constraints="None",  # TODO
+            maybe_hessian_guess=optional_str(
+                self.hessian_guess, "exess_rex::HessianGuessType"
+            ),
+            maybe_algorithm=optional_str(
+                self.algorithm, "exess_rex::OptimizationAlgorithmType"
+            ),
+            maybe_frozen_distance_slippage_tolerance_angstroms=optional_str(
+                self.frozen_distance_slippage_tolerance_angstroms
+            ),
+            maybe_frozen_angle_slippage_tolerance_degrees=optional_str(
+                self.frozen_angle_slippage_tolerance_degrees
+            ),
+            maybe_trust_region_keywords=optional_nested(self.trust_region_keywords),
+        )
+
+
+def optimization(
+    topology_path: Path | str,
+    max_iters: int,
+    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
+    method: MethodT = "RestrictedHF",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
+    scf_keywords: SCFKeywords | None = None,
+    run_spec: RunSpec = RunSpec(),
+):
+    """
+    blah blah
+    """
+
+    # Upload inputs
+    topology_vobj = upload_object(PROJECT_ID, topology_path)
+
+    # Run rex
+    rex = Template("""let
+  obj_j = λ j →
+    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
+  exess = λ topology →
+    exess_geo_opt_rex_s
+      ($run_spec)
+      (exess_geo_opt_rex::OptimizationParams {
+        schema_version = "0.2.0",
+        external_charges = None,
+        model = exess_geo_opt_rex::Model {
+          method = exess_geo_opt_rex::Method::$method,
+          basis = "$basis",
+          aux_basis = Some "$aux_basis",
+          standard_orientation = Some exess_geo_opt_rex::StandardOrientation::FullSystem,
+          force_cartesian_basis_sets = Some true,
+        },
+        system = exess_geo_opt_rex::System {
+          oversubscribe_gpus = None,
+          teams_per_node = None,
+          gpus_per_team = None,
+          max_gpu_memory_mb = None,
+        },
+        keywords = exess_geo_opt_rex::Keywords {
+          scf = $scf_keywords,
+          ks = None,
+          rtat = None,
+          frag = None,
+          boundary = None,
+          log = None,
+          dynamics = None,
+          integrals = None,
+          debug = None,
+          export = None,
+          guess = None,
+          force_field = None,
+          optimization = $optimization_keywords,
+          hessian = None,
+          gradient = None,
+          qmmm = None,
+        },
+      })
+      [ (obj_j topology) ]
+in
+  exess "$topology_vobj_path"
+""").substitute(
+        run_spec=run_spec.to_rex(),
+        optimization_keywords=optimization_keywords.to_rex(max_iters),
+        method=method,
+        basis=basis,
+        aux_basis=aux_basis,
+        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
+        topology_vobj_path=topology_vobj["path"],
+    )
+    result = None
+    try:
+        result = submit_rex(PROJECT_ID, rex)
+        if "Ok" in result["result"]:
+            qm_output_vobj = result["result"]["Ok"][0]
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
