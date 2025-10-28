@@ -896,10 +896,17 @@ in
             qm_output_json = json.loads(
                 download_object(qm_output_vobj["path"]).decode()
             )
-            out_path = f"{qm_output_vobj['path']}.json"
-            with open(out_path, "w") as f:
+            out_path1 = f"{qm_output_vobj['path']}.json"
+            with open(out_path1, "w") as f:
                 json.dump(clean_dict(qm_output_json), f, indent=2)
-            return out_path
+            qm_output_vobj = result["result"]["Ok"][1]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            out_path2 = f"{qm_output_vobj['path']}.json"
+            with open(out_path2, "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
+            return (out_path1, out_path2)
         elif "Err" in result["result"]:
             print(f"Error: {result['result']['Err']}")
         elif result["status"] == "error":
