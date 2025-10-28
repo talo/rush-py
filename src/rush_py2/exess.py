@@ -268,7 +268,7 @@ def energy(
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
     scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
+    frag_keywords: FragKeywords = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs
@@ -586,7 +586,7 @@ def qmmm(
     basis: BasisT = "STO-3G",
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
+    frag_keywords: FragKeywords = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
 ):
     # Upload inputs

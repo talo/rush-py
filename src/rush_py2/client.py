@@ -51,7 +51,7 @@ type StorageUnitT = Literal["KB", "MB", "GB"]
 
 @dataclass
 class RunSpec:
-    target: TargetT = None
+    target: TargetT | None = None
     walltime: str | None = None
     storage: int | None = 10
     storage_units: StorageUnitT | None = "MB"
@@ -80,12 +80,12 @@ class RunSpec:
       }"""
         ).substitute(
             walltime=optional_str(self.walltime),
-            target=optional_str(self.target, "ModuleInstanceTarget::"),
             storage=optional_str(self.storage),
             storage_units=optional_str(self.storage_units, "MemUnits::"),
             cpus=optional_str(self.cpus),
             gpus=optional_str(self.gpus),
             nodes=optional_str(self.nodes),
+            target=optional_str(self.target, "ModuleInstanceTarget::"),
         )
 
 
