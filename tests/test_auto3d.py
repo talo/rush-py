@@ -1,8 +1,7 @@
-
 # Run test
 import json
 
-from rush_py2.auto3d import auto3d
+from rush_py2.auto3d import run as auto3d
 from rush_py2.client import download_object
 
 if __name__ == "__main__":

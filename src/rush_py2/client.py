@@ -223,6 +223,33 @@ def print_run_trace(result):
         print()
 
 
+def submit_rex_nowait(project_id: str, rex: str):
+    mutation = gql(
+        """
+        mutation EvalRex($input: CreateRun!) {
+            eval(input: $input) {
+                id
+                status
+                created_at
+            }
+        }
+    """
+    )
+    mutation.variable_values = {
+        "input": {
+            "rex": rex,
+            "project_id": project_id,
+            "module_lock": MODULE_LOCK,
+            "draft": False,
+        },
+    }
+
+    result = client.execute(mutation)
+    run_id = result["eval"]["id"]
+    created_at = result["eval"]["created_at"].split(".")[0]
+    print(f"Run submitted @ {created_at} with ID: {run_id}")
+
+
 def submit_rex(project_id: str, rex: str):
     mutation = gql(
         """
