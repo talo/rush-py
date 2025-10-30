@@ -153,6 +153,13 @@ class SCFKeywords:
 
 @dataclass
 class FragKeywords:
+    """
+    Configure the fragmentation of the system.
+
+    Defaults are provided for all relevant levels.
+    NOTE: cutoffs for each level must be less than or equal to those at the lower levels.
+    """
+
     level: FragmentLevelT = "Dimer"
     dimer_cutoff: float | None = None
     trimer_cutoff: float | None = None
@@ -216,6 +223,10 @@ class FragKeywords:
 
 @dataclass
 class Trajectory:
+    """
+    Configure the output of QMMM runs. By default, will provide all atoms at every frame.
+    """
+
     interval: int | None = None
     start: int | None = None
     end: int | None = None
@@ -240,6 +251,13 @@ class Trajectory:
 
 @dataclass
 class Restraints:
+    """
+    Restrain atoms using an external force proportional to its distance from its original position,
+    scaled by `k` (larger values mean a stronger restraint).
+
+    All atoms can be fixed by specifying `free_atoms = []`.
+    """
+
     k: float | None = None
     fixed_atoms: list[int] | None = None
     free_atoms: list[int] | None = None
@@ -293,6 +311,10 @@ def energy(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Compute the energy of the system in the QDX topology file at `topology_path`.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
@@ -374,6 +396,11 @@ def interaction_energy(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
+    in the toplogy file at `topology_path`.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
@@ -449,6 +476,10 @@ def chelpg(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Compute the CHELPG partial charges for all atoms of the system in the topology file at `topology_path`.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
@@ -595,6 +626,17 @@ def qmmm(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Run a QMMM simulation of the system in the QDX topology and residues files at `topology_path` and `residues_path`.
+
+    Specifying the numberof timesteps is mandatory.
+    If pressure is None, an NVT ensemble is used; if pressure is specified, an NPT ensemble is used.
+    Fragments can be specified as QM, MM, or ML fragments via the respective parameters.
+    If two fragment list parameters are specified, the rest of the fragments are inferred to be of the other type.
+    If three fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
+    It is invalid to specify one fragment list parameter.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
     residues_vobj = upload_object(PROJECT_ID, residues_path)
@@ -845,7 +887,13 @@ def optimization(
     collect: bool = False,
 ):
     """
-    blah blah
+    Run optimization on the system in the QDX topology and residues files at `topology_path`.
+
+    Specifying the maximum iterations is mandatory.
+    Fragment-based QM calculation is not supported, but fragments can be used for specifying regions as QM, MM, or ML.
+    If two fragment list parameters are specified, the rest of the fragments are inferred to be of the other type.
+    If three fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
+    It is invalid to specify one fragment list parameter.
     """
 
     # Upload inputs
