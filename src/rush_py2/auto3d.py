@@ -4,7 +4,7 @@ from string import Template
 from gql.transport.exceptions import TransportQueryError
 
 from rush_py2.client import PROJECT_ID, RunSpec, print_run_trace, submit_rex
-from rush_py2.utils import bool_to_str
+from rush_py2.utils import bool_to_str, float_to_str
 
 @dataclass
 class Auto3DOptions:
@@ -46,7 +46,7 @@ class Auto3DOptions:
             k=self.k,
             batchsize_atoms=self.batchsize_atoms,
             capacity=self.capacity,
-            convergence_threshold=self.convergence_threshold,
+            convergence_threshold=float_to_str(self.convergence_threshold),
             enumerate_isomer=bool_to_str(self.enumerate_isomer),
             enumerate_tautomer=bool_to_str(self.enumerate_tautomer),
             job_name=self.job_name,
@@ -55,7 +55,7 @@ class Auto3DOptions:
             mpi_np=self.mpi_np,
             opt_steps=self.opt_steps,
             patience=self.patience,
-            threshold=self.threshold,
+            threshold=float_to_str(self.threshold),
         )
 
 def auto3d(

@@ -1,11 +1,9 @@
 
 # Run test
 import json
-import sys
 
 from rush_py2.auto3d import auto3d
 from rush_py2.client import download_object
-
 
 if __name__ == "__main__":
     run = auto3d(["C1=CC=CC=C1"])
