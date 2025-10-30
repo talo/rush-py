@@ -27,9 +27,9 @@ API_KEY = getenv("RUSH_TOKEN")
 PROJECT_ID = getenv("RUSH_PROJECT")
 MODULE_LOCK = {
     "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
-    "exess_rex": "github:talo/tengu-exess/561ffc58bb71b4454b9ada839867cf9f6730d685#exess_rex",
-    "exess_geo_opt_rex": "github:talo/tengu-exess/25586c8f53986cfc49967cfbcef207091c95ff3f#exess_geo_opt_rex",
-    "exess_qmmm_rex": "github:talo/tengu-exess/561ffc58bb71b4454b9ada839867cf9f6730d685#exess_qmmm_rex",
+    "exess_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_rex",
+    "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
+    "exess_geo_opt_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_geo_opt_rex",
     "prepare_protein_rex": "github:talo/tengu-prepare-protein/085222a5eec82dcb1dacf2b3c497e8907bd6790e#prepare_protein_rex",
     "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
 }

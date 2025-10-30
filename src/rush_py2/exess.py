@@ -240,6 +240,7 @@ class Trajectory:
 
 @dataclass
 class Restraints:
+    k: float | None = None
     fixed_atoms: list[int] | None = None
     free_atoms: list[int] | None = None
     fixed_fragments: list[int] | None = None
@@ -248,7 +249,8 @@ class Restraints:
 
     def to_rex(self):
         return Template(
-            """Some (exess_qmmm_rex::MDRestraints {
+            """Some (exess_qmmm_rex::Restraints {
+              k = $maybe_k,
               fixed_atoms = $maybe_fixed_atoms,
               free_atoms = $maybe_free_atoms,
               fixed_fragments = $maybe_fixed_fragments,
@@ -256,6 +258,7 @@ class Restraints:
               fix_heavy = $maybe_fix_heavy,
             })"""
         ).substitute(
+            maybe_k=optional_str(self.k),
             maybe_fixed_atoms=optional_str(self.fixed_atoms),
             maybe_free_atoms=optional_str(self.free_atoms),
             maybe_fixed_fragments=optional_str(self.fixed_fragments),
@@ -303,19 +306,14 @@ def energy(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_rex::Model {
+        model = Some (exess_rex::Model {
           method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -333,6 +331,8 @@ def energy(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = None,
         },
         driver = exess_rex::Driver::Energy,
       })
@@ -387,19 +387,14 @@ def interaction_energy(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_rex::Model {
+        model = Some (exess_rex::Model {
           method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -417,6 +412,8 @@ def interaction_energy(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = None,
         },
         driver = exess_rex::Driver::Energy,
       })
@@ -465,19 +462,14 @@ def chelpg(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_rex::Model {
+        model = Some (exess_rex::Model {
           method = exess_rex::Method::RestrictedHF,
           basis = "cc-pVDZ",
           aux_basis = None,
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -511,8 +503,9 @@ def chelpg(
             export_mass_weighted_hessian = None,
             export_hessian_frequencies = None,
             flatten_symmetric = None,
-            concatenate_hdf5_files = None,
             light_json = None,
+            concatenate_hdf5_files = None,
+            training_db = None,
             descriptor_grid = None,
           }),
           guess = None,
@@ -521,6 +514,8 @@ def chelpg(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = None,
         },
         driver = exess_rex::Driver::Energy,
       })
@@ -585,7 +580,6 @@ def qmmm(
     dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
-    qm_fragments: list[int] | None = None,
     restraints: Restraints | None = None,
     trajectory: Trajectory = Trajectory(),
     gradient_finite_difference_step_size: float | None = None,
@@ -594,6 +588,9 @@ def qmmm(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    ml_fragments: list[int] | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -615,15 +612,10 @@ def qmmm(
           method = exess_qmmm_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_qmmm_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
         }),
-        system = Some (exess_qmmm_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        }),
+        system = None,
         keywords = exess_qmmm_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -648,10 +640,16 @@ def qmmm(
             dt_ps = $dt_ps,
             temperature_kelvin = $temperature_kelvin,
             pressure_atm = $maybe_pressure_atm,
-            qm_fragments = $qm_fragments,
             minimisation = None,
             trajectory = $trajectory,
             restraints = $restraints,
+            energy_csv = None,
+          }),
+          machine_learning = None,
+          regions = Some (exess_qmmm_rex::RegionKeywords {
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
           }),
         },
       })
@@ -673,9 +671,11 @@ in
         dt_ps=dt_ps,
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
-        qm_fragments=qm_fragments if qm_fragments is not None else [],
         trajectory=trajectory.to_rex(),
         restraints=restraints.to_rex() if restraints is not None else "None",
+        maybe_qm_fragments=optional_str(qm_fragments),
+        maybe_mm_fragments=optional_str(mm_fragments),
+        maybe_ml_fragments=optional_str(ml_fragments),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
     )
@@ -733,7 +733,7 @@ type CoordinateSystemT = Literal["Cartesian", "NaturalInternal", "DelocalisedInt
 type HessianGuessTypeT = Literal["Identity", "ScaledIdentity", "Schlegel", "Lindh"]
 
 type OptimizationAlgorithmTypeT = Literal[
-    "EigenvectorFollowing", "TrustRegionAugmentedHessian"
+    "EigenvectorFollowing", "TrustRegionAugmentedHessian", "LBFGS"
 ]
 
 
@@ -778,7 +778,7 @@ class TrustRegionKeywords:
 @dataclass
 class OptimizationKeywords:
     convergence_criteria: OptimizationConvergenceCriteria | None = None
-    optimiser_reset_interval: int | None = None
+    optimizer_reset_interval: int | None = None
     coordinate_system: CoordinateSystemT | None = None
     constraints: list[list[int]] | None = None
     hessian_guess: HessianGuessTypeT | None = None
@@ -792,7 +792,7 @@ class OptimizationKeywords:
             """Some (exess_rex::OptimizationKeywords {
             max_iters = $max_iters,
             convergence_criteria = $maybe_convergence_criteria,
-            optimiser_reset_interval = $maybe_optimiser_reset_interval,
+            optimizer_reset_interval = $maybe_optimizer_reset_interval,
             coordinate_system = $maybe_coordinate_system,
             constraints = $maybe_constraints,
             hessian_guess = $maybe_hessian_guess,
@@ -804,7 +804,7 @@ class OptimizationKeywords:
         ).substitute(
             max_iters=max_iters,
             maybe_convergence_criteria=optional_nested(self.convergence_criteria),
-            maybe_optimiser_reset_interval=optional_str(self.optimiser_reset_interval),
+            maybe_optimizer_reset_interval=optional_str(self.optimizer_reset_interval),
             maybe_coordinate_system=optional_str(
                 self.coordinate_system, "exess_rex::CoordinateSystem"
             ),
@@ -837,6 +837,9 @@ def optimization(
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    ml_fragments: list[int] | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -858,19 +861,14 @@ def optimization(
       (exess_geo_opt_rex::OptimizationParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_geo_opt_rex::Model {
+        model = Some (exess_geo_opt_rex::Model {
           method = exess_geo_opt_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_geo_opt_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_geo_opt_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -888,6 +886,12 @@ def optimization(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = Some (exess_qmmm_rex::RegionKeywords {
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
+          }),
         },
       })
       [ (obj_j topology) ]
@@ -900,6 +904,9 @@ in
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
+        maybe_qm_fragments=optional_str(qm_fragments),
+        maybe_mm_fragments=optional_str(mm_fragments),
+        maybe_ml_fragments=optional_str(ml_fragments),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
