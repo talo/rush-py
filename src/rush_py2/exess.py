@@ -934,6 +934,10 @@ def run_qmmm():
     cyclopts.run(qmmm)
 
 
+def run_optimization():
+    cyclopts.run(optimization)
+
+
 if __name__ == "__main__":
     i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
 

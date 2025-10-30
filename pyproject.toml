@@ -23,10 +23,11 @@ dev = [
 ]
 
 [project.scripts]
-rush-exess-chelpg = "rush_py2.exess:run_chelpg"
 rush-exess-energy = "rush_py2.exess:run_energy"
 rush-exess-interaction-energy = "rush_py2.exess:run_interaction_energy"
+rush-exess-chelpg = "rush_py2.exess:run_chelpg"
 rush-exess-qmmm = "rush_py2.exess:run_qmmm"
+rush-exess-optimization = "rush_py2.exess:run_optimization"
 
 [tool.pyright]
 exclude = [
