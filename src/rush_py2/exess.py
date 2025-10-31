@@ -286,7 +286,7 @@ def energy(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
@@ -370,7 +370,7 @@ def interaction_energy(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
@@ -448,7 +448,7 @@ in
 
 def chelpg(
     topology_path: Path | str,
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
@@ -594,7 +594,7 @@ def qmmm(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
@@ -837,7 +837,7 @@ def optimization(
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):

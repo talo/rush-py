@@ -58,7 +58,7 @@ class RunSpec:
     storage: int | None = 10
     storage_units: StorageUnitT | None = "MB"
     cpus: int | None = None
-    gpus: int | None = 1
+    gpus: int | None = None
     nodes: int | None = None
 
     def to_rex(self):
