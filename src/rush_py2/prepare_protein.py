@@ -80,7 +80,7 @@ in
             chains_vobj_path=chains_vobj["path"],
         )
     try:
-        run_id = submit_rex(PROJECT_ID, rex)
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             run = collect_run(run_id)
             print(run)
