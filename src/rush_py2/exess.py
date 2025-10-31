@@ -13,7 +13,6 @@ import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    MAX_WAIT_TIME,
     PROJECT_ID,
     RunOpts,
     RunSpec,
@@ -265,27 +264,19 @@ class Restraints:
         )
 
 
-def collect_energy(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
-    try:
-        run = collect_run(run_id)
-        if "Ok" in run["result"]:
-            qm_output_vobj = run["result"]["Ok"][0]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path = f"{qm_output_vobj['path']}.json"
-            with open(out_path, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            return out_path
-        elif "Err" in run["result"]:
-            print(f"Error: {run['result']['Err']}")
-        elif run["status"] == "error":
-            print_run_trace(run)
-
-    except TransportQueryError as e:
-        if e.errors:
-            for error in e.errors:
-                print(f"Error: {error['message']}")
+def collect_energy(run_id: str):
+    run = collect_run(run_id)
+    if "Ok" in run["result"]:
+        qm_output_vobj = run["result"]["Ok"][0]
+        qm_output_json = json.loads(download_object(qm_output_vobj["path"]).decode())
+        out_path = f"{qm_output_vobj['path']}.json"
+        with open(out_path, "w") as f:
+            json.dump(clean_dict(qm_output_json), f, indent=2)
+        return out_path
+    elif "Err" in run["result"]:
+        print(f"Error: {run['result']['Err']}")
+    elif run["status"] == "error":
+        print_run_trace(run)
 
 
 def energy(
