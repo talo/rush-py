@@ -32,9 +32,9 @@ def prepare_protein(
     collect=False,
 ):
     """
-    Takes a path to a TRC JSON, runs prepare-protein on it, and
-    writes the prepared TRC file to a json file named based on the first 8 characters
-    of the output Topology, Residues, and Chains objects joing by an `_`.
+    Run prepare-protein on a TRC and write the prepared TRC file to a json file
+    named based on the first 8 characters of the output
+    Topology, Residues, and Chains objects joing by an `_`.
     """
 
     # Upload inputs
@@ -73,7 +73,7 @@ in
   exess "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
-        ph=ph,
+        ph=float_to_str(ph) if ph is not None else None,
         naming_scheme=naming_scheme,
         capping_style=capping_style,
         truncation_threshold=truncation_threshold,
@@ -85,7 +85,6 @@ in
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             run = collect_run(run_id)
-            print(run)
             if "Ok" in run["result"]:
                 trc_o_tuple = run["result"]["Ok"][0]
                 t_o_dict = json.loads(download_object(trc_o_tuple[0]["path"]).decode())
