@@ -32,7 +32,9 @@ def prepare_protein(
     collect=False,
 ):
     """
-    TODO: document
+    Takes a path to a TRC JSON, runs prepare-protein on it, and
+    writes the prepared TRC file to a json file named based on the first 8 characters
+    of the output Topology, Residues, and Chains objects joing by an `_`.
     """
 
     # Upload inputs
@@ -53,8 +55,8 @@ def prepare_protein(
         residues_vobj = upload_object(PROJECT_ID, r_f.name)
         chains_vobj = upload_object(PROJECT_ID, c_f.name)
 
-        # Run rex
-        rex = Template("""let
+    # Run rex
+    rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology residues chains →
@@ -70,15 +72,15 @@ def prepare_protein(
 in
   exess "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
-            run_spec=run_spec.to_rex(),
-            ph=ph,
-            naming_scheme=naming_scheme,
-            capping_style=capping_style,
-            truncation_threshold=truncation_threshold,
-            topology_vobj_path=topology_vobj["path"],
-            residues_vobj_path=residues_vobj["path"],
-            chains_vobj_path=chains_vobj["path"],
-        )
+        run_spec=run_spec.to_rex(),
+        ph=ph,
+        naming_scheme=naming_scheme,
+        capping_style=capping_style,
+        truncation_threshold=truncation_threshold,
+        topology_vobj_path=topology_vobj["path"],
+        residues_vobj_path=residues_vobj["path"],
+        chains_vobj_path=chains_vobj["path"],
+    )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
@@ -95,9 +97,9 @@ in
                     "chains": c_o_dict,
                 }
                 out_path = (
-                    f"{trc_o_tuple[0]['path'][:6]}_"
-                    f"{trc_o_tuple[1]['path'][:6]}_"
-                    f"{trc_o_tuple[2]['path'][:6]}.json"
+                    f"{trc_o_tuple[0]['path'][:8]}_"
+                    f"{trc_o_tuple[1]['path'][:8]}_"
+                    f"{trc_o_tuple[2]['path'][:8]}.json"
                 )
                 with open(out_path, "w") as f:
                     json.dump(clean_dict(trc_o_dict), f, indent=2)
