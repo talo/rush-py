@@ -1,6 +1,6 @@
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from os import getenv
 from pathlib import Path
 from string import Template
@@ -223,7 +223,22 @@ def print_run_trace(result):
         print()
 
 
-def submit_rex_nowait(project_id: str, rex: str):
+@dataclass
+class RunOpts:
+    """
+    The name of the run will show up as the name (i.e. title) of the run in the Rush UI.
+    The description currently doesn't show up anywhere.
+    The tags will also show up in the Rush UI and will (eventually) allow for run searching and filtering.
+    The email flag, if set to True, will cause an email to be sent to you upon run completion.
+    """
+
+    name: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    email: bool | None = None
+
+
+def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     mutation = gql(
         """
         mutation EvalRex($input: CreateRun!) {
@@ -238,44 +253,23 @@ def submit_rex_nowait(project_id: str, rex: str):
     mutation.variable_values = {
         "input": {
             "rex": rex,
-            "project_id": project_id,
             "module_lock": MODULE_LOCK,
             "draft": False,
+            "project_id": project_id,
         },
+    }
+    mutation.variable_values["input"] |= {
+        k: v for k, v in asdict(run_opts).items() if v is not None
     }
 
     result = client.execute(mutation)
     run_id = result["eval"]["id"]
     created_at = result["eval"]["created_at"].split(".")[0]
     print(f"Run submitted @ {created_at} with ID: {run_id}")
+    return run_id
 
 
-def submit_rex(project_id: str, rex: str):
-    mutation = gql(
-        """
-        mutation EvalRex($input: CreateRun!) {
-            eval(input: $input) {
-                id
-                status
-                created_at
-            }
-        }
-    """
-    )
-    mutation.variable_values = {
-        "input": {
-            "rex": rex,
-            "project_id": project_id,
-            "module_lock": MODULE_LOCK,
-            "draft": False,
-        },
-    }
-
-    result = client.execute(mutation)
-    run_id = result["eval"]["id"]
-    created_at = result["eval"]["created_at"].split(".")[0]
-    print(f"Run submitted @ {created_at} with ID: {run_id}")
-
+def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
     query = gql(
         """
         query GetStatus($id: String!) {

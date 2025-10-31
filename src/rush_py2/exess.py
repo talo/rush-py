@@ -13,8 +13,11 @@ import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    MAX_WAIT_TIME,
     PROJECT_ID,
+    RunOpts,
     RunSpec,
+    collect_run,
     download_object,
     print_run_trace,
     submit_rex,
@@ -262,6 +265,29 @@ class Restraints:
         )
 
 
+def collect_energy(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
+    try:
+        run = collect_run(run_id)
+        if "Ok" in run["result"]:
+            qm_output_vobj = run["result"]["Ok"][0]
+            qm_output_json = json.loads(
+                download_object(qm_output_vobj["path"]).decode()
+            )
+            out_path = f"{qm_output_vobj['path']}.json"
+            with open(out_path, "w") as f:
+                json.dump(clean_dict(qm_output_json), f, indent=2)
+            return out_path
+        elif "Err" in run["result"]:
+            print(f"Error: {run['result']['Err']}")
+        elif run["status"] == "error":
+            print_run_trace(run)
+
+    except TransportQueryError as e:
+        if e.errors:
+            for error in e.errors:
+                print(f"Error: {error['message']}")
+
+
 def energy(
     topology_path: Path | str,
     method: MethodT = "RestrictedHF",
@@ -270,6 +296,8 @@ def energy(
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -330,22 +358,12 @@ in
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         topology_vobj_path=topology_vobj["path"],
     )
-    result = None
     try:
-        result = submit_rex(PROJECT_ID, rex)
-        if "Ok" in result["result"]:
-            qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path = f"{qm_output_vobj['path']}.json"
-            with open(out_path, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            return out_path
-        elif "Err" in result["result"]:
-            print(f"Error: {result['result']['Err']}")
-        elif result["status"] == "error":
-            print_run_trace(result)
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        if collect:
+            return collect_energy(run_id)
+        else:
+            return run_id
 
     except TransportQueryError as e:
         if e.errors:
@@ -362,6 +380,8 @@ def interaction_energy(
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -422,22 +442,12 @@ in
         frag_keywords=frag_keywords.to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
-    result = None
     try:
-        result = submit_rex(PROJECT_ID, rex)
-        if "Ok" in result["result"]:
-            qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path = f"{qm_output_vobj['path']}.json"
-            with open(out_path, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            return out_path
-        elif "Err" in result["result"]:
-            print(f"Error: {result['result']['Err']}")
-        elif result["status"] == "error":
-            print_run_trace(result)
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        if collect:
+            return collect_energy(run_id)
+        else:
+            return run_id
 
     except TransportQueryError as e:
         if e.errors:
@@ -448,6 +458,8 @@ in
 def chelpg(
     topology_path: Path | str,
     run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -533,37 +545,41 @@ in
         frag_keywords=FragKeywords(level="Monomer").to_rex(),
         topology_vobj_path=topology_vobj["path"],
     )
-    result = None
     try:
-        result = submit_rex(PROJECT_ID, rex)
-        if "Ok" in result["result"]:
-            qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path = f"{qm_output_vobj['path']}.json"
-            with open(out_path, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            qm_output_vobj = result["result"]["Ok"][1]
-            qm_output = download_object(qm_output_vobj["path"])
-            decompressed = zstd.ZstdDecompressor().decompress(
-                qm_output, max_output_size=int(1e8)
-            )
-            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                hdf5_f = tar.extractfile(tar.getnames()[1])
-                chelpg = []
-                with h5py.File(hdf5_f, "r") as f:
-                    frag_indices = [int(x) for x in f["monomers"].keys()]
-                    for frag_idx in sorted(frag_indices):
-                        # pyright: ignore[reportGeneralTypeIssues]
-                        chelpg += [
-                            float(x) for x in f[f"monomers/{frag_idx}/chelpg_charges"]
-                        ]
-            return (out_path, chelpg)
-        elif "Err" in result["result"]:
-            print(f"Error: {result['result']['Err']}")
-        elif result["status"] == "error":
-            print_run_trace(result)
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        if collect:
+            run = collect_run(run_id)
+            if "Ok" in run["result"]:
+                qm_output_vobj = run["result"]["Ok"][0]
+                qm_output_json = json.loads(
+                    download_object(qm_output_vobj["path"]).decode()
+                )
+                out_path = f"{qm_output_vobj['path']}.json"
+                with open(out_path, "w") as f:
+                    json.dump(clean_dict(qm_output_json), f, indent=2)
+                qm_output_vobj = run["result"]["Ok"][1]
+                qm_output = download_object(qm_output_vobj["path"])
+                decompressed = zstd.ZstdDecompressor().decompress(
+                    qm_output, max_output_size=int(1e8)
+                )
+                with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+                    hdf5_f = tar.extractfile(tar.getnames()[1])
+                    chelpg = []
+                    with h5py.File(hdf5_f, "r") as f:
+                        frag_indices = [int(x) for x in f["monomers"].keys()]
+                        for frag_idx in sorted(frag_indices):
+                            # pyright: ignore[reportGeneralTypeIssues]
+                            chelpg += [
+                                float(x)
+                                for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+                            ]
+                return (out_path, chelpg)
+            elif "Err" in run["result"]:
+                print(f"Error: {run['result']['Err']}")
+            elif run["status"] == "error":
+                print_run_trace(run)
+        else:
+            return run_id
 
     except TransportQueryError as e:
         if e.errors:
@@ -588,6 +604,8 @@ def qmmm(
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
 ):
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
@@ -670,22 +688,25 @@ in
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
     )
-    result = None
     try:
-        result = submit_rex(PROJECT_ID, rex)
-        if "Ok" in result["result"]:
-            qm_output_vobj = result["result"]["Ok"]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path = f"{qm_output_vobj['path']}.json"
-            with open(out_path, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            return out_path
-        elif "Err" in result["result"]:
-            print(f"Error: {result['result']['Err']}")
-        elif result["status"] == "error":
-            print_run_trace(result)
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        if collect:
+            run = collect_run(run_id)
+            if "Ok" in run["result"]:
+                qm_output_vobj = run["result"]["Ok"]
+                qm_output_json = json.loads(
+                    download_object(qm_output_vobj["path"]).decode()
+                )
+                out_path = f"{qm_output_vobj['path']}.json"
+                with open(out_path, "w") as f:
+                    json.dump(clean_dict(qm_output_json), f, indent=2)
+                return out_path
+            elif "Err" in run["result"]:
+                print(f"Error: {run['result']['Err']}")
+            elif run["status"] == "error":
+                print_run_trace(run)
+        else:
+            return run_id
 
     except TransportQueryError as e:
         if e.errors:
@@ -826,6 +847,8 @@ def optimization(
     aux_basis: AuxBasisT = "cc-pVDZ-RIFIT",
     scf_keywords: SCFKeywords | None = None,
     run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
 ):
     """
     blah blah
@@ -888,29 +911,32 @@ in
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         topology_vobj_path=topology_vobj["path"],
     )
-    result = None
     try:
-        result = submit_rex(PROJECT_ID, rex)
-        if "Ok" in result["result"]:
-            qm_output_vobj = result["result"]["Ok"][0]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path1 = f"{qm_output_vobj['path']}.json"
-            with open(out_path1, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            qm_output_vobj = result["result"]["Ok"][1]
-            qm_output_json = json.loads(
-                download_object(qm_output_vobj["path"]).decode()
-            )
-            out_path2 = f"{qm_output_vobj['path']}.json"
-            with open(out_path2, "w") as f:
-                json.dump(clean_dict(qm_output_json), f, indent=2)
-            return (out_path1, out_path2)
-        elif "Err" in result["result"]:
-            print(f"Error: {result['result']['Err']}")
-        elif result["status"] == "error":
-            print_run_trace(result)
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        if collect:
+            run = collect_run(run_id)
+            if "Ok" in run["result"]:
+                qm_output_vobj = run["result"]["Ok"][0]
+                qm_output_json = json.loads(
+                    download_object(qm_output_vobj["path"]).decode()
+                )
+                out_path1 = f"{qm_output_vobj['path']}.json"
+                with open(out_path1, "w") as f:
+                    json.dump(clean_dict(qm_output_json), f, indent=2)
+                qm_output_vobj = run["result"]["Ok"][1]
+                qm_output_json = json.loads(
+                    download_object(qm_output_vobj["path"]).decode()
+                )
+                out_path2 = f"{qm_output_vobj['path']}.json"
+                with open(out_path2, "w") as f:
+                    json.dump(clean_dict(qm_output_json), f, indent=2)
+                return (out_path1, out_path2)
+            elif "Err" in run["result"]:
+                print(f"Error: {run['result']['Err']}")
+            elif run["status"] == "error":
+                print_run_trace(run)
+        else:
+            return run_id
 
     except TransportQueryError as e:
         if e.errors:

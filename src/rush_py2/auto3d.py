@@ -5,10 +5,11 @@ from gql.transport.exceptions import TransportQueryError
 
 from rush_py2.client import (
     PROJECT_ID,
+    RunOpts,
     RunSpec,
+    collect_run,
     print_run_trace,
     submit_rex,
-    submit_rex_nowait,
 )
 from rush_py2.utils import bool_to_str, float_to_str
 
@@ -31,24 +32,24 @@ class Auto3DOptions:
 
     def to_rex(self, reference_fragment: int | None = None):
         return Template(
-            """auto3d_rex::Auto3dOptions {
-  k = Some (int $k),
-  batchsize_atoms = Some $batchsize_atoms,
-  capacity = Some $capacity,
-  convergence_threshold = Some $convergence_threshold,
-  enumerate_isomer = Some $enumerate_isomer,
-  enumerate_tautomer = Some $enumerate_tautomer,
-  job_name = Some "$job_name",
-  max_confs = $max_confs,
-  memory = $memory,
-  mpi_np = Some $mpi_np,
-  opt_steps = Some $opt_steps,
-  optimizing_engine = Some auto3d_rex::Auto3dOptimizingEngines::AIMNET,
-  patience = Some $patience,
-  threshold = Some $threshold,
-  verbose = Some false,
-  window = None,
-}"""
+            """(auto3d_rex::Auto3dOptions {
+        k = Some (int $k),
+        batchsize_atoms = Some $batchsize_atoms,
+        capacity = Some $capacity,
+        convergence_threshold = Some $convergence_threshold,
+        enumerate_isomer = Some $enumerate_isomer,
+        enumerate_tautomer = Some $enumerate_tautomer,
+        job_name = Some "$job_name",
+        max_confs = $max_confs,
+        memory = $memory,
+        mpi_np = Some $mpi_np,
+        opt_steps = Some $opt_steps,
+        optimizing_engine = Some auto3d_rex::Auto3dOptimizingEngines::AIMNET,
+        patience = Some $patience,
+        threshold = Some $threshold,
+        verbose = Some false,
+        window = None,
+      })"""
         ).substitute(
             k=self.k,
             batchsize_atoms=self.batchsize_atoms,
@@ -66,16 +67,18 @@ class Auto3DOptions:
         )
 
 
-def submit(
+def auto3d(
     smis: list[str],
     opts: Auto3DOptions = Auto3DOptions(),
     run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect=False,
 ):
     rex = Template("""let
   results =
     try_auto3d_rex
       default_runspec_gpu
-      ($opts)
+      $opts
       $smis
 in
   map
@@ -92,51 +95,20 @@ in
         run_spec=run_spec.to_rex(),
     )
     try:
-        submit_rex_nowait(PROJECT_ID, rex)
-
-    except TransportQueryError as e:
-        if e.errors:
-            for error in e.errors:
-                print(f"Error: {error['message']}")
-
-
-def run(
-    smis: list[str],
-    opts: Auto3DOptions = Auto3DOptions(),
-    run_spec: RunSpec = RunSpec(),
-):
-    rex = Template("""let
-  results =
-    try_auto3d_rex
-      default_runspec_gpu
-      ($opts)
-      $smis
-in
-  map
-    (λ x ->
-      let
-        topology = elem0 (elem0 x),
-        smi = elem1 x
-      in
-        (smi, topology)
-    )
-    (zip (map unwrap (unwrap (unwrap results))) $smis)""").substitute(
-        smis=f"[{', '.join([f'"{smi}"' for smi in smis])}]",
-        opts=opts.to_rex(),
-        run_spec=run_spec.to_rex(),
-    )
-    try:
-        run = submit_rex(PROJECT_ID, rex)
-        if run is not None:
-            if run["status"] == "error":
-                print_run_trace(run)
-            return run
+        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        if collect:
+            run = collect_run(run_id)
+            if run is not None:
+                if run["status"] == "error":
+                    print_run_trace(run)
+                return run
+            else:
+                print("No run available")
+                return None
         else:
-            print("No run available")
-            return None
+            return run_id
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}")
-

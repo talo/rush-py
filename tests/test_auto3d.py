@@ -1,11 +1,11 @@
 # Run test
 import json
 
-from rush_py2.auto3d import run as auto3d
+from rush_py2.auto3d import auto3d
 from rush_py2.client import download_object
 
 if __name__ == "__main__":
-    run = auto3d(["C1=CC=CC=C1"])
+    run = auto3d(["C1=CC=CC=C1"], collect=True)
     if run is not None:
         for [smi, topology_data_as_vobj] in run["result"]:
             print(smi)
