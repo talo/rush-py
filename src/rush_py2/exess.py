@@ -22,11 +22,12 @@ from .client import (
     submit_rex,
     upload_object,
 )
-from .utils import bool_to_str, clean_dict, float_to_str, optional_nested, optional_str
+from .utils import bool_to_str, clean_dict, float_to_str, optional_str
 
 type MethodT = Literal[
     "RestrictedHF",
     "UnrestrictedHF",
+    "RestrictedKSDFT",
     "RestrictedRIMP2",
     "UnrestrictedRIMP2",
 ]
@@ -267,7 +268,7 @@ class Restraints:
 
     def to_rex(self):
         return Template(
-            """Some (exess_qmmm_rex::Restraints {
+            """Some (exess_rex::Restraints {
               k = $maybe_k,
               fixed_atoms = $maybe_fixed_atoms,
               free_atoms = $maybe_free_atoms,
@@ -756,7 +757,7 @@ class OptimizationConvergenceCriteria:
 
     def to_rex(self, reference_fragment: int | None = None):
         return Template(
-            """Some (exess_rex::OptimizationConvergenceCriteria {
+            """Some (exess_geo_opt_rex::OptimizationConvergenceCriteria {
             metric = $maybe_metric,
             gradient_threshold = $maybe_gradient_threshold,
             delta_energy_threshold = $maybe_delta_energy_threshold,
@@ -793,7 +794,7 @@ class TrustRegionKeywords:
 
     def to_rex(self):
         return Template(
-            """Some (exess_rex::TrustRegionKeywords {
+            """Some (exess_geo_opt_rex::TrustRegionKeywords {
             initial_radius = $maybe_initial_radius,
             max_radius = $maybe_max_radius,
             min_radius = $maybe_min_radius,
@@ -817,6 +818,39 @@ class TrustRegionKeywords:
         )
 
 
+type LBFGSLinesearchT = Literal[
+    "MoreThuente", "BacktrackingArmijo", "BacktrackingWolfe", "BacktrackingStrongWolfe"
+]
+
+
+@dataclass
+class LBFGSKeywords:
+    linesearch: LBFGSLinesearchT | None = None
+    n_corrections: int | None = None
+    epsilon: float | None = None
+    max_linesearch: int | None = None
+    gtol: float | None = None
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_geo_opt_rex::LBFGSKeywords {
+              linesearch = $maybe_linesearch,
+              n_corrections = $maybe_n_corrections,
+              epsilon = $maybe_epsilon,
+              max_linesearch = $maybe_max_linesearch,
+              gtol = $maybe_gtol,
+            })"""
+        ).substitute(
+            maybe_linesearch=optional_str(
+                self.linesearch, "exess_geo_opt_rex::LBFGSLinesearch::"
+            ),
+            maybe_n_corrections=optional_str(self.n_corrections),
+            maybe_epsilon=optional_str(self.epsilon),
+            maybe_max_linesearch=optional_str(self.max_linesearch),
+            maybe_gtol=optional_str(self.gtol),
+        )
+
+
 @dataclass
 class OptimizationKeywords:
     convergence_criteria: OptimizationConvergenceCriteria | None = None
@@ -825,13 +859,19 @@ class OptimizationKeywords:
     constraints: list[list[int]] | None = None
     hessian_guess: HessianGuessTypeT | None = None
     algorithm: OptimizationAlgorithmTypeT | None = None
+    lbfgs_keywords: LBFGSKeywords | None = None
     frozen_distance_slippage_tolerance_angstroms: float | None = None
     frozen_angle_slippage_tolerance_degrees: float | None = None
     trust_region_keywords: TrustRegionKeywords | None = None
+    fixed_atoms: list[int] | None = None
+    free_atoms: list[int] | None = None
+    fixed_fragments: list[int] | None = None
+    free_fragments: list[int] | None = None
+    fix_heavy: bool | None = None
 
     def to_rex(self, max_iters):
         return Template(
-            """Some (exess_rex::OptimizationKeywords {
+            """Some (exess_geo_opt_rex::OptimizationKeywords {
             max_iters = $max_iters,
             convergence_criteria = $maybe_convergence_criteria,
             optimizer_reset_interval = $maybe_optimizer_reset_interval,
@@ -839,27 +879,42 @@ class OptimizationKeywords:
             constraints = $maybe_constraints,
             hessian_guess = $maybe_hessian_guess,
             algorithm = $maybe_algorithm,
+            lbfgs_keywords = $maybe_lbfgs_keywords,
             frozen_distance_slippage_tolerance_angstroms = $maybe_frozen_distance_slippage_tolerance_angstroms,
             frozen_angle_slippage_tolerance_degrees = $maybe_frozen_angle_slippage_tolerance_degrees,
             trust_region_keywords = $maybe_trust_region_keywords,
+            fixed_atoms = $maybe_fixed_atoms,
+            free_atoms = $maybe_free_atoms,
+            fixed_fragments = $maybe_fixed_fragments,
+            free_fragments = $maybe_free_fragments,
+            fix_heavy = $maybe_fix_heavy,
           })"""
         ).substitute(
             max_iters=max_iters,
-            maybe_convergence_criteria=optional_nested(self.convergence_criteria),
+            maybe_convergence_criteria=(
+                self.convergence_criteria.to_rex()
+                if self.convergence_criteria is not None
+                else "None"
+            ),
             maybe_optimizer_reset_interval=optional_str(self.optimizer_reset_interval),
             maybe_coordinate_system=optional_str(
-                self.coordinate_system, "exess_rex::CoordinateSystem"
+                self.coordinate_system, "exess_geo_opt_rex::CoordinateSystem::"
             ),
             # maybe_constraints=optional_list(
             #     self.constraints,
-            #     lambda constraint: f"vec![{', '.join(f'exess_rex::AtomRef ({atom})' for atom in constraint)}]",
+            #     lambda constraint: f"vec![{', '.join(f'exess_geo_opt_rex::AtomRef ({atom})' for atom in constraint)}]",
             # ),
             maybe_constraints="None",  # TODO
             maybe_hessian_guess=optional_str(
-                self.hessian_guess, "exess_rex::HessianGuessType"
+                self.hessian_guess, "exess_geo_opt_rex::HessianGuessType::"
             ),
             maybe_algorithm=optional_str(
-                self.algorithm, "exess_rex::OptimizationAlgorithmType"
+                self.algorithm, "exess_geo_opt_rex::OptimizationAlgorithmType::"
+            ),
+            maybe_lbfgs_keywords=(
+                self.lbfgs_keywords.to_rex()
+                if self.lbfgs_keywords is not None
+                else "None"
             ),
             maybe_frozen_distance_slippage_tolerance_angstroms=optional_str(
                 self.frozen_distance_slippage_tolerance_angstroms
@@ -867,7 +922,16 @@ class OptimizationKeywords:
             maybe_frozen_angle_slippage_tolerance_degrees=optional_str(
                 self.frozen_angle_slippage_tolerance_degrees
             ),
-            maybe_trust_region_keywords=optional_nested(self.trust_region_keywords),
+            maybe_trust_region_keywords=(
+                self.trust_region_keywords.to_rex()
+                if self.trust_region_keywords is not None
+                else "None"
+            ),
+            maybe_fixed_atoms=optional_str(self.fixed_atoms),
+            maybe_free_atoms=optional_str(self.free_atoms),
+            maybe_fixed_fragments=optional_str(self.fixed_fragments),
+            maybe_free_fragments=optional_str(self.free_fragments),
+            maybe_fix_heavy=optional_str(self.fix_heavy),
         )
 
 
@@ -935,7 +999,7 @@ def optimization(
           gradient = None,
           qmmm = None,
           machine_learning = None,
-          regions = Some (exess_qmmm_rex::RegionKeywords {
+          regions = Some (exess_geo_opt_rex::RegionKeywords {
             qm_fragments = $maybe_qm_fragments,
             mm_fragments = $maybe_mm_fragments,
             ml_fragments = $maybe_ml_fragments,
@@ -947,7 +1011,11 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
-        optimization_keywords=optimization_keywords.to_rex(max_iters),
+        optimization_keywords=(
+            optimization_keywords.to_rex(max_iters)
+            if optimization_keywords is not None
+            else "None"
+        ),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
@@ -1009,24 +1077,6 @@ def run_qmmm():
 def run_optimization():
     cyclopts.run(optimization)
 
-
-if __name__ == "__main__":
-    i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
-
-    o = energy(
-        "6a5j_t.json",
-        run_spec=RunSpec(target="Bullet"),
-    )
-    # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 94)
-    # o = chelpg(i_folder / "tyk2_ejm_31_t.json")
-    # o = qmmm(
-    #     "6a5j_t.json",
-    #     "6a5j_r.json",
-    #     n_timesteps=500,
-    #     qm_fragments=[],
-    #     free_atoms=[0],
-    # )
-    print(f"Output: {o}")
 
 # TODO:
 #  - trace for failure
