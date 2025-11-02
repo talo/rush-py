@@ -22,11 +22,12 @@ from .client import (
     submit_rex,
     upload_object,
 )
-from .utils import bool_to_str, clean_dict, float_to_str, optional_nested, optional_str
+from .utils import bool_to_str, clean_dict, float_to_str, optional_str
 
 type MethodT = Literal[
     "RestrictedHF",
     "UnrestrictedHF",
+    "RestrictedKSDFT",
     "RestrictedRIMP2",
     "UnrestrictedRIMP2",
 ]
@@ -153,6 +154,13 @@ class SCFKeywords:
 
 @dataclass
 class FragKeywords:
+    """
+    Configure the fragmentation of the system.
+
+    Defaults are provided for all relevant levels.
+    NOTE: cutoffs for each level must be less than or equal to those at the lower levels.
+    """
+
     level: FragmentLevelT = "Dimer"
     dimer_cutoff: float | None = None
     trimer_cutoff: float | None = None
@@ -216,6 +224,10 @@ class FragKeywords:
 
 @dataclass
 class Trajectory:
+    """
+    Configure the output of QMMM runs. By default, will provide all atoms at every frame.
+    """
+
     interval: int | None = None
     start: int | None = None
     end: int | None = None
@@ -240,6 +252,14 @@ class Trajectory:
 
 @dataclass
 class Restraints:
+    """
+    Restrain atoms using an external force proportional to its distance from its original position,
+    scaled by `k` (larger values mean a stronger restraint).
+
+    All atoms can be fixed by specifying `free_atoms = []`.
+    """
+
+    k: float | None = None
     fixed_atoms: list[int] | None = None
     free_atoms: list[int] | None = None
     fixed_fragments: list[int] | None = None
@@ -248,7 +268,8 @@ class Restraints:
 
     def to_rex(self):
         return Template(
-            """Some (exess_qmmm_rex::MDRestraints {
+            """Some (exess_rex::Restraints {
+              k = $maybe_k,
               fixed_atoms = $maybe_fixed_atoms,
               free_atoms = $maybe_free_atoms,
               fixed_fragments = $maybe_fixed_fragments,
@@ -256,6 +277,7 @@ class Restraints:
               fix_heavy = $maybe_fix_heavy,
             })"""
         ).substitute(
+            maybe_k=optional_str(self.k),
             maybe_fixed_atoms=optional_str(self.fixed_atoms),
             maybe_free_atoms=optional_str(self.free_atoms),
             maybe_fixed_fragments=optional_str(self.fixed_fragments),
@@ -290,6 +312,10 @@ def energy(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Compute the energy of the system in the QDX topology file at `topology_path`.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
@@ -303,19 +329,14 @@ def energy(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_rex::Model {
+        model = Some (exess_rex::Model {
           method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -333,6 +354,8 @@ def energy(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = None,
         },
         driver = exess_rex::Driver::Energy,
       })
@@ -374,6 +397,11 @@ def interaction_energy(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
+    in the toplogy file at `topology_path`.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
@@ -387,19 +415,14 @@ def interaction_energy(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_rex::Model {
+        model = Some (exess_rex::Model {
           method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -417,6 +440,8 @@ def interaction_energy(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = None,
         },
         driver = exess_rex::Driver::Energy,
       })
@@ -452,6 +477,10 @@ def chelpg(
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Compute the CHELPG partial charges for all atoms of the system in the topology file at `topology_path`.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
 
@@ -465,19 +494,14 @@ def chelpg(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_rex::Model {
+        model = Some (exess_rex::Model {
           method = exess_rex::Method::RestrictedHF,
           basis = "cc-pVDZ",
           aux_basis = None,
-          standard_orientation = Some exess_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -511,8 +535,9 @@ def chelpg(
             export_mass_weighted_hessian = None,
             export_hessian_frequencies = None,
             flatten_symmetric = None,
-            concatenate_hdf5_files = None,
             light_json = None,
+            concatenate_hdf5_files = None,
+            training_db = None,
             descriptor_grid = None,
           }),
           guess = None,
@@ -521,6 +546,8 @@ def chelpg(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = None,
         },
         driver = exess_rex::Driver::Energy,
       })
@@ -585,7 +612,6 @@ def qmmm(
     dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
-    qm_fragments: list[int] | None = None,
     restraints: Restraints | None = None,
     trajectory: Trajectory = Trajectory(),
     gradient_finite_difference_step_size: float | None = None,
@@ -594,10 +620,24 @@ def qmmm(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    ml_fragments: list[int] | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
+    """
+    Run a QMMM simulation of the system in the QDX topology and residues files at `topology_path` and `residues_path`.
+
+    Specifying the numberof timesteps is mandatory.
+    If pressure is None, an NVT ensemble is used; if pressure is specified, an NPT ensemble is used.
+    Fragments can be specified as QM, MM, or ML fragments via the respective parameters.
+    If two fragment list parameters are specified, the rest of the fragments are inferred to be of the other type.
+    If three fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
+    It is invalid to specify one fragment list parameter.
+    """
+
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
     residues_vobj = upload_object(PROJECT_ID, residues_path)
@@ -615,15 +655,10 @@ def qmmm(
           method = exess_qmmm_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_qmmm_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
         }),
-        system = Some (exess_qmmm_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        }),
+        system = None,
         keywords = exess_qmmm_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -648,10 +683,16 @@ def qmmm(
             dt_ps = $dt_ps,
             temperature_kelvin = $temperature_kelvin,
             pressure_atm = $maybe_pressure_atm,
-            qm_fragments = $qm_fragments,
             minimisation = None,
             trajectory = $trajectory,
             restraints = $restraints,
+            energy_csv = None,
+          }),
+          machine_learning = None,
+          regions = Some (exess_qmmm_rex::RegionKeywords {
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
           }),
         },
       })
@@ -673,9 +714,11 @@ in
         dt_ps=dt_ps,
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
-        qm_fragments=qm_fragments if qm_fragments is not None else [],
         trajectory=trajectory.to_rex(),
         restraints=restraints.to_rex() if restraints is not None else "None",
+        maybe_qm_fragments=optional_str(qm_fragments),
+        maybe_mm_fragments=optional_str(mm_fragments),
+        maybe_ml_fragments=optional_str(ml_fragments),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
     )
@@ -714,7 +757,7 @@ class OptimizationConvergenceCriteria:
 
     def to_rex(self, reference_fragment: int | None = None):
         return Template(
-            """Some (exess_rex::OptimizationConvergenceCriteria {
+            """Some (exess_geo_opt_rex::OptimizationConvergenceCriteria {
             metric = $maybe_metric,
             gradient_threshold = $maybe_gradient_threshold,
             delta_energy_threshold = $maybe_delta_energy_threshold,
@@ -733,7 +776,7 @@ type CoordinateSystemT = Literal["Cartesian", "NaturalInternal", "DelocalisedInt
 type HessianGuessTypeT = Literal["Identity", "ScaledIdentity", "Schlegel", "Lindh"]
 
 type OptimizationAlgorithmTypeT = Literal[
-    "EigenvectorFollowing", "TrustRegionAugmentedHessian"
+    "EigenvectorFollowing", "TrustRegionAugmentedHessian", "LBFGS"
 ]
 
 
@@ -751,7 +794,7 @@ class TrustRegionKeywords:
 
     def to_rex(self):
         return Template(
-            """Some (exess_rex::TrustRegionKeywords {
+            """Some (exess_geo_opt_rex::TrustRegionKeywords {
             initial_radius = $maybe_initial_radius,
             max_radius = $maybe_max_radius,
             min_radius = $maybe_min_radius,
@@ -775,49 +818,103 @@ class TrustRegionKeywords:
         )
 
 
+type LBFGSLinesearchT = Literal[
+    "MoreThuente", "BacktrackingArmijo", "BacktrackingWolfe", "BacktrackingStrongWolfe"
+]
+
+
+@dataclass
+class LBFGSKeywords:
+    linesearch: LBFGSLinesearchT | None = None
+    n_corrections: int | None = None
+    epsilon: float | None = None
+    max_linesearch: int | None = None
+    gtol: float | None = None
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_geo_opt_rex::LBFGSKeywords {
+              linesearch = $maybe_linesearch,
+              n_corrections = $maybe_n_corrections,
+              epsilon = $maybe_epsilon,
+              max_linesearch = $maybe_max_linesearch,
+              gtol = $maybe_gtol,
+            })"""
+        ).substitute(
+            maybe_linesearch=optional_str(
+                self.linesearch, "exess_geo_opt_rex::LBFGSLinesearch::"
+            ),
+            maybe_n_corrections=optional_str(self.n_corrections),
+            maybe_epsilon=optional_str(self.epsilon),
+            maybe_max_linesearch=optional_str(self.max_linesearch),
+            maybe_gtol=optional_str(self.gtol),
+        )
+
+
 @dataclass
 class OptimizationKeywords:
     convergence_criteria: OptimizationConvergenceCriteria | None = None
-    optimiser_reset_interval: int | None = None
+    optimizer_reset_interval: int | None = None
     coordinate_system: CoordinateSystemT | None = None
     constraints: list[list[int]] | None = None
     hessian_guess: HessianGuessTypeT | None = None
     algorithm: OptimizationAlgorithmTypeT | None = None
+    lbfgs_keywords: LBFGSKeywords | None = None
     frozen_distance_slippage_tolerance_angstroms: float | None = None
     frozen_angle_slippage_tolerance_degrees: float | None = None
     trust_region_keywords: TrustRegionKeywords | None = None
+    fixed_atoms: list[int] | None = None
+    free_atoms: list[int] | None = None
+    fixed_fragments: list[int] | None = None
+    free_fragments: list[int] | None = None
+    fix_heavy: bool | None = None
 
     def to_rex(self, max_iters):
         return Template(
-            """Some (exess_rex::OptimizationKeywords {
+            """Some (exess_geo_opt_rex::OptimizationKeywords {
             max_iters = $max_iters,
             convergence_criteria = $maybe_convergence_criteria,
-            optimiser_reset_interval = $maybe_optimiser_reset_interval,
+            optimizer_reset_interval = $maybe_optimizer_reset_interval,
             coordinate_system = $maybe_coordinate_system,
             constraints = $maybe_constraints,
             hessian_guess = $maybe_hessian_guess,
             algorithm = $maybe_algorithm,
+            lbfgs_keywords = $maybe_lbfgs_keywords,
             frozen_distance_slippage_tolerance_angstroms = $maybe_frozen_distance_slippage_tolerance_angstroms,
             frozen_angle_slippage_tolerance_degrees = $maybe_frozen_angle_slippage_tolerance_degrees,
             trust_region_keywords = $maybe_trust_region_keywords,
+            fixed_atoms = $maybe_fixed_atoms,
+            free_atoms = $maybe_free_atoms,
+            fixed_fragments = $maybe_fixed_fragments,
+            free_fragments = $maybe_free_fragments,
+            fix_heavy = $maybe_fix_heavy,
           })"""
         ).substitute(
             max_iters=max_iters,
-            maybe_convergence_criteria=optional_nested(self.convergence_criteria),
-            maybe_optimiser_reset_interval=optional_str(self.optimiser_reset_interval),
+            maybe_convergence_criteria=(
+                self.convergence_criteria.to_rex()
+                if self.convergence_criteria is not None
+                else "None"
+            ),
+            maybe_optimizer_reset_interval=optional_str(self.optimizer_reset_interval),
             maybe_coordinate_system=optional_str(
-                self.coordinate_system, "exess_rex::CoordinateSystem"
+                self.coordinate_system, "exess_geo_opt_rex::CoordinateSystem::"
             ),
             # maybe_constraints=optional_list(
             #     self.constraints,
-            #     lambda constraint: f"vec![{', '.join(f'exess_rex::AtomRef ({atom})' for atom in constraint)}]",
+            #     lambda constraint: f"vec![{', '.join(f'exess_geo_opt_rex::AtomRef ({atom})' for atom in constraint)}]",
             # ),
             maybe_constraints="None",  # TODO
             maybe_hessian_guess=optional_str(
-                self.hessian_guess, "exess_rex::HessianGuessType"
+                self.hessian_guess, "exess_geo_opt_rex::HessianGuessType::"
             ),
             maybe_algorithm=optional_str(
-                self.algorithm, "exess_rex::OptimizationAlgorithmType"
+                self.algorithm, "exess_geo_opt_rex::OptimizationAlgorithmType::"
+            ),
+            maybe_lbfgs_keywords=(
+                self.lbfgs_keywords.to_rex()
+                if self.lbfgs_keywords is not None
+                else "None"
             ),
             maybe_frozen_distance_slippage_tolerance_angstroms=optional_str(
                 self.frozen_distance_slippage_tolerance_angstroms
@@ -825,7 +922,16 @@ class OptimizationKeywords:
             maybe_frozen_angle_slippage_tolerance_degrees=optional_str(
                 self.frozen_angle_slippage_tolerance_degrees
             ),
-            maybe_trust_region_keywords=optional_nested(self.trust_region_keywords),
+            maybe_trust_region_keywords=(
+                self.trust_region_keywords.to_rex()
+                if self.trust_region_keywords is not None
+                else "None"
+            ),
+            maybe_fixed_atoms=optional_str(self.fixed_atoms),
+            maybe_free_atoms=optional_str(self.free_atoms),
+            maybe_fixed_fragments=optional_str(self.fixed_fragments),
+            maybe_free_fragments=optional_str(self.free_fragments),
+            maybe_fix_heavy=optional_str(self.fix_heavy),
         )
 
 
@@ -837,12 +943,21 @@ def optimization(
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    ml_fragments: list[int] | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
 ):
     """
-    blah blah
+    Run optimization on the system in the QDX topology and residues files at `topology_path`.
+
+    Specifying the maximum iterations is mandatory.
+    Fragment-based QM calculation is not supported, but fragments can be used for specifying regions as QM, MM, or ML.
+    If two fragment list parameters are specified, the rest of the fragments are inferred to be of the other type.
+    If three fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
+    It is invalid to specify one fragment list parameter.
     """
 
     # Upload inputs
@@ -858,19 +973,14 @@ def optimization(
       (exess_geo_opt_rex::OptimizationParams {
         schema_version = "0.2.0",
         external_charges = None,
-        model = exess_geo_opt_rex::Model {
+        model = Some (exess_geo_opt_rex::Model {
           method = exess_geo_opt_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = Some exess_geo_opt_rex::StandardOrientation::FullSystem,
-          force_cartesian_basis_sets = Some true,
-        },
-        system = exess_geo_opt_rex::System {
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-          gpus_per_team = None,
-          max_gpu_memory_mb = None,
-        },
+          standard_orientation = None,
+          force_cartesian_basis_sets = None,
+        }),
+        system = None,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -888,6 +998,12 @@ def optimization(
           hessian = None,
           gradient = None,
           qmmm = None,
+          machine_learning = None,
+          regions = Some (exess_geo_opt_rex::RegionKeywords {
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
+          }),
         },
       })
       [ (obj_j topology) ]
@@ -895,11 +1011,18 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
-        optimization_keywords=optimization_keywords.to_rex(max_iters),
+        optimization_keywords=(
+            optimization_keywords.to_rex(max_iters)
+            if optimization_keywords is not None
+            else "None"
+        ),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
+        maybe_qm_fragments=optional_str(qm_fragments),
+        maybe_mm_fragments=optional_str(mm_fragments),
+        maybe_ml_fragments=optional_str(ml_fragments),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
@@ -954,24 +1077,6 @@ def run_qmmm():
 def run_optimization():
     cyclopts.run(optimization)
 
-
-if __name__ == "__main__":
-    i_folder = Path.cwd() / ".." / "libqdx" / ".scratch" / "qm-affinity" / "i"
-
-    o = energy(
-        "6a5j_t.json",
-        run_spec=RunSpec(target="Bullet"),
-    )
-    # o = interaction_energy(i_folder / "tyk2_ejm_31_t.json", 94)
-    # o = chelpg(i_folder / "tyk2_ejm_31_t.json")
-    # o = qmmm(
-    #     "6a5j_t.json",
-    #     "6a5j_r.json",
-    #     n_timesteps=500,
-    #     qm_fragments=[],
-    #     free_atoms=[0],
-    # )
-    print(f"Output: {o}")
 
 # TODO:
 #  - trace for failure
