@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
@@ -105,27 +106,8 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def run_pbsa():
     cyclopts.run(pbsa)
-
-
-if __name__ == "__main__":
-    o = pbsa(
-        "pbsa_t.json",
-        solute_dielectric=1.0,
-        solvent_dielectric=78.54,
-        solvent_radius=0.14,
-        ion_concentration=0.0,
-        temperature=298.0,
-        spacing=0.04,
-        sasa_gamma=2.26778,
-        sasa_beta=3.84928,
-        sasa_n_samples=1000,
-        convergence=0.00001,
-        box_size_factor=2.0,
-        collect=True,
-    )
-    print(o)

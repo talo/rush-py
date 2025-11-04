@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import sys
 import tarfile
 from dataclasses import dataclass
 from io import BytesIO
@@ -296,7 +297,7 @@ def collect_energy(run_id: str):
             json.dump(clean_dict(qm_output_json), f, indent=2)
         return out_path
     elif "Err" in run["result"]:
-        print(f"Error: {run['result']['Err']}")
+        print(f"Error: {run['result']['Err']}", file=sys.stderr)
     elif run["status"] == "error":
         print_run_trace(run)
 
@@ -382,7 +383,7 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def interaction_energy(
@@ -468,7 +469,7 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def chelpg(
@@ -593,7 +594,7 @@ in
                             ]
                 return (out_path, chelpg)
             elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}")
+                print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":
                 print_run_trace(run)
         else:
@@ -602,7 +603,7 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def qmmm(
@@ -736,7 +737,7 @@ in
                     json.dump(clean_dict(qm_output_json), f, indent=2)
                 return out_path
             elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}")
+                print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":
                 print_run_trace(run)
         else:
@@ -745,7 +746,7 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 @dataclass
@@ -1046,7 +1047,7 @@ in
                     json.dump(clean_dict(qm_output_json), f, indent=2)
                 return (out_path1, out_path2)
             elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}")
+                print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":
                 print_run_trace(run)
         else:
@@ -1055,7 +1056,7 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def run_energy():

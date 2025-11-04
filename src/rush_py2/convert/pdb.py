@@ -2,6 +2,7 @@
 PDB file parsing and writing functionality.
 """
 
+import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple
@@ -406,7 +407,7 @@ def from_pdb(pdb_contents: str) -> List[TRC]:
                     # else: skip atoms with other alternate locations
 
                 except ValueError as e:
-                    print(f"Warning: {e}")
+                    print(f"Warning: {e}", file=sys.stderr)
                     continue
 
             elif record_type == "CONECT":

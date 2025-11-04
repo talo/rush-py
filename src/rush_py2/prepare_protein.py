@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import sys
 from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
@@ -104,7 +105,7 @@ in
                     json.dump(clean_dict(trc_o_dict), f, indent=2)
                 return out_path
             elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}")
+                print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":
                 print_run_trace(run)
         else:
@@ -113,7 +114,7 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def run_prepare_protein():

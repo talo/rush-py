@@ -27,10 +27,10 @@ def test_cif_conversion():
     cif_files = sorted(test_cache_dir.glob("*.cif"))
 
     if not cif_files:
-        print("No .cif files found in test_cache directory")
+        print("No .cif files found in test_cache directory", file=sys.stderr)
         return
 
-    print(f"Found {len(cif_files)} PDB files to test")
+    print(f"Found {len(cif_files)} PDB files to test", file=sys.stderr)
 
     passed = 0
     failed = 0
@@ -39,7 +39,10 @@ def test_cif_conversion():
         json_file = cif_file.with_suffix(cif_file.suffix + ".json")
 
         if not json_file.exists():
-            print(f"SKIP: {cif_file.name} - no corresponding .cif.json file found")
+            print(
+                f"SKIP: {cif_file.name} - no corresponding .cif.json file found",
+                file=sys.stderr,
+            )
             continue
 
         # Read and convert PDB file
@@ -64,27 +67,29 @@ def test_cif_conversion():
 
             # Compare
             if normalized_converted == normalized_expected:
-                print(f"PASS: {cif_file.name}")
+                print(f"PASS: {cif_file.name}", file=sys.stderr)
                 passed += 1
             else:
-                print(f"FAIL: {cif_file.name} - JSON does not match")
+                print(f"FAIL: {cif_file.name} - JSON does not match", file=sys.stderr)
                 failed += 1
 
                 # Show detailed diff for debugging
                 print(
-                    f"  Expected keys: {set(normalized_expected[0].keys()) if normalized_expected else set()}"
+                    f"  Expected keys: {set(normalized_expected[0].keys()) if normalized_expected else set()}",
+                    file=sys.stderr,
                 )
                 print(
-                    f"  Converted keys: {set(normalized_converted[0].keys()) if normalized_converted else set()}"
+                    f"  Converted keys: {set(normalized_converted[0].keys()) if normalized_converted else set()}",
+                    file=sys.stderr,
                 )
 
         except Exception as e:
-            print(f"ERROR: {cif_file.name} - {type(e).__name__}: {e}")
+            print(f"ERROR: {cif_file.name} - {type(e).__name__}: {e}", file=sys.stderr)
             failed += 1
 
-    print(f"\n{'=' * 60}")
-    print(f"Results: {passed} passed, {failed} failed")
-    print(f"{'=' * 60}")
+    print(f"\n{'=' * 60}", file=sys.stderr)
+    print(f"Results: {passed} passed, {failed} failed", file=sys.stderr)
+    print(f"{'=' * 60}", file=sys.stderr)
 
     return failed == 0
 

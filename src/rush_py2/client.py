@@ -1,4 +1,5 @@
 import re
+import sys
 import time
 from dataclasses import asdict, dataclass
 from os import getenv
@@ -18,12 +19,19 @@ BACKOFF_FACTOR = 1.5
 MAX_WAIT_TIME = 3600
 
 
-API_KEY = getenv("RUSH_TOKEN")
-PROJECT_ID = getenv("RUSH_PROJECT")
 GRAPHQL_ENDPOINT = getenv(
     "RUSH_ENDPOINT",
     "https://tengu-server-staging-seaography-720805281970.asia-southeast1.run.app",
 )
+
+API_KEY = getenv("RUSH_TOKEN")
+if not API_KEY:
+    raise Exception("RUSH_TOKEN must be set")
+
+PROJECT_ID = getenv("RUSH_PROJECT")
+if not PROJECT_ID:
+    raise Exception("RUSH_PROJECT must be set")
+
 MODULE_LOCK = (
     {
         # staging
@@ -46,18 +54,22 @@ MODULE_LOCK = (
     }
 )
 
-if not API_KEY:
-    raise Exception("RUSH_TOKEN must be set")
+_client: Client | None = None
 
-if not PROJECT_ID:
-    raise Exception("RUSH_PROJECT must be set")
 
-client = Client(
-    transport=RequestsHTTPTransport(
-        url=GRAPHQL_ENDPOINT,
-        headers={"Authorization": f"Bearer {API_KEY}"},
-    ),
-)
+def _get_client() -> Client:
+    global _client
+
+    if _client is None:
+        _client = Client(
+            transport=RequestsHTTPTransport(
+                url=GRAPHQL_ENDPOINT,
+                headers={"Authorization": f"Bearer {API_KEY}"},
+            )
+        )
+
+    return _client
+
 
 type TargetT = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
 
@@ -151,7 +163,7 @@ def upload_object(project_id, filepath: Path | str):
                 },
                 "project_id": project_id,
             }
-        result = client.execute(mutation, upload_files=True)
+        result = _get_client().execute(mutation, upload_files=True)
 
     obj = result["upload_object"]["object"]
     return obj
@@ -173,7 +185,7 @@ def download_object(path):
     )
     query.variable_values = {"path": path}
 
-    result = client.execute(query)
+    result = _get_client().execute(query)
     obj_descriptor = result["object_path"]
 
     # Json
@@ -202,12 +214,12 @@ def fetch_results(run_id):
     )
     query.variable_values = {"id": run_id}
 
-    result = client.execute(query)
+    result = _get_client().execute(query)
     return result["run"]
 
 
 def print_run_trace(result):
-    print(f"Error: {result['result']}")
+    print(f"Error: {result['result']}", file=sys.stderr)
 
     trace = result["trace"]
     trace = re.sub(
@@ -225,16 +237,16 @@ def print_run_trace(result):
     stdout_match = re.search(r'stdout: Some\("(.*?)"\)', trace, re.DOTALL)
     if stdout_match:
         stdout_content = stdout_match.group(1)
-        print("stdout:")
+        print("stdout:", file=sys.stderr)
         for line in stdout_content.split("\n"):
-            print(f"  {line}")
+            print(f"  {line}", file=sys.stderr)
     stderr_match = re.search(r'stderr: Some\("(.*?)"\)', trace, re.DOTALL)
     if stderr_match:
         stderr_content = stderr_match.group(1)
-        print("stderr:")
+        print("stderr:", file=sys.stderr)
         for line in stderr_content.split("\n"):
-            print(f"  {line}")
-        print()
+            print(f"  {line}", file=sys.stderr)
+        print(file=sys.stderr)
 
 
 @dataclass
@@ -276,10 +288,10 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
         k: v for k, v in asdict(run_opts).items() if v is not None
     }
 
-    result = client.execute(mutation)
+    result = _get_client().execute(mutation)
     run_id = result["eval"]["id"]
     created_at = result["eval"]["created_at"].split(".")[0]
-    print(f"Run submitted @ {created_at} with ID: {run_id}")
+    print(f"Run submitted @ {created_at} with ID: {run_id}", file=sys.stderr)
     return run_id
 
 
@@ -319,7 +331,7 @@ def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
     while time.time() - start_time < MAX_WAIT_TIME:
         time.sleep(poll_interval)
 
-        result = client.execute(query)
+        result = _get_client().execute(query)
         status = result["run"]["status"]
         module_instances = result["run"]["module_instances"]["nodes"]
         if module_instances:
@@ -341,7 +353,7 @@ def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
                 curr_status_time = module_instances[0][f"{curr_status}_at"].split(".")[
                     0
                 ]
-                print(f"• {curr_status:11} @ {curr_status_time}")
+                print(f"• {curr_status:11} @ {curr_status_time}", file=sys.stderr)
                 poll_interval = INITIAL_POLL_INTERVAL
                 last_status = curr_status
             poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
@@ -350,7 +362,7 @@ def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
 
         if status in ["done", "error", "cancelled"]:
             if not last_status:
-                print("Restored already-completed run")
+                print("Restored already-completed run", file=sys.stderr)
             return fetch_results(run_id)
 
         poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)

@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from string import Template
 
@@ -103,7 +104,7 @@ in
                     print_run_trace(run)
                 return run
             else:
-                print("No run available")
+                print("No run available", file=sys.stderr)
                 return None
         else:
             return run_id
@@ -111,4 +112,4 @@ in
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
-                print(f"Error: {error['message']}")
+                print(f"Error: {error['message']}", file=sys.stderr)
