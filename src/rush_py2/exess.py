@@ -367,7 +367,7 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
+        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         topology_vobj_path=topology_vobj["path"],
@@ -453,7 +453,7 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
+        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
@@ -704,7 +704,7 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
+        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         maybe_gradient_finite_difference_step_size=optional_str(
@@ -764,7 +764,7 @@ class OptimizationConvergenceCriteria:
             step_component_threshold = $maybe_step_component_threshold,
           })"""
         ).substitute(
-            maybe_metric=optional_str(self.metric),
+            maybe_metric=optional_str(self.metric),  # TODO: enum prefix
             maybe_gradient_threshold=optional_str(self.gradient_threshold),
             maybe_delta_energy_threshold=optional_str(self.delta_energy_threshold),
             maybe_step_component_threshold=optional_str(self.step_component_threshold),
@@ -1018,7 +1018,7 @@ in
         ),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
+        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         maybe_qm_fragments=optional_str(qm_fragments),
         maybe_mm_fragments=optional_str(mm_fragments),
