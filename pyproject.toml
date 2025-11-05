@@ -8,7 +8,7 @@ authors = [
   { name = "Sean Laguna", email = "seanlaguna@qdx.co" },
 ]
 dependencies = [
-  "cyclopts~=3.16",
+  "cyclopts~=4.2",
   "gql~=4.0",
   "h5py~=3.14",
   "requests~=2.32",
