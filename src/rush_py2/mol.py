@@ -174,12 +174,24 @@ class FormalCharge:
 
     charge: int
 
+    def __repr__(self):
+        return f"FormalCharge({self.charge})"
+
+    def __int__(self):
+        return self.charge
+
 
 @dataclass
 class PartialCharge:
     """Partial charge of an atom."""
 
     charge: float
+
+    def __repr__(self):
+        return f"PartialCharge({self.charge})"
+
+    def __int__(self):
+        return self.charge
 
 
 @dataclass

@@ -20,6 +20,7 @@ from .client import (
     collect_run,
     download_object,
     print_run_trace,
+    save_object,
     submit_rex,
     upload_object,
 )
@@ -291,11 +292,7 @@ def collect_energy(run_id: str):
     run = collect_run(run_id)
     if "Ok" in run["result"]:
         qm_output_vobj = run["result"]["Ok"][0]
-        qm_output_json = json.loads(download_object(qm_output_vobj["path"]).decode())
-        out_path = f"{qm_output_vobj['path']}.json"
-        with open(out_path, "w") as f:
-            json.dump(clean_dict(qm_output_json), f, indent=2)
-        return out_path
+        return save_object(qm_output_vobj["path"])
     elif "Err" in run["result"]:
         print(f"Error: {run['result']['Err']}", file=sys.stderr)
     elif run["status"] == "error":
@@ -569,15 +566,8 @@ in
         if collect:
             run = collect_run(run_id)
             if "Ok" in run["result"]:
-                qm_output_vobj = run["result"]["Ok"][0]
-                qm_output_json = json.loads(
-                    download_object(qm_output_vobj["path"]).decode()
-                )
-                out_path = f"{qm_output_vobj['path']}.json"
-                with open(out_path, "w") as f:
-                    json.dump(clean_dict(qm_output_json), f, indent=2)
-                qm_output_vobj = run["result"]["Ok"][1]
-                qm_output = download_object(qm_output_vobj["path"])
+                out_path = save_object(run["result"]["Ok"][0]["path"])
+                qm_output = download_object(run["result"]["Ok"][1]["path"])
                 decompressed = zstd.ZstdDecompressor().decompress(
                     qm_output, max_output_size=int(1e8)
                 )
@@ -728,14 +718,7 @@ in
         if collect:
             run = collect_run(run_id)
             if "Ok" in run["result"]:
-                qm_output_vobj = run["result"]["Ok"]
-                qm_output_json = json.loads(
-                    download_object(qm_output_vobj["path"]).decode()
-                )
-                out_path = f"{qm_output_vobj['path']}.json"
-                with open(out_path, "w") as f:
-                    json.dump(clean_dict(qm_output_json), f, indent=2)
-                return out_path
+                return save_object(run["result"]["Ok"]["path"])
             elif "Err" in run["result"]:
                 print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":
@@ -1031,21 +1014,9 @@ in
         if collect:
             run = collect_run(run_id)
             if "Ok" in run["result"]:
-                qm_output_vobj = run["result"]["Ok"][0]
-                qm_output_json = json.loads(
-                    download_object(qm_output_vobj["path"]).decode()
-                )
-                out_path1 = f"{qm_output_vobj['path']}.json"
-                with open(out_path1, "w") as f:
-                    json.dump(clean_dict(qm_output_json), f, indent=2)
-                qm_output_vobj = run["result"]["Ok"][1]
-                qm_output_json = json.loads(
-                    download_object(qm_output_vobj["path"]).decode()
-                )
-                out_path2 = f"{qm_output_vobj['path']}.json"
-                with open(out_path2, "w") as f:
-                    json.dump(clean_dict(qm_output_json), f, indent=2)
-                return (out_path1, out_path2)
+                out_path0 = save_object(run["result"]["Ok"][0]["path"])
+                out_path1 = save_object(run["result"]["Ok"][1]["path"])
+                return (out_path0, out_path1)
             elif "Err" in run["result"]:
                 print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":

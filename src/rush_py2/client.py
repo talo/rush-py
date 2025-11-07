@@ -1,3 +1,4 @@
+import json
 import re
 import sys
 import time
@@ -11,7 +12,7 @@ import requests
 from gql import Client, FileVar, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-from .utils import optional_str
+from .utils import clean_dict, optional_str
 
 INITIAL_POLL_INTERVAL = 0.5
 MAX_POLL_INTERVAL = 30
@@ -198,6 +199,14 @@ def download_object(path):
         return response.content
 
     raise Exception(f"Object at path {path} has neither contents nor URL")
+
+
+def save_object(path):
+    qm_output_json = json.loads(download_object(path).decode())
+    out_path = f"{path}.json"
+    with open(out_path, "w") as f:
+        json.dump(clean_dict(qm_output_json), f, indent=2)
+    return out_path
 
 
 def fetch_results(run_id):

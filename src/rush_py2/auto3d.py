@@ -10,6 +10,7 @@ from rush_py2.client import (
     RunSpec,
     collect_run,
     print_run_trace,
+    save_object,
     submit_rex,
 )
 from rush_py2.utils import bool_to_str, float_to_str
@@ -17,19 +18,16 @@ from rush_py2.utils import bool_to_str, float_to_str
 
 @dataclass
 class Auto3DOptions:
-    k = 1
-    batchsize_atoms = 1024
-    capacity = 40
-    convergence_threshold = 0.003
-    enumerate_isomer = True
-    enumerate_tautomer = False
-    job_name = ""
-    max_confs = None
-    memory = None
-    mpi_np = 4
-    opt_steps = 5000
-    patience = 1000
-    threshold = 0.3
+    k: int = 1
+    batchsize_atoms: int = 1024
+    capacity: int = 40
+    convergence_threshold: float = 0.003
+    enumerate_isomer: bool = True
+    enumerate_tautomer: bool = False
+    max_confs: int | None = None
+    opt_steps: int = 5000
+    patience: int = 1000
+    threshold: float = 0.3
 
     def to_rex(self, reference_fragment: int | None = None):
         return Template(
@@ -40,10 +38,10 @@ class Auto3DOptions:
         convergence_threshold = Some $convergence_threshold,
         enumerate_isomer = Some $enumerate_isomer,
         enumerate_tautomer = Some $enumerate_tautomer,
-        job_name = Some "$job_name",
+        job_name = None,
         max_confs = $max_confs,
-        memory = $memory,
-        mpi_np = Some $mpi_np,
+        memory = None,
+        mpi_np = Some 4,
         opt_steps = Some $opt_steps,
         optimizing_engine = Some auto3d_rex::Auto3dOptimizingEngines::AIMNET,
         patience = Some $patience,
@@ -58,10 +56,7 @@ class Auto3DOptions:
             convergence_threshold=float_to_str(self.convergence_threshold),
             enumerate_isomer=bool_to_str(self.enumerate_isomer),
             enumerate_tautomer=bool_to_str(self.enumerate_tautomer),
-            job_name=self.job_name,
             max_confs=self.max_confs,
-            memory=self.memory,
-            mpi_np=self.mpi_np,
             opt_steps=self.opt_steps,
             patience=self.patience,
             threshold=float_to_str(self.threshold),
@@ -76,21 +71,14 @@ def auto3d(
     collect=False,
 ):
     rex = Template("""let
-  results =
+  auto3d = λ smis →
     try_auto3d_rex
       default_runspec_gpu
       $opts
       $smis
 in
-  map
-    (λ x ->
-      let
-        topology = elem0 (elem0 x),
-        smi = elem1 x
-      in
-        (smi, topology)
-    )
-    (zip (map unwrap (unwrap (unwrap results))) $smis)""").substitute(
+  auto3d $smis
+""").substitute(
         smis=f"[{', '.join([f'"{smi}"' for smi in smis])}]",
         opts=opts.to_rex(),
         run_spec=run_spec.to_rex(),
@@ -100,9 +88,28 @@ in
         if collect:
             run = collect_run(run_id)
             if run is not None:
-                if run["status"] == "error":
+                result = run["result"]
+                if "Ok" in result:
+                    if "Ok" in result["Ok"]:
+                        all_smi_confs = []
+                        for smi_confs_res in run["result"]["Ok"]["Ok"]:
+                            if "Ok" in smi_confs_res:
+                                all_smi_confs.append(
+                                    tuple(
+                                        save_object(smi_conf_vobj["path"])
+                                        for smi_conf_vobj in smi_confs_res["Ok"]
+                                    )
+                                )
+                            else:
+                                all_smi_confs.append(smi_confs_res["Err"])
+                        return all_smi_confs
+                    elif "Err" in run["result"]["Ok"]:
+                        print(f"Error: {run['result']['Ok']['Err']}", file=sys.stderr)
+                elif "Err" in run["result"]:
+                    print(f"Error: {run['result']['Err']}", file=sys.stderr)
+                elif run["status"] == "error":
                     print_run_trace(run)
-                return run
+
             else:
                 print("No run available", file=sys.stderr)
                 return None

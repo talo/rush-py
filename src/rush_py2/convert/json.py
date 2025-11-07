@@ -3,6 +3,7 @@ JSON conversion functionality for TRC structures.
 """
 
 import json
+from pathlib import Path
 from typing import List
 
 from ..mol import (
@@ -21,7 +22,9 @@ from ..mol import (
 )
 
 
-def from_json(json_content: str) -> List[TRC]:
+def from_json(
+    json_content: str | tuple[str, str, str] | dict | list[dict],
+) -> List[TRC]:
     """
     Load TRC structures from JSON.
 
@@ -31,7 +34,23 @@ def from_json(json_content: str) -> List[TRC]:
     Returns:
         List of TRC structures
     """
-    data = json.loads(json_content)
+    if isinstance(json_content, str):
+        data = json.loads(json_content)
+    elif isinstance(json_content, tuple) and len(json_content) == 3:
+        # TODO: type should be tuple[Path, Path, Path]
+        data = [{}]
+        with (
+            open(json_content[0]) as t_f,
+            open(json_content[1]) as r_f,
+            open(json_content[2]) as c_f,
+        ):
+            data[0]["topology"] = json.load(t_f)
+            data[0]["residues"] = json.load(r_f)
+            data[0]["chains"] = json.load(c_f)
+    elif isinstance(json_content, dict):
+        data = [json_content]
+    else:
+        data = json_content
     trcs = []
 
     for trc_data in data:
