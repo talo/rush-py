@@ -119,7 +119,7 @@ class RunSpec:
 def upload_object(project_id, filepath: Path | str):
     mutation = gql(
         """
-        mutation UploadObject($file: Upload!, $typeinfo: Json!, $format: ObjectFormat!, $project_id: String) {
+        mutation UploadObject($file: Upload!, $typeinfo: Json!, $format: ObjectFormatEnum!, $project_id: String) {
             upload_object(file: $file, typeinfo: $typeinfo, format: $format, project_id: $project_id) {
                 id
                 object {
