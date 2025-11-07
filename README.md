@@ -27,6 +27,13 @@ uv run rush-exess-chelpg [...]
 uv run rush-exess-qmmm [...]
 ```
 
+### With `pixi`
+Add to `pixi.toml`
+```toml
+[pypi-dependencies]
+rush-py2 = { git = "https://github.com/talo/rush-py2.git", rev = "main" }
+```
+
 ### Using in your project
 
 Add to your `pyproject.toml`:
