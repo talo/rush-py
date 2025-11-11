@@ -33,11 +33,14 @@ PROJECT_ID = getenv("RUSH_PROJECT")
 if not PROJECT_ID:
     raise Exception("RUSH_PROJECT must be set")
 
+MODULE_OVERRIDES = getenv("RUSH_MODULE_LOCK")
+MODULE_OVERRIDES = json.loads(MODULE_OVERRIDES) if MODULE_OVERRIDES else {}
+
 MODULE_LOCK = (
     {
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
-        "exess_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_rex",
+        "exess_rex": "github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -47,13 +50,13 @@ MODULE_LOCK = (
     else {
         # prod
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
-        "exess_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_rex",
+        "exess_rex": "github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
         "prepare_protein_rex": "github:talo/tengu-prepare-protein/33575f99ec89bd6e28b42ac28d8e992ca137d9a7#prepare_protein_rex",
     }
-)
+) | MODULE_OVERRIDES
 
 _client: Client | None = None
 
