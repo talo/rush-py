@@ -7,6 +7,7 @@ This module provides Python classes for molecular structures:
 - Topology, Residues, Chains, and TRC structures
 """
 
+import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
@@ -392,6 +393,47 @@ class Topology:
                 near_atoms.append(atom_idx)
 
         return near_atoms
+
+    def get_fragments_near_fragment(
+        self,
+        frag_idx: int,
+        threshold: float,
+        atom_indices: Optional[List[int]] = None,
+    ) -> list[AtomRef]:
+        """Get fragment indices within threshold distance of another fragment."""
+        if not self.fragments:
+            return []
+
+        if atom_indices is None:
+            atom_indices = list(range(len(self.symbols)))
+
+        near_atoms = set()
+        near_fragments = []
+        for atom_idx in self.fragments[frag_idx]:
+            atom_idx = int(atom_idx)
+            if atom_idx >= len(self.symbols):
+                print("Warning: bad atom index {atom_index}", file=sys.stderr)
+                continue
+
+            near_atoms |= set(
+                self.get_atoms_near_point(
+                    (
+                        self.geometry[atom_idx * 3],
+                        self.geometry[atom_idx * 3 + 1],
+                        self.geometry[atom_idx * 3 + 2],
+                    ),
+                    threshold,
+                )
+            )
+
+        print(sorted(near_atoms))
+        near_atoms = {AtomRef(a) for a in near_atoms}
+
+        return [
+            i
+            for (i, f) in enumerate(self.fragments)
+            if (i != frag_idx and not near_atoms.isdisjoint(f))
+        ]
 
     def extend(self, other: Self) -> None:
         """Extend this topology with atoms from another topology."""

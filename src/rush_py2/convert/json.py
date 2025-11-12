@@ -23,8 +23,12 @@ from ..mol import (
 
 
 def from_json(
-    json_content: str | tuple[str, str, str] | dict | list[dict],
-) -> List[TRC]:
+    json_content: str
+    | Path
+    | (tuple[str | Path, str | Path, str | Path])
+    | dict
+    | list[dict],
+) -> TRC | List[TRC]:
     """
     Load TRC structures from JSON.
 
@@ -36,6 +40,9 @@ def from_json(
     """
     if isinstance(json_content, str):
         data = json.loads(json_content)
+    elif isinstance(json_content, Path):
+        with open(json_content) as f:
+            data = json.load(f)
     elif isinstance(json_content, tuple) and len(json_content) == 3:
         # TODO: type should be tuple[Path, Path, Path]
         data = [{}]
@@ -52,6 +59,10 @@ def from_json(
     else:
         data = json_content
     trcs = []
+
+    # Turn single TRCs into lists
+    if isinstance(data, dict) and "topology" in data:
+        data = [data]
 
     for trc_data in data:
         # Load topology
@@ -109,7 +120,10 @@ def from_json(
         trc = TRC(topology=topology, residues=residues, chains=chains)
         trcs.append(trc)
 
-    return trcs
+    if len(trcs) == 1:
+        return trcs[0]
+    else:
+        return trcs
 
 
 def to_json(trcs: List[TRC]) -> str:
