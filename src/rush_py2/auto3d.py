@@ -10,7 +10,6 @@ from rush_py2.client import (
     RunSpec,
     collect_run,
     print_run_trace,
-    save_object,
     submit_rex,
 )
 from rush_py2.utils import bool_to_str, float_to_str
@@ -101,7 +100,7 @@ in
                     if "Ok" in smi_confs_res:
                         all_smi_confs.append(
                             tuple(
-                                save_object(smi_conf_vobj["path"], run_id)
+                                smi_conf_vobj["path"]
                                 for smi_conf_vobj in smi_confs_res["Ok"]
                             )
                         )

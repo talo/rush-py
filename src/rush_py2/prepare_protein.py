@@ -14,12 +14,11 @@ from .client import (
     RunOpts,
     RunSpec,
     collect_run,
-    download_object,
     print_run_trace,
     submit_rex,
     upload_object,
 )
-from .utils import clean_dict, float_to_str
+from .utils import float_to_str
 
 
 def prepare_protein(
@@ -87,23 +86,8 @@ in
         if collect:
             run = collect_run(run_id)
             if "Ok" in run["result"]:
-                trc_o_tuple = run["result"]["Ok"][0]
-                t_o_dict = json.loads(download_object(trc_o_tuple[0]["path"]).decode())
-                r_o_dict = json.loads(download_object(trc_o_tuple[1]["path"]).decode())
-                c_o_dict = json.loads(download_object(trc_o_tuple[2]["path"]).decode())
-                trc_o_dict = {
-                    "topology": t_o_dict,
-                    "residues": r_o_dict,
-                    "chains": c_o_dict,
-                }
-                out_path = (
-                    f"{trc_o_tuple[0]['path'][:8]}_"
-                    f"{trc_o_tuple[1]['path'][:8]}_"
-                    f"{trc_o_tuple[2]['path'][:8]}.json"
-                )
-                with open(out_path, "w") as f:
-                    json.dump(clean_dict(trc_o_dict), f, indent=2)
-                return out_path
+                trc_obj_tuple = run["result"]["Ok"][0]
+                return trc_obj_tuple
             elif "Err" in run["result"]:
                 print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":

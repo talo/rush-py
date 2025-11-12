@@ -58,21 +58,45 @@ MODULE_LOCK = (
     }
 ) | MODULE_OVERRIDES
 
-_client: Client | None = None
+
+@dataclass
+class RushOpts:
+    workspace_dir: Path = Path.cwd()
+
+
+_rush_opts: RushOpts | None = None
+
+
+def _get_opts() -> RushOpts:
+    global _rush_opts
+
+    if _rush_opts is None:
+        _rush_opts = RushOpts()
+
+    return _rush_opts
+
+
+def set_opts(workspace_dir: Path | None = None):
+    opts = _get_opts()
+    if workspace_dir is not None:
+        opts.workspace_dir = workspace_dir
+
+
+_rush_client: Client | None = None
 
 
 def _get_client() -> Client:
-    global _client
+    global _rush_client
 
-    if _client is None:
-        _client = Client(
+    if _rush_client is None:
+        _rush_client = Client(
             transport=RequestsHTTPTransport(
                 url=GRAPHQL_ENDPOINT,
                 headers={"Authorization": f"Bearer {API_KEY}"},
             )
         )
 
-    return _client
+    return _rush_client
 
 
 type TargetT = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
@@ -201,12 +225,30 @@ def download_object(path: str):
     raise Exception(f"Object at path {path} has neither contents nor URL")
 
 
-def save_object(path):
-    qm_output_json = json.loads(download_object(path).decode())
-    out_path = f"{path}.json"
-    with open(out_path, "w") as f:
-        json.dump(clean_dict(qm_output_json), f, indent=2)
-    return out_path
+def save_json(d: dict, filepath: Path | str | None = None, name: str | None = None):
+    if filepath is not None and name is None:
+        if isinstance(filepath, str):
+            filepath = Path(filepath)
+    elif filepath is None and name is not None:
+        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{name}.json"
+    else:
+        raise Exception("Must specify either filepath or name")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with open(filepath, "w") as f:
+        json.dump(clean_dict(d), f, indent=2)
+    return filepath
+
+
+def save_object(path: str, filepath: Path | str | None = None):
+    output_json = json.loads(download_object(path).decode())
+    if filepath is None:
+        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{path}.json"
+    elif isinstance(filepath, str):
+        filepath = Path(filepath)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with open(filepath, "w") as f:
+        json.dump(clean_dict(output_json), f, indent=2)
+    return filepath
 
 
 def fetch_results(run_id: str):
