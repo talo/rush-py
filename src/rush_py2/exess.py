@@ -809,7 +809,7 @@ type LBFGSLinesearchT = Literal[
 
 @dataclass
 class LBFGSKeywords:
-    linesearch: LBFGSLinesearchT | None = None
+    linesearch: LBFGSLinesearchT = "BacktrackingStrongWolfe"
     n_corrections: int | None = None
     epsilon: float | None = None
     max_linesearch: int | None = None
@@ -964,7 +964,12 @@ def optimization(
           standard_orientation = None,
           force_cartesian_basis_sets = None,
         }),
-        system = None,
+        system = Some (exess_geo_opt_rex::System {
+          max_gpu_memory_mb = Some 1000,
+          gpus_per_team = None,
+          oversubscribe_gpus = None,
+          teams_per_node = None,
+        }),
         keywords = exess_geo_opt_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -982,7 +987,9 @@ def optimization(
           hessian = None,
           gradient = None,
           qmmm = None,
-          machine_learning = None,
+          machine_learning = Some (exess_geo_opt_rex::MLKeywords {
+            ml_type = None,
+          }),
           regions = Some (exess_geo_opt_rex::RegionKeywords {
             qm_fragments = $maybe_qm_fragments,
             mm_fragments = $maybe_mm_fragments,
