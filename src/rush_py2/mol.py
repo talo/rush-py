@@ -408,15 +408,15 @@ class Topology:
             atom_indices = list(range(len(self.symbols)))
 
         near_atoms = set()
-        near_fragments = []
         for atom_idx in self.fragments[frag_idx]:
             atom_idx = int(atom_idx)
             if atom_idx >= len(self.symbols):
                 print("Warning: bad atom index {atom_index}", file=sys.stderr)
                 continue
 
-            near_atoms |= set(
-                self.get_atoms_near_point(
+            near_atoms |= {
+                AtomRef(a)
+                for a in self.get_atoms_near_point(
                     (
                         self.geometry[atom_idx * 3],
                         self.geometry[atom_idx * 3 + 1],
@@ -424,10 +424,7 @@ class Topology:
                     ),
                     threshold,
                 )
-            )
-
-        print(sorted(near_atoms))
-        near_atoms = {AtomRef(a) for a in near_atoms}
+            }
 
         return [
             i
