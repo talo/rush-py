@@ -120,9 +120,8 @@ class RunSpec:
         )
 
 
-def upload_object(project_id, filepath: Path | str):
-    mutation = gql(
-        """
+def upload_object(project_id: str, filepath: Path | str):
+    mutation = gql("""
         mutation UploadObject($file: Upload!, $typeinfo: Json!, $format: ObjectFormatEnum!, $project_id: String) {
             upload_object(file: $file, typeinfo: $typeinfo, format: $format, project_id: $project_id) {
                 id
@@ -135,8 +134,7 @@ def upload_object(project_id, filepath: Path | str):
                 url
             }
         }
-     """
-    )
+     """)
     if isinstance(filepath, str):
         filepath = Path(filepath)
     with filepath.open(mode="rb") as f:
@@ -173,9 +171,9 @@ def upload_object(project_id, filepath: Path | str):
     return obj
 
 
-def download_object(path):
-    query = gql(
-        """
+def download_object(path: str):
+    # TODO: enforce UUID type
+    query = gql("""
         query GetObject($path: String!) {
             object_path(path: $path) {
                 url
@@ -185,8 +183,7 @@ def download_object(path):
                 }
             }
         }
-    """
-    )
+    """)
     query.variable_values = {"path": path}
 
     result = _get_client().execute(query)
@@ -212,9 +209,8 @@ def save_object(path):
     return out_path
 
 
-def fetch_results(run_id):
-    query = gql(
-        """
+def fetch_results(run_id: str):
+    query = gql("""
         query GetResults($id: String!) {
             run(id: $id) {
                 status
@@ -222,8 +218,7 @@ def fetch_results(run_id):
                 trace
             }
         }
-    """
-    )
+    """)
     query.variable_values = {"id": run_id}
 
     result = _get_client().execute(query)
@@ -277,8 +272,7 @@ class RunOpts:
 
 
 def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
-    mutation = gql(
-        """
+    mutation = gql("""
         mutation EvalRex($input: CreateRun!) {
             eval(input: $input) {
                 id
@@ -286,8 +280,7 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
                 created_at
             }
         }
-    """
-    )
+    """)
     mutation.variable_values = {
         "input": {
             "rex": rex,
@@ -308,8 +301,7 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
 
 
 def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
-    query = gql(
-        """
+    query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
                 status
@@ -333,8 +325,7 @@ def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
                 }
             }
         }
-    """
-    )
+    """)
     query.variable_values = {"id": run_id}
 
     start_time = time.time()

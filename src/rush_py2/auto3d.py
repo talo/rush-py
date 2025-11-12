@@ -85,36 +85,37 @@ in
     )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
-        if collect:
-            run = collect_run(run_id)
-            if run is not None:
-                result = run["result"]
-                if "Ok" in result:
-                    if "Ok" in result["Ok"]:
-                        all_smi_confs = []
-                        for smi_confs_res in run["result"]["Ok"]["Ok"]:
-                            if "Ok" in smi_confs_res:
-                                all_smi_confs.append(
-                                    tuple(
-                                        save_object(smi_conf_vobj["path"])
-                                        for smi_conf_vobj in smi_confs_res["Ok"]
-                                    )
-                                )
-                            else:
-                                all_smi_confs.append(smi_confs_res["Err"])
-                        return all_smi_confs
-                    elif "Err" in run["result"]["Ok"]:
-                        print(f"Error: {run['result']['Ok']['Err']}", file=sys.stderr)
-                elif "Err" in run["result"]:
-                    print(f"Error: {run['result']['Err']}", file=sys.stderr)
-                elif run["status"] == "error":
-                    print_run_trace(run)
-
-            else:
-                print("No run available", file=sys.stderr)
-                return None
-        else:
+        if not collect:
             return run_id
+
+        run = collect_run(run_id)
+        if run is None:
+            print("No run available", file=sys.stderr)
+            return None
+
+        result = run["result"]
+        if "Ok" in result:
+            if "Ok" in result["Ok"]:
+                all_smi_confs = []
+                for smi_confs_res in run["result"]["Ok"]["Ok"]:
+                    if "Ok" in smi_confs_res:
+                        all_smi_confs.append(
+                            tuple(
+                                save_object(smi_conf_vobj["path"], run_id)
+                                for smi_conf_vobj in smi_confs_res["Ok"]
+                            )
+                        )
+                    else:
+                        all_smi_confs.append(smi_confs_res["Err"])
+                return all_smi_confs
+            elif "Err" in run["result"]["Ok"]:
+                print(f"Error: {run['result']['Ok']['Err']}", file=sys.stderr)
+        elif "Err" in run["result"]:
+            print(f"Error: {run['result']['Err']}", file=sys.stderr)
+        elif run["status"] == "error":
+            print_run_trace(run)
+
+        return None
 
     except TransportQueryError as e:
         if e.errors:
