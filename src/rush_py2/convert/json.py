@@ -25,7 +25,7 @@ from ..mol import (
 def from_json(
     json_content: str
     | Path
-    | (tuple[str | Path, str | Path, str | Path])
+    | tuple[str | Path, str | Path, str | Path]
     | dict
     | list[dict],
 ) -> TRC | List[TRC]:
