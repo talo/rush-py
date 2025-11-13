@@ -87,36 +87,25 @@ in
         if not collect:
             return run_id
 
-        run = collect_run(run_id)
-        if run is None:
-            print("No run available", file=sys.stderr)
-            return None
+        result = collect_run(run_id)
+        # TODO: proper error types
+        if isinstance(result, str):
+            return result
 
-        result = run["result"]
-        if "Ok" in result:
-            if "Ok" in result["Ok"]:
-                all_smi_confs = []
-                for smi_confs_res in run["result"]["Ok"]["Ok"]:
-                    if "Ok" in smi_confs_res:
-                        all_smi_confs.append(
-                            tuple(
-                                smi_conf_vobj["path"]
-                                for smi_conf_vobj in smi_confs_res["Ok"]
-                            )
-                        )
-                    else:
-                        all_smi_confs.append(smi_confs_res["Err"])
-                return all_smi_confs
-            elif "Err" in run["result"]["Ok"]:
-                print(f"Error: {run['result']['Ok']['Err']}", file=sys.stderr)
-        elif "Err" in run["result"]:
-            print(f"Error: {run['result']['Err']}", file=sys.stderr)
-        elif run["status"] == "error":
-            print_run_trace(run)
+        def is_result_type(result):
+            return (
+                isinstance(result, dict)
+                and len(result) == 1
+                and ("Ok" in result or "Err" in result)
+            )
 
-        return None
+        # TODO: no special cases for Result unwrapping
+        return [
+            next(iter(r_i.values())) if is_result_type(r_i) else r_i for r_i in result
+        ]
 
     except TransportQueryError as e:
         if e.errors:
+            print("Error:", file=sys.stderr)
             for error in e.errors:
-                print(f"Error: {error['message']}", file=sys.stderr)
+                print(f"  {error['message']}", file=sys.stderr)

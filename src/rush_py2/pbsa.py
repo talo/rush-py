@@ -95,11 +95,7 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
-            if run["status"] == "done":
-                return PBSAResults(*run["result"])
-            elif run["status"] == "error":
-                print_run_trace(run)
+            return collect_run(run_id)
         else:
             return run_id
 

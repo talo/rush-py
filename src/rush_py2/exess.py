@@ -361,19 +361,6 @@ class Restraints:
         )
 
 
-def collect_energy(run_id: str):
-    run = collect_run(run_id)
-    if "Ok" in run["result"]:
-        qm_output_vobj = run["result"]["Ok"][0]
-        return qm_output_vobj["path"]
-    elif "Err" in run["result"]:
-        print(f"Error: {run['result']['Err']}", file=sys.stderr)
-    elif run["status"] == "error":
-        print_run_trace(run)
-
-    return None
-
-
 def energy(
     topology_path: Path | str,
     method: MethodT = "RestrictedHF",
@@ -456,7 +443,7 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            return collect_energy(run_id)
+            return collect_run(run_id)
         else:
             return run_id
 
@@ -550,7 +537,7 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            return collect_energy(run_id)
+            return collect_run(run_id)
         else:
             return run_id
 
@@ -657,27 +644,21 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
-            if "Ok" in run["result"]:
-                out_path = run["result"]["Ok"][0]["path"]
-                qm_output = download_object(run["result"]["Ok"][1]["path"])
-                decompressed = zstd.ZstdDecompressor().decompress(
-                    qm_output, max_output_size=int(1e8)
-                )
-                with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                    hdf5_f = tar.extractfile(tar.getnames()[1])
-                    with h5py.File(hdf5_f, "r") as f:
-                        frag_indices = [int(x) for x in f["monomers"].keys()]
-                        chelpg = [
-                            float(x)
-                            for frag_idx in sorted(frag_indices)
-                            for x in f[f"monomers/{frag_idx}/chelpg_charges"]
-                        ]
-                return (out_path, chelpg)
-            elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}", file=sys.stderr)
-            elif run["status"] == "error":
-                print_run_trace(run)
+            result = collect_run(run_id)
+            qm_output = download_object(result[1]["path"])
+            decompressed = zstd.ZstdDecompressor().decompress(
+                qm_output, max_output_size=int(1e8)
+            )
+            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+                hdf5_f = tar.extractfile(tar.getnames()[1])
+                with h5py.File(hdf5_f, "r") as f:
+                    frag_indices = [int(x) for x in f["monomers"].keys()]
+                    chelpg = [
+                        float(x)
+                        for frag_idx in sorted(frag_indices)
+                        for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+                    ]
+            return [result[0], chelpg]
         else:
             return run_id
 
@@ -815,13 +796,7 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
-            if "Ok" in run["result"]:
-                return run["result"]["Ok"]["path"]
-            elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}", file=sys.stderr)
-            elif run["status"] == "error":
-                print_run_trace(run)
+            return collect_run(run_id)
         else:
             return run_id
 
@@ -1121,15 +1096,7 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
-            if "Ok" in run["result"]:
-                out_path0 = run["result"]["Ok"][0]["path"]
-                out_path1 = run["result"]["Ok"][1]["path"]
-                return (out_path0, out_path1)
-            elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}", file=sys.stderr)
-            elif run["status"] == "error":
-                print_run_trace(run)
+            return collect_run(run_id)
         else:
             return run_id
 

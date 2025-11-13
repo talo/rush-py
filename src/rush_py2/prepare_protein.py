@@ -84,14 +84,7 @@ in
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
-            if "Ok" in run["result"]:
-                trc_obj_tuple = run["result"]["Ok"][0]
-                return trc_obj_tuple
-            elif "Err" in run["result"]:
-                print(f"Error: {run['result']['Err']}", file=sys.stderr)
-            elif run["status"] == "error":
-                print_run_trace(run)
+            return collect_run(run_id)
         else:
             return run_id
 

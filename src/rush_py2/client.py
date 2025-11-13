@@ -214,10 +214,10 @@ def download_object(path: str):
     obj_descriptor = result["object_path"]
 
     # Json
-    if obj_descriptor.get("contents") is not None:
+    if "contents" in obj_descriptor:
         return obj_descriptor["contents"]
     # Bin
-    elif obj_descriptor.get("url"):
+    elif "url" in obj_descriptor:
         response = requests.get(obj_descriptor["url"])
         response.raise_for_status()
         return response.content
@@ -267,10 +267,10 @@ def fetch_results(run_id: str):
     return result["run"]
 
 
-def print_run_trace(result):
-    print(f"Error: {result['result']}", file=sys.stderr)
+def print_run_trace(run):
+    print(f"Error: {run['result']}", file=sys.stderr)
 
-    trace = result["trace"]
+    trace = run["trace"]
     trace = re.sub(
         r"\\u\{([0-9a-fA-F]+)\}",
         lambda m: chr(int(m.group(1), 16)),
@@ -342,7 +342,7 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     return run_id
 
 
-def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
+def poll_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
     query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
@@ -408,8 +408,56 @@ def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
         if status in ["done", "error", "cancelled"]:
             if not last_status:
                 print("Restored already-completed run", file=sys.stderr)
-            return fetch_results(run_id)
+            return status
 
         poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
 
-    raise Exception(f"Run timed out: did not complete within {MAX_WAIT_TIME} seconds")
+    return status
+
+
+def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
+    status = poll_run(run_id, max_wait_time)
+    if status not in ["cancelled", "error", "done"]:
+        err = (f"Run timed out: did not complete within {MAX_WAIT_TIME} seconds",)
+        print(err, file=sys.stderr)
+        return err
+
+    run = fetch_results(run_id)
+    if run["status"] == "cancelled":
+        err = f"Cancelled: {run['result']}"
+        print(err, file=sys.stderr)
+        return err
+    elif run["status"] == "error":
+        err = f"Error: {run['result']}"
+        print_run_trace(run)
+        return err
+
+    result = run["result"]
+
+    def is_result_type(result):
+        return (
+            isinstance(result, dict)
+            and len(result) == 1
+            and ("Ok" in result or "Err" in result)
+        )
+
+    # outer error: for tengu-level failures (should exist for try-prefixed rex fns)
+    if is_result_type(result):
+        if "Ok" in result:
+            result = result["Ok"]
+        elif "Err" in result:
+            print(f"Error: {result['Err']}", file=sys.stderr)
+            return result["Err"]
+
+    # inner error: for logic-level failures (may not exist, but should)
+    if is_result_type(result):
+        if "Ok" in result:
+            result = result["Ok"]
+        elif "Err" in result:
+            print(f"Error: {result['Err']}", file=sys.stderr)
+            return result["Err"]
+
+    if len(result) == 1:
+        return result[0]
+    else:
+        return result
