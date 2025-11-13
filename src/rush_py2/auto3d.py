@@ -9,7 +9,6 @@ from rush_py2.client import (
     RunOpts,
     RunSpec,
     collect_run,
-    print_run_trace,
     submit_rex,
 )
 from rush_py2.utils import bool_to_str, float_to_str

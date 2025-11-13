@@ -18,7 +18,6 @@ from .client import (
     RunSpec,
     collect_run,
     download_object,
-    print_run_trace,
     submit_rex,
     upload_object,
 )

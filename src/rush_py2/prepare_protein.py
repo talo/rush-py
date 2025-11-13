@@ -14,7 +14,6 @@ from .client import (
     RunOpts,
     RunSpec,
     collect_run,
-    print_run_trace,
     submit_rex,
     upload_object,
 )
