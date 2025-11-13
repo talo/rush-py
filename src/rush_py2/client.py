@@ -344,6 +344,42 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     run_id = result["eval"]["id"]
     created_at = result["eval"]["created_at"].split(".")[0]
     print(f"Run submitted @ {created_at} with ID: {run_id}", file=sys.stderr)
+
+    history_filepath = _get_opts().workspace_dir / "history.json"
+    history_filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    matching_modules = [module for module in MODULE_LOCK if module in rex]
+    if not matching_modules:
+        print(
+            "Error: no matching module for submission, not adding to history",
+            file=sys.stderr,
+        )
+        return run_id
+    elif len(matching_modules) > 1:
+        print(
+            "Error: > 1 matching module for submission, not adding to history",
+            file=sys.stderr,
+        )
+        return run_id
+
+    module = matching_modules[0]
+    if history_filepath.exists():
+        with open(history_filepath, "r") as f:
+            history = json.load(f)
+    else:
+        history = {"instances": []}
+
+    history["instances"].append(
+        {
+            "run_id": run_id,
+            "run_created_at": created_at,
+            "module_path": MODULE_LOCK[module],
+        }
+    )
+
+    with open(history_filepath, "w") as f:
+        json.dump(history, f, indent=2)
+
     return run_id
 
 
