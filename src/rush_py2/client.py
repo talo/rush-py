@@ -239,15 +239,20 @@ def save_json(d: dict, filepath: Path | str | None = None, name: str | None = No
     return filepath
 
 
-def save_object(path: str, filepath: Path | str | None = None):
-    output_json = json.loads(download_object(path).decode())
-    if filepath is None:
+def save_object(path: str, filepath: Path | str | None = None, name: str | None = None):
+    d = json.loads(download_object(path).decode())
+    if filepath is not None and name is None:
+        if isinstance(filepath, str):
+            filepath = Path(filepath)
+    elif filepath is None and name is not None:
+        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{name}.json"
+    elif filepath is None and name is None:
         filepath = _get_opts().workspace_dir / PROJECT_ID / f"{path}.json"
-    elif isinstance(filepath, str):
-        filepath = Path(filepath)
+    else:
+        raise Exception("Cannot specify both filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w") as f:
-        json.dump(clean_dict(output_json), f, indent=2)
+        json.dump(clean_dict(d), f, indent=2)
     return filepath
 
 
