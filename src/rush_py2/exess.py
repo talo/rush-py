@@ -77,15 +77,6 @@ type ConvergenceMetricT = Literal["Energy", "DIIS", "Density"]
 
 type FockBuildTypeT = Literal["HGP", "UM09", "RI"]
 
-type FragmentLevelT = Literal[
-    "Monomer",
-    "Dimer",
-    "Trimer",
-    "Tetramer",
-]
-
-type CutoffTypeT = Literal["Centroid", "ClosestPair"]
-
 
 @dataclass
 class System:
@@ -177,6 +168,16 @@ class SCFKeywords:
         )
 
 
+type FragmentLevelT = Literal[
+    "Monomer",
+    "Dimer",
+    "Trimer",
+    "Tetramer",
+]
+type CutoffTypeT = Literal["Centroid", "ClosestPair"]
+type DistanceMetricT = Literal["Max", "Average", "Min"]
+
+
 @dataclass
 class FragKeywords:
     """
@@ -191,6 +192,9 @@ class FragKeywords:
     trimer_cutoff: float | None = None
     tetramer_cutoff: float | None = None
     cutoff_type: CutoffTypeT | None = None
+    distance_metric: DistanceMetricT | None = None
+    included_fragments: list[int] | None = None
+    enable_speed: bool | None = None
 
     def __post_init__(self):
         if self.level == "Monomer":
@@ -198,6 +202,7 @@ class FragKeywords:
             self.trimer_cutoff = None
             self.tetramer_cutoff = None
             self.cutoff_type = None
+            self.distance_metric = None
         if self.level == "Dimer" and self.dimer_cutoff is None:
             self.dimer_cutoff = 100.0
             self.trimer_cutoff = None
@@ -229,11 +234,11 @@ class FragKeywords:
               octamer = None,
             }),
             cutoff_type = $maybe_cutoff_type,
-            distance_metric = None,
+            distance_metric = $maybe_distance_metric,
             level = exess_rex::FragmentLevel::$level,
-            included_fragments = None,
+            included_fragments = $maybe_included_fragments,
             reference_fragment = $maybe_reference_fragment,
-            enable_speed = None,
+            enable_speed = $maybe_enable_speed,
           })"""
         ).substitute(
             dimer_cutoff=optional_str(self.dimer_cutoff),
@@ -242,8 +247,13 @@ class FragKeywords:
             maybe_cutoff_type=optional_str(
                 self.cutoff_type, "exess_rex::FragmentDistanceMethod::"
             ),
+            maybe_distance_metric=optional_str(
+                self.distance_metric, "exess_rex::FragmentDistanceMetric::"
+            ),
             level=self.level,
+            maybe_included_fragments=optional_str(self.included_fragments),
             maybe_reference_fragment=optional_str(reference_fragment),
+            maybe_enable_speed=optional_str(self.enable_speed),
         )
 
 
