@@ -88,6 +88,29 @@ type CutoffTypeT = Literal["Centroid", "ClosestPair"]
 
 
 @dataclass
+class System:
+    max_gpu_memory_mb: int | None = None
+    oversubscribe_gpus: bool | None = None
+    gpus_per_team: int | None = None
+    teams_per_node: int | None = None
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_rex::System {
+          max_gpu_memory_mb = $maybe_max_gpu_memory_mb,
+          oversubscribe_gpus = $maybe_oversubscribe_gpus,
+          gpus_per_team = $maybe_gpus_per_team,
+          teams_per_node = $maybe_teams_per_node,
+        })"""
+        ).substitute(
+            maybe_max_gpu_memory_mb=optional_str(self.max_gpu_memory_mb),
+            maybe_oversubscribe_gpus=optional_str(self.oversubscribe_gpus),
+            maybe_gpus_per_team=optional_str(self.gpus_per_team),
+            maybe_teams_per_node=optional_str(self.teams_per_node),
+        )
+
+
+@dataclass
 class SCFKeywords:
     max_iters: int = 50
     max_diis_history_length: int = 8
@@ -306,6 +329,7 @@ def energy(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -334,7 +358,7 @@ def energy(
           standard_orientation = None,
           force_cartesian_basis_sets = None,
         }),
-        system = None,
+        system = $system,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -366,6 +390,7 @@ in
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         topology_vobj_path=topology_vobj["path"],
@@ -391,6 +416,7 @@ def interaction_energy(
     aux_basis: AuxBasisT | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -420,7 +446,7 @@ def interaction_energy(
           standard_orientation = None,
           force_cartesian_basis_sets = None,
         }),
-        system = None,
+        system = $system,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -452,6 +478,7 @@ in
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
@@ -471,6 +498,7 @@ in
 
 def chelpg(
     topology_path: Path | str,
+    system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -499,7 +527,7 @@ def chelpg(
           standard_orientation = None,
           force_cartesian_basis_sets = None,
         }),
-        system = None,
+        system = $system,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -555,6 +583,7 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
+        system=system.to_rex() if system is not None else "None",
         scf_keywords=SCFKeywords(
             max_diis_history_length=12, convergence_threshold=1e-8
         ).to_rex(),
@@ -614,6 +643,7 @@ def qmmm(
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     ml_fragments: list[int] | None = None,
+    system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -649,7 +679,7 @@ def qmmm(
           standard_orientation = None,
           force_cartesian_basis_sets = None,
         }),
-        system = None,
+        system = $system,
         keywords = exess_qmmm_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -696,6 +726,7 @@ in
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
         maybe_gradient_finite_difference_step_size=optional_str(
@@ -930,6 +961,7 @@ def optimization(
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     ml_fragments: list[int] | None = None,
+    system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -964,12 +996,7 @@ def optimization(
           standard_orientation = None,
           force_cartesian_basis_sets = None,
         }),
-        system = Some (exess_geo_opt_rex::System {
-          max_gpu_memory_mb = Some 1000,
-          gpus_per_team = None,
-          oversubscribe_gpus = None,
-          teams_per_node = None,
-        }),
+        system = $system,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $scf_keywords,
           ks = None,
@@ -1002,15 +1029,16 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
+        method=method,
+        basis=basis,
+        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        system=system.to_rex() if system is not None else "None",
+        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         optimization_keywords=(
             optimization_keywords.to_rex(max_iters)
             if optimization_keywords is not None
             else "None"
         ),
-        method=method,
-        basis=basis,
-        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         maybe_qm_fragments=optional_str(qm_fragments),
         maybe_mm_fragments=optional_str(mm_fragments),
         maybe_ml_fragments=optional_str(ml_fragments),
