@@ -10,19 +10,17 @@ import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    PROJECT_ID,
+    Client,
     RunOpts,
     RunSpec,
-    collect_run,
-    download_object,
     print_run_trace,
-    submit_rex,
-    upload_object,
 )
 from .utils import clean_dict, float_to_str
 
 
 def prepare_protein(
+    client: Client,
+    project_id: str,
     trc_path: Path | str,
     ph: float | None = None,
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
@@ -52,9 +50,9 @@ def prepare_protein(
         t_f.seek(0)
         r_f.seek(0)
         c_f.seek(0)
-        topology_vobj = upload_object(PROJECT_ID, t_f.name)
-        residues_vobj = upload_object(PROJECT_ID, r_f.name)
-        chains_vobj = upload_object(PROJECT_ID, c_f.name)
+        topology_vobj = client.upload_object(project_id, t_f.name)
+        residues_vobj = client.upload_object(project_id, r_f.name)
+        chains_vobj = client.upload_object(project_id, c_f.name)
 
     # Run rex
     rex = Template("""let
@@ -83,14 +81,14 @@ in
         chains_vobj_path=chains_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
+            run = client.collect_run(run_id)
             if "Ok" in run["result"]:
                 trc_o_tuple = run["result"]["Ok"][0]
-                t_o_dict = json.loads(download_object(trc_o_tuple[0]["path"]).decode())
-                r_o_dict = json.loads(download_object(trc_o_tuple[1]["path"]).decode())
-                c_o_dict = json.loads(download_object(trc_o_tuple[2]["path"]).decode())
+                t_o_dict = json.loads(client.download_object(trc_o_tuple[0]["path"]).decode())
+                r_o_dict = json.loads(client.download_object(trc_o_tuple[1]["path"]).decode())
+                c_o_dict = json.loads(client.download_object(trc_o_tuple[2]["path"]).decode())
                 trc_o_dict = {
                     "topology": t_o_dict,
                     "residues": r_o_dict,

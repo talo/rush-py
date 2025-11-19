@@ -5,13 +5,10 @@ from string import Template
 from gql.transport.exceptions import TransportQueryError
 
 from rush_py2.client import (
-    PROJECT_ID,
+    Client,
     RunOpts,
     RunSpec,
-    collect_run,
     print_run_trace,
-    save_object,
-    submit_rex,
 )
 from rush_py2.utils import bool_to_str, float_to_str
 
@@ -64,6 +61,8 @@ class Auto3DOptions:
 
 
 def auto3d(
+    client: Client,
+    project_id: str,
     smis: list[str],
     opts: Auto3DOptions = Auto3DOptions(),
     run_spec: RunSpec = RunSpec(),
@@ -84,11 +83,11 @@ in
         run_spec=run_spec.to_rex(),
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if not collect:
             return run_id
 
-        run = collect_run(run_id)
+        run = client.collect_run(run_id)
         if run is None:
             print("No run available", file=sys.stderr)
             return None
@@ -101,7 +100,7 @@ in
                     if "Ok" in smi_confs_res:
                         all_smi_confs.append(
                             tuple(
-                                save_object(smi_conf_vobj["path"], run_id)
+                                client.save_object(smi_conf_vobj["path"])
                                 for smi_conf_vobj in smi_confs_res["Ok"]
                             )
                         )

@@ -76,7 +76,7 @@ class Element(IntEnum):
 
         # Try common variations
         if symbol_upper in ["D"]:  # Deuterium -> Hydrogen
-            return cls.H
+            return Self.H
 
         raise ValueError(f"Unknown element symbol: {symbol}")
 
@@ -427,7 +427,7 @@ class Topology:
             }
 
         return [
-            i
+            AtomRef(i)
             for (i, f) in enumerate(self.fragments)
             if (i != frag_idx and not near_atoms.isdisjoint(f))
         ]

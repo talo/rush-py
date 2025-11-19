@@ -14,15 +14,10 @@ import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    PROJECT_ID,
+    Client,
     RunOpts,
     RunSpec,
-    collect_run,
-    download_object,
     print_run_trace,
-    save_object,
-    submit_rex,
-    upload_object,
 )
 from .utils import bool_to_str, clean_dict, float_to_str, optional_str
 
@@ -321,11 +316,11 @@ class Restraints:
         )
 
 
-def collect_energy(run_id: str):
-    run = collect_run(run_id)
+def collect_energy(client: Client, run_id: str):
+    run = client.collect_run(run_id)
     if "Ok" in run["result"]:
         qm_output_vobj = run["result"]["Ok"][0]
-        return save_object(qm_output_vobj["path"])
+        return client.save_object(qm_output_vobj["path"])
     elif "Err" in run["result"]:
         print(f"Error: {run['result']['Err']}", file=sys.stderr)
     elif run["status"] == "error":
@@ -333,6 +328,8 @@ def collect_energy(run_id: str):
 
 
 def energy(
+    client: Client,
+    project_id: str,
     topology_path: Path | str,
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
@@ -349,7 +346,7 @@ def energy(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = client.upload_object(project_id, topology_path)
 
     # Run rex
     rex = Template("""let
@@ -406,9 +403,9 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            return collect_energy(run_id)
+            return collect_energy(client, run_id)
         else:
             return run_id
 
@@ -419,6 +416,8 @@ in
 
 
 def interaction_energy(
+    client: Client,
+    project_id: str,
     topology_path: Path | str,
     reference_fragment: int,
     method: MethodT = "RestrictedHF",
@@ -437,7 +436,7 @@ def interaction_energy(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = client.upload_object(project_id, topology_path)
 
     # Run rex
     rex = Template("""let
@@ -494,9 +493,9 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            return collect_energy(run_id)
+            return collect_energy(client, run_id)
         else:
             return run_id
 
@@ -507,6 +506,8 @@ in
 
 
 def chelpg(
+    client: Client,
+    project_id: str,
     topology_path: Path | str,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
@@ -518,7 +519,7 @@ def chelpg(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = client.upload_object(project_id, topology_path)
 
     # Run rex
     rex = Template("""let
@@ -601,25 +602,25 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
+            run = client.collect_run(run_id)
             if "Ok" in run["result"]:
-                out_path = save_object(run["result"]["Ok"][0]["path"])
-                qm_output = download_object(run["result"]["Ok"][1]["path"])
+                out_path = client.save_object(run["result"]["Ok"][0]["path"])
+                qm_output = client.download_object(run["result"]["Ok"][1]["path"])
                 decompressed = zstd.ZstdDecompressor().decompress(
                     qm_output, max_output_size=int(1e8)
                 )
                 with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
                     hdf5_f = tar.extractfile(tar.getnames()[1])
                     chelpg = []
-                    with h5py.File(hdf5_f, "r") as f:
-                        frag_indices = [int(x) for x in f["monomers"].keys()]
+                    with h5py.File(hdf5_f, "r") as h:
+                        frag_indices = [int(x) for x in h["monomers"].keys()]
                         for frag_idx in sorted(frag_indices):
                             # pyright: ignore[reportGeneralTypeIssues]
                             chelpg += [
                                 float(x)
-                                for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+                                for x in h[f"monomers/{frag_idx}/chelpg_charges"].values()
                             ]
                 return (out_path, chelpg)
             elif "Err" in run["result"]:
@@ -636,6 +637,8 @@ in
 
 
 def qmmm(
+    client: Client,
+    project_id: str,
     topology_path: Path | str,
     residues_path: Path | str,
     n_timesteps: int,
@@ -670,8 +673,8 @@ def qmmm(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
-    residues_vobj = upload_object(PROJECT_ID, residues_path)
+    topology_vobj = client.upload_object(project_id, topology_path)
+    residues_vobj = client.upload_object(project_id, residues_path)
 
     # Run rex
     rex = Template("""let
@@ -755,11 +758,11 @@ in
         residues_vobj_path=residues_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
+            run = client.collect_run(run_id)
             if "Ok" in run["result"]:
-                return save_object(run["result"]["Ok"]["path"])
+                return client.save_object(run["result"]["Ok"]["path"])
             elif "Err" in run["result"]:
                 print(f"Error: {run['result']['Err']}", file=sys.stderr)
             elif run["status"] == "error":
@@ -961,6 +964,8 @@ class OptimizationKeywords:
 
 
 def optimization(
+    client: Client,
+    project_id: str,
     topology_path: Path | str,
     max_iters: int,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
@@ -987,7 +992,7 @@ def optimization(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = client.upload_object(project_id, topology_path)
 
     # Run rex
     rex = Template("""let
@@ -1055,12 +1060,12 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
+            run = client.collect_run(run_id)
             if "Ok" in run["result"]:
-                out_path0 = save_object(run["result"]["Ok"][0]["path"])
-                out_path1 = save_object(run["result"]["Ok"][1]["path"])
+                out_path0 = client.save_object(run["result"]["Ok"][0]["path"])
+                out_path1 = client.save_object(run["result"]["Ok"][1]["path"])
                 return (out_path0, out_path1)
             elif "Err" in run["result"]:
                 print(f"Error: {run['result']['Err']}", file=sys.stderr)

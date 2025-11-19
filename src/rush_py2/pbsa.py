@@ -8,13 +8,10 @@ import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    PROJECT_ID,
+    Client,
     RunOpts,
     RunSpec,
-    collect_run,
     print_run_trace,
-    submit_rex,
-    upload_object,
 )
 from .utils import float_to_str
 
@@ -27,6 +24,8 @@ class PBSAResults:
 
 
 def pbsa(
+    client: Client,
+    project_id: str,
     topology_path: Path | str,
     solute_dielectric: float,
     solvent_dielectric: float,
@@ -52,7 +51,7 @@ def pbsa(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = client.upload_object(project_id, topology_path)
 
     # Run rex
     rex = Template("""let
@@ -93,9 +92,9 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = client.submit_rex(project_id, rex, run_opts)
         if collect:
-            run = collect_run(run_id)
+            run = client.collect_run(run_id)
             if run["status"] == "done":
                 return PBSAResults(*run["result"])
             elif run["status"] == "error":
