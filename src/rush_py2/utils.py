@@ -1,6 +1,10 @@
 from decimal import Decimal
 
 
+def str_to_str(v: str) -> str:
+    return f'"{v}"'
+
+
 def float_to_str(v: float) -> str:
     return f"{Decimal(str(v)):f}"
 
@@ -13,7 +17,9 @@ def optional_str(
     v: str | int | float | list[int] | bool | None,
     prefix: str = "",
 ) -> str:
-    if isinstance(v, float):
+    if isinstance(v, str) and not prefix:
+        v = str_to_str(v)
+    elif isinstance(v, float):
         v = float_to_str(v)
     elif isinstance(v, bool):
         v = bool_to_str(v)

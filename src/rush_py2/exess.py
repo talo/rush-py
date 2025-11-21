@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import sys
 import tarfile
 from dataclasses import dataclass
@@ -24,7 +23,7 @@ from .client import (
     submit_rex,
     upload_object,
 )
-from .utils import bool_to_str, clean_dict, float_to_str, optional_str
+from .utils import bool_to_str, float_to_str, optional_str
 
 type MethodT = Literal[
     "RestrictedHF",
@@ -73,9 +72,38 @@ type AuxBasisT = Literal[
     "cc-pVTZ-RIFIT",
 ]
 
-type ConvergenceMetricT = Literal["Energy", "DIIS", "Density"]
+type StandardOrientationT = Literal[
+    "None",
+    "FullSystem",
+    "PerFragment",
+]
 
-type FockBuildTypeT = Literal["HGP", "UM09", "RI"]
+
+@dataclass
+class Method:
+    standard_orientation: StandardOrientationT | None = None
+    force_cartesian_basis_sets: bool | None = None
+
+    def to_rex(self, method: MethodT, basis: BasisT, aux_basis: AuxBasisT):
+        return Template(
+            """Some (exess_rex::Method {
+          method = exess_qmmm_rex::Method::$method,
+          basis = "$basis",
+          aux_basis = $maybe_aux_basis,
+          standard_orientation = $maybe_standard_orientation,
+          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
+        })"""
+        ).substitute(
+            method=method,
+            basis=basis,
+            maybe_aux_basis=optional_str(aux_basis),
+            maybe_standard_orientation=optional_str(
+                self.standard_orientation, "exess_rex::StandardOrientation::"
+            ),
+            maybe_force_cartesian_basis_sets=optional_str(
+                self.force_cartesian_basis_sets
+            ),
+        )
 
 
 @dataclass
@@ -99,6 +127,19 @@ class System:
             maybe_gpus_per_team=optional_str(self.gpus_per_team),
             maybe_teams_per_node=optional_str(self.teams_per_node),
         )
+
+
+type ConvergenceMetricT = Literal[
+    "Energy",
+    "DIIS",
+    "Density",
+]
+
+type FockBuildTypeT = Literal[
+    "HGP",
+    "UM09",
+    "RI",
+]
 
 
 @dataclass
@@ -337,6 +378,8 @@ def energy(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     system: System | None = None,
@@ -365,8 +408,8 @@ def energy(
           method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = None,
-          force_cartesian_basis_sets = None,
+          standard_orientation = $maybe_standard_orientation,
+          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
         system = $system,
         keywords = exess_rex::Keywords {
@@ -399,7 +442,11 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        maybe_aux_basis=optional_str(aux_basis),
+        maybe_standard_orientation=optional_str(
+            standard_orientation, "exess_rex::StandardOrientation::"
+        ),
+        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
         system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
@@ -424,6 +471,8 @@ def interaction_energy(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     system: System | None = None,
@@ -453,8 +502,8 @@ def interaction_energy(
           method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = None,
-          force_cartesian_basis_sets = None,
+          standard_orientation = $maybe_standard_orientation,
+          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
         system = $system,
         keywords = exess_rex::Keywords {
@@ -487,7 +536,11 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        maybe_aux_basis=optional_str(aux_basis),
+        maybe_standard_orientation=optional_str(
+            standard_orientation, "exess_rex::StandardOrientation::"
+        ),
+        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
         system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex(reference_fragment),
@@ -534,8 +587,8 @@ def chelpg(
           method = exess_rex::Method::RestrictedHF,
           basis = "cc-pVDZ",
           aux_basis = None,
-          standard_orientation = None,
-          force_cartesian_basis_sets = None,
+          standard_orientation = Some exess_rex::StandardOrientation::None,
+          force_cartesian_basis_sets = Some false,
         }),
         system = $system,
         keywords = exess_rex::Keywords {
@@ -648,6 +701,8 @@ def qmmm(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "STO-3G",
     aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
     qm_fragments: list[int] | None = None,
@@ -686,8 +741,8 @@ def qmmm(
           method = exess_qmmm_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = None,
-          force_cartesian_basis_sets = None,
+          standard_orientation = $maybe_standard_orientation,
+          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
@@ -735,7 +790,11 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        maybe_aux_basis=optional_str(aux_basis),
+        maybe_standard_orientation=optional_str(
+            standard_orientation, "exess_rex::StandardOrientation::"
+        ),
+        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
         system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
@@ -967,6 +1026,8 @@ def optimization(
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
@@ -1003,8 +1064,8 @@ def optimization(
           method = exess_geo_opt_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
-          standard_orientation = None,
-          force_cartesian_basis_sets = None,
+          standard_orientation = $maybe_standard_orientation,
+          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
         system = $system,
         keywords = exess_geo_opt_rex::Keywords {
@@ -1041,7 +1102,11 @@ in
         run_spec=run_spec.to_rex(),
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(f'"{aux_basis}"'),
+        maybe_aux_basis=optional_str(aux_basis),
+        maybe_standard_orientation=optional_str(
+            standard_orientation, "exess_rex::StandardOrientation::"
+        ),
+        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
         system=system.to_rex() if system is not None else "None",
         scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
         optimization_keywords=(
