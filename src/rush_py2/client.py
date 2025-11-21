@@ -348,7 +348,11 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     history_filepath = _get_opts().workspace_dir / "history.json"
     history_filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    matching_modules = [module for module in MODULE_LOCK if module in rex]
+    matching_modules = [
+        module
+        for module in MODULE_LOCK
+        if f"{module}_s" in rex or f"try_{module}" in rex
+    ]
     if not matching_modules:
         print(
             "Error: no matching module for submission, not adding to history",
