@@ -2,8 +2,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    uv2nix-parts.url = "path:/home/machineer/repos/qdx/uv2nix-parts";
-    uv2nix-parts.inputs.nixpkgs.follows = "nixpkgs";
+    uv2nix-parts = {
+      url = "github:talo/uv2nix-parts/feat/flake-module";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
