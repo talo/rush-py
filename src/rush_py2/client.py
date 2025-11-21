@@ -83,7 +83,7 @@ type StorageUnitT = Literal["KB", "MB", "GB"]
 @dataclass
 class RunSpec:
     target: TargetT | None = None
-    walltime: str | None = None
+    walltime: int | None = None
     storage: int | None = 10
     storage_units: StorageUnitT | None = "MB"
     cpus: int | None = None
