@@ -44,7 +44,7 @@ MODULE_LOCK = (
         "exess_geo_opt_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
-        "prepare_protein_rex": "github:talo/tengu-prepare-protein/085222a5eec82dcb1dacf2b3c497e8907bd6790e#prepare_protein_rex",
+        "prepare_protein_rex": "github:talo/tengu-prepare-protein/f74ef68aec8839a9ac9f70441ebc0c17b814ab2f#prepare_protein_rex",
     }
     if "staging" in GRAPHQL_ENDPOINT
     else {
