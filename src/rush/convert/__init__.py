@@ -1,7 +1,7 @@
 """
 Conversion utilities for molecular structure file formats.
 
-This module provides functions to convert between PDB, mmCIF, and JSON formats.
+This module provides functions to convert between PDB, mmCIF, SDF, and QDX's TRC JSON formats.
 """
 
 from pathlib import Path
