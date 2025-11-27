@@ -21,11 +21,9 @@ def test_merge_with_trcs():
     """Test merging TRCs using TRC objects."""
     data_dir = Path.cwd() / "tests" / "data"
     mk1_trc = from_json(data_dir / "1hsg_MK1_trc.json")
-    if isinstance(mk1_trc, list):
-        mk1_trc = mk1_trc[0]
+    assert isinstance(mk1_trc, TRC)
     hoh_trc = from_json(data_dir / "1hsg_HOH_trc.json")
-    if isinstance(hoh_trc, list):
-        hoh_trc = hoh_trc[0]
+    assert isinstance(hoh_trc, TRC)
     seqs = merge_trcs(mk1_trc, hoh_trc).residues.seqs
     assert "MK1" in seqs and "HOH" in seqs
 
@@ -66,14 +64,12 @@ def test_merge_3fly():
 
     # Load protein from JSON
     protein_trc = from_json(protein_json_file)
-    # Handle both single TRC and array of TRCs
     assert isinstance(protein_trc, TRC), (
         f"Expected 1 protein TRC, got {len(protein_trc)}"
     )
 
     # Merge protein and ligand
-    merged_trc = protein_trc
-    merged_trc.extend(ligand_trc)
+    merged_trc = merge_trcs(protein_trc, ligand_trc)
 
     # Convert merged TRC to JSON
     merged_json_str = to_json([merged_trc])
@@ -129,7 +125,9 @@ def test_merge_3fly():
     if merged_summary != expected_summary:
         print(f"  Merged summary:   {merged_summary}", file=sys.stderr)
         print(f"  Expected summary: {expected_summary}", file=sys.stderr)
-    assert merged_summary == expected_summary, "Fields differ between merged TRC and expected complex JSON"
+    assert merged_summary == expected_summary, (
+        "Fields differ between merged TRC and expected complex JSON"
+    )
 
 
 if __name__ == "__main__":

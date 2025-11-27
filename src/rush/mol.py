@@ -1,7 +1,7 @@
 """
 Provides data structures and helpers for molecular systems and structures:
 
-- Classes Rush Topology, Residues, Chains, and TRC types.
+- Classes for Rush Topology, Residues, Chains, and TRC types.
 - Element types and bonds.
 - Fragment type to represent fragmented systems.
 
@@ -860,8 +860,8 @@ class Residues:
         self.insertion_codes.extend(other.insertion_codes)
 
         # Handle labeled residues and labels
-        if hasattr(other, "labeled") and other.labeled is not None:
-            if not hasattr(self, "labeled") or self.labeled is None:
+        if other.labeled is not None:
+            if self.labeled is None:
                 self.labeled = []
             # Renumber residue references
             for ref in other.labeled:
@@ -872,8 +872,8 @@ class Residues:
                 else:
                     self.labeled.append(ref)
 
-        if hasattr(other, "labels") and other.labels is not None:
-            if not hasattr(self, "labels") or self.labels is None:
+        if other.labels is not None:
+            if self.labels is None:
                 self.labels = []
             # Copy labels (they're lists, so we need to copy them)
             for label in other.labels:

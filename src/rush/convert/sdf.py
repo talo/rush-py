@@ -6,7 +6,6 @@ Supports SDF V2000 format.
 """
 
 from enum import Enum
-from pathlib import Path
 from typing import Any
 
 from ..mol import (
@@ -411,15 +410,16 @@ def _molecule_to_trc(molecule: dict[str, Any]) -> TRC:
     """
     trc = TRC()
 
-    # Use molecule name or default to "LIG"
-    residue_name = molecule["name"].strip() or "LIG"
-
     num_atoms = len(molecule["atoms"])
 
     # Build topology
     symbols = []
     geometry = []
     formal_charges = []
+    labels = []
+
+    # Track element counts for labeling (e.g., C1, C2, N1, H1, H2...)
+    element_counts = {}
 
     for atom in molecule["atoms"]:
         try:
@@ -430,10 +430,15 @@ def _molecule_to_trc(molecule: dict[str, Any]) -> TRC:
         geometry.extend([float(atom["x"]), float(atom["y"]), float(atom["z"])])
         formal_charges.append(FormalCharge(atom["charge"]))
 
+        # Create label based on element symbol and sequence number for that element
+        element_symbol = atom["symbol"]
+        element_counts[element_symbol] = element_counts.get(element_symbol, 0) + 1
+        labels.append(f"{element_symbol}{element_counts[element_symbol]}")
+
     trc.topology.symbols = symbols
     trc.topology.geometry = geometry
     trc.topology.formal_charges = formal_charges
-    trc.topology.labels = None
+    trc.topology.labels = labels
 
     # Build connectivity (bonds) - ensure atom1 < atom2 for canonical ordering
     bonds = []
