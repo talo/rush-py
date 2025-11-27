@@ -54,7 +54,7 @@ MODULE_LOCK = (
         "exess_geo_opt_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
-        "prepare_protein_rex": "github:talo/tengu-prepare-protein/33575f99ec89bd6e28b42ac28d8e992ca137d9a7#prepare_protein_rex",
+        "prepare_protein_rex": "github:talo/tengu-prepare-protein/f74ef68aec8839a9ac9f70441ebc0c17b814ab2f#prepare_protein_rex",
     }
 ) | MODULE_OVERRIDES
 
