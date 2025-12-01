@@ -57,7 +57,7 @@ def pbsa(
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
+  pbsa = λ topology →
     pbsa_rex_s
       ($run_spec)
       (pbsa_rex::PBSAParameters {
@@ -75,7 +75,7 @@ def pbsa(
       })
       (obj_j topology)
 in
-  exess "$topology_vobj_path"
+  pbsa "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
         solute_dielectric=float_to_str(solute_dielectric),

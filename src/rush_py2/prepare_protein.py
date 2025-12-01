@@ -58,7 +58,7 @@ def prepare_protein(
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology residues chains →
+  prepare_protein = λ topology residues chains →
     prepare_protein_rex_s
       ($run_spec)
       (prepare_protein_rex::PrepareProteinOptions {
@@ -69,7 +69,7 @@ def prepare_protein(
       })
       [( (obj_j topology), (obj_j residues), (obj_j chains) )]
 in
-  exess "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
+  prepare_protein "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
         ph=float_to_str(ph) if ph is not None else None,
