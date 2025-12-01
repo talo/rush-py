@@ -368,7 +368,7 @@ def energy(
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
+    frag_keywords: FragKeywords | None = FragKeywords(),
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
