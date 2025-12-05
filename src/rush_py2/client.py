@@ -44,7 +44,7 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "exess_rex": "github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_geo_opt_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -55,7 +55,7 @@ MODULE_LOCK = (
         # prod
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "exess_rex": "github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_geo_opt_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/d3d5a3dcf47b41ce3ed04fc7517bda8e375e5383#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",

@@ -681,12 +681,12 @@ def interaction_energy(
           standard_orientation = $maybe_standard_orientation,
           force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
-        system = $system,
+        system = $maybe_system,
         keywords = exess_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
-          frag = $frag_keywords,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -717,9 +717,11 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        frag_keywords=frag_keywords.to_rex(reference_fragment),
+        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_frag_keywords=frag_keywords.to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
@@ -914,10 +916,10 @@ def qmmm(
         }),
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
-          frag = $frag_keywords,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -939,11 +941,11 @@ def qmmm(
             pressure_atm = $maybe_pressure_atm,
             minimisation = None,
             trajectory = $trajectory,
-            restraints = $restraints,
+            restraints = $maybe_restraints,
             energy_csv = None,
           }),
-          machine_learning = None,
-          regions = $regions,
+          machine_learning = $maybe_machine_learning,
+          regions = $maybe_regions,
         },
       })
       (obj_j topology)
@@ -960,8 +962,12 @@ in
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
         system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_frag_keywords=(
+            frag_keywords.to_rex() if frag_keywords is not None else "None"
+        ),
         maybe_gradient_finite_difference_step_size=optional_str(
             gradient_finite_difference_step_size
         ),
@@ -970,14 +976,19 @@ in
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
         trajectory=trajectory.to_rex(),
-        restraints=restraints.to_rex() if restraints is not None else "None",
-        regions=(
+        maybe_restraints=restraints.to_rex() if restraints is not None else "None",
+        maybe_machine_learning=(
+            "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
+            if ml_fragments is not None
+            else "None"
+        ),
+        maybe_regions=(
             Template(
                 """Some (exess_qmmm_rex::RegionKeywords {
-    qm_fragments = $maybe_qm_fragments,
-    mm_fragments = $maybe_mm_fragments,
-    ml_fragments = $maybe_ml_fragments,
-})"""
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
+          })"""
             ).substitute(
                 maybe_qm_fragments=optional_str(qm_fragments),
                 maybe_mm_fragments=optional_str(mm_fragments),
@@ -1194,6 +1205,7 @@ class OptimizationKeywords:
 def optimization(
     topology_path: Path | str,
     max_iters: int,
+    residues_path: Path | str | None = None,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
@@ -1221,12 +1233,15 @@ def optimization(
 
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
+    residues_vobj = None
+    if residues_path is not None:
+        residues_vobj = upload_object(PROJECT_ID, residues_path)
 
     # Run rex
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
+  exess = λ topology residues →
     exess_geo_opt_rex_s
       ($run_spec)
       (exess_geo_opt_rex::OptimizationParams {
@@ -1239,9 +1254,9 @@ def optimization(
           standard_orientation = $maybe_standard_orientation,
           force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
-        system = $system,
+        system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
           frag = None,
@@ -1253,19 +1268,18 @@ def optimization(
           export = None,
           guess = None,
           force_field = None,
-          optimization = $optimization_keywords,
+          optimization = $maybe_optimization_keywords,
           hessian = None,
           gradient = None,
           qmmm = None,
-          machine_learning = Some (exess_geo_opt_rex::MLKeywords {
-            ml_type = None,
-          }),
-          regions = $regions,
+          machine_learning = $maybe_machine_learning,
+          regions = $maybe_regions,
         },
       })
       [ (obj_j topology) ]
+      $residues_expr
 in
-  exess "$topology_vobj_path"
+  exess "$topology_vobj_path" "$residues_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
         method=method,
@@ -1275,20 +1289,27 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        optimization_keywords=(
+        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_optimization_keywords=(
             optimization_keywords.to_rex(max_iters)
             if optimization_keywords is not None
             else "None"
         ),
-        regions=(
+        maybe_machine_learning=(
+            "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
+            if ml_fragments is not None
+            else "None"
+        ),
+        maybe_regions=(
             Template(
                 """Some (exess_qmmm_rex::RegionKeywords {
-    qm_fragments = $maybe_qm_fragments,
-    mm_fragments = $maybe_mm_fragments,
-    ml_fragments = $maybe_ml_fragments,
-})"""
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
+          })"""
             ).substitute(
                 maybe_qm_fragments=optional_str(qm_fragments),
                 maybe_mm_fragments=optional_str(mm_fragments),
@@ -1299,7 +1320,11 @@ in
             )
             else "None"
         ),
+        residues_expr=(
+            "(Some [ (obj_j residues) ])" if residues_path is not None else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
+        residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
