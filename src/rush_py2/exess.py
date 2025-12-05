@@ -18,6 +18,7 @@ from .client import (
     RunSpec,
     collect_run,
     download_object,
+    save_object,
     submit_rex,
     upload_object,
 )
@@ -360,8 +361,9 @@ class Restraints:
         )
 
 
-def energy(
+def exess(
     topology_path: Path | str,
+    driver: str = "Energy",
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
@@ -398,12 +400,12 @@ def energy(
           standard_orientation = $maybe_standard_orientation,
           force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
-        system = $system,
+        system = $maybe_system,
         keywords = exess_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
-          frag = $frag_keywords,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -419,7 +421,7 @@ def energy(
           machine_learning = None,
           regions = None,
         },
-        driver = exess_rex::Driver::Energy,
+        driver = exess_rex::Driver::$driver,
       })
       [ (obj_j topology) ]
       None
@@ -434,10 +436,15 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
+        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_frag_keywords=(
+            frag_keywords.to_rex() if frag_keywords is not None else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
+        driver=driver,
     )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
@@ -450,6 +457,49 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedHF",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    export_keywords: ExportKeywords | None = ExportKeywords(),
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+):
+    return exess(
+        topology_path,
+        "Energy",
+        method,
+        basis,
+        aux_basis,
+        standard_orientation,
+        force_cartesian_basis_sets,
+        scf_keywords,
+        frag_keywords,
+        export_keywords,
+        system,
+        run_spec,
+        run_opts,
+        collect,
+    )
+
+
+def save_energy_outputs(res):
+    if len(res) == 1:
+        return save_object(res[0]["path"])
+    else:
+        return (
+            save_object(res[0]["path"]),
+            save_object(res[1]["path"], ext="hdf5", extract=True),
+        )
 
 
 def interaction_energy(
@@ -754,11 +804,7 @@ def qmmm(
             energy_csv = None,
           }),
           machine_learning = None,
-          regions = Some (exess_qmmm_rex::RegionKeywords {
-            qm_fragments = $maybe_qm_fragments,
-            mm_fragments = $maybe_mm_fragments,
-            ml_fragments = $maybe_ml_fragments,
-          }),
+          regions = $regions,
         },
       })
       (obj_j topology)
@@ -786,9 +832,23 @@ in
         maybe_pressure_atm=optional_str(pressure_atm),
         trajectory=trajectory.to_rex(),
         restraints=restraints.to_rex() if restraints is not None else "None",
-        maybe_qm_fragments=optional_str(qm_fragments),
-        maybe_mm_fragments=optional_str(mm_fragments),
-        maybe_ml_fragments=optional_str(ml_fragments),
+        regions=(
+            Template(
+                """Some (exess_qmmm_rex::RegionKeywords {
+    qm_fragments = $maybe_qm_fragments,
+    mm_fragments = $maybe_mm_fragments,
+    ml_fragments = $maybe_ml_fragments,
+})"""
+            ).substitute(
+                maybe_qm_fragments=optional_str(qm_fragments),
+                maybe_mm_fragments=optional_str(mm_fragments),
+                maybe_ml_fragments=optional_str(ml_fragments),
+            )
+            if not (
+                qm_fragments is None and mm_fragments is None and ml_fragments is None
+            )
+            else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
     )
@@ -1061,11 +1121,7 @@ def optimization(
           machine_learning = Some (exess_geo_opt_rex::MLKeywords {
             ml_type = None,
           }),
-          regions = Some (exess_geo_opt_rex::RegionKeywords {
-            qm_fragments = $maybe_qm_fragments,
-            mm_fragments = $maybe_mm_fragments,
-            ml_fragments = $maybe_ml_fragments,
-          }),
+          regions = $regions,
         },
       })
       [ (obj_j topology) ]
@@ -1087,9 +1143,23 @@ in
             if optimization_keywords is not None
             else "None"
         ),
-        maybe_qm_fragments=optional_str(qm_fragments),
-        maybe_mm_fragments=optional_str(mm_fragments),
-        maybe_ml_fragments=optional_str(ml_fragments),
+        regions=(
+            Template(
+                """Some (exess_qmmm_rex::RegionKeywords {
+    qm_fragments = $maybe_qm_fragments,
+    mm_fragments = $maybe_mm_fragments,
+    ml_fragments = $maybe_ml_fragments,
+})"""
+            ).substitute(
+                maybe_qm_fragments=optional_str(qm_fragments),
+                maybe_mm_fragments=optional_str(mm_fragments),
+                maybe_ml_fragments=optional_str(ml_fragments),
+            )
+            if not (
+                qm_fragments is None and mm_fragments is None and ml_fragments is None
+            )
+            else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
