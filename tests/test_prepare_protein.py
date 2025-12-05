@@ -9,7 +9,7 @@ if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
     data_dir = Path.cwd() / "tests" / "data"
     res = prepare_protein(
-        data_dir / "cdk2_dry_trc.json",
+        data_dir / "1hsg_trc.json",
         run_opts=RunOpts(
             name="Test prepare-protein 01", tags=["rush-py2", "test", "cdk2"]
         ),
