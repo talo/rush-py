@@ -12,7 +12,7 @@ from .mmcif import from_mmcif
 from .pdb import from_pdb, to_pdb
 
 
-def load_structure(file_path: str) -> List[TRC]:
+def load_structure(file_path: str) -> TRC | List[TRC]:
     """
     Load structure from PDB, mmCIF, or JSON file.
 

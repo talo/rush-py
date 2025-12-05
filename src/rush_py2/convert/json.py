@@ -8,7 +8,11 @@ from typing import List
 
 from ..mol import (
     TRC,
+    AtomRef,
+    Bond,
+    BondOrder,
     Chain,
+    ChainRef,
     Chains,
     Element,
     FormalCharge,
@@ -91,11 +95,45 @@ def from_json(
             topology.velocities = topology_data["velocities"]
 
         if "connectivity" in topology_data and topology_data["connectivity"]:
-            # Connectivity format needs to be determined from actual JSON
-            pass
+            # Connectivity is a list of [atom1, atom2, bond_order]
+            # BondOrder enum: 1=Single, 2=Double, 3=Triple, 4=OneAndAHalf (partial), 5=Ring (aromatic)
+            bonds = []
+            for bond_data in topology_data["connectivity"]:
+                if isinstance(bond_data, list) and len(bond_data) >= 2:
+                    atom1_idx = bond_data[0]
+                    atom2_idx = bond_data[1]
+                    bond_order_val = bond_data[2]
+
+                    # Support old version mapping: 254 -> 4 (OneAndAHalf/partial), 255 -> 5 (Ring/aromatic)
+                    if bond_order_val == 254:
+                        bond_order_val = 4
+                    elif bond_order_val == 255:
+                        bond_order_val = 5
+
+                    bond_order = BondOrder(bond_order_val)
+                    bonds.append(
+                        Bond(AtomRef(atom1_idx), AtomRef(atom2_idx), bond_order)
+                    )
+            topology.connectivity = bonds
 
         if "fragments" in topology_data and topology_data["fragments"]:
             topology.fragments = [Fragment(frag) for frag in topology_data["fragments"]]
+
+        if (
+            "fragment_formal_charges" in topology_data
+            and topology_data["fragment_formal_charges"]
+        ):
+            topology.fragment_formal_charges = [
+                FormalCharge(c) for c in topology_data["fragment_formal_charges"]
+            ]
+
+        if (
+            "fragment_partial_charges" in topology_data
+            and topology_data["fragment_partial_charges"]
+        ):
+            topology.fragment_partial_charges = [
+                PartialCharge(c) for c in topology_data["fragment_partial_charges"]
+            ]
 
         # Load residues
         residues_data = trc_data["residues"]
@@ -115,6 +153,12 @@ def from_json(
 
         if chains_data.get("beta_sheets"):
             chains.beta_sheets = [ResidueRef(r) for r in chains_data["beta_sheets"]]
+
+        if chains_data.get("labeled"):
+            chains.labeled = [ChainRef(c) for c in chains_data["labeled"]]
+
+        if chains_data.get("labels"):
+            chains.labels = chains_data["labels"]
 
         # Create TRC
         trc = TRC(topology=topology, residues=residues, chains=chains)
@@ -167,21 +211,35 @@ def to_json(trcs: List[TRC]) -> str:
                 "seqs": trc.residues.seqs,
                 "seq_ns": trc.residues.seq_ns,
                 "insertion_codes": trc.residues.insertion_codes,
-                "labeled": None,
-                "labels": None,
+                "labeled": (
+                    [r.value for r in trc.residues.labeled]
+                    if trc.residues.labeled is not None
+                    else None
+                ),
+                "labels": (
+                    trc.residues.labels if trc.residues.labels is not None else None
+                ),
             },
             "chains": {
                 "chains": [chain.residues for chain in trc.chains.chains],
-                "alpha_helices": [r.value for r in trc.chains.alpha_helices]
-                if trc.chains.alpha_helices
-                else None,
-                "beta_sheets": [r.value for r in trc.chains.beta_sheets]
-                if trc.chains.beta_sheets
-                else None,
-                "labeled": [r.value for r in trc.chains.labeled]
-                if trc.chains.labeled
-                else None,
-                "labels": trc.chains.labels,
+                "alpha_helices": (
+                    [r.value for r in trc.chains.alpha_helices]
+                    if trc.chains.alpha_helices
+                    else None
+                ),
+                "beta_sheets": (
+                    [r.value for r in trc.chains.beta_sheets]
+                    if trc.chains.beta_sheets
+                    else None
+                ),
+                "labeled": (
+                    [r.value for r in trc.chains.labeled]
+                    if trc.chains.labeled
+                    else None
+                ),
+                "labels": (
+                    trc.chains.labels if trc.chains.labels is not None else None
+                ),
             },
         }
 
