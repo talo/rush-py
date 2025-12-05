@@ -298,6 +298,141 @@ class FragKeywords:
 
 
 @dataclass
+class ExportKeywords:
+    """
+    Configure the exported outputs of the system. Outputs are in both json and hdf5 format (some just one or the other).
+    """
+
+    # Electron density
+    export_density: bool | None = None
+    # Relaxed MP2 density correction (?)
+    export_relaxed_mp2_density_correction: bool | None = None
+    # Fock matrix (?)
+    export_fock: bool | None = None
+    # Overlap matrix (?)
+    export_overlap: bool | None = None
+    # H core matrix
+    export_h_core: bool | None = None
+    # Provides the whole density matrix for entire fragment system, rather than per-fragment matrices
+    export_expanded_density: bool | None = None
+    # Provides the whole gradient matrix for entire fragment system, rather than per-fragment matrices
+    export_expanded_gradient: bool | None = None
+    # Fancy...
+    export_molecular_orbital_coeffs: bool | None = None
+    # Energy gradient values (as used in Optimization and QMMM)
+    export_gradient: bool | None = None
+    # If external charges are used, export the gradient for these point charges
+    export_external_charge_gradient: bool | None = None
+    # Mulliken charges for the atoms in the system
+    export_mulliken_charges: bool | None = None
+    # ChelpG partial charges for the atoms in the system
+    export_chelpg_charges: bool | None = None
+    # Believed to be a pass-through from the input connectivity
+    export_bond_orders: bool | None = None
+    export_h_caps: bool | None = None
+    # Derived values from electron density
+    export_density_descriptors: bool | None = None
+    # Derived values from electrostatic potential
+    export_esp_descriptors: bool | None = None
+    # Provides the whole esp descriptor matrix for entire fragment system, rather than per-fragment matrices
+    export_expanded_esp_descriptors: bool | None = None
+    # Provides the basis sets used (?)
+    export_basis_labels: bool | None = None
+    # Hessian tensor
+    export_hessian: bool | None = None
+    # ?
+    export_mass_weighted_hessian: bool | None = None
+    # ?
+    export_hessian_frequencies: bool | None = None
+    # When exporting square symmetric matrices
+    # save memory by exporting the flattened lower triangle of the matrix.
+    # Default should be true.
+    flatten_symmetric: bool | None = None
+    # ?
+    light_json: bool | None = None
+    # Post-process exports into a single hdf5 output file.
+    # This is relevant for fragmented runs (particularly when configured for multinode).
+    # The concatenation of the hdf5 files may be expensive.
+    concatenate_hdf5_files: bool | None = None
+    # ?
+    training_db: bool | None = None
+    # Grid to use for exporting density descriptors
+    # descriptor_grid: Option<DescriptorGridOptions>
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_rex::ExportKeywords {
+              export_density = $maybe_export_density,
+              export_relaxed_mp2_density_correction = $maybe_export_relaxed_mp2_density_correction,
+              export_fock = $maybe_export_fock,
+              export_overlap = $maybe_export_overlap,
+              export_h_core = $maybe_export_h_core,
+              export_expanded_density = $maybe_export_expanded_density,
+              export_expanded_gradient = $maybe_export_expanded_gradient,
+              export_molecular_orbital_coeffs = $maybe_export_molecular_orbital_coeffs,
+              export_gradient = $maybe_export_gradient,
+              export_external_charge_gradient = $maybe_export_external_charge_gradient,
+              export_mulliken_charges = $maybe_export_mulliken_charges,
+              export_chelpg_charges = $maybe_export_chelpg_charges,
+              export_bond_orders = $maybe_export_bond_orders,
+              export_h_caps = $maybe_export_h_caps,
+              export_density_descriptors = $maybe_export_density_descriptors,
+              export_esp_descriptors = $maybe_export_esp_descriptors,
+              export_expanded_esp_descriptors = $maybe_export_expanded_esp_descriptors,
+              export_basis_labels = $maybe_export_basis_labels,
+              export_hessian = $maybe_export_hessian,
+              export_mass_weighted_hessian = $maybe_export_mass_weighted_hessian,
+              export_hessian_frequencies = $maybe_export_hessian_frequencies,
+              flatten_symmetric = $maybe_flatten_symmetric,
+              light_json = $maybe_light_json,
+              concatenate_hdf5_files = $maybe_concatenate_hdf5_files,
+              training_db = $maybe_training_db,
+              descriptor_grid = None,
+            })"""
+        ).substitute(
+            maybe_export_density=optional_str(self.export_density),
+            maybe_export_relaxed_mp2_density_correction=optional_str(
+                self.export_relaxed_mp2_density_correction
+            ),
+            maybe_export_fock=optional_str(self.export_fock),
+            maybe_export_overlap=optional_str(self.export_overlap),
+            maybe_export_h_core=optional_str(self.export_h_core),
+            maybe_export_expanded_density=optional_str(self.export_expanded_density),
+            maybe_export_expanded_gradient=optional_str(self.export_expanded_gradient),
+            maybe_export_molecular_orbital_coeffs=optional_str(
+                self.export_molecular_orbital_coeffs
+            ),
+            maybe_export_gradient=optional_str(self.export_gradient),
+            maybe_export_external_charge_gradient=optional_str(
+                self.export_external_charge_gradient
+            ),
+            maybe_export_mulliken_charges=optional_str(self.export_mulliken_charges),
+            maybe_export_chelpg_charges=optional_str(self.export_chelpg_charges),
+            maybe_export_bond_orders=optional_str(self.export_bond_orders),
+            maybe_export_h_caps=optional_str(self.export_h_caps),
+            maybe_export_density_descriptors=optional_str(
+                self.export_density_descriptors
+            ),
+            maybe_export_esp_descriptors=optional_str(self.export_esp_descriptors),
+            maybe_export_expanded_esp_descriptors=optional_str(
+                self.export_expanded_esp_descriptors
+            ),
+            maybe_export_basis_labels=optional_str(self.export_basis_labels),
+            maybe_export_hessian=optional_str(self.export_hessian),
+            maybe_export_mass_weighted_hessian=optional_str(
+                self.export_mass_weighted_hessian
+            ),
+            maybe_export_hessian_frequencies=optional_str(
+                self.export_hessian_frequencies
+            ),
+            maybe_flatten_symmetric=optional_str(self.flatten_symmetric),
+            maybe_light_json=optional_str(self.light_json),
+            maybe_concatenate_hdf5_files=optional_str(self.concatenate_hdf5_files),
+            maybe_training_db=optional_str(self.training_db),
+        )
+
+
+@dataclass
 class Trajectory:
     """
     Configure the output of QMMM runs. By default, will provide all atoms at every frame.
@@ -371,6 +506,7 @@ def exess(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
+    export_keywords: ExportKeywords | None = ExportKeywords(),
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -411,7 +547,7 @@ def exess(
           dynamics = None,
           integrals = None,
           debug = None,
-          export = None,
+          export = $maybe_export_keywords,
           guess = None,
           force_field = None,
           optimization = None,
@@ -442,6 +578,9 @@ in
         ),
         maybe_frag_keywords=(
             frag_keywords.to_rex() if frag_keywords is not None else "None"
+        ),
+        maybe_export_keywords=(
+            export_keywords.to_rex() if export_keywords is not None else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
         driver=driver,
