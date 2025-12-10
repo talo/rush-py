@@ -182,6 +182,8 @@ def to_json(trcs: List[TRC]) -> str:
     """
     data = []
 
+    if isinstance(trcs, TRC):
+        trcs = [trcs]
     for trc in trcs:
         # Build topology dict with only the fields that exist in expected format
         topology_dict = {

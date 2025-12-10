@@ -2,7 +2,8 @@ import json
 import sys
 from pathlib import Path
 
-from rush_py2.client import RunOpts, download_object, save_json, set_opts
+from rush_py2.client import RunOpts, save_json, save_object, set_opts
+from rush_py2.convert import from_json, to_json
 from rush_py2.prepare_protein import prepare_protein
 
 if __name__ == "__main__":
@@ -10,15 +11,22 @@ if __name__ == "__main__":
     data_dir = Path.cwd() / "tests" / "data"
     res = prepare_protein(
         data_dir / "1hsg_trc.json",
+        ph=7.0,
+        naming_scheme="CHARMM",
+        capping_style="always",
+        truncation_threshold=5,
         run_opts=RunOpts(
             name="Test prepare-protein 01", tags=["rush-py2", "test", "cdk2"]
         ),
         collect=True,
     )
     print(res, file=sys.stderr)
-    t_dict = json.loads(download_object(res[0]["path"]).decode())
-    r_dict = json.loads(download_object(res[1]["path"]).decode())
-    c_dict = json.loads(download_object(res[2]["path"]).decode())
-    trc_o_dict = {"topology": t_dict, "residues": r_dict, "chains": c_dict}
+    trc = from_json(
+        (
+            save_object(res[0]["path"]),
+            save_object(res[1]["path"]),
+            save_object(res[2]["path"]),
+        )
+    )
     trc_name = f"{res[0]['path'][:8]}_{res[1]['path'][:8]}_{res[2]['path'][:8]}"
-    save_json(trc_o_dict, name=trc_name)
+    save_json(json.loads(to_json(trc)), name=trc_name)

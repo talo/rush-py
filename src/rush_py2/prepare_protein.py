@@ -19,7 +19,7 @@ from .client import (
     upload_object,
 )
 from .convert import from_pdb, to_json
-from .utils import float_to_str
+from .utils import optional_str
 
 
 def prepare_protein(
@@ -79,10 +79,16 @@ in
   prepare_protein "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
-        ph=float_to_str(ph) if ph is not None else None,
-        naming_scheme=naming_scheme,
-        capping_style=capping_style,
-        truncation_threshold=truncation_threshold,
+        ph=optional_str(ph),
+        naming_scheme=optional_str(
+            naming_scheme.title() if naming_scheme is not None else None,
+            prefix="prepare_protein_rex::NamingScheme::",
+        ),
+        capping_style=optional_str(
+            capping_style.title() if capping_style is not None else None,
+            prefix="prepare_protein_rex::CappingStyle::",
+        ),
+        truncation_threshold=optional_str(truncation_threshold),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
         chains_vobj_path=chains_vobj["path"],

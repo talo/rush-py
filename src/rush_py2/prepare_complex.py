@@ -1,13 +1,11 @@
-import json
 from collections import defaultdict
-from io import StringIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Literal
 
 from rdkit import Chem
 
-from rush_py2 import from_json, from_pdb, to_json, to_pdb
+from rush_py2 import from_json, from_pdb, to_pdb
 from rush_py2.client import (
     RunOpts,
     RunSpec,
@@ -132,7 +130,7 @@ def prepare_complex(
         input_path = Path(input_path)
 
     if input_path.suffix == ".json":
-        with open(input_path) as f, NamedTemporaryFile(mode="w") as pdb_file:
+        with NamedTemporaryFile(mode="w") as pdb_file:
             trc = from_json(input_path)
             if isinstance(trc, list):
                 trc = trc[0]
