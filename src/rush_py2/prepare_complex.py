@@ -158,18 +158,9 @@ def prepare_complex(
     if isinstance(trc_p, list):
         trc_p = trc_p[0]
 
-    trc_c = merge_trcs(trc_p, trc_l, skip_validation=True)
+    trc_c = merge_trcs(trc_p, trc_l)
     return trc_c
 
 
 def save_outputs(res):
     return res
-
-
-if __name__ == "__main__":
-    res = prepare_complex(
-        Path.cwd() / "tests" / "data" / "1hsg.pdb",
-        ["MK1"],
-        run_opts=RunOpts(name="J&J System Prep (Test)"),
-        collect=True,
-    )
