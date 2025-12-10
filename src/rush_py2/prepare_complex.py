@@ -1,11 +1,13 @@
 import json
 from collections import defaultdict
+from io import StringIO
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Literal
 
 from rdkit import Chem
 
-from rush_py2 import from_json, from_pdb, to_json
+from rush_py2 import from_json, from_pdb, to_json, to_pdb
 from rush_py2.client import (
     RunOpts,
     RunSpec,
@@ -15,7 +17,7 @@ from rush_py2.prepare_protein import save_outputs as save_prepare_protein_output
 from rush_py2.trc.merge import merge_trcs
 
 
-def extract_ligand_with_hydrogens(pdb_path, ligand_resnames, output_path):
+def extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
     """
     Load a PDB, extract a ligand by residue name, add hydrogens, and save.
 
@@ -47,7 +49,9 @@ def extract_ligand_with_hydrogens(pdb_path, ligand_resnames, output_path):
 
     # Extract ligand as a new molecule
     ligand = Chem.RWMol(mol)
-    atoms_to_remove = [i for i in range(mol.GetNumAtoms()) if i not in ligand_atom_indices]
+    atoms_to_remove = [
+        i for i in range(mol.GetNumAtoms()) if i not in ligand_atom_indices
+    ]
     for idx in sorted(atoms_to_remove, reverse=True):
         ligand.RemoveAtom(idx)
 
@@ -107,10 +111,7 @@ def extract_ligand_with_hydrogens(pdb_path, ligand_resnames, output_path):
 
                     atom.SetPDBResidueInfo(h_info)
 
-    # Write output
-    Chem.MolToPDBFile(ligand_h, output_path)
-
-    return ligand_h
+    return Chem.MolToPDBBlock(ligand_h)
 
 
 def prepare_complex(
@@ -127,8 +128,20 @@ def prepare_complex(
     """
     Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.
     """
-    extract_ligand_with_hydrogens(input_path, ligand_names, "prepared_ligand.pdb")
-    trc_l = from_pdb(Path("prepared_ligand.pdb").read_text())
+    if isinstance(input_path, str):
+        input_path = Path(input_path)
+
+    if input_path.suffix == ".json":
+        with open(input_path) as f, NamedTemporaryFile(mode="w") as pdb_file:
+            trc = from_json(input_path)
+            if isinstance(trc, list):
+                trc = trc[0]
+            pdb_file.write(to_pdb(trc))
+            pdb_l_str = extract_ligand_with_hydrogens(pdb_file.name, ligand_names)
+    else:
+        pdb_l_str = extract_ligand_with_hydrogens(input_path, ligand_names)
+
+    trc_l = from_pdb(pdb_l_str)
     if isinstance(trc_l, list):
         trc_l = trc_l[0]
 
@@ -148,15 +161,7 @@ def prepare_complex(
         trc_p = trc_p[0]
 
     trc_c = merge_trcs(trc_p, trc_l, skip_validation=True)
-    trc_c_dict = json.loads(to_json([trc_c]))[0]
-    with open("prepared_complex_t.json", "w") as f:
-        json.dump(trc_c_dict["topology"], f, indent=2)
-    with open("prepared_complex_r.json", "w") as f:
-        json.dump(trc_c_dict["residues"], f, indent=2)
-    with open("prepared_complex_c.json", "w") as f:
-        json.dump(trc_c_dict["chains"], f, indent=2)
-
-    return (Path("prepared_complex_t.json"), Path("prepared_complex_r.json"), Path("prepared_complex_c.json"))
+    return trc_c
 
 
 def save_outputs(res):
