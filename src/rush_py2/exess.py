@@ -18,6 +18,7 @@ from .client import (
     RunSpec,
     collect_run,
     download_object,
+    save_object,
     submit_rex,
     upload_object,
 )
@@ -297,6 +298,141 @@ class FragKeywords:
 
 
 @dataclass
+class ExportKeywords:
+    """
+    Configure the exported outputs of the system. Outputs are in both json and hdf5 format (some just one or the other).
+    """
+
+    # Electron density
+    export_density: bool | None = None
+    # Relaxed MP2 density correction (?)
+    export_relaxed_mp2_density_correction: bool | None = None
+    # Fock matrix (?)
+    export_fock: bool | None = None
+    # Overlap matrix (?)
+    export_overlap: bool | None = None
+    # H core matrix
+    export_h_core: bool | None = None
+    # Provides the whole density matrix for entire fragment system, rather than per-fragment matrices
+    export_expanded_density: bool | None = None
+    # Provides the whole gradient matrix for entire fragment system, rather than per-fragment matrices
+    export_expanded_gradient: bool | None = None
+    # Fancy...
+    export_molecular_orbital_coeffs: bool | None = None
+    # Energy gradient values (as used in Optimization and QMMM)
+    export_gradient: bool | None = None
+    # If external charges are used, export the gradient for these point charges
+    export_external_charge_gradient: bool | None = None
+    # Mulliken charges for the atoms in the system
+    export_mulliken_charges: bool | None = None
+    # ChelpG partial charges for the atoms in the system
+    export_chelpg_charges: bool | None = None
+    # Believed to be a pass-through from the input connectivity
+    export_bond_orders: bool | None = None
+    export_h_caps: bool | None = None
+    # Derived values from electron density
+    export_density_descriptors: bool | None = None
+    # Derived values from electrostatic potential
+    export_esp_descriptors: bool | None = None
+    # Provides the whole esp descriptor matrix for entire fragment system, rather than per-fragment matrices
+    export_expanded_esp_descriptors: bool | None = None
+    # Provides the basis sets used (?)
+    export_basis_labels: bool | None = None
+    # Hessian tensor
+    export_hessian: bool | None = None
+    # ?
+    export_mass_weighted_hessian: bool | None = None
+    # ?
+    export_hessian_frequencies: bool | None = None
+    # When exporting square symmetric matrices
+    # save memory by exporting the flattened lower triangle of the matrix.
+    # Default should be true.
+    flatten_symmetric: bool | None = None
+    # ?
+    light_json: bool | None = None
+    # Post-process exports into a single hdf5 output file.
+    # This is relevant for fragmented runs (particularly when configured for multinode).
+    # The concatenation of the hdf5 files may be expensive.
+    concatenate_hdf5_files: bool | None = None
+    # ?
+    training_db: bool | None = None
+    # Grid to use for exporting density descriptors
+    # descriptor_grid: Option<DescriptorGridOptions>
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_rex::ExportKeywords {
+              export_density = $maybe_export_density,
+              export_relaxed_mp2_density_correction = $maybe_export_relaxed_mp2_density_correction,
+              export_fock = $maybe_export_fock,
+              export_overlap = $maybe_export_overlap,
+              export_h_core = $maybe_export_h_core,
+              export_expanded_density = $maybe_export_expanded_density,
+              export_expanded_gradient = $maybe_export_expanded_gradient,
+              export_molecular_orbital_coeffs = $maybe_export_molecular_orbital_coeffs,
+              export_gradient = $maybe_export_gradient,
+              export_external_charge_gradient = $maybe_export_external_charge_gradient,
+              export_mulliken_charges = $maybe_export_mulliken_charges,
+              export_chelpg_charges = $maybe_export_chelpg_charges,
+              export_bond_orders = $maybe_export_bond_orders,
+              export_h_caps = $maybe_export_h_caps,
+              export_density_descriptors = $maybe_export_density_descriptors,
+              export_esp_descriptors = $maybe_export_esp_descriptors,
+              export_expanded_esp_descriptors = $maybe_export_expanded_esp_descriptors,
+              export_basis_labels = $maybe_export_basis_labels,
+              export_hessian = $maybe_export_hessian,
+              export_mass_weighted_hessian = $maybe_export_mass_weighted_hessian,
+              export_hessian_frequencies = $maybe_export_hessian_frequencies,
+              flatten_symmetric = $maybe_flatten_symmetric,
+              light_json = $maybe_light_json,
+              concatenate_hdf5_files = $maybe_concatenate_hdf5_files,
+              training_db = $maybe_training_db,
+              descriptor_grid = None,
+            })"""
+        ).substitute(
+            maybe_export_density=optional_str(self.export_density),
+            maybe_export_relaxed_mp2_density_correction=optional_str(
+                self.export_relaxed_mp2_density_correction
+            ),
+            maybe_export_fock=optional_str(self.export_fock),
+            maybe_export_overlap=optional_str(self.export_overlap),
+            maybe_export_h_core=optional_str(self.export_h_core),
+            maybe_export_expanded_density=optional_str(self.export_expanded_density),
+            maybe_export_expanded_gradient=optional_str(self.export_expanded_gradient),
+            maybe_export_molecular_orbital_coeffs=optional_str(
+                self.export_molecular_orbital_coeffs
+            ),
+            maybe_export_gradient=optional_str(self.export_gradient),
+            maybe_export_external_charge_gradient=optional_str(
+                self.export_external_charge_gradient
+            ),
+            maybe_export_mulliken_charges=optional_str(self.export_mulliken_charges),
+            maybe_export_chelpg_charges=optional_str(self.export_chelpg_charges),
+            maybe_export_bond_orders=optional_str(self.export_bond_orders),
+            maybe_export_h_caps=optional_str(self.export_h_caps),
+            maybe_export_density_descriptors=optional_str(
+                self.export_density_descriptors
+            ),
+            maybe_export_esp_descriptors=optional_str(self.export_esp_descriptors),
+            maybe_export_expanded_esp_descriptors=optional_str(
+                self.export_expanded_esp_descriptors
+            ),
+            maybe_export_basis_labels=optional_str(self.export_basis_labels),
+            maybe_export_hessian=optional_str(self.export_hessian),
+            maybe_export_mass_weighted_hessian=optional_str(
+                self.export_mass_weighted_hessian
+            ),
+            maybe_export_hessian_frequencies=optional_str(
+                self.export_hessian_frequencies
+            ),
+            maybe_flatten_symmetric=optional_str(self.flatten_symmetric),
+            maybe_light_json=optional_str(self.light_json),
+            maybe_concatenate_hdf5_files=optional_str(self.concatenate_hdf5_files),
+            maybe_training_db=optional_str(self.training_db),
+        )
+
+
+@dataclass
 class Trajectory:
     """
     Configure the output of QMMM runs. By default, will provide all atoms at every frame.
@@ -360,15 +496,17 @@ class Restraints:
         )
 
 
-def energy(
+def exess(
     topology_path: Path | str,
+    driver: str = "Energy",
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    export_keywords: ExportKeywords | None = ExportKeywords(),
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -398,18 +536,18 @@ def energy(
           standard_orientation = $maybe_standard_orientation,
           force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
-        system = $system,
+        system = $maybe_system,
         keywords = exess_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
-          frag = $frag_keywords,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
           integrals = None,
           debug = None,
-          export = None,
+          export = $maybe_export_keywords,
           guess = None,
           force_field = None,
           optimization = None,
@@ -419,7 +557,7 @@ def energy(
           machine_learning = None,
           regions = None,
         },
-        driver = exess_rex::Driver::Energy,
+        driver = exess_rex::Driver::$driver,
       })
       [ (obj_j topology) ]
       None
@@ -434,10 +572,18 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
+        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_frag_keywords=(
+            frag_keywords.to_rex() if frag_keywords is not None else "None"
+        ),
+        maybe_export_keywords=(
+            export_keywords.to_rex() if export_keywords is not None else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
+        driver=driver,
     )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)
@@ -450,6 +596,49 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedHF",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    export_keywords: ExportKeywords | None = ExportKeywords(),
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+):
+    return exess(
+        topology_path,
+        "Energy",
+        method,
+        basis,
+        aux_basis,
+        standard_orientation,
+        force_cartesian_basis_sets,
+        scf_keywords,
+        frag_keywords,
+        export_keywords,
+        system,
+        run_spec,
+        run_opts,
+        collect,
+    )
+
+
+def save_energy_outputs(res):
+    if len(res) == 1:
+        return save_object(res[0]["path"])
+    else:
+        return (
+            save_object(res[0]["path"]),
+            save_object(res[1]["path"], ext="hdf5", extract=True),
+        )
 
 
 def interaction_energy(
@@ -492,12 +681,12 @@ def interaction_energy(
           standard_orientation = $maybe_standard_orientation,
           force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
-        system = $system,
+        system = $maybe_system,
         keywords = exess_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
-          frag = $frag_keywords,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -528,9 +717,11 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        frag_keywords=frag_keywords.to_rex(reference_fragment),
+        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_frag_keywords=frag_keywords.to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
@@ -725,10 +916,10 @@ def qmmm(
         }),
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
-          frag = $frag_keywords,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
@@ -750,15 +941,11 @@ def qmmm(
             pressure_atm = $maybe_pressure_atm,
             minimisation = None,
             trajectory = $trajectory,
-            restraints = $restraints,
+            restraints = $maybe_restraints,
             energy_csv = None,
           }),
-          machine_learning = None,
-          regions = Some (exess_qmmm_rex::RegionKeywords {
-            qm_fragments = $maybe_qm_fragments,
-            mm_fragments = $maybe_mm_fragments,
-            ml_fragments = $maybe_ml_fragments,
-          }),
+          machine_learning = $maybe_machine_learning,
+          regions = $maybe_regions,
         },
       })
       (obj_j topology)
@@ -775,8 +962,12 @@ in
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
         system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        frag_keywords=frag_keywords.to_rex() if frag_keywords is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_frag_keywords=(
+            frag_keywords.to_rex() if frag_keywords is not None else "None"
+        ),
         maybe_gradient_finite_difference_step_size=optional_str(
             gradient_finite_difference_step_size
         ),
@@ -785,10 +976,29 @@ in
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
         trajectory=trajectory.to_rex(),
-        restraints=restraints.to_rex() if restraints is not None else "None",
-        maybe_qm_fragments=optional_str(qm_fragments),
-        maybe_mm_fragments=optional_str(mm_fragments),
-        maybe_ml_fragments=optional_str(ml_fragments),
+        maybe_restraints=restraints.to_rex() if restraints is not None else "None",
+        maybe_machine_learning=(
+            "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
+            if ml_fragments is not None
+            else "None"
+        ),
+        maybe_regions=(
+            Template(
+                """Some (exess_qmmm_rex::RegionKeywords {
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
+          })"""
+            ).substitute(
+                maybe_qm_fragments=optional_str(qm_fragments),
+                maybe_mm_fragments=optional_str(mm_fragments),
+                maybe_ml_fragments=optional_str(ml_fragments),
+            )
+            if not (
+                qm_fragments is None and mm_fragments is None and ml_fragments is None
+            )
+            else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
     )
@@ -995,6 +1205,7 @@ class OptimizationKeywords:
 def optimization(
     topology_path: Path | str,
     max_iters: int,
+    residues_path: Path | str | None = None,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
     method: MethodT = "RestrictedHF",
     basis: BasisT = "cc-pVDZ",
@@ -1022,12 +1233,15 @@ def optimization(
 
     # Upload inputs
     topology_vobj = upload_object(PROJECT_ID, topology_path)
+    residues_vobj = None
+    if residues_path is not None:
+        residues_vobj = upload_object(PROJECT_ID, residues_path)
 
     # Run rex
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
+  exess = λ topology residues →
     exess_geo_opt_rex_s
       ($run_spec)
       (exess_geo_opt_rex::OptimizationParams {
@@ -1040,9 +1254,9 @@ def optimization(
           standard_orientation = $maybe_standard_orientation,
           force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
         }),
-        system = $system,
+        system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
-          scf = $scf_keywords,
+          scf = $maybe_scf_keywords,
           ks = None,
           rtat = None,
           frag = None,
@@ -1054,23 +1268,18 @@ def optimization(
           export = None,
           guess = None,
           force_field = None,
-          optimization = $optimization_keywords,
+          optimization = $maybe_optimization_keywords,
           hessian = None,
           gradient = None,
           qmmm = None,
-          machine_learning = Some (exess_geo_opt_rex::MLKeywords {
-            ml_type = None,
-          }),
-          regions = Some (exess_geo_opt_rex::RegionKeywords {
-            qm_fragments = $maybe_qm_fragments,
-            mm_fragments = $maybe_mm_fragments,
-            ml_fragments = $maybe_ml_fragments,
-          }),
+          machine_learning = $maybe_machine_learning,
+          regions = $maybe_regions,
         },
       })
       [ (obj_j topology) ]
+      $residues_expr
 in
-  exess "$topology_vobj_path"
+  exess "$topology_vobj_path" "$residues_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
         method=method,
@@ -1080,17 +1289,42 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
-        scf_keywords=scf_keywords.to_rex() if scf_keywords is not None else "None",
-        optimization_keywords=(
+        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_scf_keywords=(
+            scf_keywords.to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_optimization_keywords=(
             optimization_keywords.to_rex(max_iters)
             if optimization_keywords is not None
             else "None"
         ),
-        maybe_qm_fragments=optional_str(qm_fragments),
-        maybe_mm_fragments=optional_str(mm_fragments),
-        maybe_ml_fragments=optional_str(ml_fragments),
+        maybe_machine_learning=(
+            "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
+            if ml_fragments is not None
+            else "None"
+        ),
+        maybe_regions=(
+            Template(
+                """Some (exess_qmmm_rex::RegionKeywords {
+            qm_fragments = $maybe_qm_fragments,
+            mm_fragments = $maybe_mm_fragments,
+            ml_fragments = $maybe_ml_fragments,
+          })"""
+            ).substitute(
+                maybe_qm_fragments=optional_str(qm_fragments),
+                maybe_mm_fragments=optional_str(mm_fragments),
+                maybe_ml_fragments=optional_str(ml_fragments),
+            )
+            if not (
+                qm_fragments is None and mm_fragments is None and ml_fragments is None
+            )
+            else "None"
+        ),
+        residues_expr=(
+            "(Some [ (obj_j residues) ])" if residues_path is not None else "None"
+        ),
         topology_vobj_path=topology_vobj["path"],
+        residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)

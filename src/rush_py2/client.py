@@ -1,14 +1,17 @@
 import json
 import re
 import sys
+import tarfile
 import time
 from dataclasses import asdict, dataclass
+from io import BytesIO
 from os import getenv
 from pathlib import Path
 from string import Template
 from typing import Literal
 
 import requests
+import zstandard as zstd
 from gql import Client, FileVar, gql
 from gql.transport.requests import RequestsHTTPTransport
 
@@ -41,8 +44,9 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "exess_rex": "github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_geo_opt_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
+        "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
         "prepare_protein_rex": "github:talo/tengu-prepare-protein/f74ef68aec8839a9ac9f70441ebc0c17b814ab2f#prepare_protein_rex",
     }
@@ -51,8 +55,9 @@ MODULE_LOCK = (
         # prod
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "exess_rex": "github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_geo_opt_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/d3d5a3dcf47b41ce3ed04fc7517bda8e375e5383#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex",
+        "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
         "prepare_protein_rex": "github:talo/tengu-prepare-protein/f74ef68aec8839a9ac9f70441ebc0c17b814ab2f#prepare_protein_rex",
     }
@@ -239,20 +244,50 @@ def save_json(d: dict, filepath: Path | str | None = None, name: str | None = No
     return filepath
 
 
-def save_object(path: str, filepath: Path | str | None = None, name: str | None = None):
-    d = json.loads(download_object(path).decode())
+def save_object(
+    path: str,
+    filepath: Path | str | None = None,
+    name: str | None = None,
+    type: Literal["json", "bin"] | None = None,
+    ext: str | None = None,
+    extract: bool = False,
+):
+    if type is None and (ext is None or ext == "json"):
+        type = "json"
+    else:
+        type = "bin"
+    ext = type if ext is None else ext
+
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
     elif filepath is None and name is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{name}.json"
+        filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{name}." + ext)
     elif filepath is None and name is None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{path}.json"
+        filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{path}." + ext)
     else:
         raise Exception("Cannot specify both filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    with open(filepath, "w") as f:
-        json.dump(clean_dict(d), f, indent=2)
+    if type == "json":
+        d = json.loads(download_object(path).decode())
+        with open(filepath, "w") as f:
+            json.dump(clean_dict(d), f, indent=2)
+    else:
+        data = download_object(path)
+        if extract:
+            decompressed = zstd.ZstdDecompressor().decompress(
+                data, max_output_size=int(1e9)
+            )
+            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+                tar_filenames = tar.getnames()
+                if len(tar_filenames) >= 2:
+                    data = tar.extractfile(tar_filenames[1]).read()
+        if len(tar_filenames) >= 2:
+            with open(filepath, "wb") as f:
+                f.write(data)
+        else:
+            filepath.touch()
+
     return filepath
 
 

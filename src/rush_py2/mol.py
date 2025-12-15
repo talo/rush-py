@@ -90,7 +90,7 @@ class BondOrder(IntEnum):
     Single = 1
     Double = 2
     Triple = 3
-    OneAndAHalf = 4
+    OneAndAHalf = 4  # Partial bond (e.g. amide bond)
     Ring = 5  # Aromatic
 
 
@@ -462,7 +462,9 @@ class Topology:
             self.velocities.extend([0.0] * (len(other.symbols) * 3))
 
         # Update connectivity with offset
-        if self.connectivity is not None and other.connectivity is not None:
+        if other.connectivity is not None:
+            if self.connectivity is None:
+                self.connectivity = []
             for bond in other.connectivity:
                 new_bond = Bond(
                     AtomRef(bond.atom1.value + offset),
@@ -482,16 +484,14 @@ class Topology:
             self.fragments.append(Fragment(new_atoms))
 
         # Extend fragment charges
-        if (
-            self.fragment_formal_charges is not None
-            and other.fragment_formal_charges is not None
-        ):
+        if other.fragment_formal_charges is not None:
+            if self.fragment_formal_charges is None:
+                self.fragment_formal_charges = []
             self.fragment_formal_charges.extend(other.fragment_formal_charges)
 
-        if (
-            self.fragment_partial_charges is not None
-            and other.fragment_partial_charges is not None
-        ):
+        if other.fragment_partial_charges is not None:
+            if self.fragment_partial_charges is None:
+                self.fragment_partial_charges = []
             self.fragment_partial_charges.extend(other.fragment_partial_charges)
 
     def new_topology_from_residue_subset(
@@ -685,6 +685,12 @@ class Residues:
     # Insertion codes
     insertion_codes: List[str] = field(default_factory=list)
 
+    # WARN: Deprecated
+    labeled: Optional[List[ChainRef]] = None
+
+    # WARN: Deprecated
+    labels: Optional[List[List[str]]] = None
+
     def check(self) -> None:
         """Validate the residues structure."""
         if len(self.seqs) != len(self.residues):
@@ -803,6 +809,12 @@ class Chains:
 
     # Optional beta sheet residues
     beta_sheets: Optional[List[ResidueRef]] = None
+
+    # WARN: Deprecated
+    labeled: Optional[List[ChainRef]] = None
+
+    # WARN: Deprecated
+    labels: Optional[List[List[str]]] = None
 
     def check(self) -> None:
         """Validate the chains structure."""

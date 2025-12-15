@@ -14,14 +14,16 @@ from .client import (
     RunOpts,
     RunSpec,
     collect_run,
+    save_object,
     submit_rex,
     upload_object,
 )
-from .utils import float_to_str
+from .convert import from_pdb, to_json
+from .utils import optional_str
 
 
 def prepare_protein(
-    trc_path: Path | str,
+    input_path: Path | str,
     ph: float | None = None,
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
     capping_style: Literal["never", "truncated", "always"] | None = None,
@@ -31,14 +33,19 @@ def prepare_protein(
     collect=False,
 ):
     """
-    Run prepare-protein on a TRC and write the prepared TRC file to a json file
-    named based on the first 8 characters of the output
-    Topology, Residues, and Chains objects joing by an `_`.
+    Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.
     """
 
     # Upload inputs
-    with open(trc_path) as f:
-        trc_dict = json.load(f)
+    if isinstance(input_path, str):
+        input_path = Path(input_path)
+    with open(input_path) as f:
+        if input_path.suffix == ".pdb":
+            trc = from_pdb(f.read())
+            trc_str = to_json(trc)
+            trc_dict = json.loads(trc_str)[0]
+        else:
+            trc_dict = json.load(f)
     with (
         NamedTemporaryFile(mode="w") as t_f,
         NamedTemporaryFile(mode="w") as r_f,
@@ -58,7 +65,7 @@ def prepare_protein(
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology residues chains →
+  prepare_protein = λ topology residues chains →
     prepare_protein_rex_s
       ($run_spec)
       (prepare_protein_rex::PrepareProteinOptions {
@@ -69,13 +76,19 @@ def prepare_protein(
       })
       [( (obj_j topology), (obj_j residues), (obj_j chains) )]
 in
-  exess "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
+  prepare_protein "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
         run_spec=run_spec.to_rex(),
-        ph=float_to_str(ph) if ph is not None else None,
-        naming_scheme=naming_scheme,
-        capping_style=capping_style,
-        truncation_threshold=truncation_threshold,
+        ph=optional_str(ph),
+        naming_scheme=optional_str(
+            naming_scheme.title() if naming_scheme is not None else None,
+            prefix="prepare_protein_rex::NamingScheme::",
+        ),
+        capping_style=optional_str(
+            capping_style.title() if capping_style is not None else None,
+            prefix="prepare_protein_rex::CappingStyle::",
+        ),
+        truncation_threshold=optional_str(truncation_threshold),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],
         chains_vobj_path=chains_vobj["path"],
@@ -91,6 +104,14 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def save_outputs(res):
+    return (
+        save_object(res[0]["path"]),
+        save_object(res[1]["path"]),
+        save_object(res[2]["path"]),
+    )
 
 
 def run_prepare_protein():
