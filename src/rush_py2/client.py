@@ -25,7 +25,7 @@ MAX_WAIT_TIME = 3600
 
 GRAPHQL_ENDPOINT = getenv(
     "RUSH_ENDPOINT",
-    "https://tengu-server-staging-seaography-720805281970.asia-southeast1.run.app",
+    "https://tengu-server-prod-seaography-720805281970.asia-southeast1.run.app",
 )
 
 API_KEY = getenv("RUSH_TOKEN")
