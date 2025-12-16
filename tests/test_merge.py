@@ -1,5 +1,3 @@
-import json
-import sys
 from pathlib import Path
 
 from rush_py2.convert import from_json
@@ -19,7 +17,11 @@ def test_merge_with_trcs():
     """Test merging TRCs using TRC objects."""
     data_dir = Path.cwd() / "tests" / "data"
     mk1_trc = from_json(data_dir / "1hsg_MK1_trc.json")
+    if isinstance(mk1_trc, list):
+        mk1_trc = mk1_trc[0]
     hoh_trc = from_json(data_dir / "1hsg_HOH_trc.json")
+    if isinstance(hoh_trc, list):
+        hoh_trc = hoh_trc[0]
     seqs = merge_trcs(mk1_trc, hoh_trc).residues.seqs
     assert "MK1" in seqs and "HOH" in seqs
 

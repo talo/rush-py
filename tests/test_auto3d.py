@@ -4,22 +4,21 @@ from pprint import pp
 
 from rush_py2 import from_json
 from rush_py2.auto3d import Auto3DOptions, auto3d
-from rush_py2.client import save_object, set_opts
+from rush_py2.client import RunOpts, save_object, set_opts
 
 if __name__ == "__main__":
-    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
+    set_opts(workspace_dir=Path.cwd() / "test-runs")
     res = auto3d(
         ["CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O", "COOH"],
         Auto3DOptions(k=5),
+        run_opts=RunOpts(
+            name="Rush-Py Test Auto3D 01",
+            tags=["rush-py", "test"],
+        ),
         collect=True,
     )
-    (t, r, c), err = res
-    pp(
-        from_json(
-            (save_object(t["path"]), save_object(r["path"]), save_object(c["path"]))
-        ),
-        width=130,
-        compact=True,
-        stream=sys.stderr,
-    )
+    # Output is a list of TRC objects in memory, or a str if auto3d failed
+    trc_obj, err = res
+    trc = from_json(tuple(save_object(o["path"]) for o in trc_obj))
+    pp(trc, width=130, compact=True, stream=sys.stderr)
     print(err, file=sys.stderr)

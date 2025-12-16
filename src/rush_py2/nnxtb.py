@@ -21,8 +21,15 @@ from .utils import optional_str
 @dataclass
 class NnxtbResults:
     energy_mev: float
-    forces_mev_per_angstrom: list[tuple[float, float, float]]
-    frequencies_inv_cm: list[float]
+    forces_mev_per_angstrom: list[tuple[float, float, float]] | None
+    frequencies_inv_cm: list[float] | None
+
+    def __init__(
+        self, energy_mev, forces_mev_per_angstrom=None, frequencies_inv_cm=None
+    ):
+        self.energy_mev = energy_mev
+        self.forces_mev_per_angstrom = forces_mev_per_angstrom
+        self.frequencies_inv_cm = frequencies_inv_cm
 
 
 def nnxtb(
