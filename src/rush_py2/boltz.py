@@ -33,11 +33,14 @@ class Modification:
 class ProteinSequence:
     id: list[str]
     sequence: str
-    msa: Path | str
+    msa: dict[str, str] | Path | str
     modifications: list[Modification] | None = None
     cyclic: bool | None = None
 
     def to_rex(self):
+        if isinstance(self.msa, Path) or isinstance(self.msa, str):
+            self.msa = upload_object(PROJECT_ID, self.msa)
+
         return Template(
             """(boltz2_rex::Sequence::Protein {
           id = $id,
@@ -93,16 +96,6 @@ def boltz(
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
-    """
-    TODO
-    """
-
-    # Upload a3m inputs
-    for seq in sequences:
-        if not isinstance(seq, ProteinSequence):
-            continue
-        seq.msa = upload_object(PROJECT_ID, seq.msa)
-
     # If necessary, upload template TRC inputs
     has_template = template_path is not None
     if template_path is not None:
