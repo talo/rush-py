@@ -62,103 +62,17 @@ def from_json(
         data = [json_content]
     else:
         data = json_content
-    trcs = []
 
     # Turn single TRCs into lists
     if isinstance(data, dict) and "topology" in data:
         data = [data]
 
+    trcs = []
     for trc_data in data:
-        # Load topology
-        topology_data = trc_data["topology"]
-        topology = Topology()
-        topology.schema_version = (
-            SchemaVersion.V2
-        )  # Default, could parse from schema_version
-        topology.symbols = [Element.from_str(s) for s in topology_data["symbols"]]
-        topology.geometry = topology_data["geometry"]
-
-        if "labels" in topology_data and topology_data["labels"]:
-            topology.labels = topology_data["labels"]
-
-        if "formal_charges" in topology_data and topology_data["formal_charges"]:
-            topology.formal_charges = [
-                FormalCharge(c) for c in topology_data["formal_charges"]
-            ]
-
-        if "partial_charges" in topology_data and topology_data["partial_charges"]:
-            topology.partial_charges = [
-                PartialCharge(c) for c in topology_data["partial_charges"]
-            ]
-
-        if "velocities" in topology_data and topology_data["velocities"]:
-            topology.velocities = topology_data["velocities"]
-
-        if "connectivity" in topology_data and topology_data["connectivity"]:
-            # Connectivity is a list of [atom1, atom2, bond_order]
-            # BondOrder enum: 1=Single, 2=Double, 3=Triple, 4=OneAndAHalf (partial), 5=Ring (aromatic)
-            bonds = []
-            for bond_data in topology_data["connectivity"]:
-                if isinstance(bond_data, list) and len(bond_data) >= 2:
-                    atom1_idx = bond_data[0]
-                    atom2_idx = bond_data[1]
-                    bond_order_val = bond_data[2]
-
-                    # Support old version mapping: 254 -> 4 (OneAndAHalf/partial), 255 -> 5 (Ring/aromatic)
-                    if bond_order_val == 254:
-                        bond_order_val = 4
-                    elif bond_order_val == 255:
-                        bond_order_val = 5
-
-                    bond_order = BondOrder(bond_order_val)
-                    bonds.append(
-                        Bond(AtomRef(atom1_idx), AtomRef(atom2_idx), bond_order)
-                    )
-            topology.connectivity = bonds
-
-        if "fragments" in topology_data and topology_data["fragments"]:
-            topology.fragments = [Fragment(frag) for frag in topology_data["fragments"]]
-
-        if (
-            "fragment_formal_charges" in topology_data
-            and topology_data["fragment_formal_charges"]
-        ):
-            topology.fragment_formal_charges = [
-                FormalCharge(c) for c in topology_data["fragment_formal_charges"]
-            ]
-
-        if (
-            "fragment_partial_charges" in topology_data
-            and topology_data["fragment_partial_charges"]
-        ):
-            topology.fragment_partial_charges = [
-                PartialCharge(c) for c in topology_data["fragment_partial_charges"]
-            ]
-
-        # Load residues
-        residues_data = trc_data["residues"]
-        residues = Residues()
-        residues.residues = [Residue(res) for res in residues_data["residues"]]
-        residues.seqs = residues_data["seqs"]
-        residues.seq_ns = residues_data["seq_ns"]
-        residues.insertion_codes = residues_data["insertion_codes"]
-
-        # Load chains
-        chains_data = trc_data["chains"]
-        chains = Chains()
-        chains.chains = [Chain(chain) for chain in chains_data["chains"]]
-
-        if chains_data.get("alpha_helices"):
-            chains.alpha_helices = [ResidueRef(r) for r in chains_data["alpha_helices"]]
-
-        if chains_data.get("beta_sheets"):
-            chains.beta_sheets = [ResidueRef(r) for r in chains_data["beta_sheets"]]
-
-        if chains_data.get("labeled"):
-            chains.labeled = [ChainRef(c) for c in chains_data["labeled"]]
-
-        if chains_data.get("labels"):
-            chains.labels = chains_data["labels"]
+        # Load topology, residues, and chains
+        topology = Topology.from_json(trc_data["topology"])
+        residues = Residues.from_json(trc_data["residues"])
+        chains = Chains.from_json(trc_data["chains"])
 
         # Create TRC
         trc = TRC(topology=topology, residues=residues, chains=chains)

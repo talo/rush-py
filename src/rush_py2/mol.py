@@ -7,10 +7,12 @@ This module provides Python classes for molecular structures:
 - Topology, Residues, Chains, and TRC structures
 """
 
+import json
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
+from pathlib import Path
 from typing import List, Optional, Self, Tuple, Union
 
 
@@ -282,6 +284,89 @@ class Topology:
     # Optional fragment charges
     fragment_formal_charges: Optional[List[FormalCharge]] = None
     fragment_partial_charges: Optional[List[PartialCharge]] = None
+
+    @staticmethod
+    def from_json(json_content: str | Path | dict):
+        if isinstance(json_content, str):
+            topology_data = json.loads(json_content)
+        elif isinstance(json_content, Path):
+            with open(json_content) as f:
+                topology_data = json.load(f)
+        elif isinstance(json_content, dict):
+            topology_data = json_content
+        else:
+            println(
+                "WARNING: Tried to load Topology from JSON but "
+                "it wasn't a str, Path, or dict!"
+            )
+            topology_data = json_content
+
+        topology = Topology()
+
+        # Default, could parse from schema_version
+        topology.schema_version = SchemaVersion.V2
+
+        topology.symbols = [Element.from_str(s) for s in topology_data["symbols"]]
+        topology.geometry = topology_data["geometry"]
+
+        if "labels" in topology_data and topology_data["labels"]:
+            topology.labels = topology_data["labels"]
+
+        if "formal_charges" in topology_data and topology_data["formal_charges"]:
+            topology.formal_charges = [
+                FormalCharge(c) for c in topology_data["formal_charges"]
+            ]
+
+        if "partial_charges" in topology_data and topology_data["partial_charges"]:
+            topology.partial_charges = [
+                PartialCharge(c) for c in topology_data["partial_charges"]
+            ]
+
+        if "velocities" in topology_data and topology_data["velocities"]:
+            topology.velocities = topology_data["velocities"]
+
+        if "connectivity" in topology_data and topology_data["connectivity"]:
+            # Connectivity is a list of [atom1, atom2, bond_order]
+            # BondOrder enum: 1=Single, 2=Double, 3=Triple, 4=OneAndAHalf (partial), 5=Ring (aromatic)
+            bonds = []
+            for bond_data in topology_data["connectivity"]:
+                if isinstance(bond_data, list) and len(bond_data) >= 2:
+                    atom1_idx = bond_data[0]
+                    atom2_idx = bond_data[1]
+                    bond_order_val = bond_data[2]
+
+                    # Support old version mapping: 254 -> 4 (OneAndAHalf/partial), 255 -> 5 (Ring/aromatic)
+                    if bond_order_val == 254:
+                        bond_order_val = 4
+                    elif bond_order_val == 255:
+                        bond_order_val = 5
+
+                    bond_order = BondOrder(bond_order_val)
+                    bonds.append(
+                        Bond(AtomRef(atom1_idx), AtomRef(atom2_idx), bond_order)
+                    )
+            topology.connectivity = bonds
+
+        if "fragments" in topology_data and topology_data["fragments"]:
+            topology.fragments = [Fragment(frag) for frag in topology_data["fragments"]]
+
+        if (
+            "fragment_formal_charges" in topology_data
+            and topology_data["fragment_formal_charges"]
+        ):
+            topology.fragment_formal_charges = [
+                FormalCharge(c) for c in topology_data["fragment_formal_charges"]
+            ]
+
+        if (
+            "fragment_partial_charges" in topology_data
+            and topology_data["fragment_partial_charges"]
+        ):
+            topology.fragment_partial_charges = [
+                PartialCharge(c) for c in topology_data["fragment_partial_charges"]
+            ]
+
+        return topology
 
     def check(self) -> None:
         """Validate the topology structure."""
@@ -691,6 +776,30 @@ class Residues:
     # WARN: Deprecated
     labels: Optional[List[List[str]]] = None
 
+    @staticmethod
+    def from_json(json_content: str | Path | dict):
+        if isinstance(json_content, str):
+            residues_data = json.loads(json_content)
+        elif isinstance(json_content, Path):
+            with open(json_content) as f:
+                residues_data = json.load(f)
+        elif isinstance(json_content, dict):
+            residues_data = json_content
+        else:
+            println(
+                "WARNING: Tried to load Residues from JSON but "
+                "it wasn't a str, Path, or dict!"
+            )
+            residues_data = json_content
+
+        residues = Residues()
+        residues.residues = [Residue(res) for res in residues_data["residues"]]
+        residues.seqs = residues_data["seqs"]
+        residues.seq_ns = residues_data["seq_ns"]
+        residues.insertion_codes = residues_data["insertion_codes"]
+
+        return residues
+
     def check(self) -> None:
         """Validate the residues structure."""
         if len(self.seqs) != len(self.residues):
@@ -815,6 +924,40 @@ class Chains:
 
     # WARN: Deprecated
     labels: Optional[List[List[str]]] = None
+
+    @staticmethod
+    def from_json(json_content: str | Path | dict):
+        if isinstance(json_content, str):
+            chains_data = json.loads(json_content)
+        elif isinstance(json_content, Path):
+            with open(json_content) as f:
+                chains_data = json.load(f)
+        elif isinstance(json_content, dict):
+            chains_data = json_content
+        else:
+            println(
+                "WARNING: Tried to load Chains from JSON but "
+                "it wasn't a str, Path, or dict!"
+            )
+            chains_data = json_content
+
+        chains = Chains()
+
+        chains.chains = [Chain(chain) for chain in chains_data["chains"]]
+
+        if chains_data.get("alpha_helices"):
+            chains.alpha_helices = [ResidueRef(r) for r in chains_data["alpha_helices"]]
+
+        if chains_data.get("beta_sheets"):
+            chains.beta_sheets = [ResidueRef(r) for r in chains_data["beta_sheets"]]
+
+        if chains_data.get("labeled"):
+            chains.labeled = [ChainRef(c) for c in chains_data["labeled"]]
+
+        if chains_data.get("labels"):
+            chains.labels = chains_data["labels"]
+
+        return chains
 
     def check(self) -> None:
         """Validate the chains structure."""
