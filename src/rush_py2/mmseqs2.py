@@ -37,7 +37,7 @@ def mmseqs2(
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
-    # Run rex
+    # TODO: set use_upstream_server to `None` for prod, when it works again
     rex = Template("""
 mmseqs2_rex_s
   ($run_spec)
