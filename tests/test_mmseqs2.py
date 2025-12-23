@@ -13,7 +13,10 @@ if __name__ == "__main__":
     protein_seq = "MVTPEGNVSLVDESLLVGVTDEDRAVRSAHQFYERLIGLWAPAVMEAAHELGVFAALAEAPADSGELARRLDCDARAMRVLLDALYAYDVIDRIHDTNGFRYLLSAEARECLLPGTLFSLVGKFMHDINVAWPAWRNLAEVVRHGARDTSGAESPNGIAQEDYESLVGGINFWAPPIVTTLSRKLRASGRSGDATASVLDVGCGTGLYSQLLLREFPRWTATGLDVERIATLANAQALRLGVEERFATRAGDFWRGGWGTGYDLVLFANIFHLQTPASAVRLMRHAAACLAPDGLVAVVDQIVDADREPKTPQDRFALLFAASMTNTGGGDAYTFQEYEEWFTAAGLQRIETLDTPMHRILLARRATEPSAVPEGQASENLYFQ"
     res = mmseqs2(
         [protein_seq],
-        run_spec=RunSpec(target="Bullet"),
+        run_opts=RunOpts(
+            name="Rush-Py Test: MMseqs2",
+            tags=["rush-py", "test", "mmseqs2"],
+        ),
         collect=True,
     )
     print(res, file=sys.stderr)
@@ -24,8 +27,8 @@ if __name__ == "__main__":
         ],
         affinity_binder_chain_id="E",
         run_opts=RunOpts(
-            name="Rush-Py Test: MMseqs2",
-            tags=["rush-py", "test", "mmseqs2"],
+            name="Rush-Py Test: Boltz",
+            tags=["rush-py", "test", "boltz"],
         ),
         run_spec=RunSpec(target="Bullet2", gpus=1),
         collect=True,

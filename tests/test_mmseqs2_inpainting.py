@@ -15,6 +15,10 @@ if __name__ == "__main__":
     protein_seq = "LSALNPELVQAVQHVVIGPSSLIVHFNEVIGRGHFGCVYHGTLLDNDGKKIHCAVKSLNRITDIGEVSQFLTEGIIMKDFSHPNVLSLLGICLRSEGSPLVVLPYMKHGDLRNFIRNETHNPTVKDLIGFGLQVAKGMKYLASKKFVHRDLAARNCMLDEKFTVKVADFGLARDMYDKEYYSVHNKTGAKLPVKWMALESLQTQKFTTKSDVWSFGVLLWELMTRGAPPYPDVNTFDITVYLLQGRRLLQPEYCPDPLYEVMLKCWHPKAEMRPSFSELVSRISAIFSTFIG"
     res = mmseqs2(
         [protein_seq],
+        run_opts=RunOpts(
+            name="Rush-Py Test: Residue Inpainting",
+            tags=["rush-py", "test", "mmseqs2", "CMET", "4r1y"],
+        ),
         collect=True,
     )
     print(res, file=sys.stderr)
@@ -27,19 +31,9 @@ if __name__ == "__main__":
         template_threshold_angstroms=0.1,
         run_opts=RunOpts(
             name="Rush-Py Test: Residue Inpainting",
-            tags=["rush-py", "test", "mmseqs2", "CMET", "4r1y"],
+            tags=["rush-py", "test", "boltz", "CMET", "4r1y"],
         ),
         run_spec=RunSpec(target="Bullet2", gpus=1),
         collect=True,
     )
-    trc_obj = res[0][0]
-    trc = from_json(
-        (
-            save_object(trc_obj[0]["path"]),
-            save_object(trc_obj[1]["path"]),
-            save_object(trc_obj[2]["path"]),
-        )
-    )
-    if isinstance(trc, list):
-        trc = trc[0]
-    (Path.cwd() / "CMET_4R1Y_inpainted.pdb").write_text(to_pdb(trc))
+    print(json.dumps(res, indent=2), file=sys.stderr)
