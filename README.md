@@ -42,7 +42,7 @@ dependencies = [
 Use environment variables to configure access:
 - `RUSH_TOKEN`: Put your token's value here
 - `RUSH_PROJECT`: Put your project's UUID value here; can find it in the URL once selecting a project in the Rush UI
-- `RUSH_ENDPOINT`: Use this to choose between staging and prod; if omitted, defaults to staging
+- `RUSH_ENDPOINT`: Use this to choose between staging and prod; if omitted, defaults to prod
 
 ## Usage
 
@@ -50,7 +50,7 @@ Use environment variables to configure access:
 from rush_py2 import exess
 
 # Can use pathlib.Path too if you like type safety
-topology_path = "./thrombin_1c_t.json"
+topology_path = Path.cwd() / "thrombin_1c_t.json"
 
 # For energy, the only mandatory argument is the Topology
 output_path = exess.energy(topology_path)
@@ -80,4 +80,6 @@ help(exess.chelpg)
 help(exess.qmmm)
 ```
 
-The outputs will be downloaded to the current folder in the form `{uuid}.json`.
+The outputs will be downloaded to the workkspace folder (default `./workspace/` in the current directory) with the filename `{rush_object_uuid}.json`.
+
+See the [basics tutorial](/tutorials/basics.md) for more usage information.
