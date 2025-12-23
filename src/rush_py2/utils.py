@@ -13,8 +13,13 @@ def bool_to_str(v: float) -> str:
     return f"{str(v).lower()}"
 
 
+def dict_to_vec_of_tuples_str(d: dict[str, str]) -> str:
+    pairs = [f'("{k}", "{v}")' for k, v in d.items()]
+    return "[" + ", ".join(pairs) + "]"
+
+
 def optional_str(
-    v: str | int | float | list[int] | bool | None,
+    v: str | int | float | bool | None,
     prefix: str = "",
 ) -> str:
     if isinstance(v, str) and not prefix:
