@@ -82,7 +82,7 @@ Obe can pass a set of run specifications to each module function via `run_spec=r
 
 ### Submit + Collect Pattern
 
-Rush modules functions will return a run ID that can be used to collect the run at a later point in time using `rush_py2.client.collect_run`, which takes the run ID and a maximum time to wait for the run to finish (1 hour by default). If it does finish, the `collect_run` call will then return the module outputs. The moudle 
+Rush modules functions will return a run ID that can be used to collect the run at a later point in time using `rush_py2.client.collect_run`, which takes the run ID and a maximum time to wait for the run to finish (1 hour by default). If it does finish, the `collect_run` call will then return the module outputs.
 
 If synchronous behavior is desired, `collect=True` can be passed to the module function and collection with a 1 hour wait time will happen automatically, without the need to call `collect_run`, and the module outputs will be returned directly from the module function call as well.
 
