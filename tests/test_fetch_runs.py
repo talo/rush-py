@@ -1,6 +1,7 @@
 import sys
 
-from rush_py2.client import fetch_runs
+from rush_py2.client import fetch_run_info, fetch_runs
 
 if __name__ == "__main__":
-    print(fetch_runs(name_contains="Rush-Py Test"), file=sys.stderr)
+    runs = fetch_runs(name_contains="Rush-Py Test")
+    print(fetch_run_info(runs[0]), file=sys.stderr)

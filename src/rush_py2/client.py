@@ -542,6 +542,68 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     return run_id
 
 
+@dataclass
+class RushRun:
+    id: str
+    created_at: str
+    updated_at: str
+    status: str
+    deleted_at: str | None = None
+    name: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    result: dict | None = None
+    trace: dict | None = None
+    stdout: str | None = None
+
+    def __str__(self) -> str:
+        lines = [
+            f"RushRun: {self.name or '(unnamed)'}",
+            f"  id:          {self.id}",
+            f"  status:      {self.status}",
+            f"  created_at:  {self.created_at}",
+            f"  updated_at:  {self.updated_at}",
+        ]
+        if self.deleted_at:
+            lines.append(f"  deleted_at:  {self.deleted_at}")
+        if self.description:
+            lines.append(f"  description: {self.description}")
+        if self.tags:
+            lines.append(f"  tags:        {', '.join(self.tags)}")
+        return "\n".join(lines)
+
+
+def fetch_run_info(run_id: str) -> RushRun | None:
+    """
+    Fetch all info for a run by ID.
+
+    Returns None if the run doesn't exist.
+    """
+    query = gql("""
+        query GetRun($id: String!) {
+            run(id: $id) {
+                created_at
+                deleted_at
+                updated_at
+                name
+                description
+                tags
+                result
+                status
+                trace
+                stdout
+            }
+        }
+    """)
+    query.variable_values = {"id": run_id}
+
+    result = _get_client().execute(query)
+    if result["run"] is None:
+        return None
+
+    return RushRun(**result["run"] | {"id": run_id})
+
+
 def poll_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
     query = gql("""
         query GetStatus($id: String!) {
