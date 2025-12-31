@@ -9,7 +9,8 @@ if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.energy(
-        data_dir / "1kuw_t.json",
+        data_dir / "benzene_t.json",
+        frag_keywords=None,  # No fragmentation; whole system calc
         export_keywords=exess.ExportKeywords(
             export_density_descriptors=True,
             export_esp_descriptors=True,
@@ -25,4 +26,5 @@ if __name__ == "__main__":
         collect=True,
     )
     print(res, file=sys.stderr)
-    exess.save_energy_outputs(res)
+    files = exess.save_energy_outputs(res, to_json=True)
+    print(files, file=sys.stderr)
