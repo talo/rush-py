@@ -14,7 +14,7 @@ if __name__ == "__main__":
     res = mmseqs2(
         [protein_seq],
         run_opts=RunOpts(
-            name="Rush-Py Test: MMseqs2",
+            name="Rush-Py Test: Fold 01 Step 1 (MMseqs2)",
             tags=["rush-py", "test", "mmseqs2"],
         ),
         collect=True,
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         ],
         affinity_binder_chain_id="E",
         run_opts=RunOpts(
-            name="Rush-Py Test: Boltz",
+            name="Rush-Py Test: Fold 01 Step 2 (Boltz)",
             tags=["rush-py", "test", "boltz"],
         ),
         run_spec=RunSpec(target="Bullet2", gpus=1),

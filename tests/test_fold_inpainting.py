@@ -16,7 +16,7 @@ if __name__ == "__main__":
     res = mmseqs2(
         [protein_seq],
         run_opts=RunOpts(
-            name="Rush-Py Test: Residue Inpainting",
+            name="Rush-Py Test: Residue Inpainting Step 1 (MMseqs2)",
             tags=["rush-py", "test", "mmseqs2", "CMET", "4r1y"],
         ),
         collect=True,
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         template_path=data_dir / "CMET_4R1Y.pdb",
         template_threshold_angstroms=0.1,
         run_opts=RunOpts(
-            name="Rush-Py Test: Residue Inpainting",
+            name="Rush-Py Test: Residue Inpainting Step 2 (Boltz)",
             tags=["rush-py", "test", "boltz", "CMET", "4r1y"],
         ),
         run_spec=RunSpec(target="Bullet2", gpus=1),
