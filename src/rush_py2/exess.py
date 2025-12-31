@@ -298,6 +298,56 @@ class FragKeywords:
 
 
 @dataclass
+class StandardDescriptorGrid:
+    value: Literal["SG1", "SG2"]
+
+    def to_rex(self):
+        return Template(
+            """Some (
+              exess_rex::DescriptorGridOptions::standard exess_rex::StandardGrid::$value
+            )""",
+        ).substitute(
+            value=self.value,
+        )
+
+
+@dataclass
+class DescriptorGrid:
+    points_per_shell: int
+    order: Literal["One", "Two"]
+    scale: float
+
+    def to_rex(self):
+        return Template(
+            """Some (exess_rex::DescriptorGridOptions::params (
+              exess_rex::Grid {
+                points_per_shell = $points_per_shell,
+                order = exess_rex::GridOrder::$order,
+                scale = $scale,
+              }
+            ))"""
+        ).substitute(
+            points_per_shell=self.points_per_shell,
+            order=self.order,
+            scale=float_to_str(self.scale),
+        )
+
+
+@dataclass
+class CustomDescriptorGrid:
+    value: list[float]
+
+    def to_rex(self):
+        return Template(
+            """Some (
+              exess_rex::DescriptorGridOptions::custom $value
+            )"""
+        ).substitute(
+            value=f"[{', '.join([float_to_str(float(v)) for v in self.value])}]",
+        )
+
+
+@dataclass
 class ExportKeywords:
     """
     Configure the exported outputs of the system. Outputs are in both json and hdf5 format (some just one or the other).
@@ -357,38 +407,40 @@ class ExportKeywords:
     # ?
     training_db: bool | None = None
     # Grid to use for exporting density descriptors
-    # descriptor_grid: Option<DescriptorGridOptions>
+    descriptor_grid: (
+        StandardDescriptorGrid | DescriptorGrid | CustomDescriptorGrid | None
+    ) = None
 
     def to_rex(self):
         return Template(
             """Some (exess_rex::ExportKeywords {
-              export_density = $maybe_export_density,
-              export_relaxed_mp2_density_correction = $maybe_export_relaxed_mp2_density_correction,
-              export_fock = $maybe_export_fock,
-              export_overlap = $maybe_export_overlap,
-              export_h_core = $maybe_export_h_core,
-              export_expanded_density = $maybe_export_expanded_density,
-              export_expanded_gradient = $maybe_export_expanded_gradient,
-              export_molecular_orbital_coeffs = $maybe_export_molecular_orbital_coeffs,
-              export_gradient = $maybe_export_gradient,
-              export_external_charge_gradient = $maybe_export_external_charge_gradient,
-              export_mulliken_charges = $maybe_export_mulliken_charges,
-              export_chelpg_charges = $maybe_export_chelpg_charges,
-              export_bond_orders = $maybe_export_bond_orders,
-              export_h_caps = $maybe_export_h_caps,
-              export_density_descriptors = $maybe_export_density_descriptors,
-              export_esp_descriptors = $maybe_export_esp_descriptors,
-              export_expanded_esp_descriptors = $maybe_export_expanded_esp_descriptors,
-              export_basis_labels = $maybe_export_basis_labels,
-              export_hessian = $maybe_export_hessian,
-              export_mass_weighted_hessian = $maybe_export_mass_weighted_hessian,
-              export_hessian_frequencies = $maybe_export_hessian_frequencies,
-              flatten_symmetric = $maybe_flatten_symmetric,
-              light_json = $maybe_light_json,
-              concatenate_hdf5_files = $maybe_concatenate_hdf5_files,
-              training_db = $maybe_training_db,
-              descriptor_grid = None,
-            })"""
+            export_density = $maybe_export_density,
+            export_relaxed_mp2_density_correction = $maybe_export_relaxed_mp2_density_correction,
+            export_fock = $maybe_export_fock,
+            export_overlap = $maybe_export_overlap,
+            export_h_core = $maybe_export_h_core,
+            export_expanded_density = $maybe_export_expanded_density,
+            export_expanded_gradient = $maybe_export_expanded_gradient,
+            export_molecular_orbital_coeffs = $maybe_export_molecular_orbital_coeffs,
+            export_gradient = $maybe_export_gradient,
+            export_external_charge_gradient = $maybe_export_external_charge_gradient,
+            export_mulliken_charges = $maybe_export_mulliken_charges,
+            export_chelpg_charges = $maybe_export_chelpg_charges,
+            export_bond_orders = $maybe_export_bond_orders,
+            export_h_caps = $maybe_export_h_caps,
+            export_density_descriptors = $maybe_export_density_descriptors,
+            export_esp_descriptors = $maybe_export_esp_descriptors,
+            export_expanded_esp_descriptors = $maybe_export_expanded_esp_descriptors,
+            export_basis_labels = $maybe_export_basis_labels,
+            export_hessian = $maybe_export_hessian,
+            export_mass_weighted_hessian = $maybe_export_mass_weighted_hessian,
+            export_hessian_frequencies = $maybe_export_hessian_frequencies,
+            flatten_symmetric = $maybe_flatten_symmetric,
+            light_json = $maybe_light_json,
+            concatenate_hdf5_files = $maybe_concatenate_hdf5_files,
+            training_db = $maybe_training_db,
+            descriptor_grid = $maybe_descriptor_grid,
+          })"""
         ).substitute(
             maybe_export_density=optional_str(self.export_density),
             maybe_export_relaxed_mp2_density_correction=optional_str(
@@ -429,6 +481,11 @@ class ExportKeywords:
             maybe_light_json=optional_str(self.light_json),
             maybe_concatenate_hdf5_files=optional_str(self.concatenate_hdf5_files),
             maybe_training_db=optional_str(self.training_db),
+            maybe_descriptor_grid=(
+                self.descriptor_grid.to_rex()
+                if self.descriptor_grid is not None
+                else "None"
+            ),
         )
 
 
