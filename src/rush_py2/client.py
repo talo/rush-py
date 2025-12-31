@@ -368,7 +368,10 @@ def _build_filters(
     tags: list[str] | None,
 ) -> dict | None:
     """Build the GraphQL filter input from Python arguments."""
-    filters = {}
+    filters = {
+        # We don't want to show deleted runs
+        "deleted_at": {"is_null": True},
+    }
 
     if name is not None:
         filters["name"] = {"ci_eq": name}
@@ -454,6 +457,20 @@ def fetch_runs(
         cursor = runs_data["page_info"]["end_cursor"]
 
     return run_ids
+
+
+def delete_run(run_id: str) -> None:
+    """Delete a run by ID."""
+    query = gql("""
+        mutation DeleteRun($run_id: String!) {
+            delete_run(run_id: $run_id) {
+                id
+            }
+        }
+    """)
+    query.variable_values = {"run_id": run_id}
+
+    _get_client().execute(query)
 
 
 def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
