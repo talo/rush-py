@@ -153,6 +153,21 @@ class RunSpec:
         )
 
 
+@dataclass
+class RunOpts:
+    """
+    The name of the run will show up as the name (i.e. title) of the run in the Rush UI.
+    The description currently doesn't show up anywhere.
+    The tags will also show up in the Rush UI and will (eventually) allow for run searching and filtering.
+    The email flag, if set to True, will cause an email to be sent to you upon run completion.
+    """
+
+    name: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    email: bool | None = None
+
+
 def upload_object(project_id: str, filepath: Path | str):
     mutation = gql("""
         mutation UploadObject($file: Upload!, $typeinfo: Json!, $format: ObjectFormatEnum!, $project_id: String) {
@@ -342,19 +357,120 @@ def print_run_trace(run):
         print(file=sys.stderr)
 
 
-@dataclass
-class RunOpts:
-    """
-    The name of the run will show up as the name (i.e. title) of the run in the Rush UI.
-    The description currently doesn't show up anywhere.
-    The tags will also show up in the Rush UI and will (eventually) allow for run searching and filtering.
-    The email flag, if set to True, will cause an email to be sent to you upon run completion.
-    """
+RunStatus = Literal["pending", "running", "done", "error", "cancelled", "draft"]
 
-    name: str | None = None
-    description: str | None = None
-    tags: list[str] | None = None
-    email: bool | None = None
+
+def _build_filters(
+    *,
+    name: str | None,
+    name_contains: str | None,
+    status: RunStatus | list[RunStatus] | None,
+    tags: list[str] | None,
+) -> dict | None:
+    """Build the GraphQL filter input from Python arguments."""
+    filters = {
+        # We don't want to show deleted runs
+        "deleted_at": {"is_null": True},
+    }
+
+    if name is not None:
+        filters["name"] = {"ci_eq": name}
+    elif name_contains is not None:
+        filters["name"] = {"ilike": f"%{name_contains}%"}
+
+    if status is not None:
+        if isinstance(status, list):
+            filters["status"] = {"is_in": status}
+        else:
+            filters["status"] = {"eq": status}
+
+    if tags is not None:
+        filters["tags"] = {"array_contains": tags}
+
+    return filters if filters else None
+
+
+def fetch_runs(
+    *,
+    name: str | None = None,
+    name_contains: str | None = None,
+    status: RunStatus | list[RunStatus] | None = None,
+    tags: list[str] | None = None,
+    limit: int | None = None,
+) -> list[str]:
+    """
+    Query runs and return their IDs.
+
+    Args:
+        name: Filter by exact run name (case-insensitive).
+        name_contains: Filter by runs whose name contains this substring.
+        status: Filter by status. Can be a single status or a list of statuses.
+        tags: Filter by tags. Returns runs that have ALL specified tags.
+        limit: Maximum number of runs to return. If None, returns all matching runs.
+
+    Returns:
+        A list of run IDs matching the filters.
+    """
+    query = gql("""
+        query GetRuns($filters: RunFilterInput, $pagination: PaginationInput) {
+            runs(filters: $filters, pagination: $pagination) {
+                page_info {
+                    has_next_page
+                    end_cursor
+                }
+                nodes {
+                    id
+                }
+            }
+        }
+    """)
+
+    filters = _build_filters(
+        name=name,
+        name_contains=name_contains,
+        status=status,
+        tags=tags,
+    )
+
+    run_ids = []
+    cursor = None
+    page_limit = min(limit, 100) if limit else 100
+
+    while True:
+        if cursor:
+            pagination = {"cursor": {"cursor": cursor, "limit": page_limit}}
+        else:
+            pagination = {"offset": {"offset": 0, "limit": page_limit}}
+
+        query.variable_values = {"filters": filters, "pagination": pagination}
+        result = _get_client().execute(query)
+
+        runs_data = result["runs"]
+        run_ids.extend(node["id"] for node in runs_data["nodes"])
+
+        if limit and len(run_ids) >= limit:
+            return run_ids[:limit]
+
+        if not runs_data["page_info"]["has_next_page"]:
+            break
+
+        cursor = runs_data["page_info"]["end_cursor"]
+
+    return run_ids
+
+
+def delete_run(run_id: str) -> None:
+    """Delete a run by ID."""
+    query = gql("""
+        mutation DeleteRun($run_id: String!) {
+            delete_run(run_id: $run_id) {
+                id
+            }
+        }
+    """)
+    query.variable_values = {"run_id": run_id}
+
+    _get_client().execute(query)
 
 
 def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
@@ -424,6 +540,68 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
         json.dump(history, f, indent=2)
 
     return run_id
+
+
+@dataclass
+class RushRun:
+    id: str
+    created_at: str
+    updated_at: str
+    status: str
+    deleted_at: str | None = None
+    name: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    result: dict | None = None
+    trace: dict | None = None
+    stdout: str | None = None
+
+    def __str__(self) -> str:
+        lines = [
+            f"RushRun: {self.name or '(unnamed)'}",
+            f"  id:          {self.id}",
+            f"  status:      {self.status}",
+            f"  created_at:  {self.created_at}",
+            f"  updated_at:  {self.updated_at}",
+        ]
+        if self.deleted_at:
+            lines.append(f"  deleted_at:  {self.deleted_at}")
+        if self.description:
+            lines.append(f"  description: {self.description}")
+        if self.tags:
+            lines.append(f"  tags:        {', '.join(self.tags)}")
+        return "\n".join(lines)
+
+
+def fetch_run_info(run_id: str) -> RushRun | None:
+    """
+    Fetch all info for a run by ID.
+
+    Returns None if the run doesn't exist.
+    """
+    query = gql("""
+        query GetRun($id: String!) {
+            run(id: $id) {
+                created_at
+                deleted_at
+                updated_at
+                name
+                description
+                tags
+                result
+                status
+                trace
+                stdout
+            }
+        }
+    """)
+    query.variable_values = {"id": run_id}
+
+    result = _get_client().execute(query)
+    if result["run"] is None:
+        return None
+
+    return RushRun(**result["run"] | {"id": run_id})
 
 
 def poll_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):

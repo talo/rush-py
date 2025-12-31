@@ -1,0 +1,27 @@
+import time
+from pathlib import Path
+
+from rush_py2 import exess
+from rush_py2.client import (
+    RunOpts,
+    delete_run,
+    fetch_runs,
+    set_opts,
+)
+
+if __name__ == "__main__":
+    set_opts(workspace_dir=Path.cwd() / "test-runs")
+    data_dir = Path.cwd() / "tests" / "data"
+    id = exess.energy(
+        data_dir / "1kuw_t.json",
+        basis="PCSeg-0",
+        run_opts=RunOpts(
+            name="Rush-Py Test Delete Run 01",
+            tags=["1kuw", "delete-me"],
+        ),
+    )
+    runs_0 = fetch_runs(tags=["delete-me"])
+    assert id in runs_0
+    delete_run(id)
+    runs_1 = fetch_runs(tags=["delete-me"])
+    assert id not in runs_1
