@@ -77,7 +77,7 @@ def pbsa(
 in
   pbsa "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         solute_dielectric=float_to_str(solute_dielectric),
         solvent_dielectric=float_to_str(solvent_dielectric),
         solvent_radius=float_to_str(solvent_radius),

@@ -27,7 +27,7 @@ class Auto3DOptions:
     patience: int = 1000
     threshold: float = 0.3
 
-    def to_rex(self, reference_fragment: int | None = None):
+    def _to_rex(self, reference_fragment: int | None = None):
         return Template(
             """(auto3d_rex::Auto3dOptions {
         k = Some (int $k),
@@ -78,8 +78,8 @@ in
   auto3d $smis
 """).substitute(
         smis=f"[{', '.join([f'"{smi}"' for smi in smis])}]",
-        opts=opts.to_rex(),
-        run_spec=run_spec.to_rex(),
+        opts=opts._to_rex(),
+        run_spec=run_spec._to_rex(),
     )
     try:
         run_id = submit_rex(PROJECT_ID, rex, run_opts)

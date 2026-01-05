@@ -78,7 +78,7 @@ def prepare_protein(
 in
   prepare_protein "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         ph=optional_str(ph),
         naming_scheme=optional_str(
             naming_scheme.title() if naming_scheme is not None else None,

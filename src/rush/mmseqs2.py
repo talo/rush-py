@@ -53,7 +53,7 @@ mmseqs2_rex_s
   })
   $sequences
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         maybe_prefilter_mode=optional_str(prefilter_mode),
         maybe_sensitivity=optional_str(sensitivity),
         maybe_expand_eval=optional_str(expand_eval),

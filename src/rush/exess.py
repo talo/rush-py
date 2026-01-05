@@ -706,7 +706,7 @@ def exess(
 in
   exess "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
@@ -714,15 +714,15 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
-            scf_keywords.to_rex() if scf_keywords is not None else "None"
+            scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
         maybe_frag_keywords=(
-            frag_keywords.to_rex() if frag_keywords is not None else "None"
+            frag_keywords._to_rex() if frag_keywords is not None else "None"
         ),
         maybe_export_keywords=(
-            export_keywords.to_rex() if export_keywords is not None else "None"
+            export_keywords._to_rex() if export_keywords is not None else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
         driver=driver,
@@ -890,7 +890,7 @@ def interaction_energy(
 in
   exess "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
@@ -898,11 +898,11 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
-            scf_keywords.to_rex() if scf_keywords is not None else "None"
+            scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
-        maybe_frag_keywords=frag_keywords.to_rex(reference_fragment),
+        maybe_frag_keywords=frag_keywords._to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
@@ -1004,12 +1004,12 @@ def chelpg(
 in
   exess "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
-        system=system.to_rex() if system is not None else "None",
+        run_spec=run_spec._to_rex(),
+        system=system._to_rex() if system is not None else "None",
         scf_keywords=SCFKeywords(
             max_diis_history_length=12, convergence_threshold=1e-8
-        ).to_rex(),
-        frag_keywords=FragKeywords(level="Monomer").to_rex(),
+        )._to_rex(),
+        frag_keywords=FragKeywords(level="Monomer")._to_rex(),
         topology_vobj_path=topology_vobj["path"],
     )
     try:
@@ -1134,7 +1134,7 @@ def qmmm(
 in
   exess "$topology_vobj_path" "$residues_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
@@ -1142,12 +1142,12 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system.to_rex() if system is not None else "None",
+        system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
-            scf_keywords.to_rex() if scf_keywords is not None else "None"
+            scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
         maybe_frag_keywords=(
-            frag_keywords.to_rex() if frag_keywords is not None else "None"
+            frag_keywords._to_rex() if frag_keywords is not None else "None"
         ),
         maybe_gradient_finite_difference_step_size=optional_str(
             gradient_finite_difference_step_size
@@ -1156,8 +1156,8 @@ in
         dt_ps=dt_ps,
         temperature_kelvin=temperature_kelvin,
         maybe_pressure_atm=optional_str(pressure_atm),
-        trajectory=trajectory.to_rex(),
-        maybe_restraints=restraints.to_rex() if restraints is not None else "None",
+        trajectory=trajectory._to_rex(),
+        maybe_restraints=restraints._to_rex() if restraints is not None else "None",
         maybe_machine_learning=(
             "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
             if ml_fragments is not None
@@ -1203,7 +1203,7 @@ class OptimizationConvergenceCriteria:
     delta_energy_threshold: float | None = None
     step_component_threshold: float | None = None
 
-    def to_rex(self, reference_fragment: int | None = None):
+    def _to_rex(self, reference_fragment: int | None = None):
         return Template(
             """Some (exess_geo_opt_rex::OptimizationConvergenceCriteria {
             metric = $maybe_metric,
@@ -1240,7 +1240,7 @@ class TrustRegionKeywords:
     decrease_threshold: float | None = None
     rejection_threshold: float | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_geo_opt_rex::TrustRegionKeywords {
             initial_radius = $maybe_initial_radius,
@@ -1279,7 +1279,7 @@ class LBFGSKeywords:
     max_linesearch: int | None = None
     gtol: float | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_geo_opt_rex::LBFGSKeywords {
               linesearch = $maybe_linesearch,
@@ -1317,7 +1317,7 @@ class OptimizationKeywords:
     free_fragments: list[int] | None = None
     fix_heavy: bool | None = None
 
-    def to_rex(self, max_iters):
+    def _to_rex(self, max_iters):
         return Template(
             """Some (exess_geo_opt_rex::OptimizationKeywords {
             max_iters = $max_iters,
@@ -1340,7 +1340,7 @@ class OptimizationKeywords:
         ).substitute(
             max_iters=max_iters,
             maybe_convergence_criteria=(
-                self.convergence_criteria.to_rex()
+                self.convergence_criteria._to_rex()
                 if self.convergence_criteria is not None
                 else "None"
             ),
@@ -1360,7 +1360,7 @@ class OptimizationKeywords:
                 self.algorithm, "exess_geo_opt_rex::OptimizationAlgorithmType::"
             ),
             maybe_lbfgs_keywords=(
-                self.lbfgs_keywords.to_rex()
+                self.lbfgs_keywords._to_rex()
                 if self.lbfgs_keywords is not None
                 else "None"
             ),
@@ -1371,7 +1371,7 @@ class OptimizationKeywords:
                 self.frozen_angle_slippage_tolerance_degrees
             ),
             maybe_trust_region_keywords=(
-                self.trust_region_keywords.to_rex()
+                self.trust_region_keywords._to_rex()
                 if self.trust_region_keywords is not None
                 else "None"
             ),
@@ -1462,7 +1462,7 @@ def optimization(
 in
   exess "$topology_vobj_path" "$residues_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
@@ -1470,12 +1470,12 @@ in
             standard_orientation, "exess_rex::StandardOrientation::"
         ),
         maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        maybe_system=system.to_rex() if system is not None else "None",
+        maybe_system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
-            scf_keywords.to_rex() if scf_keywords is not None else "None"
+            scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
         maybe_optimization_keywords=(
-            optimization_keywords.to_rex(max_iters)
+            optimization_keywords._to_rex(max_iters)
             if optimization_keywords is not None
             else "None"
         ),

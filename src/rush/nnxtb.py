@@ -70,7 +70,7 @@ def nnxtb(
 in
   nnxtb "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         maybe_compute_forces=optional_str(compute_forces),
         maybe_compute_frequencies=optional_str(compute_frequencies),
         maybe_charge=f"Some (int {charge})" if charge is not None else None,

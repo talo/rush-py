@@ -37,7 +37,7 @@ class ProteinSequence:
     modifications: list[Modification] | None = None
     cyclic: bool | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         if isinstance(self.msa, Path) or isinstance(self.msa, str):
             self.msa = upload_object(PROJECT_ID, self.msa)
 
@@ -62,7 +62,7 @@ class LigandSequence:
     id: list[str]
     smiles: str
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """(boltz2_rex::Sequence::Ligand {
           id = $id,
@@ -152,7 +152,7 @@ def boltz(
 in
   boltz "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         maybe_recycling_steps=optional_str(recycling_steps),
         maybe_sampling_steps=optional_str(sampling_steps),
         maybe_diffusion_samples=optional_str(diffusion_samples),
@@ -172,7 +172,7 @@ in
             if template_chain_mapping is not None
             else "None"
         ),
-        sequences=f"[\n        {',\n        '.join([f'{seq.to_rex()}' for seq in sequences])},\n      ]",
+        sequences=f"[\n        {',\n        '.join([f'{seq._to_rex()}' for seq in sequences])},\n      ]",
         template_trc_expr=(
             "(Some ((obj_j topology), (obj_j residues), (obj_j chains)) )"
             if template_path is not None
