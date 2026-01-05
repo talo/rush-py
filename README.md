@@ -1,4 +1,4 @@
-# rush-py: Rush Python Interface
+# rush-py: Rush Python Client
 
 ## Installation
 
