@@ -15,7 +15,7 @@ from .client import (
     RunSpec,
     collect_run,
     save_object,
-    submit_rex,
+    _submit_rex,
     upload_object,
 )
 from .convert import from_pdb, to_json
@@ -57,9 +57,9 @@ def prepare_protein(
         t_f.seek(0)
         r_f.seek(0)
         c_f.seek(0)
-        topology_vobj = upload_object(PROJECT_ID, t_f.name)
-        residues_vobj = upload_object(PROJECT_ID, r_f.name)
-        chains_vobj = upload_object(PROJECT_ID, c_f.name)
+        topology_vobj = upload_object(t_f.name)
+        residues_vobj = upload_object(r_f.name)
+        chains_vobj = upload_object(c_f.name)
 
     # Run rex
     rex = Template("""let
@@ -94,7 +94,7 @@ in
         chains_vobj_path=chains_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

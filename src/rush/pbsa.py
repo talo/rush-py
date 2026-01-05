@@ -11,8 +11,8 @@ from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
     upload_object,
 )
 from .utils import float_to_str
@@ -51,7 +51,7 @@ def pbsa(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
 
     # Run rex
     rex = Template("""let
@@ -92,7 +92,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

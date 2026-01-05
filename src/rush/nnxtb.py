@@ -12,7 +12,7 @@ from .client import (
     RunOpts,
     RunSpec,
     collect_run,
-    submit_rex,
+    _submit_rex,
     upload_object,
 )
 from .utils import optional_str
@@ -50,7 +50,7 @@ def nnxtb(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
     charge = 0
 
     # Run rex
@@ -78,7 +78,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

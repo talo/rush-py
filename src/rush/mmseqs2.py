@@ -18,7 +18,7 @@ from .client import (
     RunOpts,
     RunSpec,
     collect_run,
-    submit_rex,
+    _submit_rex,
     upload_object,
 )
 from .utils import dict_to_vec_of_tuples_str, optional_str
@@ -64,7 +64,7 @@ mmseqs2_rex_s
         sequences=f"[\n        {',\n        '.join([f'"{seq}"' for seq in sequences])}]",
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

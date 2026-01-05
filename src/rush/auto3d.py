@@ -8,8 +8,8 @@ from rush.client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
 )
 from rush.utils import bool_to_str, float_to_str
 
@@ -68,6 +68,7 @@ def auto3d(
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
+    """Blah blah"""
     rex = Template("""let
   auto3d = λ smis →
     try_auto3d_rex
@@ -82,7 +83,7 @@ in
         run_spec=run_spec._to_rex(),
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if not collect:
             return run_id
 

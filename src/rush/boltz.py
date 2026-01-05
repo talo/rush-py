@@ -16,8 +16,8 @@ from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
     upload_object,
 )
 from .utils import dict_to_vec_of_tuples_str, optional_str
@@ -39,7 +39,7 @@ class ProteinSequence:
 
     def _to_rex(self):
         if isinstance(self.msa, Path) or isinstance(self.msa, str):
-            self.msa = upload_object(PROJECT_ID, self.msa)
+            self.msa = upload_object(self.msa)
 
         return Template(
             """(boltz2_rex::Sequence::Protein {
@@ -119,9 +119,9 @@ def boltz(
             t_f.seek(0)
             r_f.seek(0)
             c_f.seek(0)
-            topology_vobj = upload_object(PROJECT_ID, t_f.name)
-            residues_vobj = upload_object(PROJECT_ID, r_f.name)
-            chains_vobj = upload_object(PROJECT_ID, c_f.name)
+            topology_vobj = upload_object(t_f.name)
+            residues_vobj = upload_object(r_f.name)
+            chains_vobj = upload_object(c_f.name)
 
     # Run rex
     rex = Template("""let
@@ -183,7 +183,7 @@ in
         chains_vobj_path=chains_vobj["path"] if has_template else "",
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

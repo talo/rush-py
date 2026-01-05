@@ -16,11 +16,11 @@ from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
     download_object,
     save_json,
     save_object,
-    submit_rex,
     upload_object,
 )
 from .utils import bool_to_str, float_to_str, optional_str
@@ -659,7 +659,7 @@ def exess(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
 
     # Run rex
     rex = Template("""let
@@ -728,7 +728,7 @@ in
         driver=driver,
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -843,7 +843,7 @@ def interaction_energy(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
 
     # Run rex
     rex = Template("""let
@@ -906,7 +906,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -930,7 +930,7 @@ def chelpg(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
 
     # Run rex
     rex = Template("""let
@@ -1013,7 +1013,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             result = collect_run(run_id)
             qm_output = download_object(result[1]["path"])
@@ -1076,8 +1076,8 @@ def qmmm(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
-    residues_vobj = upload_object(PROJECT_ID, residues_path)
+    topology_vobj = upload_object(topology_path)
+    residues_vobj = upload_object(residues_path)
 
     # Run rex
     rex = Template("""let
@@ -1184,7 +1184,7 @@ in
         residues_vobj_path=residues_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -1413,10 +1413,10 @@ def optimization(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
     residues_vobj = None
     if residues_path is not None:
-        residues_vobj = upload_object(PROJECT_ID, residues_path)
+        residues_vobj = upload_object(residues_path)
 
     # Run rex
     rex = Template("""let
@@ -1508,7 +1508,7 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
