@@ -5,14 +5,14 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush_py2 import from_json, from_pdb, to_pdb
-from rush_py2.client import (
+from rush import from_json, from_pdb, to_pdb
+from rush.client import (
     RunOpts,
     RunSpec,
 )
-from rush_py2.prepare_protein import prepare_protein as run_prepare_protein
-from rush_py2.prepare_protein import save_outputs as save_prepare_protein_outputs
-from rush_py2.trc.merge import merge_trcs
+from rush.prepare_protein import prepare_protein as run_prepare_protein
+from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
+from rush.trc.merge import merge_trcs
 
 
 def extract_ligand_with_hydrogens(pdb_path, ligand_resnames):

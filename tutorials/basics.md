@@ -13,26 +13,26 @@ Use environment variables to configure access:
 
 ### Basics
 
-Each Rush module has a Python submodule that provides support for it. For example, to get access to the EXESS module support, you can import files and functions from `rush_py2.exess`:
+Each Rush module has a Python submodule that provides support for it. For example, to get access to the EXESS module support, you can import files and functions from `rush.exess`:
 ```python
-from rush_py2 import exess
+from rush import exess
 ```
 
 You can then access the function that directly wraps EXESS as expected:
 ```python
-from rush_py2 import exess
+from rush import exess
 exess.exess("input_topology.json", <rest of args here>)
 ```
 
 Or the possibly more clear:
 ```python
-from rush_py2.exess import exess as run_exess
+from rush.exess import exess as run_exess
 run_exess("input_topology.json", <rest of args here>)
 ```
 
 Or access one of the other supplementary EXESS entrypoints, built to facilitate easily performing different kinds of runs with EXESS:
 ```python
-from rush_py2 import exess
+from rush import exess
 exess.energy(...)
 exess.interaction_energy(...)
 exess.chelpg(...)
@@ -50,9 +50,9 @@ If you find that any Rush module's python submodule doesn't abide by these desig
 
 ### Configuring Rush-Py's Behavior
 
-Unlike in the classic rush-py library, there is no need to manually create a "client" to submit jobs to Rush. But, there are some configurable behaviors that can be accessed by importing `rush_py2.client`:
+Unlike in the classic rush-py library, there is no need to manually create a "client" to submit jobs to Rush. But, there are some configurable behaviors that can be accessed by importing `rush.client`:
 ```python
-from rush_py2 import client
+from rush import client
 client.set_opts(workspace_dir=Path("/path/to/desired/workspace/folder/"))
 ```
 
@@ -66,23 +66,23 @@ A `history.json` file is also written into the root of the workspace, where it m
 
 ### Uploading, Downloading & Saving Data
 
-Rush-py provides an `upload_object`, `download_object`, and `save_object` function in the `rush_py2.client` python submodule. These functions: upload to an object from a local filesystem path; download an object via its object store path and return its data directly (either as a dict for JSON data or as bytes otherwise; and saves an object into the workspace directory, with arguments that allow for configuring how it gets named (run `help(rush_py2.client.save_object)` for usage).
+Rush-py provides an `upload_object`, `download_object`, and `save_object` function in the `rush.client` python submodule. These functions: upload to an object from a local filesystem path; download an object via its object store path and return its data directly (either as a dict for JSON data or as bytes otherwise; and saves an object into the workspace directory, with arguments that allow for configuring how it gets named (run `help(rush.client.save_object)` for usage).
 
 Also provided is a `save_json` function that allows saving a dict as JSON, by default into the workspace directory, for convenient parallel usage with `save_object`.
 
 ### Run Options (Metadata)
 
-One can pass a set of run options to each module function via `run_opts=rush_py2.client.RunOpts(...)`. Current options include setting the run's name, description, tags, and an email flag which if set to true will trigger messages for job notifications sent to the email address associated with the user's Rush account.
+One can pass a set of run options to each module function via `run_opts=rush.client.RunOpts(...)`. Current options include setting the run's name, description, tags, and an email flag which if set to true will trigger messages for job notifications sent to the email address associated with the user's Rush account.
 
 When necessary, default `RunSpec` objects are set for module functions that require the use of GPUs. Be careful when providing your own `RunSpec` such that you use supported targets for the module being run and supply at least the minimum required resources!
 
 ### Run Specification (Target + Resources)
 
-Obe can pass a set of run specifications to each module function via `run_spec=rush_py2.client.RunSpec(...)`. The target (Bullet, Bullet2, Bullet3, Gadi, Setonix), walltime (in minutes), storage (in MB, though storage units are configurable as well), cpus, gpus, and nodes are all configurable via this parameter and class.
+Obe can pass a set of run specifications to each module function via `run_spec=rush.client.RunSpec(...)`. The target (Bullet, Bullet2, Bullet3, Gadi, Setonix), walltime (in minutes), storage (in MB, though storage units are configurable as well), cpus, gpus, and nodes are all configurable via this parameter and class.
 
 ### Submit + Collect Pattern
 
-Rush modules functions will return a run ID that can be used to collect the run at a later point in time using `rush_py2.client.collect_run`, which takes the run ID and a maximum time to wait for the run to finish (1 hour by default). If it does finish, the `collect_run` call will then return the module outputs.
+Rush modules functions will return a run ID that can be used to collect the run at a later point in time using `rush.client.collect_run`, which takes the run ID and a maximum time to wait for the run to finish (1 hour by default). If it does finish, the `collect_run` call will then return the module outputs.
 
 If synchronous behavior is desired, `collect=True` can be passed to the module function and collection with a 1 hour wait time will happen automatically, without the need to call `collect_run`, and the module outputs will be returned directly from the module function call as well.
 

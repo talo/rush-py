@@ -10,8 +10,8 @@ from typing import Literal
 import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
-from rush_py2.convert.json import to_json
-from rush_py2.convert.pdb import from_pdb
+from rush.convert.json import to_json
+from rush.convert.pdb import from_pdb
 
 from .client import (
     PROJECT_ID,

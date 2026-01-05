@@ -7,7 +7,7 @@ EXESS provides its primary output through a JSON file, which through rush-py is 
 
 After calling EXESS with this parameter set:
 ```python
-from rush_py2 import exess
+from rush import exess
 res = exess.energy(
     "input_topology.json",
     export_keywords=exess.ExportKeywords(
@@ -49,7 +49,7 @@ Feel free to use h5py, CLI programs like `h5glance`, `h5ls`, and `h5dump`, or yo
 
 There are two exportable values that are "descriptors": `density_descriptors` and `esp_descriptors`. (NOTE: `expanded_esp_descriptors` is currently broken, so please don't enable it!) When these are used, the `descriptor_grid` keyword must also be set. This keyword defines a grid upon which the values are calculated, allowing the user to obtain values at the desired coarseness or fineness or even at exact points. For example, the following code will collect the electron density and electrostatic potential (ESP) descriptors at three points, `(0.0, 0.0, 0.0)` `(1.0, 1.0, 1.0)`, and `(2.0, 2.0, 2.0)`:
 ```python
-from rush_py2 import exess
+from rush import exess
 res = exess.energy(
     "input_topology.json",
     frag_keywords=None,  # No fragmentation; whole system calc

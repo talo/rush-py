@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 from pprint import pp
 
-from rush_py2 import from_json
-from rush_py2.auto3d import Auto3DOptions, auto3d
-from rush_py2.client import RunOpts, save_object, set_opts
+from rush import from_json
+from rush.auto3d import Auto3DOptions, auto3d
+from rush.client import RunOpts, save_object, set_opts
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")

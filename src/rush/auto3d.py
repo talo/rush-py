@@ -4,14 +4,14 @@ from string import Template
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush_py2.client import (
+from rush.client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
     collect_run,
     submit_rex,
 )
-from rush_py2.utils import bool_to_str, float_to_str
+from rush.utils import bool_to_str, float_to_str
 
 
 @dataclass

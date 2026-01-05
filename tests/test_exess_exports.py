@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 from pprint import pp
 
-from rush_py2 import exess
-from rush_py2.client import RunOpts, RunSpec, save_json, set_opts
+from rush import exess
+from rush.client import RunOpts, RunSpec, save_json, set_opts
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")

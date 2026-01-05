@@ -2,11 +2,8 @@ import json
 import sys
 from pathlib import Path
 
-# Add src to path so we can import rush_py2
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from rush_py2.convert.json import to_json
-from rush_py2.convert.pdb import from_pdb
+from rush.convert.json import to_json
+from rush.convert.pdb import from_pdb
 
 
 def normalize_json(obj):

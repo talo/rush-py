@@ -21,17 +21,37 @@
           ...
         }:
         let
-          name = "rush-py2";
+          name = "rush-py";
           workspaceRoot = ./.;
         in
         {
           packages = {
-            rush-py2 = config.uv2nix-parts.mkApplication { inherit name workspaceRoot; };
-            default = self'.packages.rush-py2;
+            rush-py = config.uv2nix-parts.mkApplication {
+              inherit name workspaceRoot;
+              pyprojectOverrides = final: prev: {
+                pydoc-markdown = prev.pydoc-markdown.overrideAttrs (old: {
+                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
+                });
+                docstring_parser = prev.docstring_parser.overrideAttrs (old: {
+                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
+                });
+              };
+            };
+            default = self'.packages.rush-py;
           };
           devShells = {
-            rush-py2 = config.uv2nix-parts.mkShell { inherit name workspaceRoot; };
-            default = self'.devShells.rush-py2;
+            rush-py = config.uv2nix-parts.mkShell {
+              inherit name workspaceRoot;
+              pyprojectOverrides = final: prev: {
+                pydoc-markdown = prev.pydoc-markdown.overrideAttrs (old: {
+                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
+                });
+                docstring_parser = prev.docstring_parser.overrideAttrs (old: {
+                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
+                });
+              };
+            };
+            default = self'.devShells.rush-py;
             uv = pkgs.mkShell { packages = [ pkgs.uv ]; };
           };
         };

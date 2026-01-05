@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-from rush_py2.client import RunOpts, save_json, set_opts
-from rush_py2.pbsa import PBSAResults, pbsa
+from rush.client import RunOpts, save_json, set_opts
+from rush.pbsa import PBSAResults, pbsa
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         box_size_factor=2.0,
         run_opts=RunOpts(
             name="Rush-Py Test PBSA 01",
-            tags=["rush-py2", "test", "ethane"],
+            tags=["rush-py", "test", "ethane"],
         ),
         collect=True,
     )

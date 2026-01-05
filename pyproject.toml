@@ -1,9 +1,9 @@
 [project]
-name = "rush-py2"
-version = "0.1.0"
-description = "Simple python interfaces for Rush modules"
+name = "rush-py"
+version = "0.2.0"
+description = "Simple Python interfaces for Rush modules"
 readme = "README.md"
-requires-python = ">= 3.12"
+requires-python = ">=3.12"
 authors = [
   { name = "Sean Laguna", email = "seanlaguna@qdx.co" },
 ]
@@ -11,12 +11,13 @@ dependencies = [
   "cyclopts~=4.2",
   "gql~=4.0",
   "h5py~=3.14",
-  "pytest>=9.0.2",
-  "rdkit>=2025.9.2",
+  "pytest~=9.0.2",
+  "rdkit~=2025.9.2",
   "requests~=2.32",
   "requests_toolbelt~=1.0",
   "zstandard~=0.23",
 ]
+
 
 [dependency-groups]
 dev = [
@@ -25,11 +26,11 @@ dev = [
 ]
 
 [project.scripts]
-rush-exess-energy = "rush_py2.exess:run_energy"
-rush-exess-interaction-energy = "rush_py2.exess:run_interaction_energy"
-rush-exess-chelpg = "rush_py2.exess:run_chelpg"
-rush-exess-qmmm = "rush_py2.exess:run_qmmm"
-rush-exess-optimization = "rush_py2.exess:run_optimization"
+rush-exess-energy = "rush.exess:run_energy"
+rush-exess-interaction-energy = "rush.exess:run_interaction_energy"
+rush-exess-chelpg = "rush.exess:run_chelpg"
+rush-exess-qmmm = "rush.exess:run_qmmm"
+rush-exess-optimization = "rush.exess:run_optimization"
 
 [tool.pyright]
 exclude = [
@@ -54,6 +55,9 @@ reportUnknownVariableType = "none"
 useLibraryCodeForTypes = true
 typeCheckingMode = "standard"
 reportAttributeAccessIssue = "none"
+
+[tool.uv.build-backend]
+module-name = "rush"
 
 [build-system]
 requires = ["uv_build~=0.8"]

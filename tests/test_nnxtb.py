@@ -2,8 +2,8 @@ import json
 import sys
 from pathlib import Path
 
-from rush_py2.client import RunOpts, save_object, set_opts
-from rush_py2.nnxtb import NnxtbResults, nnxtb
+from rush.client import RunOpts, save_object, set_opts
+from rush.nnxtb import NnxtbResults, nnxtb
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         multiplicity=1,  # also the default (singlet)
         run_opts=RunOpts(
             name="Rush-Py Test NN-xTB 01",
-            tags=["rush-py2", "test", "1kuw"],
+            tags=["rush-py", "test", "1kuw"],
         ),
         collect=True,
     )

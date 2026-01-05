@@ -1,4 +1,4 @@
-# rush-py2: Rush Python Bindings
+# rush-py: Rush Python Bindings
 
 ## Project setup
 
@@ -6,8 +6,8 @@ You can use this project using `pip` + `venv`, or `uv`. Reach out if you'd like 
 
 ### With `pip` + `venv`
 ```bash
-git clone git@github.com:talo/rush-py2.git
-cd rush-py2
+git clone git@github.com:talo/rush-py.git
+cd rush-py
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -15,8 +15,8 @@ pip install -e .
 
 ### With `uv`
 ```bash
-git clone git@github.com:talo/rush-py2.git
-cd rush-py2
+git clone git@github.com:talo/rush-py.git
+cd rush-py
 uv sync
 source .venv/bin/activate
 
@@ -33,7 +33,7 @@ Add to your `pyproject.toml`:
 ```toml
 [project]
 dependencies = [
-    "rush-py2 @ git+ssh://git@github.com/talo/rush-py2.git",
+    "rush-py @ git+ssh://git@github.com/talo/rush-py.git",
 ]
 ```
 
@@ -47,7 +47,7 @@ Use environment variables to configure access:
 ## Usage
 
 ```python
-from rush_py2 import exess
+from rush import exess
 
 # Can use pathlib.Path too if you like type safety
 topology_path = Path.cwd() / "thrombin_1c_t.json"
