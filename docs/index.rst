@@ -23,6 +23,7 @@ onboard and run your first rush-py script.
    :maxdepth: 2
 
    guides
+   tutorials
    api
    modules
    

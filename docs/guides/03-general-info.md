@@ -3,7 +3,7 @@
 The rush-py client functions have a structured form for their arguments:
 - The first set of arguments are the input data;
 - The remaining arguments are the configuration values;
-- When large inputs and outputs are required, paths to objects should be used instead of the objects themselves.
+- When large inputs and outputs are required, paths to objects in the Rush object store are used instead of the in-memory values.
 
 To see the documentation, signature, or parameters for any class or function, use Python's built-in help function:
 ```python
@@ -13,8 +13,6 @@ help(exess.FragKeywords)
 
 ## Automatic File Conversion
 When a Rush module expects a tuple of paths to Topology, Residues, and Chains objects to represent a molecular system, rush-py will alternatively accept a Path object to a PDB file or SDF file for proteins and ligands respectively, or a path to a TRC file on disk.
-
-When necessary, default RunSpec objects are set for module functions that require the use of GPUs. Be careful when providing your own RunSpec such that you use supported targets for the module being run and supply at least the minimum required resources!
 
 ## Run Options (Metadata)
 One can pass a set of run options to each module function via `run_opts=rush.client.RunOpts(...)`. Current options include setting the run's name, description, tags, and an email flag which, if set to true, will trigger messages for job notifications sent to the email address associated with the user's Rush account.
@@ -30,7 +28,7 @@ The rush-py client provides `upload_object`, `download_object`, and `save_object
 Also provided is a `save_json` function that allows saving a dict as JSON, by default into the workspace directory, for convenient parallel usage with `save_object`.
 
 ## Workspaces
-Workspaces are used to organize output files from Rush runs. When using the `save_outputs` functions as described above, a folder is created for the project currently in use named via the project ID, and the files are saved based on their object store paths. In this way, the output files will never be overwritten, as object store paths are guaranteed to be unique.
+Workspaces are used to organize output files from Rush runs. When using the `save_outputs` functions, a folder is created for the project currently in use named via the project ID, and the files are saved based on their object store paths. In this way, the output files will never be overwritten, as object store paths are guaranteed to be unique.
 
 A `history.json` file is also written into the root of the workspace, where it maintains a list of all module instances (i.e. runs of a module) that have been created for this workspace. Each module instance has its run ID, time created, and module path (which contains the exact revision of the module used for the run) tracked here.
 

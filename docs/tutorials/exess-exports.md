@@ -1,6 +1,6 @@
 # Exporting Data from EXESS
 
-EXESS provides its primary output through a JSON file, which through rush-py is its first (zeroth-indexed) output. Additional datda can be requsested through the `export_keywords` parameter.
+EXESS provides its primary output through a JSON file, which through rush-py is its first (zeroth-indexed) output. Additional data can be requested through the `export_keywords` parameter.
 
 
 ## Example: Obtaining the Output Files
@@ -8,6 +8,7 @@ EXESS provides its primary output through a JSON file, which through rush-py is 
 After calling EXESS with this parameter set:
 ```python
 from rush import exess
+from rush.client import RunOpts
 res = exess.energy(
     "input_topology.json",
     export_keywords=exess.ExportKeywords(
@@ -31,7 +32,7 @@ We can inspect the outputs by printing `res`, which might look something like th
 
 The path tells us a unique ID associated with this output, and we can use this path to download the object to our filesystem. The size is currently uninformative, but will eventually contain that output's actual size in bytes. The format tells us whether the data is directly downloadable as JSON, or whether it's in another format, treated by the Rush object storage as effectively binary data.
 
-The `exess.energy` function has an associated `save_energy_outputs` function that'll do the legwork for us for download these output files. We just have to pass it `res`:
+The `exess.energy` function has an associated `save_energy_outputs` function that will do the legwork for us to download these output files. We just have to pass it `res`:
 ```python 
 files = exess.save_energy_outputs(res)
 ```
@@ -40,16 +41,17 @@ And now in `files` we have the on-disk paths to the downloaded versions of these
 
 The `exess.save_energy_outputs` call saves the first output as a JSON file into our workspace, using the above object store path as the filename.
 
-If any exports are requested, it also saves the second output to the workspace with an `.hdf5` extension (after all, it is an HDF5 file). The HDF5 file contains these exported values. In the above case, we're exporting the electron density of the system. The exported data can be quite large, hence the usage of HDF5 files rather than plain old JSON.
+If any exports are requested, it also saves the second output to the workspace with an `.hdf5` extension (after all, it is an HDF5 file). The helper handles the format and extension automatically. The HDF5 file contains these exported values. In the above case, we're exporting the electron density of the system. The exported data can be quite large, hence the usage of HDF5 files rather than plain old JSON.
 
 Feel free to use h5py, CLI programs like `h5glance`, `h5ls`, and `h5dump`, or your preferred tool for working with the exported output data.
 
 
 ## Example: Descriptor Grids for Electron Density and Electrostatic Potential
 
-There are two exportable values that are "descriptors": `density_descriptors` and `esp_descriptors`. (NOTE: `expanded_esp_descriptors` is currently broken, so please don't enable it!) When these are used, the `descriptor_grid` keyword must also be set. This keyword defines a grid upon which the values are calculated, allowing the user to obtain values at the desired coarseness or fineness or even at exact points. For example, the following code will collect the electron density and electrostatic potential (ESP) descriptors at three points, `(0.0, 0.0, 0.0)` `(1.0, 1.0, 1.0)`, and `(2.0, 2.0, 2.0)`:
+There are two exportable values that are "descriptors": `density_descriptors` and `esp_descriptors`. (NOTE: `expanded_esp_descriptors` currently crashes with an internally determined OOM error, so please don't enable it.) When these are used, the `descriptor_grid` keyword must also be set. This keyword defines a grid upon which the values are calculated, allowing the user to obtain values at the desired coarseness or fineness or even at exact points. For example, the following code will collect the electron density and electrostatic potential (ESP) descriptors at three points, `(0.0, 0.0, 0.0)` `(1.0, 1.0, 1.0)`, and `(2.0, 2.0, 2.0)`:
 ```python
 from rush import exess
+from rush.client import RunOpts, RunSpec
 res = exess.energy(
     "input_topology.json",
     frag_keywords=None,  # No fragmentation; whole system calc

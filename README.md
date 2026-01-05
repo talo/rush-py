@@ -74,7 +74,7 @@ help(exess.chelpg)
 help(exess.qmmm)
 ```
 
-See the [basics tutorial](/tutorials/basics.md) for more usage information.
+See the [Getting Started guide](/docs/guides/01-getting-started.md) for more usage information.
 
 ## Development
 
