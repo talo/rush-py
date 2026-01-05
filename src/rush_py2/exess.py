@@ -80,14 +80,22 @@ type StandardOrientationT = Literal[
 
 
 @dataclass
-class Method:
+class Model:
+    #: Determines if the system is tranformed into a "standard orientation"
+    #: during the calculations. (Default: "FullSystem") Setting this value to "None"
+    #: prevents any transformation from happening, such that the output is exactly
+    #: aligned with the input.
     standard_orientation: StandardOrientationT | None = None
+
+    #: Determines whether spherical or Cartesian basis sets will be used.
+    #: (Default: "True") Setting this value to "False" could provide speedup or memory
+    #: savings in some cases, but certain features require Cartesian basis sets.
     force_cartesian_basis_sets: bool | None = None
 
-    def to_rex(self, method: MethodT, basis: BasisT, aux_basis: AuxBasisT):
+    def _to_rex(self, method: MethodT, basis: BasisT, aux_basis: AuxBasisT):
         return Template(
-            """Some (exess_rex::Method {
-          method = exess_qmmm_rex::Method::$method,
+            """Some (exess_rex::Model {
+          method = exess_rex::Method::$method,
           basis = "$basis",
           aux_basis = $maybe_aux_basis,
           standard_orientation = $maybe_standard_orientation,
@@ -108,12 +116,22 @@ class Method:
 
 @dataclass
 class System:
+    #: Maximum memory to allocate to the GPU for EXESS's dedicated use.
+    #: Try setting this to limit or increase the memory if EXESS's automatic
+    #: determination of how much to allocate is not working properly
+    #: (and probably file a bug too).
     max_gpu_memory_mb: int | None = None
+
+    #: Allow EXESS to over-allocate memory on GPUs.
     oversubscribe_gpus: bool | None = None
+
+    #: Sets corresponding MPI configuration.
     gpus_per_team: int | None = None
+
+    #: Sets corresponding MPI configuration.
     teams_per_node: int | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_rex::System {
           max_gpu_memory_mb = $maybe_max_gpu_memory_mb,
@@ -144,24 +162,47 @@ type FockBuildTypeT = Literal[
 
 @dataclass
 class SCFKeywords:
+    #: Max SCF iterations performed. Ajust depending on the convergence_threshold chosen.
     max_iters: int = 50
+    #: Use this keyword to control the size of the DIIS extrapolation space, i.e.
+    #: how many past iteration matrices will be used to extrapolate the Fock matrix.
+    #: A larger number will result in slightly higher memory use.
+    #: This can become a problem when dealing with large systems without fragmentation.
     max_diis_history_length: int = 8
+    #: Number of shell pair batches stored in the shell-pair batch bin container.
     batch_size: int = 2560
+    #: Metric to use for SCF convergence. Using energy as the convergence metric can
+    #: lead to early convergence which can produce unideal orbitals for MP2 calculations.
     convergence_metric: ConvergenceMetricT = "DIIS"
+    #: SCF convergence threshold
     convergence_threshold: float = 1e-6
+    #: Besides the Cauchy-Schwarz screening, inside each integral kernel
+    #: the integrals are further screened against the density matrix.
+    #: This threshold controls at which value an integral is considered to be negligible.
+    #: Decreasing this threshold will lead to significantly faster SCF times
+    #: at the possible cost of accuracy.
+    #: Increasing it to 1E-11 and 1E-12 will lead to longer SCF times because
+    #: more integrals will be evaluated. However, for methods such as tetramer level MBE
+    #: this can better the accuracy of the program.
+    #: This will also produce crisper orbitals for MP2 calculations.
     density_threshold: float = 1e-10
+    #: Like the density, the integrals are further screened against the gradient matrix.
     gradient_screening_threshold: float = 1e-10
     bf_cutoff_threshold: float | None = None
+    #: Fall back to STO-3G basis set for calcuulation and project up
+    #: if SCF is unconverged (Default: True)
     density_basis_set_projection_fallback_enabled: bool | None = None
     use_ri: bool = False
     store_ri_b_on_host: bool = False
+    #: Compress the B matrix for RI-HF (Default: False)
     compress_ri_b: bool = False
     homo_lumo_guess_rotation_angle: float | None = None
+    # Select type of fock build algorithm, Options: [“HGP”, “UM09”, “RI”]
     fock_build_type: FockBuildTypeT = "HGP"
     exchange_screening_threshold: float = 1e-5
     group_shared_exponents: bool = False
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_rex::SCFKeywords {
             max_iters = Some $max_iters,
@@ -228,12 +269,23 @@ class FragKeywords:
     NOTE: cutoffs for each level must be less than or equal to those at the lower levels.
     """
 
+    #: Controls at which level the many body expansion is truncated.
+    #: I.e., what order of n-mers to create fragments for when fragmenting.
+    #: Reasonable values range from Dimer to Tetramer, with Dimers being a quick and
+    #: efficient but still meaningful initial configuration when experimenting.
     level: FragmentLevelT = "Dimer"
+    #: The cutoffs control at what distance a polymer won’t be calculated.
+    #: All distances are in Angstroms.
     dimer_cutoff: float | None = None
+    #: See documentation for dimer_cutoff.
     trimer_cutoff: float | None = None
+    #: See documentation for dimer_cutoff.
     tetramer_cutoff: float | None = None
+    #: Default is "ClosestPair", which uses the closest pair of atoms in each fragment
+    #: to assess their distance rather than the distance between fragment centroids.
     cutoff_type: CutoffTypeT | None = None
     distance_metric: DistanceMetricT | None = None
+    #: Calculation will act as if only those fragments were present.
     included_fragments: list[int] | None = None
     enable_speed: bool | None = None
 
@@ -262,7 +314,7 @@ class FragKeywords:
             if self.tetramer_cutoff is None:
                 self.tetramer_cutoff = 10.0
 
-    def to_rex(self, reference_fragment: int | None = None):
+    def _to_rex(self, reference_fragment: int | None = None):
         return Template(
             """Some (exess_rex::FragKeywords {
             cutoffs = Some (exess_rex::FragmentCutoffs {
@@ -300,9 +352,13 @@ class FragKeywords:
 
 @dataclass
 class StandardDescriptorGrid:
+    """
+    Constructs a "standard" descriptor grid.
+    """
+
     value: Literal["SG1", "SG2"]
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (
               exess_rex::DescriptorGridOptions::standard exess_rex::StandardGrid::$value
@@ -314,11 +370,15 @@ class StandardDescriptorGrid:
 
 @dataclass
 class DescriptorGrid:
+    """
+    Constructs a descriptor grid based on the parameters.
+    """
+
     points_per_shell: int
     order: Literal["One", "Two"]
     scale: float
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_rex::DescriptorGridOptions::params (
               exess_rex::Grid {
@@ -336,9 +396,15 @@ class DescriptorGrid:
 
 @dataclass
 class CustomDescriptorGrid:
+    """
+    Construct a totally custom descriptor grid with each point being explicitly
+    specified by its (x, y, z) coordinates. Points are specified one after the other,
+    e.g. [x1, y1, z1, x2, y2, z2, ...].
+    """
+
     value: list[float]
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (
               exess_rex::DescriptorGridOptions::custom $value
@@ -351,68 +417,76 @@ class CustomDescriptorGrid:
 @dataclass
 class ExportKeywords:
     """
-    Configure the exported outputs of the system. Outputs are in both json and hdf5 format (some just one or the other).
+    Configure the exported outputs of the system.
+    Outputs are in both JSON and HDF5 format (some just one or the other).
+    Most outputs are in the HDF5 file only.
     """
 
-    # Electron density
+    #: Electron density
     export_density: bool | None = None
-    # Relaxed MP2 density correction (?)
+    #: Relaxed MP2 density correction (?)
     export_relaxed_mp2_density_correction: bool | None = None
-    # Fock matrix (?)
+    #: Fock matrix (?)
     export_fock: bool | None = None
-    # Overlap matrix (?)
+    #: Overlap matrix (?)
     export_overlap: bool | None = None
-    # H core matrix
+    #: H core matrix
     export_h_core: bool | None = None
-    # Provides the whole density matrix for entire fragment system, rather than per-fragment matrices
+    #: Provides the whole density matrix for entire fragment system,
+    #: rather than per-fragment matrices.
     export_expanded_density: bool | None = None
-    # Provides the whole gradient matrix for entire fragment system, rather than per-fragment matrices
+    #: Provides the whole gradient matrix for entire fragment system,
+    #: rather than per-fragment matrices.
+    #: NOTE: If set, must be performing a gradient calculation.
     export_expanded_gradient: bool | None = None
-    # Fancy...
+    #: Fancy... (?)
     export_molecular_orbital_coeffs: bool | None = None
-    # Energy gradient values (as used in Optimization and QMMM)
+    #: Energy gradient values (as used in Optimization and QMMM).
+    #: NOTE: If set, must be performing a gradient calculation.
     export_gradient: bool | None = None
-    # If external charges are used, export the gradient for these point charges
+    #: If external charges are used, export the gradient for these point charges.
     export_external_charge_gradient: bool | None = None
-    # Mulliken charges for the atoms in the system
+    #: Mulliken charges for the atoms in the system.
     export_mulliken_charges: bool | None = None
-    # ChelpG partial charges for the atoms in the system
+    #: ChelpG partial charges for the atoms in the system.
     export_chelpg_charges: bool | None = None
-    # Believed to be a pass-through from the input connectivity
+    #: Believed to be a pass-through from the input connectivity.
     export_bond_orders: bool | None = None
+    #: The generated hydrogen caps for fragments in fragmented systems.
     export_h_caps: bool | None = None
-    # Derived values from electron density
+    #: Derived values from electron density.
     export_density_descriptors: bool | None = None
-    # Derived values from electrostatic potential
+    #: Derived values from electrostatic potential.
     export_esp_descriptors: bool | None = None
-    # Provides the whole esp descriptor matrix for entire fragment system, rather than per-fragment matrices
+    #: Provides the whole esp descriptor matrix for entire fragment system,
+    #: rather than per-fragment matrices. NOTE: Causes memory errors.
     export_expanded_esp_descriptors: bool | None = None
-    # Provides the basis sets used (?)
+    # Provides the basis sets used (?).
     export_basis_labels: bool | None = None
-    # Hessian tensor
+    # Hessian tensor.
+    #: NOTE: If set, must be performing a Hessian calculation.
     export_hessian: bool | None = None
     # ?
     export_mass_weighted_hessian: bool | None = None
     # ?
     export_hessian_frequencies: bool | None = None
-    # When exporting square symmetric matrices
-    # save memory by exporting the flattened lower triangle of the matrix.
-    # Default should be true.
+    # When exporting square symmetric matrices, save memory by exporting the flattened
+    #: lower triangle of the matrix. (Default: True)
     flatten_symmetric: bool | None = None
     # ?
     light_json: bool | None = None
-    # Post-process exports into a single hdf5 output file.
+    # Post-process exports into a single HDF5 output file.
     # This is relevant for fragmented runs (particularly when configured for multinode).
-    # The concatenation of the hdf5 files may be expensive.
+    # The concatenation of the HDF5 files may be expensive.
     concatenate_hdf5_files: bool | None = None
     # ?
     training_db: bool | None = None
-    # Grid to use for exporting density descriptors
+    # Grid of points at which to calculate and export density descriptors.
     descriptor_grid: (
         StandardDescriptorGrid | DescriptorGrid | CustomDescriptorGrid | None
     ) = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_rex::ExportKeywords {
             export_density = $maybe_export_density,
@@ -483,7 +557,7 @@ class ExportKeywords:
             maybe_concatenate_hdf5_files=optional_str(self.concatenate_hdf5_files),
             maybe_training_db=optional_str(self.training_db),
             maybe_descriptor_grid=(
-                self.descriptor_grid.to_rex()
+                self.descriptor_grid._to_rex()
                 if self.descriptor_grid is not None
                 else "None"
             ),
@@ -496,12 +570,16 @@ class Trajectory:
     Configure the output of QMMM runs. By default, will provide all atoms at every frame.
     """
 
+    #: Save every n frames to the trajectory, where n is the interval specified.
     interval: int | None = None
+    #: The frame at which to start the trajectory.
     start: int | None = None
+    #: The frame at which to end the trajectory.
     end: int | None = None
+    #: Whether to include waters in the trajectory. Convenient for reducing output size.
     include_waters: int | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_qmmm_rex::MDTrajectory {
               format = None,
@@ -527,14 +605,20 @@ class Restraints:
     All atoms can be fixed by specifying `free_atoms = []`.
     """
 
+    #: Scaling factor for restraints (larger values mean a stronger restraint).
     k: float | None = None
+    #: Which atoms to hold fixed. All fixed/free parameters are mutually exclusive.
     fixed_atoms: list[int] | None = None
+    #: Which atoms to keep unfixed. All fixed/free parameters are mutually exclusive.
     free_atoms: list[int] | None = None
+    #: Which fragments to hold fixed. All fixed/free parameters are mutually exclusive.
     fixed_fragments: list[int] | None = None
+    #: Which fragments to keep unfixed. All fixed/free parameters are mutually exclusive.
     free_fragments: list[int] | None = None
+    #: Flag to easily enable fixing all heavy atoms only. Mutually exclusive with fixed/free parameters.
     fix_heavy: bool | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """Some (exess_rex::Restraints {
               k = $maybe_k,

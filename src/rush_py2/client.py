@@ -70,6 +70,13 @@ MODULE_LOCK = (
 
 @dataclass
 class RushOpts:
+    """
+    Options to configure rush-py. Can be set through the `set_opts` function.
+    """
+
+    #: The directory where the workspace resides. (Default: current working directory)
+    #: The history JSON file will be written here and the
+    #: run outputs will be downloaded here (nested under a project folder).
     workspace_dir: Path = Path.cwd()
 
 
@@ -86,6 +93,9 @@ def _get_opts() -> RushOpts:
 
 
 def set_opts(workspace_dir: Path | None = None):
+    """
+    Sets Rush options. Currently, only allows setting the workspace directory.
+    """
     opts = _get_opts()
     if workspace_dir is not None:
         opts.workspace_dir = workspace_dir
@@ -115,15 +125,28 @@ type StorageUnitT = Literal["KB", "MB", "GB"]
 
 @dataclass
 class RunSpec:
+    """
+    The run specification: configuration for the target and resources of a run.
+    """
+
+    #: The Rush-specified hardware that the run will be submitted to.
+    #: By default, randomly chooses a cloud compute "Bullet" node of the three available.
     target: TargetT | None = None
+    #: Max walltime in minutes for the run.
     walltime: int | None = None
+    #: Max storage in the specified storage units for the run.
     storage: int | None = 10
+    #: The storage units for the run.
     storage_units: StorageUnitT | None = "MB"
+    #: The number of CPUs for the run. Default is module-specific.
     cpus: int | None = None
+    #: The number of GPUs for the run. Default is module-specific.
     gpus: int | None = None
+    #: The number of nodes for the run. Only relevant for supercomputer targets.
+    #: Default is module-specific.
     nodes: int | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """RunSpec {
         resources = Resources {
@@ -156,12 +179,12 @@ class RunSpec:
 @dataclass
 class RunOpts:
     """
-    The name of the run will show up as the name (i.e. title) of the run in the Rush UI.
     The description currently doesn't show up anywhere.
     The tags will also show up in the Rush UI and will (eventually) allow for run searching and filtering.
     The email flag, if set to True, will cause an email to be sent to you upon run completion.
     """
 
+    #: Shows up as the name (i.e. title) of the run in the Rush UI.
     name: str | None = None
     description: str | None = None
     tags: list[str] | None = None
