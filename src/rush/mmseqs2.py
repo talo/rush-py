@@ -3,7 +3,6 @@ import sys
 from string import Template
 from typing import Literal
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
@@ -66,7 +65,3 @@ mmseqs2_rex_s
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_mmseqs2():
-    cyclopts.run(mmseqs2)

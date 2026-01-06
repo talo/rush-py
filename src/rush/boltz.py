@@ -6,7 +6,6 @@ from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from rush.convert.json import to_json
@@ -193,7 +192,3 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_boltz():
-    cyclopts.run(boltz)

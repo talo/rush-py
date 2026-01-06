@@ -12,15 +12,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
-    collect_run,
     _submit_rex,
+    collect_run,
     upload_object,
 )
 from .utils import optional_str
@@ -92,7 +91,3 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_nnxtb():
-    cyclopts.run(nnxtb)

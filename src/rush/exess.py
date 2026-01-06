@@ -17,7 +17,6 @@ from pathlib import Path
 from string import Template
 from typing import Literal
 
-import cyclopts
 import h5py
 import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
@@ -1528,26 +1527,6 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_energy():
-    cyclopts.run(energy)
-
-
-def run_interaction_energy():
-    cyclopts.run(interaction_energy)
-
-
-def run_chelpg():
-    cyclopts.run(chelpg)
-
-
-def run_qmmm():
-    cyclopts.run(qmmm)
-
-
-def run_optimization():
-    cyclopts.run(optimization)
 
 
 # TODO:

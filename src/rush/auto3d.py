@@ -68,7 +68,10 @@ def auto3d(
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
-    """Blah blah"""
+    """
+    Runs Auto3D on a list of SMILES strings, returning either the TRC structure
+    or an error string.
+    """
     rex = Template("""let
   auto3d = λ smis →
     try_auto3d_rex

@@ -15,16 +15,15 @@ from string import Template
 from tempfile import NamedTemporaryFile
 from typing import Literal
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
     save_object,
-    _submit_rex,
     upload_object,
 )
 from .convert import from_pdb, to_json
@@ -121,7 +120,3 @@ def save_outputs(res):
         save_object(res[1]["path"]),
         save_object(res[2]["path"]),
     )
-
-
-def run_prepare_protein():
-    cyclopts.run(prepare_protein)

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
@@ -102,7 +101,3 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_pbsa():
-    cyclopts.run(pbsa)

@@ -8,7 +8,6 @@ authors = [
   { name = "Sean Laguna", email = "seanlaguna@qdx.co" },
 ]
 dependencies = [
-  "cyclopts~=4.2",
   "gql~=4.0",
   "h5py~=3.14",
   "rdkit~=2025.9.2",
@@ -28,13 +27,6 @@ dev = [
   "shibuya>=2025.12.19",
   "myst-parser>=4.0.1",
 ]
-
-[project.scripts]
-rush-exess-energy = "rush.exess:run_energy"
-rush-exess-interaction-energy = "rush.exess:run_interaction_energy"
-rush-exess-chelpg = "rush.exess:run_chelpg"
-rush-exess-qmmm = "rush.exess:run_qmmm"
-rush-exess-optimization = "rush.exess:run_optimization"
 
 [tool.pyright]
 exclude = [
