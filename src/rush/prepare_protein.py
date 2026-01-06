@@ -7,6 +7,7 @@ to TRC, protonating and optimizing hydrogen positions, and augmenting
 structures with connectivity and formal charge information before downstream
 calculations.
 """
+
 import json
 import sys
 from pathlib import Path

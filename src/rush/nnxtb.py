@@ -6,6 +6,7 @@ NN-xTB provides xTB reparameterized by a neural network to reach higher accuracy
 while remaining fast. It can compute total energy, per-atom forces, and
 vibrational frequencies, and supports arbitrary charge and spin states.
 """
+
 import sys
 from dataclasses import dataclass
 from pathlib import Path

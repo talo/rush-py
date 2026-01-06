@@ -3,7 +3,6 @@ mmCIF file parsing functionality.
 """
 
 from collections import OrderedDict, defaultdict
-from typing import Dict, List, Optional, Tuple
 
 from ..mol import (
     TRC,
@@ -34,8 +33,8 @@ def _parse_mmcif_value(value: str) -> str:
 
 
 def _parse_mmcif_loop(
-    lines: List[str], start_idx: int, prefix: str
-) -> Tuple[Optional[Tuple[List[str], List[List[str]]]], int]:
+    lines: list[str], start_idx: int, prefix: str
+) -> tuple[tuple[list[str], list[list[str]]] | None, int]:
     """
     Parse an mmCIF loop starting at start_idx.
 
@@ -147,9 +146,9 @@ def _parse_mmcif_loop(
 
 
 def _build_trc_from_mmcif_atoms(
-    atoms: List[Dict],
-    struct_conn_data: Optional[Tuple[List[str], List[List[str]]]],
-    comp_bond_data: Optional[Tuple[List[str], List[List[str]]]],
+    atoms: list[dict],
+    struct_conn_data: tuple[list[str], list[list[str]]] | None,
+    comp_bond_data: tuple[list[str], list[list[str]]] | None,
 ) -> TRC:
     """Build a TRC from parsed mmCIF atoms."""
     trc = TRC()
@@ -424,7 +423,7 @@ def _build_trc_from_mmcif_atoms(
     return trc
 
 
-def from_mmcif(mmcif_content: str) -> List[TRC]:
+def from_mmcif(mmcif_content: str) -> TRC | list[TRC]:
     """
     Parse mmCIF file contents into TRC structures.
 
@@ -432,7 +431,7 @@ def from_mmcif(mmcif_content: str) -> List[TRC]:
         mmcif_content: String contents of an mmCIF file
 
     Returns:
-        List of TRC structures
+        TRC structure or list of TRC structures
     """
     lines = mmcif_content.split("\n")
     trcs = []
@@ -499,7 +498,7 @@ def from_mmcif(mmcif_content: str) -> List[TRC]:
                 return val if val else default
             return default
 
-        def get_int(name: str, default: int = 0) -> Optional[int]:
+        def get_int(name: str, default: int = 0) -> int | None:
             val = get_val(name)
             if not val:
                 return None
@@ -564,4 +563,6 @@ def from_mmcif(mmcif_content: str) -> List[TRC]:
         empty_trc.chains.labels = []
         trcs.append(empty_trc)
 
+    if len(trcs) == 1:
+        return trcs[0]
     return trcs

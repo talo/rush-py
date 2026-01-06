@@ -295,7 +295,7 @@ class Topology:
         elif isinstance(json_content, dict):
             topology_data = json_content
         else:
-            println(
+            print(
                 "WARNING: Tried to load Topology from JSON but "
                 "it wasn't a str, Path, or dict!"
             )
@@ -786,7 +786,7 @@ class Residues:
         elif isinstance(json_content, dict):
             residues_data = json_content
         else:
-            println(
+            print(
                 "WARNING: Tried to load Residues from JSON but "
                 "it wasn't a str, Path, or dict!"
             )
@@ -935,7 +935,7 @@ class Chains:
         elif isinstance(json_content, dict):
             chains_data = json_content
         else:
-            println(
+            print(
                 "WARNING: Tried to load Chains from JSON but "
                 "it wasn't a str, Path, or dict!"
             )

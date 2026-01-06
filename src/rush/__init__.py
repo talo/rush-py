@@ -3,7 +3,6 @@ Python library for accessing and writing computational chemistry workflows with
 the Rush platform.
 """
 
-from . import auto3d
 from .convert import (
     from_json,
     from_mmcif,

@@ -5,14 +5,17 @@ Converts SDF (Structure Data File) format to TRC (Topology-Residues-Chains) JSON
 Supports SDF V2000 format.
 """
 
-import json
-from typing import List, Dict, Any, Optional, Tuple
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+from typing import Any
+
+from ..mol import TRC
+from .json import from_json, to_json
 
 
 class SDFParseState(Enum):
     """Parser state machine states."""
+
     HEADER_BLOCK = "HeaderBlock"
     COUNTS_LINE = "CountsLine"
     ATOM_BLOCK = "AtomBlock"
@@ -24,6 +27,7 @@ class SDFParseState(Enum):
 
 class SDFPropertyType(Enum):
     """SDF property types."""
+
     CHARGE = "CHG"
     END = "END"
     UNK = "Unk"
@@ -36,7 +40,7 @@ SDF_BOND_TYPES = [1, 2, 3, 4]
 CURRENT_SCHEMA_VERSION = "0.2.0"
 
 
-def charge_field_to_charge(c: int) -> Optional[int]:
+def _charge_field_to_charge(c: int) -> int | None:
     """Convert SDF charge field to actual charge value."""
     charge_map = {
         0: 0,
@@ -50,17 +54,17 @@ def charge_field_to_charge(c: int) -> Optional[int]:
     return charge_map.get(c)
 
 
-def bond_order_from_sdf(order: int) -> int:
+def _bond_order_from_sdf(order: int) -> int:
     """Convert SDF bond type to bond order (1=single, 2=double, 3=triple, 4=ring)."""
     if order in SDF_BOND_TYPES:
         return order
     raise ValueError(f"Invalid bond type: {order}")
 
 
-def parse_sdf_entry(content: str) -> Dict[str, Any]:
+def _parse_sdf_entry(sdf_content: str) -> dict[str, Any]:
     """
     Parse a single SDF entry into a molecule dictionary.
-    
+
     SDF V2000 format:
     - Line 1: Molecule name
     - Line 2: User/Program name
@@ -74,27 +78,27 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
     """
     state = SDFParseState.HEADER_BLOCK
     seen_chg_property = False
-    
+
     molecule = {
         "name": "",
         "atoms": [],
         "bonds": [],
         "associated_data": [],
     }
-    
-    lines = content.split('\n')
+
+    lines = sdf_content.split("\n")
     line_number = 0
     i = 0
-    
+
     while i < len(lines):
         line = lines[i]
         line_number = i + 1
-        
+
         # Skip empty lines (except in header block)
         if not line.strip() and state != SDFParseState.HEADER_BLOCK:
             i += 1
             continue
-        
+
         if state == SDFParseState.HEADER_BLOCK:
             molecule["name"] = line.strip()
             # Skip next two lines (user/program and comment)
@@ -103,37 +107,37 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
             i += 3  # Skip header + 2 comment lines
             state = SDFParseState.COUNTS_LINE
             continue
-            
+
         elif state == SDFParseState.COUNTS_LINE:
             if "V3000" in line:
                 raise ValueError(f"Line {line_number}: V3000 format not supported")
-            
+
             if len(line) < 6:
                 raise ValueError(f"Line {line_number}: Counts line too short")
-            
+
             try:
                 num_atoms = int(line[:3].strip())
                 num_bonds = int(line[3:6].strip())
             except ValueError as e:
                 raise ValueError(f"Line {line_number}: Could not parse counts: {e}")
-            
+
             molecule["atoms"] = []
             molecule["bonds"] = []
-            
+
             state = SDFParseState.ATOM_BLOCK
             i += 1
             continue
-            
+
         elif state == SDFParseState.ATOM_BLOCK:
             if len(line) < 39:
                 raise ValueError(f"Line {line_number}: Atom line too short")
-            
+
             try:
                 x = float(line[0:10].strip())
                 y = float(line[10:20].strip())
                 z = float(line[20:30].strip())
                 symbol = line[30:33].strip()
-                
+
                 # Mass difference (optional, at position 33-35)
                 # TODO: never used
                 _mass_diff = 0
@@ -142,44 +146,48 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
                         _mass_diff = int(line[33:35].strip() or "0")
                     except ValueError:
                         pass
-                
+
                 # Charge (at position 36-39, but SDF uses special encoding)
                 charge = 0
                 if len(line) >= 39:
                     try:
                         charge_field = int(line[36:39].strip() or "0")
-                        charge = charge_field_to_charge(charge_field)
+                        charge = _charge_field_to_charge(charge_field)
                         if charge is None:
                             charge = 0
                     except ValueError:
                         charge = 0
-                
-                molecule["atoms"].append({
-                    "x": x,
-                    "y": y,
-                    "z": z,
-                    "symbol": symbol,
-                    "charge": charge,
-                })
-                
+
+                molecule["atoms"].append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "z": z,
+                        "symbol": symbol,
+                        "charge": charge,
+                    }
+                )
+
                 if len(molecule["atoms"]) >= num_atoms:
                     if num_bonds == 0:
                         state = SDFParseState.PROPERTIES_BLOCK
                     else:
                         state = SDFParseState.BOND_BLOCK
-                        
+
             except (ValueError, IndexError) as e:
                 raise ValueError(f"Line {line_number}: Could not parse atom: {e}")
-            
+
             i += 1
             continue
-            
+
         elif state == SDFParseState.BOND_BLOCK:
             if len(line) < 9:
                 raise ValueError(f"Line {line_number}: Bond line too short")
-            
+
             try:
-                atom1 = int(line[0:3].strip()) - 1  # SDF is 1-indexed, convert to 0-indexed
+                atom1 = (
+                    int(line[0:3].strip()) - 1
+                )  # SDF is 1-indexed, convert to 0-indexed
                 atom2 = int(line[3:6].strip()) - 1
                 bond_type = int(line[6:9].strip())
                 bond_stereo = 0
@@ -188,26 +196,30 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
                         bond_stereo = int(line[9:12].strip() or "0")
                     except ValueError:
                         pass
-                
+
                 if bond_type not in SDF_BOND_TYPES:
-                    raise ValueError(f"Line {line_number}: Invalid bond type: {bond_type}")
-                
-                molecule["bonds"].append({
-                    "atom1": atom1,
-                    "atom2": atom2,
-                    "bond_type": bond_type,
-                    "bond_stereo": bond_stereo,
-                })
-                
+                    raise ValueError(
+                        f"Line {line_number}: Invalid bond type: {bond_type}"
+                    )
+
+                molecule["bonds"].append(
+                    {
+                        "atom1": atom1,
+                        "atom2": atom2,
+                        "bond_type": bond_type,
+                        "bond_stereo": bond_stereo,
+                    }
+                )
+
                 if len(molecule["bonds"]) >= num_bonds:
                     state = SDFParseState.PROPERTIES_BLOCK
-                    
+
             except (ValueError, IndexError) as e:
                 raise ValueError(f"Line {line_number}: Could not parse bond: {e}")
-            
+
             i += 1
             continue
-            
+
         elif state == SDFParseState.PROPERTIES_BLOCK:
             if len(line) < 6:
                 # Might be empty line or start of data items
@@ -218,7 +230,7 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
                 else:
                     state = SDFParseState.DATA_ITEMS
                     continue
-            
+
             try:
                 prop_type_str = line[3:6].strip()
                 if prop_type_str == "CHG":
@@ -227,68 +239,76 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
                     prop_type = SDFPropertyType.END
                 else:
                     prop_type = SDFPropertyType.UNK
-                
+
                 if prop_type == SDFPropertyType.CHARGE:
                     if not seen_chg_property:
                         # Reset all charges to 0
                         for atom in molecule["atoms"]:
                             atom["charge"] = 0
                         seen_chg_property = True
-                    
+
                     # Parse charge count (position 6-8 or 6-9)
                     count_end = 9 if len(line) > 8 and line[8:9].strip() else 8
                     if len(line) < count_end:
                         raise ValueError(f"Line {line_number}: CHG line too short")
-                    
+
                     count = int(line[6:count_end].strip())
-                    
+
                     # Parse charge entries
                     for j in range(count):
                         i += 1
                         if i >= len(lines):
-                            raise ValueError(f"Line {line_number}: Unexpected end of file in CHG block")
+                            raise ValueError(
+                                f"Line {line_number}: Unexpected end of file in CHG block"
+                            )
                         chg_line = lines[i]
                         if len(chg_line) < 12:
-                            raise ValueError(f"Line {i+1}: CHG entry line too short")
-                        
-                        atom_idx = int(chg_line[0:3].strip()) - 1  # 1-indexed to 0-indexed
+                            raise ValueError(f"Line {i + 1}: CHG entry line too short")
+
+                        atom_idx = (
+                            int(chg_line[0:3].strip()) - 1
+                        )  # 1-indexed to 0-indexed
                         charge = int(chg_line[3:6].strip())
-                        
+
                         if atom_idx < 0 or atom_idx >= len(molecule["atoms"]):
-                            raise ValueError(f"Line {i+1}: CHG atom index out of range: {atom_idx}")
+                            raise ValueError(
+                                f"Line {i + 1}: CHG atom index out of range: {atom_idx}"
+                            )
                         if charge < -3 or charge > 3:
-                            raise ValueError(f"Line {i+1}: CHG charge out of range: {charge}")
-                        
+                            raise ValueError(
+                                f"Line {i + 1}: CHG charge out of range: {charge}"
+                            )
+
                         molecule["atoms"][atom_idx]["charge"] = charge
-                        
+
                 elif prop_type == SDFPropertyType.END:
                     state = SDFParseState.DATA_ITEMS
-                    
+
             except (ValueError, IndexError):
                 # If we can't parse as property, assume we're in data items
                 state = SDFParseState.DATA_ITEMS
                 continue
-            
+
             i += 1
             continue
-            
+
         elif state == SDFParseState.DATA_ITEMS:
             if line.strip() == "$$$$":
                 # Terminator found
                 break
-            
-            if line.startswith('>'):
+
+            if line.startswith(">"):
                 # Data item key
-                start = line.find('<')
+                start = line.find("<")
                 if start == -1:
                     raise ValueError(f"Line {line_number}: Invalid data item format")
-                end = line.find('>', start)
+                end = line.find(">", start)
                 if end == -1:
                     raise ValueError(f"Line {line_number}: Invalid data item format")
-                
-                key = line[start + 1:end]
+
+                key = line[start + 1 : end]
                 data = []
-                
+
                 # Read data until empty line
                 i += 1
                 while i < len(lines):
@@ -297,22 +317,22 @@ def parse_sdf_entry(content: str) -> Dict[str, Any]:
                         break
                     data.append(data_line)
                     i += 1
-                
-                molecule["associated_data"].append((key, '\n'.join(data)))
+
+                molecule["associated_data"].append((key, "\n".join(data)))
                 continue
-            
+
             i += 1
             continue
-    
+
     return molecule
 
 
-def sdf_entries(content: str) -> List[Tuple[int, str]]:
+def _sdf_entries(sdf_content: str) -> list[tuple[int, str]]:
     """Split SDF content into individual entries (separated by $$$$)."""
     entries = []
-    tail = content
+    tail = sdf_content
     current_line_number = 1
-    
+
     while True:
         terminator_pos = tail.find("\n$$$$")
         if terminator_pos == -1:
@@ -320,30 +340,35 @@ def sdf_entries(content: str) -> List[Tuple[int, str]]:
             if tail.strip().endswith("$$$$"):
                 entries.append((current_line_number, tail))
             else:
-                raise ValueError(f"Line {current_line_number}: Missing SDF terminator ($$$$)")
+                raise ValueError(
+                    f"Line {current_line_number}: Missing SDF terminator ($$$$)"
+                )
             break
-        
+
         offset_after_terminator = terminator_pos + 5
         if len(tail) == offset_after_terminator:
             entries.append((current_line_number, tail))
             break
-        elif len(tail) > offset_after_terminator and tail[offset_after_terminator] != '\n':
+        elif (
+            len(tail) > offset_after_terminator
+            and tail[offset_after_terminator] != "\n"
+        ):
             raise ValueError(f"Line {current_line_number}: Invalid terminator format")
         else:
-            entry = tail[:terminator_pos + 6]  # Include \n$$$$
-            tail = tail[terminator_pos + 6:]
+            entry = tail[: terminator_pos + 6]  # Include \n$$$$
+            tail = tail[terminator_pos + 6 :]
             entries.append((current_line_number, entry))
-            current_line_number += entry.count('\n')
+            current_line_number += entry.count("\n")
             if not tail.strip():
                 break
-    
+
     return entries
 
 
-def molecule_to_trc(molecule: Dict[str, Any]) -> Dict[str, Any]:
+def _molecule_to_trc(molecule: dict[str, Any]) -> dict[str, Any]:
     """
     Convert a parsed molecule to TRC format.
-    
+
     Creates a TRC with:
     - Single residue containing all atoms
     - Residue name from molecule name (or "LIG" if empty)
@@ -353,37 +378,37 @@ def molecule_to_trc(molecule: Dict[str, Any]) -> Dict[str, Any]:
     """
     # Use molecule name or default to "LIG"
     residue_name = molecule["name"].strip() or "LIG"
-    
+
     # Create residues: single residue with all atoms
     num_atoms = len(molecule["atoms"])
     residues_list = [list(range(num_atoms))]  # All atoms in one residue
-    
+
     # Create topology
     symbols = [atom["symbol"] for atom in molecule["atoms"]]
     geometry = []
     for atom in molecule["atoms"]:
         geometry.extend([float(atom["x"]), float(atom["y"]), float(atom["z"])])
-    
+
     # Formal charges
     formal_charges = [atom["charge"] for atom in molecule["atoms"]]
-    
+
     # Connectivity (bonds)
     connectivity = []
     for bond in molecule["bonds"]:
         atom1 = bond["atom1"]
         atom2 = bond["atom2"]
-        bond_order = bond_order_from_sdf(bond["bond_type"])
+        bond_order = _bond_order_from_sdf(bond["bond_type"])
         # Ensure atom1 < atom2 (canonical ordering)
         if atom1 > atom2:
             atom1, atom2 = atom2, atom1
         connectivity.append([atom1, atom2, bond_order])
-    
+
     # Fragments: single fragment with all atoms
     fragments = [list(range(num_atoms))]
-    
+
     # Fragment formal charge: sum of all atom charges
     fragment_formal_charge = sum(atom["charge"] for atom in molecule["atoms"])
-    
+
     # Build TRC structure
     trc = {
         "topology": {
@@ -417,48 +442,52 @@ def molecule_to_trc(molecule: Dict[str, Any]) -> Dict[str, Any]:
             "labels": None,
         },
     }
-    
+
     return trc
 
 
-def from_sdf(content: str) -> List[Dict[str, Any]]:
+def from_sdf(sdf_content: str) -> TRC | list[TRC]:
     """
-    Convert SDF content to a list of TRC dictionaries.
-    
+    Convert SDF content to TRC structures.
+
     Args:
-        content: SDF file content as string
-    
+        sdf_content: SDF file content as string
+
     Returns:
-        List of TRC dictionaries (one per molecule in the SDF file)
-    
+        TRC structure or list of TRC structures (one per molecule in the SDF file)
+
     Raises:
         ValueError: If SDF parsing fails
     """
-    entries = sdf_entries(content)
-    trcs = []
-    
+    entries = _sdf_entries(sdf_content)
+    trcs: list[TRC] = []
+
     for line_number, entry in entries:
         try:
-            molecule = parse_sdf_entry(entry)
-            trc = molecule_to_trc(molecule)
-            trcs.append(trc)
+            molecule = _parse_sdf_entry(entry)
+            trc_dict = _molecule_to_trc(molecule)
+            trcs.append(from_json(trc_dict))
         except Exception as e:
-            raise ValueError(f"Error parsing SDF entry starting at line {line_number}: {e}")
-    
+            raise ValueError(
+                f"Error parsing SDF entry starting at line {line_number}: {e}"
+            )
+
+    if len(trcs) == 1:
+        return trcs[0]
     return trcs
 
 
-def from_sdf_file(input_file: str, output_file: Optional[str] = None) -> List[Dict[str, Any]]:
+def from_sdf_file(input_file: str, output_file: str | None = None) -> TRC | list[TRC]:
     """
     Read SDF file and convert to TRC JSON.
-    
+
     Args:
         input_file: Path to input SDF file
         output_file: Optional path to output JSON file. If None, only returns the result.
-    
+
     Returns:
-        List of TRC dictionaries
-    
+        TRC structure or list of TRC structures
+
     Raises:
         FileNotFoundError: If input file doesn't exist
         ValueError: If SDF parsing fails
@@ -466,45 +495,35 @@ def from_sdf_file(input_file: str, output_file: Optional[str] = None) -> List[Di
     path = Path(input_file)
     if not path.exists():
         raise FileNotFoundError(f"SDF file not found: {input_file}")
-    
-    with open(path, 'r') as f:
-        content = f.read()
-    
-    trcs = from_sdf(content)
-    
+
+    with open(path, "r") as f:
+        sdf_content = f.read()
+
+    trcs = from_sdf(sdf_content)
+
     if output_file:
         output_path = Path(output_file)
-        with open(output_path, 'w') as f:
-            if len(trcs) == 1:
-                json.dump(trcs[0], f, indent=2)
-            else:
-                json.dump(trcs, f, indent=2)
-    
+        with output_path.open("w") as f:
+            f.write(to_json(trcs))
+
     return trcs
 
 
 # Command-line interface
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Convert SDF file to TRC JSON file")
-    parser.add_argument(
-        "--input",
-        required=True,
-        help="Input SDF file"
-    )
-    parser.add_argument(
-        "--output",
-        required=True,
-        help="Output TRC JSON file"
-    )
-    
+    parser.add_argument("--input", required=True, help="Input SDF file")
+    parser.add_argument("--output", required=True, help="Output TRC JSON file")
+
     args = parser.parse_args()
-    
+
     trcs = from_sdf_file(args.input, args.output)
-    
-    if len(trcs) == 1:
+
+    if isinstance(trcs, TRC):
         print(f"Successfully converted SDF to TRC: {args.output}")
     else:
-        print(f"Successfully converted {len(trcs)} molecules from SDF to TRC: {args.output}")
-
+        print(
+            f"Successfully converted {len(trcs)} molecules from SDF to TRC: {args.output}"
+        )

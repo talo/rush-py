@@ -1,27 +1,19 @@
 #!/usr/bin/env python3
-import json
 import sys
-from dataclasses import dataclass
-from pathlib import Path
 from string import Template
-from tempfile import NamedTemporaryFile
 from typing import Literal
 
 import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
-from rush.convert.json import to_json
-from rush.convert.pdb import from_pdb
-
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
-    collect_run,
     _submit_rex,
-    upload_object,
+    collect_run,
 )
-from .utils import dict_to_vec_of_tuples_str, optional_str
+from .utils import optional_str
 
 
 def mmseqs2(
