@@ -1,5 +1,4 @@
 import sys
-from dataclasses import dataclass
 from string import Template
 
 from gql.transport.exceptions import TransportQueryError
@@ -14,22 +13,31 @@ from rush.client import (
 from rush.utils import bool_to_str, float_to_str
 
 
-@dataclass
-class Auto3DOptions:
-    k: int = 1
-    batchsize_atoms: int = 1024
-    capacity: int = 40
-    convergence_threshold: float = 0.003
-    enumerate_isomer: bool = True
-    enumerate_tautomer: bool = False
-    max_confs: int | None = None
-    opt_steps: int = 5000
-    patience: int = 1000
-    threshold: float = 0.3
-
-    def _to_rex(self, reference_fragment: int | None = None):
-        return Template(
-            """(auto3d_rex::Auto3dOptions {
+def auto3d(
+    smis: list[str],
+    k: int = 1,
+    batchsize_atoms: int = 1024,
+    capacity: int = 40,
+    convergence_threshold: float = 0.003,
+    enumerate_isomer: bool = True,
+    enumerate_tautomer: bool = False,
+    max_confs: int | None = None,
+    opt_steps: int = 5000,
+    patience: int = 1000,
+    threshold: float = 0.3,
+    run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+    collect=False,
+):
+    """
+    Runs Auto3D on a list of SMILES strings, returning either the TRC structure
+    or an error string.
+    """
+    rex = Template("""let
+  auto3d = λ smis →
+    try_auto3d_rex
+      default_runspec_gpu
+      (auto3d_rex::Auto3dOptions {
         k = Some (int $k),
         batchsize_atoms = Some $batchsize_atoms,
         capacity = Some $capacity,
@@ -46,43 +54,22 @@ class Auto3DOptions:
         threshold = Some $threshold,
         verbose = Some false,
         window = None,
-      })"""
-        ).substitute(
-            k=self.k,
-            batchsize_atoms=self.batchsize_atoms,
-            capacity=self.capacity,
-            convergence_threshold=float_to_str(self.convergence_threshold),
-            enumerate_isomer=bool_to_str(self.enumerate_isomer),
-            enumerate_tautomer=bool_to_str(self.enumerate_tautomer),
-            max_confs=self.max_confs,
-            opt_steps=self.opt_steps,
-            patience=self.patience,
-            threshold=float_to_str(self.threshold),
-        )
-
-
-def auto3d(
-    smis: list[str],
-    opts: Auto3DOptions = Auto3DOptions(),
-    run_spec: RunSpec = RunSpec(),
-    run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
-    """
-    Runs Auto3D on a list of SMILES strings, returning either the TRC structure
-    or an error string.
-    """
-    rex = Template("""let
-  auto3d = λ smis →
-    try_auto3d_rex
-      default_runspec_gpu
-      $opts
+      })
       $smis
 in
   auto3d $smis
 """).substitute(
         smis=f"[{', '.join([f'"{smi}"' for smi in smis])}]",
-        opts=opts._to_rex(),
+        k=k,
+        batchsize_atoms=batchsize_atoms,
+        capacity=capacity,
+        convergence_threshold=float_to_str(convergence_threshold),
+        enumerate_isomer=bool_to_str(enumerate_isomer),
+        enumerate_tautomer=bool_to_str(enumerate_tautomer),
+        max_confs=max_confs,
+        opt_steps=opt_steps,
+        patience=patience,
+        threshold=float_to_str(threshold),
         run_spec=run_spec._to_rex(),
     )
     try:
