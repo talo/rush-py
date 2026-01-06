@@ -56,3 +56,7 @@ client.set_opts(workspace_dir=Path("/path/to/desired/workspace/folder/"))
 ## Opening Issues
 
 If you find that any Rush module's Python submodule doesn't abide by these design criteria or behaves in an unexpected way, please file a bug report by [opening an issue](https://github.com/talo/rush-py/issues/new)!
+
+## Submitting Bug Reports and Feedback
+
+If you want to submit bug reports or give us any feedback for any part of rush, you can use [this form](https://forms.gle/1DPWK91utzJ6SED47) as well!
