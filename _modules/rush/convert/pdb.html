@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rush.convert.pdb - rush documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/shibuya.css?v=a318c5d4" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="rush.convert.pdb"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../index.html">
+      
+      
+      <strong>rush</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/02-first-run.html">Doing Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/03-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/04-helpers-and-trc-files.html">Helpers and TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/05-hardware.html">Hardware</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.client.html">rush.client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.mol.html">rush.mol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.convert.html">rush.convert</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../rush.convert.json.html">rush.convert.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rush.convert.mmcif.html">rush.convert.mmcif</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rush.convert.pdb.html">rush.convert.pdb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rush.convert.sdf.html">rush.convert.sdf</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.prepare_protein.html">Prepare Protein</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.prepare_complex.html">Prepare Complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">rush</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">Module code</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../convert.html"><span itemprop="name">rush.convert</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">rush.convert.pdb</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <h1>Source code for rush.convert.pdb</h1><div class="highlight"><pre>
+<span></span><span data-line="1"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="2"><span class="sd">PDB file parsing and writing functionality.</span>
+</span><span data-line="3"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">defaultdict</span>
+</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="kn">from</span><span class="w"> </span><span class="nn">..mol</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="11">    <span class="n">TRC</span><span class="p">,</span>
+</span><span data-line="12">    <span class="n">AminoAcidSeq</span><span class="p">,</span>
+</span><span data-line="13">    <span class="n">AtomRef</span><span class="p">,</span>
+</span><span data-line="14">    <span class="n">Bond</span><span class="p">,</span>
+</span><span data-line="15">    <span class="n">BondOrder</span><span class="p">,</span>
+</span><span data-line="16">    <span class="n">Chain</span><span class="p">,</span>
+</span><span data-line="17">    <span class="n">ChainRef</span><span class="p">,</span>
+</span><span data-line="18">    <span class="n">Element</span><span class="p">,</span>
+</span><span data-line="19">    <span class="n">FormalCharge</span><span class="p">,</span>
+</span><span data-line="20">    <span class="n">Fragment</span><span class="p">,</span>
+</span><span data-line="21">    <span class="n">Residue</span><span class="p">,</span>
+</span><span data-line="22">    <span class="n">ResidueId</span><span class="p">,</span>
+</span><span data-line="23">    <span class="n">ResidueRef</span><span class="p">,</span>
+</span><span data-line="24"><span class="p">)</span>
+</span><span data-line="25">
+</span><span data-line="26">
+<div class="viewcode-block" id="PDBAtom">
+<a class="viewcode-back" href="../../../rush.convert.pdb.html#rush.convert.PDBAtom">[docs]</a>
+</span><span data-line="27"><span class="nd">@dataclass</span>
+</span><span data-line="28"><span class="k">class</span><span class="w"> </span><span class="nc">PDBAtom</span><span class="p">:</span>
+</span><span data-line="29"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a parsed PDB ATOM/HETATM record.&quot;&quot;&quot;</span>
+</span><span data-line="30">
+</span><span data-line="31">    <span class="n">atom_idx</span><span class="p">:</span> <span class="nb">int</span>
+</span><span data-line="32">    <span class="n">atom_name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="33">    <span class="n">alternate_location</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="34">    <span class="n">residue_name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="35">    <span class="n">chain_id</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="36">    <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span>
+</span><span data-line="37">    <span class="n">residue_insertion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="38">    <span class="n">atom_x</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="39">    <span class="n">atom_y</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="40">    <span class="n">atom_z</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="41">    <span class="n">occupancy</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="42">    <span class="n">temperature_factor</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="43">    <span class="n">segment_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="44">    <span class="n">element_symbol</span><span class="p">:</span> <span class="n">Element</span>
+</span><span data-line="45">    <span class="n">charge</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span></div>
+
+</span><span data-line="46">
+</span><span data-line="47">
+</span><span data-line="48"><span class="k">def</span><span class="w"> </span><span class="nf">_parse_pdb_atom_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">line_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PDBAtom</span><span class="p">:</span>
+</span><span data-line="49"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a PDB ATOM or HETATM line.&quot;&quot;&quot;</span>
+</span><span data-line="50">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">54</span><span class="p">:</span>
+</span><span data-line="51">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line_num</span><span class="si">}</span><span class="s2">: ATOM/HETATM line too short&quot;</span><span class="p">)</span>
+</span><span data-line="52">
+</span><span data-line="53">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="54">        <span class="n">atom_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="55">        <span class="n">atom_name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="56">        <span class="n">alternate_location</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="57">        <span class="n">residue_name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">17</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="58">        <span class="n">chain_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">21</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+</span><span data-line="59">        <span class="n">sequence_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="mi">1</span>
+</span><span data-line="60">        <span class="n">residue_insertion</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="61">            <span class="n">line</span><span class="p">[</span><span class="mi">26</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">26</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">26</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="62">        <span class="p">)</span>
+</span><span data-line="63">
+</span><span data-line="64">        <span class="n">atom_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="65">        <span class="n">atom_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="66">        <span class="n">atom_z</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="67">
+</span><span data-line="68">        <span class="n">occupancy</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="69">            <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">54</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="70">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">60</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">54</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="71">            <span class="k">else</span> <span class="mf">1.0</span>
+</span><span data-line="72">        <span class="p">)</span>
+</span><span data-line="73">        <span class="n">temperature_factor</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="74">            <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">60</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="75">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">66</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">60</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="76">            <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="77">        <span class="p">)</span>
+</span><span data-line="78">
+</span><span data-line="79">        <span class="n">segment_id</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="80">            <span class="n">line</span><span class="p">[</span><span class="mi">72</span><span class="p">:</span><span class="mi">76</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">76</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">72</span><span class="p">:</span><span class="mi">76</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="81">        <span class="p">)</span>
+</span><span data-line="82">
+</span><span data-line="83">        <span class="n">element_symbol_str</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="84">            <span class="n">line</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">78</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="85">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">78</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">78</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="86">            <span class="k">else</span> <span class="n">atom_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="87">        <span class="p">)</span>
+</span><span data-line="88">        <span class="n">element_symbol</span> <span class="o">=</span> <span class="n">Element</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="n">element_symbol_str</span><span class="p">)</span>
+</span><span data-line="89">
+</span><span data-line="90">        <span class="n">charge</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="91">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">80</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">78</span><span class="p">:</span><span class="mi">80</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="92">            <span class="n">charge_str</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">78</span><span class="p">:</span><span class="mi">80</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="93">            <span class="k">if</span> <span class="n">charge_str</span><span class="p">:</span>
+</span><span data-line="94">                <span class="c1"># Parse charge like &quot;+1&quot;, &quot;-2&quot;, etc.</span>
+</span><span data-line="95">                <span class="k">if</span> <span class="n">charge_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;+-&quot;</span><span class="p">:</span>
+</span><span data-line="96">                    <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">charge_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+</span><span data-line="97">                    <span class="n">magnitude</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">charge_str</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">charge_str</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span>
+</span><span data-line="98">                    <span class="n">charge</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">magnitude</span>
+</span><span data-line="99">                <span class="k">else</span><span class="p">:</span>
+</span><span data-line="100">                    <span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">charge_str</span><span class="p">)</span>
+</span><span data-line="101">
+</span><span data-line="102">        <span class="k">return</span> <span class="n">PDBAtom</span><span class="p">(</span>
+</span><span data-line="103">            <span class="n">atom_idx</span><span class="o">=</span><span class="n">atom_idx</span><span class="p">,</span>
+</span><span data-line="104">            <span class="n">atom_name</span><span class="o">=</span><span class="n">atom_name</span><span class="p">,</span>
+</span><span data-line="105">            <span class="n">alternate_location</span><span class="o">=</span><span class="n">alternate_location</span><span class="p">,</span>
+</span><span data-line="106">            <span class="n">residue_name</span><span class="o">=</span><span class="n">residue_name</span><span class="p">,</span>
+</span><span data-line="107">            <span class="n">chain_id</span><span class="o">=</span><span class="n">chain_id</span><span class="p">,</span>
+</span><span data-line="108">            <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
+</span><span data-line="109">            <span class="n">residue_insertion</span><span class="o">=</span><span class="n">residue_insertion</span><span class="p">,</span>
+</span><span data-line="110">            <span class="n">atom_x</span><span class="o">=</span><span class="n">atom_x</span><span class="p">,</span>
+</span><span data-line="111">            <span class="n">atom_y</span><span class="o">=</span><span class="n">atom_y</span><span class="p">,</span>
+</span><span data-line="112">            <span class="n">atom_z</span><span class="o">=</span><span class="n">atom_z</span><span class="p">,</span>
+</span><span data-line="113">            <span class="n">occupancy</span><span class="o">=</span><span class="n">occupancy</span><span class="p">,</span>
+</span><span data-line="114">            <span class="n">temperature_factor</span><span class="o">=</span><span class="n">temperature_factor</span><span class="p">,</span>
+</span><span data-line="115">            <span class="n">segment_id</span><span class="o">=</span><span class="n">segment_id</span><span class="p">,</span>
+</span><span data-line="116">            <span class="n">element_symbol</span><span class="o">=</span><span class="n">element_symbol</span><span class="p">,</span>
+</span><span data-line="117">            <span class="n">charge</span><span class="o">=</span><span class="n">charge</span><span class="p">,</span>
+</span><span data-line="118">        <span class="p">)</span>
+</span><span data-line="119">    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="120">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line_num</span><span class="si">}</span><span class="s2">: Error parsing ATOM/HETATM line: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="121">
+</span><span data-line="122">
+</span><span data-line="123"><span class="k">def</span><span class="w"> </span><span class="nf">_parse_conect_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+</span><span data-line="124"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a CONECT line and return list of atom indices.&quot;&quot;&quot;</span>
+</span><span data-line="125">    <span class="n">atom_idxs</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="126">    <span class="c1"># CONECT format: positions 6-11, 11-16, 16-21, 21-26, 26-31 for atom indices</span>
+</span><span data-line="127">    <span class="n">start</span> <span class="o">=</span> <span class="mi">6</span>
+</span><span data-line="128">    <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span data-line="129">        <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">5</span>
+</span><span data-line="130">        <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span data-line="131">            <span class="n">end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="132">        <span class="n">atom_idx_str</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="133">        <span class="k">if</span> <span class="n">atom_idx_str</span><span class="p">:</span>
+</span><span data-line="134">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="135">                <span class="n">atom_idxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">atom_idx_str</span><span class="p">))</span>
+</span><span data-line="136">            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="137">                <span class="k">break</span>
+</span><span data-line="138">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="139">            <span class="k">break</span>
+</span><span data-line="140">        <span class="n">start</span> <span class="o">=</span> <span class="n">end</span>
+</span><span data-line="141">    <span class="k">return</span> <span class="n">atom_idxs</span>
+</span><span data-line="142">
+</span><span data-line="143">
+</span><span data-line="144"><span class="k">def</span><span class="w"> </span><span class="nf">_build_trc</span><span class="p">(</span>
+</span><span data-line="145">    <span class="n">atoms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PDBAtom</span><span class="p">],</span>
+</span><span data-line="146">    <span class="n">atom_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+</span><span data-line="147">    <span class="n">residue_data</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span>
+</span><span data-line="148">    <span class="n">chain_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="n">ResidueId</span><span class="p">]],</span>
+</span><span data-line="149">    <span class="n">connectivity</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+</span><span data-line="150"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span><span class="p">:</span>
+</span><span data-line="151"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a TRC structure from parsed PDB data.&quot;&quot;&quot;</span>
+</span><span data-line="152">
+</span><span data-line="153">    <span class="n">trc</span> <span class="o">=</span> <span class="n">TRC</span><span class="p">()</span>
+</span><span data-line="154">
+</span><span data-line="155">    <span class="c1"># Build topology</span>
+</span><span data-line="156">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">element_symbol</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+</span><span data-line="157">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="158">    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+</span><span data-line="159">        <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_x</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_y</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">atom_z</span><span class="p">])</span>
+</span><span data-line="160">
+</span><span data-line="161">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+</span><span data-line="162">
+</span><span data-line="163">    <span class="c1"># Formal charges (per atom)</span>
+</span><span data-line="164">    <span class="n">atom_formal_charges</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">charge</span> <span class="ow">or</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">]</span>
+</span><span data-line="165">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">formal_charges</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="166">        <span class="n">FormalCharge</span><span class="p">(</span><span class="n">charge</span><span class="p">)</span> <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">atom_formal_charges</span>
+</span><span data-line="167">    <span class="p">]</span>
+</span><span data-line="168">
+</span><span data-line="169">    <span class="c1"># Sort residues by ResidueId (chain_id, sequence_number, insertion_code, residue_name)</span>
+</span><span data-line="170">    <span class="c1"># This matches the Rust BTreeMap ordering</span>
+</span><span data-line="171">    <span class="n">sorted_residue_ids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+</span><span data-line="172">        <span class="n">residue_data</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+</span><span data-line="173">        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">rid</span><span class="p">:</span> <span class="p">(</span>
+</span><span data-line="174">            <span class="n">rid</span><span class="o">.</span><span class="n">chain_id</span><span class="p">,</span>
+</span><span data-line="175">            <span class="n">rid</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+</span><span data-line="176">            <span class="n">rid</span><span class="o">.</span><span class="n">insertion_code</span><span class="p">,</span>
+</span><span data-line="177">            <span class="n">rid</span><span class="o">.</span><span class="n">residue_name</span><span class="p">,</span>
+</span><span data-line="178">        <span class="p">),</span>
+</span><span data-line="179">    <span class="p">)</span>
+</span><span data-line="180">
+</span><span data-line="181">    <span class="c1"># Build residues in sorted order</span>
+</span><span data-line="182">    <span class="n">residue_list</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="183">    <span class="n">seq_names</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="184">    <span class="n">seq_numbers</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="185">    <span class="n">insertion_codes_list</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="186">
+</span><span data-line="187">    <span class="k">for</span> <span class="n">residue_id</span> <span class="ow">in</span> <span class="n">sorted_residue_ids</span><span class="p">:</span>
+</span><span data-line="188">        <span class="n">atom_indices</span> <span class="o">=</span> <span class="n">residue_data</span><span class="p">[</span><span class="n">residue_id</span><span class="p">]</span>
+</span><span data-line="189">        <span class="n">residue_atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">AtomRef</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">atom_indices</span><span class="p">]</span>
+</span><span data-line="190">        <span class="n">residue_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Residue</span><span class="p">(</span><span class="n">residue_atoms</span><span class="p">))</span>
+</span><span data-line="191">        <span class="n">seq_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">residue_id</span><span class="o">.</span><span class="n">residue_name</span><span class="p">)</span>
+</span><span data-line="192">        <span class="n">seq_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">residue_id</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">)</span>
+</span><span data-line="193">        <span class="c1"># Convert &quot;~&quot; back to empty string for storage</span>
+</span><span data-line="194">        <span class="n">insertion_code</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="195">            <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">residue_id</span><span class="o">.</span><span class="n">insertion_code</span> <span class="o">==</span> <span class="s2">&quot;~&quot;</span> <span class="k">else</span> <span class="n">residue_id</span><span class="o">.</span><span class="n">insertion_code</span>
+</span><span data-line="196">        <span class="p">)</span>
+</span><span data-line="197">        <span class="n">insertion_codes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">insertion_code</span><span class="p">)</span>
+</span><span data-line="198">
+</span><span data-line="199">    <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span> <span class="o">=</span> <span class="n">residue_list</span>
+</span><span data-line="200">    <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span> <span class="o">=</span> <span class="n">seq_names</span>
+</span><span data-line="201">    <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seq_ns</span> <span class="o">=</span> <span class="n">seq_numbers</span>
+</span><span data-line="202">    <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">insertion_codes</span> <span class="o">=</span> <span class="n">insertion_codes_list</span>
+</span><span data-line="203">
+</span><span data-line="204">    <span class="c1"># Build chains</span>
+</span><span data-line="205">    <span class="n">chains</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="206">    <span class="n">residue_id_to_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">rid</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">rid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_residue_ids</span><span class="p">)}</span>
+</span><span data-line="207">    <span class="n">chain_ids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chain_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span data-line="208">
+</span><span data-line="209">    <span class="k">for</span> <span class="n">chain_id</span> <span class="ow">in</span> <span class="n">chain_ids</span><span class="p">:</span>
+</span><span data-line="210">        <span class="n">chain_residue_ids</span> <span class="o">=</span> <span class="n">chain_data</span><span class="p">[</span><span class="n">chain_id</span><span class="p">]</span>
+</span><span data-line="211">        <span class="c1"># Sort residues in chain by sequence number</span>
+</span><span data-line="212">        <span class="n">sorted_residue_ids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+</span><span data-line="213">            <span class="n">chain_residue_ids</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">rid</span><span class="p">:</span> <span class="p">(</span><span class="n">rid</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span> <span class="n">rid</span><span class="o">.</span><span class="n">insertion_code</span><span class="p">)</span>
+</span><span data-line="214">        <span class="p">)</span>
+</span><span data-line="215">
+</span><span data-line="216">        <span class="n">chain_residue_refs</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="217">            <span class="n">ResidueRef</span><span class="p">(</span><span class="n">residue_id_to_index</span><span class="p">[</span><span class="n">rid</span><span class="p">])</span> <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="n">sorted_residue_ids</span>
+</span><span data-line="218">        <span class="p">]</span>
+</span><span data-line="219">        <span class="n">chains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chain</span><span class="p">(</span><span class="n">chain_residue_refs</span><span class="p">))</span>
+</span><span data-line="220">
+</span><span data-line="221">    <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="n">chains</span>
+</span><span data-line="222">    <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">labeled</span> <span class="o">=</span> <span class="p">[</span><span class="n">ChainRef</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chains</span><span class="p">))]</span>
+</span><span data-line="223">    <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[[</span><span class="n">chain_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">chain_id</span> <span class="ow">in</span> <span class="n">chain_ids</span><span class="p">]</span>
+</span><span data-line="224">
+</span><span data-line="225">    <span class="c1"># Create fragments (one per residue) - amino acids as default fragments</span>
+</span><span data-line="226">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragments</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="227">        <span class="n">Fragment</span><span class="p">([</span><span class="n">AtomRef</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">])</span>
+</span><span data-line="228">        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span>
+</span><span data-line="229">    <span class="p">]</span>
+</span><span data-line="230">
+</span><span data-line="231">    <span class="c1"># Process connectivity</span>
+</span><span data-line="232">    <span class="n">connectivity_deduper</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># (origin, target) -&gt; order</span>
+</span><span data-line="233">    <span class="k">for</span> <span class="n">origin_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">connectivity</span><span class="p">:</span>
+</span><span data-line="234">        <span class="c1"># Convert atom IDs to indices</span>
+</span><span data-line="235">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="236">            <span class="n">origin_idx</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">origin_id</span><span class="p">)</span>
+</span><span data-line="237">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="238">            <span class="k">continue</span>
+</span><span data-line="239">
+</span><span data-line="240">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="241">            <span class="n">target_idx</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">target_id</span><span class="p">)</span>
+</span><span data-line="242">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="243">            <span class="k">continue</span>
+</span><span data-line="244">
+</span><span data-line="245">        <span class="c1"># Check if reverse bond already exists (dedup)</span>
+</span><span data-line="246">        <span class="k">if</span> <span class="p">(</span><span class="n">target_idx</span><span class="p">,</span> <span class="n">origin_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="n">connectivity_deduper</span><span class="p">:</span>
+</span><span data-line="247">            <span class="k">continue</span>
+</span><span data-line="248">
+</span><span data-line="249">        <span class="c1"># If same bond already exists, increment order (double bond)</span>
+</span><span data-line="250">        <span class="k">if</span> <span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="n">connectivity_deduper</span><span class="p">:</span>
+</span><span data-line="251">            <span class="n">connectivity_deduper</span><span class="p">[(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span data-line="252">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="253">            <span class="n">connectivity_deduper</span><span class="p">[(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">order</span>
+</span><span data-line="254">
+</span><span data-line="255">    <span class="c1"># Convert to Bond objects</span>
+</span><span data-line="256">    <span class="n">bonds</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="257">    <span class="k">for</span> <span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">),</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">connectivity_deduper</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="258">        <span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="259">            <span class="n">Bond</span><span class="p">(</span>
+</span><span data-line="260">                <span class="n">AtomRef</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)),</span>
+</span><span data-line="261">                <span class="n">AtomRef</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)),</span>
+</span><span data-line="262">                <span class="n">BondOrder</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+</span><span data-line="263">            <span class="p">)</span>
+</span><span data-line="264">        <span class="p">)</span>
+</span><span data-line="265">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">=</span> <span class="n">bonds</span>
+</span><span data-line="266">
+</span><span data-line="267">    <span class="c1"># Calculate fragment formal charges (sum of atom charges in each residue)</span>
+</span><span data-line="268">    <span class="n">fragment_formal_charges</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="269">    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+</span><span data-line="270">        <span class="n">total_charge</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atom_formal_charges</span><span class="p">[</span><span class="n">atom_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+</span><span data-line="271">        <span class="n">fragment_formal_charges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FormalCharge</span><span class="p">(</span><span class="n">total_charge</span><span class="p">))</span>
+</span><span data-line="272">    <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragment_formal_charges</span> <span class="o">=</span> <span class="n">fragment_formal_charges</span>
+</span><span data-line="273">
+</span><span data-line="274">    <span class="k">return</span> <span class="n">trc</span>
+</span><span data-line="275">
+</span><span data-line="276">
+</span><span data-line="277"><span class="k">def</span><span class="w"> </span><span class="nf">_apply_global_connectivity</span><span class="p">(</span>
+</span><span data-line="278">    <span class="n">trc</span><span class="p">:</span> <span class="n">TRC</span><span class="p">,</span> <span class="n">atom_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">global_connectivity</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
+</span><span data-line="279"><span class="p">):</span>
+</span><span data-line="280"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply global connectivity records to a TRC.&quot;&quot;&quot;</span>
+</span><span data-line="281">    <span class="k">if</span> <span class="ow">not</span> <span class="n">global_connectivity</span><span class="p">:</span>
+</span><span data-line="282">        <span class="k">return</span>
+</span><span data-line="283">
+</span><span data-line="284">    <span class="n">connectivity_deduper</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># (origin, target) -&gt; order</span>
+</span><span data-line="285">
+</span><span data-line="286">    <span class="k">for</span> <span class="n">origin_id</span><span class="p">,</span> <span class="n">target_id</span><span class="p">,</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">global_connectivity</span><span class="p">:</span>
+</span><span data-line="287">        <span class="c1"># Convert atom IDs to indices</span>
+</span><span data-line="288">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="289">            <span class="n">origin_idx</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">origin_id</span><span class="p">)</span>
+</span><span data-line="290">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="291">            <span class="k">continue</span>
+</span><span data-line="292">
+</span><span data-line="293">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="294">            <span class="n">target_idx</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">target_id</span><span class="p">)</span>
+</span><span data-line="295">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="296">            <span class="k">continue</span>
+</span><span data-line="297">
+</span><span data-line="298">        <span class="c1"># Check if reverse bond already exists (dedup)</span>
+</span><span data-line="299">        <span class="k">if</span> <span class="p">(</span><span class="n">target_idx</span><span class="p">,</span> <span class="n">origin_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="n">connectivity_deduper</span><span class="p">:</span>
+</span><span data-line="300">            <span class="k">continue</span>
+</span><span data-line="301">
+</span><span data-line="302">        <span class="c1"># If same bond already exists, increment order (double bond)</span>
+</span><span data-line="303">        <span class="k">if</span> <span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="n">connectivity_deduper</span><span class="p">:</span>
+</span><span data-line="304">            <span class="n">connectivity_deduper</span><span class="p">[(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span data-line="305">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="306">            <span class="n">connectivity_deduper</span><span class="p">[(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">order</span>
+</span><span data-line="307">
+</span><span data-line="308">    <span class="c1"># Convert to Bond objects</span>
+</span><span data-line="309">    <span class="n">additional_bonds</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="310">    <span class="k">for</span> <span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">),</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">connectivity_deduper</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="311">        <span class="n">additional_bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="312">            <span class="n">Bond</span><span class="p">(</span>
+</span><span data-line="313">                <span class="n">AtomRef</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)),</span>
+</span><span data-line="314">                <span class="n">AtomRef</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">origin_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">)),</span>
+</span><span data-line="315">                <span class="n">BondOrder</span><span class="p">(</span><span class="n">order</span><span class="p">),</span>
+</span><span data-line="316">            <span class="p">)</span>
+</span><span data-line="317">        <span class="p">)</span>
+</span><span data-line="318">
+</span><span data-line="319">    <span class="c1"># Add to existing connectivity</span>
+</span><span data-line="320">    <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">connectivity</span><span class="p">:</span>
+</span><span data-line="321">        <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">additional_bonds</span><span class="p">)</span>
+</span><span data-line="322">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="323">        <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">=</span> <span class="n">additional_bonds</span>
+</span><span data-line="324">
+</span><span data-line="325">
+<div class="viewcode-block" id="from_pdb">
+<a class="viewcode-back" href="../../../rush.convert.pdb.html#rush.convert.from_pdb">[docs]</a>
+</span><span data-line="326"><span class="k">def</span><span class="w"> </span><span class="nf">from_pdb</span><span class="p">(</span><span class="n">pdb_contents</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
+</span><span data-line="327"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="328"><span class="sd">    Parse PDB file contents into TRC structures.</span>
+</span><span data-line="329">
+</span><span data-line="330"><span class="sd">    Args:</span>
+</span><span data-line="331"><span class="sd">        pdb_contents: String contents of a PDB file</span>
+</span><span data-line="332">
+</span><span data-line="333"><span class="sd">    Returns:</span>
+</span><span data-line="334"><span class="sd">        List of TRC structures (one per model in multi-model files)</span>
+</span><span data-line="335"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="336">    <span class="n">trcs</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="337">    <span class="n">trc_atom_ids</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="338">    <span class="n">global_connectivity</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List of (origin, target, order) tuples</span>
+</span><span data-line="339">
+</span><span data-line="340">    <span class="n">lines</span> <span class="o">=</span> <span class="n">pdb_contents</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="341">    <span class="n">line_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span data-line="342">
+</span><span data-line="343">    <span class="n">eof</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="344">    <span class="k">while</span> <span class="ow">not</span> <span class="n">eof</span><span class="p">:</span>
+</span><span data-line="345">        <span class="c1"># Storage for current model</span>
+</span><span data-line="346">        <span class="n">atoms</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="347">        <span class="n">atom_ids</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="348">        <span class="n">residue_data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>  <span class="c1"># ResidueId -&gt; atom indices</span>
+</span><span data-line="349">        <span class="n">chain_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>  <span class="c1"># chain_id -&gt; set of ResidueIds</span>
+</span><span data-line="350">        <span class="n">connectivity</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Local connectivity for this model</span>
+</span><span data-line="351">
+</span><span data-line="352">        <span class="n">in_model</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="353">
+</span><span data-line="354">        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span data-line="355">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="356">                <span class="n">line_num</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">line_iter</span><span class="p">)</span>
+</span><span data-line="357">            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+</span><span data-line="358">                <span class="n">eof</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="359">                <span class="k">break</span>
+</span><span data-line="360">
+</span><span data-line="361">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+</span><span data-line="362">                <span class="k">continue</span>
+</span><span data-line="363">
+</span><span data-line="364">            <span class="n">record_type</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="365">
+</span><span data-line="366">            <span class="k">if</span> <span class="n">record_type</span> <span class="o">==</span> <span class="s2">&quot;MODEL&quot;</span><span class="p">:</span>
+</span><span data-line="367">                <span class="n">in_model</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="368">
+</span><span data-line="369">            <span class="k">elif</span> <span class="n">record_type</span> <span class="o">==</span> <span class="s2">&quot;ENDMDL&quot;</span><span class="p">:</span>
+</span><span data-line="370">                <span class="n">in_model</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="371">                <span class="k">break</span>
+</span><span data-line="372">
+</span><span data-line="373">            <span class="k">elif</span> <span class="n">record_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ATOM&quot;</span><span class="p">,</span> <span class="s2">&quot;HETATM&quot;</span><span class="p">]:</span>
+</span><span data-line="374">                <span class="n">in_model</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="375">
+</span><span data-line="376">                <span class="k">try</span><span class="p">:</span>
+</span><span data-line="377">                    <span class="n">atom</span> <span class="o">=</span> <span class="n">_parse_pdb_atom_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">line_num</span><span class="p">)</span>
+</span><span data-line="378">
+</span><span data-line="379">                    <span class="c1"># Only process atoms with alternate location &quot;A&quot; or None</span>
+</span><span data-line="380">                    <span class="c1"># Skip atoms with other alternate locations (e.g., &quot;B&quot;, &quot;C&quot;, etc.)</span>
+</span><span data-line="381">                    <span class="k">if</span> <span class="p">(</span>
+</span><span data-line="382">                        <span class="n">atom</span><span class="o">.</span><span class="n">alternate_location</span> <span class="ow">is</span> <span class="kc">None</span>
+</span><span data-line="383">                        <span class="ow">or</span> <span class="n">atom</span><span class="o">.</span><span class="n">alternate_location</span> <span class="o">==</span> <span class="s2">&quot;A&quot;</span>
+</span><span data-line="384">                    <span class="p">):</span>
+</span><span data-line="385">                        <span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+</span><span data-line="386">                        <span class="n">atom_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">atom_idx</span><span class="p">)</span>
+</span><span data-line="387">
+</span><span data-line="388">                        <span class="c1"># Create residue identifier</span>
+</span><span data-line="389">                        <span class="c1"># Note: insertion_code uses &quot;~&quot; for sorting (to sort after all letters)</span>
+</span><span data-line="390">                        <span class="c1"># but the actual value stored in the residues structure is empty string</span>
+</span><span data-line="391">                        <span class="n">residue_id</span> <span class="o">=</span> <span class="n">ResidueId</span><span class="p">(</span>
+</span><span data-line="392">                            <span class="n">chain_id</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">chain_id</span><span class="p">,</span>
+</span><span data-line="393">                            <span class="n">sequence_number</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+</span><span data-line="394">                            <span class="n">insertion_code</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">residue_insertion</span> <span class="ow">or</span> <span class="s2">&quot;~&quot;</span><span class="p">,</span>
+</span><span data-line="395">                            <span class="n">residue_name</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">residue_name</span><span class="p">,</span>
+</span><span data-line="396">                        <span class="p">)</span>
+</span><span data-line="397">
+</span><span data-line="398">                        <span class="c1"># Add to residue data</span>
+</span><span data-line="399">                        <span class="k">if</span> <span class="n">residue_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">residue_data</span><span class="p">:</span>
+</span><span data-line="400">                            <span class="n">residue_data</span><span class="p">[</span><span class="n">residue_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="401">                        <span class="n">residue_data</span><span class="p">[</span><span class="n">residue_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="402">                            <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+</span><span data-line="403">                        <span class="p">)</span>  <span class="c1"># Index in atoms list</span>
+</span><span data-line="404">
+</span><span data-line="405">                        <span class="c1"># Add to chain data</span>
+</span><span data-line="406">                        <span class="n">chain_data</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">chain_id</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">residue_id</span><span class="p">)</span>
+</span><span data-line="407">                    <span class="c1"># else: skip atoms with other alternate locations</span>
+</span><span data-line="408">
+</span><span data-line="409">                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="410">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="411">                    <span class="k">continue</span>
+</span><span data-line="412">
+</span><span data-line="413">            <span class="k">elif</span> <span class="n">record_type</span> <span class="o">==</span> <span class="s2">&quot;CONECT&quot;</span><span class="p">:</span>
+</span><span data-line="414">                <span class="k">try</span><span class="p">:</span>
+</span><span data-line="415">                    <span class="n">atom_idxs</span> <span class="o">=</span> <span class="n">_parse_conect_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="416">                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom_idxs</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+</span><span data-line="417">                        <span class="n">origin</span> <span class="o">=</span> <span class="n">atom_idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="418">                        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">atom_idxs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+</span><span data-line="419">                            <span class="k">if</span> <span class="n">in_model</span><span class="p">:</span>
+</span><span data-line="420">                                <span class="n">connectivity</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">origin</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span data-line="421">                            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="422">                                <span class="n">global_connectivity</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">origin</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span><span data-line="423">                <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+</span><span data-line="424">                    <span class="k">continue</span>
+</span><span data-line="425">
+</span><span data-line="426">            <span class="k">elif</span> <span class="n">record_type</span> <span class="o">==</span> <span class="s2">&quot;END&quot;</span><span class="p">:</span>
+</span><span data-line="427">                <span class="k">break</span>
+</span><span data-line="428">
+</span><span data-line="429">        <span class="c1"># If no atoms were found, skip this model</span>
+</span><span data-line="430">        <span class="k">if</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span>
+</span><span data-line="431">            <span class="k">if</span> <span class="n">eof</span><span class="p">:</span>
+</span><span data-line="432">                <span class="k">break</span>
+</span><span data-line="433">            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="434">                <span class="k">continue</span>
+</span><span data-line="435">
+</span><span data-line="436">        <span class="c1"># Build the TRC for this model</span>
+</span><span data-line="437">        <span class="n">trc</span> <span class="o">=</span> <span class="n">_build_trc</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">atom_ids</span><span class="p">,</span> <span class="n">residue_data</span><span class="p">,</span> <span class="n">chain_data</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">)</span>
+</span><span data-line="438">        <span class="n">trcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span>
+</span><span data-line="439">        <span class="n">trc_atom_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_ids</span><span class="p">)</span>
+</span><span data-line="440">
+</span><span data-line="441">        <span class="k">if</span> <span class="n">eof</span><span class="p">:</span>
+</span><span data-line="442">            <span class="k">break</span>
+</span><span data-line="443">
+</span><span data-line="444">    <span class="c1"># Apply global connectivity to all models</span>
+</span><span data-line="445">    <span class="k">for</span> <span class="n">trc</span><span class="p">,</span> <span class="n">atom_ids</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">trcs</span><span class="p">,</span> <span class="n">trc_atom_ids</span><span class="p">):</span>
+</span><span data-line="446">        <span class="n">_apply_global_connectivity</span><span class="p">(</span><span class="n">trc</span><span class="p">,</span> <span class="n">atom_ids</span><span class="p">,</span> <span class="n">global_connectivity</span><span class="p">)</span>
+</span><span data-line="447">
+</span><span data-line="448">    <span class="c1"># If no TRCs were created, return an empty one</span>
+</span><span data-line="449">    <span class="k">if</span> <span class="ow">not</span> <span class="n">trcs</span><span class="p">:</span>
+</span><span data-line="450">        <span class="n">trcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TRC</span><span class="p">())</span>
+</span><span data-line="451">
+</span><span data-line="452">    <span class="k">return</span> <span class="n">trcs</span></div>
+
+</span><span data-line="453">
+</span><span data-line="454">
+<div class="viewcode-block" id="to_pdb">
+<a class="viewcode-back" href="../../../rush.convert.pdb.html#rush.convert.to_pdb">[docs]</a>
+</span><span data-line="455"><span class="k">def</span><span class="w"> </span><span class="nf">to_pdb</span><span class="p">(</span><span class="n">trc</span><span class="p">:</span> <span class="n">TRC</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="456"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="457"><span class="sd">    Convert TRC structure to PDB format string.</span>
+</span><span data-line="458">
+</span><span data-line="459"><span class="sd">    Args:</span>
+</span><span data-line="460"><span class="sd">        trc: TRC structure to convert</span>
+</span><span data-line="461">
+</span><span data-line="462"><span class="sd">    Returns:</span>
+</span><span data-line="463"><span class="sd">        PDB format string</span>
+</span><span data-line="464"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="465">    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="466">
+</span><span data-line="467">    <span class="c1"># Create mapping from residue to chain</span>
+</span><span data-line="468">    <span class="n">residue_to_chain</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="469">    <span class="k">for</span> <span class="n">chain_idx</span><span class="p">,</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">chains</span><span class="p">):</span>
+</span><span data-line="470">        <span class="k">for</span> <span class="n">residue_idx</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+</span><span data-line="471">            <span class="n">residue_to_chain</span><span class="p">[</span><span class="n">residue_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">chain_idx</span>
+</span><span data-line="472">
+</span><span data-line="473">    <span class="n">atom_idx</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span data-line="474">    <span class="k">for</span> <span class="n">residue_idx</span><span class="p">,</span> <span class="n">residue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="475">        <span class="n">chain_idx</span> <span class="o">=</span> <span class="n">residue_to_chain</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residue_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span><span data-line="476">        <span class="n">chain_id</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">65</span> <span class="o">+</span> <span class="n">chain_idx</span><span class="p">)</span> <span class="k">if</span> <span class="n">chain_idx</span> <span class="o">&lt;</span> <span class="mi">26</span> <span class="k">else</span> <span class="s2">&quot;A&quot;</span>  <span class="c1"># A, B, C, ...</span>
+</span><span data-line="477">
+</span><span data-line="478">        <span class="n">residue_name</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="479">            <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="p">[</span><span class="n">residue_idx</span><span class="p">]</span>
+</span><span data-line="480">            <span class="k">if</span> <span class="n">residue_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span>
+</span><span data-line="481">            <span class="k">else</span> <span class="s2">&quot;UNK&quot;</span>
+</span><span data-line="482">        <span class="p">)</span>
+</span><span data-line="483">        <span class="n">seq_num</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="484">            <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">[</span><span class="n">residue_idx</span><span class="p">]</span>
+</span><span data-line="485">            <span class="k">if</span> <span class="n">residue_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span>
+</span><span data-line="486">            <span class="k">else</span> <span class="mi">1</span>
+</span><span data-line="487">        <span class="p">)</span>
+</span><span data-line="488">        <span class="n">insertion_code</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="489">            <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">[</span><span class="n">residue_idx</span><span class="p">]</span>
+</span><span data-line="490">            <span class="k">if</span> <span class="n">residue_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span>
+</span><span data-line="491">            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+</span><span data-line="492">        <span class="p">)</span>
+</span><span data-line="493">
+</span><span data-line="494">        <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+</span><span data-line="495">            <span class="k">if</span> <span class="n">atom_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+</span><span data-line="496">                <span class="k">continue</span>
+</span><span data-line="497">
+</span><span data-line="498">            <span class="n">element</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">atom_idx</span><span class="p">]</span>
+</span><span data-line="499">            <span class="n">atom_name</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="500">                <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">atom_idx</span><span class="p">]</span> <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">labels</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+</span><span data-line="501">            <span class="p">)</span>
+</span><span data-line="502">
+</span><span data-line="503">            <span class="n">x</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="504">                <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+</span><span data-line="505">                <span class="k">if</span> <span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+</span><span data-line="506">                <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="507">            <span class="p">)</span>
+</span><span data-line="508">            <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="509">                <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="510">                <span class="k">if</span> <span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+</span><span data-line="511">                <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="512">            <span class="p">)</span>
+</span><span data-line="513">            <span class="n">z</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="514">                <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+</span><span data-line="515">                <span class="k">if</span> <span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+</span><span data-line="516">                <span class="k">else</span> <span class="mf">0.0</span>
+</span><span data-line="517">            <span class="p">)</span>
+</span><span data-line="518">
+</span><span data-line="519">            <span class="n">formal_charge</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span data-line="520">            <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">formal_charges</span> <span class="ow">and</span> <span class="n">atom_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span>
+</span><span data-line="521">                <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">formal_charges</span>
+</span><span data-line="522">            <span class="p">):</span>
+</span><span data-line="523">                <span class="n">formal_charge</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">formal_charges</span><span class="p">[</span><span class="n">atom_idx</span><span class="p">]</span><span class="o">.</span><span class="n">charge</span>
+</span><span data-line="524">
+</span><span data-line="525">            <span class="c1"># Format ATOM record</span>
+</span><span data-line="526">            <span class="n">record_type</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="527">                <span class="s2">&quot;ATOM&quot;</span> <span class="k">if</span> <span class="n">AminoAcidSeq</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="n">residue_name</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;HETATM&quot;</span>
+</span><span data-line="528">            <span class="p">)</span>
+</span><span data-line="529">
+</span><span data-line="530">            <span class="n">line</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">record_type</span><span class="si">:</span><span class="s2">&lt;6</span><span class="si">}{</span><span class="n">atom_idx</span><span class="si">:</span><span class="s2">&gt;5</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">atom_name</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">residue_name</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">chain_id</span><span class="si">}{</span><span class="n">seq_num</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}{</span><span class="n">insertion_code</span><span class="si">:</span><span class="s2">&lt;1</span><span class="si">}</span><span class="s2">   </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">&gt;8.3f</span><span class="si">}{</span><span class="n">y</span><span class="si">:</span><span class="s2">&gt;8.3f</span><span class="si">}{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;8.3f</span><span class="si">}</span><span class="s2">  1.00  0.00          </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;2</span><span class="si">}{</span><span class="n">formal_charge</span><span class="si">:</span><span class="s2">+2d</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="531">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="532">            <span class="n">atom_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span data-line="533">
+</span><span data-line="534">    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;END&quot;</span><span class="p">)</span>
+</span><span data-line="535">    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+</span></pre></div>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rush.convert - rush documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="rush.convert.json" href="rush.convert.json.html" /><link rel="prev" title="rush.mol" href="rush.mol.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=a318c5d4" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="rush.convert"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="index.html">
+      
+      
+      <strong>rush</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/02-first-run.html">Doing Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/03-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/04-helpers-and-trc-files.html">Helpers and TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/05-hardware.html">Hardware</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Core API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="rush.client.html">rush.client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.mol.html">rush.mol</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">rush.convert</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rush.convert.json.html">rush.convert.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rush.convert.mmcif.html">rush.convert.mmcif</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rush.convert.pdb.html">rush.convert.pdb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rush.convert.sdf.html">rush.convert.sdf</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.prepare_protein.html">Prepare Protein</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.prepare_complex.html">Prepare Complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.convert.from_json"><code class="docutils literal notranslate"><span class="pre">from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.from_mmcif"><code class="docutils literal notranslate"><span class="pre">from_mmcif()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.from_pdb"><code class="docutils literal notranslate"><span class="pre">from_pdb()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.load_structure"><code class="docutils literal notranslate"><span class="pre">load_structure()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.save_structure"><code class="docutils literal notranslate"><span class="pre">save_structure()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.to_json"><code class="docutils literal notranslate"><span class="pre">to_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.to_pdb"><code class="docutils literal notranslate"><span class="pre">to_pdb()</span></code></a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">rush</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="api.html"><span itemprop="name">Core API</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">rush.convert</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="module-rush.convert">
+<span id="rush-convert"></span><h1>rush.convert<a class="headerlink" href="#module-rush.convert" title="Link to this heading">¶</a></h1>
+<p>Conversion utilities for molecular structure file formats.</p>
+<p>This module provides functions to convert between PDB, mmCIF, and JSON formats.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_json">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/json.html#from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Load TRC structures from JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_content</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>tuple</em><em>[</em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>dict</em><em> | </em><em>list</em><em>[</em><em>dict</em><em>]</em>) – JSON string content</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of TRC structures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a> | <em>List</em>[<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_mmcif">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_mmcif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmcif_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/mmcif.html#from_mmcif"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_mmcif" title="Link to this definition">¶</a></dt>
+<dd><p>Parse mmCIF file contents into TRC structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mmcif_content</strong> (<em>str</em>) – String contents of an mmCIF file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of TRC structures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_pdb">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_contents</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/pdb.html#from_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_pdb" title="Link to this definition">¶</a></dt>
+<dd><p>Parse PDB file contents into TRC structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pdb_contents</strong> (<em>str</em>) – String contents of a PDB file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of TRC structures (one per model in multi-model files)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.load_structure">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">load_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#load_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.load_structure" title="Link to this definition">¶</a></dt>
+<dd><p>Load structure from PDB, mmCIF, or JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – Path to structure file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of TRC structures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a> | <em>List</em>[<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.save_structure">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">save_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#save_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.save_structure" title="Link to this definition">¶</a></dt>
+<dd><p>Save TRC structures to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trcs</strong> (<em>List</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em>]</em>) – List of TRC structures</p></li>
+<li><p><strong>file_path</strong> (<em>str</em>) – Output file path</p></li>
+<li><p><strong>format</strong> (<em>str</em><em> | </em><em>None</em>) – Output format (‘pdb’, ‘json’, or None for auto-detect from extension)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.to_json">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trcs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/json.html#to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Convert TRC structures to JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trcs</strong> (<em>List</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em>]</em>) – List of TRC structures</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>JSON string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.to_pdb">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">to_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/pdb.html#to_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.to_pdb" title="Link to this definition">¶</a></dt>
+<dd><p>Convert TRC structure to PDB format string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trc</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a>) – TRC structure to convert</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PDB format string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rush.convert.json.html">rush.convert.json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rush.convert.mmcif.html">rush.convert.mmcif</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rush.convert.pdb.html">rush.convert.pdb</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rush.convert.sdf.html">rush.convert.sdf</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="rush.mol.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">rush.mol</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="rush.convert.json.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">rush.convert.json</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+</html>

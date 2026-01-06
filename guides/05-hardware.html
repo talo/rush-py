@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Hardware - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Tutorials" href="../tutorials.html" /><link rel="prev" title="Helpers and TRC Files" href="04-helpers-and-trc-files.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=a318c5d4" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Hardware"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>rush</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../guides.html">Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-first-run.html">Doing Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-helpers-and-trc-files.html">Helpers and TRC Files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Hardware</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.client.html">rush.client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mol.html">rush.mol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.convert.html">rush.convert</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../rush.convert.json.html">rush.convert.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rush.convert.mmcif.html">rush.convert.mmcif</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rush.convert.pdb.html">rush.convert.pdb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rush.convert.sdf.html">rush.convert.sdf</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare_protein.html">Prepare Protein</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare_complex.html">Prepare Complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#run-specification-target-and-resources">Run Specification: Target and Resources</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">rush</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../guides.html"><span itemprop="name">Guides</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Hardware</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="hardware">
+<h1>Hardware<a class="headerlink" href="#hardware" title="Link to this heading">¶</a></h1>
+<p>Rush provides both cloud computing and supercomputing infrastructure for you to perform runs on. When you submit a job on Rush, it remotely runs the job on either our cloud computing infrastructure (three “Bullet” clusters) or one of two supercomputers, Gadi or Setonix. For teams that prefer to “bring their own compute,” Rush supports integration with existing academic or corporate HPC setups. Email hello&#64;qdx.co to discuss this with us.</p>
+<section id="run-specification-target-and-resources">
+<h2>Run Specification: Target and Resources<a class="headerlink" href="#run-specification-target-and-resources" title="Link to this heading">¶</a></h2>
+<p>You can pass a set of run specifications to each module function via <code class="docutils literal notranslate"><span class="pre">run_spec=rush.client.RunSpec(...)</span></code>. The target (“Bullet”, “Bullet2”, “Bullet3”, “Gadi”, “Setonix”), walltime (in minutes), storage (in MB, though storage units are configurable as well), cpus, gpus, and nodes are all configurable via this parameter and class.</p>
+<p>If the target is left unspecified, one of the three Bullet clusters will be chosen.</p>
+<p>By default, modules have default resources that will be allocated to them. If supplying custom resources, be sure to provide compatible resources for the selected module: for example. if a module requires a GPU but isn’t allocated one, the run will fail.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="04-helpers-and-trc-files.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Helpers and TRC Files</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../tutorials.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Tutorials</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>
