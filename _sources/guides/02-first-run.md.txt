@@ -1,4 +1,4 @@
-# Doing Your First rush-py Run
+# Your First rush-py Run
 
 ## Background Info: Rush Modules
 

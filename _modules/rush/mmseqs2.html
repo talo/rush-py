@@ -57,9 +57,9 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="0"><ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guides.html">Guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../guides/01-getting-started.html">Getting Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../guides/02-first-run.html">Doing Your First rush-py Run</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../guides/03-general-info.html">General Info and Design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../guides/04-helpers-and-trc-files.html">Helpers and TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/04-general-info.html">General Info and Design</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../guides/05-hardware.html">Hardware</a></li>
 </ul>
 </li>
@@ -70,13 +70,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">Core API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../rush.client.html">rush.client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../rush.mol.html">rush.mol</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../rush.convert.html">rush.convert</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../rush.convert.json.html">rush.convert.json</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../rush.convert.mmcif.html">rush.convert.mmcif</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../rush.convert.pdb.html">rush.convert.pdb</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../rush.convert.sdf.html">rush.convert.sdf</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.convert.html">rush.convert</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Rush Modules</a><ul>
@@ -136,90 +130,74 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <h1>Source code for rush.mmseqs2</h1><div class="highlight"><pre>
 <span></span><span data-line="1"><span class="ch">#!/usr/bin/env python3</span>
-</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-</span><span data-line="5"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
-</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
-</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
-</span><span data-line="9">
-</span><span data-line="10"><span class="kn">import</span><span class="w"> </span><span class="nn">cyclopts</span>
-</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
-</span><span data-line="12">
-</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.convert.json</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_json</span>
-</span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.convert.pdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_pdb</span>
-</span><span data-line="15">
-</span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="17">    <span class="n">PROJECT_ID</span><span class="p">,</span>
-</span><span data-line="18">    <span class="n">RunOpts</span><span class="p">,</span>
-</span><span data-line="19">    <span class="n">RunSpec</span><span class="p">,</span>
-</span><span data-line="20">    <span class="n">collect_run</span><span class="p">,</span>
-</span><span data-line="21">    <span class="n">_submit_rex</span><span class="p">,</span>
-</span><span data-line="22">    <span class="n">upload_object</span><span class="p">,</span>
-</span><span data-line="23"><span class="p">)</span>
-</span><span data-line="24"><span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">dict_to_vec_of_tuples_str</span><span class="p">,</span> <span class="n">optional_str</span>
-</span><span data-line="25">
-</span><span data-line="26">
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
+</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="9">    <span class="n">PROJECT_ID</span><span class="p">,</span>
+</span><span data-line="10">    <span class="n">RunOpts</span><span class="p">,</span>
+</span><span data-line="11">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="12">    <span class="n">_submit_rex</span><span class="p">,</span>
+</span><span data-line="13">    <span class="n">collect_run</span><span class="p">,</span>
+</span><span data-line="14"><span class="p">)</span>
+</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">optional_str</span>
+</span><span data-line="16">
+</span><span data-line="17">
 <div class="viewcode-block" id="mmseqs2">
 <a class="viewcode-back" href="../../rush.mmseqs2.html#rush.mmseqs2.mmseqs2">[docs]</a>
-</span><span data-line="27"><span class="k">def</span><span class="w"> </span><span class="nf">mmseqs2</span><span class="p">(</span>
-</span><span data-line="28">    <span class="n">sequences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-</span><span data-line="29">    <span class="n">prefilter_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;KMer&quot;</span><span class="p">,</span> <span class="s2">&quot;Ungapped&quot;</span><span class="p">,</span> <span class="s2">&quot;Exhaustive&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="30">    <span class="n">sensitivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="31">    <span class="n">expand_eval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="32">    <span class="n">align_eval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="33">    <span class="n">diff</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="34">    <span class="n">qsc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="35">    <span class="n">max_accept</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="36">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-</span><span data-line="37">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
-</span><span data-line="38">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="39"><span class="p">):</span>
-</span><span data-line="40">    <span class="c1"># TODO: set use_upstream_server to `None` for prod, when it works again</span>
-</span><span data-line="41">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="42"><span class="s2">mmseqs2_rex_s</span>
-</span><span data-line="43"><span class="s2">  ($run_spec)</span>
-</span><span data-line="44"><span class="s2">  (mmseqs2_rex::Mmseqs2Config {</span>
-</span><span data-line="45"><span class="s2">    prefilter_mode = $maybe_prefilter_mode,</span>
-</span><span data-line="46"><span class="s2">    sensitivity = $maybe_sensitivity,</span>
-</span><span data-line="47"><span class="s2">    expand_eval = $maybe_expand_eval,</span>
-</span><span data-line="48"><span class="s2">    align_eval = $maybe_align_eval,</span>
-</span><span data-line="49"><span class="s2">    diff = $maybe_diff,</span>
-</span><span data-line="50"><span class="s2">    qsc = $maybe_qsc,</span>
-</span><span data-line="51"><span class="s2">    max_accept = $maybe_max_accept,</span>
-</span><span data-line="52"><span class="s2">    use_upstream_server = (Some &quot;yes&quot;)</span>
-</span><span data-line="53"><span class="s2">  })</span>
-</span><span data-line="54"><span class="s2">  $sequences</span>
-</span><span data-line="55"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
-</span><span data-line="56">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
-</span><span data-line="57">        <span class="n">maybe_prefilter_mode</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">prefilter_mode</span><span class="p">),</span>
-</span><span data-line="58">        <span class="n">maybe_sensitivity</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">sensitivity</span><span class="p">),</span>
-</span><span data-line="59">        <span class="n">maybe_expand_eval</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">expand_eval</span><span class="p">),</span>
-</span><span data-line="60">        <span class="n">maybe_align_eval</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">align_eval</span><span class="p">),</span>
-</span><span data-line="61">        <span class="n">maybe_diff</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span>
-</span><span data-line="62">        <span class="n">maybe_qsc</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">qsc</span><span class="p">),</span>
-</span><span data-line="63">        <span class="n">maybe_max_accept</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">max_accept</span><span class="p">),</span>
-</span><span data-line="64">        <span class="n">sequences</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="se">\n</span><span class="s2">        </span><span class="si">{</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">        &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">seq</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seq</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sequences</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
-</span><span data-line="65">    <span class="p">)</span>
-</span><span data-line="66">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="67">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
-</span><span data-line="68">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
-</span><span data-line="69">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
-</span><span data-line="70">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="71">            <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="72">
-</span><span data-line="73">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="74">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="75">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="76">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
-
-</span><span data-line="77">
-</span><span data-line="78">
-<div class="viewcode-block" id="run_mmseqs2">
-<a class="viewcode-back" href="../../rush.mmseqs2.html#rush.mmseqs2.run_mmseqs2">[docs]</a>
-</span><span data-line="79"><span class="k">def</span><span class="w"> </span><span class="nf">run_mmseqs2</span><span class="p">():</span>
-</span><span data-line="80">    <span class="n">cyclopts</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mmseqs2</span><span class="p">)</span></div>
+</span><span data-line="18"><span class="k">def</span><span class="w"> </span><span class="nf">mmseqs2</span><span class="p">(</span>
+</span><span data-line="19">    <span class="n">sequences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+</span><span data-line="20">    <span class="n">prefilter_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;KMer&quot;</span><span class="p">,</span> <span class="s2">&quot;Ungapped&quot;</span><span class="p">,</span> <span class="s2">&quot;Exhaustive&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="21">    <span class="n">sensitivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="22">    <span class="n">expand_eval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="23">    <span class="n">align_eval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="24">    <span class="n">diff</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="25">    <span class="n">qsc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="26">    <span class="n">max_accept</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="27">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+</span><span data-line="28">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
+</span><span data-line="29">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span data-line="30"><span class="p">):</span>
+</span><span data-line="31">    <span class="c1"># TODO: set use_upstream_server to `None` for prod, when it works again</span>
+</span><span data-line="32">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="33"><span class="s2">mmseqs2_rex_s</span>
+</span><span data-line="34"><span class="s2">  ($run_spec)</span>
+</span><span data-line="35"><span class="s2">  (mmseqs2_rex::Mmseqs2Config {</span>
+</span><span data-line="36"><span class="s2">    prefilter_mode = $maybe_prefilter_mode,</span>
+</span><span data-line="37"><span class="s2">    sensitivity = $maybe_sensitivity,</span>
+</span><span data-line="38"><span class="s2">    expand_eval = $maybe_expand_eval,</span>
+</span><span data-line="39"><span class="s2">    align_eval = $maybe_align_eval,</span>
+</span><span data-line="40"><span class="s2">    diff = $maybe_diff,</span>
+</span><span data-line="41"><span class="s2">    qsc = $maybe_qsc,</span>
+</span><span data-line="42"><span class="s2">    max_accept = $maybe_max_accept,</span>
+</span><span data-line="43"><span class="s2">    use_upstream_server = (Some &quot;yes&quot;)</span>
+</span><span data-line="44"><span class="s2">  })</span>
+</span><span data-line="45"><span class="s2">  $sequences</span>
+</span><span data-line="46"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="47">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
+</span><span data-line="48">        <span class="n">maybe_prefilter_mode</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">prefilter_mode</span><span class="p">),</span>
+</span><span data-line="49">        <span class="n">maybe_sensitivity</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">sensitivity</span><span class="p">),</span>
+</span><span data-line="50">        <span class="n">maybe_expand_eval</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">expand_eval</span><span class="p">),</span>
+</span><span data-line="51">        <span class="n">maybe_align_eval</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">align_eval</span><span class="p">),</span>
+</span><span data-line="52">        <span class="n">maybe_diff</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span>
+</span><span data-line="53">        <span class="n">maybe_qsc</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">qsc</span><span class="p">),</span>
+</span><span data-line="54">        <span class="n">maybe_max_accept</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">max_accept</span><span class="p">),</span>
+</span><span data-line="55">        <span class="n">sequences</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="se">\n</span><span class="s2">        </span><span class="si">{</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">        &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">seq</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seq</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sequences</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+</span><span data-line="56">    <span class="p">)</span>
+</span><span data-line="57">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="58">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="59">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
+</span><span data-line="60">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+</span><span data-line="61">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="62">            <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="63">
+</span><span data-line="64">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="65">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="66">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="67">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

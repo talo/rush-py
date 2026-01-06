@@ -57,9 +57,9 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="0"><ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="guides/01-getting-started.html">Getting Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/02-first-run.html">Doing Your First rush-py Run</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/03-general-info.html">General Info and Design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/04-helpers-and-trc-files.html">Helpers and TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/04-general-info.html">General Info and Design</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guides/05-hardware.html">Hardware</a></li>
 </ul>
 </li>
@@ -70,13 +70,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="api.html">Core API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="rush.client.html">rush.client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rush.mol.html">rush.mol</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.convert.html">rush.convert</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="rush.convert.json.html">rush.convert.json</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rush.convert.mmcif.html">rush.convert.mmcif</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rush.convert.pdb.html">rush.convert.pdb</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rush.convert.sdf.html">rush.convert.sdf</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="rush.convert.html">rush.convert</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Rush Modules</a><ul class="current">
@@ -254,11 +248,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rush.exess.interaction_energy"><code class="docutils literal notranslate"><span class="pre">interaction_energy()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.optimization"><code class="docutils literal notranslate"><span class="pre">optimization()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.qmmm"><code class="docutils literal notranslate"><span class="pre">qmmm()</span></code></a></li>
-<li><a class="reference internal" href="#rush.exess.run_chelpg"><code class="docutils literal notranslate"><span class="pre">run_chelpg()</span></code></a></li>
-<li><a class="reference internal" href="#rush.exess.run_energy"><code class="docutils literal notranslate"><span class="pre">run_energy()</span></code></a></li>
-<li><a class="reference internal" href="#rush.exess.run_interaction_energy"><code class="docutils literal notranslate"><span class="pre">run_interaction_energy()</span></code></a></li>
-<li><a class="reference internal" href="#rush.exess.run_optimization"><code class="docutils literal notranslate"><span class="pre">run_optimization()</span></code></a></li>
-<li><a class="reference internal" href="#rush.exess.run_qmmm"><code class="docutils literal notranslate"><span class="pre">run_qmmm()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.save_energy_outputs"><code class="docutils literal notranslate"><span class="pre">save_energy_outputs()</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
@@ -296,6 +285,12 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="module-rush.exess">
 <span id="exess"></span><h1>EXESS<a class="headerlink" href="#module-rush.exess" title="Link to this heading">¶</a></h1>
+<p>EXESS module helpers for the Rush Python client.</p>
+<p>EXESS supports whole-system energy calculations (fragmented or unfragmented),
+interaction energy between a fragment and the rest of the system, geometry
+optimization, simulations, and gradient/Hessian calculations. It supports
+multiple levels of theory (e.g., restricted/unrestricted HF, RI-MP2, DFT),
+flexible basis set selection, and configurable n-mer fragmentation levels.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="rush.exess.CustomDescriptorGrid">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">CustomDescriptorGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#CustomDescriptorGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.CustomDescriptorGrid" title="Link to this definition">¶</a></dt>
@@ -1362,31 +1357,6 @@ It is invalid to specify one fragment list parameter.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.exess.run_chelpg">
-<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">run_chelpg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#run_chelpg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.run_chelpg" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.exess.run_energy">
-<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">run_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#run_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.run_energy" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.exess.run_interaction_energy">
-<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">run_interaction_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#run_interaction_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.run_interaction_energy" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.exess.run_optimization">
-<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">run_optimization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#run_optimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.run_optimization" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.exess.run_qmmm">
-<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">run_qmmm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#run_qmmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.run_qmmm" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.exess.save_energy_outputs">
