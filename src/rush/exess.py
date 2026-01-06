@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+EXESS module helpers for the Rush Python client.
+
+EXESS supports whole-system energy calculations (fragmented or unfragmented),
+interaction energy between a fragment and the rest of the system, geometry
+optimization, simulations, and gradient/Hessian calculations. It supports
+multiple levels of theory (e.g., restricted/unrestricted HF, RI-MP2, DFT),
+flexible basis set selection, and configurable n-mer fragmentation levels.
+"""
 import sys
 import tarfile
 from dataclasses import dataclass

@@ -1,3 +1,11 @@
+"""
+Protein-ligand complex preparation module for the Rush Python client.
+
+This module builds on the protein preparation workflow to prepare complexes by
+extracting ligands from PDB inputs, adding hydrogens, and merging ligand data
+with prepared protein TRC data for downstream computations.
+"""
+
 from collections import defaultdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile

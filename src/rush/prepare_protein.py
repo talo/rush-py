@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+Protein preparation module for the Rush Python client.
+
+This module supports system preparation workflows such as converting PDB inputs
+to TRC, protonating and optimizing hydrogen positions, and augmenting
+structures with connectivity and formal charge information before downstream
+calculations.
+"""
 import json
 import sys
 from pathlib import Path
