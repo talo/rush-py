@@ -53,7 +53,6 @@ autodoc_typehints_format = "short"
 # Control member ordering - group by type (functions, classes, then data)
 autodoc_member_order = "groupwise"
 
-
 # Skip individual enum members to prevent documentation clutter
 def skip_enum_members(app, what, name, obj, skip, options):
     """

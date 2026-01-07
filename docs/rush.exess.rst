@@ -3,5 +3,6 @@ EXESS
 
 .. automodule:: rush.exess
    :members:
-   :undoc-members:
+   :member-order: bysource
    :show-inheritance:
+   :undoc-members:

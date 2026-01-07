@@ -1,10 +1,17 @@
 """
-Common data structures and helpers for molecular topology.
+Provides data structures and helpers for molecular systems and structures:
 
-This module provides Python classes for molecular structures:
-- Element types and bonds
-- Atom, residue, and chain references
-- Topology, Residues, Chains, and TRC structures
+- Classes Rush Topology, Residues, Chains, and TRC types.
+- Element types and bonds.
+- Fragment type to represent fragmented systems.
+
+Quick Links
+-----------
+
+- :class:`rush.mol.TRC`
+- :class:`rush.mol.Topology`
+- :class:`rush.mol.Residues`
+- :class:`rush.mol.Chains`
 """
 
 import json
@@ -84,16 +91,6 @@ class Element(IntEnum):
 
     def __str__(self) -> str:
         return self.name
-
-
-class BondOrder(IntEnum):
-    """Bond order enum."""
-
-    Single = 1
-    Double = 2
-    Triple = 3
-    OneAndAHalf = 4  # Partial bond (e.g. amide bond)
-    Ring = 5  # Aromatic
 
 
 class AtomRef:
@@ -204,6 +201,16 @@ class PartialCharge:
 
     def __float__(self):
         return self.charge
+
+
+class BondOrder(IntEnum):
+    """Bond order enum."""
+
+    Single = 1
+    Double = 2
+    Triple = 3
+    OneAndAHalf = 4  # Partial bond (e.g. amide bond)
+    Ring = 5  # Aromatic
 
 
 @dataclass

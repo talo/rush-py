@@ -7,6 +7,18 @@ interaction energy between a fragment and the rest of the system, geometry
 optimization, simulations, and gradient/Hessian calculations. It supports
 multiple levels of theory (e.g., restricted/unrestricted HF, RI-MP2, DFT),
 flexible basis set selection, and configurable n-mer fragmentation levels.
+
+Quick Links
+-----------
+
+- :func:`rush.exess.exess`
+- :func:`rush.exess.energy`
+- :func:`rush.exess.interaction_energy`
+- :func:`rush.exess.chelpg`
+- :func:`rush.exess.qmmm`
+- :func:`rush.exess.optimization`
+
+
 """
 
 import sys
