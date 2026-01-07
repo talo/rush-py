@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from rush_py2.convert import from_json
-from rush_py2.trc.merge import merge_trcs
+from rush.convert import from_json
+from rush.trc.merge import merge_trcs
 
 
 def test_merge_with_paths():

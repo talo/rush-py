@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from rush_py2.client import RunOpts, save_object, set_opts
-from rush_py2.convert import from_json
-from rush_py2.prepare_protein import prepare_protein
+from rush.client import RunOpts, save_object, set_opts
+from rush.convert import from_json
+from rush.prepare_protein import prepare_protein
 
 
 def test_prepare_protein():
@@ -12,7 +12,7 @@ def test_prepare_protein():
         data_dir / "3FLN.pdb",
         capping_style="always",
         run_opts=RunOpts(
-            name="Test prepare-protein 01", tags=["rush-py2", "test", "cdk2"]
+            name="Test prepare-protein 01", tags=["rush-py", "test", "cdk2"]
         ),
         collect=True,
     )

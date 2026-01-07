@@ -1,27 +1,18 @@
 #!/usr/bin/env python3
-import json
 import sys
-from dataclasses import dataclass
-from pathlib import Path
 from string import Template
-from tempfile import NamedTemporaryFile
 from typing import Literal
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
-
-from rush_py2.convert.json import to_json
-from rush_py2.convert.pdb import from_pdb
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
-    upload_object,
 )
-from .utils import dict_to_vec_of_tuples_str, optional_str
+from .utils import optional_str
 
 
 def mmseqs2(
@@ -53,7 +44,7 @@ mmseqs2_rex_s
   })
   $sequences
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         maybe_prefilter_mode=optional_str(prefilter_mode),
         maybe_sensitivity=optional_str(sensitivity),
         maybe_expand_eval=optional_str(expand_eval),
@@ -64,7 +55,7 @@ mmseqs2_rex_s
         sequences=f"[\n        {',\n        '.join([f'"{seq}"' for seq in sequences])}]",
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -74,7 +65,3 @@ mmseqs2_rex_s
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_mmseqs2():
-    cyclopts.run(mmseqs2)

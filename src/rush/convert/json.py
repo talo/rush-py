@@ -4,35 +4,15 @@ JSON conversion functionality for TRC structures.
 
 import json
 from pathlib import Path
-from typing import List
 
-from ..mol import (
-    TRC,
-    AtomRef,
-    Bond,
-    BondOrder,
-    Chain,
-    ChainRef,
-    Chains,
-    Element,
-    FormalCharge,
-    Fragment,
-    PartialCharge,
-    Residue,
-    ResidueRef,
-    Residues,
-    SchemaVersion,
-    Topology,
-)
+from ..mol import TRC, Chains, Residues, Topology
 
 
 def from_json(
-    json_content: str
-    | Path
-    | tuple[str | Path, str | Path, str | Path]
-    | dict
-    | list[dict],
-) -> TRC | List[TRC]:
+    json_content: (
+        str | Path | tuple[str | Path, str | Path, str | Path] | dict | list[dict]
+    ),
+) -> TRC | list[TRC]:
     """
     Load TRC structures from JSON.
 
@@ -40,20 +20,19 @@ def from_json(
         json_content: JSON string content
 
     Returns:
-        List of TRC structures
+        TRC structure or list of TRC structures
     """
     if isinstance(json_content, str):
         data = json.loads(json_content)
     elif isinstance(json_content, Path):
-        with open(json_content) as f:
+        with json_content.open() as f:
             data = json.load(f)
     elif isinstance(json_content, tuple) and len(json_content) == 3:
-        # TODO: type should be tuple[Path, Path, Path]
         data = [{}]
         with (
-            open(json_content[0]) as t_f,
-            open(json_content[1]) as r_f,
-            open(json_content[2]) as c_f,
+            Path(json_content[0]).open() as t_f,
+            Path(json_content[1]).open() as r_f,
+            Path(json_content[2]).open() as c_f,
         ):
             data[0]["topology"] = json.load(t_f)
             data[0]["residues"] = json.load(r_f)
@@ -84,12 +63,12 @@ def from_json(
         return trcs
 
 
-def to_json(trcs: List[TRC]) -> str:
+def to_json(trcs: TRC | list[TRC]) -> str:
     """
     Convert TRC structures to JSON.
 
     Args:
-        trcs: List of TRC structures
+        trcs: TRC structure or list of TRC structures
 
     Returns:
         JSON string

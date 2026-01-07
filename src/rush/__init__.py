@@ -1,5 +1,6 @@
 """
-rush-py2: Python library for molecular structure file format conversion.
+Python library for accessing and writing computational chemistry workflows with
+the Rush platform.
 """
 
 from .convert import (

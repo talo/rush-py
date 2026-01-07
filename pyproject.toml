@@ -1,35 +1,54 @@
 [project]
-name = "rush-py2"
-version = "0.1.0"
-description = "Simple python interfaces for Rush modules"
+name = "rush-py"
+version = "6.0.1"
+description = "Python client for QDX's Rush platform"
 readme = "README.md"
-requires-python = ">= 3.12"
+requires-python = ">=3.12"
+license = { text = "MIT" }
 authors = [
   { name = "Sean Laguna", email = "seanlaguna@qdx.co" },
 ]
 dependencies = [
-  "cyclopts~=4.2",
   "gql~=4.0",
   "h5py~=3.14",
-  "pytest>=9.0.2",
-  "rdkit>=2025.9.2",
+  "rdkit~=2025.9.2",
   "requests~=2.32",
   "requests_toolbelt~=1.0",
   "zstandard~=0.23",
 ]
+keywords = [
+  "chemistry",
+  "quantum-chemistry",
+  "molecular-modeling",
+  "HPC",
+]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Healthcare Industry",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: System :: Distributed Computing",
+]
+
+[project.urls]
+Homepage = "https://rush.cloud"
+Documentation = "https://talo.github.io/rush-py"
+Source = "https://github.com/talo/rush-py"
+Issues = "https://github.com/talo/rush-py/issues"
 
 [dependency-groups]
 dev = [
+  "pytest~=9.0.2",
   "basedpyright",
   "ruff",
+  "sphinx>=8.2.3",
+  "sphinx-autodoc-typehints>=3.5.2",
+  "shibuya>=2025.12.19",
+  "myst-parser>=4.0.1",
 ]
-
-[project.scripts]
-rush-exess-energy = "rush_py2.exess:run_energy"
-rush-exess-interaction-energy = "rush_py2.exess:run_interaction_energy"
-rush-exess-chelpg = "rush_py2.exess:run_chelpg"
-rush-exess-qmmm = "rush_py2.exess:run_qmmm"
-rush-exess-optimization = "rush_py2.exess:run_optimization"
 
 [tool.pyright]
 exclude = [
@@ -55,6 +74,9 @@ useLibraryCodeForTypes = true
 typeCheckingMode = "standard"
 reportAttributeAccessIssue = "none"
 
+[tool.uv.build-backend]
+module-name = "rush"
+
 [build-system]
-requires = ["uv_build~=0.8"]
+requires = ["uv_build~=0.9"]
 build-backend = "uv_build"

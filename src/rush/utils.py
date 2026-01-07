@@ -19,7 +19,7 @@ def dict_to_vec_of_tuples_str(d: dict[str, str]) -> str:
 
 
 def optional_str(
-    v: str | int | float | bool | None,
+    v: str | int | float | bool | list[int] | None,
     prefix: str = "",
 ) -> str:
     if isinstance(v, str) and not prefix:

@@ -6,18 +6,17 @@ from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
-from rush_py2.convert.json import to_json
-from rush_py2.convert.pdb import from_pdb
+from rush.convert.json import to_json
+from rush.convert.pdb import from_pdb
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
     upload_object,
 )
 from .utils import dict_to_vec_of_tuples_str, optional_str
@@ -37,9 +36,9 @@ class ProteinSequence:
     modifications: list[Modification] | None = None
     cyclic: bool | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         if isinstance(self.msa, Path) or isinstance(self.msa, str):
-            self.msa = upload_object(PROJECT_ID, self.msa)
+            self.msa = upload_object(self.msa)
 
         return Template(
             """(boltz2_rex::Sequence::Protein {
@@ -62,7 +61,7 @@ class LigandSequence:
     id: list[str]
     smiles: str
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """(boltz2_rex::Sequence::Ligand {
           id = $id,
@@ -119,9 +118,9 @@ def boltz(
             t_f.seek(0)
             r_f.seek(0)
             c_f.seek(0)
-            topology_vobj = upload_object(PROJECT_ID, t_f.name)
-            residues_vobj = upload_object(PROJECT_ID, r_f.name)
-            chains_vobj = upload_object(PROJECT_ID, c_f.name)
+            topology_vobj = upload_object(t_f.name)
+            residues_vobj = upload_object(r_f.name)
+            chains_vobj = upload_object(c_f.name)
 
     # Run rex
     rex = Template("""let
@@ -152,7 +151,7 @@ def boltz(
 in
   boltz "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         maybe_recycling_steps=optional_str(recycling_steps),
         maybe_sampling_steps=optional_str(sampling_steps),
         maybe_diffusion_samples=optional_str(diffusion_samples),
@@ -172,7 +171,7 @@ in
             if template_chain_mapping is not None
             else "None"
         ),
-        sequences=f"[\n        {',\n        '.join([f'{seq.to_rex()}' for seq in sequences])},\n      ]",
+        sequences=f"[\n        {',\n        '.join([f'{seq._to_rex()}' for seq in sequences])},\n      ]",
         template_trc_expr=(
             "(Some ((obj_j topology), (obj_j residues), (obj_j chains)) )"
             if template_path is not None
@@ -183,7 +182,7 @@ in
         chains_vobj_path=chains_vobj["path"] if has_template else "",
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -193,7 +192,3 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_boltz():
-    cyclopts.run(boltz)

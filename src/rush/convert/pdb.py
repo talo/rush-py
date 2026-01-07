@@ -5,7 +5,6 @@ PDB file parsing and writing functionality.
 import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple
 
 from ..mol import (
     TRC,
@@ -30,19 +29,19 @@ class PDBAtom:
 
     atom_idx: int
     atom_name: str
-    alternate_location: Optional[str]
+    alternate_location: str | None
     residue_name: str
     chain_id: str
     sequence_number: int
-    residue_insertion: Optional[str]
+    residue_insertion: str | None
     atom_x: float
     atom_y: float
     atom_z: float
     occupancy: float
     temperature_factor: float
-    segment_id: Optional[str]
+    segment_id: str | None
     element_symbol: Element
-    charge: Optional[int]
+    charge: int | None
 
 
 def _parse_pdb_atom_line(line: str, line_num: int) -> PDBAtom:
@@ -120,7 +119,7 @@ def _parse_pdb_atom_line(line: str, line_num: int) -> PDBAtom:
         raise ValueError(f"Line {line_num}: Error parsing ATOM/HETATM line: {e}")
 
 
-def _parse_conect_line(line: str) -> List[int]:
+def _parse_conect_line(line: str) -> list[int]:
     """Parse a CONECT line and return list of atom indices."""
     atom_idxs = []
     # CONECT format: positions 6-11, 11-16, 16-21, 21-26, 26-31 for atom indices
@@ -142,11 +141,11 @@ def _parse_conect_line(line: str) -> List[int]:
 
 
 def _build_trc(
-    atoms: List[PDBAtom],
-    atom_ids: List[int],
+    atoms: list[PDBAtom],
+    atom_ids: list[int],
     residue_data: OrderedDict,
-    chain_data: Dict[str, Set[ResidueId]],
-    connectivity: List[Tuple[int, int, int]],
+    chain_data: dict[str, set[ResidueId]],
+    connectivity: list[tuple[int, int, int]],
 ) -> TRC:
     """Build a TRC structure from parsed PDB data."""
 
@@ -275,7 +274,7 @@ def _build_trc(
 
 
 def _apply_global_connectivity(
-    trc: TRC, atom_ids: List[int], global_connectivity: List[Tuple[int, int, int]]
+    trc: TRC, atom_ids: list[int], global_connectivity: list[tuple[int, int, int]]
 ):
     """Apply global connectivity records to a TRC."""
     if not global_connectivity:
@@ -323,21 +322,21 @@ def _apply_global_connectivity(
         trc.topology.connectivity = additional_bonds
 
 
-def from_pdb(pdb_contents: str) -> List[TRC]:
+def from_pdb(pdb_content: str) -> TRC | list[TRC]:
     """
-    Parse PDB file contents into TRC structures.
+    Parse PDB file content into TRC structures.
 
     Args:
-        pdb_contents: String contents of a PDB file
+        pdb_content: String content of a PDB file
 
     Returns:
-        List of TRC structures (one per model in multi-model files)
+        TRC structure or list of TRC structures (one per model in multi-model files)
     """
     trcs = []
     trc_atom_ids = []
     global_connectivity = []  # List of (origin, target, order) tuples
 
-    lines = pdb_contents.strip().split("\n")
+    lines = pdb_content.strip().split("\n")
     line_iter = iter(enumerate(lines, 1))
 
     eof = False
@@ -449,6 +448,8 @@ def from_pdb(pdb_contents: str) -> List[TRC]:
     if not trcs:
         trcs.append(TRC())
 
+    if len(trcs) == 1:
+        return trcs[0]
     return trcs
 
 

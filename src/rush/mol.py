@@ -1,10 +1,17 @@
 """
-Common data structures and helpers for molecular topology.
+Provides data structures and helpers for molecular systems and structures:
 
-This module provides Python classes for molecular structures:
-- Element types and bonds
-- Atom, residue, and chain references
-- Topology, Residues, Chains, and TRC structures
+- Classes Rush Topology, Residues, Chains, and TRC types.
+- Element types and bonds.
+- Fragment type to represent fragmented systems.
+
+Quick Links
+-----------
+
+- :class:`rush.mol.TRC`
+- :class:`rush.mol.Topology`
+- :class:`rush.mol.Residues`
+- :class:`rush.mol.Chains`
 """
 
 import json
@@ -13,11 +20,11 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import List, Optional, Self, Tuple, Union
+from typing import Self
 
 
 class Element(IntEnum):
-    """Element enum equivalent to Rust Element enum."""
+    """Represents all relevant elements."""
 
     X = 0
     H = 1
@@ -86,22 +93,8 @@ class Element(IntEnum):
         return self.name
 
 
-class BondOrder(IntEnum):
-    """Bond order enum."""
-
-    Single = 1
-    Double = 2
-    Triple = 3
-    OneAndAHalf = 4  # Partial bond (e.g. amide bond)
-    Ring = 5  # Aromatic
-
-
 class AtomRef:
-    """Reference to an atom by index. Equivalent to Rust AtomRef(u32).
-
-    Rust tuple structs serialize to JSON as single values, not objects.
-    AtomRef(5) becomes just 5 in JSON.
-    """
+    """Reference to an atom by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -121,12 +114,29 @@ class AtomRef:
         return self.value
 
 
-class ResidueRef:
-    """Reference to a residue by index. Equivalent to Rust ResidueRef(u32).
+class FragmentRef:
+    """Reference to a fragment by index."""
 
-    Rust tuple structs serialize to JSON as single values, not objects.
-    ResidueRef(3) becomes just 3 in JSON.
-    """
+    def __init__(self, value: int):
+        if value < 0:
+            raise ValueError("Fragment index must be non-negative")
+        self.value = value
+
+    def __eq__(self, other):
+        return isinstance(other, FragmentRef) and self.value == other.value
+
+    def __hash__(self):
+        return hash(self.value)
+
+    def __repr__(self):
+        return f"FragmentRef({self.value})"
+
+    def __int__(self):
+        return self.value
+
+
+class ResidueRef:
+    """Reference to a residue by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -147,11 +157,7 @@ class ResidueRef:
 
 
 class ChainRef:
-    """Reference to a chain by index. Equivalent to Rust ChainRef(u32).
-
-    Rust tuple structs serialize to JSON as single values, not objects.
-    ChainRef(1) becomes just 1 in JSON.
-    """
+    """Reference to a chain by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -193,8 +199,18 @@ class PartialCharge:
     def __repr__(self):
         return f"PartialCharge({self.charge})"
 
-    def __int__(self):
+    def __float__(self):
         return self.charge
+
+
+class BondOrder(IntEnum):
+    """Bond order enum."""
+
+    Single = 1
+    Double = 2
+    Triple = 3
+    OneAndAHalf = 4  # Partial bond (e.g. amide bond)
+    Ring = 5  # Aromatic
 
 
 @dataclass
@@ -211,13 +227,9 @@ class Bond:
 
 
 class Fragment:
-    """Fragment containing a list of atoms. Equivalent to Rust Fragment(Vec<AtomRef>).
+    """Fragment containing a list of atoms."""
 
-    Rust tuple structs with Vec serialize to JSON as arrays.
-    Fragment([AtomRef(1), AtomRef(2)]) becomes [1, 2] in JSON.
-    """
-
-    def __init__(self, atoms: Optional[Union[List[AtomRef], List[int]]] = None):
+    def __init__(self, atoms: list[AtomRef] | list[int] | None = None):
         # Store as list of integers to match JSON serialization
         if atoms is None:
             self.atoms = []
@@ -249,53 +261,49 @@ class SchemaVersion(Enum):
 
 @dataclass
 class Topology:
-    """
-    Topology contains all atom information.
-
-    This is equivalent to the Rust Topology struct.
-    """
+    """Topology contains all atom information."""
 
     schema_version: SchemaVersion = SchemaVersion.V2
 
     # Element of each atom
-    symbols: List[Element] = field(default_factory=list)
+    symbols: list[Element] = field(default_factory=list)
 
     # XYZ coordinates of each atom (3 * len(symbols))
-    geometry: List[float] = field(default_factory=list)
+    geometry: list[float] = field(default_factory=list)
 
     # Optional atom labels
-    labels: Optional[List[str]] = None
+    labels: list[str] | None = None
 
     # Optional partial charges
-    partial_charges: Optional[List[PartialCharge]] = None
+    partial_charges: list[PartialCharge] | None = None
 
     # Optional formal charges
-    formal_charges: Optional[List[FormalCharge]] = None
+    formal_charges: list[FormalCharge] | None = None
 
     # Optional connectivity
-    connectivity: Optional[List[Bond]] = None
+    connectivity: list[Bond] | None = None
 
     # Optional velocities (3 * len(symbols))
-    velocities: Optional[List[float]] = None
+    velocities: list[float] | None = None
 
     # Optional fragments
-    fragments: Optional[List[Fragment]] = None
+    fragments: list[Fragment] | None = None
 
     # Optional fragment charges
-    fragment_formal_charges: Optional[List[FormalCharge]] = None
-    fragment_partial_charges: Optional[List[PartialCharge]] = None
+    fragment_formal_charges: list[FormalCharge] | None = None
+    fragment_partial_charges: list[PartialCharge] | None = None
 
     @staticmethod
-    def from_json(json_content: str | Path | dict):
+    def from_json(json_content: str | Path | dict) -> "Topology":
         if isinstance(json_content, str):
             topology_data = json.loads(json_content)
         elif isinstance(json_content, Path):
-            with open(json_content) as f:
+            with json_content.open() as f:
                 topology_data = json.load(f)
         elif isinstance(json_content, dict):
             topology_data = json_content
         else:
-            println(
+            print(
                 "WARNING: Tried to load Topology from JSON but "
                 "it wasn't a str, Path, or dict!"
             )
@@ -445,7 +453,7 @@ class Topology:
         return (dx * dx + dy * dy + dz * dz) ** 0.5
 
     def distance_to_point(
-        self, atom: AtomRef, point: Tuple[float, float, float]
+        self, atom: AtomRef, point: tuple[float, float, float]
     ) -> float:
         """Calculate distance from atom to a point."""
         if atom.value >= len(self.symbols):
@@ -460,10 +468,10 @@ class Topology:
 
     def get_atoms_near_point(
         self,
-        point: Tuple[float, float, float],
+        point: tuple[float, float, float],
         threshold: float,
-        atom_indices: Optional[List[int]] = None,
-    ) -> List[int]:
+        atom_indices: list[int] | None = None,
+    ) -> list[int]:
         """Get atom indices within threshold distance of a point."""
         if atom_indices is None:
             atom_indices = list(range(len(self.symbols)))
@@ -483,8 +491,8 @@ class Topology:
         self,
         frag_idx: int,
         threshold: float,
-        atom_indices: Optional[List[int]] = None,
-    ) -> list[AtomRef]:
+        atom_indices: list[int] | None = None,
+    ) -> list[FragmentRef]:
         """Get fragment indices within threshold distance of another fragment."""
         if not self.fragments:
             return []
@@ -512,7 +520,7 @@ class Topology:
             }
 
         return [
-            i
+            FragmentRef(i)
             for (i, f) in enumerate(self.fragments)
             if (i != frag_idx and not near_atoms.isdisjoint(f))
         ]
@@ -580,7 +588,7 @@ class Topology:
             self.fragment_partial_charges.extend(other.fragment_partial_charges)
 
     def new_topology_from_residue_subset(
-        self, residue_subset: List["Residue"]
+        self, residue_subset: list["Residue"]
     ) -> "Topology":
         """Create a new topology containing only atoms from specified residues."""
         new_topology = Topology(schema_version=self.schema_version)
@@ -722,13 +730,9 @@ class AminoAcidSeq(Enum):
 
 
 class Residue:
-    """A residue containing a list of atoms. Equivalent to Rust Residue(Vec<AtomRef>).
+    """A residue containing a list of atoms."""
 
-    Rust tuple structs with Vec serialize to JSON as arrays.
-    Residue([AtomRef(1), AtomRef(2)]) becomes [1, 2] in JSON.
-    """
-
-    def __init__(self, atoms: Optional[Union[List[AtomRef], List[int]]] = None):
+    def __init__(self, atoms: list[AtomRef] | list[int] | None = None):
         # Store as list of integers to match JSON serialization
         if atoms is None:
             self.atoms = []
@@ -759,34 +763,34 @@ class Residues:
     """Collection of residues with metadata."""
 
     # List of residues
-    residues: List[Residue] = field(default_factory=list)
+    residues: list[Residue] = field(default_factory=list)
 
     # Sequence names (e.g., amino acid names)
-    seqs: List[str] = field(default_factory=list)
+    seqs: list[str] = field(default_factory=list)
 
     # Sequence numbers
-    seq_ns: List[int] = field(default_factory=list)
+    seq_ns: list[int] = field(default_factory=list)
 
     # Insertion codes
-    insertion_codes: List[str] = field(default_factory=list)
+    insertion_codes: list[str] = field(default_factory=list)
 
     # WARN: Deprecated
-    labeled: Optional[List[ChainRef]] = None
+    labeled: list[ResidueRef] | None = None
 
     # WARN: Deprecated
-    labels: Optional[List[List[str]]] = None
+    labels: list[list[str]] | None = None
 
     @staticmethod
-    def from_json(json_content: str | Path | dict):
+    def from_json(json_content: str | Path | dict) -> "Residues":
         if isinstance(json_content, str):
             residues_data = json.loads(json_content)
         elif isinstance(json_content, Path):
-            with open(json_content) as f:
+            with json_content.open() as f:
                 residues_data = json.load(f)
         elif isinstance(json_content, dict):
             residues_data = json_content
         else:
-            println(
+            print(
                 "WARNING: Tried to load Residues from JSON but "
                 "it wasn't a str, Path, or dict!"
             )
@@ -823,11 +827,11 @@ class Residues:
             return False
         return AminoAcidSeq.is_amino_acid(self.seqs[index])
 
-    def amino_acid_indices(self) -> List[int]:
+    def amino_acid_indices(self) -> list[int]:
         """Get indices of amino acid residues."""
         return [i for i in range(len(self.seqs)) if self.is_amino_acid(i)]
 
-    def non_amino_acid_indices(self) -> List[int]:
+    def non_amino_acid_indices(self) -> list[int]:
         """Get indices of non-amino acid residues."""
         return [i for i in range(len(self.seqs)) if not self.is_amino_acid(i)]
 
@@ -846,7 +850,7 @@ class Residues:
         self.seq_ns.extend(other.seq_ns)
         self.insertion_codes.extend(other.insertion_codes)
 
-    def new_residues_from_subset(self, residue_refs: List[ResidueRef]) -> "Residues":
+    def new_residues_from_subset(self, residue_refs: list[ResidueRef]) -> "Residues":
         """Create new residues collection from a subset of residue references."""
         new_residues = Residues()
 
@@ -874,13 +878,9 @@ class Residues:
 
 
 class Chain:
-    """A chain containing a list of residues. Equivalent to Rust Chain(Vec<ResidueRef>).
+    """A chain containing a list of residues."""
 
-    Rust tuple structs with Vec serialize to JSON as arrays.
-    Chain([ResidueRef(1), ResidueRef(2)]) becomes [1, 2] in JSON.
-    """
-
-    def __init__(self, residues: Optional[Union[List[ResidueRef], List[int]]] = None):
+    def __init__(self, residues: list[ResidueRef] | list[int] | None = None):
         # Store as list of integers to match JSON serialization
         if residues is None:
             self.residues = []
@@ -911,31 +911,31 @@ class Chains:
     """Collection of chains with secondary structure information."""
 
     # List of chains
-    chains: List[Chain] = field(default_factory=list)
+    chains: list[Chain] = field(default_factory=list)
 
     # Optional alpha helix residues
-    alpha_helices: Optional[List[ResidueRef]] = None
+    alpha_helices: list[ResidueRef] | None = None
 
     # Optional beta sheet residues
-    beta_sheets: Optional[List[ResidueRef]] = None
+    beta_sheets: list[ResidueRef] | None = None
 
     # WARN: Deprecated
-    labeled: Optional[List[ChainRef]] = None
+    labeled: list[ChainRef] | None = None
 
     # WARN: Deprecated
-    labels: Optional[List[List[str]]] = None
+    labels: list[list[str]] | None = None
 
     @staticmethod
-    def from_json(json_content: str | Path | dict):
+    def from_json(json_content: str | Path | dict) -> "Chains":
         if isinstance(json_content, str):
             chains_data = json.loads(json_content)
         elif isinstance(json_content, Path):
-            with open(json_content) as f:
+            with json_content.open() as f:
                 chains_data = json.load(f)
         elif isinstance(json_content, dict):
             chains_data = json_content
         else:
-            println(
+            print(
                 "WARNING: Tried to load Chains from JSON but "
                 "it wasn't a str, Path, or dict!"
             )
@@ -986,7 +986,7 @@ class Chains:
             self.beta_sheets.extend([ResidueRef(ref) for ref in new_beta_sheets])
 
     def new_chains_from_residue_subset(
-        self, residue_refs: List[ResidueRef]
+        self, residue_refs: list[ResidueRef]
     ) -> "Chains":
         """Create new chains collection from a subset of residue references."""
         new_chains = Chains()
@@ -1042,8 +1042,7 @@ class Chains:
 class TRC:
     """
     Combined Topology, Residues, and Chains structure.
-
-    This is the main wrapper class equivalent to the Rust TRC struct.
+    This is the main structure for representing molecular systems on the Rush platform.
     """
 
     topology: Topology = field(default_factory=Topology)
@@ -1090,7 +1089,7 @@ class TRC:
         self.residues.extend(other.residues)
         self.chains.extend(other.chains)
 
-    def new_trc_from_residue_subset(self, residue_refs: List[ResidueRef]) -> "TRC":
+    def new_trc_from_residue_subset(self, residue_refs: list[ResidueRef]) -> "TRC":
         """Create new TRC from a subset of residue references."""
         # Get residue subset
         residue_subset = [self.residues.residues[ref.value] for ref in residue_refs]

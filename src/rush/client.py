@@ -8,7 +8,7 @@ from io import BytesIO
 from os import getenv
 from pathlib import Path
 from string import Template
-from typing import Literal
+from typing import Literal, TypeAlias
 
 import requests
 import zstandard as zstd
@@ -18,10 +18,10 @@ from gql.transport.requests import RequestsHTTPTransport
 from .utils import clean_dict, optional_str
 
 INITIAL_POLL_INTERVAL = 0.5
-MAX_POLL_INTERVAL = 30
-BACKOFF_FACTOR = 1.5
-MAX_WAIT_TIME = 3600
 
+MAX_POLL_INTERVAL = 30
+
+BACKOFF_FACTOR = 1.5
 
 GRAPHQL_ENDPOINT = getenv(
     "RUSH_ENDPOINT",
@@ -69,23 +69,33 @@ MODULE_LOCK = (
 
 
 @dataclass
-class RushOpts:
+class _RushOpts:
+    """
+    Options to configure rush-py. Can be set through the `set_opts` function.
+    """
+
+    #: The directory where the workspace resides. (Default: current working directory)
+    #: The history JSON file will be written here and the
+    #: run outputs will be downloaded here (nested under a project folder).
     workspace_dir: Path = Path.cwd()
 
 
-_rush_opts: RushOpts | None = None
+_rush_opts: _RushOpts | None = None
 
 
-def _get_opts() -> RushOpts:
+def _get_opts() -> _RushOpts:
     global _rush_opts
 
     if _rush_opts is None:
-        _rush_opts = RushOpts()
+        _rush_opts = _RushOpts()
 
     return _rush_opts
 
 
 def set_opts(workspace_dir: Path | None = None):
+    """
+    Sets Rush options. Currently, only allows setting the workspace directory.
+    """
     opts = _get_opts()
     if workspace_dir is not None:
         opts.workspace_dir = workspace_dir
@@ -108,22 +118,35 @@ def _get_client() -> Client:
     return _rush_client
 
 
-type TargetT = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
+type Target = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
 
-type StorageUnitT = Literal["KB", "MB", "GB"]
+type StorageUnit = Literal["KB", "MB", "GB"]
 
 
 @dataclass
 class RunSpec:
-    target: TargetT | None = None
+    """
+    The run specification: configuration for the target and resources of a run.
+    """
+
+    #: The Rush-specified hardware that the run will be submitted to.
+    #: By default, randomly chooses a cloud compute "Bullet" node of the three available.
+    target: Target | None = None
+    #: Max walltime in minutes for the run.
     walltime: int | None = None
+    #: Max storage in the specified storage units for the run.
     storage: int | None = 10
-    storage_units: StorageUnitT | None = "MB"
+    #: The storage units for the run.
+    storage_units: StorageUnit | None = "MB"
+    #: The number of CPUs for the run. Default is module-specific.
     cpus: int | None = None
+    #: The number of GPUs for the run. Default is module-specific.
     gpus: int | None = None
+    #: The number of nodes for the run. Only relevant for supercomputer targets.
+    #: Default is module-specific.
     nodes: int | None = None
 
-    def to_rex(self):
+    def _to_rex(self):
         return Template(
             """RunSpec {
         resources = Resources {
@@ -156,19 +179,23 @@ class RunSpec:
 @dataclass
 class RunOpts:
     """
-    The name of the run will show up as the name (i.e. title) of the run in the Rush UI.
     The description currently doesn't show up anywhere.
     The tags will also show up in the Rush UI and will (eventually) allow for run searching and filtering.
     The email flag, if set to True, will cause an email to be sent to you upon run completion.
     """
 
+    #: Shows up as the name (i.e. title) of the run in the Rush UI.
     name: str | None = None
     description: str | None = None
     tags: list[str] | None = None
     email: bool | None = None
 
 
-def upload_object(project_id: str, filepath: Path | str):
+def upload_object(filepath: Path | str):
+    """
+    Upload an object at the filepath to the current project. Usually not necessary; the
+    module functions should handle this automatically.
+    """
     mutation = gql("""
         mutation UploadObject($file: Upload!, $typeinfo: Json!, $format: ObjectFormatEnum!, $project_id: String) {
             upload_object(file: $file, typeinfo: $typeinfo, format: $format, project_id: $project_id) {
@@ -194,7 +221,7 @@ def upload_object(project_id: str, filepath: Path | str):
                     "k": "record",
                     "t": {},
                 },
-                "project_id": project_id,
+                "project_id": PROJECT_ID,
             }
         else:
             mutation.variable_values = {
@@ -211,7 +238,7 @@ def upload_object(project_id: str, filepath: Path | str):
                     },
                     "n": "Object",
                 },
-                "project_id": project_id,
+                "project_id": PROJECT_ID,
             }
         result = _get_client().execute(mutation, upload_files=True)
 
@@ -220,6 +247,10 @@ def upload_object(project_id: str, filepath: Path | str):
 
 
 def download_object(path: str):
+    """
+    Downloads the contents of the given Rush object store path directly into a variable.
+    Be careful, if the contents are too large it might not fit into memory!
+    """
     # TODO: enforce UUID type
     query = gql("""
         query GetObject($path: String!) {
@@ -250,10 +281,15 @@ def download_object(path: str):
 
 
 def save_json(d: dict, filepath: Path | str | None = None, name: str | None = None):
+    """
+    Save a JSON file into the workspace folder.
+    Convenient for saving non-object JSON output from a module run alongside
+    the object outputs.
+    """
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
-    elif filepath is None and name is not None:
+    elif filepath is None and name is not None and PROJECT_ID is not None:
         filepath = _get_opts().workspace_dir / PROJECT_ID / f"{name}.json"
     else:
         raise Exception("Must specify either filepath or name")
@@ -271,6 +307,22 @@ def save_object(
     ext: str | None = None,
     extract: bool = False,
 ):
+    """
+    Saves the contents of the given Rush object store path into the workspace folder.
+    Provides a variety of naming schemes, and supports automatically extracting tar.zst
+    archives (which are sometimes used for module outputs).
+
+    Note:
+        The `filepath` and `name` parameters are mutually exculsive.
+
+    Args:
+        path: The Rush object store path to save.
+        filepath: Overrides the path to save to.
+        name: Sets the name of the file to save to.
+        type: Manually specify the type of object (usually not necessary).
+        ext: Manually the filetype extension to use (otherwise, based on `type`).
+        extract: Automatically extract tar.zst files before saving.
+    """
     if type is None and (ext is None or ext == "json"):
         type = "json"
     else:
@@ -280,9 +332,9 @@ def save_object(
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
-    elif filepath is None and name is not None:
+    elif filepath is None and name is not None and PROJECT_ID is not None:
         filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{name}." + ext)
-    elif filepath is None and name is None:
+    elif filepath is None and name is None and PROJECT_ID is not None:
         filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{path}." + ext)
     else:
         raise Exception("Cannot specify both filepath or name")
@@ -310,7 +362,7 @@ def save_object(
     return filepath
 
 
-def fetch_results(run_id: str):
+def _fetch_results(run_id: str):
     query = gql("""
         query GetResults($id: String!) {
             run(id: $id) {
@@ -326,7 +378,7 @@ def fetch_results(run_id: str):
     return result["run"]
 
 
-def print_run_trace(run):
+def _print_run_trace(run):
     print(f"Error: {run['result']}", file=sys.stderr)
 
     trace = run["trace"]
@@ -357,7 +409,7 @@ def print_run_trace(run):
         print(file=sys.stderr)
 
 
-RunStatus = Literal["pending", "running", "done", "error", "cancelled", "draft"]
+type RunStatus = Literal["pending", "running", "done", "error", "cancelled", "draft"]
 
 
 def _build_filters(
@@ -460,7 +512,9 @@ def fetch_runs(
 
 
 def delete_run(run_id: str) -> None:
-    """Delete a run by ID."""
+    """
+    Delete a run by ID.
+    """
     query = gql("""
         mutation DeleteRun($run_id: String!) {
             delete_run(run_id: $run_id) {
@@ -473,7 +527,7 @@ def delete_run(run_id: str) -> None:
     _get_client().execute(query)
 
 
-def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
+def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     mutation = gql("""
         mutation EvalRex($input: CreateRun!) {
             eval(input: $input) {
@@ -544,6 +598,10 @@ def submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
 
 @dataclass
 class RushRun:
+    """
+    Print it out to see a nicely-formatted summary of a run!
+    """
+
     id: str
     created_at: str
     updated_at: str
@@ -577,7 +635,7 @@ def fetch_run_info(run_id: str) -> RushRun | None:
     """
     Fetch all info for a run by ID.
 
-    Returns None if the run doesn't exist.
+    Returns `None` if the run doesn't exist.
     """
     query = gql("""
         query GetRun($id: String!) {
@@ -604,7 +662,7 @@ def fetch_run_info(run_id: str) -> RushRun | None:
     return RushRun(**result["run"] | {"id": run_id})
 
 
-def poll_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
+def _poll_run(run_id: str, max_wait_time):
     query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
@@ -635,7 +693,7 @@ def poll_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
     start_time = time.time()
     poll_interval = INITIAL_POLL_INTERVAL
     last_status = None
-    while time.time() - start_time < MAX_WAIT_TIME:
+    while time.time() - start_time < max_wait_time:
         time.sleep(poll_interval)
 
         result = _get_client().execute(query)
@@ -677,21 +735,26 @@ def poll_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
     return status
 
 
-def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
-    status = poll_run(run_id, max_wait_time)
+def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | str:
+    """
+    Waits until the run finishes, or `max_wait_time` elapses, and returns either the
+    actual result of the run, an error string if the run failed, or a string indicating
+    that the run timed out.
+    """
+    status = _poll_run(run_id, max_wait_time)
     if status not in ["cancelled", "error", "done"]:
-        err = (f"Run timed out: did not complete within {MAX_WAIT_TIME} seconds",)
+        err = f"Run timed out: did not complete within {max_wait_time} seconds"
         print(err, file=sys.stderr)
         return err
 
-    run = fetch_results(run_id)
+    run = _fetch_results(run_id)
     if run["status"] == "cancelled":
         err = f"Cancelled: {run['result']}"
         print(err, file=sys.stderr)
         return err
     elif run["status"] == "error":
         err = f"Error: {run['result']}"
-        print_run_trace(run)
+        _print_run_trace(run)
         return err
 
     result = run["result"]
@@ -723,3 +786,15 @@ def collect_run(run_id: str, max_wait_time: int = MAX_WAIT_TIME):
         return result[0]
     else:
         return result
+
+
+#: All self-explanatory: pending runs are queued for submission to a target.
+RunStatus: TypeAlias = Literal[
+    "pending", "running", "done", "error", "cancelled", "draft"
+]
+
+#: Valid values for the `target` field of `RunSpec`.
+Target: TypeAlias = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
+
+#: Valid values for the `storage_units` field of `RunSpec`.
+StorageUnit: TypeAlias = Literal["KB", "MB", "GB"]

@@ -1,8 +1,8 @@
 import time
 from pathlib import Path
 
-from rush_py2 import exess
-from rush_py2.client import (
+from rush import exess
+from rush.client import (
     RunOpts,
     delete_run,
     fetch_runs,

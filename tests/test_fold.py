@@ -3,10 +3,10 @@ import sys
 from pathlib import Path
 from pprint import pp
 
-from rush_py2 import from_json
-from rush_py2.boltz import LigandSequence, ProteinSequence, boltz
-from rush_py2.client import RunOpts, RunSpec, save_object, set_opts
-from rush_py2.mmseqs2 import mmseqs2
+from rush import from_json
+from rush.boltz import LigandSequence, ProteinSequence, boltz
+from rush.client import RunOpts, RunSpec, save_object, set_opts
+from rush.mmseqs2 import mmseqs2
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")

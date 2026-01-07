@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+Protein preparation module for the Rush Python client.
+
+This module supports system preparation workflows such as converting PDB inputs
+to TRC, protonating and optimizing hydrogen positions, and augmenting
+structures with connectivity and formal charge information before downstream
+calculations.
+"""
+
 import json
 import sys
 from pathlib import Path
@@ -6,16 +15,15 @@ from string import Template
 from tempfile import NamedTemporaryFile
 from typing import Literal
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
     save_object,
-    submit_rex,
     upload_object,
 )
 from .convert import from_pdb, to_json
@@ -57,9 +65,9 @@ def prepare_protein(
         t_f.seek(0)
         r_f.seek(0)
         c_f.seek(0)
-        topology_vobj = upload_object(PROJECT_ID, t_f.name)
-        residues_vobj = upload_object(PROJECT_ID, r_f.name)
-        chains_vobj = upload_object(PROJECT_ID, c_f.name)
+        topology_vobj = upload_object(t_f.name)
+        residues_vobj = upload_object(r_f.name)
+        chains_vobj = upload_object(c_f.name)
 
     # Run rex
     rex = Template("""let
@@ -78,7 +86,7 @@ def prepare_protein(
 in
   prepare_protein "$topology_vobj_path" "$residues_vobj_path" "$chains_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         ph=optional_str(ph),
         naming_scheme=optional_str(
             naming_scheme.title() if naming_scheme is not None else None,
@@ -94,7 +102,7 @@ in
         chains_vobj_path=chains_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -112,7 +120,3 @@ def save_outputs(res):
         save_object(res[1]["path"]),
         save_object(res[2]["path"]),
     )
-
-
-def run_prepare_protein():
-    cyclopts.run(prepare_protein)

@@ -4,15 +4,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
     upload_object,
 )
 from .utils import float_to_str
@@ -51,7 +50,7 @@ def pbsa(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
 
     # Run rex
     rex = Template("""let
@@ -77,7 +76,7 @@ def pbsa(
 in
   pbsa "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         solute_dielectric=float_to_str(solute_dielectric),
         solvent_dielectric=float_to_str(solvent_dielectric),
         solvent_radius=float_to_str(solvent_radius),
@@ -92,7 +91,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -102,7 +101,3 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_pbsa():
-    cyclopts.run(pbsa)

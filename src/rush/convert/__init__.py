@@ -4,15 +4,16 @@ Conversion utilities for molecular structure file formats.
 This module provides functions to convert between PDB, mmCIF, and JSON formats.
 """
 
-from typing import List, Optional
+from pathlib import Path
 
 from ..mol import TRC
 from .json import from_json, to_json
 from .mmcif import from_mmcif
 from .pdb import from_pdb, to_pdb
+from .sdf import from_sdf
 
 
-def load_structure(file_path: str) -> TRC | List[TRC]:
+def load_structure(file_path: str | Path) -> TRC | list[TRC]:
     """
     Load structure from PDB, mmCIF, or JSON file.
 
@@ -20,17 +21,19 @@ def load_structure(file_path: str) -> TRC | List[TRC]:
         file_path: Path to structure file
 
     Returns:
-        List of TRC structures
+        TRC structure or list of TRC structures
     """
-    with open(file_path, "r") as f:
+    path = Path(file_path)
+    with path.open("r") as f:
         content = f.read()
 
     # Determine file type by extension
-    if file_path.lower().endswith(".json"):
+    suffix = path.suffix.lower()
+    if suffix == ".json":
         return from_json(content)
-    elif file_path.lower().endswith(".cif"):
+    elif suffix in {".cif", ".mmcif"}:
         return from_mmcif(content)
-    elif file_path.lower().endswith(".pdb"):
+    elif suffix == ".pdb":
         return from_pdb(content)
     else:
         # Try to guess from content
@@ -43,20 +46,23 @@ def load_structure(file_path: str) -> TRC | List[TRC]:
             return from_pdb(content)
 
 
-def save_structure(trcs: List[TRC], file_path: str, format: Optional[str] = None):
+def save_structure(
+    trcs: TRC | list[TRC], file_path: str | Path, format: str | None = None
+):
     """
     Save TRC structures to file.
 
     Args:
-        trcs: List of TRC structures
+        trcs: TRC structure or list of TRC structures
         file_path: Output file path
         format: Output format ('pdb', 'json', or None for auto-detect from extension)
     """
+    path = Path(file_path)
     if format is None:
         # Auto-detect from extension
-        if file_path.lower().endswith(".json"):
+        if path.suffix.lower() == ".json":
             format = "json"
-        elif file_path.lower().endswith(".pdb"):
+        elif path.suffix.lower() == ".pdb":
             format = "pdb"
         else:
             format = "pdb"  # Default
@@ -64,6 +70,8 @@ def save_structure(trcs: List[TRC], file_path: str, format: Optional[str] = None
     if format.lower() == "json":
         content = to_json(trcs)
     elif format.lower() == "pdb":
+        if isinstance(trcs, TRC):
+            trcs = [trcs]
         if len(trcs) > 1:
             # Multi-model PDB
             content_parts = []
@@ -78,16 +86,17 @@ def save_structure(trcs: List[TRC], file_path: str, format: Optional[str] = None
     else:
         raise ValueError(f"Unsupported format: {format}")
 
-    with open(file_path, "w") as f:
+    with path.open("w") as f:
         f.write(content)
 
 
 __all__ = [
-    "from_pdb",
-    "to_pdb",
-    "from_mmcif",
     "from_json",
     "to_json",
+    "from_mmcif",
+    "from_pdb",
+    "to_pdb",
+    "from_sdf",
     "load_structure",
     "save_structure",
 ]

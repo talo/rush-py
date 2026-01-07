@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
+"""
+NN-xTB module helpers for the Rush Python client.
+
+NN-xTB reparameterizes xTB with a neural network to approach DFT-level accuracy
+while keeping xTB-like speed. It supports arbitrary charge and spin states and
+is well-suited for large-scale screening where fast, per-atom forces or
+vibrational frequencies are needed. Frequency calculations are more expensive.
+"""
+
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 
-import cyclopts
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
     RunOpts,
     RunSpec,
+    _submit_rex,
     collect_run,
-    submit_rex,
     upload_object,
 )
 from .utils import optional_str
@@ -20,6 +28,15 @@ from .utils import optional_str
 
 @dataclass
 class NnxtbResults:
+    """
+    Parsed nn-xTB results.
+
+    Use this to load JSON output from the Rush object store. When calling
+    `nnxtb(..., collect=True)`, the return value includes a `path` to the JSON
+    output. After reading the json into a dict, you can pass it to this class
+    like `NnxtbResults(**data)`.
+    """
+
     energy_mev: float
     forces_mev_per_angstrom: list[tuple[float, float, float]] | None
     frequencies_inv_cm: list[float] | None
@@ -42,15 +59,22 @@ def nnxtb(
     collect=False,
 ):
     """
-    Run nn-xTB on the system in the QDX topology file at `topology_path`.
+    Run NN-xTB on the system in the QDX topology file at `topology_path`.
 
-    Returns the
-    total energy, polar solvation energy, and nonpolar solvation energy
-    of the system, in Hartrees.
+    Args:
+        topology_path: Path to a TRC topology JSON file.
+        compute_forces: Whether to compute per-atom forces.
+            Defaults to true.
+        compute_frequencies: Whether to compute vibrational frequencies.
+            Defaults to false.
+        multiplicity: Spin multiplicity. Defaults to 1 (singlet).
+        run_spec: Rush compute resources to request.
+        run_opts: Rush run metadata.
+        collect: Whether to wait for completion and return outputs.
     """
 
     # Upload inputs
-    topology_vobj = upload_object(PROJECT_ID, topology_path)
+    topology_vobj = upload_object(topology_path)
     charge = 0
 
     # Run rex
@@ -70,7 +94,7 @@ def nnxtb(
 in
   nnxtb "$topology_vobj_path"
 """).substitute(
-        run_spec=run_spec.to_rex(),
+        run_spec=run_spec._to_rex(),
         maybe_compute_forces=optional_str(compute_forces),
         maybe_compute_frequencies=optional_str(compute_frequencies),
         maybe_charge=f"Some (int {charge})" if charge is not None else None,
@@ -78,7 +102,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -88,7 +112,3 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def run_nnxtb():
-    cyclopts.run(nnxtb)
