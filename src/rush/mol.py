@@ -17,7 +17,7 @@ from typing import Self
 
 
 class Element(IntEnum):
-    """Element enum equivalent to Rust Element enum."""
+    """Represents all relevant elements."""
 
     X = 0
     H = 1
@@ -97,11 +97,7 @@ class BondOrder(IntEnum):
 
 
 class AtomRef:
-    """Reference to an atom by index. Equivalent to Rust AtomRef(u32).
-
-    Rust tuple structs serialize to JSON as single values, not objects.
-    AtomRef(5) becomes just 5 in JSON.
-    """
+    """Reference to an atom by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -122,7 +118,7 @@ class AtomRef:
 
 
 class FragmentRef:
-    """Reference to a fragment by index. Equivalent to Rust FragmentRef(u32)."""
+    """Reference to a fragment by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -143,11 +139,7 @@ class FragmentRef:
 
 
 class ResidueRef:
-    """Reference to a residue by index. Equivalent to Rust ResidueRef(u32).
-
-    Rust tuple structs serialize to JSON as single values, not objects.
-    ResidueRef(3) becomes just 3 in JSON.
-    """
+    """Reference to a residue by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -168,11 +160,7 @@ class ResidueRef:
 
 
 class ChainRef:
-    """Reference to a chain by index. Equivalent to Rust ChainRef(u32).
-
-    Rust tuple structs serialize to JSON as single values, not objects.
-    ChainRef(1) becomes just 1 in JSON.
-    """
+    """Reference to a chain by index."""
 
     def __init__(self, value: int):
         if value < 0:
@@ -232,11 +220,7 @@ class Bond:
 
 
 class Fragment:
-    """Fragment containing a list of atoms. Equivalent to Rust Fragment(Vec<AtomRef>).
-
-    Rust tuple structs with Vec serialize to JSON as arrays.
-    Fragment([AtomRef(1), AtomRef(2)]) becomes [1, 2] in JSON.
-    """
+    """Fragment containing a list of atoms."""
 
     def __init__(self, atoms: list[AtomRef] | list[int] | None = None):
         # Store as list of integers to match JSON serialization
@@ -270,11 +254,7 @@ class SchemaVersion(Enum):
 
 @dataclass
 class Topology:
-    """
-    Topology contains all atom information.
-
-    This is equivalent to the Rust Topology struct.
-    """
+    """Topology contains all atom information."""
 
     schema_version: SchemaVersion = SchemaVersion.V2
 
@@ -743,11 +723,7 @@ class AminoAcidSeq(Enum):
 
 
 class Residue:
-    """A residue containing a list of atoms. Equivalent to Rust Residue(Vec<AtomRef>).
-
-    Rust tuple structs with Vec serialize to JSON as arrays.
-    Residue([AtomRef(1), AtomRef(2)]) becomes [1, 2] in JSON.
-    """
+    """A residue containing a list of atoms."""
 
     def __init__(self, atoms: list[AtomRef] | list[int] | None = None):
         # Store as list of integers to match JSON serialization
@@ -895,11 +871,7 @@ class Residues:
 
 
 class Chain:
-    """A chain containing a list of residues. Equivalent to Rust Chain(Vec<ResidueRef>).
-
-    Rust tuple structs with Vec serialize to JSON as arrays.
-    Chain([ResidueRef(1), ResidueRef(2)]) becomes [1, 2] in JSON.
-    """
+    """A chain containing a list of residues."""
 
     def __init__(self, residues: list[ResidueRef] | list[int] | None = None):
         # Store as list of integers to match JSON serialization
@@ -1063,8 +1035,7 @@ class Chains:
 class TRC:
     """
     Combined Topology, Residues, and Chains structure.
-
-    This is the main wrapper class equivalent to the Rust TRC struct.
+    This is the main structure for representing molecular systems on the Rush platform.
     """
 
     topology: Topology = field(default_factory=Topology)
