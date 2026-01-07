@@ -2,9 +2,10 @@
 """
 NN-xTB module helpers for the Rush Python client.
 
-NN-xTB provides xTB reparameterized by a neural network to reach higher accuracy
-while remaining fast. It can compute total energy, per-atom forces, and
-vibrational frequencies, and supports arbitrary charge and spin states.
+NN-xTB reparameterizes xTB with a neural network to approach DFT-level accuracy
+while keeping xTB-like speed. It supports arbitrary charge and spin states and
+is well-suited for large-scale screening where fast, per-atom forces or
+vibrational frequencies are needed. Frequency calculations are more expensive.
 """
 
 import sys
@@ -27,6 +28,15 @@ from .utils import optional_str
 
 @dataclass
 class NnxtbResults:
+    """
+    Parsed nn-xTB results.
+
+    Use this to load JSON output from the Rush object store. When calling
+    `nnxtb(..., collect=True)`, the return value includes a `path` to the JSON
+    output. After reading the json into a dict, you can pass it to this class
+    like `NnxtbResults(**data)`.
+    """
+
     energy_mev: float
     forces_mev_per_angstrom: list[tuple[float, float, float]] | None
     frequencies_inv_cm: list[float] | None
@@ -50,6 +60,17 @@ def nnxtb(
 ):
     """
     Run NN-xTB on the system in the QDX topology file at `topology_path`.
+
+    Args:
+        topology_path: Path to a TRC topology JSON file.
+        compute_forces: Whether to compute per-atom forces.
+            Defaults to true.
+        compute_frequencies: Whether to compute vibrational frequencies.
+            Defaults to false.
+        multiplicity: Spin multiplicity. Defaults to 1 (singlet).
+        run_spec: Rush compute resources to request.
+        run_opts: Rush run metadata.
+        collect: Whether to wait for completion and return outputs.
     """
 
     # Upload inputs
