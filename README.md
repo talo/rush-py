@@ -74,7 +74,7 @@ help(exess.chelpg)
 help(exess.qmmm)
 ```
 
-See the [Getting Started guide](/docs/guides/01-getting-started.md) for more usage information.
+See the [docs](https://talo.github.io/rush-py) for more information!
 
 ## Development
 
