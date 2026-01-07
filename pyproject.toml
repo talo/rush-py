@@ -1,10 +1,10 @@
 [project]
 name = "rush-py"
-version = "6.0.1"
+version = "6.0.2"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 authors = [
   { name = "Sean Laguna", email = "seanlaguna@qdx.co" },
 ]
@@ -17,13 +17,17 @@ dependencies = [
   "zstandard~=0.23",
 ]
 keywords = [
-  "chemistry",
+  "computational-chemistry",
   "quantum-chemistry",
-  "molecular-modeling",
   "HPC",
+  "molecular-modeling",
+  "protein-folding",
+  "EXESS",
+  "NN-xTB",
+  "PBSA",
 ]
 classifiers = [
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
   "Intended Audience :: Healthcare Industry",

@@ -12,7 +12,7 @@ If you manage dependencies with `uv`, add it to your project (updates `pyproject
 uv add rush-py
 ```
 
-### Using in your project
+### Using in Your Project
 
 Add to your `pyproject.toml`:
 ```toml
@@ -22,14 +22,14 @@ dependencies = [
 ]
 ```
 
-## Rush setup
+## Rush Setup
 
 Use environment variables to configure access:
 - `RUSH_TOKEN`: Put your token's value here
 - `RUSH_PROJECT`: Put your project's UUID value here; can find it in the URL once selecting a project in the Rush UI
 - `RUSH_ENDPOINT`: Use this to choose between staging and prod; if omitted, defaults to prod
 
-## Quick start
+## Quick Start
 
 ```python
 from pathlib import Path
@@ -96,3 +96,5 @@ cd rush-py
 uv sync
 source .venv/bin/activate
 ```
+
+See the Terms of Service for use of the underlying Rush software at https://qdx.co/terms.
