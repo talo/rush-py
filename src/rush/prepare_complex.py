@@ -23,7 +23,7 @@ from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
 from rush.trc.merge import merge_trcs
 
 
-def extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
+def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
     """
     Load a PDB, extract a ligand by residue name, add hydrogens, and save.
 
@@ -143,9 +143,9 @@ def prepare_complex(
             if isinstance(trc, list):
                 trc = trc[0]
             pdb_file.write(to_pdb(trc))
-            pdb_l_str = extract_ligand_with_hydrogens(pdb_file.name, ligand_names)
+            pdb_l_str = _extract_ligand_with_hydrogens(pdb_file.name, ligand_names)
     else:
-        pdb_l_str = extract_ligand_with_hydrogens(input_path, ligand_names)
+        pdb_l_str = _extract_ligand_with_hydrogens(input_path, ligand_names)
 
     trc_l = from_pdb(pdb_l_str)
     if isinstance(trc_l, list):
