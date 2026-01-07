@@ -140,13 +140,19 @@ data-aria-dark="Switch to auto color mode">
           <section id="module-rush.nnxtb">
 <span id="nn-xtb"></span><h1>NN-xTB<a class="headerlink" href="#module-rush.nnxtb" title="Link to this heading">¶</a></h1>
 <p>NN-xTB module helpers for the Rush Python client.</p>
-<p>NN-xTB provides xTB reparameterized by a neural network to reach higher accuracy
-while remaining fast. It can compute total energy, per-atom forces, and
-vibrational frequencies, and supports arbitrary charge and spin states.</p>
+<p>NN-xTB reparameterizes xTB with a neural network to approach DFT-level accuracy
+while keeping xTB-like speed. It supports arbitrary charge and spin states and
+is well-suited for large-scale screening where fast, per-atom forces or
+vibrational frequencies are needed. Frequency calculations are more expensive.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rush.nnxtb.</span></span><span class="sig-name descname"><span class="pre">NnxtbResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_mev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces_mev_per_angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies_inv_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/nnxtb.html#NnxtbResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.nnxtb.NnxtbResults" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Parsed nn-xTB results.</p>
+<p>Use this to load JSON output from the Rush object store. When calling
+<cite>nnxtb(…, collect=True)</cite>, the return value includes a <cite>path</cite> to the JSON
+output. After reading the json into a dict, you can pass it to this class
+like <cite>NnxtbResults(**data)</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -180,12 +186,15 @@ vibrational frequencies, and supports arbitrary charge and spin states.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>topology_path</strong> (<em>Path</em><em> | </em><em>str</em>)</p></li>
-<li><p><strong>compute_forces</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>compute_frequencies</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>multiplicity</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
-<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>
+<li><p><strong>topology_path</strong> (<em>Path</em><em> | </em><em>str</em>) – Path to a TRC topology JSON file.</p></li>
+<li><p><strong>compute_forces</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to compute per-atom forces.
+Defaults to true.</p></li>
+<li><p><strong>compute_frequencies</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to compute vibrational frequencies.
+Defaults to false.</p></li>
+<li><p><strong>multiplicity</strong> (<em>int</em><em> | </em><em>None</em>) – Spin multiplicity. Defaults to 1 (singlet).</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>) – Rush compute resources to request.</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>) – Rush run metadata.</p></li>
+<li><p><strong>collect</strong> – Whether to wait for completion and return outputs.</p></li>
 </ul>
 </dd>
 </dl>

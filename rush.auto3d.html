@@ -96,19 +96,6 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions"><code class="docutils literal notranslate"><span class="pre">Auto3DOptions</span></code></a><ul>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.batchsize_atoms"><code class="docutils literal notranslate">batchsize_atoms</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.capacity"><code class="docutils literal notranslate">capacity</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.convergence_threshold"><code class="docutils literal notranslate">convergence_threshold</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.enumerate_isomer"><code class="docutils literal notranslate">enumerate_isomer</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.enumerate_tautomer"><code class="docutils literal notranslate">enumerate_tautomer</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.k"><code class="docutils literal notranslate">k</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.max_confs"><code class="docutils literal notranslate">max_confs</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.opt_steps"><code class="docutils literal notranslate">opt_steps</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.patience"><code class="docutils literal notranslate">patience</span></code></a></li>
-<li><a class="reference internal" href="#rush.auto3d.Auto3DOptions.threshold"><code class="docutils literal notranslate">threshold</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#rush.auto3d.auto3d"><code class="docutils literal notranslate"><span class="pre">auto3d()</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
@@ -146,13 +133,15 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="module-rush.auto3d">
 <span id="auto3d"></span><h1>Auto3D<a class="headerlink" href="#module-rush.auto3d" title="Link to this heading">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">Auto3DOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batchsize_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convergence_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.003</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enumerate_isomer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enumerate_tautomer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_confs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#Auto3DOptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.Auto3DOptions" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.auto3d.auto3d">
+<span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">auto3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batchsize_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convergence_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.003</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enumerate_isomer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enumerate_tautomer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_confs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#auto3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.auto3d" title="Link to this definition">¶</a></dt>
+<dd><p>Runs Auto3D on a list of SMILES strings, returning either the TRC structure
+or an error string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>smis</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p></li>
 <li><p><strong>k</strong> (<em>int</em>)</p></li>
 <li><p><strong>batchsize_atoms</strong> (<em>int</em>)</p></li>
 <li><p><strong>capacity</strong> (<em>int</em>)</p></li>
@@ -163,71 +152,6 @@ data-aria-dark="Switch to auto color mode">
 <li><p><strong>opt_steps</strong> (<em>int</em>)</p></li>
 <li><p><strong>patience</strong> (<em>int</em>)</p></li>
 <li><p><strong>threshold</strong> (<em>float</em>)</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.batchsize_atoms">
-<span class="sig-name descname"><span class="pre">batchsize_atoms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.batchsize_atoms" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.capacity">
-<span class="sig-name descname"><span class="pre">capacity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.capacity" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.convergence_threshold">
-<span class="sig-name descname"><span class="pre">convergence_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.003</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.convergence_threshold" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.enumerate_isomer">
-<span class="sig-name descname"><span class="pre">enumerate_isomer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.enumerate_isomer" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.enumerate_tautomer">
-<span class="sig-name descname"><span class="pre">enumerate_tautomer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.enumerate_tautomer" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.k">
-<span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.k" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.max_confs">
-<span class="sig-name descname"><span class="pre">max_confs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.max_confs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.opt_steps">
-<span class="sig-name descname"><span class="pre">opt_steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5000</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.opt_steps" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.patience">
-<span class="sig-name descname"><span class="pre">patience</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.patience" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rush.auto3d.Auto3DOptions.threshold">
-<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3</span></em><a class="headerlink" href="#rush.auto3d.Auto3DOptions.threshold" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.auto3d.auto3d">
-<span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">auto3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Auto3DOptions()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#auto3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.auto3d" title="Link to this definition">¶</a></dt>
-<dd><p>Runs Auto3D on a list of SMILES strings, returning either the TRC structure
-or an error string.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smis</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>opts</strong> (<a class="reference internal" href="#rush.auto3d.Auto3DOptions" title="rush.auto3d.Auto3DOptions"><em>Auto3DOptions</em></a>)</p></li>
 <li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
 <li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>
 </ul>

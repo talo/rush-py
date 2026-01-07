@@ -96,7 +96,6 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#rush.prepare_complex.extract_ligand_with_hydrogens"><code class="docutils literal notranslate"><span class="pre">extract_ligand_with_hydrogens()</span></code></a></li>
 <li><a class="reference internal" href="#rush.prepare_complex.prepare_complex"><code class="docutils literal notranslate"><span class="pre">prepare_complex()</span></code></a></li>
 <li><a class="reference internal" href="#rush.prepare_complex.save_outputs"><code class="docutils literal notranslate"><span class="pre">save_outputs()</span></code></a></li>
 </ul>
@@ -139,21 +138,6 @@ data-aria-dark="Switch to auto color mode">
 <p>This module builds on the protein preparation workflow to prepare complexes by
 extracting ligands from PDB inputs, adding hydrogens, and merging ligand data
 with prepared protein TRC data for downstream computations.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.prepare_complex.extract_ligand_with_hydrogens">
-<span class="sig-prename descclassname"><span class="pre">rush.prepare_complex.</span></span><span class="sig-name descname"><span class="pre">extract_ligand_with_hydrogens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ligand_resnames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_complex.html#extract_ligand_with_hydrogens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_complex.extract_ligand_with_hydrogens" title="Link to this definition">¶</a></dt>
-<dd><p>Load a PDB, extract a ligand by residue name, add hydrogens, and save.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pdb_path</strong> – Path to input PDB file</p></li>
-<li><p><strong>ligand_resname</strong> – Residue name of the ligand (e.g., “LIG”, “UNK”, “ATP”)</p></li>
-<li><p><strong>output_path</strong> – Path for output PDB file</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.prepare_complex.prepare_complex">
 <span class="sig-prename descclassname"><span class="pre">rush.prepare_complex.</span></span><span class="sig-name descname"><span class="pre">prepare_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ligand_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_complex.html#prepare_complex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_complex.prepare_complex" title="Link to this definition">¶</a></dt>

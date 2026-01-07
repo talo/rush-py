@@ -154,9 +154,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="23"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.trc.merge</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_trcs</span>
 </span><span data-line="24">
 </span><span data-line="25">
-<div class="viewcode-block" id="extract_ligand_with_hydrogens">
-<a class="viewcode-back" href="../../rush.prepare_complex.html#rush.prepare_complex.extract_ligand_with_hydrogens">[docs]</a>
-</span><span data-line="26"><span class="k">def</span><span class="w"> </span><span class="nf">extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">pdb_path</span><span class="p">,</span> <span class="n">ligand_resnames</span><span class="p">):</span>
+</span><span data-line="26"><span class="k">def</span><span class="w"> </span><span class="nf">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">pdb_path</span><span class="p">,</span> <span class="n">ligand_resnames</span><span class="p">):</span>
 </span><span data-line="27"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="28"><span class="sd">    Load a PDB, extract a ligand by residue name, add hydrogens, and save.</span>
 </span><span data-line="29">
@@ -250,8 +248,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="117">
 </span><span data-line="118">                    <span class="n">atom</span><span class="o">.</span><span class="n">SetPDBResidueInfo</span><span class="p">(</span><span class="n">h_info</span><span class="p">)</span>
 </span><span data-line="119">
-</span><span data-line="120">    <span class="k">return</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToPDBBlock</span><span class="p">(</span><span class="n">ligand_h</span><span class="p">)</span></div>
-
+</span><span data-line="120">    <span class="k">return</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolToPDBBlock</span><span class="p">(</span><span class="n">ligand_h</span><span class="p">)</span>
 </span><span data-line="121">
 </span><span data-line="122">
 <div class="viewcode-block" id="prepare_complex">
@@ -279,9 +276,9 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="143">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
 </span><span data-line="144">                <span class="n">trc</span> <span class="o">=</span> <span class="n">trc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span><span data-line="145">            <span class="n">pdb_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">to_pdb</span><span class="p">(</span><span class="n">trc</span><span class="p">))</span>
-</span><span data-line="146">            <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">pdb_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
+</span><span data-line="146">            <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">pdb_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
 </span><span data-line="147">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="148">        <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
+</span><span data-line="148">        <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
 </span><span data-line="149">
 </span><span data-line="150">    <span class="n">trc_l</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">pdb_l_str</span><span class="p">)</span>
 </span><span data-line="151">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_l</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
