@@ -17,8 +17,6 @@ Quick Links
 - :func:`rush.exess.chelpg`
 - :func:`rush.exess.qmmm`
 - :func:`rush.exess.optimization`
-
-
 """
 
 import sys
@@ -436,6 +434,33 @@ class CustomDescriptorGrid:
 
 
 @dataclass
+class RegularDescriptorGrid:
+    """
+    Construct a regular Cartesian descriptor grid with evenly-spaced points between
+    the minimum and maximum points specified, at the defined spacing in each dimension.
+    """
+
+    min: list[float]
+    max: list[float]
+    spacing: list[float]
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::DescriptorGridOptions::regular (
+              exess_rex::RegularGrid {
+                min = $min,
+                max = $max,
+                spacing = $spacing,
+              }
+            ))"""
+        ).substitute(
+            min=f"[{', '.join([float_to_str(float(v)) for v in self.min])}]",
+            max=f"[{', '.join([float_to_str(float(v)) for v in self.max])}]",
+            spacing=f"[{', '.join([float_to_str(float(v)) for v in self.spacing])}]",
+        )
+
+
+@dataclass
 class ExportKeywords:
     """
     Configure the exported outputs of the system.
@@ -504,7 +529,11 @@ class ExportKeywords:
     training_db: bool | None = None
     # Grid of points at which to calculate and export density descriptors.
     descriptor_grid: (
-        StandardDescriptorGrid | DescriptorGrid | CustomDescriptorGrid | None
+        StandardDescriptorGrid
+        | DescriptorGrid
+        | CustomDescriptorGrid
+        | RegularDescriptorGrid
+        | None
     ) = None
 
     def _to_rex(self):

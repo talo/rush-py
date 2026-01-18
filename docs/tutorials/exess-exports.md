@@ -58,8 +58,10 @@ res = exess.energy(
     export_keywords=exess.ExportKeywords(
         export_density_descriptors=True,
         export_esp_descriptors=True,
-        descriptor_grid=exess.CustomDescriptorGrid(
-            [0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
+        descriptor_grid=exess.RegularDescriptorGrid(
+            min=[0.0, 0.0, 0.0],
+            max=[2.0, 2.0, 2.0],
+            spacing=[2.0, 2.0, 2.0],
         ),
     ),
     run_spec=RunSpec(storage=1000, gpus=1),
@@ -71,7 +73,7 @@ res = exess.energy(
 )
 ```
 
-Note that we did not use fragmentation: this custom descriptor grid would get duplicated across all fragments, which probably isn't the desired behavior. Other types of descriptor grids are more applicable for fragmented systems.
+Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values and should be avoided. 
 
 Because the descriptor grid values aren't particularly numerous, it may be more convenient to save them as JSON. This can be done by passing `to_json=True` to `exess.save_energy_outputs`:
 ```python

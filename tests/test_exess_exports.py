@@ -14,8 +14,10 @@ if __name__ == "__main__":
         export_keywords=exess.ExportKeywords(
             export_density_descriptors=True,
             export_esp_descriptors=True,
-            descriptor_grid=exess.CustomDescriptorGrid(
-                [0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
+            descriptor_grid=exess.RegularDescriptorGrid(
+                min=[0.0, 0.0, 0.0],
+                max=[1.9, 2.0, 2.1],
+                spacing=[1.0, 1.0, 1.0],
             ),
         ),
         run_spec=RunSpec(storage=1000, gpus=1),
