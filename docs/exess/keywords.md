@@ -1,21 +1,30 @@
 # Keyword reference
 
-Keywords live under the top-level `keywords` object. The main groups are `scf`, `frag`, `guess`, `optimization`, `dynamics`, `boundary`, `ff`, `log`, `export`, `ks_dft`, `rtat`, and `debug`.
+Keywords live under the top-level `keywords` object. The groups recognized by the EXESS/libqdx schema are:
+
+`scf`, `ks_dft`, `rtat`, `frag`, `boundary`, `debug`, `export`, `guess`, `log`, `dynamics`, `integrals`, `force_field`, `optimization`, `gradient`, `hessian`, `machine_learning`, `qmmm`, `regions`.
 
 ## scf
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `max_iters` | double | Max number of SCF iterations (default: 30). |
-| `max_diis_history_length` | int | Max size of DIIS window (default: 8). |
-| `batch_size` | int | Number of integral shell pairs per batch (default: 2560). |
-| `convergence_metric` | string | Convergence metric: `DIIS`, `Energy`, `Density`. |
-| `convergence_threshold` | double | SCF convergence threshold (default: 1e-6). |
-| `density_threshold` | double | Integral screening threshold (default: 1e-10). |
-| `density_basis_set_projection_fallback_enabled` | bool | Fall back to basis set projection if unconverged (default: true). |
-| `fock_build_type` | string | Fock build algorithm: `HGP`, `UM09`, `RI`. |
-| `compress_ri_b` | bool | Compress the RI B matrix (default: false). |
-| `store_ri_b_on_host` | bool | Store RI B matrix on host (documented but commented in upstream docs). |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `max_iters` | int | 50 | Max number of SCF iterations. |
+| `max_diis_history_length` | int | 8 | Max size of DIIS window. |
+| `batch_size` | int | 2560 | Shell-pair batches per bin. |
+| `convergence_metric` | string | `DIIS` | `DIIS`, `Energy`, or `Density`. |
+| `convergence_threshold` | float | 1e-6 | SCF convergence threshold. |
+| `density_threshold` | float | 1e-10 | Density screening threshold. |
+| `gradient_screening_threshold` | float | 1e-10 | Gradient screening threshold. |
+| `bf_cutoff_threshold` | float | none | Basis function cutoff threshold (DFT/shell pairs). |
+| `density_basis_set_projection_fallback_enabled` | bool | none | STO-3G projection fallback. |
+| `use_ri` | bool | false | Deprecated RI toggle. |
+| `allow_crap_scf` | bool | false | Expert flag. |
+| `store_ri_b_on_host` | bool | false | Store RI B on host. |
+| `compress_ri_b` | bool | false | Compress RI B matrix. |
+| `homo_lumo_guess_rotation_angle` | float | none | HOMO/LUMO rotation (degrees). |
+| `fock_build_type` | string | `HGP` | `HGP`, `UM09`, or `RI`. |
+| `exchange_screening_threshold` | float | 1e-5 | Exchange screening threshold. |
+| `group_shared_exponents` | bool | false | Group shared basis exponents (UM09 only). |
 
 Example:
 
@@ -34,41 +43,50 @@ Example:
 
 Details:
 
-- `max_iters`: Maximum SCF iterations. Defaults to 30.
-- `max_diis_history_length`: Size of DIIS extrapolation space. Larger values use more memory.
-- `batch_size`: Shell-pair batch bin size. Suggested to scale in multiples of 128; do not go below 128.
-- `convergence_metric`: `Energy`, `Density`, or `DIIS`. Default is `DIIS`.
-- `convergence_threshold`: Default 1e-6. Suggested values in upstream docs:
+- `max_iters`: Default in libqdx is 50 (older docs mention 30).
+- `batch_size`: Use multiples of 128; do not go below 128.
+- `convergence_metric`: `Energy`, `Density`, or `DIIS`. Default is `DIIS` in libqdx.
+- `convergence_threshold`: Suggested values from upstream docs:
   - 1e-6 for non-fragmented RHF + RI-MP2 with `Density`/`DIIS`.
   - 1e-8 for non-fragmented RHF + RI-MP2 with `Energy`.
   - 1e-6 for dimer-level RHF + RI-MP2.
   - 1e-8 for trimer/tetramer-level calculations with `DIIS`.
   - 1e-10 for large tetramer-level calculations with `DIIS`.
-- `density_threshold`: Default 1e-10. Lower values speed up SCF with potential accuracy loss.
-- `density_basis_set_projection_fallback_enabled`: If unconverged, rerun using STO-3G then project to the target basis.
+- `density_threshold`: Lower values speed up SCF with potential accuracy loss.
+- `gradient_screening_threshold`: Additional screening for gradient-related integrals.
+- `density_basis_set_projection_fallback_enabled`: If unconverged, rerun using STO-3G then project to the target basis (C++ comments suggest true for fragmented runs, false otherwise).
 - `fock_build_type`:
   - `HGP`: Head-Gordon-Pople algorithm, optimized for dense systems.
   - `UM09`: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
   - `RI`: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
-- `compress_ri_b`: Compress RI B matrix (experimental).
-- `store_ri_b_on_host`: When GPU memory is insufficient, store B on host (documented but commented in upstream docs).
+- `use_ri`: Deprecated in EXESS; use `fock_build_type = "RI"` instead.
+- `homo_lumo_guess_rotation_angle`: Rotation in degrees (0-180) for unrestricted symmetry breaking.
+- `exchange_screening_threshold` and `group_shared_exponents` are expert controls for large systems and shared-exponent basis sets.
 
 ## frag
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `level` | int | Fragmentation level (documented as 1-4). Examples also use `Dimer`, `Trimer`, `Tetramer`. |
-| `reference_fragment` | int | Reference fragment for interaction energy calculations. |
-| `included_fragments` | array[int] | Fragment IDs to include. |
-| `enable_speed` | bool | Experimental queue optimization for AIMD. |
-| `cutoffs` | object | Distance cutoffs per level (Angstroms). |
-| `cutoff_type` | string | Distance metric: `Centroid` or `MinimalDistance` (also documented as `ClosestPair`). |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `level` | string | required | `Monomer` .. `Octamer`. |
+| `cutoffs` | object | none | Distance cutoffs in Angstroms. |
+| `cutoff_type` | string | `ClosestPair` | `Centroid` or `ClosestPair`. |
+| `distance_metric` | string | `Max` | `Max`, `Average`, `Min`, `Ryan`. |
+| `reference_fragment` | int | none | Reference fragment for interaction energies. |
+| `included_fragments` | array[int] | none | Subset of fragments to include. |
+| `enable_speed` | bool | false | Experimental queue optimization. |
+
+Notes:
+
+- `cutoffs` can include `dimer`, `trimer`, `tetramer`, `pentamer`, `hexamer`, `heptamer`, `octamer`.
+- Distances are in Angstroms and should follow `dimer > trimer > tetramer` when using higher orders.
+- `distance_metric` affects higher-order fragment distances and is noted in the C++ schema as undocumented.
 
 Example:
 
 ```json
 "frag": {
   "cutoff_type": "Centroid",
+  "distance_metric": "Max",
   "level": "Tetramer",
   "enable_speed": false,
   "cutoffs": {
@@ -80,37 +98,45 @@ Example:
 }
 ```
 
-Notes:
-- `cutoffs` are in Angstroms and should follow `dimer > trimer > tetramer`.
-- `reference_fragment` enables interaction (lattice) energies by selecting a single fragment of interest.
-- `included_fragments` limits which fragments are considered.
-
 ## guess
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `external_initial_density_path` | string | Path to external initial density. |
-| `bsp` | bool | Basis set projection bootstrap (default: false). |
-| `bsp_basis` | string | Lower-resolution basis set for BSP. |
-| `bsp_scf_keywords` | object | SCF keywords for the BSP calculation. |
-| `hcore` | bool | Use hcore initial guess. |
-| `smd` | bool | Superposition of monomer densities (default: true). |
-| `ssfd` | bool | Subfragment density guess (experimental, default: false). |
-| `ssfd_target_size` | int | Target atoms per subfragment (default: 30). |
-| `ssfd_only_converge_in_bsp_basis` | bool | Only converge subfragments in BSP basis (default: true). |
-| `ssfd_scf_keywords` | object | SCF keywords for each subfragment calculation. |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `external_initial_density_path` | string | none | HDF5 density guess path. |
+| `bsp` | bool | false | Basis set projection bootstrap. |
+| `bsp_basis` | string | empty | Lower-resolution basis set for BSP. |
+| `bsp_scf_keywords` | object | none | SCF keywords for BSP. |
+| `hcore` | bool | false | Use hcore initial guess. |
+| `smd` | bool | none | Superposition of monomer densities. |
+| `ssfd` | bool | false | Subfragment density guess (experimental). |
+| `ssfd_target_size` | int | 30 | Target atoms per subfragment. |
+| `ssfd_only_converge_in_bsp_basis` | bool | true | Only converge subfragments in BSP basis. |
+| `ssfd_scf_keywords` | object | none | SCF keywords for subfragment runs. |
+
+`external_initial_density_path` must reference an HDF5 file with a `density` dataset at root for RHF, or `alpha/density` and `beta/density` for UHF. The EXESS schema warns that density guesses from other codes may be incompatible due to basis ordering and normalization. External guesses are not supported for fragmented calculations.
 
 ## optimization
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `max_iters` | size_t | Max optimization iterations. |
-| `convergence_criteria` | object | Metric and thresholds for convergence. |
-| `optimizer_reset_interval` | optional size_t | Reset coordinate system and hessian every N iterations. |
-| `coordinate_system` | enum | `Cartesian`, `NaturalInternal`, `DelocalisedInternal`. |
-| `hessian_guess` | enum | Hessian guess type. |
-| `algorithm` | enum | Optimization algorithm type. |
-| `trust_region_keywords` | optional object | Trust-region settings (TRAH only). |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `max_iters` | int | required | Max optimization iterations. |
+| `convergence_criteria` | object | defaults | Metric + thresholds. |
+| `optimizer_reset_interval` | int | none | Reset coordinate system and hessian every N iterations. |
+| `coordinate_system` | string | `DelocalisedInternal` | `Cartesian`, `NaturalInternal`, `DelocalisedInternal`. |
+| `constraints` | array[array[int]] | none | Constraints on bonds/angles/dihedrals. |
+| `hessian_guess` | string | depends | `Identity`, `ScaledIdentity`, `Schlegel`, `Lindh`. |
+| `algorithm` | string | `EigenvectorFollowing` | `EigenvectorFollowing`, `TrustRegionAugmentedHessian`, `LBFGS`. |
+| `lbfgs_keywords` | object | none | LBFGS parameters. |
+| `trust_region` | object | defaults | Trust-region parameters. |
+| `frozen_distance_slippage_tolerance_angstroms` | float | 1e-8 | Slippage tolerance (distance). |
+| `frozen_angle_slippage_tolerance_degrees` | float | 1e-8 | Slippage tolerance (angle). |
+| `debug_xyz` | bool | false | Debug XYZ output. |
+| `output_trc` | string | none | Output TRC path. |
+| `fixed_atoms` | array[int] | none | Fixed atoms. |
+| `free_atoms` | array[int] | none | Free atoms. |
+| `fixed_fragments` | array[int] | none | Fixed fragments. |
+| `free_fragments` | array[int] | none | Free fragments. |
+| `fix_heavy` | bool | false | Fix heavy atoms. |
 
 Example:
 
@@ -127,20 +153,20 @@ Example:
 ```
 
 Details:
+
 - `convergence_criteria.metric`: `GradientOnly` or `Baker`.
-- `gradient_threshold`, `delta_energy_threshold`, and `step_component_threshold` are numerical thresholds.
-- `coordinate_system`: `DelocalisedInternal` is default and recommended.
-- `hessian_guess`: identity, scaled identity (default), Schlegel, or Lindh.
-- `algorithm`: trust region augmented hessian or eigenvector following (default).
-- `trust_region_keywords` includes `initial_radius`, `max_radius`, `min_radius`, `increase_factor`, `decrease_factor`, `constrict_factor`, `increase_threshold`, `decrease_threshold`, `rejection_threshold`.
+- Default thresholds come from Baker criteria (see https://doi.org/10.1063/1.1515483).
+- `trust_region` defaults are based on Helmich-Paris 2021.
+- `constraints` are lists of atom indices specifying constrained bonds, angles, or dihedrals.
 
 ## dynamics
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `n_timesteps` | int | Number of timesteps. |
-| `dt` | double | Timestep size in ps (default: 0.001). |
-| `use_async_timesteps` | bool | Asynchronous timesteps (expert). |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `n_timesteps` | int | required | Number of timesteps. |
+| `dt` | float | required | Timestep size in ps. |
+| `reuse_orbitals` | bool | false | Reuse orbitals between steps. |
+| `use_async_timesteps` | bool | true | Asynchronous timesteps (expert). |
 
 Example:
 
@@ -154,7 +180,7 @@ Example:
 
 ## boundary
 
-Boundary conditions for periodic simulations:
+Boundary conditions for periodic or truncated simulations:
 
 ```json
 "boundary": {
@@ -164,7 +190,9 @@ Boundary conditions for periodic simulations:
 }
 ```
 
-## ff
+`kind` can be `Periodic`, `Rigid`, or `Delete`.
+
+## force_field
 
 | Keyword | Type | Brief |
 | --- | --- | --- |
@@ -172,10 +200,10 @@ Boundary conditions for periodic simulations:
 
 ## log
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `console` | object | Console log settings. |
-| `logfiles` | array | File log settings. |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `console` | object | see below | Console log settings. |
+| `logfiles` | array | empty | File log settings. |
 
 Example:
 
@@ -192,145 +220,173 @@ Example:
 }
 ```
 
-Log levels (descending verbosity): `Debug`, `Verbose`, `LargeInfo`, `Info`, `Performance`, `Warning`.
+Log levels: `Debug`, `Verbose`, `LargeInfo`, `Info`, `Performance`, `Warning`, `Error`.
+
+Defaults from the C++ schema:
+
+- `console.level`: `LargeInfo` (or `Debug` in debug builds).
+- `console.prefix_fmt`: empty string.
+- `logfiles.level`: `Verbose`.
+- `logfiles.prefix_fmt`: `[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}] `.
 
 ## rtat
 
-RTAT is a runtime auto-tuner for matrix operations. EXESS can use it for GPU BLAS tuning.
+RTAT is a runtime auto-tuner for matrix operations.
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `enabled` | bool | Enable runtime autotuning. |
-| `synchronous` | bool | Use synchronous operations. |
-| `json_file_dump_prefix` | optional string | Prefix for RTAT JSON dumps. |
-
-Example:
-
-```json
-"rtat": {
-  "enabled": true,
-  "synchronous": true,
-  "json_file_dump_prefix": "prefix"
-}
-```
-
-## debug
-
-Example:
-
-```json
-"debug": {
-  "dry_run": false,
-  "print_subfragment_xyz": false,
-  "max_fragments": 10000,
-  "skip_calcs": false
-}
-```
-
-Documented debug keywords:
-- `dry_run`: Validate fragment queue without computing.
-- `print_subfragment_xyz`: Print subfragment XYZ (for SSFD).
-- `max_fragments`: Limit number of fragments computed.
-- `ignore_fragments`: Ignore fragmentation (developer validation).
-- `skip_calcs`: Skip computations in fragmentation routines.
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `enabled` | bool | true | Enable runtime autotuning. |
+| `synchronous` | bool | false | Use synchronous operations. |
+| `json_file_dump_prefix` | string | none | Prefix for RTAT JSON dumps. |
 
 ## export
 
 Export controls what is written to HDF5 output files:
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `export_density` | bool | Export density matrix. |
-| `export_relaxed_mp2_density_correction` | bool | Export relaxed MP2 density correction. |
-| `export_fock` | bool | Export Fock matrix. |
-| `export_overlap` | bool | Export overlap matrix. |
-| `export_h_core` | bool | Export H core matrix. |
-| `export_expanded_density` | bool | Export expanded density. |
-| `export_expanded_gradient` | bool | Export expanded gradient. |
-| `export_molecular_orbital_coeffs` | bool | Export MO coefficients. |
-| `export_gradient` | bool | Export gradient. |
-| `export_mulliken_charges` | bool | Export Mulliken charges. |
-| `export_bond_orders` | bool | Export bond orders. |
-| `export_h_caps` | bool | Export H caps. |
-| `export_density_descriptors` | bool | Export density descriptors. |
-| `export_esp_descriptors` | bool | Export ESP descriptors. |
-| `export_basis_labels` | bool | Export basis labels. |
-| `flatten_symmetric` | bool | Export lower triangle for symmetric matrices (default: true). |
-| `concatenate_hdf5_files` | bool | Concatenate multi-team HDF5 outputs (can be expensive). |
-| `descriptor_grid` | array | Standard grid, grid params, or raw point list. |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `export_density` | bool | false | Export density. |
+| `export_relaxed_mp2_density_correction` | bool | false | Export relaxed MP2 density correction. |
+| `export_fock` | bool | false | Export Fock matrix. |
+| `export_overlap` | bool | false | Export overlap matrix. |
+| `export_h_core` | bool | false | Export H core matrix. |
+| `export_expanded_density` | bool | false | Export expanded density. |
+| `export_expanded_gradient` | bool | false | Export expanded gradient. |
+| `export_molecular_orbital_coeffs` | bool | false | Export MO coefficients. |
+| `export_gradient` | bool | false | Export gradients. |
+| `export_external_charge_gradient` | bool | false | Export external charge gradients. |
+| `export_mulliken_charges` | bool | false | Export Mulliken charges. |
+| `export_chelpg_charges` | bool | false | Export CHELPG charges. |
+| `export_bond_orders` | bool | false | Export bond orders. |
+| `export_h_caps` | bool | false | Export H caps. |
+| `export_density_descriptors` | bool | false | Export density descriptors. |
+| `export_esp_descriptors` | bool | false | Export ESP descriptors. |
+| `export_expanded_esp_descriptors` | bool | false | Export expanded ESP descriptors. |
+| `export_basis_labels` | bool | false | Export basis labels. |
+| `export_hessian` | bool | false | Export hessian. |
+| `export_mass_weighted_hessian` | bool | false | Export mass-weighted hessian. |
+| `export_hessian_frequencies` | bool | false | Export hessian frequencies. |
+| `flatten_symmetric` | bool | true | Flatten symmetric matrices. |
+| `light_json` | bool | false | Light JSON output. |
+| `concatenate_hdf5_files` | bool | false | Concatenate HDF5 outputs. |
+| `training_db` | bool | false | Export training DB metadata. |
+| `descriptor_grid` | object | none | Grid for descriptor exports. |
+
+`descriptor_grid` can be one of the following structures (libqdx):
+
+- `standard`: `FINE`, `ULTRAFINE`, `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
+- `params`: `points_per_shell`, `order` (`One` or `Two`), `scale`.
+- `regular`: `min`, `max`, `spacing` arrays (Cartesian grid).
+- `custom`: flat list of points `[x1, y1, z1, x2, y2, z2, ...]`.
+
+The rush-py API maps these to `StandardDescriptorGrid`, `DescriptorGrid`, `RegularDescriptorGrid`, and `CustomDescriptorGrid`.
+
+Note: the rush-py tutorial warns that `export_expanded_esp_descriptors` can trigger an internal OOM error.
 
 ## ks_dft
 
 KSDFT is used when `model.method` is `RestrictedKSDFT`. The upstream docs recommend reading the KSDFT paper (DOI: 10.1021/acs.jctc.5c01229).
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `functional` | string | LibXC functional name (required). |
-| `method` | string | XC evaluation method (default: `GauXC`). |
-| `use_C_opt` | bool | Use C-matrix optimization for Dense/BatchDense (default: true). |
-| `grid` | object | Numerical grid parameters (defaults to ULTRAFINE). |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `functional` | string | required | LibXC functional name. |
+| `method` | string | `GauXC` | XC evaluation method. |
+| `use_C_opt` | bool | true | Use C-matrix optimization (Dense/BatchDense). |
+| `grid` | object | `{}` | Numerical grid settings. |
+| `sp_threshold` | float | none | Single-precision threshold. |
+| `dp_threshold` | float | none | Double-precision threshold. |
+| `batches_per_batch` | int | 20 | Batch batching for GauXC. |
 
-### functional
+Grid parameters supported in the libqdx Rust schema:
 
-Examples: `GGA_XC_PBE`, `HYB_GGA_XC_B3LYP`, `HYB_MGGA_XC_B98`.
+- `radial_quad`: `MuraKnowles`, `MurrayHandyLaming`, `TreutlerAldrichs`.
+- `pruning_scheme`: `ROBUST`, `UNPRUNED`, `TREUTLER`.
+- `batch_size`: GauXC batch size.
+- `radial_size`, `angular_size`: Custom grid sizes.
+- `default_grid`: `FINE`, `ULTRAFINE`, `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
 
-Notes from upstream docs:
+The C++ schema treats `grid` as raw JSON and may accept additional structures (octree, space-filling curves) described in the upstream docs.
+
+Functional notes from upstream docs:
+
 - Meta-GGA functionals are experimental and supported only with `GauXC`.
 - Range-separated functionals are not supported.
 - Only `B2PLYP` and `revDSD-PBEP86-D4` double hybrids are implemented; D4 must be added externally.
 
-### method
+## integrals
 
-Available methods:
-- `GauXC` (default)
-- `Dense`
-- `BatchDense`
-- `Direct`
-- `SemiDirect`
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `scheduler` | string | `Callback` | `Callback` or `RoundRobin`. |
+| `n_streams` | int | 4 (CUDA) / 1 (HIP) | GPU stream count. |
 
-### use_C_opt
+## gradient
 
-Uses the coefficient matrix instead of the density matrix to reduce cost. Default is `true`.
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `finite_difference_step_size` | float | 5e-3 | Step size for numerical gradients. |
+| `method` | string | `Analytical` | `Analytical` or `Numerical`. |
 
-### grid
+## hessian
 
-If unspecified, EXESS uses an ULTRAFINE grid with ROBUST pruning. Grid parameters include:
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `finite_difference_step_size` | float | 5e-3 | Step size for numerical Hessians. |
+| `method` | string | `Numerical` | `Analytical` or `Numerical`. |
 
-- Preset sizes: `FINE`, `ULTRAFINE` (default), `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
-- Custom sizes: `radial_size` and `angular_size`.
-- Radial quadrature: `MuraKnowles` (default), `MurrayHandyLaming`, `TreutlerAldrichs`.
-- Pruning: `ROBUST` (default), `UNPRUNED`, `TREUTLER`.
-- Batching:
-  - `octree`: `max_size`, `max_depth`, `max_distance`.
-  - `space_filling`: `octree` plus `target_batch_size`.
-  - `GauXC` batching: `batch_size`.
+## machine_learning
 
-Examples:
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `ml_type` | string | `AIMNet` | ML model type. |
 
-```json
-"ks_dft": {
-  "functional": "GGA_XC_PBE"
-}
-```
+## qmmm
 
-```json
-"ks_dft": {
-  "functional": "HYB_GGA_XC_B3LYP",
-  "method": "Dense",
-  "grid": {
-    "default_grid": "ULTRAFINE",
-    "radial_quad": "MuraKnowles",
-    "pruning_scheme": "ROBUST"
-  }
-}
-```
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `n_timesteps` | int | required | Number of QMMM timesteps. |
+| `dt_ps` | float | required | Timestep size in ps. |
+| `temperature_kelvin` | float | required | Temperature in Kelvin. |
+| `pressure_atm` | float | none | If set, runs NPT; otherwise NVT. |
+| `minimisation` | object | none | Classical minimisation settings. |
+| `trajectory` | object | none | Trajectory output settings. |
+| `energy_csv` | string | none | Path for energy CSV. |
+| `restraints` | object | none | Restraints for atoms/fragments. |
 
-```json
-"ks_dft": {
-  "functional": "HYB_GGA_XC_B3LYP",
-  "method": "BatchDense",
-  "grid": {
-    "octree": { "max_size": 512 }
-  }
-}
-```
+`minimisation` fields:
+
+- `err_tol_kj_per_mol_nm` (default 10)
+- `max_iterations` (default 0)
+
+`trajectory` fields:
+
+- `format`: `JSON` or `XYZ` (default `JSON`)
+- `interval` (default 1)
+- `start` (default 0)
+- `end` (default max u32)
+- `include_waters` (default false)
+
+`restraints` fields:
+
+- `k` (default 2000.0)
+- `fixed_atoms` / `free_atoms`
+- `fixed_fragments` / `free_fragments`
+- `fix_heavy`
+
+## regions
+
+`regions` defines which fragments are treated as QM, MM, or ML (Q4ML/QMMM workflows):
+
+- `qm_fragments`: array[int]
+- `mm_fragments`: array[int]
+- `ml_fragments`: array[int]
+
+## debug
+
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `dry_run` | bool | false | Validate fragment queue without computing. |
+| `print_subfragment_xyz` | bool | false | Print subfragment XYZ for SSFD. |
+| `max_fragments` | int | -1 | Limit number of fragments computed. |
+| `ignore_fragments` | bool | false | Ignore fragmentation (developer validation). |
+| `skip_calcs` | bool | false | Skip computations in fragmentation routines. |

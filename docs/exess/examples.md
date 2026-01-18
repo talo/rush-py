@@ -68,6 +68,8 @@ These examples are taken from the upstream EXESS docs and the historical EXESS d
 
 ## RI-HF example
 
+The EXESS schema does not include a distinct `RestrictedRIHF` method. Use `RestrictedHF` with `fock_build_type: "RI"` to enable RI-HF behavior:
+
 ```json
 {
   "topologies": [
@@ -82,7 +84,7 @@ These examples are taken from the upstream EXESS docs and the historical EXESS d
   ],
   "driver": "Energy",
   "model": {
-    "method": "RestrictedRIHF",
+    "method": "RestrictedHF",
     "basis": "cc-pVDZ",
     "aux_basis": "cc-pVDZ-RIFIT"
   },
@@ -264,11 +266,11 @@ Add a `reference_fragment` under `frag`:
       "cutoffs": {
         "dimer": 40,
         "trimer": 30
-      },
-      "dynamics": {
-        "n_timesteps": 10,
-        "dt": 0.002
       }
+    },
+    "dynamics": {
+      "n_timesteps": 10,
+      "dt": 0.002
     }
   },
   "driver": "Dynamics"
