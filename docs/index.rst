@@ -24,6 +24,7 @@ onboard and run your first rush-py script.
 
    guides
    tutorials
+   exess/index
    api
    modules
    
