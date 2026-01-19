@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Examples - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Outputs" href="outputs.html" /><link rel="prev" title="Keyword reference" href="keywords.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=a318c5d4" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Examples"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="index.html">
+      <strong>EXESS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        <form class="searchbox flex items-center" action="../search.html" method="get">
+          <input type="text" name="q" placeholder="Search" />
+          <input type="hidden" name="exess" value="1" />
+          <kbd>/</kbd>
+        </form>
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">Keyword reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mismatches.html">Layer mismatches and alignment notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#start-here-first-calculation">Start here: first calculation</a></li>
+<li><a class="reference internal" href="#full-system-basics">Full-system basics</a><ul>
+<li><a class="reference internal" href="#rhf-energy-single-system">RHF energy (single system)</a></li>
+<li><a class="reference internal" href="#ri-hf-via-fock-build-type">RI-HF (via <code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code>)</a></li>
+<li><a class="reference internal" href="#ri-mp2-energy">RI-MP2 energy</a></li>
+<li><a class="reference internal" href="#ksdft-example-pbe">KSDFT example (PBE)</a></li>
+<li><a class="reference internal" href="#gradient-calculation">Gradient calculation</a></li>
+<li><a class="reference internal" href="#batched-input-multiple-topologies">Batched input (multiple topologies)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fragmentation-workflows-mbe">Fragmentation workflows (MBE)</a><ul>
+<li><a class="reference internal" href="#fragmented-mbe-energy-dimer-level">Fragmented MBE energy (dimer level)</a></li>
+<li><a class="reference internal" href="#interaction-lattice-energy">Interaction (lattice) energy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamics-aimd">Dynamics (AIMD)</a></li>
+<li><a class="reference internal" href="#geometry-optimization">Geometry optimization</a></li>
+<li><a class="reference internal" href="#dynamics-and-optimization">Dynamics and optimization</a><ul>
+<li><a class="reference internal" href="#ab-initio-md-dynamics">Ab initio MD (Dynamics)</a></li>
+<li><a class="reference internal" href="#id1">Geometry optimization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush-py-workflows">Rush-py workflows</a><ul>
+<li><a class="reference internal" href="#rush-py-wrapper-example">Rush-py wrapper example</a></li>
+</ul>
+</li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">EXESS</strong>
+        <meta itemprop="position" content="1" />
+      </li>
+    </ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside" aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h1>
+<p>These examples progress from minimal inputs to production-style workflows. They use the EXESS JSON input format, which is documented in <code class="docutils literal notranslate"><span class="pre">docs/exess/input.md</span></code>, and reference keywords defined in <code class="docutils literal notranslate"><span class="pre">docs/exess/keywords.md</span></code>.</p>
+<section id="start-here-first-calculation">
+<h2>Start here: first calculation<a class="headerlink" href="#start-here-first-calculation" title="Link to this heading">¶</a></h2>
+<p>Minimal RHF energy input (single topology):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/water.xyz&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span data-line="4"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="10"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="11"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span data-line="12"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Run with the EXESS CLI or rush-py:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">module<span class="w"> </span>load<span class="w"> </span>exess
+</span><span data-line="2">runexess<span class="w"> </span>input.json<span class="w"> </span>-g<span class="w"> </span>NGPUS
+</span></pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span><span class="s2">&quot;input_topology.json&quot;</span><span class="p">,</span> <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="full-system-basics">
+<h2>Full-system basics<a class="headerlink" href="#full-system-basics" title="Link to this heading">¶</a></h2>
+<section id="rhf-energy-single-system">
+<h3>RHF energy (single system)<a class="headerlink" href="#rhf-energy-single-system" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
+</span><span data-line="8"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="9"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+</span><span data-line="10"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="11"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="12"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="14"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="17"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="18"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="19"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="20"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span data-line="22"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">      </span><span class="nt">&quot;density_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="25"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="26"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="27"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="ri-hf-via-fock-build-type">
+<h3>RI-HF (via <code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code>)<a class="headerlink" href="#ri-hf-via-fock-build-type" title="Link to this heading">¶</a></h3>
+<p>The EXESS schema does not include a distinct <code class="docutils literal notranslate"><span class="pre">RestrictedRIHF</span></code> method. Use <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code> with <code class="docutils literal notranslate"><span class="pre">fock_build_type:</span> <span class="pre">&quot;RI&quot;</span></code>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
+</span><span data-line="8"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="9"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+</span><span data-line="10"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="11"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="12"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="14"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="17"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="18"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="19"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="20"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;fock_build_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RI&quot;</span><span class="p">,</span>
+</span><span data-line="22"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">      </span><span class="nt">&quot;density_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="26"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="27"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="28"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="ri-mp2-energy">
+<h3>RI-MP2 energy<a class="headerlink" href="#ri-mp2-energy" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="5"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="ksdft-example-pbe">
+<h3>KSDFT example (PBE)<a class="headerlink" href="#ksdft-example-pbe" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
+</span><span data-line="8"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="9"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+</span><span data-line="10"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="11"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="12"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="14"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedKSDFT&quot;</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span>
+</span><span data-line="16"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="17"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="18"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="19"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
+</span><span data-line="20"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">,</span>
+</span><span data-line="22"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="23"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="24"><span class="w">    </span><span class="nt">&quot;ks_dft&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="25"><span class="w">      </span><span class="nt">&quot;functional&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GGA_XC_PBE&quot;</span>
+</span><span data-line="26"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="27"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="28"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="gradient-calculation">
+<h3>Gradient calculation<a class="headerlink" href="#gradient-calculation" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gradient&quot;</span><span class="p">,</span>
+</span><span data-line="2"><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="6"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="batched-input-multiple-topologies">
+<h3>Batched input (multiple topologies)<a class="headerlink" href="#batched-input-multiple-topologies" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/water_1.xyz&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="4"><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/water_2.xyz&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span data-line="5"><span class="w">  </span><span class="p">]</span>
+</span><span data-line="6"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="fragmentation-workflows-mbe">
+<h2>Fragmentation workflows (MBE)<a class="headerlink" href="#fragmentation-workflows-mbe" title="Link to this heading">¶</a></h2>
+<section id="fragmented-mbe-energy-dimer-level">
+<h3>Fragmented MBE energy (dimer level)<a class="headerlink" href="#fragmented-mbe-energy-dimer-level" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.207</span><span class="p">,</span><span class="w"> </span><span class="mf">1.207</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-0.365</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.012</span><span class="p">,</span><span class="w"> </span><span class="mf">1.575</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">0.045</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.364</span><span class="p">,</span><span class="w"> </span><span class="mf">0.264</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">        </span><span class="mf">0.232</span><span class="p">,</span><span class="w"> </span><span class="mf">1.076</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.308</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">        </span><span class="mf">0.828</span><span class="p">,</span><span class="w"> </span><span class="mf">1.353</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.003</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">        </span><span class="mf">-0.599</span><span class="p">,</span><span class="w"> </span><span class="mf">1.509</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.506</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">        </span><span class="mf">-2.274</span><span class="p">,</span><span class="w"> </span><span class="mf">1.303</span><span class="p">,</span><span class="w"> </span><span class="mf">0.971</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">        </span><span class="mf">-1.737</span><span class="p">,</span><span class="w"> </span><span class="mf">1.624</span><span class="p">,</span><span class="w"> </span><span class="mf">1.696</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">        </span><span class="mf">-1.829</span><span class="p">,</span><span class="w"> </span><span class="mf">0.513</span><span class="p">,</span><span class="w"> </span><span class="mf">0.664</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">        </span><span class="mf">-2.272</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.224</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.322</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">        </span><span class="mf">-2.136</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.414</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.813</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">        </span><span class="mf">-2.265</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.961</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.402</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">        </span><span class="mf">0.935</span><span class="p">,</span><span class="w"> </span><span class="mf">1.982</span><span class="p">,</span><span class="w"> </span><span class="mf">1.885</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">        </span><span class="mf">1.347</span><span class="p">,</span><span class="w"> </span><span class="mf">1.122</span><span class="p">,</span><span class="w"> </span><span class="mf">1.814</span><span class="p">,</span>
+</span><span data-line="19"><span class="w">        </span><span class="mf">1.289</span><span class="p">,</span><span class="w"> </span><span class="mf">2.361</span><span class="p">,</span><span class="w"> </span><span class="mf">2.689</span>
+</span><span data-line="20"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="22"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span>
+</span><span data-line="27"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="28"><span class="w">      </span><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="29"><span class="w">        </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">]</span>
+</span><span data-line="30"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="31"><span class="w">      </span><span class="nt">&quot;connectivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span data-line="32"><span class="w">      </span><span class="nt">&quot;fragment_formal_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="33"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="34"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="35"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="36"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span>
+</span><span data-line="37"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STO-3G&quot;</span>
+</span><span data-line="38"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="39"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="40"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="41"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="42"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span data-line="43"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">,</span>
+</span><span data-line="44"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="45"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="46"><span class="w">    </span><span class="nt">&quot;frag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="47"><span class="w">      </span><span class="nt">&quot;cutoff_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="48"><span class="w">      </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dimer&quot;</span><span class="p">,</span>
+</span><span data-line="49"><span class="w">      </span><span class="nt">&quot;cutoffs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="50"><span class="w">        </span><span class="nt">&quot;dimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="51"><span class="w">        </span><span class="nt">&quot;trimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+</span><span data-line="52"><span class="w">      </span><span class="p">}</span>
+</span><span data-line="53"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="54"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="55"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="56"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>In this example, <code class="docutils literal notranslate"><span class="pre">fragments</span></code> is an array of arrays holding zero-indexed atom IDs, and <code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code> lists the charge for each fragment:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="2"><span class="w">  </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">]</span>
+</span><span data-line="3"><span class="p">],</span>
+</span><span data-line="4"><span class="nt">&quot;fragment_formal_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+</span></pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">frag</span></code> group controls truncation level, distance cutoffs, and the distance metric (<code class="docutils literal notranslate"><span class="pre">Centroid</span></code> vs <code class="docutils literal notranslate"><span class="pre">ClosestPair</span></code>). See the keyword reference for guidance.</p>
+</section>
+<section id="interaction-lattice-energy">
+<h3>Interaction (lattice) energy<a class="headerlink" href="#interaction-lattice-energy" title="Link to this heading">¶</a></h3>
+<p>Add a <code class="docutils literal notranslate"><span class="pre">reference_fragment</span></code> under <code class="docutils literal notranslate"><span class="pre">frag</span></code>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;frag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;reference_fragment&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;cutoff_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dimer&quot;</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;cutoffs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="6"><span class="w">    </span><span class="nt">&quot;dimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;trimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+</span><span data-line="8"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="9"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>This produces an interaction (lattice) energy between the reference fragment and the rest of the system. The usual convention applies: negative values indicate binding, positive values indicate repulsion.</p>
+</section>
+</section>
+<section id="dynamics-aimd">
+<h2>Dynamics (AIMD)<a class="headerlink" href="#dynamics-aimd" title="Link to this heading">¶</a></h2>
+<p>EXESS can run Born-Oppenheimer AIMD using RHF, RI-HF, or RI-MP2 gradients (fragmented or full-system). Switch the driver to <code class="docutils literal notranslate"><span class="pre">Dynamics</span></code> and add a <code class="docutils literal notranslate"><span class="pre">dynamics</span></code> block:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.207</span><span class="p">,</span><span class="w"> </span><span class="mf">1.207</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-0.365</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.012</span><span class="p">,</span><span class="w"> </span><span class="mf">1.575</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">0.045</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.364</span><span class="p">,</span><span class="w"> </span><span class="mf">0.264</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">        </span><span class="mf">0.232</span><span class="p">,</span><span class="w"> </span><span class="mf">1.076</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.308</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">        </span><span class="mf">0.828</span><span class="p">,</span><span class="w"> </span><span class="mf">1.353</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.003</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">        </span><span class="mf">-0.599</span><span class="p">,</span><span class="w"> </span><span class="mf">1.509</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.506</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">        </span><span class="mf">-2.274</span><span class="p">,</span><span class="w"> </span><span class="mf">1.303</span><span class="p">,</span><span class="w"> </span><span class="mf">0.971</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">        </span><span class="mf">-1.737</span><span class="p">,</span><span class="w"> </span><span class="mf">1.624</span><span class="p">,</span><span class="w"> </span><span class="mf">1.696</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">        </span><span class="mf">-1.829</span><span class="p">,</span><span class="w"> </span><span class="mf">0.513</span><span class="p">,</span><span class="w"> </span><span class="mf">0.664</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">        </span><span class="mf">-2.272</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.224</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.322</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">        </span><span class="mf">-2.136</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.414</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.813</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">        </span><span class="mf">-2.265</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.961</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.402</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">        </span><span class="mf">0.935</span><span class="p">,</span><span class="w"> </span><span class="mf">1.982</span><span class="p">,</span><span class="w"> </span><span class="mf">1.885</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">        </span><span class="mf">1.347</span><span class="p">,</span><span class="w"> </span><span class="mf">1.122</span><span class="p">,</span><span class="w"> </span><span class="mf">1.814</span><span class="p">,</span>
+</span><span data-line="19"><span class="w">        </span><span class="mf">1.289</span><span class="p">,</span><span class="w"> </span><span class="mf">2.361</span><span class="p">,</span><span class="w"> </span><span class="mf">2.689</span>
+</span><span data-line="20"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="22"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span>
+</span><span data-line="27"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="28"><span class="w">      </span><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="29"><span class="w">        </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">]</span>
+</span><span data-line="30"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="31"><span class="w">      </span><span class="nt">&quot;connectivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span data-line="32"><span class="w">      </span><span class="nt">&quot;fragment_formal_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="33"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="34"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="35"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="36"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="37"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="38"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="39"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="40"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="41"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="42"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="43"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span data-line="44"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">,</span>
+</span><span data-line="45"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="46"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="47"><span class="w">    </span><span class="nt">&quot;frag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="48"><span class="w">      </span><span class="nt">&quot;cutoff_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="49"><span class="w">      </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dimer&quot;</span><span class="p">,</span>
+</span><span data-line="50"><span class="w">      </span><span class="nt">&quot;cutoffs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="51"><span class="w">        </span><span class="nt">&quot;dimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="52"><span class="w">        </span><span class="nt">&quot;trimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+</span><span data-line="53"><span class="w">      </span><span class="p">}</span>
+</span><span data-line="54"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="55"><span class="w">    </span><span class="nt">&quot;dynamics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="56"><span class="w">      </span><span class="nt">&quot;n_timesteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span data-line="57"><span class="w">      </span><span class="nt">&quot;dt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.002</span>
+</span><span data-line="58"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="59"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="60"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dynamics&quot;</span>
+</span><span data-line="61"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">dt</span></code> is in ps (1 fs is 0.001 ps); the upstream docs treat 1 fs as a typical default.</p>
+</section>
+<section id="geometry-optimization">
+<h2>Geometry optimization<a class="headerlink" href="#geometry-optimization" title="Link to this heading">¶</a></h2>
+<p>Geometry optimization uses RHF, RI-HF, or RI-MP2 gradients. The upstream docs provide a simple RI-MP2 optimization example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">-0.75</span><span class="p">,</span><span class="w"> </span><span class="mf">0.452</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.417</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.696</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.588</span><span class="p">,</span><span class="w"> </span><span class="mf">0.609</span><span class="p">,</span><span class="w"> </span><span class="mf">0.82</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.678</span><span class="p">,</span><span class="w"> </span><span class="mf">0.537</span><span class="p">,</span><span class="w"> </span><span class="mf">0.892</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">0.417</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.428</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.285</span><span class="p">,</span><span class="w"> </span><span class="mf">1.273</span><span class="p">,</span><span class="w"> </span><span class="mf">0.066</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.328</span><span class="p">,</span><span class="w"> </span><span class="mf">0.08</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.263</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.225</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-1.507</span><span class="p">,</span><span class="w"> </span><span class="mf">0.366</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.029</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.162</span><span class="p">,</span><span class="w"> </span><span class="mf">1.555</span><span class="p">,</span><span class="w"> </span><span class="mf">1.158</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.594</span><span class="p">,</span><span class="w"> </span><span class="mf">0.054</span><span class="p">,</span><span class="w"> </span><span class="mf">1.31</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">        </span><span class="mf">-0.477</span><span class="p">,</span><span class="w"> </span><span class="mf">1.488</span><span class="p">,</span><span class="w"> </span><span class="mf">1.432</span><span class="p">,</span><span class="w"> </span><span class="mf">0.009</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.29</span><span class="p">,</span><span class="w"> </span><span class="mf">1.506</span><span class="p">,</span><span class="w"> </span><span class="mf">1.236</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.056</span>
+</span><span data-line="9"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="10"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+</span><span data-line="11"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="12"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="13"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Optimization&quot;</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="15"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">    </span><span class="nt">&quot;standard_orientation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span>
+</span><span data-line="19"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="20"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="21"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="22"><span class="w">      </span><span class="nt">&quot;fock_build_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RI&quot;</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DIIS&quot;</span>
+</span><span data-line="27"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="28"><span class="w">    </span><span class="nt">&quot;optimization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="29"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="30"><span class="w">      </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DelocalisedInternal&quot;</span>
+</span><span data-line="31"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="32"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="33"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="dynamics-and-optimization">
+<h2>Dynamics and optimization<a class="headerlink" href="#dynamics-and-optimization" title="Link to this heading">¶</a></h2>
+<section id="ab-initio-md-dynamics">
+<h3>Ab initio MD (Dynamics)<a class="headerlink" href="#ab-initio-md-dynamics" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.207</span><span class="p">,</span><span class="w"> </span><span class="mf">1.207</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-0.365</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.012</span><span class="p">,</span><span class="w"> </span><span class="mf">1.575</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">0.045</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.364</span><span class="p">,</span><span class="w"> </span><span class="mf">0.264</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">        </span><span class="mf">0.232</span><span class="p">,</span><span class="w"> </span><span class="mf">1.076</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.308</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">        </span><span class="mf">0.828</span><span class="p">,</span><span class="w"> </span><span class="mf">1.353</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.003</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">        </span><span class="mf">-0.599</span><span class="p">,</span><span class="w"> </span><span class="mf">1.509</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.506</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">        </span><span class="mf">-2.274</span><span class="p">,</span><span class="w"> </span><span class="mf">1.303</span><span class="p">,</span><span class="w"> </span><span class="mf">0.971</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">        </span><span class="mf">-1.737</span><span class="p">,</span><span class="w"> </span><span class="mf">1.624</span><span class="p">,</span><span class="w"> </span><span class="mf">1.696</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">        </span><span class="mf">-1.829</span><span class="p">,</span><span class="w"> </span><span class="mf">0.513</span><span class="p">,</span><span class="w"> </span><span class="mf">0.664</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">        </span><span class="mf">-2.272</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.224</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.322</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">        </span><span class="mf">-2.136</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.414</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.813</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">        </span><span class="mf">-2.265</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.961</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.402</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">        </span><span class="mf">0.935</span><span class="p">,</span><span class="w"> </span><span class="mf">1.982</span><span class="p">,</span><span class="w"> </span><span class="mf">1.885</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">        </span><span class="mf">1.347</span><span class="p">,</span><span class="w"> </span><span class="mf">1.122</span><span class="p">,</span><span class="w"> </span><span class="mf">1.814</span><span class="p">,</span>
+</span><span data-line="19"><span class="w">        </span><span class="mf">1.289</span><span class="p">,</span><span class="w"> </span><span class="mf">2.361</span><span class="p">,</span><span class="w"> </span><span class="mf">2.689</span>
+</span><span data-line="20"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="22"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">        </span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span>
+</span><span data-line="27"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="28"><span class="w">      </span><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="29"><span class="w">        </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">]</span>
+</span><span data-line="30"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="31"><span class="w">      </span><span class="nt">&quot;connectivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span data-line="32"><span class="w">      </span><span class="nt">&quot;fragment_formal_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="33"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="34"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="35"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="36"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="37"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="38"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span>
+</span><span data-line="39"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="40"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="41"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="42"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="43"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span data-line="44"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">,</span>
+</span><span data-line="45"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span>
+</span><span data-line="46"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="47"><span class="w">    </span><span class="nt">&quot;frag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="48"><span class="w">      </span><span class="nt">&quot;cutoff_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="49"><span class="w">      </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dimer&quot;</span><span class="p">,</span>
+</span><span data-line="50"><span class="w">      </span><span class="nt">&quot;cutoffs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="51"><span class="w">        </span><span class="nt">&quot;dimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="52"><span class="w">        </span><span class="nt">&quot;trimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+</span><span data-line="53"><span class="w">      </span><span class="p">}</span>
+</span><span data-line="54"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="55"><span class="w">    </span><span class="nt">&quot;dynamics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="56"><span class="w">      </span><span class="nt">&quot;n_timesteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span data-line="57"><span class="w">      </span><span class="nt">&quot;dt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.002</span>
+</span><span data-line="58"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="59"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="60"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dynamics&quot;</span>
+</span><span data-line="61"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>Geometry optimization<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">-0.75</span><span class="p">,</span><span class="w"> </span><span class="mf">0.452</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.417</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.696</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.588</span><span class="p">,</span><span class="w"> </span><span class="mf">0.609</span><span class="p">,</span><span class="w"> </span><span class="mf">0.82</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.678</span><span class="p">,</span><span class="w"> </span><span class="mf">0.537</span><span class="p">,</span><span class="w"> </span><span class="mf">0.892</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">0.417</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.428</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.285</span><span class="p">,</span><span class="w"> </span><span class="mf">1.273</span><span class="p">,</span><span class="w"> </span><span class="mf">0.066</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.328</span><span class="p">,</span><span class="w"> </span><span class="mf">0.08</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.263</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.225</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-1.507</span><span class="p">,</span><span class="w"> </span><span class="mf">0.366</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.029</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.162</span><span class="p">,</span><span class="w"> </span><span class="mf">1.555</span><span class="p">,</span><span class="w"> </span><span class="mf">1.158</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.594</span><span class="p">,</span><span class="w"> </span><span class="mf">0.054</span><span class="p">,</span><span class="w"> </span><span class="mf">1.31</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">        </span><span class="mf">-0.477</span><span class="p">,</span><span class="w"> </span><span class="mf">1.488</span><span class="p">,</span><span class="w"> </span><span class="mf">1.432</span><span class="p">,</span><span class="w"> </span><span class="mf">0.009</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.29</span><span class="p">,</span><span class="w"> </span><span class="mf">1.506</span><span class="p">,</span><span class="w"> </span><span class="mf">1.236</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.056</span>
+</span><span data-line="9"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="10"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+</span><span data-line="11"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="12"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="13"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Optimization&quot;</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="15"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">    </span><span class="nt">&quot;standard_orientation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span>
+</span><span data-line="19"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="20"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="21"><span class="w">    </span><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="22"><span class="w">      </span><span class="nt">&quot;fock_build_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RI&quot;</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">      </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">      </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">      </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DIIS&quot;</span>
+</span><span data-line="27"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="28"><span class="w">    </span><span class="nt">&quot;optimization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="29"><span class="w">      </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="30"><span class="w">      </span><span class="nt">&quot;coordinate_system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DelocalisedInternal&quot;</span>
+</span><span data-line="31"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="32"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="33"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="rush-py-workflows">
+<h2>Rush-py workflows<a class="headerlink" href="#rush-py-workflows" title="Link to this heading">¶</a></h2>
+<section id="rush-py-wrapper-example">
+<h3>Rush-py wrapper example<a class="headerlink" href="#rush-py-wrapper-example" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
+</span><span data-line="4">    <span class="s2">&quot;input_topology.json&quot;</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="6"><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>For exports, descriptor grids, and output downloading, see the <a class="reference internal" href="../tutorials/exess-exports.html"><span class="doc std std-doc">EXESS exports tutorial</span></a>.</p>
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

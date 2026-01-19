@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Keyword reference - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Examples" href="examples.html" /><link rel="prev" title="Input format" href="input.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=a318c5d4" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Keyword reference"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="index.html">
+      <strong>EXESS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        <form class="searchbox flex items-center" action="../search.html" method="get">
+          <input type="text" name="q" placeholder="Search" />
+          <input type="hidden" name="exess" value="1" />
+          <kbd>/</kbd>
+        </form>
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input format</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mismatches.html">Layer mismatches and alignment notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#scf">scf</a></li>
+<li><a class="reference internal" href="#frag">frag</a></li>
+<li><a class="reference internal" href="#guess">guess</a></li>
+<li><a class="reference internal" href="#optimization">optimization</a></li>
+<li><a class="reference internal" href="#dynamics">dynamics</a></li>
+<li><a class="reference internal" href="#boundary">boundary</a></li>
+<li><a class="reference internal" href="#force-field">force_field</a></li>
+<li><a class="reference internal" href="#log">log</a></li>
+<li><a class="reference internal" href="#rtat">rtat</a></li>
+<li><a class="reference internal" href="#export">export</a></li>
+<li><a class="reference internal" href="#ks-dft">ks_dft</a></li>
+<li><a class="reference internal" href="#integrals">integrals</a></li>
+<li><a class="reference internal" href="#gradient">gradient</a></li>
+<li><a class="reference internal" href="#hessian">hessian</a></li>
+<li><a class="reference internal" href="#machine-learning">machine_learning</a></li>
+<li><a class="reference internal" href="#qmmm">qmmm</a></li>
+<li><a class="reference internal" href="#regions">regions</a></li>
+<li><a class="reference internal" href="#debug">debug</a></li>
+<li><a class="reference internal" href="#rush-py-defaults">Rush-py defaults</a></li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">EXESS</strong>
+        <meta itemprop="position" content="1" />
+      </li>
+    </ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside" aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="keyword-reference">
+<h1>Keyword reference<a class="headerlink" href="#keyword-reference" title="Link to this heading">¶</a></h1>
+<p>Keywords live under the top-level <code class="docutils literal notranslate"><span class="pre">keywords</span></code> object. The groups recognized by the EXESS/libqdx schema are:</p>
+<p><code class="docutils literal notranslate"><span class="pre">scf</span></code>, <code class="docutils literal notranslate"><span class="pre">ks_dft</span></code>, <code class="docutils literal notranslate"><span class="pre">rtat</span></code>, <code class="docutils literal notranslate"><span class="pre">frag</span></code>, <code class="docutils literal notranslate"><span class="pre">boundary</span></code>, <code class="docutils literal notranslate"><span class="pre">debug</span></code>, <code class="docutils literal notranslate"><span class="pre">export</span></code>, <code class="docutils literal notranslate"><span class="pre">guess</span></code>, <code class="docutils literal notranslate"><span class="pre">log</span></code>, <code class="docutils literal notranslate"><span class="pre">dynamics</span></code>, <code class="docutils literal notranslate"><span class="pre">integrals</span></code>, <code class="docutils literal notranslate"><span class="pre">force_field</span></code>, <code class="docutils literal notranslate"><span class="pre">optimization</span></code>, <code class="docutils literal notranslate"><span class="pre">gradient</span></code>, <code class="docutils literal notranslate"><span class="pre">hessian</span></code>, <code class="docutils literal notranslate"><span class="pre">machine_learning</span></code>, <code class="docutils literal notranslate"><span class="pre">qmmm</span></code>, <code class="docutils literal notranslate"><span class="pre">regions</span></code>.</p>
+<p>Defaults in the tables below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.</p>
+<p>The upstream manual describes <code class="docutils literal notranslate"><span class="pre">keywords</span></code> as the main set of controls for the calculation. In practice, you will spend most of your time in <code class="docutils literal notranslate"><span class="pre">scf</span></code>, <code class="docutils literal notranslate"><span class="pre">frag</span></code>, <code class="docutils literal notranslate"><span class="pre">ks_dft</span></code>, and the driver-specific groups (<code class="docutils literal notranslate"><span class="pre">optimization</span></code>, <code class="docutils literal notranslate"><span class="pre">dynamics</span></code>, <code class="docutils literal notranslate"><span class="pre">qmmm</span></code>).</p>
+<section id="scf">
+<h2>scf<a class="headerlink" href="#scf" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_iters</span></code></p></td>
+<td><p>int</p></td>
+<td><p>50</p></td>
+<td><p>Max number of SCF iterations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_diis_history_length</span></code></p></td>
+<td><p>int</p></td>
+<td><p>8</p></td>
+<td><p>Max size of DIIS window.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code></p></td>
+<td><p>int</p></td>
+<td><p>2560</p></td>
+<td><p>Shell-pair batches per bin.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">convergence_metric</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DIIS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DIIS</span></code>, <code class="docutils literal notranslate"><span class="pre">Energy</span></code>, or <code class="docutils literal notranslate"><span class="pre">Density</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">convergence_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1e-6</p></td>
+<td><p>SCF convergence threshold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">density_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1e-10</p></td>
+<td><p>Density screening threshold.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gradient_screening_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1e-10</p></td>
+<td><p>Gradient screening threshold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bf_cutoff_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">density_threshold</span></code></p></td>
+<td><p>Basis function cutoff threshold (DFT/shell pairs).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">density_basis_set_projection_fallback_enabled</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>auto (fragmented)</p></td>
+<td><p>STO-3G projection fallback.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_ri</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Deprecated RI toggle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">allow_crap_scf</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Expert flag.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">store_ri_b_on_host</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Store RI B on host.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">compress_ri_b</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Compress RI B matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">homo_lumo_guess_rotation_angle</span></code></p></td>
+<td><p>float</p></td>
+<td><p>auto (0 or 45)</p></td>
+<td><p>HOMO/LUMO rotation (degrees).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">HGP</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">HGP</span></code>, <code class="docutils literal notranslate"><span class="pre">UM09</span></code>, or <code class="docutils literal notranslate"><span class="pre">RI</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exchange_screening_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1e-5</p></td>
+<td><p>Exchange screening threshold.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">group_shared_exponents</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Group shared basis exponents (UM09 only).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;scf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;max_diis_history_length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;convergence_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;density_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="nt">&quot;density_basis_set_projection_fallback_enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="nt">&quot;fock_build_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RI&quot;</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="nt">&quot;compress_ri_b&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="nt">&quot;convergence_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DIIS&quot;</span>
+</span><span data-line="10"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Details:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: Use multiples of 128; do not go below 128. Upstream docs cite 10.1021/acs.jctc.0c00768, 10.1021/acs.jctc.1c00720, and 10.1080/00268976.2022.2112987 for details on the shell-pair batch bin container.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence_metric</span></code>: <code class="docutils literal notranslate"><span class="pre">Energy</span></code>, <code class="docutils literal notranslate"><span class="pre">Density</span></code>, or <code class="docutils literal notranslate"><span class="pre">DIIS</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence_threshold</span></code>: Suggested values from upstream docs:</p>
+<ul>
+<li><p>1e-6 for non-fragmented RHF + RI-MP2 with <code class="docutils literal notranslate"><span class="pre">Density</span></code>/<code class="docutils literal notranslate"><span class="pre">DIIS</span></code>.</p></li>
+<li><p>1e-8 for non-fragmented RHF + RI-MP2 with <code class="docutils literal notranslate"><span class="pre">Energy</span></code>.</p></li>
+<li><p>1e-6 for dimer-level RHF + RI-MP2.</p></li>
+<li><p>1e-8 for trimer/tetramer-level calculations with <code class="docutils literal notranslate"><span class="pre">DIIS</span></code>.</p></li>
+<li><p>1e-10 for large tetramer-level calculations with <code class="docutils literal notranslate"><span class="pre">DIIS</span></code>.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">density_threshold</span></code>: Lower values speed up SCF with potential accuracy loss. Upstream guidance suggests exploring 1e-8 to 1e-12 and validating accuracy; too-large values can lead to NaNs. Increasing to 1e-11 or 1e-12 will slow SCF but can improve accuracy for higher-order fragmentation (e.g., tetramers) and produce crisper MP2 orbitals. Validate results against the default before adopting more aggressive thresholds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gradient_screening_threshold</span></code>: Additional screening for gradient-related integrals.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bf_cutoff_threshold</span></code>: If omitted, EXESS uses <code class="docutils literal notranslate"><span class="pre">density_threshold</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">density_basis_set_projection_fallback_enabled</span></code>: If omitted, EXESS enables fallback for fragmented calculations and disables it for full-system calculations. When triggered, EXESS reruns SCF in STO-3G and projects the density into the target basis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">HGP</span></code>: Head-Gordon-Pople algorithm, optimized for dense systems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UM09</span></code>: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RI</span></code>: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_ri</span></code>: Deprecated in EXESS (scheduled for removal in 5.0.0); use <code class="docutils literal notranslate"><span class="pre">fock_build_type</span> <span class="pre">=</span> <span class="pre">&quot;RI&quot;</span></code> instead. If set, EXESS forces the Fock build type to <code class="docutils literal notranslate"><span class="pre">RI</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">homo_lumo_guess_rotation_angle</span></code>: Rotation in degrees (0-180) for unrestricted symmetry breaking. If omitted, EXESS uses 45 degrees for unrestricted singlets and 0 otherwise.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code> guidance from upstream docs:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">HGP</span></code> is tuned for dense systems where screening is less important (e.g., compact biomolecules).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UM09</span></code> is tuned for screening-heavy systems (e.g., long chains) and can scale better on large systems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RI</span></code> stores integrals, can be faster on small systems, but memory usage rises substantially; it requires an auxiliary basis.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">store_ri_b_on_host</span></code>: Use this if GPU memory is insufficient for RI; this is slower but can still outperform non-RI for some systems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compress_ri_b</span></code>: Experimental compression for RI-HF; upstream docs warn it may misbehave.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">group_shared_exponents</span></code>: Expert control used with UM09 and shared-exponent basis sets (e.g., cc-pVDZ).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exchange_screening_threshold</span></code> and <code class="docutils literal notranslate"><span class="pre">allow_crap_scf</span></code> are expert controls; adjust only with validation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code> includes improved screening for large systems (&gt;3000 basis functions); see https://arxiv.org/abs/2407.21445 for details.</p></li>
+</ul>
+</section>
+<section id="frag">
+<h2>frag<a class="headerlink" href="#frag" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">level</span></code></p></td>
+<td><p>string</p></td>
+<td><p>required</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Monomer</span></code> .. <code class="docutils literal notranslate"><span class="pre">Octamer</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cutoffs</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>Distance cutoffs in Angstroms.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cutoff_type</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ClosestPair</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Centroid</span></code> or <code class="docutils literal notranslate"><span class="pre">ClosestPair</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">distance_metric</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Max</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Max</span></code>, <code class="docutils literal notranslate"><span class="pre">Average</span></code>, <code class="docutils literal notranslate"><span class="pre">Min</span></code>, <code class="docutils literal notranslate"><span class="pre">Ryan</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference_fragment</span></code></p></td>
+<td><p>int</p></td>
+<td><p>unset</p></td>
+<td><p>Reference fragment for interaction energies.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">included_fragments</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>unset</p></td>
+<td><p>Subset of fragments to include.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">enable_speed</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Experimental queue optimization.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cutoffs</span></code> can include <code class="docutils literal notranslate"><span class="pre">dimer</span></code>, <code class="docutils literal notranslate"><span class="pre">trimer</span></code>, <code class="docutils literal notranslate"><span class="pre">tetramer</span></code>, <code class="docutils literal notranslate"><span class="pre">pentamer</span></code>, <code class="docutils literal notranslate"><span class="pre">hexamer</span></code>, <code class="docutils literal notranslate"><span class="pre">heptamer</span></code>, <code class="docutils literal notranslate"><span class="pre">octamer</span></code>.</p></li>
+<li><p>Distances are in Angstroms and should follow <code class="docutils literal notranslate"><span class="pre">dimer</span> <span class="pre">&gt;</span> <span class="pre">trimer</span> <span class="pre">&gt;</span> <span class="pre">tetramer</span></code> when using higher orders.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">cutoffs</span></code> is omitted, the calculation proceeds without distance filtering (all n-mers up to <code class="docutils literal notranslate"><span class="pre">level</span></code>); be cautious with fragment counts to avoid excessive compute.</p></li>
+<li><p>Truncation counts scale combinatorially: dimers <code class="docutils literal notranslate"><span class="pre">n(n-1)/2</span></code>, trimers <code class="docutils literal notranslate"><span class="pre">n(n-1)(n-2)/6</span></code>, tetramers <code class="docutils literal notranslate"><span class="pre">n(n-1)(n-2)(n-3)/24</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reference_fragment</span></code> enables lattice/interaction energies by summing n-mer corrections that include the reference fragment. Negative values indicate binding; positive values indicate repulsion under the usual convention.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">included_fragments</span></code> restricts the fragment set and treats them as an independent system.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cutoff_type</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Centroid</span></code> compares fragment centroids.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ClosestPair</span></code> uses the minimal inter-fragment atom distance (more accurate and generally preferred).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">distance_metric</span></code> controls how higher-order distances are computed from pair distances (<code class="docutils literal notranslate"><span class="pre">Max</span></code>, <code class="docutils literal notranslate"><span class="pre">Min</span></code>, <code class="docutils literal notranslate"><span class="pre">Average</span></code>, or <code class="docutils literal notranslate"><span class="pre">Ryan</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable_speed</span></code> is an experimental queue optimization intended for AIMD workflows (upstream docs label this “broom broom”).</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;frag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;cutoff_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;distance_metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Max&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tetramer&quot;</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;enable_speed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="nt">&quot;cutoffs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;dimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">    </span><span class="nt">&quot;trimer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">    </span><span class="nt">&quot;tetramer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span>
+</span><span data-line="10"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="11"><span class="w">  </span><span class="nt">&quot;included_fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+</span><span data-line="12"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Enum aliases accepted by libqdx (case variants shown as defined in the parser):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: <code class="docutils literal notranslate"><span class="pre">MONOMER</span></code>, <code class="docutils literal notranslate"><span class="pre">Monomer</span></code>, <code class="docutils literal notranslate"><span class="pre">monomer</span></code>; <code class="docutils literal notranslate"><span class="pre">DIMMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Dimer</span></code>/<code class="docutils literal notranslate"><span class="pre">dimer</span></code>; <code class="docutils literal notranslate"><span class="pre">TRIMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Trimer</span></code>/<code class="docutils literal notranslate"><span class="pre">trimer</span></code>; <code class="docutils literal notranslate"><span class="pre">TETRAMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Tetramer</span></code>/<code class="docutils literal notranslate"><span class="pre">tetramer</span></code>; <code class="docutils literal notranslate"><span class="pre">PENTAMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Pentamer</span></code>/<code class="docutils literal notranslate"><span class="pre">pentamer</span></code>; <code class="docutils literal notranslate"><span class="pre">HEXAMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Hexamer</span></code>/<code class="docutils literal notranslate"><span class="pre">hexamer</span></code>; <code class="docutils literal notranslate"><span class="pre">HEPTAMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Heptamer</span></code>/<code class="docutils literal notranslate"><span class="pre">heptamer</span></code>; <code class="docutils literal notranslate"><span class="pre">OCTAMER</span></code>/<code class="docutils literal notranslate"><span class="pre">Octamer</span></code>/<code class="docutils literal notranslate"><span class="pre">octamer</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cutoff_type</span></code>: <code class="docutils literal notranslate"><span class="pre">CENTROID</span></code>, <code class="docutils literal notranslate"><span class="pre">Centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">centroid</span></code>; <code class="docutils literal notranslate"><span class="pre">CLOSEST_PAIR</span></code>, <code class="docutils literal notranslate"><span class="pre">ClosestPair</span></code>, <code class="docutils literal notranslate"><span class="pre">closest_pair</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">distance_metric</span></code>: <code class="docutils literal notranslate"><span class="pre">MAX</span></code>, <code class="docutils literal notranslate"><span class="pre">Max</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>; <code class="docutils literal notranslate"><span class="pre">AVERAGE</span></code>, <code class="docutils literal notranslate"><span class="pre">Average</span></code>, <code class="docutils literal notranslate"><span class="pre">average</span></code>; <code class="docutils literal notranslate"><span class="pre">MIN</span></code>, <code class="docutils literal notranslate"><span class="pre">Min</span></code>, <code class="docutils literal notranslate"><span class="pre">min</span></code>.</p></li>
+</ul>
+</section>
+<section id="guess">
+<h2>guess<a class="headerlink" href="#guess" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">external_initial_density_path</span></code></p></td>
+<td><p>string</p></td>
+<td><p>unset</p></td>
+<td><p>HDF5 density guess path.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bsp</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Basis set projection bootstrap.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bsp_basis</span></code></p></td>
+<td><p>string</p></td>
+<td><p>empty</p></td>
+<td><p>Lower-resolution basis set for BSP.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bsp_scf_keywords</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>SCF keywords for BSP.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hcore</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Use hcore initial guess.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">smd</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>auto (fragmented non-RI)</p></td>
+<td><p>Superposition of monomer densities.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ssfd</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Subfragment density guess (experimental).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ssfd_target_size</span></code></p></td>
+<td><p>int</p></td>
+<td><p>30</p></td>
+<td><p>Target atoms per subfragment.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ssfd_only_converge_in_bsp_basis</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>true</p></td>
+<td><p>Only converge subfragments in BSP basis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ssfd_scf_keywords</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>SCF keywords for subfragment runs.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">external_initial_density_path</span></code> must reference an HDF5 file with a <code class="docutils literal notranslate"><span class="pre">density</span></code> dataset at root for RHF, or <code class="docutils literal notranslate"><span class="pre">alpha/density</span></code> and <code class="docutils literal notranslate"><span class="pre">beta/density</span></code> for UHF. Guesses are expected to be stored as flattened lower-triangular density matrices. External guesses are not supported for fragmented calculations, and EXESS warns that guesses from other codes may be incompatible due to basis ordering and normalization.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">smd</span></code> is omitted, EXESS enables it for fragmented calculations that are not using RI, and disables it otherwise.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">bsp_scf_keywords</span></code> or <code class="docutils literal notranslate"><span class="pre">ssfd_scf_keywords</span></code> are omitted, EXESS reuses the base SCF keywords.</p>
+<p>Additional notes from upstream docs:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bsp</span></code> (basis set projection) computes a lower-resolution SCF and projects to the target basis; it is off by default and requires <code class="docutils literal notranslate"><span class="pre">bsp_basis</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ssfd</span></code> is an experimental subfragment guess; <code class="docutils literal notranslate"><span class="pre">ssfd_target_size</span></code> controls subfragment size (default 30).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ssfd_only_converge_in_bsp_basis</span></code> keeps subfragments unconverged in the primary basis and only projects from the bootstrap basis.</p></li>
+</ul>
+</section>
+<section id="optimization">
+<h2>optimization<a class="headerlink" href="#optimization" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_iters</span></code></p></td>
+<td><p>int</p></td>
+<td><p>required</p></td>
+<td><p>Max optimization iterations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">convergence_criteria</span></code></p></td>
+<td><p>object</p></td>
+<td><p>defaults</p></td>
+<td><p>Metric + thresholds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">optimizer_reset_interval</span></code></p></td>
+<td><p>int</p></td>
+<td><p>unset</p></td>
+<td><p>Reset coordinate system and hessian every N iterations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">coordinate_system</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DelocalisedInternal</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Cartesian</span></code>, <code class="docutils literal notranslate"><span class="pre">NaturalInternal</span></code>, <code class="docutils literal notranslate"><span class="pre">DelocalisedInternal</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">constraints</span></code></p></td>
+<td><p>array[array[int]]</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[]</span></code></p></td>
+<td><p>Constraints on bonds/angles/dihedrals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hessian_guess</span></code></p></td>
+<td><p>string</p></td>
+<td><p>depends</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Identity</span></code>, <code class="docutils literal notranslate"><span class="pre">ScaledIdentity</span></code>, <code class="docutils literal notranslate"><span class="pre">Schlegel</span></code>, <code class="docutils literal notranslate"><span class="pre">Lindh</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">algorithm</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EigenvectorFollowing</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EigenvectorFollowing</span></code>, <code class="docutils literal notranslate"><span class="pre">TrustRegionAugmentedHessian</span></code>, <code class="docutils literal notranslate"><span class="pre">LBFGS</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lbfgs_keywords</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>LBFGS parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">trust_region</span></code></p></td>
+<td><p>object</p></td>
+<td><p>defaults</p></td>
+<td><p>Trust-region parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">frozen_distance_slippage_tolerance_angstroms</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1e-8</p></td>
+<td><p>Slippage tolerance (distance).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">frozen_angle_slippage_tolerance_degrees</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1e-8</p></td>
+<td><p>Slippage tolerance (angle).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">debug_xyz</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Debug XYZ output.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output_trc</span></code></p></td>
+<td><p>string</p></td>
+<td><p>unset</p></td>
+<td><p>Output TRC path.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fixed_atoms</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>unset</p></td>
+<td><p>Fixed atoms.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">free_atoms</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>unset</p></td>
+<td><p>Free atoms.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fixed_fragments</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>unset</p></td>
+<td><p>Fixed fragments.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">free_fragments</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>unset</p></td>
+<td><p>Free fragments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fix_heavy</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Fix heavy atoms.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Defaults for <code class="docutils literal notranslate"><span class="pre">convergence_criteria</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">metric</span></code>: <code class="docutils literal notranslate"><span class="pre">Baker</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gradient_threshold</span></code>: <code class="docutils literal notranslate"><span class="pre">3e-4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">delta_energy_threshold</span></code>: <code class="docutils literal notranslate"><span class="pre">1e-6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step_component_threshold</span></code>: <code class="docutils literal notranslate"><span class="pre">3e-4</span></code></p></li>
+</ul>
+<p>Defaults for <code class="docutils literal notranslate"><span class="pre">trust_region</span></code> (only used with <code class="docutils literal notranslate"><span class="pre">TrustRegionAugmentedHessian</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">initial_radius</span></code>: 0.4</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_radius</span></code>: 1e5</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_radius</span></code>: 1e-5</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">increase_factor</span></code>: 1.2</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">decrease_factor</span></code>: 0.7</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">constrict_factor</span></code>: 0.1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">increase_threshold</span></code>: 0.75</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">decrease_threshold</span></code>: 0.25</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rejection_threshold</span></code>: 0.0</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">hessian_guess</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">Identity</span></code> for Cartesian coordinates, otherwise <code class="docutils literal notranslate"><span class="pre">ScaledIdentity</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">lbfgs_keywords</span></code> defaults (only used with <code class="docutils literal notranslate"><span class="pre">LBFGS</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">linesearch</span></code>: <code class="docutils literal notranslate"><span class="pre">BacktrackingStrongWolfe</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_corrections</span></code>: 6</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epsilon</span></code>: 1e-5</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_linesearch</span></code>: 40</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gtol</span></code>: 0.9</p></li>
+</ul>
+<p>Guidance from upstream docs and libqdx comments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence_criteria.metric</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Baker</span></code>: max gradient component must be within threshold and either delta energy or step component must be within their thresholds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GradientOnly</span></code>: only the gradient threshold is enforced.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence_criteria</span></code> units: <code class="docutils literal notranslate"><span class="pre">gradient_threshold</span></code> (Eh/a0), <code class="docutils literal notranslate"><span class="pre">delta_energy_threshold</span></code> (Eh), <code class="docutils literal notranslate"><span class="pre">step_component_threshold</span></code> (a0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">coordinate_system</span></code>: <code class="docutils literal notranslate"><span class="pre">DelocalisedInternal</span></code> is the default and strongly recommended; <code class="docutils literal notranslate"><span class="pre">Cartesian</span></code> and <code class="docutils literal notranslate"><span class="pre">NaturalInternal</span></code> are available.</p></li>
+<li><p>Machine learning optimizations require <code class="docutils literal notranslate"><span class="pre">coordinate_system=&quot;Cartesian&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hessian_guess</span></code>: identity, scaled identity (default and recommended), Schlegel, and Lindh. Upstream docs caution that the non-default models are not recommended for general use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithm</span></code>: <code class="docutils literal notranslate"><span class="pre">EigenvectorFollowing</span></code> is recommended; <code class="docutils literal notranslate"><span class="pre">TrustRegionAugmentedHessian</span></code> is available but not recommended for most users.</p></li>
+<li><p>For machine learning optimizations, <code class="docutils literal notranslate"><span class="pre">algorithm=&quot;LBFGS&quot;</span></code> is strongly recommended.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">algorithm=&quot;LBFGS&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">lbfgs_keywords</span></code> must be provided (an empty object <code class="docutils literal notranslate"><span class="pre">{}</span></code> is acceptable).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optimizer_reset_interval</span></code> is an expert feature: every N iterations EXESS will regenerate the coordinate system and reset the Hessian; if omitted, it never resets.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">constraints</span></code> support constrained bond lengths, angles, and dihedrals (lists of atom indices).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">frozen_distance_slippage_tolerance_angstroms</span></code> and <code class="docutils literal notranslate"><span class="pre">frozen_angle_slippage_tolerance_degrees</span></code> control expected slippage in frozen delocalized coordinates.</p></li>
+<li><p>Fragmentation (<code class="docutils literal notranslate"><span class="pre">frag</span></code>) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact.</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;optimization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;max_iters&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;convergence_criteria&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">    </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Baker&quot;</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">&quot;gradient_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.66918e-4</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">    </span><span class="nt">&quot;delta_energy_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;step_component_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2e-3</span>
+</span><span data-line="8"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="9"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="dynamics">
+<h2>dynamics<a class="headerlink" href="#dynamics" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_timesteps</span></code></p></td>
+<td><p>int</p></td>
+<td><p>required</p></td>
+<td><p>Number of timesteps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dt</span></code></p></td>
+<td><p>float</p></td>
+<td><p>required</p></td>
+<td><p>Timestep size in ps.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reuse_orbitals</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Reuse orbitals between steps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_async_timesteps</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>true</p></td>
+<td><p>Asynchronous timesteps (expert).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;dynamics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;n_timesteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;use_async_timesteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;dt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.002</span>
+</span><span data-line="5"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>Upstream docs list 1 fs (0.001 ps) as a typical default for <code class="docutils literal notranslate"><span class="pre">dt</span></code>; the schema requires that you set <code class="docutils literal notranslate"><span class="pre">dt</span></code> explicitly.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_async_timesteps</span></code> is an expert keyword; use with care.</p></li>
+</ul>
+</section>
+<section id="boundary">
+<h2>boundary<a class="headerlink" href="#boundary" title="Link to this heading">¶</a></h2>
+<p>Boundary conditions for periodic or truncated simulations:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;boundary&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Periodic&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;range&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;lower&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;upper&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Periodic&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;range&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;lower&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;upper&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Periodic&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;range&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;lower&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;upper&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+</span><span data-line="5"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">kind</span></code> can be <code class="docutils literal notranslate"><span class="pre">Periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">Rigid</span></code>, or <code class="docutils literal notranslate"><span class="pre">Delete</span></code>.</p>
+<p>Boundary conditions are specified per axis; <code class="docutils literal notranslate"><span class="pre">range.lower</span></code>/<code class="docutils literal notranslate"><span class="pre">range.upper</span></code> define the box extent for <code class="docutils literal notranslate"><span class="pre">Periodic</span></code> boundaries.</p>
+</section>
+<section id="force-field">
+<h2>force_field<a class="headerlink" href="#force-field" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ff_filename</span></code></p></td>
+<td><p>string</p></td>
+<td><p>required</p></td>
+<td><p>Force field filename path.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">force_field</span></code> is used for classical MM components (e.g., solvent in AIMD/QMMM workflows).</p>
+</section>
+<section id="log">
+<h2>log<a class="headerlink" href="#log" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">console</span></code></p></td>
+<td><p>object</p></td>
+<td><p>defaults</p></td>
+<td><p>Console log settings.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">logfiles</span></code></p></td>
+<td><p>array</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[]</span></code></p></td>
+<td><p>File log settings.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Defaults:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">console.level</span></code>: <code class="docutils literal notranslate"><span class="pre">LargeInfo</span></code> (or <code class="docutils literal notranslate"><span class="pre">Debug</span></code> in debug builds).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">console.prefix_fmt</span></code>: empty string.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logfiles.level</span></code>: <code class="docutils literal notranslate"><span class="pre">Verbose</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logfiles.prefix_fmt</span></code>: <code class="docutils literal notranslate"><span class="pre">[%Y-%m-%d</span> <span class="pre">%H:%M:%S.{us}</span> <span class="pre">r{rank}</span> <span class="pre">{level}]</span> </code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logfiles.directory</span></code>: unset.</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;log&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;console&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Verbose&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;logfiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="4"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="5"><span class="w">      </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Verbose&quot;</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">      </span><span class="nt">&quot;prefix_fmt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}] &quot;</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">      </span><span class="nt">&quot;directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/exess&quot;</span>
+</span><span data-line="8"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="9"><span class="w">  </span><span class="p">]</span>
+</span><span data-line="10"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Log levels: <code class="docutils literal notranslate"><span class="pre">Debug</span></code>, <code class="docutils literal notranslate"><span class="pre">Verbose</span></code>, <code class="docutils literal notranslate"><span class="pre">LargeInfo</span></code>, <code class="docutils literal notranslate"><span class="pre">Info</span></code>, <code class="docutils literal notranslate"><span class="pre">Performance</span></code>, <code class="docutils literal notranslate"><span class="pre">Warning</span></code>, <code class="docutils literal notranslate"><span class="pre">Error</span></code>.</p>
+<p>Upstream docs describe this order as descending verbosity.</p>
+</section>
+<section id="rtat">
+<h2>rtat<a class="headerlink" href="#rtat" title="Link to this heading">¶</a></h2>
+<p>RTAT is a runtime auto-tuner for matrix operations.</p>
+<p>Upstream docs note that RTAT is the open-source <code class="docutils literal notranslate"><span class="pre">rtatblas</span></code> library (https://github.com/csnowdon2/rtatblas). When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">enabled</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>true</p></td>
+<td><p>Enable runtime autotuning.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">synchronous</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Use synchronous operations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">json_file_dump_prefix</span></code></p></td>
+<td><p>string</p></td>
+<td><p>unset</p></td>
+<td><p>Prefix for RTAT JSON dumps.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="export">
+<h2>export<a class="headerlink" href="#export" title="Link to this heading">¶</a></h2>
+<p>Export controls what is written to HDF5 output files:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_density</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export density.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_relaxed_mp2_density_correction</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export relaxed MP2 density correction.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_fock</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export Fock matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_overlap</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export overlap matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_h_core</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export H core matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_expanded_density</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export expanded density.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_expanded_gradient</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export expanded gradient.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_molecular_orbital_coeffs</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export MO coefficients.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_gradient</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export gradients.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_external_charge_gradient</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export external charge gradients.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_mulliken_charges</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export Mulliken charges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_chelpg_charges</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export CHELPG charges.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_bond_orders</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export bond orders.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_h_caps</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export H caps.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_density_descriptors</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export density descriptors.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_esp_descriptors</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export ESP descriptors.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_expanded_esp_descriptors</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export expanded ESP descriptors.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_basis_labels</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export basis labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_hessian</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export hessian.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_mass_weighted_hessian</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export mass-weighted hessian.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">export_hessian_frequencies</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export hessian frequencies.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flatten_symmetric</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>true</p></td>
+<td><p>Flatten symmetric matrices.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">light_json</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Light JSON output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">concatenate_hdf5_files</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Concatenate HDF5 outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">training_db</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Export training DB metadata.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">descriptor_grid</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>Grid for descriptor exports.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">descriptor_grid</span></code> can be one of the following structures (libqdx):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">standard</span></code>: <code class="docutils literal notranslate"><span class="pre">FINE</span></code>, <code class="docutils literal notranslate"><span class="pre">ULTRAFINE</span></code>, <code class="docutils literal notranslate"><span class="pre">SUPERFINE</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER_GM3</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER_GM5</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">params</span></code>: <code class="docutils literal notranslate"><span class="pre">points_per_shell</span></code>, <code class="docutils literal notranslate"><span class="pre">order</span></code> (<code class="docutils literal notranslate"><span class="pre">One</span></code> or <code class="docutils literal notranslate"><span class="pre">Two</span></code>), <code class="docutils literal notranslate"><span class="pre">scale</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">regular</span></code>: <code class="docutils literal notranslate"><span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, <code class="docutils literal notranslate"><span class="pre">spacing</span></code> arrays (Cartesian grid).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">custom</span></code>: flat list of points <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">z1,</span> <span class="pre">x2,</span> <span class="pre">y2,</span> <span class="pre">z2,</span> <span class="pre">...]</span></code>.</p></li>
+</ul>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">export_gradient</span></code> and <code class="docutils literal notranslate"><span class="pre">export_expanded_gradient</span></code> require a gradient-capable driver (Gradient, Dynamics, QMMM, Optimization).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">export_hessian</span></code>, <code class="docutils literal notranslate"><span class="pre">export_mass_weighted_hessian</span></code>, and <code class="docutils literal notranslate"><span class="pre">export_hessian_frequencies</span></code> require a Hessian calculation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">export_expanded_esp_descriptors</span></code> is documented as causing memory errors; avoid enabling it for production runs.</p></li>
+<li><p>rush-py source comments flag a few exports as undocumented or unclear (e.g., <code class="docutils literal notranslate"><span class="pre">export_molecular_orbital_coeffs</span></code>, <code class="docutils literal notranslate"><span class="pre">export_relaxed_mp2_density_correction</span></code>, <code class="docutils literal notranslate"><span class="pre">export_mass_weighted_hessian</span></code>, <code class="docutils literal notranslate"><span class="pre">export_hessian_frequencies</span></code>, and <code class="docutils literal notranslate"><span class="pre">export_basis_labels</span></code>). <code class="docutils literal notranslate"><span class="pre">export_bond_orders</span></code> is described as a pass-through of input connectivity.</p></li>
+</ul>
+</section>
+<section id="ks-dft">
+<h2>ks_dft<a class="headerlink" href="#ks-dft" title="Link to this heading">¶</a></h2>
+<p>KSDFT is used when <code class="docutils literal notranslate"><span class="pre">model.method</span></code> is <code class="docutils literal notranslate"><span class="pre">RestrictedKSDFT</span></code>. Upstream docs recommend reading the KSDFT paper (see the citations page) before tuning advanced settings.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">functional</span></code></p></td>
+<td><p>string</p></td>
+<td><p>required</p></td>
+<td><p>LibXC functional name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">method</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GauXC</span></code></p></td>
+<td><p>XC evaluation method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">use_C_opt</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>true</p></td>
+<td><p>Use C-matrix optimization (Dense/BatchDense).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grid</span></code></p></td>
+<td><p>object</p></td>
+<td><p>default grid (ULTRAFINE)</p></td>
+<td><p>Numerical grid settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sp_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p>SCF density_threshold</p></td>
+<td><p>Single-precision threshold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dp_threshold</span></code></p></td>
+<td><p>float</p></td>
+<td><p>SCF density_threshold</p></td>
+<td><p>Double-precision threshold.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batches_per_batch</span></code></p></td>
+<td><p>int</p></td>
+<td><p>20</p></td>
+<td><p>Batch batching for GauXC.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Grid parameters supported in the libqdx Rust schema:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">radial_quad</span></code>: <code class="docutils literal notranslate"><span class="pre">MuraKnowles</span></code>, <code class="docutils literal notranslate"><span class="pre">MurrayHandyLaming</span></code>, <code class="docutils literal notranslate"><span class="pre">TreutlerAldrichs</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pruning_scheme</span></code>: <code class="docutils literal notranslate"><span class="pre">ROBUST</span></code>, <code class="docutils literal notranslate"><span class="pre">UNPRUNED</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: GauXC batch size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">radial_size</span></code>, <code class="docutils literal notranslate"><span class="pre">angular_size</span></code>: Custom grid sizes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_grid</span></code>: <code class="docutils literal notranslate"><span class="pre">FINE</span></code>, <code class="docutils literal notranslate"><span class="pre">ULTRAFINE</span></code>, <code class="docutils literal notranslate"><span class="pre">SUPERFINE</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER_GM3</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER_GM5</span></code>.</p></li>
+</ul>
+<p>Defaults (EXESS):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">grid.default_grid</span></code>: <code class="docutils literal notranslate"><span class="pre">ULTRAFINE</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid.radial_quad</span></code>: <code class="docutils literal notranslate"><span class="pre">MuraKnowles</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid.pruning_scheme</span></code>: <code class="docutils literal notranslate"><span class="pre">ROBUST</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid.batch_size</span></code>: 512 (GauXC).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dp_threshold</span></code>: SCF <code class="docutils literal notranslate"><span class="pre">density_threshold</span></code> if omitted.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sp_threshold</span></code>: <code class="docutils literal notranslate"><span class="pre">dp_threshold</span></code> if set, otherwise SCF <code class="docutils literal notranslate"><span class="pre">density_threshold</span></code>.</p></li>
+</ul>
+<p>Method options (from upstream docs):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">GauXC</span></code> (default): GPU-accelerated XC evaluation with the broadest support.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dense</span></code>: Dense matrix evaluation, roughly O(N^3); suitable for small to medium systems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BatchDense</span></code>: Batched dense evaluation; O(N^2) with <code class="docutils literal notranslate"><span class="pre">use_C_opt=true</span></code>, O(N) with <code class="docutils literal notranslate"><span class="pre">use_C_opt=false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Direct</span></code>: Direct evaluation without storing intermediates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SemiDirect</span></code>: Hybrid of direct and batch-dense methods.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">use_C_opt</span></code> enables C-matrix based XC evaluation, reducing matrix dimensions from <code class="docutils literal notranslate"><span class="pre">n_basis</span></code> to <code class="docutils literal notranslate"><span class="pre">n_occ</span></code> for Dense/BatchDense methods. Upstream docs note it is only valid for <code class="docutils literal notranslate"><span class="pre">Dense</span></code> and <code class="docutils literal notranslate"><span class="pre">BatchDense</span></code>.</p>
+<p>Grid configuration details (from upstream docs):</p>
+<ul class="simple">
+<li><p>Default grid presets via <code class="docutils literal notranslate"><span class="pre">default_grid</span></code>: <code class="docutils literal notranslate"><span class="pre">FINE</span></code>, <code class="docutils literal notranslate"><span class="pre">ULTRAFINE</span></code> (default), <code class="docutils literal notranslate"><span class="pre">SUPERFINE</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER_GM3</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER_GM5</span></code>.</p></li>
+<li><p>Custom grid sizes via <code class="docutils literal notranslate"><span class="pre">radial_size</span></code> and <code class="docutils literal notranslate"><span class="pre">angular_size</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">radial_quad</span></code>: <code class="docutils literal notranslate"><span class="pre">MuraKnowles</span></code> (default), <code class="docutils literal notranslate"><span class="pre">MurrayHandyLaming</span></code>, <code class="docutils literal notranslate"><span class="pre">TreutlerAldrichs</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pruning_scheme</span></code>: <code class="docutils literal notranslate"><span class="pre">ROBUST</span></code> (default), <code class="docutils literal notranslate"><span class="pre">UNPRUNED</span></code>, <code class="docutils literal notranslate"><span class="pre">TREUTLER</span></code>.</p></li>
+<li><p>Batching:</p>
+<ul>
+<li><p>Closest-atom batching (default when no batch settings are provided).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">octree</span></code>: <code class="docutils literal notranslate"><span class="pre">max_size</span></code> (default 512), <code class="docutils literal notranslate"><span class="pre">max_depth</span></code> (default unlimited), <code class="docutils literal notranslate"><span class="pre">max_distance</span></code> (default unlimited).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">space_filling</span></code>: <code class="docutils literal notranslate"><span class="pre">octree</span></code> parameters plus <code class="docutils literal notranslate"><span class="pre">target_batch_size</span></code> (default 1024).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: GauXC batch size (default 512).</p></li>
+</ul>
+</li>
+</ul>
+<p>Examples:</p>
+<p>Minimal KSDFT:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;ks_dft&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;functional&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GGA_XC_PBE&quot;</span>
+</span><span data-line="3"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Custom grid defaults:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;ks_dft&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;functional&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HYB_GGA_XC_B3LYP&quot;</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dense&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;grid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">&quot;default_grid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ULTRAFINE&quot;</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">    </span><span class="nt">&quot;radial_quad&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MuraKnowles&quot;</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;pruning_scheme&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ROBUST&quot;</span>
+</span><span data-line="8"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="9"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Octree batching:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;ks_dft&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;functional&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HYB_GGA_XC_B3LYP&quot;</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BatchDense&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;grid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">&quot;octree&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="6"><span class="w">      </span><span class="nt">&quot;max_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">512</span>
+</span><span data-line="7"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="8"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="9"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Functional notes from upstream docs:</p>
+<ul class="simple">
+<li><p>Meta-GGA functionals are experimental and supported only with <code class="docutils literal notranslate"><span class="pre">GauXC</span></code>.</p></li>
+<li><p>Range-separated functionals are not supported.</p></li>
+<li><p>Only <code class="docutils literal notranslate"><span class="pre">B2PLYP</span></code> and <code class="docutils literal notranslate"><span class="pre">revDSD-PBEP86-D4</span></code> double hybrids are implemented; D4 must be added externally.</p></li>
+<li><p>For a full list of functionals, see the LibXC documentation: https://www.tddft.org/programs/libxc/functionals/</p></li>
+</ul>
+<p>Grid guidance from upstream docs:</p>
+<ul class="simple">
+<li><p>Default grid settings (ULTRAFINE with ROBUST pruning) provide a good accuracy/cost balance for most users.</p></li>
+<li><p>SUPERFINE grids can improve accuracy but significantly increase compute time.</p></li>
+<li><p>Octree batching with BatchDense is useful for large systems where linear scaling is critical.</p></li>
+</ul>
+</section>
+<section id="integrals">
+<h2>integrals<a class="headerlink" href="#integrals" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scheduler</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Callback</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Callback</span></code> or <code class="docutils literal notranslate"><span class="pre">RoundRobin</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_streams</span></code></p></td>
+<td><p>int</p></td>
+<td><p>4 (CUDA) / 1 (HIP)</p></td>
+<td><p>GPU stream count.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">integrals</span></code> is omitted entirely, EXESS uses <code class="docutils literal notranslate"><span class="pre">Callback</span></code> with 4 streams.</p>
+</section>
+<section id="gradient">
+<h2>gradient<a class="headerlink" href="#gradient" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">finite_difference_step_size</span></code></p></td>
+<td><p>float</p></td>
+<td><p>5e-3</p></td>
+<td><p>Step size for numerical gradients.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">method</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Analytical</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Analytical</span></code> or <code class="docutils literal notranslate"><span class="pre">Numerical</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="hessian">
+<h2>hessian<a class="headerlink" href="#hessian" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">finite_difference_step_size</span></code></p></td>
+<td><p>float</p></td>
+<td><p>5e-3</p></td>
+<td><p>Step size for numerical Hessians.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">method</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Numerical</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Analytical</span></code> or <code class="docutils literal notranslate"><span class="pre">Numerical</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="machine-learning">
+<h2>machine_learning<a class="headerlink" href="#machine-learning" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ml_type</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AIMNet</span></code></p></td>
+<td><p>ML model type.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="qmmm">
+<h2>qmmm<a class="headerlink" href="#qmmm" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_timesteps</span></code></p></td>
+<td><p>int</p></td>
+<td><p>required</p></td>
+<td><p>Number of QMMM timesteps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dt_ps</span></code></p></td>
+<td><p>float</p></td>
+<td><p>required</p></td>
+<td><p>Timestep size in ps.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">temperature_kelvin</span></code></p></td>
+<td><p>float</p></td>
+<td><p>required</p></td>
+<td><p>Temperature in Kelvin.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pressure_atm</span></code></p></td>
+<td><p>float</p></td>
+<td><p>unset</p></td>
+<td><p>If set, runs NPT; otherwise NVT.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimisation</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>Classical minimisation settings.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>Trajectory output settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">energy_csv</span></code></p></td>
+<td><p>string</p></td>
+<td><p>unset</p></td>
+<td><p>Path for energy CSV.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">restraints</span></code></p></td>
+<td><p>object</p></td>
+<td><p>unset</p></td>
+<td><p>Restraints for atoms/fragments.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">minimisation</span></code> is provided, defaults are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">err_tol_kj_per_mol_nm</span></code>: 10</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_iterations</span></code>: 0</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">trajectory</span></code> is provided, defaults are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: <code class="docutils literal notranslate"><span class="pre">JSON</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interval</span></code>: 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start</span></code>: 0</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end</span></code>: max u32</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include_waters</span></code>: false</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">restraints</span></code> is provided, defaults are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code>: 2000.0</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fix_heavy</span></code>: false</p></li>
+<li><p>Only one of <code class="docutils literal notranslate"><span class="pre">fixed_atoms</span></code>, <code class="docutils literal notranslate"><span class="pre">free_atoms</span></code>, <code class="docutils literal notranslate"><span class="pre">fixed_fragments</span></code>, <code class="docutils literal notranslate"><span class="pre">free_fragments</span></code> may be specified.</p></li>
+</ul>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pressure_atm</span></code>: if set, EXESS runs NPT; if unset, NVT is used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">energy_csv</span></code>: when set, EXESS uses a Verlet integrator and does not apply the thermostat (the temperature is not used for integration).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minimisation</span></code> can only be used in a purely classical run (no QM/ML regions).</p></li>
+<li><p>Fragmentation (<code class="docutils literal notranslate"><span class="pre">frag</span></code>) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact.</p></li>
+<li><p>If residues are not provided and any non-QM region exists, QMMM fails; with no residues, the entire system must be QM.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory.format</span></code> can be <code class="docutils literal notranslate"><span class="pre">JSON</span></code> or <code class="docutils literal notranslate"><span class="pre">XYZ</span></code> (default <code class="docutils literal notranslate"><span class="pre">JSON</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory.include_waters</span></code> can be set to omit waters for smaller trajectories.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">restraints</span></code>: only one of <code class="docutils literal notranslate"><span class="pre">fixed_atoms</span></code>, <code class="docutils literal notranslate"><span class="pre">free_atoms</span></code>, <code class="docutils literal notranslate"><span class="pre">fixed_fragments</span></code>, <code class="docutils literal notranslate"><span class="pre">free_fragments</span></code> may be specified; set <code class="docutils literal notranslate"><span class="pre">free_atoms</span> <span class="pre">=</span> <span class="pre">[]</span></code> to fix all atoms.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">restraints.k</span></code> scales the restraint force; larger values mean stronger restraints.</p></li>
+</ul>
+</section>
+<section id="regions">
+<h2>regions<a class="headerlink" href="#regions" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">regions</span></code> defines which fragments are treated as QM, MM, or ML (Q4ML/QMMM workflows):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qm_fragments</span></code>: array[int]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mm_fragments</span></code>: array[int]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ml_fragments</span></code>: array[int]</p></li>
+</ul>
+<p>Rules and defaults:</p>
+<ul class="simple">
+<li><p>Provide at least two of the three lists; the remaining region is inferred as the fragments not mentioned elsewhere.</p></li>
+<li><p>If all three lists are provided, they must be disjoint and cover all fragments.</p></li>
+<li><p>Supplying only one list is invalid.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">regions</span></code> is omitted in JSON, libqdx defaults to <code class="docutils literal notranslate"><span class="pre">mm_fragments=[]</span></code> and <code class="docutils literal notranslate"><span class="pre">ml_fragments=[]</span></code> and EXESS infers <code class="docutils literal notranslate"><span class="pre">qm_fragments</span></code> as all fragments (pure QM).</p></li>
+<li><p>Non-QM regions are only supported for <code class="docutils literal notranslate"><span class="pre">QMMM</span></code> and <code class="docutils literal notranslate"><span class="pre">Optimization</span></code>; other drivers (including <code class="docutils literal notranslate"><span class="pre">Energy</span></code>) require pure QM regions.</p></li>
+<li><p>Non-QM regions are not supported for batched topology inputs.</p></li>
+</ul>
+</section>
+<section id="debug">
+<h2>debug<a class="headerlink" href="#debug" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Keyword</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Brief</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dry_run</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Validate fragment queue without computing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">print_subfragment_xyz</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Print subfragment XYZ for SSFD.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_fragments</span></code></p></td>
+<td><p>int</p></td>
+<td><p>-1</p></td>
+<td><p>Limit number of fragments computed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ignore_fragments</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Ignore fragmentation (developer validation).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip_calcs</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>false</p></td>
+<td><p>Skip computations in fragmentation routines.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dry_run</span></code> runs queue construction only (no computation) to validate fragment counts and detect input issues.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">print_subfragment_xyz</span></code> prints subfragment geometries for SSFD debugging.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_fragments</span></code> can be used to limit the number of fragments evaluated for non-covalent systems; the default <code class="docutils literal notranslate"><span class="pre">-1</span></code> means “use all fragments.”</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore_fragments</span></code> forces a full-system calculation for validation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">skip_calcs</span></code> skips calculations during fragmentation to debug queue construction performance.</p></li>
+</ul>
+</section>
+<section id="rush-py-defaults">
+<h2>Rush-py defaults<a class="headerlink" href="#rush-py-defaults" title="Link to this heading">¶</a></h2>
+<p>Rush-py sets some defaults in Python before submitting a run. If a <code class="docutils literal notranslate"><span class="pre">*_keywords</span></code> argument is omitted, rush-py may pass <code class="docutils literal notranslate"><span class="pre">None</span></code> (no overrides) or construct a default object.</p>
+<p>Default keyword behavior for the common entry points:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.exess</span></code> / <code class="docutils literal notranslate"><span class="pre">exess.energy</span></code> / <code class="docutils literal notranslate"><span class="pre">exess.interaction_energy</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">scf_keywords</span></code>: unset (EXESS defaults apply).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">frag_keywords</span></code>: <code class="docutils literal notranslate"><span class="pre">FragKeywords()</span></code> (level <code class="docutils literal notranslate"><span class="pre">Dimer</span></code>, <code class="docutils literal notranslate"><span class="pre">dimer_cutoff=100.0</span></code>, <code class="docutils literal notranslate"><span class="pre">trimer_cutoff=None</span></code>, <code class="docutils literal notranslate"><span class="pre">tetramer_cutoff=None</span></code>, <code class="docutils literal notranslate"><span class="pre">cutoff_type=None</span></code>, <code class="docutils literal notranslate"><span class="pre">distance_metric=None</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">export_keywords</span></code>: <code class="docutils literal notranslate"><span class="pre">ExportKeywords()</span></code> (all fields unset; no exports requested).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.chelpg</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">scf_keywords</span></code>: <code class="docutils literal notranslate"><span class="pre">SCFKeywords(max_diis_history_length=12,</span> <span class="pre">convergence_threshold=1e-8)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">frag_keywords</span></code>: <code class="docutils literal notranslate"><span class="pre">FragKeywords(level=&quot;Monomer&quot;)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">export</span></code>: CHELPG charges and bond orders enabled.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.qmmm</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">scf_keywords</span></code>: unset (EXESS defaults apply).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">frag_keywords</span></code>: <code class="docutils literal notranslate"><span class="pre">FragKeywords()</span></code> (same defaults as above).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code>: <code class="docutils literal notranslate"><span class="pre">Trajectory()</span></code> (all fields unset; EXESS defaults apply).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.optimization</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">optimization_keywords</span></code>: <code class="docutils literal notranslate"><span class="pre">OptimizationKeywords()</span></code> (all fields unset; EXESS defaults apply), with required <code class="docutils literal notranslate"><span class="pre">max_iters</span></code> passed separately.</p></li>
+</ul>
+</li>
+</ul>
+<p>Rush-py entrypoint defaults (non-keyword parameters):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.exess</span></code> / <code class="docutils literal notranslate"><span class="pre">exess.energy</span></code> / <code class="docutils literal notranslate"><span class="pre">exess.interaction_energy</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;cc-pVDZ&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">aux_basis=None</span></code>.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.chelpg</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;cc-pVDZ&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">aux_basis=None</span></code>.</p></li>
+<li><p>Overrides <code class="docutils literal notranslate"><span class="pre">standard_orientation=&quot;None&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">force_cartesian_basis_sets=false</span></code>.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.qmmm</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-3G&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">aux_basis=None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dt_ps=0.002</span></code>, <code class="docutils literal notranslate"><span class="pre">temperature_kelvin=290.0</span></code>, <code class="docutils literal notranslate"><span class="pre">pressure_atm=None</span></code>.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exess.optimization</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;cc-pVDZ&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">aux_basis=None</span></code>.</p></li>
+</ul>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">FragKeywords</span></code> defaults by level in rush-py:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Monomer</span></code>: <code class="docutils literal notranslate"><span class="pre">dimer_cutoff=100.0</span></code>, <code class="docutils literal notranslate"><span class="pre">trimer_cutoff=None</span></code>, <code class="docutils literal notranslate"><span class="pre">tetramer_cutoff=None</span></code>, <code class="docutils literal notranslate"><span class="pre">cutoff_type=None</span></code>, <code class="docutils literal notranslate"><span class="pre">distance_metric=None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dimer</span></code>: <code class="docutils literal notranslate"><span class="pre">dimer_cutoff=100.0</span></code>, <code class="docutils literal notranslate"><span class="pre">trimer_cutoff=None</span></code>, <code class="docutils literal notranslate"><span class="pre">tetramer_cutoff=None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Trimer</span></code>: <code class="docutils literal notranslate"><span class="pre">dimer_cutoff=100.0</span></code>, <code class="docutils literal notranslate"><span class="pre">trimer_cutoff=25.0</span></code>, <code class="docutils literal notranslate"><span class="pre">tetramer_cutoff=None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Tetramer</span></code>: <code class="docutils literal notranslate"><span class="pre">dimer_cutoff=100.0</span></code>, <code class="docutils literal notranslate"><span class="pre">trimer_cutoff=25.0</span></code>, <code class="docutils literal notranslate"><span class="pre">tetramer_cutoff=10.0</span></code>.</p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

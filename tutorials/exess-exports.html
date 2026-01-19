@@ -184,20 +184,22 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="6">    <span class="n">export_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">ExportKeywords</span><span class="p">(</span>
 </span><span data-line="7">        <span class="n">export_density_descriptors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span data-line="8">        <span class="n">export_esp_descriptors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="9">        <span class="n">descriptor_grid</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">CustomDescriptorGrid</span><span class="p">(</span>
-</span><span data-line="10">            <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
-</span><span data-line="11">        <span class="p">),</span>
-</span><span data-line="12">    <span class="p">),</span>
-</span><span data-line="13">    <span class="n">run_spec</span><span class="o">=</span><span class="n">RunSpec</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-</span><span data-line="14">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
-</span><span data-line="15">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Rush-Py Tutorial: EXESS Exports 2&quot;</span><span class="p">,</span>
-</span><span data-line="16">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;1kuw&quot;</span><span class="p">,</span> <span class="s2">&quot;electron density&quot;</span><span class="p">,</span> <span class="s2">&quot;ESP&quot;</span><span class="p">],</span>
-</span><span data-line="17">    <span class="p">),</span>
-</span><span data-line="18">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="19"><span class="p">)</span>
+</span><span data-line="9">        <span class="n">descriptor_grid</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">RegularDescriptorGrid</span><span class="p">(</span>
+</span><span data-line="10">            <span class="nb">min</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+</span><span data-line="11">            <span class="nb">max</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+</span><span data-line="12">            <span class="n">spacing</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+</span><span data-line="13">        <span class="p">),</span>
+</span><span data-line="14">    <span class="p">),</span>
+</span><span data-line="15">    <span class="n">run_spec</span><span class="o">=</span><span class="n">RunSpec</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+</span><span data-line="16">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
+</span><span data-line="17">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Rush-Py Tutorial: EXESS Exports 2&quot;</span><span class="p">,</span>
+</span><span data-line="18">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;1kuw&quot;</span><span class="p">,</span> <span class="s2">&quot;electron density&quot;</span><span class="p">,</span> <span class="s2">&quot;ESP&quot;</span><span class="p">],</span>
+</span><span data-line="19">    <span class="p">),</span>
+</span><span data-line="20">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="21"><span class="p">)</span>
 </span></pre></div>
 </div>
-<p>Note that we did not use fragmentation: this custom descriptor grid would get duplicated across all fragments, which probably isn’t the desired behavior. Other types of descriptor grids are more applicable for fragmented systems.</p>
+<p>Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values and should be avoided.</p>
 <p>Because the descriptor grid values aren’t particularly numerous, it may be more convenient to save them as JSON. This can be done by passing <code class="docutils literal notranslate"><span class="pre">to_json=True</span></code> to <code class="docutils literal notranslate"><span class="pre">exess.save_energy_outputs</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">files</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">to_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></pre></div>

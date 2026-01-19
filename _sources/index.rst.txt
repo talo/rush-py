@@ -26,6 +26,11 @@ onboard and run your first rush-py script.
    tutorials
    api
    modules
+
+.. toctree::
+   :hidden:
+
+   exess/index
    
 
 * :ref:`search`
