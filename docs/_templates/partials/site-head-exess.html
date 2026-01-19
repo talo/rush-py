@@ -1,0 +1,28 @@
+<div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="{{ pathto('exess/index') }}">
+      <strong>EXESS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden">
+        <form class="searchbox flex items-center" action="{{ pathto('search') }}" method="get">
+          <input type="text" name="q" placeholder="{{ _('Search') }}" />
+          <input type="hidden" name="exess" value="1" />
+          <kbd>/</kbd>
+        </form>
+      </div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden">
+      {%- include "components/theme-switch.html" -%}
+      <button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
