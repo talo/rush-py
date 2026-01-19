@@ -6,6 +6,7 @@ Key strengths at a glance:
 
 - GPU-first HF/RI/MP2/KSDFT workflows tuned for accelerator throughput.
 - Fragmentation (MBE) to make large systems tractable and scalable.
+- Region-based QM/MM/ML partitioning via `keywords.regions`, including MM force fields (OpenMM) and ML potentials (AIMNet) in QMMM and optimization workflows.
 - JSON-first inputs that support batched topologies and automation.
 - Native fit for multi-GPU and multi-node runs via Rush and MPI.
 
@@ -18,17 +19,19 @@ EXESS targets:
 - Large molecular systems where full-system QM is too expensive.
 - Fragment-based quantum chemistry via a Many-Body Expansion (MBE).
 - GPU-accelerated energies, gradients, geometry optimization, and AIMD.
+- Mixed-fidelity QM/MM/ML runs where fragments are assigned to regions (QMMM and optimization workflows).
 - High-throughput runs where a single input describes multiple topologies.
 
-If your workflow needs plane waves, pseudopotentials, or thermostatted/barostatted MD, EXESS is not the right tool (see limitations below).
+If your workflow needs plane waves or pseudopotentials, EXESS is not the right tool (see limitations below). Thermostatted/barostatted dynamics are supported in QMMM workflows (NVT/NPT via `qmmm.temperature_kelvin` and `qmmm.pressure_atm`), but fully ab initio AIMD is microcanonical only.
 
 ## Core ideas and workflow
 
-EXESS is built around three practical ideas:
+EXESS is built around four practical ideas:
 
 1. **GPU-first execution.** Methods and kernels are designed to run efficiently on NVIDIA (CUDA) and AMD (HIP) GPUs.
 2. **Fragmentation as a primary scaling strategy.** Many-Body Expansion enables accurate calculations on systems that are otherwise too large for full-system QM.
-3. **Automation-friendly inputs.** The JSON schema supports batched topologies, which is useful for screening or dataset generation.
+3. **Region-aware modeling.** The `regions` keyword assigns fragments to QM, MM, or ML partitions for QMMM and optimization workflows, with MM driven by OpenMM force fields and ML driven by AIMNet.
+4. **Automation-friendly inputs.** The JSON schema supports batched topologies, which is useful for screening or dataset generation.
 
 This philosophy shapes how you should approach method choice, fragmentation, and performance tuning.
 
@@ -75,6 +78,7 @@ Upstream docs recommend the MBE reviews at https://doi.org/10.1063/1.5126216 and
 
 - Geometry optimization is supported for RHF, RI-HF, and RI-MP2.
 - Born-Oppenheimer AIMD uses a Verlet integrator and is microcanonical only (no thermostats or barostats).
+- QMMM dynamics support NVT/NPT via the `qmmm` block (temperature and optional pressure), with MM handled through OpenMM and ML via AIMNet.
 - Dynamics can be combined with fragmentation for large systems.
 - Periodic boundary conditions and water-only classical solvent support are available in AIMD workflows.
 
@@ -86,6 +90,7 @@ EXESS is strong when you need GPU performance and fragmentation at scale. It is 
 
 - GPU-accelerated RHF, RI-HF, RI-MP2, and KSDFT energies.
 - Large-system QM via MBE fragmentation.
+- QM/MM/ML partitioning with `regions` for QMMM and optimization workflows.
 - Multi-GPU scaling for fragmented runs.
 - AIMD and geometry optimization with gradient-enabled methods.
 
@@ -97,6 +102,7 @@ EXESS is strong when you need GPU performance and fragmentation at scale. It is 
 - Hydrogen capping is the only supported covalent bond-breaking scheme.
 - UHF is supported only without RI; UHF gradients are not available.
 - Plane-wave basis sets are not supported.
+- Fully ab initio AIMD is microcanonical; thermostatted/barostatted dynamics require QMMM.
 
 Hardware guidance and known issues are listed in the [reference page](reference).
 
@@ -132,6 +138,7 @@ LibXC naming is required. Commonly used examples include:
 ### Dynamics capabilities
 
 - Born-Oppenheimer AIMD with a Verlet integrator (microcanonical only).
+- QMMM dynamics with NVT or NPT control via `qmmm.temperature_kelvin` and `qmmm.pressure_atm`.
 - Periodic boundary conditions.
 - Water-only classical solvent support (as documented upstream).
 
@@ -166,6 +173,7 @@ LibXC naming is required. Commonly used examples include:
 
 - Dynamics and optimization require gradients; use RHF, RI-HF, or RI-MP2.
 - AIMD is microcanonical only, so choose timestep and total steps accordingly.
+- For thermostatted or barostatted dynamics, use QMMM and set `keywords.regions` with `qmmm.temperature_kelvin` (and optional `qmmm.pressure_atm`).
 - Geometry optimization defaults to internal coordinates; override only if you understand the tradeoffs.
 
 ### GPU scaling and system settings

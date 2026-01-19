@@ -74,7 +74,7 @@ res = exess.energy(
 )
 ```
 
-Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values and should be avoided. 
+Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values and should be avoided.
 
 Because the descriptor grid values aren't particularly numerous, it may be more convenient to save them as JSON. This can be done by passing `convert_hdf5_to_json=True` to exess.energy as shown above and then saving the output using `exess.save_energy_outputs`:
 ```python

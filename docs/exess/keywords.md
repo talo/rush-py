@@ -210,11 +210,15 @@ Guidance from upstream docs and libqdx comments:
   - `GradientOnly`: only the gradient threshold is enforced.
 - `convergence_criteria` units: `gradient_threshold` (Eh/a0), `delta_energy_threshold` (Eh), `step_component_threshold` (a0).
 - `coordinate_system`: `DelocalisedInternal` is the default and strongly recommended; `Cartesian` and `NaturalInternal` are available.
+- Machine learning optimizations require `coordinate_system="Cartesian"`.
 - `hessian_guess`: identity, scaled identity (default and recommended), Schlegel, and Lindh. Upstream docs caution that the non-default models are not recommended for general use.
 - `algorithm`: `EigenvectorFollowing` is recommended; `TrustRegionAugmentedHessian` is available but not recommended for most users.
+- For machine learning optimizations, `algorithm="LBFGS"` is strongly recommended.
+- If `algorithm="LBFGS"`, `lbfgs_keywords` must be provided (an empty object `{}` is acceptable).
 - `optimizer_reset_interval` is an expert feature: every N iterations EXESS will regenerate the coordinate system and reset the Hessian; if omitted, it never resets.
 - `constraints` support constrained bond lengths, angles, and dihedrals (lists of atom indices).
 - `frozen_distance_slippage_tolerance_angstroms` and `frozen_angle_slippage_tolerance_degrees` control expected slippage in frozen delocalized coordinates.
+- Fragmentation (`frag`) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact.
 
 Example:
 
@@ -534,15 +538,19 @@ If `restraints` is provided, defaults are:
 
 - `k`: 2000.0
 - `fix_heavy`: false
+- Only one of `fixed_atoms`, `free_atoms`, `fixed_fragments`, `free_fragments` may be specified.
 
 Notes:
 
 - `pressure_atm`: if set, EXESS runs NPT; if unset, NVT is used.
+- `energy_csv`: when set, EXESS uses a Verlet integrator and does not apply the thermostat (the temperature is not used for integration).
+- `minimisation` can only be used in a purely classical run (no QM/ML regions).
+- Fragmentation (`frag`) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact.
+- If residues are not provided and any non-QM region exists, QMMM fails; with no residues, the entire system must be QM.
 - `trajectory.format` can be `JSON` or `XYZ` (default `JSON`).
 - `trajectory.include_waters` can be set to omit waters for smaller trajectories.
-- `restraints` are mutually exclusive across fixed/free atom/fragment lists; set `free_atoms = []` to fix all atoms.
+- `restraints`: only one of `fixed_atoms`, `free_atoms`, `fixed_fragments`, `free_fragments` may be specified; set `free_atoms = []` to fix all atoms.
 - `restraints.k` scales the restraint force; larger values mean stronger restraints.
-- In the rush-py interface, fragment lists obey these rules: if two of `qm_fragments`, `mm_fragments`, `ml_fragments` are provided, the remainder is inferred; if all three are provided, each fragment must be in exactly one list; providing only one list is invalid.
 
 ## regions
 
@@ -552,7 +560,14 @@ Notes:
 - `mm_fragments`: array[int]
 - `ml_fragments`: array[int]
 
-If omitted, the EXESS JSON parser sets `mm_fragments` and `ml_fragments` to empty lists and leaves `qm_fragments` unset.
+Rules and defaults:
+
+- Provide at least two of the three lists; the remaining region is inferred as the fragments not mentioned elsewhere.
+- If all three lists are provided, they must be disjoint and cover all fragments.
+- Supplying only one list is invalid.
+- If `regions` is omitted in JSON, libqdx defaults to `mm_fragments=[]` and `ml_fragments=[]` and EXESS infers `qm_fragments` as all fragments (pure QM).
+- Non-QM regions are only supported for `QMMM` and `Optimization`; other drivers (including `Energy`) require pure QM regions.
+- Non-QM regions are not supported for batched topology inputs.
 
 ## debug
 

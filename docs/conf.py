@@ -29,7 +29,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # HTML output options
 html_theme = "shibuya"
 html_static_path = ["_static"]
-html_js_files = ["exess-search.js"]
 
 # Shibuya theme options
 html_theme_options = {
