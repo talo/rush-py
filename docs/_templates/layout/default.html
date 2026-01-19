@@ -1,0 +1,77 @@
+{%- extends "base.html" -%}
+{%- set is_exess = pagename.startswith('exess/') or pagename == 'exess' -%}
+
+{%- block extrahead -%}
+  {% include "components/meta-opengraph.html" %}
+  {% include "components/alternate-links.html" %}
+{%- endblock -%}
+
+{%- if meta and meta.dark_code == "true" -%}
+  {% set dark_code = True %}
+{%- elif theme_dark_code -%}
+  {% set dark_code = True %}
+{%- else -%}
+  {% set dark_code = False %}
+{%- endif -%}
+
+{%- block header -%}
+  {%- if is_exess -%}
+    {%- include "partials/site-head-exess.html" -%}
+  {%- else -%}
+    {{ super() }}
+  {%- endif -%}
+{%- endblock -%}
+
+{% block body %}
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        {%- include "partials/globaltoc-above.html" %}
+        <div class="globaltoc" data-expand-depth="{{ theme_globaltoc_expand_depth }}">
+          {%- if is_exess -%}
+            {%- set globaltoc = exess_globaltoc|default('') -%}
+          {%- else -%}
+            {%- set globaltoc = toctree(collapse=theme_toctree_collapse, maxdepth=theme_toctree_maxdepth, titles_only=theme_toctree_titles_only, includehidden=theme_toctree_includehidden) -%}
+          {%- endif -%}
+          {{ expandtoc(globaltoc, theme_globaltoc_expand_depth) }}
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4">
+      {%- if sidebars -%}
+        {%- for sidebartemplate in sidebars -%}
+          {%- include sidebartemplate -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+    {%- if is_exess -%}
+      {%- include "partials/exess-crumbs.html" -%}
+    {%- else -%}
+      {%- include "components/breadcrumbs.html" -%}
+    {%- endif -%}
+    <div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        {%- include "components/copy-page-button.html" -%}
+        <article class="yue{% if dark_code %} dark-code{% endif %}" role="main">
+          {% block content %}{{ body }}{% endblock %}
+        </article>
+        {%- include "components/back-to-top.html" -%}
+        {%- if not is_exess -%}
+          {%- include "components/navigation.html" -%}
+        {%- endif -%}
+        {%- include "partials/page-bottom.html" -%}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
