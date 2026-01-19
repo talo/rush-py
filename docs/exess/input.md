@@ -19,9 +19,17 @@ Top-level EXESS input fields (as parsed by EXESS/libqdx):
 | `keywords` | object | Yes | Calculation parameters; may be `{}`. |
 | `driver` | string | Yes | Calculation type (Energy, Gradient, Dynamics, Optimization, Hessian, QMMM). |
 | `title` | string | No | Printed in output files. |
-| `check_schema` | bool | No | Only when compiled with configurable schema checks. |
+| `check_schema` | bool | No | Defaults to true when schema checks are enabled. |
 
 `keywords` is required in the C++ schema, but can be an empty object because defaults are applied by the parser.
+
+## Default resolution order
+
+Defaults are applied in the following order:
+
+1. rush-py defaults: any non-`None` values set in Python (function defaults or dataclass defaults) are explicit values.
+2. EXESS/libqdx JSON parser defaults (as defined in `libqdx.hpp`) for omitted fields.
+3. EXESS internal defaults for values that remain unset after parsing.
 
 ## topologies
 
@@ -38,13 +46,13 @@ Top-level EXESS input fields (as parsed by EXESS/libqdx):
 | `velocities` | array of float | No | Flat XYZ velocity array (Angstrom/ps). |
 | `labels` | array of string | No | Atom labels. |
 | `partial_charges` | array of float | No | Per-atom partial charges. |
-| `formal_charges` | array of int | No | Per-atom formal charges. |
+| `formal_charges` | array of int | No | Per-atom formal charges. Defaults to 0 for all atoms. |
 | `connectivity` | array of bonds | No | Bond list for covalent fragmentation. |
 | `stereochemistry` | array of int | No | One entry per bond. |
-| `fragments` | array of arrays | No | Zero-indexed atom indices per fragment. |
-| `fragment_formal_charges` | array of int | No | Per-fragment formal charges. |
+| `fragments` | array of arrays | No | Zero-indexed atom indices per fragment. If omitted, EXESS assumes a single fragment containing all atoms. |
+| `fragment_formal_charges` | array of int | No | Per-fragment formal charges. Defaults to 0 per fragment if omitted. |
 | `fragment_partial_charges` | array of float | No | Per-fragment partial charges. |
-| `fragment_multiplicities` | array of int | No | Per-fragment multiplicities. |
+| `fragment_multiplicities` | array of int | No | Per-fragment multiplicities. Defaults to 1 per fragment if omitted. |
 | `waters` | array of two ints | No | First/last water molecule treated classically. |
 
 
@@ -136,8 +144,9 @@ Fragment indices are zero-indexed. Example for five water fragments:
 
 #### fragment_formal_charges / fragment_multiplicities
 
-- `fragment_formal_charges` defaults to `[0]` for a single fragment.
-- `fragment_multiplicities` defaults to singlet (`[1]`) for a single fragment.
+- If `fragment_formal_charges` is omitted, EXESS sets fragment charges to the sum of per-atom `formal_charges` when provided, otherwise 0.
+- If `fragment_multiplicities` is omitted, EXESS sets multiplicity to 1 for every fragment.
+- If `fragments` is omitted, EXESS assumes a single fragment containing all atoms and derives defaults accordingly.
 
 #### waters
 
@@ -162,8 +171,8 @@ External charges are represented as:
 
 ```json
 "external_charges": {
-  "positions": [x0, y0, z0, x1, y1, z1, ...],
-  "charges": [q0, q1, ...]
+  "positions": [0.0, 0.0, 0.0, 1.5, 0.0, 0.0],
+  "charges": [0.5, -0.5]
 }
 ```
 
@@ -230,6 +239,17 @@ Key differences:
 - `external_charges` and some keyword groups (e.g., `rtat`, `integrals`, `ks_dft`) are not yet exposed in the rush-py API.
 
 See the Rush guides for TRC objects and conversions: [Objects and TRC Files](../guides/03-objects-and-trc-files).
+
+## Rush-py defaults
+
+Default values set by the rush-py entry points:
+
+- `exess.exess` / `exess.energy` / `exess.interaction_energy`: `driver="Energy"` (for `exess.exess`), `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`).
+- `exess.chelpg`: `method="RestrictedHF"`, `basis="cc-pVDZ"`, `standard_orientation="None"`, `force_cartesian_basis_sets=false`.
+- `exess.qmmm`: `method="RestrictedHF"`, `basis="STO-3G"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`), `dt_ps=0.002`, `temperature_kelvin=290.0`, `pressure_atm=None`, gradient method `Analytical` with default step size.
+- `exess.optimization`: `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`), `max_iters` required.
+
+Keyword defaults for rush-py are documented in the keyword reference page.
 
 ## Input conversion tools
 
