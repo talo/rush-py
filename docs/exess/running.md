@@ -27,6 +27,26 @@ runexess your_input_file.json -g NGPUS
 
 If `-g NGPUS` is omitted, the script will use all available GPUs. Use `runexess --help` for details on the wrapper arguments.
 
+### Input conversion (parley.py)
+
+Upstream docs point to the `parley.py` tool for converting XYZ to EXESS JSON (and back). It can also attach minimal default keywords for Dynamics and Optimization. Basic usage:
+
+```bash
+usage: parley.py [-h] [--input_format {xyz,json}] [--output_format {json,xyz}] --input_file INPUT_FILE [--output_file OUTPUT_FILE]
+                 [--basis_set BASIS_SET] [--aux_basis_set AUX_BASIS_SET] [--driver DRIVER] [--method METHOD]
+```
+
+Defaults (as documented upstream):
+
+- `input_format`: `xyz`
+- `output_format`: `json`
+- `basis_set`: `6-31G`
+- `aux_basis_set`: `none`
+- `driver`: `Energy` (options: Energy, Gradient, Dynamics, Optimization)
+- `method`: `RestrictedHF` (options: RestrictedHF, RestrictedRIMP2)
+
+The tool does not validate basis set choices; use the supported basis list in the [reference page](reference).
+
 ### Multi-node runs (fragmentation)
 
 Multi-node runs are used for fragmentation calculations. With Slurm, a typical launch looks like:
@@ -102,6 +122,17 @@ exess.optimization(...)
 exess.qmmm(...)
 ```
 
+Sample topology inputs are available in `tests/data/`, including `tests/data/1kuw_t.json` (small protein topology), `tests/data/benzene_t.json`, and `tests/data/ethane_t.json`.
+
+`exess.optimization` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM/ML regions when needed.
+
+To inspect function signatures and parameter docs locally, use Python's `help`:
+
+```python
+help(exess.energy)
+help(exess.FragKeywords)
+```
+
 By default, runs are asynchronous and return a run ID. Pass `collect=True` to wait for completion, or collect later:
 
 ```python
@@ -111,6 +142,8 @@ from rush.exess import exess as run_exess
 run_id = run_exess("input_topology.json")
 result = collect_run(run_id)
 ```
+
+`collect_run` waits up to one hour by default before timing out.
 
 ### Run metadata and resources
 
@@ -122,11 +155,46 @@ from rush.client import RunOpts, RunSpec
 
 res = exess.energy(
     "input_topology.json",
-    run_opts=RunOpts(name="example", tags=["exess"]),
+    run_opts=RunOpts(name="example", tags=["exess"], email=True),
     run_spec=RunSpec(storage=1000, gpus=1),
     collect=True,
 )
 ```
+
+### Automatic file conversion
+
+When a Rush module expects paths to Topology/Residues/Chains objects, rush-py can accept a PDB or SDF file path instead (proteins and ligands respectively), or a TRC file on disk. This is convenient for QMMM workflows.
+
+### Uploading, downloading, and saving outputs
+
+Rush uses object store paths for inputs and outputs. You can upload, download, and save objects explicitly:
+
+```python
+from rush.client import download_object, save_json, save_object, upload_object
+```
+
+The `save_outputs` helpers download outputs to the local workspace and preserve the original output signature, replacing object store paths with local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
+
+Not every module has a `save_outputs` helper yet; if you rely on this pattern and find a gap, file an issue so it can be prioritized.
+
+### Workspaces
+
+`save_outputs` writes files into a per-project workspace directory, keeping a `history.json` ledger of module runs (run ID, time created, module revision). To customize the workspace location:
+
+```python
+from pathlib import Path
+from rush import client
+
+client.set_opts(workspace_dir=Path("/path/to/workspace"))
+```
+
+### View runs in the Rush web interface
+
+Runs appear in the Rush web UI. For detailed debugging information, visit:
+
+`https://rush.cloud/projects/{PROJECT_ID}/runs`
+
+Replace `{PROJECT_ID}` with your actual project ID.
 
 ### Outputs and object store paths
 
@@ -137,3 +205,13 @@ files = exess.save_energy_outputs(res)
 ```
 
 Details on output files and the JSON and HDF5 structures are in the [outputs page](outputs).
+
+### Support and feedback (rush-py)
+
+If a rush-py module behaves unexpectedly or violates the documented client design, open an issue at:
+
+`https://github.com/talo/rush-py/issues/new`
+
+For general feedback across Rush, a public feedback form is also available:
+
+`https://forms.gle/1DPWK91utzJ6SED47`

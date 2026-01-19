@@ -6,6 +6,8 @@ Keywords live under the top-level `keywords` object. The groups recognized by th
 
 Defaults in the tables below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.
 
+The upstream manual describes `keywords` as the main set of controls for the calculation. In practice, you will spend most of your time in `scf`, `frag`, `ks_dft`, and the driver-specific groups (`optimization`, `dynamics`, `qmmm`).
+
 ## scf
 
 | Keyword | Type | Default | Brief |
@@ -45,7 +47,7 @@ Example:
 
 Details:
 
-- `batch_size`: Use multiples of 128; do not go below 128.
+- `batch_size`: Use multiples of 128; do not go below 128. Upstream docs cite 10.1021/acs.jctc.0c00768, 10.1021/acs.jctc.1c00720, and 10.1080/00268976.2022.2112987 for details on the shell-pair batch bin container.
 - `convergence_metric`: `Energy`, `Density`, or `DIIS`.
 - `convergence_threshold`: Suggested values from upstream docs:
   - 1e-6 for non-fragmented RHF + RI-MP2 with `Density`/`DIIS`.
@@ -53,17 +55,25 @@ Details:
   - 1e-6 for dimer-level RHF + RI-MP2.
   - 1e-8 for trimer/tetramer-level calculations with `DIIS`.
   - 1e-10 for large tetramer-level calculations with `DIIS`.
-- `density_threshold`: Lower values speed up SCF with potential accuracy loss.
+- `density_threshold`: Lower values speed up SCF with potential accuracy loss. Upstream guidance suggests exploring 1e-8 to 1e-12 and validating accuracy; too-large values can lead to NaNs. Increasing to 1e-11 or 1e-12 will slow SCF but can improve accuracy for higher-order fragmentation (e.g., tetramers) and produce crisper MP2 orbitals. Validate results against the default before adopting more aggressive thresholds.
 - `gradient_screening_threshold`: Additional screening for gradient-related integrals.
 - `bf_cutoff_threshold`: If omitted, EXESS uses `density_threshold`.
-- `density_basis_set_projection_fallback_enabled`: If omitted, EXESS enables fallback for fragmented calculations and disables it for full-system calculations.
+- `density_basis_set_projection_fallback_enabled`: If omitted, EXESS enables fallback for fragmented calculations and disables it for full-system calculations. When triggered, EXESS reruns SCF in STO-3G and projects the density into the target basis.
 - `fock_build_type`:
   - `HGP`: Head-Gordon-Pople algorithm, optimized for dense systems.
   - `UM09`: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
   - `RI`: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
-- `use_ri`: Deprecated in EXESS; use `fock_build_type = "RI"` instead. If set, EXESS forces the Fock build type to `RI`.
-- `homo_lumo_guess_rotation_angle`: If omitted, EXESS uses 45 degrees for unrestricted singlets and 0 otherwise.
-- `exchange_screening_threshold` and `group_shared_exponents` are expert controls for large systems and shared-exponent basis sets.
+- `use_ri`: Deprecated in EXESS (scheduled for removal in 5.0.0); use `fock_build_type = "RI"` instead. If set, EXESS forces the Fock build type to `RI`.
+- `homo_lumo_guess_rotation_angle`: Rotation in degrees (0-180) for unrestricted symmetry breaking. If omitted, EXESS uses 45 degrees for unrestricted singlets and 0 otherwise.
+- `fock_build_type` guidance from upstream docs:
+  - `HGP` is tuned for dense systems where screening is less important (e.g., compact biomolecules).
+  - `UM09` is tuned for screening-heavy systems (e.g., long chains) and can scale better on large systems.
+  - `RI` stores integrals, can be faster on small systems, but memory usage rises substantially; it requires an auxiliary basis.
+- `store_ri_b_on_host`: Use this if GPU memory is insufficient for RI; this is slower but can still outperform non-RI for some systems.
+- `compress_ri_b`: Experimental compression for RI-HF; upstream docs warn it may misbehave.
+- `group_shared_exponents`: Expert control used with UM09 and shared-exponent basis sets (e.g., cc-pVDZ).
+- `exchange_screening_threshold` and `allow_crap_scf` are expert controls; adjust only with validation.
+- `fock_build_type` includes improved screening for large systems (>3000 basis functions); see https://arxiv.org/abs/2407.21445 for details.
 
 ## frag
 
@@ -81,7 +91,15 @@ Notes:
 
 - `cutoffs` can include `dimer`, `trimer`, `tetramer`, `pentamer`, `hexamer`, `heptamer`, `octamer`.
 - Distances are in Angstroms and should follow `dimer > trimer > tetramer` when using higher orders.
-- If `cutoffs` is omitted, the calculation proceeds without distance filtering (all n-mers up to `level`).
+- If `cutoffs` is omitted, the calculation proceeds without distance filtering (all n-mers up to `level`); be cautious with fragment counts to avoid excessive compute.
+- Truncation counts scale combinatorially: dimers `n(n-1)/2`, trimers `n(n-1)(n-2)/6`, tetramers `n(n-1)(n-2)(n-3)/24`.
+- `reference_fragment` enables lattice/interaction energies by summing n-mer corrections that include the reference fragment. Negative values indicate binding; positive values indicate repulsion under the usual convention.
+- `included_fragments` restricts the fragment set and treats them as an independent system.
+- `cutoff_type`:
+  - `Centroid` compares fragment centroids.
+  - `ClosestPair` uses the minimal inter-fragment atom distance (more accurate and generally preferred).
+- `distance_metric` controls how higher-order distances are computed from pair distances (`Max`, `Min`, `Average`, or `Ryan`).
+- `enable_speed` is an experimental queue optimization intended for AIMD workflows (upstream docs label this "broom broom").
 
 Example:
 
@@ -100,6 +118,12 @@ Example:
 }
 ```
 
+Enum aliases accepted by libqdx (case variants shown as defined in the parser):
+
+- `level`: `MONOMER`, `Monomer`, `monomer`; `DIMMER`/`Dimer`/`dimer`; `TRIMER`/`Trimer`/`trimer`; `TETRAMER`/`Tetramer`/`tetramer`; `PENTAMER`/`Pentamer`/`pentamer`; `HEXAMER`/`Hexamer`/`hexamer`; `HEPTAMER`/`Heptamer`/`heptamer`; `OCTAMER`/`Octamer`/`octamer`.
+- `cutoff_type`: `CENTROID`, `Centroid`, `centroid`; `CLOSEST_PAIR`, `ClosestPair`, `closest_pair`.
+- `distance_metric`: `MAX`, `Max`, `max`; `AVERAGE`, `Average`, `average`; `MIN`, `Min`, `min`.
+
 ## guess
 
 | Keyword | Type | Default | Brief |
@@ -115,11 +139,17 @@ Example:
 | `ssfd_only_converge_in_bsp_basis` | bool | true | Only converge subfragments in BSP basis. |
 | `ssfd_scf_keywords` | object | unset | SCF keywords for subfragment runs. |
 
-`external_initial_density_path` must reference an HDF5 file with a `density` dataset at root for RHF, or `alpha/density` and `beta/density` for UHF. The EXESS schema warns that density guesses from other codes may be incompatible due to basis ordering and normalization. External guesses are not supported for fragmented calculations.
+`external_initial_density_path` must reference an HDF5 file with a `density` dataset at root for RHF, or `alpha/density` and `beta/density` for UHF. Guesses are expected to be stored as flattened lower-triangular density matrices. External guesses are not supported for fragmented calculations, and EXESS warns that guesses from other codes may be incompatible due to basis ordering and normalization.
 
 If `smd` is omitted, EXESS enables it for fragmented calculations that are not using RI, and disables it otherwise.
 
 If `bsp_scf_keywords` or `ssfd_scf_keywords` are omitted, EXESS reuses the base SCF keywords.
+
+Additional notes from upstream docs:
+
+- `bsp` (basis set projection) computes a lower-resolution SCF and projects to the target basis; it is off by default and requires `bsp_basis`.
+- `ssfd` is an experimental subfragment guess; `ssfd_target_size` controls subfragment size (default 30).
+- `ssfd_only_converge_in_bsp_basis` keeps subfragments unconverged in the primary basis and only projects from the bootstrap basis.
 
 ## optimization
 
@@ -173,6 +203,19 @@ Defaults for `trust_region` (only used with `TrustRegionAugmentedHessian`):
 - `max_linesearch`: 40
 - `gtol`: 0.9
 
+Guidance from upstream docs and libqdx comments:
+
+- `convergence_criteria.metric`:
+  - `Baker`: max gradient component must be within threshold and either delta energy or step component must be within their thresholds.
+  - `GradientOnly`: only the gradient threshold is enforced.
+- `convergence_criteria` units: `gradient_threshold` (Eh/a0), `delta_energy_threshold` (Eh), `step_component_threshold` (a0).
+- `coordinate_system`: `DelocalisedInternal` is the default and strongly recommended; `Cartesian` and `NaturalInternal` are available.
+- `hessian_guess`: identity, scaled identity (default and recommended), Schlegel, and Lindh. Upstream docs caution that the non-default models are not recommended for general use.
+- `algorithm`: `EigenvectorFollowing` is recommended; `TrustRegionAugmentedHessian` is available but not recommended for most users.
+- `optimizer_reset_interval` is an expert feature: every N iterations EXESS will regenerate the coordinate system and reset the Hessian; if omitted, it never resets.
+- `constraints` support constrained bond lengths, angles, and dihedrals (lists of atom indices).
+- `frozen_distance_slippage_tolerance_angstroms` and `frozen_angle_slippage_tolerance_degrees` control expected slippage in frozen delocalized coordinates.
+
 Example:
 
 ```json
@@ -206,6 +249,11 @@ Example:
 }
 ```
 
+Notes:
+
+- Upstream docs list 1 fs (0.001 ps) as a typical default for `dt`; the schema requires that you set `dt` explicitly.
+- `use_async_timesteps` is an expert keyword; use with care.
+
 ## boundary
 
 Boundary conditions for periodic or truncated simulations:
@@ -220,11 +268,15 @@ Boundary conditions for periodic or truncated simulations:
 
 `kind` can be `Periodic`, `Rigid`, or `Delete`.
 
+Boundary conditions are specified per axis; `range.lower`/`range.upper` define the box extent for `Periodic` boundaries.
+
 ## force_field
 
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
 | `ff_filename` | string | required | Force field filename path. |
+
+`force_field` is used for classical MM components (e.g., solvent in AIMD/QMMM workflows).
 
 ## log
 
@@ -258,9 +310,13 @@ Example:
 
 Log levels: `Debug`, `Verbose`, `LargeInfo`, `Info`, `Performance`, `Warning`, `Error`.
 
+Upstream docs describe this order as descending verbosity.
+
 ## rtat
 
 RTAT is a runtime auto-tuner for matrix operations.
+
+Upstream docs note that RTAT is the open-source `rtatblas` library (https://github.com/csnowdon2/rtatblas). When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
 
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
@@ -308,9 +364,16 @@ Export controls what is written to HDF5 output files:
 - `regular`: `min`, `max`, `spacing` arrays (Cartesian grid).
 - `custom`: flat list of points `[x1, y1, z1, x2, y2, z2, ...]`.
 
+Notes:
+
+- `export_gradient` and `export_expanded_gradient` require a gradient-capable driver (Gradient, Dynamics, QMMM, Optimization).
+- `export_hessian`, `export_mass_weighted_hessian`, and `export_hessian_frequencies` require a Hessian calculation.
+- `export_expanded_esp_descriptors` is documented as causing memory errors; avoid enabling it for production runs.
+- rush-py source comments flag a few exports as undocumented or unclear (e.g., `export_molecular_orbital_coeffs`, `export_relaxed_mp2_density_correction`, `export_mass_weighted_hessian`, `export_hessian_frequencies`, and `export_basis_labels`). `export_bond_orders` is described as a pass-through of input connectivity.
+
 ## ks_dft
 
-KSDFT is used when `model.method` is `RestrictedKSDFT`.
+KSDFT is used when `model.method` is `RestrictedKSDFT`. Upstream docs recommend reading the KSDFT paper (see the citations page) before tuning advanced settings.
 
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
@@ -339,11 +402,78 @@ Defaults (EXESS):
 - `dp_threshold`: SCF `density_threshold` if omitted.
 - `sp_threshold`: `dp_threshold` if set, otherwise SCF `density_threshold`.
 
+Method options (from upstream docs):
+
+- `GauXC` (default): GPU-accelerated XC evaluation with the broadest support.
+- `Dense`: Dense matrix evaluation, roughly O(N^3); suitable for small to medium systems.
+- `BatchDense`: Batched dense evaluation; O(N^2) with `use_C_opt=true`, O(N) with `use_C_opt=false`.
+- `Direct`: Direct evaluation without storing intermediates.
+- `SemiDirect`: Hybrid of direct and batch-dense methods.
+
+`use_C_opt` enables C-matrix based XC evaluation, reducing matrix dimensions from `n_basis` to `n_occ` for Dense/BatchDense methods. Upstream docs note it is only valid for `Dense` and `BatchDense`.
+
+Grid configuration details (from upstream docs):
+
+- Default grid presets via `default_grid`: `FINE`, `ULTRAFINE` (default), `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
+- Custom grid sizes via `radial_size` and `angular_size`.
+- `radial_quad`: `MuraKnowles` (default), `MurrayHandyLaming`, `TreutlerAldrichs`.
+- `pruning_scheme`: `ROBUST` (default), `UNPRUNED`, `TREUTLER`.
+- Batching:
+  - Closest-atom batching (default when no batch settings are provided).
+  - `octree`: `max_size` (default 512), `max_depth` (default unlimited), `max_distance` (default unlimited).
+  - `space_filling`: `octree` parameters plus `target_batch_size` (default 1024).
+  - `batch_size`: GauXC batch size (default 512).
+
+Examples:
+
+Minimal KSDFT:
+
+```json
+"ks_dft": {
+  "functional": "GGA_XC_PBE"
+}
+```
+
+Custom grid defaults:
+
+```json
+"ks_dft": {
+  "functional": "HYB_GGA_XC_B3LYP",
+  "method": "Dense",
+  "grid": {
+    "default_grid": "ULTRAFINE",
+    "radial_quad": "MuraKnowles",
+    "pruning_scheme": "ROBUST"
+  }
+}
+```
+
+Octree batching:
+
+```json
+"ks_dft": {
+  "functional": "HYB_GGA_XC_B3LYP",
+  "method": "BatchDense",
+  "grid": {
+    "octree": {
+      "max_size": 512
+    }
+  }
+}
+```
+
 Functional notes from upstream docs:
 
 - Meta-GGA functionals are experimental and supported only with `GauXC`.
 - Range-separated functionals are not supported.
 - Only `B2PLYP` and `revDSD-PBEP86-D4` double hybrids are implemented; D4 must be added externally.
+- For a full list of functionals, see the LibXC documentation: https://www.tddft.org/programs/libxc/functionals/
+
+Grid guidance from upstream docs:
+
+- Default grid settings (ULTRAFINE with ROBUST pruning) provide a good accuracy/cost balance for most users.
+- SUPERFINE grids can improve accuracy but significantly increase compute time.
+- Octree batching with BatchDense is useful for large systems where linear scaling is critical.
 
 ## integrals
 
@@ -405,6 +535,15 @@ If `restraints` is provided, defaults are:
 - `k`: 2000.0
 - `fix_heavy`: false
 
+Notes:
+
+- `pressure_atm`: if set, EXESS runs NPT; if unset, NVT is used.
+- `trajectory.format` can be `JSON` or `XYZ` (default `JSON`).
+- `trajectory.include_waters` can be set to omit waters for smaller trajectories.
+- `restraints` are mutually exclusive across fixed/free atom/fragment lists; set `free_atoms = []` to fix all atoms.
+- `restraints.k` scales the restraint force; larger values mean stronger restraints.
+- In the rush-py interface, fragment lists obey these rules: if two of `qm_fragments`, `mm_fragments`, `ml_fragments` are provided, the remainder is inferred; if all three are provided, each fragment must be in exactly one list; providing only one list is invalid.
+
 ## regions
 
 `regions` defines which fragments are treated as QM, MM, or ML (Q4ML/QMMM workflows):
@@ -425,6 +564,13 @@ If omitted, the EXESS JSON parser sets `mm_fragments` and `ml_fragments` to empt
 | `ignore_fragments` | bool | false | Ignore fragmentation (developer validation). |
 | `skip_calcs` | bool | false | Skip computations in fragmentation routines. |
 
+Notes:
+
+- `dry_run` runs queue construction only (no computation) to validate fragment counts and detect input issues.
+- `print_subfragment_xyz` prints subfragment geometries for SSFD debugging.
+- `max_fragments` can be used to limit the number of fragments evaluated for non-covalent systems; the default `-1` means "use all fragments."
+- `ignore_fragments` forces a full-system calculation for validation.
+- `skip_calcs` skips calculations during fragmentation to debug queue construction performance.
 ## Rush-py defaults
 
 Rush-py sets some defaults in Python before submitting a run. If a `*_keywords` argument is omitted, rush-py may pass `None` (no overrides) or construct a default object.
@@ -445,6 +591,19 @@ Default keyword behavior for the common entry points:
   - `trajectory`: `Trajectory()` (all fields unset; EXESS defaults apply).
 - `exess.optimization`:
   - `optimization_keywords`: `OptimizationKeywords()` (all fields unset; EXESS defaults apply), with required `max_iters` passed separately.
+
+Rush-py entrypoint defaults (non-keyword parameters):
+
+- `exess.exess` / `exess.energy` / `exess.interaction_energy`:
+  - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
+- `exess.chelpg`:
+  - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
+  - Overrides `standard_orientation="None"` and `force_cartesian_basis_sets=false`.
+- `exess.qmmm`:
+  - `method="RestrictedHF"`, `basis="STO-3G"`, `aux_basis=None`.
+  - `dt_ps=0.002`, `temperature_kelvin=290.0`, `pressure_atm=None`.
+- `exess.optimization`:
+  - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
 
 `FragKeywords` defaults by level in rush-py:
 

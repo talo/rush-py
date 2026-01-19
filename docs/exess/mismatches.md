@@ -13,7 +13,9 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - `force_field` is the schema key for forcefield settings; older docs use `ff`.
 - `optimization` uses `trust_region` in the schema, while earlier docs use `trust_region_keywords`.
 - SCF default values differ: the schema defaults `max_iters` to 50, whereas older docs state 30.
+- SCF docs note `convergence_metric` defaults to Energy; the schema defaults it to DIIS.
 - `dynamics.use_async_timesteps` defaults to true in the schema; older docs indicate false.
+- `debug.max_fragments` is described as "total fragments" in older docs; the schema uses `-1` as the default sentinel for "all fragments".
 
 **libqdx C++ vs libqdx Rust**
 - `frag.distance_metric` defaults to `Max` in libqdx.hpp but defaults to `Average` in libqdx Rust.
@@ -23,6 +25,7 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - `GuessSCF` uses `bf_cutoff_threshold` in libqdx.hpp but `bt_cutoff_threshold` in libqdx Rust.
 - `ssfd_only_converge_in_bsp_basis` has a trailing space in the libqdx.hpp JSON key (`"ssfd_only_converge_in_bsp_basis "`).
 - `ks_dft.grid` is free-form JSON in libqdx.hpp, but the Rust schema uses a fixed `XCGridParameters` struct (no octree/space-filling fields).
+- `model.method` and `model.basis` are required in libqdx.hpp, but libqdx Rust provides defaults (`RestrictedHF`, `cc-pVDZ`) when omitted.
 
 **libqdx C++ vs EXESS core defaults**
 - `scf.density_basis_set_projection_fallback_enabled` is optional in libqdx; EXESS defaults it to true for fragmented calculations and false otherwise.

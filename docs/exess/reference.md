@@ -135,6 +135,60 @@ From the installation docs:
 - `EXESS_RECORDS_PATH`: records directory.
 - `EXESS_VALIDATION_PATH`: validation directory (used by Julia validation scripts).
 
+## Installation (HPC build notes)
+
+The upstream installation guide targets HPC system administrators building EXESS from source. Key dependencies:
+
+- C/C++ compiler with C++17 support
+- CUDA or ROCm compiler
+- MPI library
+- OpenMP support
+- HDF5
+- MAGMA with HIP support (AMD systems)
+
+Upstream notes: EXESS has a minimal dependency set, but the team cannot guarantee out-of-the-box builds for non-standard compilers that they cannot test.
+
+Example build on Gadi (NCI):
+
+```bash
+module load julia/1.9.1
+module load cuda/12.0.0
+module load openmpi/4.0.1
+module load hdf5/1.12.1
+module load gcc/12.2.0
+module load cmake/3.24.2
+module load intel-mkl/2023.2.0
+module load python3/3.10.0
+
+mkdir build
+cd build
+CUDAARCHS="70;80" cmake -DCMAKE_INSTALL_PREFIX=$PATH_TO_INSTALL ../
+make -j install
+```
+
+Example build on Setonix (Pawsey):
+
+```bash
+module load gcc/12.2.0
+module load cray-hdf5/1.12.2.7
+module load rocm/5.7.3
+module load cmake/3.27.7
+module load magma/2.8.0-${custom}
+module load craype-accel-amd-gfx90a
+module load julia
+export MPI_ROOT=$MPICH_DIR
+export MPICH_GPU_SUPPORT_ENABLED=1
+
+mkdir build
+cd build
+cmake .. -DGPU_RUNTIME=HIP -DMPI_ROOT=$MPI_ROOT -DCMAKE_HIP_ARCHITECTURES=gfx90a -DCMAKE_INSTALL_PREFIX=$PATH_TO_INSTALL ../
+make -j install
+```
+
+After installation, the runtime requires `EXESS_RECORDS_PATH` plus the `run.sh` and `runexess` scripts; other source tree content can be removed.
+
+Custom installer templates live under `modulefiles/` in the upstream repo (for Gadi/Setonix). GNU is the recommended build environment, but Cray, NVHPC, and Intel compilers are known to work; report compilation issues with compiler/MPI/CUDA/ROCm versions to the EXESS team.
+
 ## Hardware considerations
 
 ### NVIDIA
@@ -144,22 +198,36 @@ From the installation docs:
 - Supported up to Hopper (compute capability 90).
 - CUDA 11.1+ supported.
 - NVHPC toolkit supported.
+- Performance scales with the GPU's double-precision throughput.
+- If you have access to newer NVIDIA hardware, upstream docs ask that you open an issue.
 
 ### AMD
 
 - Requires MAGMA with HIP support.
 - ROCm 5.7.0 is documented as most stable; newer versions may vary.
 - Tested primarily on MI250x (gfx90a).
+- Other gfx architectures are not tested.
 - ROCm runtime bug can crash large 4-center kernels for gradients; RI-HF can avoid this.
 
 ## Known issues
 
 - NVIDIA: no issues listed.
-- AMD: out-of-resources errors can occur; reduce `max_gpu_memory_mb` or use RI in `fock_build_type`.
+- AMD: out-of-resources errors can occur; reduce `max_gpu_memory_mb` or use RI in `fock_build_type`. Upstream docs include this example error:
+
+```text
+:0:rocdevice.cpp
+:2688: 1214497773164 us: [pid:853101 tid:0x14e50c57d700]
+Callback: Queue 0x14dbb9800000 Aborting with error :
+HSA_STATUS_ERROR_OUT_OF_RESOURCES:
+```
 
 ## Reporting issues
 
 Before reporting issues, consult the known issues above. Report bugs to placeholder@rush.exess.co with details on hardware, software, and an input that reproduces the issue.
+
+## License
+
+For licensing questions, contact placeholder@qdx.co.
 
 ## Performance
 
