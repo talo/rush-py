@@ -4,6 +4,8 @@ Keywords live under the top-level `keywords` object. The groups recognized by th
 
 `scf`, `ks_dft`, `rtat`, `frag`, `boundary`, `debug`, `export`, `guess`, `log`, `dynamics`, `integrals`, `force_field`, `optimization`, `gradient`, `hessian`, `machine_learning`, `qmmm`, `regions`.
 
+Defaults in the tables below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.
+
 ## scf
 
 | Keyword | Type | Default | Brief |
@@ -15,13 +17,13 @@ Keywords live under the top-level `keywords` object. The groups recognized by th
 | `convergence_threshold` | float | 1e-6 | SCF convergence threshold. |
 | `density_threshold` | float | 1e-10 | Density screening threshold. |
 | `gradient_screening_threshold` | float | 1e-10 | Gradient screening threshold. |
-| `bf_cutoff_threshold` | float | none | Basis function cutoff threshold (DFT/shell pairs). |
-| `density_basis_set_projection_fallback_enabled` | bool | none | STO-3G projection fallback. |
+| `bf_cutoff_threshold` | float | `density_threshold` | Basis function cutoff threshold (DFT/shell pairs). |
+| `density_basis_set_projection_fallback_enabled` | bool | auto (fragmented) | STO-3G projection fallback. |
 | `use_ri` | bool | false | Deprecated RI toggle. |
 | `allow_crap_scf` | bool | false | Expert flag. |
 | `store_ri_b_on_host` | bool | false | Store RI B on host. |
 | `compress_ri_b` | bool | false | Compress RI B matrix. |
-| `homo_lumo_guess_rotation_angle` | float | none | HOMO/LUMO rotation (degrees). |
+| `homo_lumo_guess_rotation_angle` | float | auto (0 or 45) | HOMO/LUMO rotation (degrees). |
 | `fock_build_type` | string | `HGP` | `HGP`, `UM09`, or `RI`. |
 | `exchange_screening_threshold` | float | 1e-5 | Exchange screening threshold. |
 | `group_shared_exponents` | bool | false | Group shared basis exponents (UM09 only). |
@@ -43,9 +45,8 @@ Example:
 
 Details:
 
-- `max_iters`: Default in libqdx is 50 (older docs mention 30).
 - `batch_size`: Use multiples of 128; do not go below 128.
-- `convergence_metric`: `Energy`, `Density`, or `DIIS`. Default is `DIIS` in libqdx.
+- `convergence_metric`: `Energy`, `Density`, or `DIIS`.
 - `convergence_threshold`: Suggested values from upstream docs:
   - 1e-6 for non-fragmented RHF + RI-MP2 with `Density`/`DIIS`.
   - 1e-8 for non-fragmented RHF + RI-MP2 with `Energy`.
@@ -54,13 +55,14 @@ Details:
   - 1e-10 for large tetramer-level calculations with `DIIS`.
 - `density_threshold`: Lower values speed up SCF with potential accuracy loss.
 - `gradient_screening_threshold`: Additional screening for gradient-related integrals.
-- `density_basis_set_projection_fallback_enabled`: If unconverged, rerun using STO-3G then project to the target basis (C++ comments suggest true for fragmented runs, false otherwise).
+- `bf_cutoff_threshold`: If omitted, EXESS uses `density_threshold`.
+- `density_basis_set_projection_fallback_enabled`: If omitted, EXESS enables fallback for fragmented calculations and disables it for full-system calculations.
 - `fock_build_type`:
   - `HGP`: Head-Gordon-Pople algorithm, optimized for dense systems.
   - `UM09`: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
   - `RI`: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
-- `use_ri`: Deprecated in EXESS; use `fock_build_type = "RI"` instead.
-- `homo_lumo_guess_rotation_angle`: Rotation in degrees (0-180) for unrestricted symmetry breaking.
+- `use_ri`: Deprecated in EXESS; use `fock_build_type = "RI"` instead. If set, EXESS forces the Fock build type to `RI`.
+- `homo_lumo_guess_rotation_angle`: If omitted, EXESS uses 45 degrees for unrestricted singlets and 0 otherwise.
 - `exchange_screening_threshold` and `group_shared_exponents` are expert controls for large systems and shared-exponent basis sets.
 
 ## frag
@@ -68,18 +70,18 @@ Details:
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
 | `level` | string | required | `Monomer` .. `Octamer`. |
-| `cutoffs` | object | none | Distance cutoffs in Angstroms. |
+| `cutoffs` | object | unset | Distance cutoffs in Angstroms. |
 | `cutoff_type` | string | `ClosestPair` | `Centroid` or `ClosestPair`. |
 | `distance_metric` | string | `Max` | `Max`, `Average`, `Min`, `Ryan`. |
-| `reference_fragment` | int | none | Reference fragment for interaction energies. |
-| `included_fragments` | array[int] | none | Subset of fragments to include. |
+| `reference_fragment` | int | unset | Reference fragment for interaction energies. |
+| `included_fragments` | array[int] | unset | Subset of fragments to include. |
 | `enable_speed` | bool | false | Experimental queue optimization. |
 
 Notes:
 
 - `cutoffs` can include `dimer`, `trimer`, `tetramer`, `pentamer`, `hexamer`, `heptamer`, `octamer`.
 - Distances are in Angstroms and should follow `dimer > trimer > tetramer` when using higher orders.
-- `distance_metric` affects higher-order fragment distances and is noted in the C++ schema as undocumented.
+- If `cutoffs` is omitted, the calculation proceeds without distance filtering (all n-mers up to `level`).
 
 Example:
 
@@ -102,18 +104,22 @@ Example:
 
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
-| `external_initial_density_path` | string | none | HDF5 density guess path. |
+| `external_initial_density_path` | string | unset | HDF5 density guess path. |
 | `bsp` | bool | false | Basis set projection bootstrap. |
 | `bsp_basis` | string | empty | Lower-resolution basis set for BSP. |
-| `bsp_scf_keywords` | object | none | SCF keywords for BSP. |
+| `bsp_scf_keywords` | object | unset | SCF keywords for BSP. |
 | `hcore` | bool | false | Use hcore initial guess. |
-| `smd` | bool | none | Superposition of monomer densities. |
+| `smd` | bool | auto (fragmented non-RI) | Superposition of monomer densities. |
 | `ssfd` | bool | false | Subfragment density guess (experimental). |
 | `ssfd_target_size` | int | 30 | Target atoms per subfragment. |
 | `ssfd_only_converge_in_bsp_basis` | bool | true | Only converge subfragments in BSP basis. |
-| `ssfd_scf_keywords` | object | none | SCF keywords for subfragment runs. |
+| `ssfd_scf_keywords` | object | unset | SCF keywords for subfragment runs. |
 
 `external_initial_density_path` must reference an HDF5 file with a `density` dataset at root for RHF, or `alpha/density` and `beta/density` for UHF. The EXESS schema warns that density guesses from other codes may be incompatible due to basis ordering and normalization. External guesses are not supported for fragmented calculations.
+
+If `smd` is omitted, EXESS enables it for fragmented calculations that are not using RI, and disables it otherwise.
+
+If `bsp_scf_keywords` or `ssfd_scf_keywords` are omitted, EXESS reuses the base SCF keywords.
 
 ## optimization
 
@@ -121,22 +127,51 @@ Example:
 | --- | --- | --- | --- |
 | `max_iters` | int | required | Max optimization iterations. |
 | `convergence_criteria` | object | defaults | Metric + thresholds. |
-| `optimizer_reset_interval` | int | none | Reset coordinate system and hessian every N iterations. |
+| `optimizer_reset_interval` | int | unset | Reset coordinate system and hessian every N iterations. |
 | `coordinate_system` | string | `DelocalisedInternal` | `Cartesian`, `NaturalInternal`, `DelocalisedInternal`. |
-| `constraints` | array[array[int]] | none | Constraints on bonds/angles/dihedrals. |
+| `constraints` | array[array[int]] | `[]` | Constraints on bonds/angles/dihedrals. |
 | `hessian_guess` | string | depends | `Identity`, `ScaledIdentity`, `Schlegel`, `Lindh`. |
 | `algorithm` | string | `EigenvectorFollowing` | `EigenvectorFollowing`, `TrustRegionAugmentedHessian`, `LBFGS`. |
-| `lbfgs_keywords` | object | none | LBFGS parameters. |
+| `lbfgs_keywords` | object | unset | LBFGS parameters. |
 | `trust_region` | object | defaults | Trust-region parameters. |
 | `frozen_distance_slippage_tolerance_angstroms` | float | 1e-8 | Slippage tolerance (distance). |
 | `frozen_angle_slippage_tolerance_degrees` | float | 1e-8 | Slippage tolerance (angle). |
 | `debug_xyz` | bool | false | Debug XYZ output. |
-| `output_trc` | string | none | Output TRC path. |
-| `fixed_atoms` | array[int] | none | Fixed atoms. |
-| `free_atoms` | array[int] | none | Free atoms. |
-| `fixed_fragments` | array[int] | none | Fixed fragments. |
-| `free_fragments` | array[int] | none | Free fragments. |
+| `output_trc` | string | unset | Output TRC path. |
+| `fixed_atoms` | array[int] | unset | Fixed atoms. |
+| `free_atoms` | array[int] | unset | Free atoms. |
+| `fixed_fragments` | array[int] | unset | Fixed fragments. |
+| `free_fragments` | array[int] | unset | Free fragments. |
 | `fix_heavy` | bool | false | Fix heavy atoms. |
+
+Defaults for `convergence_criteria`:
+
+- `metric`: `Baker`
+- `gradient_threshold`: `3e-4`
+- `delta_energy_threshold`: `1e-6`
+- `step_component_threshold`: `3e-4`
+
+Defaults for `trust_region` (only used with `TrustRegionAugmentedHessian`):
+
+- `initial_radius`: 0.4
+- `max_radius`: 1e5
+- `min_radius`: 1e-5
+- `increase_factor`: 1.2
+- `decrease_factor`: 0.7
+- `constrict_factor`: 0.1
+- `increase_threshold`: 0.75
+- `decrease_threshold`: 0.25
+- `rejection_threshold`: 0.0
+
+`hessian_guess` defaults to `Identity` for Cartesian coordinates, otherwise `ScaledIdentity`.
+
+`lbfgs_keywords` defaults (only used with `LBFGS`):
+
+- `linesearch`: `BacktrackingStrongWolfe`
+- `n_corrections`: 6
+- `epsilon`: 1e-5
+- `max_linesearch`: 40
+- `gtol`: 0.9
 
 Example:
 
@@ -151,13 +186,6 @@ Example:
   }
 }
 ```
-
-Details:
-
-- `convergence_criteria.metric`: `GradientOnly` or `Baker`.
-- Default thresholds come from Baker criteria (see https://doi.org/10.1063/1.1515483).
-- `trust_region` defaults are based on Helmich-Paris 2021.
-- `constraints` are lists of atom indices specifying constrained bonds, angles, or dihedrals.
 
 ## dynamics
 
@@ -194,16 +222,24 @@ Boundary conditions for periodic or truncated simulations:
 
 ## force_field
 
-| Keyword | Type | Brief |
-| --- | --- | --- |
-| `ff_filename` | string | Force field filename path. |
+| Keyword | Type | Default | Brief |
+| --- | --- | --- | --- |
+| `ff_filename` | string | required | Force field filename path. |
 
 ## log
 
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
-| `console` | object | see below | Console log settings. |
-| `logfiles` | array | empty | File log settings. |
+| `console` | object | defaults | Console log settings. |
+| `logfiles` | array | `[]` | File log settings. |
+
+Defaults:
+
+- `console.level`: `LargeInfo` (or `Debug` in debug builds).
+- `console.prefix_fmt`: empty string.
+- `logfiles.level`: `Verbose`.
+- `logfiles.prefix_fmt`: `[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}] `.
+- `logfiles.directory`: unset.
 
 Example:
 
@@ -222,13 +258,6 @@ Example:
 
 Log levels: `Debug`, `Verbose`, `LargeInfo`, `Info`, `Performance`, `Warning`, `Error`.
 
-Defaults from the C++ schema:
-
-- `console.level`: `LargeInfo` (or `Debug` in debug builds).
-- `console.prefix_fmt`: empty string.
-- `logfiles.level`: `Verbose`.
-- `logfiles.prefix_fmt`: `[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}] `.
-
 ## rtat
 
 RTAT is a runtime auto-tuner for matrix operations.
@@ -237,7 +266,7 @@ RTAT is a runtime auto-tuner for matrix operations.
 | --- | --- | --- | --- |
 | `enabled` | bool | true | Enable runtime autotuning. |
 | `synchronous` | bool | false | Use synchronous operations. |
-| `json_file_dump_prefix` | string | none | Prefix for RTAT JSON dumps. |
+| `json_file_dump_prefix` | string | unset | Prefix for RTAT JSON dumps. |
 
 ## export
 
@@ -270,7 +299,7 @@ Export controls what is written to HDF5 output files:
 | `light_json` | bool | false | Light JSON output. |
 | `concatenate_hdf5_files` | bool | false | Concatenate HDF5 outputs. |
 | `training_db` | bool | false | Export training DB metadata. |
-| `descriptor_grid` | object | none | Grid for descriptor exports. |
+| `descriptor_grid` | object | unset | Grid for descriptor exports. |
 
 `descriptor_grid` can be one of the following structures (libqdx):
 
@@ -279,22 +308,18 @@ Export controls what is written to HDF5 output files:
 - `regular`: `min`, `max`, `spacing` arrays (Cartesian grid).
 - `custom`: flat list of points `[x1, y1, z1, x2, y2, z2, ...]`.
 
-The rush-py API maps these to `StandardDescriptorGrid`, `DescriptorGrid`, `RegularDescriptorGrid`, and `CustomDescriptorGrid`.
-
-Note: the rush-py tutorial warns that `export_expanded_esp_descriptors` can trigger an internal OOM error.
-
 ## ks_dft
 
-KSDFT is used when `model.method` is `RestrictedKSDFT`. The upstream docs recommend reading the KSDFT paper (DOI: 10.1021/acs.jctc.5c01229).
+KSDFT is used when `model.method` is `RestrictedKSDFT`.
 
 | Keyword | Type | Default | Brief |
 | --- | --- | --- | --- |
 | `functional` | string | required | LibXC functional name. |
 | `method` | string | `GauXC` | XC evaluation method. |
 | `use_C_opt` | bool | true | Use C-matrix optimization (Dense/BatchDense). |
-| `grid` | object | `{}` | Numerical grid settings. |
-| `sp_threshold` | float | none | Single-precision threshold. |
-| `dp_threshold` | float | none | Double-precision threshold. |
+| `grid` | object | default grid (ULTRAFINE) | Numerical grid settings. |
+| `sp_threshold` | float | SCF density_threshold | Single-precision threshold. |
+| `dp_threshold` | float | SCF density_threshold | Double-precision threshold. |
 | `batches_per_batch` | int | 20 | Batch batching for GauXC. |
 
 Grid parameters supported in the libqdx Rust schema:
@@ -305,7 +330,14 @@ Grid parameters supported in the libqdx Rust schema:
 - `radial_size`, `angular_size`: Custom grid sizes.
 - `default_grid`: `FINE`, `ULTRAFINE`, `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
 
-The C++ schema treats `grid` as raw JSON and may accept additional structures (octree, space-filling curves) described in the upstream docs.
+Defaults (EXESS):
+
+- `grid.default_grid`: `ULTRAFINE`.
+- `grid.radial_quad`: `MuraKnowles`.
+- `grid.pruning_scheme`: `ROBUST`.
+- `grid.batch_size`: 512 (GauXC).
+- `dp_threshold`: SCF `density_threshold` if omitted.
+- `sp_threshold`: `dp_threshold` if set, otherwise SCF `density_threshold`.
 
 Functional notes from upstream docs:
 
@@ -319,6 +351,8 @@ Functional notes from upstream docs:
 | --- | --- | --- | --- |
 | `scheduler` | string | `Callback` | `Callback` or `RoundRobin`. |
 | `n_streams` | int | 4 (CUDA) / 1 (HIP) | GPU stream count. |
+
+If `integrals` is omitted entirely, EXESS uses `Callback` with 4 streams.
 
 ## gradient
 
@@ -347,31 +381,29 @@ Functional notes from upstream docs:
 | `n_timesteps` | int | required | Number of QMMM timesteps. |
 | `dt_ps` | float | required | Timestep size in ps. |
 | `temperature_kelvin` | float | required | Temperature in Kelvin. |
-| `pressure_atm` | float | none | If set, runs NPT; otherwise NVT. |
-| `minimisation` | object | none | Classical minimisation settings. |
-| `trajectory` | object | none | Trajectory output settings. |
-| `energy_csv` | string | none | Path for energy CSV. |
-| `restraints` | object | none | Restraints for atoms/fragments. |
+| `pressure_atm` | float | unset | If set, runs NPT; otherwise NVT. |
+| `minimisation` | object | unset | Classical minimisation settings. |
+| `trajectory` | object | unset | Trajectory output settings. |
+| `energy_csv` | string | unset | Path for energy CSV. |
+| `restraints` | object | unset | Restraints for atoms/fragments. |
 
-`minimisation` fields:
+If `minimisation` is provided, defaults are:
 
-- `err_tol_kj_per_mol_nm` (default 10)
-- `max_iterations` (default 0)
+- `err_tol_kj_per_mol_nm`: 10
+- `max_iterations`: 0
 
-`trajectory` fields:
+If `trajectory` is provided, defaults are:
 
-- `format`: `JSON` or `XYZ` (default `JSON`)
-- `interval` (default 1)
-- `start` (default 0)
-- `end` (default max u32)
-- `include_waters` (default false)
+- `format`: `JSON`
+- `interval`: 1
+- `start`: 0
+- `end`: max u32
+- `include_waters`: false
 
-`restraints` fields:
+If `restraints` is provided, defaults are:
 
-- `k` (default 2000.0)
-- `fixed_atoms` / `free_atoms`
-- `fixed_fragments` / `free_fragments`
-- `fix_heavy`
+- `k`: 2000.0
+- `fix_heavy`: false
 
 ## regions
 
@@ -380,6 +412,8 @@ Functional notes from upstream docs:
 - `qm_fragments`: array[int]
 - `mm_fragments`: array[int]
 - `ml_fragments`: array[int]
+
+If omitted, the EXESS JSON parser sets `mm_fragments` and `ml_fragments` to empty lists and leaves `qm_fragments` unset.
 
 ## debug
 
@@ -390,3 +424,31 @@ Functional notes from upstream docs:
 | `max_fragments` | int | -1 | Limit number of fragments computed. |
 | `ignore_fragments` | bool | false | Ignore fragmentation (developer validation). |
 | `skip_calcs` | bool | false | Skip computations in fragmentation routines. |
+
+## Rush-py defaults
+
+Rush-py sets some defaults in Python before submitting a run. If a `*_keywords` argument is omitted, rush-py may pass `None` (no overrides) or construct a default object.
+
+Default keyword behavior for the common entry points:
+
+- `exess.exess` / `exess.energy` / `exess.interaction_energy`:
+  - `scf_keywords`: unset (EXESS defaults apply).
+  - `frag_keywords`: `FragKeywords()` (level `Dimer`, `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`, `cutoff_type=None`, `distance_metric=None`).
+  - `export_keywords`: `ExportKeywords()` (all fields unset; no exports requested).
+- `exess.chelpg`:
+  - `scf_keywords`: `SCFKeywords(max_diis_history_length=12, convergence_threshold=1e-8)`.
+  - `frag_keywords`: `FragKeywords(level="Monomer")`.
+  - `export`: CHELPG charges and bond orders enabled.
+- `exess.qmmm`:
+  - `scf_keywords`: unset (EXESS defaults apply).
+  - `frag_keywords`: `FragKeywords()` (same defaults as above).
+  - `trajectory`: `Trajectory()` (all fields unset; EXESS defaults apply).
+- `exess.optimization`:
+  - `optimization_keywords`: `OptimizationKeywords()` (all fields unset; EXESS defaults apply), with required `max_iters` passed separately.
+
+`FragKeywords` defaults by level in rush-py:
+
+- `Monomer`: `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`, `cutoff_type=None`, `distance_metric=None`.
+- `Dimer`: `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`.
+- `Trimer`: `dimer_cutoff=100.0`, `trimer_cutoff=25.0`, `tetramer_cutoff=None`.
+- `Tetramer`: `dimer_cutoff=100.0`, `trimer_cutoff=25.0`, `tetramer_cutoff=10.0`.

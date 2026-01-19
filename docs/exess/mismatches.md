@@ -24,6 +24,16 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - `ssfd_only_converge_in_bsp_basis` has a trailing space in the libqdx.hpp JSON key (`"ssfd_only_converge_in_bsp_basis "`).
 - `ks_dft.grid` is free-form JSON in libqdx.hpp, but the Rust schema uses a fixed `XCGridParameters` struct (no octree/space-filling fields).
 
+**libqdx C++ vs EXESS core defaults**
+- `scf.density_basis_set_projection_fallback_enabled` is optional in libqdx; EXESS defaults it to true for fragmented calculations and false otherwise.
+- `scf.bf_cutoff_threshold` is optional in libqdx; EXESS defaults it to `density_threshold`.
+- `scf.homo_lumo_guess_rotation_angle` is optional in libqdx; EXESS defaults it to 45 degrees for unrestricted singlets and 0 otherwise.
+- `guess.smd` is optional in libqdx; EXESS defaults it to true for fragmented non-RI calculations and false otherwise.
+- `lbfgs_keywords` fields are optional in libqdx; EXESS defaults to `n_corrections=6`, `epsilon=1e-5`, `max_linesearch=40`, and `gtol=0.9` when omitted.
+- `integrals` omitted in inputs defaults to `Callback` and 4 streams in EXESS; libqdx only sets `n_streams` defaults when the group is present (4 for CUDA, 1 for HIP).
+- `ks_dft.grid` defaults (ULTRAFINE grid, MuraKnowles radial quadrature, ROBUST pruning, GauXC batch size 512) are set in EXESS, not the libqdx schema.
+- `ks_dft` `sp_threshold`/`dp_threshold` default to the SCF `density_threshold` in EXESS; libqdx leaves them optional.
+
 **rush-py vs schema**
 - rush-py exposes a limited `MethodT` list and does not include `RestrictedRICCSD`.
 - rush-py `BasisT` / `AuxBasisT` lists are narrower than the EXESS basis set lists.
@@ -34,3 +44,8 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - rush-py `Topology` does not expose `stereochemistry`, `fragment_multiplicities`, or `waters`.
 - rush-py `BondOrder` only covers a subset of EXESS bond-order values and remaps legacy values 254/255.
 - rush-py uses Topology paths rather than full EXESS input JSON, so `schema_version`, `title`, and some top-level input fields are not directly set by users.
+- rush-py defaults `frag_keywords` to `FragKeywords()` (dimer-level cutoffs), while the EXESS schema has no fragmentation defaults unless `frag` is provided.
+- rush-py `chelpg` overrides SCF defaults (`max_diis_history_length=12`, `convergence_threshold=1e-8`), sets `frag.level=Monomer`, and enables CHELPG + bond-order exports.
+- rush-py `chelpg` sets `standard_orientation="None"` and `force_cartesian_basis_sets=false`, overriding CLI defaults (`FullSystem`, `true`).
+- rush-py `qmmm` defaults to `basis="STO-3G"`, `dt_ps=0.002`, and `temperature_kelvin=290.0`.
+- rush-py `FragKeywords` auto-fills cutoffs for `Trimer` and `Tetramer` levels (100/25/10 Angstroms) when omitted.

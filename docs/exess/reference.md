@@ -78,8 +78,6 @@ The upstream docs contain two overlapping lists. Both are reproduced here for co
 - pcseg-0
 - pcseg-1
 
-Differences between these lists are tracked in the mismatches page.
-
 ## Lebedev grids
 
 Mapping of Lebedev grid sizes to maximum spherical harmonic degree:
