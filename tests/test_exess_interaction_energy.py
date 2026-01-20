@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from rush import Topology, exess
-from rush.client import RunOpts, save_object, set_opts
+from rush.client import RunOpts, set_opts
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")

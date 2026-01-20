@@ -1,9 +1,8 @@
 import sys
 from pathlib import Path
-from pprint import pp
 
 from rush import exess
-from rush.client import RunOpts, RunSpec, save_json, set_opts
+from rush.client import RunOpts, RunSpec, set_opts
 
 if __name__ == "__main__":
     set_opts(workspace_dir=Path.cwd() / "test-runs")
@@ -29,5 +28,5 @@ if __name__ == "__main__":
         collect=True,
     )
     print(res, file=sys.stderr)
-    files = exess.save_energy_outputs(res, to_json=True)
+    files = exess.save_energy_outputs(res)
     print(files, file=sys.stderr)
