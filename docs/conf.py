@@ -3,6 +3,7 @@ import sys
 
 # Add your project root to path for autodoc
 sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("_ext"))
 
 # Project information
 project = "rush"
@@ -15,6 +16,14 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "myst_parser",
+    "sphinx_design",
+    "exess_params",
+]
+
+# MyST extensions needed for ::: directives and definition lists in Markdown.
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
 ]
 
 # Support for Markdown files

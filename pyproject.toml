@@ -54,6 +54,7 @@ dev = [
   "sphinx-autodoc-typehints>=3.5.2",
   "shibuya>=2025.12.19",
   "myst-parser>=4.0.1",
+  "sphinx-design>=0.6.1",
 ]
 
 [tool.pyright]

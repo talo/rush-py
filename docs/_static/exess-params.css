@@ -1,0 +1,226 @@
+.param-list.param-list-deflist dl,
+.param-list.param-list--deflist dl,
+.param-list-deflist dl,
+.param-list--deflist dl {
+  margin: 0;
+  border: 1px solid var(--sy-c-border, #e2e8f0) !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.param-list.param-list-deflist dt,
+.param-list.param-list-deflist dd,
+.param-list.param-list--deflist dt,
+.param-list.param-list--deflist dd,
+.param-list-deflist dt,
+.param-list-deflist dd,
+.param-list--deflist dt,
+.param-list--deflist dd {
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+}
+
+.param-list.param-list-deflist dd,
+.param-list.param-list--deflist dd,
+.param-list-deflist dd,
+.param-list--deflist dd {
+  padding-top: 0;
+  margin-left: 0;
+}
+
+.param-list.param-list-deflist dt,
+.param-list.param-list--deflist dt,
+.param-list-deflist dt,
+.param-list--deflist dt {
+  border-top: 1px solid var(--sy-c-border, #e2e8f0);
+}
+
+.param-list.param-list-deflist dt:first-of-type,
+.param-list.param-list--deflist dt:first-of-type,
+.param-list-deflist dt:first-of-type,
+.param-list--deflist dt:first-of-type {
+  border-top: 0;
+}
+
+.param-list.param-list-deflist dt:nth-of-type(odd),
+.param-list.param-list-deflist dt:nth-of-type(odd) + dd,
+.param-list.param-list--deflist dt:nth-of-type(odd),
+.param-list.param-list--deflist dt:nth-of-type(odd) + dd,
+.param-list-deflist dt:nth-of-type(odd),
+.param-list-deflist dt:nth-of-type(odd) + dd,
+.param-list--deflist dt:nth-of-type(odd),
+.param-list--deflist dt:nth-of-type(odd) + dd {
+  background: var(--sy-bg-muted, #f8fafc);
+}
+
+.param-dropdowns {
+  border: 1px solid var(--sy-c-border, #e2e8f0);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.param-dropdowns .param-row,
+.param-dropdowns .param-dropdown {
+  border-top: 1px solid var(--sy-c-border, #e2e8f0);
+}
+
+.param-dropdowns > .param-row:nth-child(odd),
+.param-dropdowns > details.param-dropdown:nth-child(odd) {
+  background: var(--sy-c-surface, #f8fafc);
+}
+
+.param-dropdowns .param-row:first-child,
+.param-dropdowns .param-dropdown:first-child {
+  border-top: 0;
+}
+
+.param-dropdowns .param-row {
+  padding: 0.35rem 0.75rem;
+}
+
+.param-dropdowns .param-dropdown {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.param-dropdowns details.param-dropdown.sd-card,
+.param-dropdowns details.param-dropdown.sd-card[open] {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-top: 1px solid var(--sy-c-border, #e2e8f0);
+}
+
+.param-dropdowns details.param-dropdown:not([open]) > .sd-card-header {
+  border: 0;
+  border-radius: 0;
+}
+
+.param-dropdowns .param-dropdown .sd-card-header,
+.param-dropdowns .param-dropdown .sd-card-body {
+  border: 0;
+}
+
+.param-dropdowns .param-dropdown .sd-summary-title {
+  padding: 0.35rem 0.75rem;
+  font-weight: 400;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.param-dropdowns .param-dropdown .sd-summary-text {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.param-dropdowns .param-line,
+.param-dropdowns .param-brief {
+  display: block;
+  line-height: 1.25;
+}
+
+.param-dropdowns .param-line {
+  color: var(--sy-fg-muted, #64748b);
+}
+
+.param-dropdowns .param-brief {
+  margin-top: 0.05rem;
+  color: var(--sy-c-text);
+}
+
+.param-dropdowns .param-note {
+  --param-note-icon: var(--note-icon);
+  --param-note-color: var(--sy-c-text);
+  --param-note-icon-color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-left: 0;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--param-note-color);
+  line-height: 1;
+  vertical-align: middle;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 999px;
+  background-color: var(--param-note-color);
+}
+
+.param-dropdowns .param-note-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 0 0 auto;
+}
+
+.param-dropdowns .param-note::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  background-color: var(--param-note-icon-color);
+  -webkit-mask: var(--param-note-icon) no-repeat;
+  mask: var(--param-note-icon) no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  flex: 0 0 auto;
+}
+
+.param-dropdowns .param-note--info {
+  --param-note-icon: var(--note-icon);
+  --param-note-color: var(--note-3, var(--accent-9));
+}
+
+.param-dropdowns .param-note--expert {
+  --param-note-icon: var(--important-icon);
+  --param-note-color: var(--important-3, var(--orange-9));
+}
+
+.param-dropdowns .param-note--experimental {
+  --param-note-icon: var(--warning-icon);
+  --param-note-color: var(--warning-3, var(--amber-9));
+}
+
+.param-dropdowns .param-note--broken {
+  --param-note-icon: var(--error-icon);
+  --param-note-color: var(--error-3, var(--red-9));
+}
+
+.param-dropdowns .param-brief code,
+.param-dropdowns .param-details code {
+  background-color: var(--yue-c-code-background, var(--accent-a3));
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-weight: 500;
+  color: var(--yue-c-code-text, var(--accent-a11));
+}
+
+.param-dropdowns .param-details,
+.param-dropdowns .sd-summary-content.param-details {
+  padding: 0 0.75rem 0.35rem;
+  color: var(--sy-c-text);
+  margin: 0;
+}
+
+.param-dropdowns .param-details p,
+.param-dropdowns .param-details ul,
+.param-dropdowns .param-details ol {
+  margin: 0.25rem 0;
+}
+
+.param-dropdowns .param-details p:first-child,
+.param-dropdowns .param-details ul:first-child,
+.param-dropdowns .param-details ol:first-child {
+  margin-top: 0;
+}
+
+.param-dropdowns .param-details p:last-child,
+.param-dropdowns .param-details ul:last-child,
+.param-dropdowns .param-details ol:last-child {
+  margin-bottom: 0;
+}
