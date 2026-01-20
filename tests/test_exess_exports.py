@@ -20,6 +20,7 @@ if __name__ == "__main__":
                 spacing=[1.0, 1.0, 1.0],
             ),
         ),
+        convert_hdf5_to_json=True,
         run_spec=RunSpec(storage=1000, gpus=1),
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 04: Electron Density and ESP",

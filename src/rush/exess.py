@@ -700,6 +700,7 @@ def exess(
     frag_keywords: FragKeywords | None = FragKeywords(),
     export_keywords: ExportKeywords | None = ExportKeywords(),
     system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -721,6 +722,7 @@ def exess(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
+        convert_hdf5_to_json = $maybe_convert_hdf5_to_json,
         model = Some (exess_rex::Model {
           method = exess_rex::Method::$method,
           basis = "$basis",
@@ -757,6 +759,7 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec._to_rex(),
+        maybe_convert_hdf5_to_json=optional_str(convert_hdf5_to_json),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),
@@ -801,6 +804,7 @@ def energy(
     frag_keywords: FragKeywords | None = FragKeywords(),
     export_keywords: ExportKeywords | None = ExportKeywords(),
     system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
@@ -817,6 +821,7 @@ def energy(
         frag_keywords,
         export_keywords,
         system,
+        convert_hdf5_to_json,
         run_spec,
         run_opts,
         collect,
