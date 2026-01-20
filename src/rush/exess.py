@@ -832,6 +832,17 @@ def save_energy_outputs(res, to_json=False):
     if len(res) == 1:
         return save_object(res[0]["path"])
     else:
+        # hdf5-to-json set to true
+        if "Json" in res[1]:
+            return (
+                save_object(res[0]["path"]),
+                save_object(res[1]["Json"]["path"]),
+            )
+
+        # hdf5-to-json set to false (or not set)
+        # Support new-style with the type key, and old-style without
+        if "Hdf5" in res[1]:
+            res[1] = res[1]["Hdf5"]
         qm_output = download_object(res[1]["path"])
         decompressed = zstd.ZstdDecompressor().decompress(
             qm_output, max_output_size=int(1e9)
