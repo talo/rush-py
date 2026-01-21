@@ -9,7 +9,7 @@ def test_prepare_protein():
     set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
     data_dir = Path.cwd() / "tests" / "data"
     res = prepare_protein(
-        data_dir / "3FLN.pdb",
+        data_dir / "3fln_raw.pdb",
         capping_style="always",
         run_opts=RunOpts(
             name="Test prepare-protein 01", tags=["rush-py", "test", "cdk2"]
