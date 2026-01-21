@@ -4,7 +4,8 @@ from pathlib import Path
 from rush import Topology, exess
 from rush.client import RunOpts, set_opts
 
-if __name__ == "__main__":
+
+def test_exess_interaction_energy():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     topology = Topology.from_json(data_dir / "tyk2_ejm_31_t.json")
@@ -29,3 +30,7 @@ if __name__ == "__main__":
     )
     print(res, file=sys.stderr)
     exess.save_energy_outputs(res)
+
+
+if __name__ == "__main__":
+    test_exess_interaction_energy()
