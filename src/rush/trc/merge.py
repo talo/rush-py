@@ -1,5 +1,6 @@
 """
 TRC merging functionality.
+
 This module provides functions to merge TRC (Topology-Residues-Chains) structures,
 which contain protein and/or ligand conformer information.
 """
@@ -19,18 +20,23 @@ def merge_trcs(
 ) -> TRC:
     """
     Merge two TRC objects into a single TRC.
+
     A TRC (Topology-Residues-Chains) object contains:
     - topology: atom information (symbols, geometry, bonds, charges, etc.)
     - residues: residue information (which atoms belong to which residues)
     - chains: chain information (which residues belong to which chains)
+
     When merging, atom indices, residue indices, and chain indices are renumbered
     to ensure uniqueness in the merged structure.
+
     Args:
         trc1: First TRC object, or path to JSON file containing TRC or array of TRCs
         trc2: Second TRC object, or path to JSON file containing TRC or array of TRCs
         skip_validation: If True, skip validation of the merged TRC
+
     Returns:
         Merged TRC object
+
     Raises:
         ValueError: If validation fails and skip_validation is False
         FileNotFoundError: If file paths are provided but files don't exist

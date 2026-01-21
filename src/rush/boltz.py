@@ -104,7 +104,7 @@ def boltz(
             if template_path.suffix == ".pdb":
                 trc = from_pdb(f.read())
                 trc_str = to_json(trc)
-                trc_dict = json.loads(trc_str)[0]
+                trc_dict = json.loads(trc_str)
             else:
                 trc_dict = json.load(f)
         with (

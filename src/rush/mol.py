@@ -1,7 +1,7 @@
 """
 Provides data structures and helpers for molecular systems and structures:
 
-- Classes Rush Topology, Residues, Chains, and TRC types.
+- Classes for Rush Topology, Residues, Chains, and TRC types.
 - Element types and bonds.
 - Fragment type to represent fragmented systems.
 
@@ -802,6 +802,12 @@ class Residues:
         residues.seq_ns = residues_data["seq_ns"]
         residues.insertion_codes = residues_data["insertion_codes"]
 
+        if residues_data.get("labeled"):
+            residues.labeled = [ResidueRef(r) for r in residues_data["labeled"]]
+
+        if residues_data.get("labels"):
+            residues.labels = residues_data["labels"]
+
         return residues
 
     def check(self) -> None:
@@ -840,6 +846,9 @@ class Residues:
         # Calculate atom offset for renumbering
         offset = sum(len(residue.atoms) for residue in self.residues)
 
+        # Calculate residue offset before extending (number of residues in self before merge)
+        residue_offset = len(self.residues)
+
         # Extend residues with renumbered atoms
         for residue in other.residues:
             new_atoms = [atom + offset for atom in residue.atoms]
@@ -849,6 +858,29 @@ class Residues:
         self.seqs.extend(other.seqs)
         self.seq_ns.extend(other.seq_ns)
         self.insertion_codes.extend(other.insertion_codes)
+
+        # Handle labeled residues and labels
+        if other.labeled is not None:
+            if self.labeled is None:
+                self.labeled = []
+            # Renumber residue references
+            for ref in other.labeled:
+                if isinstance(ref, ResidueRef):
+                    self.labeled.append(ResidueRef(ref.value + residue_offset))
+                elif isinstance(ref, int):
+                    self.labeled.append(ref + residue_offset)
+                else:
+                    self.labeled.append(ref)
+
+        if other.labels is not None:
+            if self.labels is None:
+                self.labels = []
+            # Copy labels (they're lists, so we need to copy them)
+            for label in other.labels:
+                if isinstance(label, list):
+                    self.labels.append(label.copy())
+                else:
+                    self.labels.append(label)
 
     def new_residues_from_subset(self, residue_refs: list[ResidueRef]) -> "Residues":
         """Create new residues collection from a subset of residue references."""

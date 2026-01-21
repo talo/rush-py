@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 from rush import exess
@@ -23,6 +24,7 @@ def test_delete_run():
     runs_0 = fetch_runs(tags=["delete-me"])
     assert id in runs_0
     delete_run(id)
+    time.sleep(1)
     runs_1 = fetch_runs(tags=["delete-me"])
     assert id not in runs_1
 

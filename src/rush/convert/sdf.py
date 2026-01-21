@@ -1,16 +1,26 @@
 """
-Python implementation of from_sdf functionality.
+SDF file parsing functionality.
 
-Converts SDF (Structure Data File) format to TRC (Topology-Residues-Chains) JSON format.
+Converts SDF (Structure Data File) format to TRC structures.
 Supports SDF V2000 format.
 """
 
 from enum import Enum
-from pathlib import Path
 from typing import Any
 
-from ..mol import TRC
-from .json import from_json, to_json
+from ..mol import (
+    TRC,
+    AtomRef,
+    Bond,
+    BondOrder,
+    Chain,
+    ChainRef,
+    Element,
+    FormalCharge,
+    Fragment,
+    Residue,
+    ResidueRef,
+)
 
 
 class SDFParseState(Enum):
@@ -34,10 +44,7 @@ class SDFPropertyType(Enum):
 
 
 # SDF bond types: 1=single, 2=double, 3=triple, 4=aromatic/ring
-SDF_BOND_TYPES = [1, 2, 3, 4]
-
-# Schema version
-CURRENT_SCHEMA_VERSION = "0.2.0"
+_SDF_BOND_TYPES = [1, 2, 3, 4]
 
 
 def _charge_field_to_charge(c: int) -> int | None:
@@ -54,11 +61,18 @@ def _charge_field_to_charge(c: int) -> int | None:
     return charge_map.get(c)
 
 
-def _bond_order_from_sdf(order: int) -> int:
-    """Convert SDF bond type to bond order (1=single, 2=double, 3=triple, 4=ring)."""
-    if order in SDF_BOND_TYPES:
-        return order
-    raise ValueError(f"Invalid bond type: {order}")
+def _bond_order_from_sdf(order: int) -> BondOrder:
+    """Convert SDF bond type to BondOrder."""
+    if order == 1:
+        return BondOrder.Single
+    elif order == 2:
+        return BondOrder.Double
+    elif order == 3:
+        return BondOrder.Triple
+    elif order == 4:
+        return BondOrder.Ring
+    else:
+        raise ValueError(f"Invalid bond type: {order}")
 
 
 def _parse_sdf_entry(sdf_content: str) -> dict[str, Any]:
@@ -78,6 +92,8 @@ def _parse_sdf_entry(sdf_content: str) -> dict[str, Any]:
     """
     state = SDFParseState.HEADER_BLOCK
     seen_chg_property = False
+    num_atoms = 0
+    num_bonds = 0
 
     molecule = {
         "name": "",
@@ -197,7 +213,7 @@ def _parse_sdf_entry(sdf_content: str) -> dict[str, Any]:
                     except ValueError:
                         pass
 
-                if bond_type not in SDF_BOND_TYPES:
+                if bond_type not in _SDF_BOND_TYPES:
                     raise ValueError(
                         f"Line {line_number}: Invalid bond type: {bond_type}"
                     )
@@ -248,35 +264,51 @@ def _parse_sdf_entry(sdf_content: str) -> dict[str, Any]:
                         seen_chg_property = True
 
                     # Parse charge count (position 6-8 or 6-9)
+                    # apparently, the count block is 6..9 in some standards, and 6..8 in others
+                    # lets determine this by checking if 9 is a space or not
                     count_end = 9 if len(line) > 8 and line[8:9].strip() else 8
                     if len(line) < count_end:
                         raise ValueError(f"Line {line_number}: CHG line too short")
 
                     count = int(line[6:count_end].strip())
 
-                    # Parse charge entries
+                    if count == 0 or count > 8:
+                        raise ValueError(
+                            f"Line {line_number}: CHG count out of range: {count}"
+                        )
+
+                    # Parse charge entries from the same line
+                    # Each entry is 8 characters: 4 for index, 4 for charge
                     for j in range(count):
-                        i += 1
-                        if i >= len(lines):
+                        start = count_end + 8 * j
+                        end = count_end + 4 + 8 * j
+
+                        if len(line) < end:
                             raise ValueError(
-                                f"Line {line_number}: Unexpected end of file in CHG block"
+                                f"Line {line_number}: CHG entry out of range"
                             )
-                        chg_line = lines[i]
-                        if len(chg_line) < 12:
-                            raise ValueError(f"Line {i + 1}: CHG entry line too short")
 
                         atom_idx = (
-                            int(chg_line[0:3].strip()) - 1
+                            int(line[start:end].strip()) - 1
                         )  # 1-indexed to 0-indexed
-                        charge = int(chg_line[3:6].strip())
+
+                        start = count_end + 4 + 8 * j
+                        end = count_end + 8 + 8 * j
+
+                        if len(line) < end:
+                            raise ValueError(
+                                f"Line {line_number}: CHG entry out of range"
+                            )
+
+                        charge = int(line[start:end].strip())
 
                         if atom_idx < 0 or atom_idx >= len(molecule["atoms"]):
                             raise ValueError(
-                                f"Line {i + 1}: CHG atom index out of range: {atom_idx}"
+                                f"Line {line_number}: CHG atom index out of range: {atom_idx}"
                             )
                         if charge < -3 or charge > 3:
                             raise ValueError(
-                                f"Line {i + 1}: CHG charge out of range: {charge}"
+                                f"Line {line_number}: CHG charge out of range: {charge}"
                             )
 
                         molecule["atoms"][atom_idx]["charge"] = charge
@@ -365,9 +397,9 @@ def _sdf_entries(sdf_content: str) -> list[tuple[int, str]]:
     return entries
 
 
-def _molecule_to_trc(molecule: dict[str, Any]) -> dict[str, Any]:
+def _molecule_to_trc(molecule: dict[str, Any]) -> TRC:
     """
-    Convert a parsed molecule to TRC format.
+    Convert a parsed molecule to TRC structure.
 
     Creates a TRC with:
     - Single residue containing all atoms
@@ -376,79 +408,86 @@ def _molecule_to_trc(molecule: dict[str, Any]) -> dict[str, Any]:
     - Bonds as connectivity
     - Charges as formal_charges
     """
-    # Use molecule name or default to "LIG"
-    residue_name = molecule["name"].strip() or "LIG"
+    trc = TRC()
 
-    # Create residues: single residue with all atoms
     num_atoms = len(molecule["atoms"])
-    residues_list = [list(range(num_atoms))]  # All atoms in one residue
 
-    # Create topology
-    symbols = [atom["symbol"] for atom in molecule["atoms"]]
+    # Build topology
+    symbols = []
     geometry = []
+    formal_charges = []
+    labels = []
+
+    # Track element counts for labeling (e.g., C1, C2, N1, H1, H2...)
+    element_counts = {}
+
     for atom in molecule["atoms"]:
+        try:
+            element = Element.from_str(atom["symbol"])
+        except ValueError:
+            element = Element.C  # Default to carbon if unknown
+        symbols.append(element)
         geometry.extend([float(atom["x"]), float(atom["y"]), float(atom["z"])])
+        formal_charges.append(FormalCharge(atom["charge"]))
 
-    # Formal charges
-    formal_charges = [atom["charge"] for atom in molecule["atoms"]]
+        # Create label based on element symbol and sequence number for that element
+        element_symbol = atom["symbol"]
+        element_counts[element_symbol] = element_counts.get(element_symbol, 0) + 1
+        labels.append(f"{element_symbol}{element_counts[element_symbol]}")
 
-    # Connectivity (bonds)
-    connectivity = []
+    trc.topology.symbols = symbols
+    trc.topology.geometry = geometry
+    trc.topology.formal_charges = formal_charges
+    trc.topology.labels = labels
+
+    # Build connectivity (bonds) - ensure atom1 < atom2 for canonical ordering
+    bonds = []
     for bond in molecule["bonds"]:
-        atom1 = bond["atom1"]
-        atom2 = bond["atom2"]
+        atom1_idx = bond["atom1"]
+        atom2_idx = bond["atom2"]
         bond_order = _bond_order_from_sdf(bond["bond_type"])
+
         # Ensure atom1 < atom2 (canonical ordering)
-        if atom1 > atom2:
-            atom1, atom2 = atom2, atom1
-        connectivity.append([atom1, atom2, bond_order])
+        if atom1_idx > atom2_idx:
+            atom1_idx, atom2_idx = atom2_idx, atom1_idx
+
+        bonds.append(
+            Bond(
+                AtomRef(atom1_idx),
+                AtomRef(atom2_idx),
+                bond_order,
+            )
+        )
+
+    trc.topology.connectivity = bonds
 
     # Fragments: single fragment with all atoms
-    fragments = [list(range(num_atoms))]
+    trc.topology.fragments = [Fragment([AtomRef(i) for i in range(num_atoms)])]
 
     # Fragment formal charge: sum of all atom charges
     fragment_formal_charge = sum(atom["charge"] for atom in molecule["atoms"])
+    trc.topology.fragment_formal_charges = [FormalCharge(fragment_formal_charge)]
 
-    # Build TRC structure
-    trc = {
-        "topology": {
-            "schema_version": CURRENT_SCHEMA_VERSION,
-            "symbols": symbols,
-            "geometry": geometry,
-            "labels": None,
-            "partial_charges": None,
-            "formal_charges": formal_charges,
-            "connectivity": connectivity,
-            "stereochemistry": None,
-            "velocities": None,
-            "fragments": fragments,
-            "fragment_formal_charges": [fragment_formal_charge],
-            "fragment_partial_charges": None,
-            "fragment_multiplicities": None,
-        },
-        "residues": {
-            "residues": residues_list,
-            "seqs": [residue_name],
-            "seq_ns": [0],
-            "insertion_codes": [""],
-            "labeled": [0],
-            "labels": [[residue_name]],
-        },
-        "chains": {
-            "chains": [[0]],  # Single chain with residue 0
-            "alpha_helices": None,
-            "beta_sheets": None,
-            "labeled": None,
-            "labels": None,
-        },
-    }
+    # Build residues: single residue with all atoms
+    trc.residues.residues = [Residue([AtomRef(i) for i in range(num_atoms)])]
+    trc.residues.seqs = ["LIG"]
+    trc.residues.seq_ns = [0]
+    trc.residues.insertion_codes = [""]
+    # Label the ligand residue
+    trc.residues.labeled = [ResidueRef(0)]
+    trc.residues.labels = [[molecule["name"].strip().lower() or "LIG"]]
+
+    # Build chains: single chain with residue 0
+    trc.chains.chains = [Chain([ResidueRef(0)])]
+    trc.chains.labeled = [ChainRef(0)]
+    trc.chains.labels = [[molecule["name"].strip() or "LIG"]]
 
     return trc
 
 
 def from_sdf(sdf_content: str) -> TRC | list[TRC]:
     """
-    Convert SDF content to TRC structures.
+    Parse SDF file contents into TRC structures.
 
     Args:
         sdf_content: SDF file content as string
@@ -465,8 +504,7 @@ def from_sdf(sdf_content: str) -> TRC | list[TRC]:
     for line_number, entry in entries:
         try:
             molecule = _parse_sdf_entry(entry)
-            trc_dict = _molecule_to_trc(molecule)
-            trcs.append(from_json(trc_dict))
+            trcs.append(_molecule_to_trc(molecule))
         except Exception as e:
             raise ValueError(
                 f"Error parsing SDF entry starting at line {line_number}: {e}"
@@ -475,55 +513,3 @@ def from_sdf(sdf_content: str) -> TRC | list[TRC]:
     if len(trcs) == 1:
         return trcs[0]
     return trcs
-
-
-def from_sdf_file(input_file: str, output_file: str | None = None) -> TRC | list[TRC]:
-    """
-    Read SDF file and convert to TRC JSON.
-
-    Args:
-        input_file: Path to input SDF file
-        output_file: Optional path to output JSON file. If None, only returns the result.
-
-    Returns:
-        TRC structure or list of TRC structures
-
-    Raises:
-        FileNotFoundError: If input file doesn't exist
-        ValueError: If SDF parsing fails
-    """
-    path = Path(input_file)
-    if not path.exists():
-        raise FileNotFoundError(f"SDF file not found: {input_file}")
-
-    with open(path, "r") as f:
-        sdf_content = f.read()
-
-    trcs = from_sdf(sdf_content)
-
-    if output_file:
-        output_path = Path(output_file)
-        with output_path.open("w") as f:
-            f.write(to_json(trcs))
-
-    return trcs
-
-
-# Command-line interface
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Convert SDF file to TRC JSON file")
-    parser.add_argument("--input", required=True, help="Input SDF file")
-    parser.add_argument("--output", required=True, help="Output TRC JSON file")
-
-    args = parser.parse_args()
-
-    trcs = from_sdf_file(args.input, args.output)
-
-    if isinstance(trcs, TRC):
-        print(f"Successfully converted SDF to TRC: {args.output}")
-    else:
-        print(
-            f"Successfully converted {len(trcs)} molecules from SDF to TRC: {args.output}"
-        )

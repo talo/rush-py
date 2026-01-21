@@ -108,12 +108,10 @@ def to_json(trcs: TRC | list[TRC]) -> str:
                 "insertion_codes": trc.residues.insertion_codes,
                 "labeled": (
                     [r.value for r in trc.residues.labeled]
-                    if trc.residues.labeled is not None
+                    if trc.residues.labeled
                     else None
                 ),
-                "labels": (
-                    trc.residues.labels if trc.residues.labels is not None else None
-                ),
+                "labels": trc.residues.labels if trc.residues.labels else None,
             },
             "chains": {
                 "chains": [chain.residues for chain in trc.chains.chains],
@@ -132,9 +130,7 @@ def to_json(trcs: TRC | list[TRC]) -> str:
                     if trc.chains.labeled
                     else None
                 ),
-                "labels": (
-                    trc.chains.labels if trc.chains.labels is not None else None
-                ),
+                "labels": trc.chains.labels if trc.chains.labels else None,
             },
         }
 
@@ -158,5 +154,8 @@ def to_json(trcs: TRC | list[TRC]) -> str:
             ]
 
         data.append(trc_data)
+
+    if len(data) == 1:
+        data = data[0]
 
     return json.dumps(data, indent=2)

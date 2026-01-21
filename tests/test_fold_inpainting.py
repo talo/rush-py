@@ -25,7 +25,7 @@ def test_fold_inpainting():
             ProteinSequence(["A"], protein_seq, res[0]),
         ],
         use_potentials=True,
-        template_path=data_dir / "CMET_4R1Y.pdb",
+        template_path=data_dir / "4r1y_protein.pdb",
         template_threshold_angstroms=0.1,
         run_opts=RunOpts(
             name="Rush-Py Test: Residue Inpainting Step 2 (Boltz)",
