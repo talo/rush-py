@@ -1,15 +1,13 @@
 import json
 import sys
 from pathlib import Path
-from pprint import pp
 
-from rush import from_json
-from rush.boltz import LigandSequence, ProteinSequence, boltz
-from rush.client import RunOpts, RunSpec, save_object, set_opts
-from rush.convert.pdb import to_pdb
+from rush.boltz import ProteinSequence, boltz
+from rush.client import RunOpts, RunSpec, set_opts
 from rush.mmseqs2 import mmseqs2
 
-if __name__ == "__main__":
+
+def test_fold_inpainting():
     set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
     data_dir = Path.cwd() / "tests" / "data"
     protein_seq = "LSALNPELVQAVQHVVIGPSSLIVHFNEVIGRGHFGCVYHGTLLDNDGKKIHCAVKSLNRITDIGEVSQFLTEGIIMKDFSHPNVLSLLGICLRSEGSPLVVLPYMKHGDLRNFIRNETHNPTVKDLIGFGLQVAKGMKYLASKKFVHRDLAARNCMLDEKFTVKVADFGLARDMYDKEYYSVHNKTGAKLPVKWMALESLQTQKFTTKSDVWSFGVLLWELMTRGAPPYPDVNTFDITVYLLQGRRLLQPEYCPDPLYEVMLKCWHPKAEMRPSFSELVSRISAIFSTFIG"
@@ -37,3 +35,7 @@ if __name__ == "__main__":
         collect=True,
     )
     print(json.dumps(res, indent=2), file=sys.stderr)
+
+
+if __name__ == "__main__":
+    test_fold_inpainting()

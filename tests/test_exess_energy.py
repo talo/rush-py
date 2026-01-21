@@ -4,7 +4,8 @@ from pathlib import Path
 from rush import exess
 from rush.client import RunOpts, collect_run, set_opts
 
-if __name__ == "__main__":
+
+def test_exess_energy():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     # Default method is ReducedHF, and default basis is cc-pVDZ
@@ -31,3 +32,7 @@ if __name__ == "__main__":
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
     exess.save_energy_outputs(res)
+
+
+if __name__ == "__main__":
+    test_exess_energy()

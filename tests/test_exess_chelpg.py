@@ -5,7 +5,8 @@ from pprint import pp
 from rush import exess
 from rush.client import RunOpts, save_json, set_opts
 
-if __name__ == "__main__":
+
+def test_exess_chelpg():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.chelpg(
@@ -18,3 +19,7 @@ if __name__ == "__main__":
     )
     pp(res, width=130, compact=True, stream=sys.stderr)
     save_json(res, name="tyk2_ejm_31_chelpg_charges.json")
+
+
+if __name__ == "__main__":
+    test_exess_chelpg()

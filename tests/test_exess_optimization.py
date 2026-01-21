@@ -4,7 +4,8 @@ from pathlib import Path
 from rush import exess
 from rush.client import RunOpts, save_object, set_opts
 
-if __name__ == "__main__":
+
+def test_exess_optimization():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     # Setting `standard_orientation="None"` (different from `standard_orientation=None)
@@ -35,3 +36,7 @@ if __name__ == "__main__":
     # here a canonical way to save all the objects.
     for res_i in res:
         save_object(res_i["path"])
+
+
+if __name__ == "__main__":
+    test_exess_optimization()

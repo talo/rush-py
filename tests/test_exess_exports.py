@@ -1,11 +1,11 @@
 import sys
 from pathlib import Path
-from pprint import pp
 
 from rush import exess
-from rush.client import RunOpts, RunSpec, save_json, set_opts
+from rush.client import RunOpts, RunSpec, set_opts
 
-if __name__ == "__main__":
+
+def test_exess_exports():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.energy(
@@ -14,10 +14,13 @@ if __name__ == "__main__":
         export_keywords=exess.ExportKeywords(
             export_density_descriptors=True,
             export_esp_descriptors=True,
-            descriptor_grid=exess.CustomDescriptorGrid(
-                [0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0],
+            descriptor_grid=exess.RegularDescriptorGrid(
+                min=[0.0, 0.0, 0.0],
+                max=[1.9, 2.0, 2.1],
+                spacing=[1.0, 1.0, 1.0],
             ),
         ),
+        convert_hdf5_to_json=True,
         run_spec=RunSpec(storage=1000, gpus=1),
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 04: Electron Density and ESP",
@@ -26,5 +29,9 @@ if __name__ == "__main__":
         collect=True,
     )
     print(res, file=sys.stderr)
-    files = exess.save_energy_outputs(res, to_json=True)
+    files = exess.save_energy_outputs(res)
     print(files, file=sys.stderr)
+
+
+if __name__ == "__main__":
+    test_exess_exports()

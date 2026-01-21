@@ -6,7 +6,8 @@ from rush import from_json
 from rush.auto3d import auto3d as run_auto3d
 from rush.client import RunOpts, save_object, set_opts
 
-if __name__ == "__main__":
+
+def test_auto3d():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     res = run_auto3d(
         ["CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O", "COOH"],
@@ -22,3 +23,7 @@ if __name__ == "__main__":
     trc = from_json(tuple(save_object(o["path"]) for o in trc_obj))
     pp(trc, width=130, compact=True, stream=sys.stderr)
     print(err, file=sys.stderr)
+
+
+if __name__ == "__main__":
+    test_auto3d()

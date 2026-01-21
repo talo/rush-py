@@ -4,7 +4,8 @@ from pathlib import Path
 from rush.client import RunOpts, save_json, set_opts
 from rush.pbsa import PBSAResults, pbsa
 
-if __name__ == "__main__":
+
+def test_pbsa():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = pbsa(
@@ -28,3 +29,7 @@ if __name__ == "__main__":
     )
     print(PBSAResults(*res), file=sys.stderr)
     save_json(res, name="test_pbsa.json")
+
+
+if __name__ == "__main__":
+    test_pbsa()

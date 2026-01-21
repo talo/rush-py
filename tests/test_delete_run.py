@@ -1,4 +1,3 @@
-import time
 from pathlib import Path
 
 from rush import exess
@@ -9,7 +8,8 @@ from rush.client import (
     set_opts,
 )
 
-if __name__ == "__main__":
+
+def test_delete_run():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     id = exess.energy(
@@ -25,3 +25,7 @@ if __name__ == "__main__":
     delete_run(id)
     runs_1 = fetch_runs(tags=["delete-me"])
     assert id not in runs_1
+
+
+if __name__ == "__main__":
+    test_delete_run()

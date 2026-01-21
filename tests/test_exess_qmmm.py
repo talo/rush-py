@@ -4,7 +4,8 @@ from pathlib import Path
 from rush import exess
 from rush.client import RunOpts, save_object, set_opts
 
-if __name__ == "__main__":
+
+def test_exess_qmmm():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.qmmm(
@@ -24,3 +25,7 @@ if __name__ == "__main__":
     print(res, file=sys.stderr)
     # Single-output results get returned direclty, not inside a list or tuple
     save_object(res["path"])
+
+
+if __name__ == "__main__":
+    test_exess_qmmm()

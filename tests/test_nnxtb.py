@@ -5,7 +5,8 @@ from pathlib import Path
 from rush.client import RunOpts, save_object, set_opts
 from rush.nnxtb import NnxtbResults, nnxtb
 
-if __name__ == "__main__":
+
+def test_nnxtb():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = nnxtb(
@@ -24,3 +25,7 @@ if __name__ == "__main__":
         NnxtbResults(**json.loads(save_object(res["path"]).read_text())),
         file=sys.stderr,
     )
+
+
+if __name__ == "__main__":
+    test_nnxtb()
