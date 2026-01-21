@@ -353,11 +353,12 @@ def save_object(
                 tar_filenames = tar.getnames()
                 if len(tar_filenames) >= 2:
                     data = tar.extractfile(tar_filenames[1]).read()
-        if len(tar_filenames) >= 2:
+            if len(tar_filenames) >= 2:
+                with open(filepath, "wb") as f:
+                    f.write(data)
+        else:
             with open(filepath, "wb") as f:
                 f.write(data)
-        else:
-            filepath.touch()
 
     return filepath
 

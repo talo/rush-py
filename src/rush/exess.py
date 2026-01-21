@@ -42,6 +42,7 @@ from .client import (
     save_object,
     upload_object,
 )
+from .mol import FragmentRef
 from .utils import bool_to_str, float_to_str, optional_str
 
 type MethodT = Literal[
@@ -305,7 +306,7 @@ class FragKeywords:
     cutoff_type: CutoffTypeT | None = None
     distance_metric: DistanceMetricT | None = None
     #: Calculation will act as if only those fragments were present.
-    included_fragments: list[int] | None = None
+    included_fragments: list[int | FragmentRef] | None = None
     enable_speed: bool | None = None
 
     def __post_init__(self):
@@ -334,6 +335,12 @@ class FragKeywords:
                 self.tetramer_cutoff = 10.0
 
     def _to_rex(self, reference_fragment: int | None = None):
+        included_fragments = None
+        if self.included_fragments:
+            included_fragments = [
+                f.value if isinstance(f, FragmentRef) else f
+                for f in self.included_fragments
+            ]
         return Template(
             """Some (exess_rex::FragKeywords {
             cutoffs = Some (exess_rex::FragmentCutoffs {
@@ -363,7 +370,7 @@ class FragKeywords:
                 self.distance_metric, "exess_rex::FragmentDistanceMetric::"
             ),
             level=self.level,
-            maybe_included_fragments=optional_str(self.included_fragments),
+            maybe_included_fragments=optional_str(included_fragments),
             maybe_reference_fragment=optional_str(reference_fragment),
             maybe_enable_speed=optional_str(self.enable_speed),
         )
@@ -828,11 +835,11 @@ def energy(
     )
 
 
-def save_energy_outputs(res, to_json=False):
+def save_energy_outputs(res, extract=True):
     if len(res) == 1:
         return save_object(res[0]["path"])
     else:
-        # hdf5-to-json set to true
+        # convert_hdf5_to_json set to true
         if "Json" in res[1]:
             return (
                 save_object(res[0]["path"]),
@@ -843,47 +850,11 @@ def save_energy_outputs(res, to_json=False):
         # Support new-style with the type key, and old-style without
         if "Hdf5" in res[1]:
             res[1] = res[1]["Hdf5"]
-        qm_output = download_object(res[1]["path"])
-        decompressed = zstd.ZstdDecompressor().decompress(
-            qm_output, max_output_size=int(1e9)
-        )
-        with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-            hdf5_f = tar.extractfile(tar.getnames()[1])
-            with h5py.File(hdf5_f, "r") as f:
-                if "monomers" not in f.keys():
-                    # Our outer key will be the exported val
-                    exported_vals = [x for x in f.keys()]
-                    d = {k: {} for k in exported_vals}
-                    for exported_val in exported_vals:
-                        d[exported_val] = f[exported_val][()].tolist()
-                else:
-                    # Check if we have any fragments (we probably should)
-                    frag_indices = [int(x) for x in f["monomers"].keys()]
-                    if not frag_indices:
-                        return save_object(res[0]["path"])
-
-                    # Check if anything got exported
-                    exported_vals = [x for x in f[f"monomers/{frag_indices[0]}"].keys()]
-                    if not exported_vals:
-                        return save_object(res[0]["path"])
-
-                    # Our outer key will be the exported val
-                    d = {k: {} for k in exported_vals}
-                    for exported_val in exported_vals:
-                        for nmer_type in f.keys():
-                            if nmer_type not in d[exported_val]:
-                                d[exported_val][nmer_type] = {}
-                            for nmer_idx in sorted(f[f"{nmer_type}"].keys()):
-                                d[exported_val][nmer_type][nmer_idx] = f[
-                                    f"{nmer_type}/{nmer_idx}/{exported_val}"
-                                ][()].tolist()
 
         return (
             save_object(res[0]["path"]),
-            (
-                save_json(d, name=res[1]["path"])
-                if to_json
-                else save_object(res[1]["path"], ext="hdf5", extract=True)
+            save_object(
+                res[1]["path"], ext="hdf5" if extract else "tar.zst", extract=extract
             ),
         )
 
@@ -921,6 +892,7 @@ def interaction_energy(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
+        convert_hdf5_to_json = None,
         model = Some (exess_rex::Model {
           method = exess_rex::Method::$method,
           basis = "$basis",
@@ -1008,6 +980,7 @@ def chelpg(
       (exess_rex::ExessParams {
         schema_version = "0.2.0",
         external_charges = None,
+        convert_hdf5_to_json = None,
         model = Some (exess_rex::Model {
           method = exess_rex::Method::RestrictedHF,
           basis = "cc-pVDZ",
@@ -1082,6 +1055,9 @@ in
         run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             result = collect_run(run_id)
+            # Support new-style with the type key, and old-style without
+            if "Hdf5" in result[1]:
+                result[1] = result[1]["Hdf5"]
             qm_output = download_object(result[1]["path"])
             decompressed = zstd.ZstdDecompressor().decompress(
                 qm_output, max_output_size=int(1e9)
