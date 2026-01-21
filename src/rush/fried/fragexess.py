@@ -16,26 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
-from .. import exess as rushpy2_exess
-from ..client import RunOpts
-from ..exess import FragKeywords as ExessFragKeywords
-from ..exess import SCFKeywords as ExessSCFKeywords
-from ..exess import System as ExessSystem
-
-DEFAULT_METHOD = "RestrictedRIMP2"
-DEFAULT_BASIS = "cc-pVDZ"
-DEFAULT_AUX_BASIS = "cc-pVDZ-RIFIT"
-
-DEFAULT_SYSTEM_PARAMS: dict[str, Any] = {}
-
-DEFAULT_SCF_PARAMS = {
-    "max_iters": 50,
-    "max_diis_history_length": 12,
-    "convergence_metric": "DIIS",
-    "convergence_threshold": 1e-8,
-    "density_threshold": 1e-10,
-    "density_basis_set_projection_fallback_enabled": True,
-}
+from .. import exess
+from ..client import RunOpts, save_object
 
 __all__ = [
     "fragmented_exess",
@@ -43,7 +25,6 @@ __all__ = [
     "collect_ligand_fragments",
     "compute_fragment_cutoffs",
     "build_frag_keywords",
-    "run_exess",
     "discover_inputs",
 ]
 
@@ -52,13 +33,6 @@ __all__ = [
 class FragmentJob:
     reference_fragment: int
     cutoff: int
-
-
-def _ensure_rushpy2_available() -> None:
-    if rushpy2_exess is None:
-        raise ModuleNotFoundError(
-            "rush_py2 is required to submit EXESS jobs. Install the 'rush-py2' package."
-        )
 
 
 def _load_conf(path: Path) -> dict[str, Any]:
@@ -199,87 +173,22 @@ def compute_fragment_cutoffs(
     return fragment_jobs
 
 
-def _build_system_config() -> Any:
-    if ExessSystem is None or not DEFAULT_SYSTEM_PARAMS:
-        return None
-    return ExessSystem(**DEFAULT_SYSTEM_PARAMS)
-
-
-def _build_scf_keywords() -> Any:
-    if ExessSCFKeywords is None:
-        return dict(DEFAULT_SCF_PARAMS)
-    return ExessSCFKeywords(**DEFAULT_SCF_PARAMS)
-
-
 def build_frag_keywords(
     cutoff: int,
     reference_fragment: int,
     included_fragments: list[int],
     trimer_cap: float,
-) -> Any:
+) -> exess.FragKeywords:
     trimer_cutoff = float(min(cutoff, trimer_cap))
-    params = {
-        "level": "Trimer",
-        "dimer_cutoff": float(cutoff),
-        "trimer_cutoff": trimer_cutoff,
-        "tetramer_cutoff": trimer_cutoff,
-        "cutoff_type": "Centroid",
-        "included_fragments": sorted(set([reference_fragment] + included_fragments)),
-    }
-    if ExessFragKeywords is None:
-        return params
-    return ExessFragKeywords(**params)
-
-
-def run_exess(
-    topology_path: Path,
-    output_dir: Path,
-    collect: bool,
-    output_filename: str | None = None,
-    run_opts: Any | None = None,
-    exess_kwargs: dict[str, Any] | None = None,
-    reference_fragment: int | None = None,
-) -> None:
-    """
-    Run exess on a single topology and save results.
-    """
-    output_dir = Path(output_dir).resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    target_path = output_dir / f"{output_filename or topology_path.stem}.json"
-    if target_path.exists():
-        print(f"  SKIP: Output file already exists: {target_path}", file=sys.stderr)
-        return
-
-    call_kwargs: dict[str, Any] = {"collect": collect}
-    if run_opts is not None:
-        call_kwargs["run_opts"] = run_opts
-    if exess_kwargs:
-        call_kwargs.update(exess_kwargs)
-
-    call_kwargs["reference_fragment"] = reference_fragment
-
-    _ensure_rushpy2_available()
-    submit_fn = rushpy2_exess.interaction_energy
-    topology_path_str = str(topology_path)
-
-    if not topology_path.exists():
-        raise RuntimeError(f"Topology file no longer exists: {topology_path_str}")
-
-    job_display_name = output_filename or topology_path.stem
-    print(f"Process {job_display_name}", file=sys.stderr)
-
-    run_output = submit_fn(topology_path_str, **call_kwargs)
-    if not run_output:
-        print("Warning: exess.energy returned no filename", file=sys.stderr)
-        return
-
-    run_path = Path(run_output)
-    if run_path.exists():
-        shutil.move(str(run_path), str(target_path))
-        print(f"  SAVED: {target_path}", file=sys.stderr)
-    elif collect:
-        print(f"Warning: exess output file not found: {run_path}", file=sys.stderr)
+    included = sorted(set(included_fragments + [reference_fragment]))
+    return exess.FragKeywords(
+        level="Trimer",
+        dimer_cutoff=float(cutoff),
+        trimer_cutoff=trimer_cutoff,
+        tetramer_cutoff=trimer_cutoff,
+        cutoff_type="Centroid",
+        included_fragments=included,
+    )
 
 
 def fragmented_exess(
@@ -319,12 +228,13 @@ def fragmented_exess(
         print(f"  WARNING: No fragments within {distance_threshold} Å of ligand")
         return
 
+    if not topology_path.exists():
+        raise RuntimeError(f"Topology file no longer exists: {topology_path}")
+
     for job in fragment_jobs:
         job_name = f"{input_path.stem}_ref{job.reference_fragment}"
-        run_opts = None
-        if RunOpts is not None:
-            tags = [input_path.parent.name, f"ref_frag_{job.reference_fragment}"]
-            run_opts = RunOpts(name=job_name[:63], tags=tags)
+        tags = [input_path.parent.name, f"ref_frag_{job.reference_fragment}"]
+        run_opts = RunOpts(name=job_name[:63], tags=tags)
 
         frag_keywords = build_frag_keywords(
             cutoff=job.cutoff,
@@ -333,28 +243,37 @@ def fragmented_exess(
             trimer_cap=trimer_cutoff_cap,
         )
 
-        exess_kwargs = {
-            "method": DEFAULT_METHOD,
-            "basis": DEFAULT_BASIS,
-            "aux_basis": DEFAULT_AUX_BASIS,
-            "system": _build_system_config(),
-            "scf_keywords": _build_scf_keywords(),
-            "frag_keywords": frag_keywords,
-        }
-
         output_filename = f"{input_path.stem}_ref{job.reference_fragment}"
-        if (output_dir / f"{output_filename}.json").exists():
+        target_path = output_dir / f"{output_filename}.json"
+        if target_path.exists():
             continue
 
-        run_exess(
-            topology_path=topology_path,
-            output_dir=output_dir,
-            collect=collect,
-            output_filename=output_filename,
+        print(f"Process {output_filename}", file=sys.stderr)
+        run_output = exess.interaction_energy(
+            topology_path,
+            job.reference_fragment,
+            "RestrictedRIMP2",
+            "cc-pVDZ",
+            "cc-pVDZ-RIFIT",
+            scf_keywords=exess.SCFKeywords(
+                max_iters=50,
+                max_diis_history_length=12,
+                convergence_metric="DIIS",
+                convergence_threshold=1e-8,
+                density_threshold=1e-10,
+                density_basis_set_projection_fallback_enabled=True,
+            ),
+            frag_keywords=frag_keywords,
             run_opts=run_opts,
-            exess_kwargs=exess_kwargs,
-            reference_fragment=job.reference_fragment,
+            collect=collect,
         )
+        run_path = save_object(run_output[0]["path"])
+        
+        if run_path.exists():
+            shutil.move(str(run_path), str(target_path))
+            print(f"  SAVED: {target_path}", file=sys.stderr)
+        elif collect:
+            print(f"Warning: exess output file not found: {run_path}", file=sys.stderr)
 
 
 def discover_inputs(

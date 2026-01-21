@@ -7,8 +7,8 @@ Public API:
 - plotfried.plot_fried_stacked
 """
 
-from .fragmenter import fragment_ligand  # noqa: F401
 from .fragexess import fragmented_exess  # noqa: F401
+from .fragmenter import fragment_ligand  # noqa: F401
 from .plotfried import plot_fried_stacked  # noqa: F401
 
 __all__ = [
@@ -16,5 +16,3 @@ __all__ = [
     "fragmented_exess",
     "plot_fried_stacked",
 ]
-
-

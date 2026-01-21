@@ -155,4 +155,7 @@ def to_json(trcs: TRC | list[TRC]) -> str:
 
         data.append(trc_data)
 
+    if len(data) == 1:
+        data = data[0]
+
     return json.dumps(data, indent=2)

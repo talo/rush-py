@@ -5,7 +5,6 @@ Primary entrypoint:
 - plot_fried_stacked(<proj_dir>, <system_prefix>, num_top_entries=8, ylim=None, colormap="tab20")
 """
 
-import argparse
 import json
 from collections import OrderedDict
 from pathlib import Path
@@ -299,8 +298,8 @@ def plot_stacked(
         labels = [item["key"] for item in aa_contrib]
         values = [item["energy_kcal_per_mol"] for item in aa_contrib]
 
-        positive_cumulative = sum(value for value in values if value >= 0)
-        negative_cumulative = sum(value for value in values if value < 0)
+        _positive_cumulative = sum(value for value in values if value >= 0)
+        _negative_cumulative = sum(value for value in values if value < 0)
 
         plot_positive_cumulative = 0
         plot_negative_cumulative = 0
