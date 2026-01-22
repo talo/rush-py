@@ -19,6 +19,7 @@ from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
+    RunError,
     RunOpts,
     RunSpec,
     _submit_rex,
@@ -114,9 +115,13 @@ in
                 print(f"Error: {error['message']}", file=sys.stderr)
 
 
-def save_outputs(res):
-    return (
-        save_object(res[0]["path"]),
-        save_object(res[1]["path"]),
-        save_object(res[2]["path"]),
-    )
+def save_outputs(res: dict | RunError) -> tuple[Path, Path, Path] | RunError:
+    if isinstance(res, dict):
+        return (
+            save_object(res[0]["path"]),
+            save_object(res[1]["path"]),
+            save_object(res[2]["path"]),
+        )
+    else:
+        print(res)
+        return res

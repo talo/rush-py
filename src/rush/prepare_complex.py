@@ -13,10 +13,10 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush import from_json, from_pdb, to_pdb
+from rush import from_json, from_pdb, to_pdb, TRC
 from rush.client import (
     RunOpts,
-    RunSpec,
+    RunSpec, RunError,
 )
 from rush.prepare_protein import prepare_protein as run_prepare_protein
 from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
@@ -130,7 +130,7 @@ def prepare_complex(
     run_spec: RunSpec = RunSpec(),
     run_opts: RunOpts = RunOpts(),
     collect=False,
-):
+) -> TRC | RunError:
     """
     Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.
     """
@@ -161,14 +161,12 @@ def prepare_complex(
         run_opts,
         collect,
     )
-    trc_p_files = save_prepare_protein_outputs(res)
-    trc_p = from_json(trc_p_files)
+    trc_p_output = save_prepare_protein_outputs(res)
+    if isinstance(trc_p_output, RunError):
+        return trc_p_output
+    trc_p = from_json(trc_p_output)
     if isinstance(trc_p, list):
         trc_p = trc_p[0]
 
     trc_c = merge_trcs(trc_p, trc_l)
     return trc_c
-
-
-def save_outputs(res):
-    return res

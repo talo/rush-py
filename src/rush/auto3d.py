@@ -8,7 +8,7 @@ from rush.client import (
     RunOpts,
     RunSpec,
     _submit_rex,
-    collect_run,
+    collect_run, RunError,
 )
 from rush.utils import bool_to_str, float_to_str
 
@@ -78,8 +78,7 @@ in
             return run_id
 
         result = collect_run(run_id)
-        # TODO: proper error types
-        if isinstance(result, str):
+        if isinstance(result, RunError):
             return result
 
         def is_result_type(result):
@@ -90,6 +89,7 @@ in
             )
 
         # TODO: no special cases for Result unwrapping
+
         return [
             next(iter(r_i.values())) if is_result_type(r_i) else r_i for r_i in result
         ]
