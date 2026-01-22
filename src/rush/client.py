@@ -306,7 +306,7 @@ def save_object(
     type: Literal["json", "bin"] | None = None,
     ext: str | None = None,
     extract: bool = False,
-):
+) -> Path:
     """
     Saves the contents of the given Rush object store path into the workspace folder.
     Provides a variety of naming schemes, and supports automatically extracting tar.zst
@@ -352,7 +352,7 @@ def save_object(
             with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
                 tar_filenames = tar.getnames()
                 if len(tar_filenames) >= 2:
-                    data = tar.extractfile(tar_filenames[1]).read()
+                    data = tar.extractfile(tar_filenames[1]).read()  # type: ignore
             if len(tar_filenames) >= 2:
                 with open(filepath, "wb") as f:
                     f.write(data)
@@ -411,6 +411,13 @@ def _print_run_trace(run):
 
 
 type RunStatus = Literal["pending", "running", "done", "error", "cancelled", "draft"]
+
+
+@dataclass
+class RunError:
+    """Represents a run error message, returned from failed collected runs."""
+
+    message: str
 
 
 def _build_filters(
@@ -736,7 +743,7 @@ def _poll_run(run_id: str, max_wait_time):
     return status
 
 
-def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | str:
+def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | RunError:
     """
     Waits until the run finishes, or `max_wait_time` elapses, and returns either the
     actual result of the run, an error string if the run failed, or a string indicating
@@ -746,17 +753,17 @@ def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | str:
     if status not in ["cancelled", "error", "done"]:
         err = f"Run timed out: did not complete within {max_wait_time} seconds"
         print(err, file=sys.stderr)
-        return err
+        return RunError(err)
 
     run = _fetch_results(run_id)
     if run["status"] == "cancelled":
         err = f"Cancelled: {run['result']}"
         print(err, file=sys.stderr)
-        return err
+        return RunError(err)
     elif run["status"] == "error":
         err = f"Error: {run['result']}"
         _print_run_trace(run)
-        return err
+        return RunError(err)
 
     result = run["result"]
 
@@ -773,7 +780,7 @@ def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | str:
             result = result["Ok"]
         elif "Err" in result:
             print(f"Error: {result['Err']}", file=sys.stderr)
-            return result["Err"]
+            return RunError(result["Err"])
 
     # inner error: for logic-level failures (may not exist, but should)
     if is_result_type(result):
@@ -781,7 +788,7 @@ def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | str:
             result = result["Ok"]
         elif "Err" in result:
             print(f"Error: {result['Err']}", file=sys.stderr)
-            return result["Err"]
+            return RunError(result["Err"])
 
     if len(result) == 1:
         return result[0]
@@ -793,6 +800,7 @@ def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | str:
 RunStatus: TypeAlias = Literal[
     "pending", "running", "done", "error", "cancelled", "draft"
 ]
+
 
 #: Valid values for the `target` field of `RunSpec`.
 Target: TypeAlias = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]

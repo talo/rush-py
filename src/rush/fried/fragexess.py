@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 from .. import exess
-from ..client import RunOpts, save_object
+from ..client import RunError, RunOpts, save_object
 
 __all__ = [
     "fragmented_exess",
@@ -267,13 +267,22 @@ def fragmented_exess(
             run_opts=run_opts,
             collect=collect,
         )
-        run_path = save_object(run_output[0]["path"])
-        
-        if run_path.exists():
-            shutil.move(str(run_path), str(target_path))
-            print(f"  SAVED: {target_path}", file=sys.stderr)
-        elif collect:
-            print(f"Warning: exess output file not found: {run_path}", file=sys.stderr)
+        if collect:
+            if isinstance(run_output, RunError):
+                # Short-circuit with a warning if the run failed
+                print(f"  Warning: exess run failed! {run_output}", file=sys.stderr)
+                continue
+            run_path = save_object(run_output[0]["path"])
+            if run_path.exists():
+                # Save the successful run
+                shutil.move(str(run_path), str(target_path))
+                print(f"  SAVED: {target_path}", file=sys.stderr)
+            else:
+                # This case really should never get hit
+                print(
+                    f"  Warning: exess output file not found: {run_path}",
+                    file=sys.stderr,
+                )
 
 
 def discover_inputs(

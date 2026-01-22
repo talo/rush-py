@@ -33,12 +33,12 @@ from gql.transport.exceptions import TransportQueryError
 
 from .client import (
     PROJECT_ID,
+    RunError,
     RunOpts,
     RunSpec,
     _submit_rex,
     collect_run,
     download_object,
-    save_json,
     save_object,
     upload_object,
 )
@@ -835,28 +835,34 @@ def energy(
     )
 
 
-def save_energy_outputs(res, extract=True):
-    if len(res) == 1:
-        return save_object(res[0]["path"])
-    else:
-        # convert_hdf5_to_json set to true
-        if "Json" in res[1]:
+def save_energy_outputs(res: dict | RunError, extract=True) -> Path | tuple[Path, Path] | RunError:
+    if isinstance(res, dict):
+        if len(res) == 1:
+            return save_object(res[0]["path"])
+        else:
+            # convert_hdf5_to_json set to true
+            if "Json" in res[1]:
+                return (
+                    save_object(res[0]["path"]),
+                    save_object(res[1]["Json"]["path"]),
+                )
+
+            # hdf5-to-json set to false (or not set)
+            # Support new-style with the type key, and old-style without
+            if "Hdf5" in res[1]:
+                hdf5_obj = res[1]["Hdf5"]
+
             return (
                 save_object(res[0]["path"]),
-                save_object(res[1]["Json"]["path"]),
+                save_object(
+                    hdf5_obj["path"],
+                    ext="hdf5" if extract else "tar.zst",
+                    extract=extract,
+                ),
             )
-
-        # hdf5-to-json set to false (or not set)
-        # Support new-style with the type key, and old-style without
-        if "Hdf5" in res[1]:
-            res[1] = res[1]["Hdf5"]
-
-        return (
-            save_object(res[0]["path"]),
-            save_object(
-                res[1]["path"], ext="hdf5" if extract else "tar.zst", extract=extract
-            ),
-        )
+    else:
+        print(res)
+        return res
 
 
 def interaction_energy(
@@ -1055,23 +1061,29 @@ in
         run_id = _submit_rex(PROJECT_ID, rex, run_opts)
         if collect:
             result = collect_run(run_id)
-            # Support new-style with the type key, and old-style without
-            if "Hdf5" in result[1]:
-                result[1] = result[1]["Hdf5"]
-            qm_output = download_object(result[1]["path"])
-            decompressed = zstd.ZstdDecompressor().decompress(
-                qm_output, max_output_size=int(1e9)
-            )
-            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                hdf5_f = tar.extractfile(tar.getnames()[1])
-                with h5py.File(hdf5_f, "r") as f:
-                    frag_indices = [int(x) for x in f["monomers"].keys()]
-                    chelpg = [
-                        float(x)
-                        for frag_idx in sorted(frag_indices)
-                        for x in f[f"monomers/{frag_idx}/chelpg_charges"]
-                    ]
-            return [result[0], chelpg]
+            if isinstance(result, dict):
+                # Support new-style with the type key, and old-style without
+                if "Hdf5" in result[1]:
+                    hdf5_obj = result[1]["Hdf5"]
+                else:
+                    return (result[0], result[1]["Json"])
+                qm_output = download_object(hdf5_obj["path"])
+                decompressed = zstd.ZstdDecompressor().decompress(
+                    qm_output, max_output_size=int(1e9)
+                )
+                with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+                    hdf5_f = tar.extractfile(tar.getnames()[1])
+                    with h5py.File(hdf5_f, "r") as f:
+                        frag_indices = [int(x) for x in f["monomers"].keys()]
+                        chelpg = [
+                            float(x)
+                            for frag_idx in sorted(frag_indices)
+                            for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+                        ]
+                return (result[0], chelpg)
+            else:
+                # Error
+                return result
         else:
             return run_id
 
