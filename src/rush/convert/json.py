@@ -10,7 +10,12 @@ from ..mol import TRC, Chains, Residues, Topology
 
 def from_json(
     json_content: (
-        str | Path | tuple[str | Path, str | Path, str | Path] | dict | list[dict]
+        str
+        | Path
+        | tuple[str | Path, str | Path, str | Path]
+        | dict
+        | list[dict]
+        | tuple[Path, ...]
     ),
 ) -> TRC | list[TRC]:
     """

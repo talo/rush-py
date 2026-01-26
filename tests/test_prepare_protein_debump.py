@@ -1,0 +1,160 @@
+import math
+from pathlib import Path
+
+from rush.client import RunOpts, save_object, set_opts
+from rush.convert import from_json, from_pdb
+from rush.mol import Element
+from rush.prepare_protein import prepare_protein
+
+
+def _as_trc(trc):
+    return trc[0] if isinstance(trc, list) else trc
+
+
+def _atom_label_map(trc, residue_idx, include_hydrogens=False):
+    labels = trc.topology.labels
+    symbols = trc.topology.symbols
+    assert labels is not None, "Expected topology labels for atom matching."
+    residue = trc.residues.residues[residue_idx]
+    mapping = {}
+    for atom_idx in residue.atoms:
+        if not include_hydrogens and symbols[atom_idx] == Element.H:
+            continue
+        label = labels[atom_idx]
+        if label in mapping:
+            raise AssertionError(
+                f"Duplicate atom label {label} in residue {residue_idx}."
+            )
+        mapping[label] = atom_idx
+    return mapping
+
+
+def _rmsd_for_matching_atoms(trc_ref, trc_cmp):
+    ref_geom = trc_ref.topology.geometry
+    cmp_geom = trc_cmp.topology.geometry
+    total_sq = 0.0
+    atom_count = 0
+    for residue_idx in range(len(trc_cmp.residues.residues)):
+        ref_map = _atom_label_map(trc_ref, residue_idx)
+        cmp_map = _atom_label_map(trc_cmp, residue_idx)
+        missing = set(ref_map) - set(cmp_map)
+        assert not missing, f"Missing atoms in residue {residue_idx}: {sorted(missing)}"
+        for label, ref_idx in ref_map.items():
+            cmp_idx = cmp_map[label]
+            ref_base = ref_idx * 3
+            cmp_base = cmp_idx * 3
+            dx = ref_geom[ref_base] - cmp_geom[cmp_base]
+            dy = ref_geom[ref_base + 1] - cmp_geom[cmp_base + 1]
+            dz = ref_geom[ref_base + 2] - cmp_geom[cmp_base + 2]
+            total_sq += dx * dx + dy * dy + dz * dz
+            atom_count += 1
+    if atom_count == 0:
+        return 0.0
+    return math.sqrt(total_sq / atom_count)
+
+
+def _residue_rmsd(trc_ref, trc_cmp, residue_idx):
+    ref_map = _atom_label_map(trc_ref, residue_idx)
+    cmp_map = _atom_label_map(trc_cmp, residue_idx)
+    missing = set(ref_map) - set(cmp_map)
+    extra = set(cmp_map) - set(ref_map)
+    assert not missing, (
+        "Non-hydrogen atoms differ in residue "
+        f"{residue_idx} (missing={sorted(missing)}, extra={sorted(extra)})."
+    )
+    if not ref_map:
+        return 0.0
+
+    ref_geom = trc_ref.topology.geometry
+    cmp_geom = trc_cmp.topology.geometry
+    total_sq = 0.0
+    for label, ref_idx in ref_map.items():
+        cmp_idx = cmp_map[label]
+        ref_base = ref_idx * 3
+        cmp_base = cmp_idx * 3
+        dx = ref_geom[ref_base] - cmp_geom[cmp_base]
+        dy = ref_geom[ref_base + 1] - cmp_geom[cmp_base + 1]
+        dz = ref_geom[ref_base + 2] - cmp_geom[cmp_base + 2]
+        total_sq += dx * dx + dy * dy + dz * dz
+    return math.sqrt(total_sq / len(ref_map))
+
+
+def _per_residue_rmsd(trc_ref, trc_cmp):
+    if not trc_ref.residues.residues:
+        return 0.0
+    all = []
+    for residue_idx in range(len(trc_cmp.residues.residues)):
+        all.append(_residue_rmsd(trc_ref, trc_cmp, residue_idx))
+    return all
+
+
+def test_prepare_protein():
+    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
+    data_dir = Path.cwd() / "tests" / "data"
+    res_debumped = prepare_protein(
+        data_dir / "3fln_raw.pdb",
+        ph=7.4,
+        naming_scheme="AMBER",
+        capping_style="truncated",
+        truncation_threshold=1,
+        debump=True,
+        run_opts=RunOpts(
+            name="Test prepare-protein 02: Debump",
+            tags=["rush-py", "test", "MAPK14"],
+        ),
+        collect=True,
+    )
+    res_nodebump = prepare_protein(
+        data_dir / "3fln_raw.pdb",
+        ph=7.4,
+        naming_scheme="AMBER",
+        capping_style="truncated",
+        truncation_threshold=1,
+        debump=False,
+        run_opts=RunOpts(
+            name="Test prepare-protein 02: No Debump",
+            tags=["rush-py", "test", "MAPK14"],
+        ),
+        collect=True,
+    )
+
+    # Load the original PDB into a TRC
+    trc_unprepped = _as_trc(from_pdb((data_dir / "3fln_raw.pdb").read_text()))
+
+    # Parse into TRC object
+    trc_debumped = _as_trc(
+        from_json(tuple(save_object(object["path"]) for object in res_debumped))
+    )
+    trc_nodebump = _as_trc(
+        from_json(tuple(save_object(object["path"]) for object in res_nodebump))
+    )
+
+    rmsd_nodebump = _rmsd_for_matching_atoms(trc_unprepped, trc_nodebump)
+    rmsd_debumped = _rmsd_for_matching_atoms(trc_unprepped, trc_debumped)
+    assert rmsd_nodebump <= rmsd_debumped, (
+        "Expected nodebump RMSD to be lower than debumped RMSD for "
+        f"unprepped atoms (nodebump={rmsd_nodebump:.4f}, "
+        f"debumped={rmsd_debumped:.4f})."
+    )
+    residues_rmsd_nodebump = _per_residue_rmsd(trc_unprepped, trc_nodebump)
+    residues_rmsd_debumped = _per_residue_rmsd(trc_unprepped, trc_debumped)
+    for residue_rmsd_nodebump, residue_rmsd_debumped in zip(
+        residues_rmsd_nodebump, residues_rmsd_debumped
+    ):
+        assert residue_rmsd_nodebump < 1.5, (
+            "Expected nodebump residue RMSD to be lower than 1.5 Angstroms: "
+            f"debumped={residue_rmsd_debumped:.4f})."
+        )
+        assert residue_rmsd_debumped < 3.0, (
+            "Expected debumped residue RMSD to be lower than 3.0 Angstroms: "
+            f"debumped={residue_rmsd_debumped:.4f})."
+        )
+        assert residue_rmsd_nodebump <= residue_rmsd_debumped, (
+            "Expected nodebump residue RMSD to be lower than debumped residue RMSD for "
+            f"unprepped residues (nodebump={residue_rmsd_nodebump:.4f}, "
+            f"debumped={residue_rmsd_debumped:.4f})."
+        )
+
+
+if __name__ == "__main__":
+    test_prepare_protein()
