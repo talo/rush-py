@@ -621,6 +621,103 @@ class ExportKeywords:
         )
 
 
+type RadialQuadT = Literal[
+    "MuraKnowles",  #: Default
+    "MurrayHandyLaming",
+    "TreutlerAldrichs",
+]
+
+type PruningSchemeT = Literal[
+    "Unpruned",
+    "Robust",  #: Default
+    "Treutler",
+]
+
+type XCGridDefaults = Literal[
+    "Fine",
+    "Ultrafine",  #: Default
+    "Superfine",
+    "TreutlerGM3",
+    "TreutlerGM5",
+]
+
+
+@dataclass
+class XCGridParameters:
+    radial_quad: RadialQuadT | None = None
+    pruning_scheme: PruningSchemeT | None = None
+    batch_size: int | None = None
+    radial_size: int | None = None
+    angular_size: int | None = None
+    default_grid: XCGridDefaults | None = None
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCGridParameters {
+              radial_quad = $maybe_radial_quad,
+              pruning_scheme = $maybe_pruning_scheme,
+              batch_size = $maybe_batch_size,
+              radial_size = $maybe_radial_size,
+              angular_size = $maybe_angular_size,
+              default_grid = $maybe_default_grid,
+            })"""
+        ).substitute(
+            maybe_radial_quad=optional_str(self.radial_quad, "exess_rex::RadialQuad::"),
+            maybe_pruning_scheme=optional_str(
+                self.pruning_scheme, "exess_rex::PruningScheme::"
+            ),
+            maybe_batch_size=optional_str(self.batch_size),
+            maybe_angular_size=optional_str(self.angular_size),
+            maybe_radial_size=optional_str(self.radial_size),
+            maybe_default_grid=optional_str(
+                self.default_grid, "exess_rex::XCGridDefaults::"
+            ),
+        )
+
+
+type KSDFTMethodT = Literal[
+    "GauXC",
+    "Dense",
+    "BatchDense",
+    "Direct",
+    "SemiDirect",
+]
+
+
+@dataclass
+class KSDFTKeywords:
+    """
+    Configure runs done with the RestrictedKSDFT method.
+    """
+
+    #: KS-DFT functional to use
+    functional: str
+    grid: XCGridParameters | None = None
+    method: KSDFTMethodT | None = "BatchDense"
+    sp_threshold: float | None = None
+    dp_threshold: float | None = None
+    batches_per_batch: int | None = None
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::KSKeywords {
+            functional = $functional,
+            grid = $maybe_grid,
+            method = $maybe_method,
+            sp_threshold = $maybe_sp_threshold,
+            dp_threshold = $maybe_dp_threshold,
+            batches_per_batch = $maybe_batches_per_batch,
+          })"""
+        ).substitute(
+            functional=f'"{self.functional}"',
+            maybe_grid=self.grid._to_rex() if self.grid is not None else "None",
+            maybe_method=optional_str(self.method),
+            maybe_sp_threshold=optional_str(self.sp_threshold),
+            maybe_dp_threshold=optional_str(self.dp_threshold),
+            maybe_batches_per_batch=optional_str(self.batches_per_batch),
+        )
+
+
 @dataclass
 class Trajectory:
     """
@@ -705,7 +802,8 @@ def exess(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    export_keywords: ExportKeywords | None = ExportKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = None,
+    export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
@@ -740,7 +838,7 @@ def exess(
         system = $maybe_system,
         keywords = exess_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -778,6 +876,9 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_frag_keywords=(
             frag_keywords._to_rex() if frag_keywords is not None else "None"
         ),
@@ -809,7 +910,8 @@ def energy(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    export_keywords: ExportKeywords | None = ExportKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = None,
+    export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
@@ -826,6 +928,7 @@ def energy(
         force_cartesian_basis_sets,
         scf_keywords,
         frag_keywords,
+        ksdft_keywords,
         export_keywords,
         system,
         convert_hdf5_to_json,
@@ -835,7 +938,9 @@ def energy(
     )
 
 
-def save_energy_outputs(res: dict | RunError, extract=True) -> Path | tuple[Path, Path] | RunError:
+def save_energy_outputs(
+    res: dict | RunError, extract=True
+) -> Path | tuple[Path, Path] | RunError:
     if isinstance(res, dict):
         if len(res) == 1:
             return save_object(res[0]["path"])
@@ -1095,8 +1200,8 @@ in
 
 def qmmm(
     topology_path: Path | str,
-    residues_path: Path | str,
     n_timesteps: int,
+    residues_path: Path | str | None = None,
     dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
@@ -1110,6 +1215,7 @@ def qmmm(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = None,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     ml_fragments: list[int] | None = None,
@@ -1131,7 +1237,9 @@ def qmmm(
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
-    residues_vobj = upload_object(residues_path)
+    residues_vobj = None
+    if residues_path is not None:
+        residues_vobj = upload_object(residues_path)
 
     # Run rex
     rex = Template("""let
@@ -1152,7 +1260,7 @@ def qmmm(
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1200,6 +1308,9 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_frag_keywords=(
             frag_keywords._to_rex() if frag_keywords is not None else "None"
         ),
@@ -1235,7 +1346,7 @@ in
             else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
-        residues_vobj_path=residues_vobj["path"],
+        residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
         run_id = _submit_rex(PROJECT_ID, rex, run_opts)
@@ -1448,6 +1559,8 @@ def optimization(
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = None,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     ml_fragments: list[int] | None = None,
@@ -1492,9 +1605,9 @@ def optimization(
         system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks = $maybe_ks_keywords,
           rtat = None,
-          frag = None,
+          frag = $maybe_frag_keywords,
           boundary = None,
           log = None,
           dynamics = None,
