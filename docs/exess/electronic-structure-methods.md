@@ -16,8 +16,23 @@ For the full list, see the [reference page](reference).
 
 ### DFT functionals
 
-LibXC naming is required. Commonly used examples include:
+Any functional available in libXC can be requested directly through EXESS input parameters by its standard identifier. LibXC naming is required. 
+In addition to the named functionals provided by libXC, EXESS supports user-defined hybrid and composite functionals. Users can construct custom functionals by combining libXC components with specified weights for exchange, correlation, and exact-exchange contributions. This enables the definition of arbitrary linear combinations of libXC primitives, allowing for method development and systematic functional benchmarking without modifying the EXESS source code.
 
+**Current functional support**
+
+Functionals can be categorized by the density-related quantities they require as input. EXESS currently supports:
+
+- **LDA (Local Density Approximation)**: functionals that depend only on the electron density ρ(r)
+- **GGA (Generalized Gradient Approximation)**: functionals that depend on the electron density and its gradient, ∇ρ(r)
+- **Hybrid functionals**: any combination of LDA, GGA, and exact exchange
+
+EXESS does not currently support:
+
+- **Meta-GGA functionals**: these require the kinetic energy density or other quantities not yet computed in EXESS
+- **Range-separated hybrid functionals**: these require special treatment of the Coulomb operator partitioning that has not been implemented
+
+Some examples of commonly used supported functionals include:
 - LDA: `LDA_X`, `LDA_C_PZ`, `LDA_XC_TETER93`
 - GGA: `GGA_XC_PBE`, `GGA_XC_PW91`
 - Meta-GGA (experimental): `MGGA_XC_TPSS`, `MGGA_XC_M06_L`
