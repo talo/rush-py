@@ -6,7 +6,8 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,7 +133,7 @@ data-aria-dark="Switch to auto color mode">
 <span></span><span data-line="1"><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="2"><span class="sd">Provides data structures and helpers for molecular systems and structures:</span>
 </span><span data-line="3">
-</span><span data-line="4"><span class="sd">- Classes Rush Topology, Residues, Chains, and TRC types.</span>
+</span><span data-line="4"><span class="sd">- Classes for Rush Topology, Residues, Chains, and TRC types.</span>
 </span><span data-line="5"><span class="sd">- Element types and bonds.</span>
 </span><span data-line="6"><span class="sd">- Fragment type to represent fragmented systems.</span>
 </span><span data-line="7">
@@ -1015,371 +1016,403 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="802">        <span class="n">residues</span><span class="o">.</span><span class="n">seq_ns</span> <span class="o">=</span> <span class="n">residues_data</span><span class="p">[</span><span class="s2">&quot;seq_ns&quot;</span><span class="p">]</span>
 </span><span data-line="803">        <span class="n">residues</span><span class="o">.</span><span class="n">insertion_codes</span> <span class="o">=</span> <span class="n">residues_data</span><span class="p">[</span><span class="s2">&quot;insertion_codes&quot;</span><span class="p">]</span>
 </span><span data-line="804">
-</span><span data-line="805">        <span class="k">return</span> <span class="n">residues</span></div>
+</span><span data-line="805">        <span class="k">if</span> <span class="n">residues_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labeled&quot;</span><span class="p">):</span>
+</span><span data-line="806">            <span class="n">residues</span><span class="o">.</span><span class="n">labeled</span> <span class="o">=</span> <span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">residues_data</span><span class="p">[</span><span class="s2">&quot;labeled&quot;</span><span class="p">]]</span>
+</span><span data-line="807">
+</span><span data-line="808">        <span class="k">if</span> <span class="n">residues_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">):</span>
+</span><span data-line="809">            <span class="n">residues</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">residues_data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span>
+</span><span data-line="810">
+</span><span data-line="811">        <span class="k">return</span> <span class="n">residues</span></div>
 
-</span><span data-line="806">
+</span><span data-line="812">
 <div class="viewcode-block" id="Residues.check">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.check">[docs]</a>
-</span><span data-line="807">    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="808"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the residues structure.&quot;&quot;&quot;</span>
-</span><span data-line="809">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
-</span><span data-line="810">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="811">                <span class="sa">f</span><span class="s2">&quot;Seqs length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span><span class="si">}</span><span class="s2"> != residues length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="812">            <span class="p">)</span>
-</span><span data-line="813">
-</span><span data-line="814">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
-</span><span data-line="815">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="816">                <span class="sa">f</span><span class="s2">&quot;Seq_ns length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span><span class="si">}</span><span class="s2"> != residues length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="817">            <span class="p">)</span>
-</span><span data-line="818">
-</span><span data-line="819">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
-</span><span data-line="820">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="821">                <span class="sa">f</span><span class="s2">&quot;Insertion codes length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span><span class="si">}</span><span class="s2"> != residues length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="822">            <span class="p">)</span></div>
-
-</span><span data-line="823">
-<div class="viewcode-block" id="Residues.is_amino_acid">
-<a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.is_amino_acid">[docs]</a>
-</span><span data-line="824">    <span class="k">def</span><span class="w"> </span><span class="nf">is_amino_acid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="825"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if residue at index is an amino acid.&quot;&quot;&quot;</span>
-</span><span data-line="826">        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">):</span>
-</span><span data-line="827">            <span class="k">return</span> <span class="kc">False</span>
-</span><span data-line="828">        <span class="k">return</span> <span class="n">AminoAcidSeq</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
+</span><span data-line="813">    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="814"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the residues structure.&quot;&quot;&quot;</span>
+</span><span data-line="815">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="816">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="817">                <span class="sa">f</span><span class="s2">&quot;Seqs length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span><span class="si">}</span><span class="s2"> != residues length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="818">            <span class="p">)</span>
+</span><span data-line="819">
+</span><span data-line="820">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="821">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="822">                <span class="sa">f</span><span class="s2">&quot;Seq_ns length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span><span class="si">}</span><span class="s2"> != residues length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="823">            <span class="p">)</span>
+</span><span data-line="824">
+</span><span data-line="825">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="826">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="827">                <span class="sa">f</span><span class="s2">&quot;Insertion codes length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span><span class="si">}</span><span class="s2"> != residues length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="828">            <span class="p">)</span></div>
 
 </span><span data-line="829">
+<div class="viewcode-block" id="Residues.is_amino_acid">
+<a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.is_amino_acid">[docs]</a>
+</span><span data-line="830">    <span class="k">def</span><span class="w"> </span><span class="nf">is_amino_acid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="831"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if residue at index is an amino acid.&quot;&quot;&quot;</span>
+</span><span data-line="832">        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">):</span>
+</span><span data-line="833">            <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="834">        <span class="k">return</span> <span class="n">AminoAcidSeq</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
+
+</span><span data-line="835">
 <div class="viewcode-block" id="Residues.amino_acid_indices">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.amino_acid_indices">[docs]</a>
-</span><span data-line="830">    <span class="k">def</span><span class="w"> </span><span class="nf">amino_acid_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-</span><span data-line="831"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get indices of amino acid residues.&quot;&quot;&quot;</span>
-</span><span data-line="832">        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span></div>
+</span><span data-line="836">    <span class="k">def</span><span class="w"> </span><span class="nf">amino_acid_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+</span><span data-line="837"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get indices of amino acid residues.&quot;&quot;&quot;</span>
+</span><span data-line="838">        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">))</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span></div>
 
-</span><span data-line="833">
+</span><span data-line="839">
 <div class="viewcode-block" id="Residues.non_amino_acid_indices">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.non_amino_acid_indices">[docs]</a>
-</span><span data-line="834">    <span class="k">def</span><span class="w"> </span><span class="nf">non_amino_acid_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-</span><span data-line="835"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get indices of non-amino acid residues.&quot;&quot;&quot;</span>
-</span><span data-line="836">        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">))</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span></div>
+</span><span data-line="840">    <span class="k">def</span><span class="w"> </span><span class="nf">non_amino_acid_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+</span><span data-line="841"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get indices of non-amino acid residues.&quot;&quot;&quot;</span>
+</span><span data-line="842">        <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">))</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_amino_acid</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span></div>
 
-</span><span data-line="837">
+</span><span data-line="843">
 <div class="viewcode-block" id="Residues.extend">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.extend">[docs]</a>
-</span><span data-line="838">    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="839"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend this residues collection with another.&quot;&quot;&quot;</span>
-</span><span data-line="840">        <span class="c1"># Calculate atom offset for renumbering</span>
-</span><span data-line="841">        <span class="n">offset</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
-</span><span data-line="842">
-</span><span data-line="843">        <span class="c1"># Extend residues with renumbered atoms</span>
-</span><span data-line="844">        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
-</span><span data-line="845">            <span class="n">new_atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="o">+</span> <span class="n">offset</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
-</span><span data-line="846">            <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Residue</span><span class="p">(</span><span class="n">new_atoms</span><span class="p">))</span>
-</span><span data-line="847">
-</span><span data-line="848">        <span class="c1"># Extend metadata</span>
-</span><span data-line="849">        <span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span>
-</span><span data-line="850">        <span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span>
-</span><span data-line="851">        <span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span></div>
+</span><span data-line="844">    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="845"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend this residues collection with another.&quot;&quot;&quot;</span>
+</span><span data-line="846">        <span class="c1"># Calculate atom offset for renumbering</span>
+</span><span data-line="847">        <span class="n">offset</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
+</span><span data-line="848">
+</span><span data-line="849">        <span class="c1"># Calculate residue offset before extending (number of residues in self before merge)</span>
+</span><span data-line="850">        <span class="n">residue_offset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
+</span><span data-line="851">
+</span><span data-line="852">        <span class="c1"># Extend residues with renumbered atoms</span>
+</span><span data-line="853">        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+</span><span data-line="854">            <span class="n">new_atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="o">+</span> <span class="n">offset</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
+</span><span data-line="855">            <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Residue</span><span class="p">(</span><span class="n">new_atoms</span><span class="p">))</span>
+</span><span data-line="856">
+</span><span data-line="857">        <span class="c1"># Extend metadata</span>
+</span><span data-line="858">        <span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">seqs</span><span class="p">)</span>
+</span><span data-line="859">        <span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">)</span>
+</span><span data-line="860">        <span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">)</span>
+</span><span data-line="861">
+</span><span data-line="862">        <span class="c1"># Handle labeled residues and labels</span>
+</span><span data-line="863">        <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">labeled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="864">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">labeled</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="865">                <span class="bp">self</span><span class="o">.</span><span class="n">labeled</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="866">            <span class="c1"># Renumber residue references</span>
+</span><span data-line="867">            <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">labeled</span><span class="p">:</span>
+</span><span data-line="868">                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">ResidueRef</span><span class="p">):</span>
+</span><span data-line="869">                    <span class="bp">self</span><span class="o">.</span><span class="n">labeled</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">residue_offset</span><span class="p">))</span>
+</span><span data-line="870">                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+</span><span data-line="871">                    <span class="bp">self</span><span class="o">.</span><span class="n">labeled</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span> <span class="o">+</span> <span class="n">residue_offset</span><span class="p">)</span>
+</span><span data-line="872">                <span class="k">else</span><span class="p">:</span>
+</span><span data-line="873">                    <span class="bp">self</span><span class="o">.</span><span class="n">labeled</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+</span><span data-line="874">
+</span><span data-line="875">        <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="876">            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="877">                <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="878">            <span class="c1"># Copy labels (they&#39;re lists, so we need to copy them)</span>
+</span><span data-line="879">            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
+</span><span data-line="880">                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="881">                    <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+</span><span data-line="882">                <span class="k">else</span><span class="p">:</span>
+</span><span data-line="883">                    <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span></div>
 
-</span><span data-line="852">
+</span><span data-line="884">
 <div class="viewcode-block" id="Residues.new_residues_from_subset">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Residues.new_residues_from_subset">[docs]</a>
-</span><span data-line="853">    <span class="k">def</span><span class="w"> </span><span class="nf">new_residues_from_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Residues&quot;</span><span class="p">:</span>
-</span><span data-line="854"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new residues collection from a subset of residue references.&quot;&quot;&quot;</span>
-</span><span data-line="855">        <span class="n">new_residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="p">()</span>
-</span><span data-line="856">
-</span><span data-line="857">        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span data-line="858">        <span class="k">for</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="n">residue_refs</span><span class="p">:</span>
-</span><span data-line="859">            <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
-</span><span data-line="860">                <span class="k">continue</span>
-</span><span data-line="861">
-</span><span data-line="862">            <span class="c1"># Get original residue</span>
-</span><span data-line="863">            <span class="n">original_residue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
-</span><span data-line="864">            <span class="n">residue_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-</span><span data-line="865">
-</span><span data-line="866">            <span class="c1"># Create new residue with renumbered atoms</span>
-</span><span data-line="867">            <span class="n">new_atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">offset</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">residue_len</span><span class="p">)]</span>
-</span><span data-line="868">            <span class="n">new_residues</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Residue</span><span class="p">(</span><span class="n">new_atoms</span><span class="p">))</span>
-</span><span data-line="869">
-</span><span data-line="870">            <span class="c1"># Copy metadata</span>
-</span><span data-line="871">            <span class="n">new_residues</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
-</span><span data-line="872">            <span class="n">new_residues</span><span class="o">.</span><span class="n">seq_ns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
-</span><span data-line="873">            <span class="n">new_residues</span><span class="o">.</span><span class="n">insertion_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
-</span><span data-line="874">
-</span><span data-line="875">            <span class="n">offset</span> <span class="o">+=</span> <span class="n">residue_len</span>
-</span><span data-line="876">
-</span><span data-line="877">        <span class="k">return</span> <span class="n">new_residues</span></div>
+</span><span data-line="885">    <span class="k">def</span><span class="w"> </span><span class="nf">new_residues_from_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Residues&quot;</span><span class="p">:</span>
+</span><span data-line="886"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new residues collection from a subset of residue references.&quot;&quot;&quot;</span>
+</span><span data-line="887">        <span class="n">new_residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="p">()</span>
+</span><span data-line="888">
+</span><span data-line="889">        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span data-line="890">        <span class="k">for</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="n">residue_refs</span><span class="p">:</span>
+</span><span data-line="891">            <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="892">                <span class="k">continue</span>
+</span><span data-line="893">
+</span><span data-line="894">            <span class="c1"># Get original residue</span>
+</span><span data-line="895">            <span class="n">original_residue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+</span><span data-line="896">            <span class="n">residue_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+</span><span data-line="897">
+</span><span data-line="898">            <span class="c1"># Create new residue with renumbered atoms</span>
+</span><span data-line="899">            <span class="n">new_atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">offset</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">residue_len</span><span class="p">)]</span>
+</span><span data-line="900">            <span class="n">new_residues</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Residue</span><span class="p">(</span><span class="n">new_atoms</span><span class="p">))</span>
+</span><span data-line="901">
+</span><span data-line="902">            <span class="c1"># Copy metadata</span>
+</span><span data-line="903">            <span class="n">new_residues</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqs</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+</span><span data-line="904">            <span class="n">new_residues</span><span class="o">.</span><span class="n">seq_ns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+</span><span data-line="905">            <span class="n">new_residues</span><span class="o">.</span><span class="n">insertion_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+</span><span data-line="906">
+</span><span data-line="907">            <span class="n">offset</span> <span class="o">+=</span> <span class="n">residue_len</span>
+</span><span data-line="908">
+</span><span data-line="909">        <span class="k">return</span> <span class="n">new_residues</span></div>
 </div>
 
-</span><span data-line="878">
-</span><span data-line="879">
+</span><span data-line="910">
+</span><span data-line="911">
 <div class="viewcode-block" id="Chain">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chain">[docs]</a>
-</span><span data-line="880"><span class="k">class</span><span class="w"> </span><span class="nc">Chain</span><span class="p">:</span>
-</span><span data-line="881"><span class="w">    </span><span class="sd">&quot;&quot;&quot;A chain containing a list of residues.&quot;&quot;&quot;</span>
-</span><span data-line="882">
-</span><span data-line="883">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-</span><span data-line="884">        <span class="c1"># Store as list of integers to match JSON serialization</span>
-</span><span data-line="885">        <span class="k">if</span> <span class="n">residues</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="886">            <span class="bp">self</span><span class="o">.</span><span class="n">residues</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="887">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="888">            <span class="bp">self</span><span class="o">.</span><span class="n">residues</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="889">                <span class="n">res</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">ResidueRef</span><span class="p">)</span> <span class="k">else</span> <span class="n">res</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">residues</span>
-</span><span data-line="890">            <span class="p">]</span>
-</span><span data-line="891">
-</span><span data-line="892">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span data-line="893">        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
-</span><span data-line="894">
-</span><span data-line="895">    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span data-line="896">        <span class="c1"># Return ResidueRef objects when iterating</span>
-</span><span data-line="897">        <span class="k">return</span> <span class="p">(</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
-</span><span data-line="898">
+</span><span data-line="912"><span class="k">class</span><span class="w"> </span><span class="nc">Chain</span><span class="p">:</span>
+</span><span data-line="913"><span class="w">    </span><span class="sd">&quot;&quot;&quot;A chain containing a list of residues.&quot;&quot;&quot;</span>
+</span><span data-line="914">
+</span><span data-line="915">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+</span><span data-line="916">        <span class="c1"># Store as list of integers to match JSON serialization</span>
+</span><span data-line="917">        <span class="k">if</span> <span class="n">residues</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="918">            <span class="bp">self</span><span class="o">.</span><span class="n">residues</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="919">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="920">            <span class="bp">self</span><span class="o">.</span><span class="n">residues</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="921">                <span class="n">res</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">ResidueRef</span><span class="p">)</span> <span class="k">else</span> <span class="n">res</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">residues</span>
+</span><span data-line="922">            <span class="p">]</span>
+</span><span data-line="923">
+</span><span data-line="924">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span data-line="925">        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
+</span><span data-line="926">
+</span><span data-line="927">    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="928">        <span class="c1"># Return ResidueRef objects when iterating</span>
+</span><span data-line="929">        <span class="k">return</span> <span class="p">(</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
+</span><span data-line="930">
 <div class="viewcode-block" id="Chain.contains">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chain.contains">[docs]</a>
-</span><span data-line="899">    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue</span><span class="p">:</span> <span class="n">ResidueRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="900">        <span class="k">return</span> <span class="n">residue</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span></div>
+</span><span data-line="931">    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue</span><span class="p">:</span> <span class="n">ResidueRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="932">        <span class="k">return</span> <span class="n">residue</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span></div>
 
-</span><span data-line="901">
-</span><span data-line="902">    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-</span><span data-line="903">        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Chain</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">residues</span>
-</span><span data-line="904">
-</span><span data-line="905">    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span data-line="906">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Chain(</span><span class="si">{</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+</span><span data-line="933">
+</span><span data-line="934">    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+</span><span data-line="935">        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Chain</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">residues</span>
+</span><span data-line="936">
+</span><span data-line="937">    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="938">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Chain(</span><span class="si">{</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
-</span><span data-line="907">
-</span><span data-line="908">
+</span><span data-line="939">
+</span><span data-line="940">
 <div class="viewcode-block" id="Chains">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chains">[docs]</a>
-</span><span data-line="909"><span class="nd">@dataclass</span>
-</span><span data-line="910"><span class="k">class</span><span class="w"> </span><span class="nc">Chains</span><span class="p">:</span>
-</span><span data-line="911"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Collection of chains with secondary structure information.&quot;&quot;&quot;</span>
-</span><span data-line="912">
-</span><span data-line="913">    <span class="c1"># List of chains</span>
-</span><span data-line="914">    <span class="n">chains</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Chain</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-</span><span data-line="915">
-</span><span data-line="916">    <span class="c1"># Optional alpha helix residues</span>
-</span><span data-line="917">    <span class="n">alpha_helices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="918">
-</span><span data-line="919">    <span class="c1"># Optional beta sheet residues</span>
-</span><span data-line="920">    <span class="n">beta_sheets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="921">
-</span><span data-line="922">    <span class="c1"># WARN: Deprecated</span>
-</span><span data-line="923">    <span class="n">labeled</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ChainRef</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="924">
-</span><span data-line="925">    <span class="c1"># WARN: Deprecated</span>
-</span><span data-line="926">    <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="927">
+</span><span data-line="941"><span class="nd">@dataclass</span>
+</span><span data-line="942"><span class="k">class</span><span class="w"> </span><span class="nc">Chains</span><span class="p">:</span>
+</span><span data-line="943"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Collection of chains with secondary structure information.&quot;&quot;&quot;</span>
+</span><span data-line="944">
+</span><span data-line="945">    <span class="c1"># List of chains</span>
+</span><span data-line="946">    <span class="n">chains</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Chain</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+</span><span data-line="947">
+</span><span data-line="948">    <span class="c1"># Optional alpha helix residues</span>
+</span><span data-line="949">    <span class="n">alpha_helices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="950">
+</span><span data-line="951">    <span class="c1"># Optional beta sheet residues</span>
+</span><span data-line="952">    <span class="n">beta_sheets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="953">
+</span><span data-line="954">    <span class="c1"># WARN: Deprecated</span>
+</span><span data-line="955">    <span class="n">labeled</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ChainRef</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="956">
+</span><span data-line="957">    <span class="c1"># WARN: Deprecated</span>
+</span><span data-line="958">    <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="959">
 <div class="viewcode-block" id="Chains.from_json">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chains.from_json">[docs]</a>
-</span><span data-line="928">    <span class="nd">@staticmethod</span>
-</span><span data-line="929">    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Chains&quot;</span><span class="p">:</span>
-</span><span data-line="930">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="931">            <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
-</span><span data-line="932">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
-</span><span data-line="933">            <span class="k">with</span> <span class="n">json_content</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="934">                <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</span><span data-line="935">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span data-line="936">            <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json_content</span>
-</span><span data-line="937">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="938">            <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="939">                <span class="s2">&quot;WARNING: Tried to load Chains from JSON but &quot;</span>
-</span><span data-line="940">                <span class="s2">&quot;it wasn&#39;t a str, Path, or dict!&quot;</span>
-</span><span data-line="941">            <span class="p">)</span>
-</span><span data-line="942">            <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json_content</span>
-</span><span data-line="943">
-</span><span data-line="944">        <span class="n">chains</span> <span class="o">=</span> <span class="n">Chains</span><span class="p">()</span>
-</span><span data-line="945">
-</span><span data-line="946">        <span class="n">chains</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]]</span>
-</span><span data-line="947">
-</span><span data-line="948">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;alpha_helices&quot;</span><span class="p">):</span>
-</span><span data-line="949">            <span class="n">chains</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="o">=</span> <span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;alpha_helices&quot;</span><span class="p">]]</span>
-</span><span data-line="950">
-</span><span data-line="951">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;beta_sheets&quot;</span><span class="p">):</span>
-</span><span data-line="952">            <span class="n">chains</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;beta_sheets&quot;</span><span class="p">]]</span>
-</span><span data-line="953">
-</span><span data-line="954">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labeled&quot;</span><span class="p">):</span>
-</span><span data-line="955">            <span class="n">chains</span><span class="o">.</span><span class="n">labeled</span> <span class="o">=</span> <span class="p">[</span><span class="n">ChainRef</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;labeled&quot;</span><span class="p">]]</span>
-</span><span data-line="956">
-</span><span data-line="957">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">):</span>
-</span><span data-line="958">            <span class="n">chains</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span>
-</span><span data-line="959">
-</span><span data-line="960">        <span class="k">return</span> <span class="n">chains</span></div>
+</span><span data-line="960">    <span class="nd">@staticmethod</span>
+</span><span data-line="961">    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Chains&quot;</span><span class="p">:</span>
+</span><span data-line="962">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="963">            <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
+</span><span data-line="964">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+</span><span data-line="965">            <span class="k">with</span> <span class="n">json_content</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="966">                <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="967">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span data-line="968">            <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json_content</span>
+</span><span data-line="969">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="970">            <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="971">                <span class="s2">&quot;WARNING: Tried to load Chains from JSON but &quot;</span>
+</span><span data-line="972">                <span class="s2">&quot;it wasn&#39;t a str, Path, or dict!&quot;</span>
+</span><span data-line="973">            <span class="p">)</span>
+</span><span data-line="974">            <span class="n">chains_data</span> <span class="o">=</span> <span class="n">json_content</span>
+</span><span data-line="975">
+</span><span data-line="976">        <span class="n">chains</span> <span class="o">=</span> <span class="n">Chains</span><span class="p">()</span>
+</span><span data-line="977">
+</span><span data-line="978">        <span class="n">chains</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]]</span>
+</span><span data-line="979">
+</span><span data-line="980">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;alpha_helices&quot;</span><span class="p">):</span>
+</span><span data-line="981">            <span class="n">chains</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="o">=</span> <span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;alpha_helices&quot;</span><span class="p">]]</span>
+</span><span data-line="982">
+</span><span data-line="983">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;beta_sheets&quot;</span><span class="p">):</span>
+</span><span data-line="984">            <span class="n">chains</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;beta_sheets&quot;</span><span class="p">]]</span>
+</span><span data-line="985">
+</span><span data-line="986">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labeled&quot;</span><span class="p">):</span>
+</span><span data-line="987">            <span class="n">chains</span><span class="o">.</span><span class="n">labeled</span> <span class="o">=</span> <span class="p">[</span><span class="n">ChainRef</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;labeled&quot;</span><span class="p">]]</span>
+</span><span data-line="988">
+</span><span data-line="989">        <span class="k">if</span> <span class="n">chains_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">):</span>
+</span><span data-line="990">            <span class="n">chains</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">chains_data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span>
+</span><span data-line="991">
+</span><span data-line="992">        <span class="k">return</span> <span class="n">chains</span></div>
 
-</span><span data-line="961">
+</span><span data-line="993">
 <div class="viewcode-block" id="Chains.check">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chains.check">[docs]</a>
-</span><span data-line="962">    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="963"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the chains structure.&quot;&quot;&quot;</span>
-</span><span data-line="964">        <span class="c1"># Basic validation - more complex checks could be added</span>
-</span><span data-line="965">        <span class="k">pass</span></div>
+</span><span data-line="994">    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="995"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the chains structure.&quot;&quot;&quot;</span>
+</span><span data-line="996">        <span class="c1"># Basic validation - more complex checks could be added</span>
+</span><span data-line="997">        <span class="k">pass</span></div>
 
-</span><span data-line="966">
+</span><span data-line="998">
 <div class="viewcode-block" id="Chains.extend">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chains.extend">[docs]</a>
-</span><span data-line="967">    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="968"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend this chains collection with another.&quot;&quot;&quot;</span>
-</span><span data-line="969">        <span class="c1"># Calculate residue offset</span>
-</span><span data-line="970">        <span class="n">residue_offset</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
-</span><span data-line="971">
-</span><span data-line="972">        <span class="c1"># Extend chains with renumbered residue references</span>
-</span><span data-line="973">        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
-</span><span data-line="974">            <span class="n">new_residue_refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref</span> <span class="o">+</span> <span class="n">residue_offset</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">]</span>
-</span><span data-line="975">            <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chain</span><span class="p">(</span><span class="n">new_residue_refs</span><span class="p">))</span>
-</span><span data-line="976">
-</span><span data-line="977">        <span class="c1"># Extend secondary structure info</span>
-</span><span data-line="978">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="979">            <span class="n">new_alpha_helices</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="980">                <span class="n">ref</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">residue_offset</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">alpha_helices</span>
-</span><span data-line="981">            <span class="p">]</span>
-</span><span data-line="982">            <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">new_alpha_helices</span><span class="p">])</span>
-</span><span data-line="983">
-</span><span data-line="984">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="985">            <span class="n">new_beta_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">residue_offset</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">]</span>
-</span><span data-line="986">            <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">new_beta_sheets</span><span class="p">])</span></div>
+</span><span data-line="999">    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1000"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend this chains collection with another.&quot;&quot;&quot;</span>
+</span><span data-line="1001">        <span class="c1"># Calculate residue offset</span>
+</span><span data-line="1002">        <span class="n">residue_offset</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
+</span><span data-line="1003">
+</span><span data-line="1004">        <span class="c1"># Extend chains with renumbered residue references</span>
+</span><span data-line="1005">        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
+</span><span data-line="1006">            <span class="n">new_residue_refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref</span> <span class="o">+</span> <span class="n">residue_offset</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">]</span>
+</span><span data-line="1007">            <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chain</span><span class="p">(</span><span class="n">new_residue_refs</span><span class="p">))</span>
+</span><span data-line="1008">
+</span><span data-line="1009">        <span class="c1"># Extend secondary structure info</span>
+</span><span data-line="1010">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1011">            <span class="n">new_alpha_helices</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="1012">                <span class="n">ref</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">residue_offset</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">alpha_helices</span>
+</span><span data-line="1013">            <span class="p">]</span>
+</span><span data-line="1014">            <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">new_alpha_helices</span><span class="p">])</span>
+</span><span data-line="1015">
+</span><span data-line="1016">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1017">            <span class="n">new_beta_sheets</span> <span class="o">=</span> <span class="p">[</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span> <span class="o">+</span> <span class="n">residue_offset</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">]</span>
+</span><span data-line="1018">            <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">ResidueRef</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">new_beta_sheets</span><span class="p">])</span></div>
 
-</span><span data-line="987">
+</span><span data-line="1019">
 <div class="viewcode-block" id="Chains.new_chains_from_residue_subset">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.Chains.new_chains_from_residue_subset">[docs]</a>
-</span><span data-line="988">    <span class="k">def</span><span class="w"> </span><span class="nf">new_chains_from_residue_subset</span><span class="p">(</span>
-</span><span data-line="989">        <span class="bp">self</span><span class="p">,</span> <span class="n">residue_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span>
-</span><span data-line="990">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Chains&quot;</span><span class="p">:</span>
-</span><span data-line="991"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new chains collection from a subset of residue references.&quot;&quot;&quot;</span>
-</span><span data-line="992">        <span class="n">new_chains</span> <span class="o">=</span> <span class="n">Chains</span><span class="p">()</span>
-</span><span data-line="993">
-</span><span data-line="994">        <span class="c1"># Create mapping from old residue indices to new ones</span>
-</span><span data-line="995">        <span class="n">old_to_new_residue</span> <span class="o">=</span> <span class="p">{</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ref</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">)}</span>
-</span><span data-line="996">
-</span><span data-line="997">        <span class="c1"># Group residues by their original chains</span>
-</span><span data-line="998">        <span class="n">chain_to_new_residues</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
-</span><span data-line="999">
-</span><span data-line="1000">        <span class="k">for</span> <span class="n">new_idx</span><span class="p">,</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">):</span>
-</span><span data-line="1001">            <span class="c1"># Find which chain this residue belonged to</span>
-</span><span data-line="1002">            <span class="k">for</span> <span class="n">chain_idx</span><span class="p">,</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">):</span>
-</span><span data-line="1003">                <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
-</span><span data-line="1004">                    <span class="n">chain_to_new_residues</span><span class="p">[</span><span class="n">chain_idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_idx</span><span class="p">)</span>
-</span><span data-line="1005">                    <span class="k">break</span>
-</span><span data-line="1006">
-</span><span data-line="1007">        <span class="c1"># Create new chains</span>
-</span><span data-line="1008">        <span class="k">for</span> <span class="n">chain_idx</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chain_to_new_residues</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-</span><span data-line="1009">            <span class="n">new_chain_residues</span> <span class="o">=</span> <span class="n">chain_to_new_residues</span><span class="p">[</span><span class="n">chain_idx</span><span class="p">]</span>
-</span><span data-line="1010">            <span class="c1"># Sort by original sequence order</span>
-</span><span data-line="1011">            <span class="n">original_chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">[</span><span class="n">chain_idx</span><span class="p">]</span>
-</span><span data-line="1012">            <span class="n">new_chain_residues</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
-</span><span data-line="1013">                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">new_idx</span><span class="p">:</span> <span class="n">original_chain</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
-</span><span data-line="1014">                    <span class="n">residue_refs</span><span class="p">[</span><span class="n">new_idx</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-</span><span data-line="1015">                <span class="p">)</span>
-</span><span data-line="1016">            <span class="p">)</span>
-</span><span data-line="1017">            <span class="n">new_chains</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chain</span><span class="p">(</span><span class="n">new_chain_residues</span><span class="p">))</span>
-</span><span data-line="1018">
-</span><span data-line="1019">        <span class="c1"># Filter secondary structure info</span>
-</span><span data-line="1020">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span><span class="p">:</span>
-</span><span data-line="1021">            <span class="n">new_alpha_helices</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="1022">            <span class="k">for</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span><span class="p">:</span>
-</span><span data-line="1023">                <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">old_to_new_residue</span><span class="p">:</span>
-</span><span data-line="1024">                    <span class="n">new_alpha_helices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span data-line="1025">                        <span class="n">ResidueRef</span><span class="p">(</span><span class="n">old_to_new_residue</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
-</span><span data-line="1026">                    <span class="p">)</span>
-</span><span data-line="1027">            <span class="n">new_chains</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="o">=</span> <span class="n">new_alpha_helices</span> <span class="k">if</span> <span class="n">new_alpha_helices</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="1020">    <span class="k">def</span><span class="w"> </span><span class="nf">new_chains_from_residue_subset</span><span class="p">(</span>
+</span><span data-line="1021">        <span class="bp">self</span><span class="p">,</span> <span class="n">residue_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">]</span>
+</span><span data-line="1022">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Chains&quot;</span><span class="p">:</span>
+</span><span data-line="1023"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new chains collection from a subset of residue references.&quot;&quot;&quot;</span>
+</span><span data-line="1024">        <span class="n">new_chains</span> <span class="o">=</span> <span class="n">Chains</span><span class="p">()</span>
+</span><span data-line="1025">
+</span><span data-line="1026">        <span class="c1"># Create mapping from old residue indices to new ones</span>
+</span><span data-line="1027">        <span class="n">old_to_new_residue</span> <span class="o">=</span> <span class="p">{</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ref</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">)}</span>
 </span><span data-line="1028">
-</span><span data-line="1029">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">:</span>
-</span><span data-line="1030">            <span class="n">new_beta_sheets</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="1031">            <span class="k">for</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">:</span>
-</span><span data-line="1032">                <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">old_to_new_residue</span><span class="p">:</span>
-</span><span data-line="1033">                    <span class="n">new_beta_sheets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span data-line="1034">                        <span class="n">ResidueRef</span><span class="p">(</span><span class="n">old_to_new_residue</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
-</span><span data-line="1035">                    <span class="p">)</span>
-</span><span data-line="1036">            <span class="n">new_chains</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="o">=</span> <span class="n">new_beta_sheets</span> <span class="k">if</span> <span class="n">new_beta_sheets</span> <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="1037">
-</span><span data-line="1038">        <span class="k">return</span> <span class="n">new_chains</span></div>
+</span><span data-line="1029">        <span class="c1"># Group residues by their original chains</span>
+</span><span data-line="1030">        <span class="n">chain_to_new_residues</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+</span><span data-line="1031">
+</span><span data-line="1032">        <span class="k">for</span> <span class="n">new_idx</span><span class="p">,</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">):</span>
+</span><span data-line="1033">            <span class="c1"># Find which chain this residue belonged to</span>
+</span><span data-line="1034">            <span class="k">for</span> <span class="n">chain_idx</span><span class="p">,</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">):</span>
+</span><span data-line="1035">                <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+</span><span data-line="1036">                    <span class="n">chain_to_new_residues</span><span class="p">[</span><span class="n">chain_idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_idx</span><span class="p">)</span>
+</span><span data-line="1037">                    <span class="k">break</span>
+</span><span data-line="1038">
+</span><span data-line="1039">        <span class="c1"># Create new chains</span>
+</span><span data-line="1040">        <span class="k">for</span> <span class="n">chain_idx</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chain_to_new_residues</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+</span><span data-line="1041">            <span class="n">new_chain_residues</span> <span class="o">=</span> <span class="n">chain_to_new_residues</span><span class="p">[</span><span class="n">chain_idx</span><span class="p">]</span>
+</span><span data-line="1042">            <span class="c1"># Sort by original sequence order</span>
+</span><span data-line="1043">            <span class="n">original_chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">[</span><span class="n">chain_idx</span><span class="p">]</span>
+</span><span data-line="1044">            <span class="n">new_chain_residues</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+</span><span data-line="1045">                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">new_idx</span><span class="p">:</span> <span class="n">original_chain</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+</span><span data-line="1046">                    <span class="n">residue_refs</span><span class="p">[</span><span class="n">new_idx</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+</span><span data-line="1047">                <span class="p">)</span>
+</span><span data-line="1048">            <span class="p">)</span>
+</span><span data-line="1049">            <span class="n">new_chains</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chain</span><span class="p">(</span><span class="n">new_chain_residues</span><span class="p">))</span>
+</span><span data-line="1050">
+</span><span data-line="1051">        <span class="c1"># Filter secondary structure info</span>
+</span><span data-line="1052">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span><span class="p">:</span>
+</span><span data-line="1053">            <span class="n">new_alpha_helices</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="1054">            <span class="k">for</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_helices</span><span class="p">:</span>
+</span><span data-line="1055">                <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">old_to_new_residue</span><span class="p">:</span>
+</span><span data-line="1056">                    <span class="n">new_alpha_helices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="1057">                        <span class="n">ResidueRef</span><span class="p">(</span><span class="n">old_to_new_residue</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+</span><span data-line="1058">                    <span class="p">)</span>
+</span><span data-line="1059">            <span class="n">new_chains</span><span class="o">.</span><span class="n">alpha_helices</span> <span class="o">=</span> <span class="n">new_alpha_helices</span> <span class="k">if</span> <span class="n">new_alpha_helices</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="1060">
+</span><span data-line="1061">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">:</span>
+</span><span data-line="1062">            <span class="n">new_beta_sheets</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="1063">            <span class="k">for</span> <span class="n">residue_ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">:</span>
+</span><span data-line="1064">                <span class="k">if</span> <span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="n">old_to_new_residue</span><span class="p">:</span>
+</span><span data-line="1065">                    <span class="n">new_beta_sheets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="1066">                        <span class="n">ResidueRef</span><span class="p">(</span><span class="n">old_to_new_residue</span><span class="p">[</span><span class="n">residue_ref</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+</span><span data-line="1067">                    <span class="p">)</span>
+</span><span data-line="1068">            <span class="n">new_chains</span><span class="o">.</span><span class="n">beta_sheets</span> <span class="o">=</span> <span class="n">new_beta_sheets</span> <span class="k">if</span> <span class="n">new_beta_sheets</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="1069">
+</span><span data-line="1070">        <span class="k">return</span> <span class="n">new_chains</span></div>
 </div>
 
-</span><span data-line="1039">
-</span><span data-line="1040">
+</span><span data-line="1071">
+</span><span data-line="1072">
 <div class="viewcode-block" id="TRC">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.TRC">[docs]</a>
-</span><span data-line="1041"><span class="nd">@dataclass</span>
-</span><span data-line="1042"><span class="k">class</span><span class="w"> </span><span class="nc">TRC</span><span class="p">:</span>
-</span><span data-line="1043"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="1044"><span class="sd">    Combined Topology, Residues, and Chains structure.</span>
-</span><span data-line="1045"><span class="sd">    This is the main structure for representing molecular systems on the Rush platform.</span>
-</span><span data-line="1046"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="1047">
-</span><span data-line="1048">    <span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Topology</span><span class="p">)</span>
-</span><span data-line="1049">    <span class="n">residues</span><span class="p">:</span> <span class="n">Residues</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Residues</span><span class="p">)</span>
-</span><span data-line="1050">    <span class="n">chains</span><span class="p">:</span> <span class="n">Chains</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Chains</span><span class="p">)</span>
-</span><span data-line="1051">
+</span><span data-line="1073"><span class="nd">@dataclass</span>
+</span><span data-line="1074"><span class="k">class</span><span class="w"> </span><span class="nc">TRC</span><span class="p">:</span>
+</span><span data-line="1075"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="1076"><span class="sd">    Combined Topology, Residues, and Chains structure.</span>
+</span><span data-line="1077"><span class="sd">    This is the main structure for representing molecular systems on the Rush platform.</span>
+</span><span data-line="1078"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="1079">
+</span><span data-line="1080">    <span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Topology</span><span class="p">)</span>
+</span><span data-line="1081">    <span class="n">residues</span><span class="p">:</span> <span class="n">Residues</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Residues</span><span class="p">)</span>
+</span><span data-line="1082">    <span class="n">chains</span><span class="p">:</span> <span class="n">Chains</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Chains</span><span class="p">)</span>
+</span><span data-line="1083">
 <div class="viewcode-block" id="TRC.check">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.TRC.check">[docs]</a>
-</span><span data-line="1052">    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="1053"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the entire TRC structure.&quot;&quot;&quot;</span>
-</span><span data-line="1054">        <span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
-</span><span data-line="1055">        <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
-</span><span data-line="1056">        <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
-</span><span data-line="1057">
-</span><span data-line="1058">        <span class="c1"># Check that all atoms are in residues</span>
-</span><span data-line="1059">        <span class="n">atom_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-</span><span data-line="1060">        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
-</span><span data-line="1061">            <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
-</span><span data-line="1062">                <span class="k">if</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">atom_set</span><span class="p">:</span>
-</span><span data-line="1063">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Atom </span><span class="si">{</span><span class="n">atom_idx</span><span class="si">}</span><span class="s2"> appears in multiple residues&quot;</span><span class="p">)</span>
-</span><span data-line="1064">                <span class="n">atom_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">)</span>
-</span><span data-line="1065">
-</span><span data-line="1066">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom_set</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
-</span><span data-line="1067">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not all atoms are assigned to residues&quot;</span><span class="p">)</span>
-</span><span data-line="1068">
-</span><span data-line="1069">        <span class="c1"># Check that all residues are in chains</span>
-</span><span data-line="1070">        <span class="n">residue_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-</span><span data-line="1071">        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
-</span><span data-line="1072">            <span class="k">for</span> <span class="n">residue_idx</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
-</span><span data-line="1073">                <span class="k">if</span> <span class="n">residue_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
-</span><span data-line="1074">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="1075">                        <span class="sa">f</span><span class="s2">&quot;Chain references invalid residue index: </span><span class="si">{</span><span class="n">residue_idx</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="1076">                    <span class="p">)</span>
-</span><span data-line="1077">                <span class="k">if</span> <span class="n">residue_idx</span> <span class="ow">in</span> <span class="n">residue_set</span><span class="p">:</span>
-</span><span data-line="1078">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="1079">                        <span class="sa">f</span><span class="s2">&quot;Residue </span><span class="si">{</span><span class="n">residue_idx</span><span class="si">}</span><span class="s2"> appears in multiple chains&quot;</span>
-</span><span data-line="1080">                    <span class="p">)</span>
-</span><span data-line="1081">                <span class="n">residue_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">residue_idx</span><span class="p">)</span>
-</span><span data-line="1082">
-</span><span data-line="1083">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residue_set</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
-</span><span data-line="1084">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not all residues are assigned to chains&quot;</span><span class="p">)</span></div>
+</span><span data-line="1084">    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1085"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the entire TRC structure.&quot;&quot;&quot;</span>
+</span><span data-line="1086">        <span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+</span><span data-line="1087">        <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+</span><span data-line="1088">        <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+</span><span data-line="1089">
+</span><span data-line="1090">        <span class="c1"># Check that all atoms are in residues</span>
+</span><span data-line="1091">        <span class="n">atom_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span data-line="1092">        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+</span><span data-line="1093">            <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+</span><span data-line="1094">                <span class="k">if</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">atom_set</span><span class="p">:</span>
+</span><span data-line="1095">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Atom </span><span class="si">{</span><span class="n">atom_idx</span><span class="si">}</span><span class="s2"> appears in multiple residues&quot;</span><span class="p">)</span>
+</span><span data-line="1096">                <span class="n">atom_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">)</span>
+</span><span data-line="1097">
+</span><span data-line="1098">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atom_set</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+</span><span data-line="1099">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not all atoms are assigned to residues&quot;</span><span class="p">)</span>
+</span><span data-line="1100">
+</span><span data-line="1101">        <span class="c1"># Check that all residues are in chains</span>
+</span><span data-line="1102">        <span class="n">residue_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span data-line="1103">        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
+</span><span data-line="1104">            <span class="k">for</span> <span class="n">residue_idx</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+</span><span data-line="1105">                <span class="k">if</span> <span class="n">residue_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="1106">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="1107">                        <span class="sa">f</span><span class="s2">&quot;Chain references invalid residue index: </span><span class="si">{</span><span class="n">residue_idx</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="1108">                    <span class="p">)</span>
+</span><span data-line="1109">                <span class="k">if</span> <span class="n">residue_idx</span> <span class="ow">in</span> <span class="n">residue_set</span><span class="p">:</span>
+</span><span data-line="1110">                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="1111">                        <span class="sa">f</span><span class="s2">&quot;Residue </span><span class="si">{</span><span class="n">residue_idx</span><span class="si">}</span><span class="s2"> appears in multiple chains&quot;</span>
+</span><span data-line="1112">                    <span class="p">)</span>
+</span><span data-line="1113">                <span class="n">residue_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">residue_idx</span><span class="p">)</span>
+</span><span data-line="1114">
+</span><span data-line="1115">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residue_set</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+</span><span data-line="1116">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not all residues are assigned to chains&quot;</span><span class="p">)</span></div>
 
-</span><span data-line="1085">
+</span><span data-line="1117">
 <div class="viewcode-block" id="TRC.extend">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.TRC.extend">[docs]</a>
-</span><span data-line="1086">    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="1087"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend this TRC with another TRC.&quot;&quot;&quot;</span>
-</span><span data-line="1088">        <span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">topology</span><span class="p">)</span>
-</span><span data-line="1089">        <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
-</span><span data-line="1090">        <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span></div>
+</span><span data-line="1118">    <span class="k">def</span><span class="w"> </span><span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1119"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend this TRC with another TRC.&quot;&quot;&quot;</span>
+</span><span data-line="1120">        <span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">topology</span><span class="p">)</span>
+</span><span data-line="1121">        <span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">residues</span><span class="p">)</span>
+</span><span data-line="1122">        <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span></div>
 
-</span><span data-line="1091">
+</span><span data-line="1123">
 <div class="viewcode-block" id="TRC.new_trc_from_residue_subset">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.TRC.new_trc_from_residue_subset">[docs]</a>
-</span><span data-line="1092">    <span class="k">def</span><span class="w"> </span><span class="nf">new_trc_from_residue_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;TRC&quot;</span><span class="p">:</span>
-</span><span data-line="1093"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new TRC from a subset of residue references.&quot;&quot;&quot;</span>
-</span><span data-line="1094">        <span class="c1"># Get residue subset</span>
-</span><span data-line="1095">        <span class="n">residue_subset</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">[</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">residue_refs</span><span class="p">]</span>
-</span><span data-line="1096">
-</span><span data-line="1097">        <span class="k">return</span> <span class="n">TRC</span><span class="p">(</span>
-</span><span data-line="1098">            <span class="n">topology</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">new_topology_from_residue_subset</span><span class="p">(</span><span class="n">residue_subset</span><span class="p">),</span>
-</span><span data-line="1099">            <span class="n">residues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">new_residues_from_subset</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">),</span>
-</span><span data-line="1100">            <span class="n">chains</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">new_chains_from_residue_subset</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">),</span>
-</span><span data-line="1101">        <span class="p">)</span></div>
+</span><span data-line="1124">    <span class="k">def</span><span class="w"> </span><span class="nf">new_trc_from_residue_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ResidueRef</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;TRC&quot;</span><span class="p">:</span>
+</span><span data-line="1125"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new TRC from a subset of residue references.&quot;&quot;&quot;</span>
+</span><span data-line="1126">        <span class="c1"># Get residue subset</span>
+</span><span data-line="1127">        <span class="n">residue_subset</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">[</span><span class="n">ref</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">residue_refs</span><span class="p">]</span>
+</span><span data-line="1128">
+</span><span data-line="1129">        <span class="k">return</span> <span class="n">TRC</span><span class="p">(</span>
+</span><span data-line="1130">            <span class="n">topology</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">new_topology_from_residue_subset</span><span class="p">(</span><span class="n">residue_subset</span><span class="p">),</span>
+</span><span data-line="1131">            <span class="n">residues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">new_residues_from_subset</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">),</span>
+</span><span data-line="1132">            <span class="n">chains</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">new_chains_from_residue_subset</span><span class="p">(</span><span class="n">residue_refs</span><span class="p">),</span>
+</span><span data-line="1133">        <span class="p">)</span></div>
 </div>
 
-</span><span data-line="1102">
-</span><span data-line="1103">
+</span><span data-line="1134">
+</span><span data-line="1135">
 <div class="viewcode-block" id="ResidueId">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.ResidueId">[docs]</a>
-</span><span data-line="1104"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="1105"><span class="k">class</span><span class="w"> </span><span class="nc">ResidueId</span><span class="p">:</span>
-</span><span data-line="1106"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Unique identifier for a residue.&quot;&quot;&quot;</span>
-</span><span data-line="1107">
-</span><span data-line="1108">    <span class="n">chain_id</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="1109">    <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span>
-</span><span data-line="1110">    <span class="n">insertion_code</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="1111">    <span class="n">residue_name</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="1112">
-</span><span data-line="1113">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="1114">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">chain_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_code</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+</span><span data-line="1136"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="1137"><span class="k">class</span><span class="w"> </span><span class="nc">ResidueId</span><span class="p">:</span>
+</span><span data-line="1138"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Unique identifier for a residue.&quot;&quot;&quot;</span>
+</span><span data-line="1139">
+</span><span data-line="1140">    <span class="n">chain_id</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="1141">    <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span>
+</span><span data-line="1142">    <span class="n">insertion_code</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="1143">    <span class="n">residue_name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="1144">
+</span><span data-line="1145">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="1146">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">chain_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">insertion_code</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">residue_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -1394,7 +1427,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with
@@ -1409,7 +1442,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

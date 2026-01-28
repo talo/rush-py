@@ -6,7 +6,8 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -141,14 +142,14 @@ data-aria-dark="Switch to auto color mode">
           <section id="module-rush.convert">
 <span id="rush-convert"></span><h1>rush.convert<a class="headerlink" href="#module-rush.convert" title="Link to this heading">¶</a></h1>
 <p>Conversion utilities for molecular structure file formats.</p>
-<p>This module provides functions to convert between PDB, mmCIF, and JSON formats.</p>
+<p>This module provides functions to convert between PDB, mmCIF, SDF, and QDX’s TRC JSON formats.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.convert.from_json">
 <span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/json.html#from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_json" title="Link to this definition">¶</a></dt>
 <dd><p>Load TRC structures from JSON.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>json_content</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>tuple</em><em>[</em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>dict</em><em> | </em><em>list</em><em>[</em><em>dict</em><em>]</em>) – JSON string content</p>
+<dd class="field-odd"><p><strong>json_content</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>tuple</em><em>[</em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>dict</em><em> | </em><em>list</em><em>[</em><em>dict</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>Path</em><em>, </em><em>...</em><em>]</em>) – JSON string content</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>TRC structure or list of TRC structures</p>
@@ -196,7 +197,7 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.convert.from_sdf">
 <span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/sdf.html#from_sdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_sdf" title="Link to this definition">¶</a></dt>
-<dd><p>Convert SDF content to TRC structures.</p>
+<dd><p>Parse SDF file contents into TRC structures.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>sdf_content</strong> (<em>str</em>) – SDF file content as string</p>
@@ -307,7 +308,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with
@@ -322,7 +323,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
       <script src="_static/shibuya.js?v=cac61aee"></script></body>
 </html>

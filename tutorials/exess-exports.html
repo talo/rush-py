@@ -6,7 +6,8 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -175,7 +176,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="example-descriptor-grids-for-electron-density-and-electrostatic-potential">
 <h2>Example: Descriptor Grids for Electron Density and Electrostatic Potential<a class="headerlink" href="#example-descriptor-grids-for-electron-density-and-electrostatic-potential" title="Link to this heading">¶</a></h2>
-<p>There are two exportable values that are “descriptors”: <code class="docutils literal notranslate"><span class="pre">density_descriptors</span></code> and <code class="docutils literal notranslate"><span class="pre">esp_descriptors</span></code>. (NOTE: <code class="docutils literal notranslate"><span class="pre">expanded_esp_descriptors</span></code> currently crashes with an internally determined OOM error, so please don’t enable it.) When these are used, the <code class="docutils literal notranslate"><span class="pre">descriptor_grid</span></code> keyword must also be set. This keyword defines a grid upon which the values are calculated, allowing the user to obtain values at the desired coarseness or fineness or even at exact points. For example, the following code will collect the electron density and electrostatic potential (ESP) descriptors at three points, <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code> <code class="docutils literal notranslate"><span class="pre">(1.0,</span> <span class="pre">1.0,</span> <span class="pre">1.0)</span></code>, and <code class="docutils literal notranslate"><span class="pre">(2.0,</span> <span class="pre">2.0,</span> <span class="pre">2.0)</span></code>:</p>
+<p>There are two exportable values that are “descriptors”: <code class="docutils literal notranslate"><span class="pre">density_descriptors</span></code> and <code class="docutils literal notranslate"><span class="pre">esp_descriptors</span></code>. (NOTE: <code class="docutils literal notranslate"><span class="pre">expanded_esp_descriptors</span></code> currently crashes with an internally determined OOM error, so please don’t enable it.) When these are used, the <code class="docutils literal notranslate"><span class="pre">descriptor_grid</span></code> keyword must also be set. This keyword defines a grid upon which the values are calculated, allowing the user to obtain values at the desired coarseness or fineness or even at exact points. For example, the following code will collect the electron density and electrostatic potential (ESP) descriptors in a rectangular region bounded by min points <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code> and <code class="docutils literal notranslate"><span class="pre">(1.0,</span> <span class="pre">1.0,</span> <span class="pre">1.0)</span></code>, and with spacing of 1 Angstrom in each dimension. So, our grid will be the eight vertices of a cube.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">RunSpec</span>
 </span><span data-line="3"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
@@ -186,56 +187,79 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="8">        <span class="n">export_esp_descriptors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span data-line="9">        <span class="n">descriptor_grid</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">RegularDescriptorGrid</span><span class="p">(</span>
 </span><span data-line="10">            <span class="nb">min</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
-</span><span data-line="11">            <span class="nb">max</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
-</span><span data-line="12">            <span class="n">spacing</span><span class="o">=</span><span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+</span><span data-line="11">            <span class="nb">max</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+</span><span data-line="12">            <span class="n">spacing</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
 </span><span data-line="13">        <span class="p">),</span>
 </span><span data-line="14">    <span class="p">),</span>
-</span><span data-line="15">    <span class="n">run_spec</span><span class="o">=</span><span class="n">RunSpec</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-</span><span data-line="16">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
-</span><span data-line="17">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Rush-Py Tutorial: EXESS Exports 2&quot;</span><span class="p">,</span>
-</span><span data-line="18">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;1kuw&quot;</span><span class="p">,</span> <span class="s2">&quot;electron density&quot;</span><span class="p">,</span> <span class="s2">&quot;ESP&quot;</span><span class="p">],</span>
-</span><span data-line="19">    <span class="p">),</span>
-</span><span data-line="20">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="21"><span class="p">)</span>
+</span><span data-line="15">    <span class="n">convert_hdf5_to_json</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="16">    <span class="n">run_spec</span><span class="o">=</span><span class="n">RunSpec</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+</span><span data-line="17">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
+</span><span data-line="18">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Rush-Py Tutorial: EXESS Exports 2&quot;</span><span class="p">,</span>
+</span><span data-line="19">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;tutorial&quot;</span><span class="p">,</span> <span class="s2">&quot;exess&quot;</span><span class="p">,</span> <span class="s2">&quot;electron density&quot;</span><span class="p">,</span> <span class="s2">&quot;ESP&quot;</span><span class="p">],</span>
+</span><span data-line="20">    <span class="p">),</span>
+</span><span data-line="21">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="22"><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values and should be avoided.</p>
-<p>Because the descriptor grid values aren’t particularly numerous, it may be more convenient to save them as JSON. This can be done by passing <code class="docutils literal notranslate"><span class="pre">to_json=True</span></code> to <code class="docutils literal notranslate"><span class="pre">exess.save_energy_outputs</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">files</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">to_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<p>Because the descriptor grid values aren’t particularly numerous, it may be more convenient to save them as JSON. This can be done by passing <code class="docutils literal notranslate"><span class="pre">convert_hdf5_to_json=True</span></code> to exess.energy as shown above and then saving the output using <code class="docutils literal notranslate"><span class="pre">exess.save_energy_outputs</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">files</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p>After opening the saved JSON file, one might see output as follows:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">  </span><span class="nt">&quot;density_descriptors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="3"><span class="w">    </span><span class="mf">0.019335589097924273</span><span class="p">,</span>
-</span><span data-line="4"><span class="w">    </span><span class="mf">0.03332198726559439</span><span class="p">,</span>
-</span><span data-line="5"><span class="w">    </span><span class="mf">0.0001262822899485241</span>
-</span><span data-line="6"><span class="w">  </span><span class="p">],</span>
-</span><span data-line="7"><span class="w">  </span><span class="nt">&quot;esp_descriptors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="8"><span class="w">    </span><span class="mf">-14.73877477683919</span><span class="p">,</span>
-</span><span data-line="9"><span class="w">    </span><span class="mf">-11.399947425592524</span><span class="p">,</span>
-</span><span data-line="10"><span class="w">    </span><span class="mf">-6.359468034195182</span>
+</span><span data-line="3"><span class="w">    </span><span class="mf">0.019335589097923125</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">    </span><span class="mf">0.006869915843364948</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">    </span><span class="mf">0.0005634210968506005</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">    </span><span class="mf">0.2633564534732077</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">    </span><span class="mf">0.03143799260181341</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">    </span><span class="mf">0.0012500707523984667</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">    </span><span class="mf">0.05346373829046323</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">    </span><span class="mf">0.010633021816107797</span><span class="p">,</span>
 </span><span data-line="11"><span class="w">  </span><span class="p">],</span>
-</span><span data-line="12"><span class="w">  </span><span class="nt">&quot;descriptor_grid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="13"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="p">],</span>
-</span><span data-line="14"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="p">],</span>
-</span><span data-line="15"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="p">]</span>
-</span><span data-line="16"><span class="w">  </span><span class="p">],</span>
-</span><span data-line="17"><span class="w">  </span><span class="nt">&quot;descriptor_grid_weights&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="18"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
-</span><span data-line="19"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
-</span><span data-line="20"><span class="w">    </span><span class="mf">1.0</span>
-</span><span data-line="21"><span class="w">  </span><span class="p">]</span>
-</span><span data-line="22"><span class="p">}</span>
+</span><span data-line="12"><span class="w">  </span><span class="nt">&quot;esp_descriptors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="13"><span class="w">    </span><span class="mf">-14.738774776839207</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">    </span><span class="mf">-12.25448503958538</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">    </span><span class="mf">-8.832058509543936</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">    </span><span class="mf">-15.686691210669682</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">    </span><span class="mf">-12.001374325303633</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">    </span><span class="mf">-8.482681332376423</span><span class="p">,</span>
+</span><span data-line="19"><span class="w">    </span><span class="mf">-11.792483297622633</span><span class="p">,</span>
+</span><span data-line="20"><span class="w">    </span><span class="mf">-9.824425520888148</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="22">
+</span><span data-line="23"><span class="w">  </span><span class="nt">&quot;descriptor_grid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="24"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="p">],</span>
+</span><span data-line="25"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="p">],</span>
+</span><span data-line="26"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="p">],</span>
+</span><span data-line="27"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="p">],</span>
+</span><span data-line="28"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="p">]</span>
+</span><span data-line="29"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="p">]</span>
+</span><span data-line="30"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="p">]</span>
+</span><span data-line="31"><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="p">]</span>
+</span><span data-line="32"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="33"><span class="w">  </span><span class="nt">&quot;descriptor_grid_weights&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="34"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="35"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="36"><span class="w">    </span><span class="mf">1.0</span>
+</span><span data-line="37"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="38"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="39"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="40"><span class="w">    </span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="41"><span class="w">    </span><span class="mf">1.0</span>
+</span><span data-line="42"><span class="w">  </span><span class="p">]</span>
+</span><span data-line="43"><span class="p">}</span>
 </span></pre></div>
 </div>
-<p>The data for the exported values are present, and the descriptor grid coordinates are given as well (transposed, so the first array contains the x coordinates, the second the y coordinates, and the third the z coordinates). Descriptor grid weights are also present. TODO: Learn when these weights are something other than 1.0, and explain how to create these types of grids, how they behave, and what they are useful for.</p>
+<p>The data for the exported values are present, and the descriptor grid coordinates are given as well. Descriptor grid weights are also present. TODO: Learn when these weights are something other than 1.0, and explain how to create these types of grids, how they behave, and what they are useful for.</p>
 <p>This will convert the HDF5 file to JSON and save it to the workspace with its filename as the path of the original HDF5 output, same as if the HDF5 file itself had been saved, but with the <code class="docutils literal notranslate"><span class="pre">.json</span></code> extension instead, as expected.</p>
-<p>Note that in the case of fragmentation, the data are stored on a per-nmer basis, and if both descriptors are requested, they will be stored together at the innermost level of nesting in the HDF5 file. When exported to JSON, the different descriptors are stored in entirely separate outer keys in the JSON file, making it easy to work with just one or the other. Otherwise, the structure of the HDF5 file is preserved in the JSON file.</p>
+<p>Note that in the case of fragmentation, the data are stored on a per-nmer basis, and if both descriptors are requested, they will be stored together at the innermost level of nesting in the HDF5 file. When converted to JSON, the different descriptors are stored in entirely separate outer keys in the JSON file, making it easy to work with just one or the other. Otherwise, the structure of the HDF5 file is preserved in the JSON file.</p>
 <section id="other-types-of-descriptor-grids">
 <h3>Other Types of Descriptor Grids<a class="headerlink" href="#other-types-of-descriptor-grids" title="Link to this heading">¶</a></h3>
-<p>In addition to <code class="docutils literal notranslate"><span class="pre">CustomDescriptorGrid</span></code>, which can be constructed by passing a single list with the x, y, and z coordinates of each point in the grid listed sequentially, i.e. <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">z1,</span> <span class="pre">x2,</span> <span class="pre">y2,</span> <span class="pre">z2,</span> <span class="pre">...]</span></code>, a descriptor grid can be constructed via <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid</span></code> or <code class="docutils literal notranslate"><span class="pre">DescriptorGrid</span></code>.</p>
-<p>There are two valid values of <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid</span></code>: <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid(&quot;SG1&quot;)</span></code> and <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid(&quot;SG2&quot;)</span></code>. TODO: Learn these grids’ behavior and document them. They seem to be very fine grids and construct many points.</p>
+<p>In addition to the <code class="docutils literal notranslate"><span class="pre">RectangularDescriptorGrid</span></code> shown in the example, a descriptor grid can also be constructed via <code class="docutils literal notranslate"><span class="pre">CustomDescriptorGrid</span></code>, <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid</span></code> or <code class="docutils literal notranslate"><span class="pre">DescriptorGrid</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CustomDescriptorGrid</span></code> can be constructed by passing a single list with the x, y, and z coordinates of each point in the grid listed sequentially, i.e. <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">z1,</span> <span class="pre">x2,</span> <span class="pre">y2,</span> <span class="pre">z2,</span> <span class="pre">...]</span></code>. Only small (i.e., less than hundreds) numbers of points should be specified using this method.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid</span></code> takes a single string keyword. Valud values are <code class="docutils literal notranslate"><span class="pre">&quot;FINE&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;ULTRAFINE&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;SUPERFINE&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;TREUTLER_GM3&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;TREUTLER_GM5&quot;</span></code>. These are radial grids centered around the atom locations. <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid(&quot;ULTRAFINE&quot;)</span></code> can serve as a good baseline if a radial grid is desired.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">DescriptorGrid</span></code> class takes three arguments to its constructor: <code class="docutils literal notranslate"><span class="pre">points_per_shell</span></code> (an int), <code class="docutils literal notranslate"><span class="pre">order</span></code> (must be either <code class="docutils literal notranslate"><span class="pre">&quot;One&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;Two&quot;</span></code>), and <code class="docutils literal notranslate"><span class="pre">scale</span></code> (a float). TODO: Learn how the grid is constructed from this and document it.</p>
 <p>TODO: The EXESS validation tests exemplify other ways of constructing descriptor grids; support them and document them as well.</p>
 </section>
@@ -268,7 +292,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with
@@ -283,7 +307,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>
