@@ -2,6 +2,26 @@
 
 This page covers both the EXESS executable and the rush-py interface. The input format and keyword reference are documented in the input and keyword pages.
 
+## Quick start (CLI vs rush-py)
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: bash
+
+         runexess input.json -g 1
+
+   .. tab-item:: rush-py
+
+      .. code-block:: python
+
+         from rush import exess
+
+         exess.energy("input.json", collect=True)
+```
+
 ## CLI (EXESS executable)
 
 ### Environment and installation

@@ -2,433 +2,487 @@
 
 Keywords live under the top-level `keywords` object. The groups recognized by the EXESS/libqdx schema are:
 
-`scf`, `ks_dft`, `rtat`, `frag`, `boundary`, `debug`, `export`, `guess`, `log`, `dynamics`, `integrals`, `force_field`, `optimization`, `gradient`, `hessian`, `machine_learning`, `qmmm`, `regions`.
+`scf`, `frag`, `ks_dft`, `export`, `regions`, `optimization`, `qmmm`, `gradient`, `guess`, `integrals`, `rtat`, `hessian`, `dynamics`, `boundary`, `machine_learning`, `force_field`, `log`, `debug`.
 
-Defaults in the tables below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.
+Defaults in the parameter listings below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.
 
 The upstream manual describes `keywords` as the main set of controls for the calculation. In practice, you will spend most of your time in `scf`, `frag`, `ks_dft`, and the driver-specific groups (`optimization`, `dynamics`, `qmmm`).
 
-## scf
+Icon key:
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `max_iters` | int | 50 | Max number of SCF iterations. |
-| `max_diis_history_length` | int | 8 | Max size of DIIS window. |
-| `batch_size` | int | 2560 | Shell-pair batches per bin. |
-| `convergence_metric` | string | `DIIS` | `DIIS`, `Energy`, or `Density`. |
-| `convergence_threshold` | float | 1e-6 | SCF convergence threshold. |
-| `density_threshold` | float | 1e-10 | Density screening threshold. |
-| `gradient_screening_threshold` | float | 1e-10 | Gradient screening threshold. |
-| `bf_cutoff_threshold` | float | `density_threshold` | Basis function cutoff threshold (DFT/shell pairs). |
-| `density_basis_set_projection_fallback_enabled` | bool | auto (fragmented) | STO-3G projection fallback. |
-| `use_ri` | bool | false | Deprecated RI toggle. |
-| `allow_crap_scf` | bool | false | Expert flag. |
-| `store_ri_b_on_host` | bool | false | Store RI B on host. |
-| `compress_ri_b` | bool | false | Compress RI B matrix. |
-| `homo_lumo_guess_rotation_angle` | float | auto (0 or 45) | HOMO/LUMO rotation (degrees). |
-| `fock_build_type` | string | `HGP` | `HGP`, `UM09`, or `RI`. |
-| `exchange_screening_threshold` | float | 1e-5 | Exchange screening threshold. |
-| `group_shared_exponents` | bool | false | Group shared basis exponents (UM09 only). |
+```{eval-rst}
+.. raw:: html
 
-Example:
-
-```json
-"scf": {
-  "max_iters": 40,
-  "max_diis_history_length": 12,
-  "convergence_threshold": 1e-6,
-  "density_threshold": 1e-10,
-  "density_basis_set_projection_fallback_enabled": false,
-  "fock_build_type": "RI",
-  "compress_ri_b": false,
-  "convergence_metric": "DIIS"
-}
+   <div class="exess-icon-key">
+     <span class="exess-icon-key__item"><span class="param-note param-note--info" aria-hidden="true"></span> Tip</span>
+     <span class="exess-icon-key__item"><span class="param-note param-note--expert" aria-hidden="true"></span> Expert</span>
+     <span class="exess-icon-key__item"><span class="param-note param-note--experimental" aria-hidden="true"></span> Experimental</span>
+     <span class="exess-icon-key__item"><span class="param-note param-note--broken" aria-hidden="true"></span> Known issues</span>
+   </div>
 ```
 
-Details:
+## Core Electronic-Structure Keywords
 
-- `batch_size`: Use multiples of 128; do not go below 128. Upstream docs cite 10.1021/acs.jctc.0c00768, 10.1021/acs.jctc.1c00720, and 10.1080/00268976.2022.2112987 for details on the shell-pair batch bin container.
-- `convergence_metric`: `Energy`, `Density`, or `DIIS`.
-- `convergence_threshold`: Suggested values from upstream docs:
-  - 1e-6 for non-fragmented RHF + RI-MP2 with `Density`/`DIIS`.
-  - 1e-8 for non-fragmented RHF + RI-MP2 with `Energy`.
-  - 1e-6 for dimer-level RHF + RI-MP2.
-  - 1e-8 for trimer/tetramer-level calculations with `DIIS`.
-  - 1e-10 for large tetramer-level calculations with `DIIS`.
-- `density_threshold`: Lower values speed up SCF with potential accuracy loss. Upstream guidance suggests exploring 1e-8 to 1e-12 and validating accuracy; too-large values can lead to NaNs. Increasing to 1e-11 or 1e-12 will slow SCF but can improve accuracy for higher-order fragmentation (e.g., tetramers) and produce crisper MP2 orbitals. Validate results against the default before adopting more aggressive thresholds.
-- `gradient_screening_threshold`: Additional screening for gradient-related integrals.
-- `bf_cutoff_threshold`: If omitted, EXESS uses `density_threshold`.
-- `density_basis_set_projection_fallback_enabled`: If omitted, EXESS enables fallback for fragmented calculations and disables it for full-system calculations. When triggered, EXESS reruns SCF in STO-3G and projects the density into the target basis.
-- `fock_build_type`:
-  - `HGP`: Head-Gordon-Pople algorithm, optimized for dense systems.
-  - `UM09`: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
-  - `RI`: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
-- `use_ri`: Deprecated in EXESS (scheduled for removal in 5.0.0); use `fock_build_type = "RI"` instead. If set, EXESS forces the Fock build type to `RI`.
-- `homo_lumo_guess_rotation_angle`: Rotation in degrees (0-180) for unrestricted symmetry breaking. If omitted, EXESS uses 45 degrees for unrestricted singlets and 0 otherwise.
-- `fock_build_type` guidance from upstream docs:
-  - `HGP` is tuned for dense systems where screening is less important (e.g., compact biomolecules).
-  - `UM09` is tuned for screening-heavy systems (e.g., long chains) and can scale better on large systems.
-  - `RI` stores integrals, can be faster on small systems, but memory usage rises substantially; it requires an auxiliary basis.
-- `store_ri_b_on_host`: Use this if GPU memory is insufficient for RI; this is slower but can still outperform non-RI for some systems.
-- `compress_ri_b`: Experimental compression for RI-HF; upstream docs warn it may misbehave.
-- `group_shared_exponents`: Expert control used with UM09 and shared-exponent basis sets (e.g., cc-pVDZ).
-- `exchange_screening_threshold` and `allow_crap_scf` are expert controls; adjust only with validation.
-- `fock_build_type` includes improved screening for large systems (>3000 basis functions); see https://arxiv.org/abs/2407.21445 for details.
+### scf
 
-## frag
+```{eval-rst}
+.. tab-set::
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `level` | string | required | `Monomer` .. `Octamer`. |
-| `cutoffs` | object | unset | Distance cutoffs in Angstroms. |
-| `cutoff_type` | string | `ClosestPair` | `Centroid` or `ClosestPair`. |
-| `distance_metric` | string | `Max` | `Max`, `Average`, `Min`, `Ryan`. |
-| `reference_fragment` | int | unset | Reference fragment for interaction energies. |
-| `included_fragments` | array[int] | unset | Subset of fragments to include. |
-| `enable_speed` | bool | false | Experimental queue optimization. |
+   .. tab-item:: EXESS CLI
 
-Notes:
+      .. code-block:: json
+         :caption: config.json
 
-- `cutoffs` can include `dimer`, `trimer`, `tetramer`, `pentamer`, `hexamer`, `heptamer`, `octamer`.
-- Distances are in Angstroms and should follow `dimer > trimer > tetramer` when using higher orders.
-- If `cutoffs` is omitted, the calculation proceeds without distance filtering (all n-mers up to `level`); be cautious with fragment counts to avoid excessive compute.
-- Truncation counts scale combinatorially: dimers `n(n-1)/2`, trimers `n(n-1)(n-2)/6`, tetramers `n(n-1)(n-2)(n-3)/24`.
-- `reference_fragment` enables lattice/interaction energies by summing n-mer corrections that include the reference fragment. Negative values indicate binding; positive values indicate repulsion under the usual convention.
-- `included_fragments` restricts the fragment set and treats them as an independent system.
-- `cutoff_type`:
-  - `Centroid` compares fragment centroids.
-  - `ClosestPair` uses the minimal inter-fragment atom distance (more accurate and generally preferred).
-- `distance_metric` controls how higher-order distances are computed from pair distances (`Max`, `Min`, `Average`, or `Ryan`).
-- `enable_speed` is an experimental queue optimization intended for AIMD workflows (upstream docs label this "broom broom").
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "scf": {
+               "max_iters": 40,
+               "max_diis_history_length": 12,
+               "convergence_threshold": 1e-8,
+               "density_threshold": 1e-11,
+               "fock_build_type": "RI"
+             }
+           },
+           "schema_version": "0.2.0"
+         }
 
-Example:
+   .. tab-item:: Python
 
-```json
-"frag": {
-  "cutoff_type": "Centroid",
-  "distance_metric": "Max",
-  "level": "Tetramer",
-  "enable_speed": false,
-  "cutoffs": {
-    "dimer": 1000,
-    "trimer": 20,
-    "tetramer": 15
-  },
-  "included_fragments": [0, 1, 2, 3, 4]
-}
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import SCFKeywords, energy
+
+         energy(
+             topology_path="molecule_t.json",
+             scf_keywords=SCFKeywords(
+                 max_iters=40,
+                 max_diis_history_length=12,
+                 convergence_threshold=1e-8,
+                 density_threshold=1e-11,
+                 fock_build_type="RI",
+             ),
+         )
 ```
 
-Enum aliases accepted by libqdx (case variants shown as defined in the parser):
+```{eval-rst}
+.. exess-params::
 
-- `level`: `MONOMER`, `Monomer`, `monomer`; `DIMMER`/`Dimer`/`dimer`; `TRIMER`/`Trimer`/`trimer`; `TETRAMER`/`Tetramer`/`tetramer`; `PENTAMER`/`Pentamer`/`pentamer`; `HEXAMER`/`Hexamer`/`hexamer`; `HEPTAMER`/`Heptamer`/`heptamer`; `OCTAMER`/`Octamer`/`octamer`.
-- `cutoff_type`: `CENTROID`, `Centroid`, `centroid`; `CLOSEST_PAIR`, `ClosestPair`, `closest_pair`.
-- `distance_metric`: `MAX`, `Max`, `max`; `AVERAGE`, `Average`, `average`; `MIN`, `Min`, `min`.
+   .. exess-param:: max_iters
+      :type: int
+      :default: 50
+      :brief: Max number of SCF iterations.
 
-## guess
+   .. exess-param:: max_diis_history_length
+      :type: int
+      :default: 8
+      :brief: Max size of DIIS window.
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `external_initial_density_path` | string | unset | HDF5 density guess path. |
-| `bsp` | bool | false | Basis set projection bootstrap. |
-| `bsp_basis` | string | empty | Lower-resolution basis set for BSP. |
-| `bsp_scf_keywords` | object | unset | SCF keywords for BSP. |
-| `hcore` | bool | false | Use hcore initial guess. |
-| `smd` | bool | auto (fragmented non-RI) | Superposition of monomer densities. |
-| `ssfd` | bool | false | Subfragment density guess (experimental). |
-| `ssfd_target_size` | int | 30 | Target atoms per subfragment. |
-| `ssfd_only_converge_in_bsp_basis` | bool | true | Only converge subfragments in BSP basis. |
-| `ssfd_scf_keywords` | object | unset | SCF keywords for subfragment runs. |
+   .. exess-param:: batch_size
+      :type: int
+      :default: 2560
+      :brief: Shell-pair batches per bin; use multiples of 128.
+      :note: info
 
-`external_initial_density_path` must reference an HDF5 file with a `density` dataset at root for RHF, or `alpha/density` and `beta/density` for UHF. Guesses are expected to be stored as flattened lower-triangular density matrices. External guesses are not supported for fragmented calculations, and EXESS warns that guesses from other codes may be incompatible due to basis ordering and normalization.
+      Do not go below 128. Upstream docs cite 10.1021/acs.jctc.0c00768, 10.1021/acs.jctc.1c00720, and 10.1080/00268976.2022.2112987 for details on the shell-pair batch bin container.
 
-If `smd` is omitted, EXESS enables it for fragmented calculations that are not using RI, and disables it otherwise.
+   .. exess-param:: convergence_metric
+      :type: string
+      :default: DIIS
+      :brief: Convergence metric (``DIIS``, ``Energy``, ``Density``).
 
-If `bsp_scf_keywords` or `ssfd_scf_keywords` are omitted, EXESS reuses the base SCF keywords.
+   .. exess-param:: convergence_threshold
+      :type: float
+      :default: 1e-6
+      :brief: SCF convergence threshold; tighten for higher-order fragmentation or tighter energy targets.
+      :note: info
 
-Additional notes from upstream docs:
+      Suggested values from upstream docs:
 
-- `bsp` (basis set projection) computes a lower-resolution SCF and projects to the target basis; it is off by default and requires `bsp_basis`.
-- `ssfd` is an experimental subfragment guess; `ssfd_target_size` controls subfragment size (default 30).
-- `ssfd_only_converge_in_bsp_basis` keeps subfragments unconverged in the primary basis and only projects from the bootstrap basis.
+      - ``1e-6`` for non-fragmented RHF + RI-MP2 with ``Density``/``DIIS``.
+      - ``1e-8`` for non-fragmented RHF + RI-MP2 with ``Energy``.
+      - ``1e-6`` for dimer-level RHF + RI-MP2.
+      - ``1e-8`` for trimer/tetramer-level calculations with ``DIIS``.
+      - ``1e-10`` for large tetramer-level calculations with ``DIIS``.
 
-## optimization
+   .. exess-param:: density_threshold
+      :type: float
+      :default: 1e-10
+      :brief: Density screening threshold; affects SCF cost and accuracy.
+      :note: info
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `max_iters` | int | required | Max optimization iterations. |
-| `convergence_criteria` | object | defaults | Metric + thresholds. |
-| `optimizer_reset_interval` | int | unset | Reset coordinate system and hessian every N iterations. |
-| `coordinate_system` | string | `DelocalisedInternal` | `Cartesian`, `NaturalInternal`, `DelocalisedInternal`. |
-| `constraints` | array[array[int]] | `[]` | Constraints on bonds/angles/dihedrals. |
-| `hessian_guess` | string | depends | `Identity`, `ScaledIdentity`, `Schlegel`, `Lindh`. |
-| `algorithm` | string | `EigenvectorFollowing` | `EigenvectorFollowing`, `TrustRegionAugmentedHessian`, `LBFGS`. |
-| `lbfgs_keywords` | object | unset | LBFGS parameters. |
-| `trust_region` | object | defaults | Trust-region parameters. |
-| `frozen_distance_slippage_tolerance_angstroms` | float | 1e-8 | Slippage tolerance (distance). |
-| `frozen_angle_slippage_tolerance_degrees` | float | 1e-8 | Slippage tolerance (angle). |
-| `debug_xyz` | bool | false | Debug XYZ output. |
-| `output_trc` | string | unset | Output TRC path. |
-| `fixed_atoms` | array[int] | unset | Fixed atoms. |
-| `free_atoms` | array[int] | unset | Free atoms. |
-| `fixed_fragments` | array[int] | unset | Fixed fragments. |
-| `free_fragments` | array[int] | unset | Free fragments. |
-| `fix_heavy` | bool | false | Fix heavy atoms. |
+      Lower values speed up SCF with potential accuracy loss. Upstream guidance suggests exploring ``1e-8`` to ``1e-12`` and validating accuracy; too-large values can lead to NaNs.
 
-Defaults for `convergence_criteria`:
+      Increasing to ``1e-11`` or ``1e-12`` will slow SCF but can improve accuracy for higher-order fragmentation (e.g., tetramers) and produce crisper MP2 orbitals. Validate results against the default before adopting more aggressive thresholds.
 
-- `metric`: `Baker`
-- `gradient_threshold`: `3e-4`
-- `delta_energy_threshold`: `1e-6`
-- `step_component_threshold`: `3e-4`
+   .. exess-param:: gradient_screening_threshold
+      :type: float
+      :default: 1e-10
+      :brief: Additional screening for gradient-related integrals.
 
-Defaults for `trust_region` (only used with `TrustRegionAugmentedHessian`):
+   .. exess-param:: bf_cutoff_threshold
+      :type: float
+      :default: density_threshold
+      :brief: Basis-function cutoff threshold (defaults to ``density_threshold`` if omitted).
 
-- `initial_radius`: 0.4
-- `max_radius`: 1e5
-- `min_radius`: 1e-5
-- `increase_factor`: 1.2
-- `decrease_factor`: 0.7
-- `constrict_factor`: 0.1
-- `increase_threshold`: 0.75
-- `decrease_threshold`: 0.25
-- `rejection_threshold`: 0.0
+   .. exess-param:: density_basis_set_projection_fallback_enabled
+      :type: bool
+      :default: auto (fragmented)
+      :brief: STO-3G projection fallback toggle.
 
-`hessian_guess` defaults to `Identity` for Cartesian coordinates, otherwise `ScaledIdentity`.
+      If omitted, EXESS enables fallback for fragmented calculations and disables it for full-system calculations.
 
-`lbfgs_keywords` defaults (only used with `LBFGS`):
+      When triggered, EXESS reruns SCF in STO-3G and projects the density into the target basis.
 
-- `linesearch`: `BacktrackingStrongWolfe`
-- `n_corrections`: 6
-- `epsilon`: 1e-5
-- `max_linesearch`: 40
-- `gtol`: 0.9
+   .. exess-param:: allow_crap_scf
+      :type: bool
+      :default: false
+      :brief: Expert flag to allow lower-quality SCF.
+      :note: expert
 
-Guidance from upstream docs and libqdx comments:
+      Expert control; adjust only with validation and verify accuracy before production use.
 
-- `convergence_criteria.metric`:
-  - `Baker`: max gradient component must be within threshold and either delta energy or step component must be within their thresholds.
-  - `GradientOnly`: only the gradient threshold is enforced.
-- `convergence_criteria` units: `gradient_threshold` (Eh/a0), `delta_energy_threshold` (Eh), `step_component_threshold` (a0).
-- `coordinate_system`: `DelocalisedInternal` is the default and strongly recommended; `Cartesian` and `NaturalInternal` are available.
-- Machine learning optimizations require `coordinate_system="Cartesian"`.
-- `hessian_guess`: identity, scaled identity (default and recommended), Schlegel, and Lindh. Upstream docs caution that the non-default models are not recommended for general use.
-- `algorithm`: `EigenvectorFollowing` is recommended; `TrustRegionAugmentedHessian` is available but not recommended for most users.
-- For machine learning optimizations, `algorithm="LBFGS"` is strongly recommended.
-- If `algorithm="LBFGS"`, `lbfgs_keywords` must be provided (an empty object `{}` is acceptable).
-- `optimizer_reset_interval` is an expert feature: every N iterations EXESS will regenerate the coordinate system and reset the Hessian; if omitted, it never resets.
-- `constraints` support constrained bond lengths, angles, and dihedrals (lists of atom indices).
-- `frozen_distance_slippage_tolerance_angstroms` and `frozen_angle_slippage_tolerance_degrees` control expected slippage in frozen delocalized coordinates.
-- Fragmentation (`frag`) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact.
+   .. exess-param:: store_ri_b_on_host
+      :type: bool
+      :default: false
+      :brief: Store RI B matrix on host memory.
 
-Example:
+      Use this if GPU memory is insufficient for RI; this is slower but can still outperform non-RI for some systems.
 
-```json
-"optimization": {
-  "max_iters": 200,
-  "convergence_criteria": {
-    "metric": "Baker",
-    "gradient_threshold": 5.66918e-4,
-    "delta_energy_threshold": 1e-6,
-    "step_component_threshold": 1.2e-3
-  }
-}
+   .. exess-param:: compress_ri_b
+      :type: bool
+      :default: false
+      :brief: Compress RI B matrix.
+      :note: info
+
+      Compression can reduce GPU memory use enough to run larger systems that would otherwise exceed available RAM.
+
+   .. exess-param:: homo_lumo_guess_rotation_angle
+      :type: float
+      :default: auto (0 or 45)
+      :brief: HOMO/LUMO guess rotation (degrees).
+
+      Rotation in degrees (0-180) for unrestricted symmetry breaking.
+
+      If omitted, EXESS uses 45 degrees for unrestricted singlets and 0 otherwise.
+
+   .. exess-param:: fock_build_type
+      :type: string
+      :default: HGP
+      :brief: Fock build algorithm (``HGP``, ``UM09``, ``RI``).
+      :note: info
+
+      Algorithm definitions:
+
+      - ``HGP``: Head-Gordon-Pople algorithm, optimized for dense systems.
+      - ``UM09``: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
+      - ``RI``: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
+
+      Guidance: ``HGP`` is tuned for dense systems where screening is less important (e.g., compact biomolecules). ``UM09`` is tuned for screening-heavy systems (e.g., long chains) and can scale better on large systems. ``RI`` stores integrals, can be faster on small systems, but memory usage rises substantially.
+
+      ``fock_build_type`` includes improved screening for large systems (>3000 basis functions); see <https://arxiv.org/abs/2407.21445> for details.
+
+   .. exess-param:: exchange_screening_threshold
+      :type: float
+      :default: 1e-5
+      :brief: Exchange screening threshold (expert control).
+      :note: expert
+
+      Expert control; adjust only with validation.
+
+   .. exess-param:: group_shared_exponents
+      :type: bool
+      :default: false
+      :brief: Group shared basis exponents (UM09 only).
+      :note: expert
+
+      Expert control used with UM09 and shared-exponent basis sets (e.g., cc-pVDZ).
 ```
 
-## dynamics
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `n_timesteps` | int | required | Number of timesteps. |
-| `dt` | float | required | Timestep size in ps. |
-| `reuse_orbitals` | bool | false | Reuse orbitals between steps. |
-| `use_async_timesteps` | bool | true | Asynchronous timesteps (expert). |
+### frag
 
-Example:
+```{eval-rst}
+.. tab-set::
 
-```json
-"dynamics": {
-  "n_timesteps": 10,
-  "use_async_timesteps": false,
-  "dt": 0.002
-}
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "frag": {
+               "cutoff_type": "Centroid",
+               "distance_metric": "Average",
+               "level": "Tetramer",
+               "cutoffs": {
+                 "dimer": 1000,
+                 "trimer": 20,
+                 "tetramer": 15
+               },
+               "included_fragments": [0, 1, 2, 3, 4]
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import FragKeywords, energy
+
+         energy(
+             topology_path="molecule_t.json",
+             frag_keywords=FragKeywords(
+                 cutoff_type="Centroid",
+                 distance_metric="Average",
+                 level="Tetramer",
+                 dimer_cutoff=1000,
+                 trimer_cutoff=20,
+                 tetramer_cutoff=15,
+                 included_fragments=[0, 1, 2, 3, 4],
+             ),
+         )
 ```
 
-Notes:
+```{eval-rst}
+.. exess-params::
 
-- Upstream docs list 1 fs (0.001 ps) as a typical default for `dt`; the schema requires that you set `dt` explicitly.
-- `use_async_timesteps` is an expert keyword; use with care.
+   .. exess-param:: level
+      :type: string
+      :default: required
+      :brief: Fragment expansion order (``Monomer`` .. ``Octamer``).
+      :note: info
 
-## boundary
+      Truncation counts scale combinatorially: dimers :math:`n(n-1)/2`,
+      trimers :math:`n(n-1)(n-2)/6`, tetramers
+      :math:`n(n-1)(n-2)(n-3)/24`.
 
-Boundary conditions for periodic or truncated simulations:
+   .. exess-param:: cutoffs
+      :type: object
+      :default: unset
+      :brief: Distance cutoffs in Angstroms.
+      :note: info
 
-```json
-"boundary": {
-  "x": { "kind": "Periodic", "range": { "lower": -2, "upper": 3 } },
-  "y": { "kind": "Periodic", "range": { "lower": -2, "upper": 3 } },
-  "z": { "kind": "Periodic", "range": { "lower": -2, "upper": 3 } }
-}
+      Keys can include ``dimer``, ``trimer``, ``tetramer``, ``pentamer``,
+      ``hexamer``, ``heptamer``, ``octamer``.
+
+      Distances are in Angstroms and should follow ``dimer > trimer >
+      tetramer`` when using higher orders.
+
+      If omitted, the calculation proceeds without distance filtering (all
+      :math:`n`-mers up to ``level``); be cautious with fragment counts to avoid
+      excessive compute.
+
+   .. exess-param:: cutoff_type
+      :type: string
+      :default: ClosestPair
+      :brief: Distance definition (``Centroid`` or ``ClosestPair``).
+
+      ``Centroid`` compares fragment centroids.
+
+      ``ClosestPair`` uses the minimal inter-fragment atom distance (more
+      accurate and generally preferred).
+
+   .. exess-param:: distance_metric
+      :type: string
+      :default: Max
+      :brief: Reduce pair distances (``Max``, ``Average``, ``Min``).
+
+      Controls how higher-order distances are computed from pair distances.
+
+   .. exess-param:: reference_fragment
+      :type: int
+      :default: unset
+      :brief: Reference fragment for interaction energies.
+      :note: info
+
+      Enables lattice/interaction energies by summing :math:`n`-mer corrections that
+      include the reference fragment. Negative values indicate binding; positive
+      values indicate repulsion under the usual convention.
+
+   .. exess-param:: included_fragments
+      :type: array[int]
+      :default: unset
+      :brief: Subset of fragments to include.
+
+      Restricts the fragment set and treats them as an independent system.
+
+   .. exess-param:: enable_speed
+      :type: bool
+      :default: false
+      :brief: Experimental queue optimization.
+      :note: experimental
+
+      Experimental queue optimization intended for AIMD workflows (upstream docs
+      label this "broom broom").
 ```
 
-`kind` can be `Periodic`, `Rigid`, or `Delete`.
 
-Boundary conditions are specified per axis; `range.lower`/`range.upper` define the box extent for `Periodic` boundaries.
+### ks_dft
 
-## force_field
+KSDFT is used when `model.method` is `RestrictedKSDFT`. Upstream docs recommend reading about the KSDFT methodologies in the following paper:
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `ff_filename` | string | required | Force field filename path. |
+Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation of the DFT Exchange-Correlation Functional. J. Chem. Theory Comput. 2025. <https://doi.org/10.1021/acs.jctc.5c01229>.
 
-`force_field` is used for classical MM components (e.g., solvent in AIMD/QMMM workflows).
+```{eval-rst}
+.. tab-set::
 
-## log
+   .. tab-item:: EXESS CLI
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `console` | object | defaults | Console log settings. |
-| `logfiles` | array | `[]` | File log settings. |
+      .. code-block:: json
+         :caption: config.json
 
-Defaults:
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedKSDFT",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "ks_dft": {
+               "functional": "GGA_XC_PBE",
+               "grid": {
+                 "default_grid": "SUPERFINE",
+                 "radial_quad": "TreutlerAldrichs",
+                 "pruning_scheme": "TREUTLER"
+               }
+             }
+           },
+           "schema_version": "0.2.0"
+         }
 
-- `console.level`: `LargeInfo` (or `Debug` in debug builds).
-- `console.prefix_fmt`: empty string.
-- `logfiles.level`: `Verbose`.
-- `logfiles.prefix_fmt`: `[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}] `.
-- `logfiles.directory`: unset.
+   .. tab-item:: Python
 
-Example:
+      .. code-block:: python
+         :caption: run.py
 
-```json
-"log": {
-  "console": { "level": "Verbose" },
-  "logfiles": [
-    {
-      "level": "Verbose",
-      "prefix_fmt": "[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}] ",
-      "directory": "/tmp/exess"
-    }
-  ]
-}
+         from rush.exess import DefaultGridResolution, KSKeywords, XCGridParameters, energy
+
+         energy(
+             topology_path="molecule_t.json",
+             method="RestrictedKSDFT",
+             ks_keywords=KSKeywords(
+                 functional="GGA_XC_PBE",
+                 grid=XCGridParameters(
+                     resolution=DefaultGridResolution("SUPERFINE"),
+                     radial_quad="TreutlerAldrichs",
+                     pruning_scheme="TREUTLER",
+                 ),
+             ),
+         )
 ```
 
-Log levels: `Debug`, `Verbose`, `LargeInfo`, `Info`, `Performance`, `Warning`, `Error`.
+```{eval-rst}
+.. exess-params::
 
-Upstream docs describe this order as descending verbosity.
+   .. exess-param:: functional
+      :type: string
+      :default: required
+      :brief: LibXC functional name.
+      :note: info
 
-## rtat
+      Meta-GGA functionals are experimental and supported only with ``GauXC``.
 
-RTAT is a runtime auto-tuner for matrix operations.
+      Range-separated functionals are not supported.
 
-Upstream docs note that RTAT is the open-source `rtatblas` library (https://github.com/csnowdon2/rtatblas). When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
+      Only ``B2PLYP`` and ``revDSD-PBEP86-D4`` double hybrids are implemented; D4 must be added externally.
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `enabled` | bool | true | Enable runtime autotuning. |
-| `synchronous` | bool | false | Use synchronous operations. |
-| `json_file_dump_prefix` | string | unset | Prefix for RTAT JSON dumps. |
+      For a full list of functionals, see the LibXC documentation: <https://libxc.gitlab.io/functionals>
 
-## export
+   .. exess-param:: method
+      :type: string
+      :default: GauXC
+      :brief: XC evaluation method.
+      :note: info
 
-Export controls what is written to HDF5 output files:
+      - ``GauXC`` (default): GPU-accelerated XC evaluation with the broadest support.
+      - ``Dense``: Dense matrix evaluation; :math:`\mathcal{O}(N^3)` scaling, suitable for small to medium systems.
+      - ``BatchDense``: Batched dense evaluation; :math:`\mathcal{O}(N^2)` with ``use_C_opt=true``, :math:`\mathcal{O}(N)` with ``use_C_opt=false``.
+      - ``Direct``: Direct evaluation without storing intermediates.
+      - ``SemiDirect``: Hybrid of direct and batch-dense methods.
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `export_density` | bool | false | Export density. |
-| `export_relaxed_mp2_density_correction` | bool | false | Export relaxed MP2 density correction. |
-| `export_fock` | bool | false | Export Fock matrix. |
-| `export_overlap` | bool | false | Export overlap matrix. |
-| `export_h_core` | bool | false | Export H core matrix. |
-| `export_expanded_density` | bool | false | Export expanded density. |
-| `export_expanded_gradient` | bool | false | Export expanded gradient. |
-| `export_molecular_orbital_coeffs` | bool | false | Export MO coefficients. |
-| `export_gradient` | bool | false | Export gradients. |
-| `export_external_charge_gradient` | bool | false | Export external charge gradients. |
-| `export_mulliken_charges` | bool | false | Export Mulliken charges. |
-| `export_chelpg_charges` | bool | false | Export CHELPG charges. |
-| `export_bond_orders` | bool | false | Export bond orders. |
-| `export_h_caps` | bool | false | Export H caps. |
-| `export_density_descriptors` | bool | false | Export density descriptors. |
-| `export_esp_descriptors` | bool | false | Export ESP descriptors. |
-| `export_expanded_esp_descriptors` | bool | false | Export expanded ESP descriptors. |
-| `export_basis_labels` | bool | false | Export basis labels. |
-| `export_hessian` | bool | false | Export hessian. |
-| `export_mass_weighted_hessian` | bool | false | Export mass-weighted hessian. |
-| `export_hessian_frequencies` | bool | false | Export hessian frequencies. |
-| `flatten_symmetric` | bool | true | Flatten symmetric matrices. |
-| `light_json` | bool | false | Light JSON output. |
-| `concatenate_hdf5_files` | bool | false | Concatenate HDF5 outputs. |
-| `training_db` | bool | false | Export training DB metadata. |
-| `descriptor_grid` | object | unset | Grid for descriptor exports. |
+   .. exess-param:: use_C_opt
+      :type: bool
+      :default: true
+      :brief: Use C-matrix optimization (Dense/BatchDense).
 
-`descriptor_grid` can be one of the following structures (libqdx):
+      ``use_C_opt`` enables C-matrix based XC evaluation, reducing matrix dimensions from ``n_basis`` to ``n_occ`` for Dense/BatchDense methods. It is only valid for ``Dense`` and ``BatchDense``.
 
-- `standard`: `FINE`, `ULTRAFINE`, `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
-- `params`: `points_per_shell`, `order` (`One` or `Two`), `scale`.
-- `regular`: `min`, `max`, `spacing` arrays (Cartesian grid).
-- `custom`: flat list of points `[x1, y1, z1, x2, y2, z2, ...]`.
+   .. exess-param:: grid
+      :type: object
+      :default: default grid (ULTRAFINE)
+      :brief: Numerical grid settings.
+      :note: info
 
-Notes:
+      Grid parameters supported in the libqdx Rust schema:
 
-- `export_gradient` and `export_expanded_gradient` require a gradient-capable driver (Gradient, Dynamics, QMMM, Optimization).
-- `export_hessian`, `export_mass_weighted_hessian`, and `export_hessian_frequencies` require a Hessian calculation.
-- `export_expanded_esp_descriptors` is documented as causing memory errors; avoid enabling it for production runs.
-- rush-py source comments flag a few exports as undocumented or unclear (e.g., `export_molecular_orbital_coeffs`, `export_relaxed_mp2_density_correction`, `export_mass_weighted_hessian`, `export_hessian_frequencies`, and `export_basis_labels`). `export_bond_orders` is described as a pass-through of input connectivity.
+      - ``radial_quad``: ``MuraKnowles``, ``MurrayHandyLaming``, ``TreutlerAldrichs``.
+      - ``pruning_scheme``: ``ROBUST``, ``UNPRUNED``, ``TREUTLER``.
+      - ``batch_size``: GauXC batch size.
+      - ``radial_size``, ``angular_size``: Custom grid sizes.
+      - ``default_grid``: ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
 
-## ks_dft
+      Defaults (EXESS):
 
-KSDFT is used when `model.method` is `RestrictedKSDFT`. Upstream docs recommend reading the KSDFT paper (see the citations page) before tuning advanced settings.
+      - ``default_grid`` — ``string`` (default: ``ULTRAFINE``)
+      - ``radial_quad`` — ``string`` (default: ``MuraKnowles``)
+      - ``pruning_scheme`` — ``string`` (default: ``ROBUST``)
+      - ``batch_size`` — ``int`` (default: ``512``)
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `functional` | string | required | LibXC functional name. |
-| `method` | string | `GauXC` | XC evaluation method. |
-| `use_C_opt` | bool | true | Use C-matrix optimization (Dense/BatchDense). |
-| `grid` | object | default grid (ULTRAFINE) | Numerical grid settings. |
-| `sp_threshold` | float | SCF density_threshold | Single-precision threshold. |
-| `dp_threshold` | float | SCF density_threshold | Double-precision threshold. |
-| `batches_per_batch` | int | 20 | Batch batching for GauXC. |
+      Grid configuration details (from upstream docs):
 
-Grid parameters supported in the libqdx Rust schema:
+      - Default grid presets via ``default_grid``: ``FINE``, ``ULTRAFINE`` (default), ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
+      - Custom grid sizes via ``radial_size`` and ``angular_size``.
+      - ``radial_quad``: ``MuraKnowles`` (default), ``MurrayHandyLaming``, ``TreutlerAldrichs``.
+      - ``pruning_scheme``: ``ROBUST`` (default), ``UNPRUNED``, ``TREUTLER``.
 
-- `radial_quad`: `MuraKnowles`, `MurrayHandyLaming`, `TreutlerAldrichs`.
-- `pruning_scheme`: `ROBUST`, `UNPRUNED`, `TREUTLER`.
-- `batch_size`: GauXC batch size.
-- `radial_size`, `angular_size`: Custom grid sizes.
-- `default_grid`: `FINE`, `ULTRAFINE`, `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
+      Batching options (choose one):
 
-Defaults (EXESS):
+      - Closest-atom batching (default when no batch settings are provided).
+      - ``octree``: uses ``max_size`` (default 512), ``max_depth`` (default unlimited), ``max_distance`` (default unlimited).
+      - ``space_filling``: uses the ``octree`` parameters plus ``target_batch_size`` (default 1024).
+      - ``batch_size``: GauXC batch size (default 512).
 
-- `grid.default_grid`: `ULTRAFINE`.
-- `grid.radial_quad`: `MuraKnowles`.
-- `grid.pruning_scheme`: `ROBUST`.
-- `grid.batch_size`: 512 (GauXC).
-- `dp_threshold`: SCF `density_threshold` if omitted.
-- `sp_threshold`: `dp_threshold` if set, otherwise SCF `density_threshold`.
+      Grid guidance from upstream docs:
 
-Method options (from upstream docs):
+      - Default grid settings (ULTRAFINE with ROBUST pruning) provide a good accuracy/cost balance for most users.
+      - SUPERFINE grids can improve accuracy but significantly increase compute time.
+      - Octree batching with BatchDense is useful for large systems where linear scaling is critical.
 
-- `GauXC` (default): GPU-accelerated XC evaluation with the broadest support.
-- `Dense`: Dense matrix evaluation, roughly O(N^3); suitable for small to medium systems.
-- `BatchDense`: Batched dense evaluation; O(N^2) with `use_C_opt=true`, O(N) with `use_C_opt=false`.
-- `Direct`: Direct evaluation without storing intermediates.
-- `SemiDirect`: Hybrid of direct and batch-dense methods.
+   .. exess-param:: sp_threshold
+      :type: float
+      :default: SCF density_threshold
+      :brief: Single-precision threshold.
 
-`use_C_opt` enables C-matrix based XC evaluation, reducing matrix dimensions from `n_basis` to `n_occ` for Dense/BatchDense methods. Upstream docs note it is only valid for `Dense` and `BatchDense`.
+      Defaults to ``dp_threshold`` when set, otherwise the SCF ``density_threshold``.
 
-Grid configuration details (from upstream docs):
+   .. exess-param:: dp_threshold
+      :type: float
+      :default: SCF density_threshold
+      :brief: Double-precision threshold.
 
-- Default grid presets via `default_grid`: `FINE`, `ULTRAFINE` (default), `SUPERFINE`, `TREUTLER_GM3`, `TREUTLER_GM5`.
-- Custom grid sizes via `radial_size` and `angular_size`.
-- `radial_quad`: `MuraKnowles` (default), `MurrayHandyLaming`, `TreutlerAldrichs`.
-- `pruning_scheme`: `ROBUST` (default), `UNPRUNED`, `TREUTLER`.
-- Batching:
-  - Closest-atom batching (default when no batch settings are provided).
-  - `octree`: `max_size` (default 512), `max_depth` (default unlimited), `max_distance` (default unlimited).
-  - `space_filling`: `octree` parameters plus `target_batch_size` (default 1024).
-  - `batch_size`: GauXC batch size (default 512).
-
-Examples:
+   .. exess-param:: batches_per_batch
+      :type: int
+      :default: 20
+      :brief: Batch batching for GauXC.
+```
 
 Minimal KSDFT:
 
@@ -466,99 +520,294 @@ Octree batching:
 }
 ```
 
-Functional notes from upstream docs:
 
-- Meta-GGA functionals are experimental and supported only with `GauXC`.
-- Range-separated functionals are not supported.
-- Only `B2PLYP` and `revDSD-PBEP86-D4` double hybrids are implemented; D4 must be added externally.
-- For a full list of functionals, see the LibXC documentation: https://www.tddft.org/programs/libxc/functionals/
+### export
 
-Grid guidance from upstream docs:
+Export controls what is written to HDF5 output files:
 
-- Default grid settings (ULTRAFINE with ROBUST pruning) provide a good accuracy/cost balance for most users.
-- SUPERFINE grids can improve accuracy but significantly increase compute time.
-- Octree batching with BatchDense is useful for large systems where linear scaling is critical.
+```{eval-rst}
+.. tab-set::
 
-## integrals
+   .. tab-item:: EXESS CLI
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `scheduler` | string | `Callback` | `Callback` or `RoundRobin`. |
-| `n_streams` | int | 4 (CUDA) / 1 (HIP) | GPU stream count. |
+      .. code-block:: json
+         :caption: config.json
 
-If `integrals` is omitted entirely, EXESS uses `Callback` with 4 streams.
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "export": {
+               "export_density": true,
+               "export_fock": true,
+               "descriptor_grid": {
+                 "regular": {
+                   "min": [-4.0, -4.0, -4.0],
+                   "max": [4.0, 4.0, 4.0],
+                   "spacing": [0.2, 0.2, 0.2]
+                 }
+               }
+             }
+           },
+           "schema_version": "0.2.0"
+         }
 
-## gradient
+   .. tab-item:: Python
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `finite_difference_step_size` | float | 5e-3 | Step size for numerical gradients. |
-| `method` | string | `Analytical` | `Analytical` or `Numerical`. |
+      .. code-block:: python
+         :caption: run.py
 
-## hessian
+         from rush.exess import ExportKeywords, RegularDescriptorGrid, energy
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `finite_difference_step_size` | float | 5e-3 | Step size for numerical Hessians. |
-| `method` | string | `Numerical` | `Analytical` or `Numerical`. |
+         energy(
+             topology_path="molecule_t.json",
+             export_keywords=ExportKeywords(
+                 export_density=True,
+                 export_fock=True,
+                 descriptor_grid=RegularDescriptorGrid(
+                     min=[-4.0, -4.0, -4.0],
+                     max=[4.0, 4.0, 4.0],
+                     spacing=[0.2, 0.2, 0.2],
+                 ),
+             ),
+         )
+```
 
-## machine_learning
+```{eval-rst}
+.. exess-params::
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `ml_type` | string | `AIMNet` | ML model type. |
+   .. exess-param:: export_density
+      :type: bool
+      :default: false
+      :brief: Export density.
+      :note: info
 
-## qmmm
+   .. exess-param:: export_relaxed_mp2_density_correction
+      :type: bool
+      :default: false
+      :brief: Export relaxed MP2 density correction.
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `n_timesteps` | int | required | Number of QMMM timesteps. |
-| `dt_ps` | float | required | Timestep size in ps. |
-| `temperature_kelvin` | float | required | Temperature in Kelvin. |
-| `pressure_atm` | float | unset | If set, runs NPT; otherwise NVT. |
-| `minimisation` | object | unset | Classical minimisation settings. |
-| `trajectory` | object | unset | Trajectory output settings. |
-| `energy_csv` | string | unset | Path for energy CSV. |
-| `restraints` | object | unset | Restraints for atoms/fragments. |
+      Rush-py source comments flag this as undocumented; validate outputs before production use.
 
-If `minimisation` is provided, defaults are:
+   .. exess-param:: export_fock
+      :type: bool
+      :default: false
+      :brief: Export Fock matrix.
 
-- `err_tol_kj_per_mol_nm`: 10
-- `max_iterations`: 0
+   .. exess-param:: export_overlap
+      :type: bool
+      :default: false
+      :brief: Export overlap matrix.
 
-If `trajectory` is provided, defaults are:
+   .. exess-param:: export_h_core
+      :type: bool
+      :default: false
+      :brief: Export H core matrix.
 
-- `format`: `JSON`
-- `interval`: 1
-- `start`: 0
-- `end`: max u32
-- `include_waters`: false
+   .. exess-param:: export_expanded_density
+      :type: bool
+      :default: false
+      :brief: Export expanded density.
+      :note: info
 
-If `restraints` is provided, defaults are:
+      Provides the whole density matrix for the entire fragment system, rather than per-fragment matrices.
 
-- `k`: 2000.0
-- `fix_heavy`: false
-- Only one of `fixed_atoms`, `free_atoms`, `fixed_fragments`, `free_fragments` may be specified.
+   .. exess-param:: export_expanded_gradient
+      :type: bool
+      :default: false
+      :brief: Export expanded gradient.
 
-Notes:
+      Provides the whole gradient matrix for the entire fragment system, rather than per-fragment matrices.
 
-- `pressure_atm`: if set, EXESS runs NPT; if unset, NVT is used.
-- `energy_csv`: when set, EXESS uses a Verlet integrator and does not apply the thermostat (the temperature is not used for integration).
-- `minimisation` can only be used in a purely classical run (no QM/ML regions).
-- Fragmentation (`frag`) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact.
-- If residues are not provided and any non-QM region exists, QMMM fails; with no residues, the entire system must be QM.
-- `trajectory.format` can be `JSON` or `XYZ` (default `JSON`).
-- `trajectory.include_waters` can be set to omit waters for smaller trajectories.
-- `restraints`: only one of `fixed_atoms`, `free_atoms`, `fixed_fragments`, `free_fragments` may be specified; set `free_atoms = []` to fix all atoms.
-- `restraints.k` scales the restraint force; larger values mean stronger restraints.
+      Requires a gradient-capable driver (Gradient, Dynamics, QMMM, Optimization).
 
-## regions
+   .. exess-param:: export_molecular_orbital_coeffs
+      :type: bool
+      :default: false
+      :brief: Export MO coefficients.
 
-`regions` defines which fragments are treated as QM, MM, or ML (Q4ML/QMMM workflows):
+      Rush-py source comments flag this as undocumented; validate outputs before production use.
 
-- `qm_fragments`: array[int]
-- `mm_fragments`: array[int]
-- `ml_fragments`: array[int]
+   .. exess-param:: export_gradient
+      :type: bool
+      :default: false
+      :brief: Export gradients.
+
+      Requires a gradient-capable driver (Gradient, Dynamics, QMMM, Optimization).
+
+   .. exess-param:: export_external_charge_gradient
+      :type: bool
+      :default: false
+      :brief: Export external charge gradients.
+
+   .. exess-param:: export_mulliken_charges
+      :type: bool
+      :default: false
+      :brief: Export Mulliken charges.
+      :note: info
+
+   .. exess-param:: export_chelpg_charges
+      :type: bool
+      :default: false
+      :brief: Export CHELPG charges.
+      :note: info
+
+   .. exess-param:: export_bond_orders
+      :type: bool
+      :default: false
+      :brief: Export bond orders.
+
+      Rush-py source comments describe this as a pass-through of input connectivity.
+
+   .. exess-param:: export_h_caps
+      :type: bool
+      :default: false
+      :brief: Export H caps.
+
+   .. exess-param:: export_density_descriptors
+      :type: bool
+      :default: false
+      :brief: Export density descriptors.
+      :note: info
+
+   .. exess-param:: export_esp_descriptors
+      :type: bool
+      :default: false
+      :brief: Export ESP descriptors.
+      :note: info
+
+   .. exess-param:: export_expanded_esp_descriptors
+      :type: bool
+      :default: false
+      :brief: Export expanded ESP descriptors.
+      :note: broken
+
+      Documented as causing memory errors; avoid enabling for production runs.
+
+   .. exess-param:: export_basis_labels
+      :type: bool
+      :default: false
+      :brief: Export basis labels.
+
+      Rush-py source comments flag this as undocumented; validate outputs before production use.
+
+   .. exess-param:: export_hessian
+      :type: bool
+      :default: false
+      :brief: Export hessian.
+
+      Requires a Hessian calculation.
+
+   .. exess-param:: export_mass_weighted_hessian
+      :type: bool
+      :default: false
+      :brief: Export mass-weighted hessian.
+
+      Rush-py source comments flag this as undocumented; validate outputs before production use.
+
+      Requires a Hessian calculation.
+
+   .. exess-param:: export_hessian_frequencies
+      :type: bool
+      :default: false
+      :brief: Export hessian frequencies.
+
+      Rush-py source comments flag this as undocumented; validate outputs before production use.
+
+      Requires a Hessian calculation.
+
+   .. exess-param:: flatten_symmetric
+      :type: bool
+      :default: true
+      :brief: Flatten symmetric matrices.
+
+   .. exess-param:: light_json
+      :type: bool
+      :default: false
+      :brief: Light JSON output.
+
+   .. exess-param:: concatenate_hdf5_files
+      :type: bool
+      :default: false
+      :brief: Concatenate HDF5 outputs.
+
+      Post-process exports into a single HDF5 output file. This is primarily relevant for fragmented runs (particularly when configured for multinode). The concatenation may be expensive.
+
+   .. exess-param:: training_db
+      :type: bool
+      :default: false
+      :brief: Export training DB metadata.
+
+   .. exess-param:: descriptor_grid
+      :type: object
+      :default: unset
+      :brief: Grid for descriptor exports.
+      :note: info
+
+      ``descriptor_grid`` can be one of the following structures (libqdx):
+
+      - ``standard``: ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
+      - ``params``: ``points_per_shell``, ``order`` (``One`` or ``Two``), ``scale``.
+      - ``regular``: ``min``, ``max``, ``spacing`` arrays (Cartesian grid).
+      - ``custom``: flat list of points ``[x1, y1, z1, x2, y2, z2, ...]``.
+```
+
+
+## Q4ML: Optimization & Simulation
+
+(regions)=
+### regions
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "QMMM",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "STO-3G"
+           },
+           "keywords": {
+             "qmmm": {
+               "n_timesteps": 10,
+               "dt_ps": 0.002,
+               "temperature_kelvin": 290.0
+             },
+             "regions": {
+               "qm_fragments": [0, 1],
+               "mm_fragments": [2, 3]
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import qmmm
+
+         qmmm(
+             topology_path="molecule_t.json",
+             residues_path="system.residues",
+             n_timesteps=10,
+             dt_ps=0.002,
+             temperature_kelvin=290.0,
+             qm_fragments=[0, 1],
+             mm_fragments=[2, 3],
+         )
+```
 
 Rules and defaults:
 
@@ -566,26 +815,1034 @@ Rules and defaults:
 - If all three lists are provided, they must be disjoint and cover all fragments.
 - Supplying only one list is invalid.
 - If `regions` is omitted in JSON, libqdx defaults to `mm_fragments=[]` and `ml_fragments=[]` and EXESS infers `qm_fragments` as all fragments (pure QM).
+- If any non-QM region exists, residues must be provided; with no residues, the entire system must be QM.
 - Non-QM regions are only supported for `QMMM` and `Optimization`; other drivers (including `Energy`) require pure QM regions.
 - Non-QM regions are not supported for batched topology inputs.
 
-## debug
+```{eval-rst}
+.. exess-params::
 
-| Keyword | Type | Default | Brief |
-| --- | --- | --- | --- |
-| `dry_run` | bool | false | Validate fragment queue without computing. |
-| `print_subfragment_xyz` | bool | false | Print subfragment XYZ for SSFD. |
-| `max_fragments` | int | -1 | Limit number of fragments computed. |
-| `ignore_fragments` | bool | false | Ignore fragmentation (developer validation). |
-| `skip_calcs` | bool | false | Skip computations in fragmentation routines. |
+   .. exess-param:: qm_fragments
+      :type: array[int]
+      :default: inferred
+      :brief: Fragments treated as QM.
 
-Notes:
+   .. exess-param:: mm_fragments
+      :type: array[int]
+      :default: inferred
+      :brief: Fragments treated as MM.
 
-- `dry_run` runs queue construction only (no computation) to validate fragment counts and detect input issues.
-- `print_subfragment_xyz` prints subfragment geometries for SSFD debugging.
-- `max_fragments` can be used to limit the number of fragments evaluated for non-covalent systems; the default `-1` means "use all fragments."
-- `ignore_fragments` forces a full-system calculation for validation.
-- `skip_calcs` skips calculations during fragmentation to debug queue construction performance.
+   .. exess-param:: ml_fragments
+      :type: array[int]
+      :default: inferred
+      :brief: Fragments treated as ML.
+```
+
+
+### optimization
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Optimization",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "optimization": {
+               "max_iters": 200,
+               "algorithm": "LBFGS",
+               "coordinate_system": "Cartesian",
+               "lbfgs_keywords": {}
+             },
+             "regions": {
+               "qm_fragments": [0],
+               "ml_fragments": [1, 2, 3]
+             },
+             "machine_learning": {
+               "ml_type": "AIMNet"
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import LBFGSKeywords, OptimizationKeywords, optimization
+
+         optimization(
+             topology_path="molecule_t.json",
+             max_iters=200,
+             optimization_keywords=OptimizationKeywords(
+                 algorithm="LBFGS",
+                 coordinate_system="Cartesian",
+                 lbfgs_keywords=LBFGSKeywords(),
+             ),
+             qm_fragments=[0],
+             ml_fragments=[1, 2, 3],
+         )
+```
+
+Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact. Residue requirements and region validation details are covered in the [regions](#regions) section.
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: max_iters
+      :type: int
+      :default: required
+      :brief: Max optimization iterations.
+
+   .. exess-param:: convergence_criteria
+      :type: object
+      :default: see details
+      :brief: Convergence metric and thresholds.
+
+      Fields:
+
+      - ``metric`` — ``string`` (default: ``Baker``)
+      - ``gradient_threshold`` — ``float`` (default: ``3e-4``; units: Eh/a0)
+      - ``delta_energy_threshold`` — ``float`` (default: ``1e-6``; units: Eh)
+      - ``step_component_threshold`` — ``float`` (default: ``3e-4``; units: a0)
+
+      ``metric`` options:
+
+      - ``Baker``: max gradient component must be within threshold and either
+        delta energy or step component must be within their thresholds.
+      - ``GradientOnly``: only the gradient threshold is enforced.
+
+   .. exess-param:: optimizer_reset_interval
+      :type: int
+      :default: unset
+      :brief: The coordinate system will be regenerated and the Hessian reset every :math:`N` iterations.
+      :note: expert
+
+      If omitted, EXESS never regenerates the coordinate system or resets the Hessian.
+
+   .. exess-param:: coordinate_system
+      :type: string
+      :default: DelocalisedInternal
+      :brief: Coordinate system (``Cartesian``, ``NaturalInternal``, ``DelocalisedInternal``).
+      :note: info
+
+      ``DelocalisedInternal`` is the default and strongly recommended.
+
+      Machine learning optimizations require ``Cartesian``.
+
+   .. exess-param:: constraints
+      :type: array[array[int]]
+      :default: []
+      :brief: Constrain bond lengths, angles, or dihedrals.
+      :note: info
+
+      Specify lists of atom indices to constrain.
+
+   .. exess-param:: hessian_guess
+      :type: string
+      :default: auto
+      :brief: Initial Hessian model (``Identity``, ``ScaledIdentity``, ``Schlegel``, ``Lindh``).
+
+      Defaults to ``Identity`` for Cartesian coordinates, otherwise
+      ``ScaledIdentity``.
+
+      Upstream docs caution that non-default models are not recommended for
+      general use.
+
+   .. exess-param:: algorithm
+      :type: string
+      :default: EigenvectorFollowing
+      :brief: Optimization algorithm (``EigenvectorFollowing``, ``TrustRegionAugmentedHessian``, ``LBFGS``).
+      :note: info
+
+      ``EigenvectorFollowing`` is recommended for most users.
+
+      ``TrustRegionAugmentedHessian`` is available but not recommended for most
+      workflows.
+
+      For machine learning optimizations, ``LBFGS`` is strongly recommended.
+
+   .. exess-param:: lbfgs_keywords
+      :type: object
+      :default: unset
+      :brief: LBFGS parameters.
+      :note: info
+
+      Required when ``algorithm`` is ``LBFGS`` (an empty object ``{}`` is
+      acceptable).
+
+      Fields (defaults apply when ``LBFGS`` is used; set ``{}`` to use defaults):
+
+      - ``linesearch`` — ``string`` (default: ``BacktrackingStrongWolfe``)
+      - ``n_corrections`` — ``int`` (default: ``6``)
+      - ``epsilon`` — ``float`` (default: ``1e-5``)
+      - ``max_linesearch`` — ``int`` (default: ``40``)
+      - ``gtol`` — ``float`` (default: ``0.9``)
+
+   .. exess-param:: trust_region
+      :type: object
+      :default: see details
+      :brief: Trust-region parameters (for ``TrustRegionAugmentedHessian``).
+
+      Fields (defaults apply when ``TrustRegionAugmentedHessian`` is used; set ``{}`` to use defaults):
+
+      - ``initial_radius`` — ``float`` (default: ``0.4``)
+      - ``max_radius`` — ``float`` (default: ``1e5``)
+      - ``min_radius`` — ``float`` (default: ``1e-5``)
+      - ``increase_factor`` — ``float`` (default: ``1.2``)
+      - ``decrease_factor`` — ``float`` (default: ``0.7``)
+      - ``constrict_factor`` — ``float`` (default: ``0.1``)
+      - ``increase_threshold`` — ``float`` (default: ``0.75``)
+      - ``decrease_threshold`` — ``float`` (default: ``0.25``)
+      - ``rejection_threshold`` — ``float`` (default: ``0.0``)
+
+      The defaults have been optimized in upstream testing; changing them is not recommended unless you have a validated use case.
+
+   .. exess-param:: frozen_distance_slippage_tolerance_angstroms
+      :type: float
+      :default: 1e-8
+      :brief: Slippage tolerance (distance).
+
+      Controls expected slippage in frozen delocalized coordinates.
+      These tolerances account for small drift when delocalized coordinates are held fixed.
+
+   .. exess-param:: frozen_angle_slippage_tolerance_degrees
+      :type: float
+      :default: 1e-8
+      :brief: Slippage tolerance (angle).
+
+      Controls expected slippage in frozen delocalized coordinates.
+      These tolerances account for small drift when delocalized coordinates are held fixed.
+
+   .. exess-param:: debug_xyz
+      :type: bool
+      :default: false
+      :brief: Debug XYZ output.
+
+   .. exess-param:: output_trc
+      :type: string
+      :default: unset
+      :brief: Output TRC path.
+
+   .. exess-param:: fixed_atoms
+      :type: array[int]
+      :default: unset
+      :brief: Fixed atoms.
+
+   .. exess-param:: free_atoms
+      :type: array[int]
+      :default: unset
+      :brief: Free atoms.
+
+   .. exess-param:: fixed_fragments
+      :type: array[int]
+      :default: unset
+      :brief: Fixed fragments.
+
+   .. exess-param:: free_fragments
+      :type: array[int]
+      :default: unset
+      :brief: Free fragments.
+
+   .. exess-param:: fix_heavy
+      :type: bool
+      :default: false
+      :brief: Fix heavy atoms.
+```
+
+
+### qmmm
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "QMMM",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "STO-3G"
+           },
+           "keywords": {
+             "qmmm": {
+               "n_timesteps": 1000,
+               "dt_ps": 0.002,
+               "temperature_kelvin": 290.0,
+               "trajectory": {
+                 "format": "XYZ",
+                 "interval": 10
+               },
+               "restraints": {
+                 "k": 1500.0,
+                 "fix_heavy": true
+               }
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import Restraints, Trajectory, qmmm
+
+         qmmm(
+             topology_path="molecule_t.json",
+             residues_path="system.residues",
+             n_timesteps=1000,
+             dt_ps=0.002,
+             temperature_kelvin=290.0,
+             trajectory=Trajectory(interval=10),
+             restraints=Restraints(k=1500.0, fix_heavy=True),
+         )
+```
+
+Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact. Residue requirements and region validation details are covered in the [regions](#regions) section.
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: n_timesteps
+      :type: int
+      :default: required
+      :brief: Number of QMMM timesteps.
+
+   .. exess-param:: dt_ps
+      :type: float
+      :default: required
+      :brief: Timestep size in ps.
+
+   .. exess-param:: temperature_kelvin
+      :type: float
+      :default: required
+      :brief: Temperature in Kelvin.
+
+   .. exess-param:: pressure_atm
+      :type: float
+      :default: unset
+      :brief: Optional pressure for NPT runs.
+      :note: info
+
+      If set, EXESS runs NPT; if unset, NVT is used.
+
+   .. exess-param:: minimisation
+      :type: object
+      :default: unset
+      :brief: Classical minimisation settings.
+
+      Fields:
+
+      - ``err_tol_kj_per_mol_nm`` — ``float`` (default: ``10``)
+      - ``max_iterations`` — ``int`` (default: ``0``)
+
+      ``minimisation`` can only be used in a purely classical run (no QM/ML regions).
+
+   .. exess-param:: trajectory
+      :type: object
+      :default: unset
+      :brief: Trajectory output settings.
+      :note: info
+
+      Fields:
+
+      - ``format`` — ``string`` (default: ``JSON``)
+      - ``interval`` — ``int`` (default: ``1``)
+      - ``start`` — ``int`` (default: ``0``)
+      - ``end`` — ``int`` (default: max u32)
+      - ``include_waters`` — ``bool`` (default: ``false``)
+
+      ``trajectory.format`` can be ``JSON`` or ``XYZ`` (default ``JSON``).
+
+      ``trajectory.include_waters`` can be set to omit waters for smaller trajectories.
+
+   .. exess-param:: energy_csv
+      :type: string
+      :default: unset
+      :brief: Path for energy CSV.
+
+      When set, EXESS uses a Verlet integrator and does not apply the thermostat (the temperature is not used for integration).
+
+   .. exess-param:: restraints
+      :type: object
+      :default: unset
+      :brief: Restraints for atoms/fragments.
+      :note: info
+
+      Fields:
+
+      - ``k`` — ``float`` (default: ``2000.0``)
+      - ``fix_heavy`` — ``bool`` (default: ``false``)
+
+      Only one of ``fixed_atoms``, ``free_atoms``, ``fixed_fragments``, or ``free_fragments`` may be specified. Set ``free_atoms = []`` to fix all atoms.
+
+      ``restraints.k`` scales the restraint force; larger values mean stronger restraints.
+```
+
+
+### gradient
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Gradient",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "gradient": {
+               "method": "Numerical",
+               "finite_difference_step_size": 0.004
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: finite_difference_step_size
+      :type: float
+      :default: 5e-3
+      :brief: Step size for numerical gradients.
+
+   .. exess-param:: method
+      :type: string
+      :default: Analytical
+      :brief: ``Analytical`` or ``Numerical``.
+```
+
+
+## Advanced & Diagnostic Keywords
+
+### guess
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "guess": {
+               "external_initial_density_path": "guess.h5",
+               "bsp": true,
+               "bsp_basis": "STO-3G"
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: external_initial_density_path
+      :type: string
+      :default: unset
+      :brief: HDF5 density guess path.
+
+      Must reference an HDF5 file with a ``density`` dataset at root for RHF, or
+      ``alpha/density`` and ``beta/density`` for UHF.
+
+      Guesses are expected to be stored as flattened lower-triangular density
+      matrices. External guesses are not supported for fragmented calculations,
+      and EXESS warns that guesses from other codes may be incompatible due to
+      basis ordering and normalization.
+
+   .. exess-param:: bsp
+      :type: bool
+      :default: false
+      :brief: Basis set projection bootstrap.
+
+      Computes a lower-resolution SCF and projects to the target basis. Requires
+      ``bsp_basis``.
+
+   .. exess-param:: bsp_basis
+      :type: string
+      :default: unset
+      :brief: Lower-resolution basis set for BSP.
+
+   .. exess-param:: bsp_scf_keywords
+      :type: object
+      :default: unset
+      :brief: SCF keywords for BSP.
+
+      If omitted, EXESS reuses the base SCF keywords.
+
+   .. exess-param:: hcore
+      :type: bool
+      :default: false
+      :brief: Use hcore initial guess.
+
+   .. exess-param:: smd
+      :type: bool
+      :default: auto (fragmented non-RI)
+      :brief: Superposition of monomer densities.
+
+      If omitted, EXESS enables it for fragmented calculations that are not
+      using RI, and disables it otherwise.
+
+   .. exess-param:: ssfd
+      :type: bool
+      :default: false
+      :brief: Subfragment density guess.
+      :note: experimental
+
+      Experimental subfragment guess. ``ssfd_target_size`` controls subfragment
+      size (default 30).
+
+   .. exess-param:: ssfd_target_size
+      :type: int
+      :default: 30
+      :brief: Target atoms per subfragment.
+
+   .. exess-param:: ssfd_only_converge_in_bsp_basis
+      :type: bool
+      :default: true
+      :brief: Only converge subfragments in BSP basis.
+
+      Keeps subfragments unconverged in the primary basis and only projects from
+      the bootstrap basis.
+
+   .. exess-param:: ssfd_scf_keywords
+      :type: object
+      :default: unset
+      :brief: SCF keywords for subfragment runs.
+
+      If omitted, EXESS reuses the base SCF keywords.
+```
+
+
+### integrals
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "integrals": {
+               "scheduler": "RoundRobin",
+               "n_streams": 8
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: scheduler
+      :type: string
+      :default: Callback
+      :brief: Integral scheduler (``Callback`` or ``RoundRobin``).
+
+      If ``integrals`` is omitted entirely, EXESS uses ``Callback`` with 4 streams.
+
+   .. exess-param:: n_streams
+      :type: int
+      :default: 4 (CUDA) / 1 (HIP)
+      :brief: GPU stream count.
+```
+
+
+### rtat
+
+RTAT is a runtime auto-tuner for matrix operations.
+
+Upstream docs note that RTAT is the open-source [`rtatblas`](https://github.com/csnowdon2/rtatblas) library. When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "rtat": {
+               "synchronous": true,
+               "json_file_dump_prefix": "rtat"
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: enabled
+      :type: bool
+      :default: true
+      :brief: Enable runtime autotuning.
+
+   .. exess-param:: synchronous
+      :type: bool
+      :default: false
+      :brief: Use synchronous operations.
+
+   .. exess-param:: json_file_dump_prefix
+      :type: string
+      :default: unset
+      :brief: Prefix for RTAT JSON dumps.
+```
+
+
+### hessian
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Hessian",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "hessian": {
+               "finite_difference_step_size": 0.004
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: finite_difference_step_size
+      :type: float
+      :default: 5e-3
+      :brief: Step size for numerical Hessians.
+
+   .. exess-param:: method
+      :type: string
+      :default: Numerical
+      :brief: ``Analytical`` or ``Numerical``.
+```
+
+
+### dynamics
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Dynamics",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "dynamics": {
+               "n_timesteps": 10,
+               "use_async_timesteps": false,
+               "dt": 0.002
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: n_timesteps
+      :type: int
+      :default: required
+      :brief: Number of timesteps.
+
+   .. exess-param:: dt
+      :type: float
+      :default: required
+      :brief: Timestep size in ps.
+
+      Upstream docs cite 1 fs (``0.001`` ps) as a typical value, but the schema requires you to set ``dt`` explicitly.
+
+   .. exess-param:: reuse_orbitals
+      :type: bool
+      :default: false
+      :brief: Reuse orbitals between timesteps.
+
+   .. exess-param:: use_async_timesteps
+      :type: bool
+      :default: true
+      :brief: Run asynchronous timesteps.
+      :note: expert
+
+      Expert option; validate stability before production runs.
+```
+
+
+### boundary
+
+Boundary conditions for periodic or truncated simulations:
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Dynamics",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "boundary": {
+               "x": { "kind": "Periodic", "range": { "lower": -2, "upper": 3 } },
+               "y": { "kind": "Periodic", "range": { "lower": -2, "upper": 3 } },
+               "z": { "kind": "Periodic", "range": { "lower": -2, "upper": 3 } }
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: x
+      :type: object
+      :default: unset
+      :brief: Boundary configuration for the X axis.
+
+      Each axis entry has:
+
+      - ``kind``: ``Periodic``, ``Rigid``, or ``Delete``.
+      - ``range``: ``lower``/``upper`` extents for periodic boundaries.
+
+   .. exess-param:: y
+      :type: object
+      :default: unset
+      :brief: Boundary configuration for the Y axis.
+
+      Same structure as ``x``.
+
+   .. exess-param:: z
+      :type: object
+      :default: unset
+      :brief: Boundary configuration for the Z axis.
+
+      Same structure as ``x``.
+```
+
+
+### machine_learning
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: ml_type
+      :type: string
+      :default: AIMNet
+      :brief: ML model type.
+
+      AIMNet is currently the only supported value.
+```
+
+
+### force_field
+
+`force_field` supplies a classical force field for water/MM components in fragmented AIMD (Dynamics) and other classical MBE steps. QMMM uses `qmmm.ffs` for additional force fields instead.
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Dynamics",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ",
+             "aux_basis": "cc-pVDZ-RIFIT"
+           },
+           "keywords": {
+             "scf": {
+               "fock_build_type": "RI"
+             },
+             "dynamics": {
+               "n_timesteps": 10,
+               "dt": 0.001
+             },
+             "frag": {
+               "level": "Dimer",
+               "cutoffs": {
+                 "dimer": 7
+               }
+             },
+             "boundary": {
+               "x": { "kind": "Periodic", "range": { "lower": -3, "upper": 4 } },
+               "y": { "kind": "Periodic", "range": { "lower": -3, "upper": 6 } },
+               "z": { "kind": "Periodic", "range": { "lower": -3, "upper": 6 } }
+             },
+             "force_field": {
+               "ff_filename": "forcefield.xml"
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: ff_filename
+      :type: string
+      :default: required
+      :brief: Force field filename path.
+
+      Used for classical water/MM contributions in fragmented AIMD/MBE; QMMM uses `qmmm.ffs` instead.
+```
+
+
+### log
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "log": {
+               "console": { "level": "Verbose" },
+               "logfiles": [
+                 {
+                   "level": "Info",
+                   "prefix_fmt": "[%H:%M:%S {level}] ",
+                   "directory": "/tmp/exess"
+                 }
+               ]
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: console
+      :type: object
+      :default: see details
+      :brief: Console log settings.
+
+      Fields:
+
+      - ``level`` — ``string`` (default: ``LargeInfo``). Debug builds use ``Debug``.
+      - ``prefix_fmt`` — ``string`` (default: ``""``).
+
+      Log levels: ``Debug``, ``Verbose``, ``LargeInfo``, ``Info``, ``Performance``,
+      ``Warning``, ``Error`` (descending verbosity).
+
+   .. exess-param:: logfiles
+      :type: array[object]
+      :default: []
+      :brief: File log settings.
+
+      .. role:: raw-html(raw)
+         :format: html
+
+      Fields:
+
+      - ``level`` — ``string`` (default: ``Verbose``)
+      - ``prefix_fmt`` — ``string`` (default: :raw-html:`<code>[%Y-%m-%d %H:%M:%S.{us} r{rank} {level}]&nbsp;</code>`)
+      - ``directory`` — ``string`` (default: unset)
+```
+
+
+### debug
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedHF",
+             "basis": "cc-pVDZ"
+           },
+           "keywords": {
+             "debug": {
+               "dry_run": true
+             }
+           },
+           "schema_version": "0.2.0"
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: dry_run
+      :type: bool
+      :default: false
+      :brief: Validate fragment queue without computing.
+
+      Runs queue construction only (no computation) to validate fragment counts and detect input issues.
+
+   .. exess-param:: print_subfragment_xyz
+      :type: bool
+      :default: false
+      :brief: Print subfragment XYZ for SSFD.
+
+      Prints subfragment geometries for SSFD debugging.
+
+   .. exess-param:: max_fragments
+      :type: int
+      :default: -1
+      :brief: Limit number of fragments computed.
+
+      The default ``-1`` means "use all fragments."
+
+   .. exess-param:: ignore_fragments
+      :type: bool
+      :default: false
+      :brief: Ignore fragmentation (developer validation).
+
+      Forces a full-system calculation for validation.
+
+   .. exess-param:: skip_calcs
+      :type: bool
+      :default: false
+      :brief: Skip computations in fragmentation routines.
+
+      Skips calculations during fragmentation to debug queue construction performance.
+```
+
 ## Rush-py defaults
 
 Rush-py sets some defaults in Python before submitting a run. If a `*_keywords` argument is omitted, rush-py may pass `None` (no overrides) or construct a default object.
