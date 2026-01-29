@@ -277,15 +277,6 @@
   --param-note-color: var(--error-3, var(--red-9));
 }
 
-.param-dropdowns .param-brief code,
-.param-dropdowns .param-details code {
-  background-color: var(--yue-c-code-background, var(--accent-a3));
-  border-radius: 3px;
-  padding: 2px 4px;
-  font-weight: 500;
-  color: var(--yue-c-code-text, var(--accent-a11));
-}
-
 .param-dropdowns .param-details,
 .param-dropdowns .sd-summary-content.param-details {
   padding: 0 0.75rem 0.35rem;
@@ -295,18 +286,36 @@
 
 .param-dropdowns .param-details p,
 .param-dropdowns .param-details ul,
-.param-dropdowns .param-details ol {
+.param-dropdowns .param-details ol,
+.param-dropdowns .param-details dl {
   margin: 0.25rem 0;
 }
 
 .param-dropdowns .param-details p:first-child,
 .param-dropdowns .param-details ul:first-child,
-.param-dropdowns .param-details ol:first-child {
+.param-dropdowns .param-details ol:first-child,
+.param-dropdowns .param-details dl:first-child {
   margin-top: 0;
 }
 
 .param-dropdowns .param-details p:last-child,
 .param-dropdowns .param-details ul:last-child,
-.param-dropdowns .param-details ol:last-child {
+.param-dropdowns .param-details ol:last-child,
+.param-dropdowns .param-details dl:last-child {
   margin-bottom: 0;
+}
+
+.param-dropdowns .param-details dt {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.param-dropdowns .param-details dd {
+  margin: 0 0 0.1rem 1rem;
+  line-height: 1.35;
+}
+
+.param-dropdowns .param-details dl + p {
+  margin-top: 0.35rem;
 }

@@ -11,7 +11,7 @@ class ExessParam(nodes.General, nodes.Element):
     pass
 
 
-class ExessParamBrief(nodes.Inline, nodes.Element):
+class ExessParamBrief(nodes.TextElement, nodes.Element):
     pass
 
 

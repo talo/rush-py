@@ -23,6 +23,7 @@ Icon key:
 
 ## Core Electronic-Structure Keywords
 
+(scf)=
 ### scf
 
 ```{eval-rst}
@@ -180,13 +181,18 @@ Icon key:
 
       Algorithm definitions:
 
-      - ``HGP``: Head-Gordon-Pople algorithm, optimized for dense systems.
-      - ``UM09``: Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
-      - ``RI``: Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
+      ``HGP``
+        Head-Gordon-Pople algorithm, optimized for dense systems.
+
+      ``UM09``
+        Ufimtsev-Martinez algorithm, optimized for screening-heavy systems.
+
+      ``RI``
+        Resolution-of-identity approximation (requires auxiliary basis, higher memory use).
 
       Guidance: ``HGP`` is tuned for dense systems where screening is less important (e.g., compact biomolecules). ``UM09`` is tuned for screening-heavy systems (e.g., long chains) and can scale better on large systems. ``RI`` stores integrals, can be faster on small systems, but memory usage rises substantially.
 
-      ``fock_build_type`` includes improved screening for large systems (>3000 basis functions); see <https://arxiv.org/abs/2407.21445> for details.
+      ``fock_build_type`` includes improved screening for large systems (>3000 basis functions); see https://arxiv.org/abs/2407.21445 for details.
 
    .. exess-param:: exchange_screening_threshold
       :type: float
@@ -206,6 +212,7 @@ Icon key:
 ```
 
 
+(frag)=
 ### frag
 
 ```{eval-rst}
@@ -334,11 +341,12 @@ Icon key:
 ```
 
 
+(ks_dft)=
 ### ks_dft
 
 KSDFT is used when `model.method` is `RestrictedKSDFT`. Upstream docs recommend reading about the KSDFT methodologies in the following paper:
 
-Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation of the DFT Exchange-Correlation Functional. J. Chem. Theory Comput. 2025. <https://doi.org/10.1021/acs.jctc.5c01229>.
+Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation of the DFT Exchange-Correlation Functional. J. Chem. Theory Comput. 2025. [https://doi.org/10.1021/acs.jctc.5c01229](https://doi.org/10.1021/acs.jctc.5c01229).
 
 ```{eval-rst}
 .. tab-set::
@@ -404,7 +412,7 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
 
       Only ``B2PLYP`` and ``revDSD-PBEP86-D4`` double hybrids are implemented; D4 must be added externally.
 
-      For a full list of functionals, see the LibXC documentation: <https://libxc.gitlab.io/functionals>
+      For a full list of functionals, see the LibXC documentation: https://libxc.gitlab.io/functionals
 
    .. exess-param:: method
       :type: string
@@ -412,11 +420,20 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
       :brief: XC evaluation method.
       :note: info
 
-      - ``GauXC`` (default): GPU-accelerated XC evaluation with the broadest support.
-      - ``Dense``: Dense matrix evaluation; :math:`\mathcal{O}(N^3)` scaling, suitable for small to medium systems.
-      - ``BatchDense``: Batched dense evaluation; :math:`\mathcal{O}(N^2)` with ``use_C_opt=true``, :math:`\mathcal{O}(N)` with ``use_C_opt=false``.
-      - ``Direct``: Direct evaluation without storing intermediates.
-      - ``SemiDirect``: Hybrid of direct and batch-dense methods.
+      ``GauXC`` (default)
+        GPU-accelerated XC evaluation with the broadest support.
+
+      ``Dense``
+        Dense matrix evaluation; :math:`\mathcal{O}(N^3)` scaling, suitable for small to medium systems.
+
+      ``BatchDense``
+        Batched dense evaluation; :math:`\mathcal{O}(N^2)` with ``use_C_opt=true``, :math:`\mathcal{O}(N)` with ``use_C_opt=false``.
+
+      ``Direct``
+        Direct evaluation without storing intermediates.
+
+      ``SemiDirect``
+        Hybrid of direct and batch-dense methods.
 
    .. exess-param:: use_C_opt
       :type: bool
@@ -431,36 +448,44 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
       :brief: Numerical grid settings.
       :note: info
 
-      Grid parameters supported in the libqdx Rust schema:
+      .. rubric:: Grid quality parameters
 
-      - ``radial_quad``: ``MuraKnowles``, ``MurrayHandyLaming``, ``TreutlerAldrichs``.
-      - ``pruning_scheme``: ``ROBUST``, ``UNPRUNED``, ``TREUTLER``.
-      - ``batch_size``: GauXC batch size.
-      - ``radial_size``, ``angular_size``: Custom grid sizes.
-      - ``default_grid``: ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
+      libqdx schema; defaults shown where applicable.
 
-      Defaults (EXESS):
+      ``radial_quad`` (default: ``MuraKnowles``)
+        ``MuraKnowles``, ``MurrayHandyLaming``, ``TreutlerAldrichs``.
 
-      - ``default_grid`` — ``string`` (default: ``ULTRAFINE``)
-      - ``radial_quad`` — ``string`` (default: ``MuraKnowles``)
-      - ``pruning_scheme`` — ``string`` (default: ``ROBUST``)
-      - ``batch_size`` — ``int`` (default: ``512``)
+      ``pruning_scheme`` (default: ``ROBUST``)
+        ``ROBUST``, ``UNPRUNED``, ``TREUTLER``.
 
-      Grid configuration details (from upstream docs):
+      .. rubric:: Grid size options
 
-      - Default grid presets via ``default_grid``: ``FINE``, ``ULTRAFINE`` (default), ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
-      - Custom grid sizes via ``radial_size`` and ``angular_size``.
-      - ``radial_quad``: ``MuraKnowles`` (default), ``MurrayHandyLaming``, ``TreutlerAldrichs``.
-      - ``pruning_scheme``: ``ROBUST`` (default), ``UNPRUNED``, ``TREUTLER``.
+      Choose one:
 
-      Batching options (choose one):
+      ``default_grid`` (default: ``ULTRAFINE``)
+        Preset grid: ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
 
-      - Closest-atom batching (default when no batch settings are provided).
-      - ``octree``: uses ``max_size`` (default 512), ``max_depth`` (default unlimited), ``max_distance`` (default unlimited).
-      - ``space_filling``: uses the ``octree`` parameters plus ``target_batch_size`` (default 1024).
-      - ``batch_size``: GauXC batch size (default 512).
+      ``radial_size``, ``angular_size``
+        Custom grid sizes (use together).
 
-      Grid guidance from upstream docs:
+      .. rubric:: Batching options
+
+      Choose one:
+
+      Closest-atom batching
+        Default when no batch settings are provided.
+
+      ``octree``
+        Uses ``max_size`` (default 512), ``max_depth`` (default unlimited),
+        ``max_distance`` (default unlimited).
+
+      ``space_filling``
+        Uses the ``octree`` parameters plus ``target_batch_size`` (default 1024).
+
+      ``batch_size``
+        GauXC batch size (default 512).
+
+      .. rubric:: Grid guidance
 
       - Default grid settings (ULTRAFINE with ROBUST pruning) provide a good accuracy/cost balance for most users.
       - SUPERFINE grids can improve accuracy but significantly increase compute time.
@@ -521,6 +546,7 @@ Octree batching:
 ```
 
 
+(export)=
 ### export
 
 Export controls what is written to HDF5 output files:
@@ -750,10 +776,17 @@ Export controls what is written to HDF5 output files:
 
       ``descriptor_grid`` can be one of the following structures (libqdx):
 
-      - ``standard``: ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
-      - ``params``: ``points_per_shell``, ``order`` (``One`` or ``Two``), ``scale``.
-      - ``regular``: ``min``, ``max``, ``spacing`` arrays (Cartesian grid).
-      - ``custom``: flat list of points ``[x1, y1, z1, x2, y2, z2, ...]``.
+      ``standard``
+        ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
+
+      ``params``
+        ``points_per_shell``, ``order`` (``One`` or ``Two``), ``scale``.
+
+      ``regular``
+        ``min``, ``max``, ``spacing`` arrays (Cartesian grid).
+
+      ``custom``
+        flat list of points ``[x1, y1, z1, x2, y2, z2, ...]``.
 ```
 
 
@@ -839,6 +872,7 @@ Rules and defaults:
 ```
 
 
+(optimization)=
 ### optimization
 
 ```{eval-rst}
@@ -918,9 +952,12 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 
       ``metric`` options:
 
-      - ``Baker``: max gradient component must be within threshold and either
-        delta energy or step component must be within their thresholds.
-      - ``GradientOnly``: only the gradient threshold is enforced.
+      ``Baker``
+        max gradient component must be within threshold and either delta energy or
+        step component must be within their thresholds.
+
+      ``GradientOnly``
+        only the gradient threshold is enforced.
 
    .. exess-param:: optimizer_reset_interval
       :type: int
@@ -1061,6 +1098,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 ```
 
 
+(qmmm)=
 ### qmmm
 
 ```{eval-rst}
@@ -1196,6 +1234,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 ```
 
 
+(gradient)=
 ### gradient
 
 ```{eval-rst}
@@ -1408,7 +1447,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 
 RTAT is a runtime auto-tuner for matrix operations.
 
-Upstream docs note that RTAT is the open-source [`rtatblas`](https://github.com/csnowdon2/rtatblas) library. When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
+Upstream docs note that RTAT is the open-source [rtatblas](https://github.com/csnowdon2/rtatblas) library. When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
 
 ```{eval-rst}
 .. tab-set::
@@ -1459,6 +1498,7 @@ Upstream docs note that RTAT is the open-source [`rtatblas`](https://github.com/
 ```
 
 
+(hessian)=
 ### hessian
 
 ```{eval-rst}
@@ -1504,6 +1544,7 @@ Upstream docs note that RTAT is the open-source [`rtatblas`](https://github.com/
 ```
 
 
+(dynamics)=
 ### dynamics
 
 ```{eval-rst}
@@ -1610,8 +1651,11 @@ Boundary conditions for periodic or truncated simulations:
 
       Each axis entry has:
 
-      - ``kind``: ``Periodic``, ``Rigid``, or ``Delete``.
-      - ``range``: ``lower``/``upper`` extents for periodic boundaries.
+      ``kind``
+        ``Periodic``, ``Rigid``, or ``Delete``.
+
+      ``range``
+        ``lower``/``upper`` extents for periodic boundaries.
 
    .. exess-param:: y
       :type: object
@@ -1642,6 +1686,7 @@ Boundary conditions for periodic or truncated simulations:
 ```
 
 
+(force_field)=
 ### force_field
 
 `force_field` supplies a classical force field for water/MM components in fragmented AIMD (Dynamics) and other classical MBE steps. QMMM uses `qmmm.ffs` for additional force fields instead.
@@ -1879,7 +1924,15 @@ Rush-py entrypoint defaults (non-keyword parameters):
 
 `FragKeywords` defaults by level in rush-py:
 
-- `Monomer`: `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`, `cutoff_type=None`, `distance_metric=None`.
-- `Dimer`: `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`.
-- `Trimer`: `dimer_cutoff=100.0`, `trimer_cutoff=25.0`, `tetramer_cutoff=None`.
-- `Tetramer`: `dimer_cutoff=100.0`, `trimer_cutoff=25.0`, `tetramer_cutoff=10.0`.
+`Monomer`
+: `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`,
+  `cutoff_type=None`, `distance_metric=None`.
+
+`Dimer`
+: `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`.
+
+`Trimer`
+: `dimer_cutoff=100.0`, `trimer_cutoff=25.0`, `tetramer_cutoff=None`.
+
+`Tetramer`
+: `dimer_cutoff=100.0`, `trimer_cutoff=25.0`, `tetramer_cutoff=10.0`.

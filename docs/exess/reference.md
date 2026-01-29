@@ -1,5 +1,6 @@
 # Reference
 
+(basis_sets)=
 ## Supported basis sets
 
 The upstream docs contain two overlapping lists. Both are reproduced here for completeness.
