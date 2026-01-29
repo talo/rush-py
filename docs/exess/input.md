@@ -343,7 +343,7 @@ Key differences:
 - `Model` in rush-py only includes `standard_orientation` and `force_cartesian_basis_sets`; `method`, `basis`, and `aux_basis` are function parameters.
 - `keywords` in rush-py are passed as Python dataclasses (for `SCFKeywords`, `FragKeywords`, `ExportKeywords`, `OptimizationKeywords`, etc.).
 - `frag_keywords` defaults to a dimer fragmentation setup; pass `frag_keywords=None` to run a full-system calculation.
-- `external_charges` and some keyword groups (e.g., `rtat`, `integrals`, `ks_dft`) are not yet exposed in the rush-py API.
+- `external_charges` and some keyword groups (e.g., `rtat`, `integrals`) are not yet exposed in the rush-py API.
 
 See the Rush guides for TRC objects and conversions: [Objects and TRC Files](../guides/03-objects-and-trc-files).
 

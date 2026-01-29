@@ -78,7 +78,7 @@ class ExessParamDirective(Directive):
 
 
 NOTE_META = {
-    "info": ("param-note--info", "Info"),
+    "info": ("param-note--info", "Tip"),
     "expert": ("param-note--expert", "Expert"),
     "experimental": ("param-note--experimental", "Experimental"),
     "broken": ("param-note--broken", "Known issues"),
@@ -88,7 +88,13 @@ NOTE_META = {
 def _render_param_line(name: str, param_type: str, default: str) -> str:
     name_html = f"<code>{html.escape(name)}</code>" if name else ""
     type_html = f"<code>{html.escape(param_type)}</code>" if param_type else ""
-    default_html = f"<code>{html.escape(default)}</code>" if default else ""
+    default_html = ""
+    if default:
+        default_text = html.escape(default)
+        if _is_code_default(default):
+            default_html = f"<code>{default_text}</code>"
+        else:
+            default_html = f"<span class=\"param-default-text\">{default_text}</span>"
     parts = ['<span class="param-line">', name_html]
     if type_html:
         parts.append(" — ")
@@ -99,6 +105,15 @@ def _render_param_line(name: str, param_type: str, default: str) -> str:
         parts.append(")")
     parts.append("</span>")
     return "".join(parts)
+
+
+def _is_code_default(default: str) -> bool:
+    if not default:
+        return False
+    lower = default.lower()
+    if lower in {"required", "unset", "defaults", "depends", "auto", "inferred"}:
+        return False
+    return not any(ch.isspace() for ch in default)
 
 
 def _render_notes(notes: list[str]) -> str:
@@ -140,11 +155,17 @@ def visit_exess_param_html(self, node: ExessParam) -> None:
 
     if not has_details:
         self.body.append('<div class="param-row">')
+        self.body.append('<div class="param-row-header">')
+        self.body.append('<span class="param-row-text">')
         self.body.append(_render_param_line(name, param_type, default))
         if brief_node:
             self.body.append('<span class="param-brief">')
             brief_node.walkabout(self)
             self.body.append("</span>")
+        self.body.append("</span>")
+        self.body.append(_render_notes(notes))
+        self.body.append('<span class="param-row-chevron" aria-hidden="true"></span>')
+        self.body.append("</div>")
         return
 
     self.body.append(
