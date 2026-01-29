@@ -62,6 +62,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="electronic-structure-methods.html">Electronic Structure Methods</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running EXESS</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topologies.html">Topologies and residues</a></li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">Keyword reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
@@ -80,6 +81,7 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#quick-start-cli-vs-rush-py">Quick start (CLI vs rush-py)</a></li>
 <li><a class="reference internal" href="#cli-exess-executable">CLI (EXESS executable)</a><ul>
 <li><a class="reference internal" href="#environment-and-installation">Environment and installation</a></li>
 <li><a class="reference internal" href="#single-node-runs">Single-node runs</a></li>
@@ -129,6 +131,27 @@ data-aria-dark="Switch to auto color mode">
           <section id="running-exess">
 <h1>Running EXESS<a class="headerlink" href="#running-exess" title="Link to this heading">¶</a></h1>
 <p>This page covers both the EXESS executable and the rush-py interface. The input format and keyword reference are documented in the input and keyword pages.</p>
+<section id="quick-start-cli-vs-rush-py">
+<h2>Quick start (CLI vs rush-py)<a class="headerlink" href="#quick-start-cli-vs-rush-py" title="Link to this heading">¶</a></h2>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">runexess<span class="w"> </span>input.json<span class="w"> </span>-g<span class="w"> </span><span class="m">1</span>
+</span></pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+rush-py</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">exess</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span><span class="s2">&quot;input.json&quot;</span><span class="p">,</span> <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+</section>
 <section id="cli-exess-executable">
 <h2>CLI (EXESS executable)<a class="headerlink" href="#cli-exess-executable" title="Link to this heading">¶</a></h2>
 <section id="environment-and-installation">
@@ -327,7 +350,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

@@ -6,7 +6,8 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -156,7 +157,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="25">
 </span><span data-line="26"><span class="n">GRAPHQL_ENDPOINT</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span>
 </span><span data-line="27">    <span class="s2">&quot;RUSH_ENDPOINT&quot;</span><span class="p">,</span>
-</span><span data-line="28">    <span class="s2">&quot;https://tengu-server-prod-seaography-720805281970.asia-southeast1.run.app&quot;</span><span class="p">,</span>
+</span><span data-line="28">    <span class="s2">&quot;https://tengu-server-prod-api-519406798674.asia-southeast1.run.app&quot;</span><span class="p">,</span>
 </span><span data-line="29"><span class="p">)</span>
 </span><span data-line="30">
 </span><span data-line="31"><span class="n">API_KEY</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RUSH_TOKEN&quot;</span><span class="p">)</span>
@@ -175,26 +176,26 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="44">        <span class="c1"># staging</span>
 </span><span data-line="45">        <span class="s2">&quot;auto3d_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex&quot;</span><span class="p">,</span>
 </span><span data-line="46">        <span class="s2">&quot;boltz2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex&quot;</span><span class="p">,</span>
-</span><span data-line="47">        <span class="s2">&quot;exess_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex&quot;</span><span class="p">,</span>
+</span><span data-line="47">        <span class="s2">&quot;exess_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/0e5d338b2521881a51f80c92c571681d0cc01b5c#exess_rex&quot;</span><span class="p">,</span>
 </span><span data-line="48">        <span class="s2">&quot;exess_geo_opt_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex&quot;</span><span class="p">,</span>
 </span><span data-line="49">        <span class="s2">&quot;exess_qmmm_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex&quot;</span><span class="p">,</span>
 </span><span data-line="50">        <span class="s2">&quot;mmseqs2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex&quot;</span><span class="p">,</span>
 </span><span data-line="51">        <span class="s2">&quot;nnxtb_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex&quot;</span><span class="p">,</span>
 </span><span data-line="52">        <span class="s2">&quot;pbsa_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex&quot;</span><span class="p">,</span>
-</span><span data-line="53">        <span class="s2">&quot;prepare_protein_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-prepare-protein/f74ef68aec8839a9ac9f70441ebc0c17b814ab2f#prepare_protein_rex&quot;</span><span class="p">,</span>
+</span><span data-line="53">        <span class="s2">&quot;prepare_protein_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-prepare-protein/911d9fb69c269f8783b7cce2de3e87ee9333fb08#prepare_protein_rex&quot;</span><span class="p">,</span>
 </span><span data-line="54">    <span class="p">}</span>
 </span><span data-line="55">    <span class="k">if</span> <span class="s2">&quot;staging&quot;</span> <span class="ow">in</span> <span class="n">GRAPHQL_ENDPOINT</span>
 </span><span data-line="56">    <span class="k">else</span> <span class="p">{</span>
 </span><span data-line="57">        <span class="c1"># prod</span>
 </span><span data-line="58">        <span class="s2">&quot;auto3d_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex&quot;</span><span class="p">,</span>
 </span><span data-line="59">        <span class="s2">&quot;boltz2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex&quot;</span><span class="p">,</span>
-</span><span data-line="60">        <span class="s2">&quot;exess_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/19af943399614b829a181c8620cc36e86b2705a8#exess_rex&quot;</span><span class="p">,</span>
+</span><span data-line="60">        <span class="s2">&quot;exess_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/0e5d338b2521881a51f80c92c571681d0cc01b5c#exess_rex&quot;</span><span class="p">,</span>
 </span><span data-line="61">        <span class="s2">&quot;exess_geo_opt_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/d3d5a3dcf47b41ce3ed04fc7517bda8e375e5383#exess_geo_opt_rex&quot;</span><span class="p">,</span>
 </span><span data-line="62">        <span class="s2">&quot;exess_qmmm_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex&quot;</span><span class="p">,</span>
 </span><span data-line="63">        <span class="s2">&quot;mmseqs2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-colabfold/0b6ca8b9dc97fc6380d334169a6faae51d85fac7#mmseqs2_rex&quot;</span><span class="p">,</span>
 </span><span data-line="64">        <span class="s2">&quot;nnxtb_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex&quot;</span><span class="p">,</span>
 </span><span data-line="65">        <span class="s2">&quot;pbsa_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex&quot;</span><span class="p">,</span>
-</span><span data-line="66">        <span class="s2">&quot;prepare_protein_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-prepare-protein/f74ef68aec8839a9ac9f70441ebc0c17b814ab2f#prepare_protein_rex&quot;</span><span class="p">,</span>
+</span><span data-line="66">        <span class="s2">&quot;prepare_protein_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-prepare-protein/911d9fb69c269f8783b7cce2de3e87ee9333fb08#prepare_protein_rex&quot;</span><span class="p">,</span>
 </span><span data-line="67">    <span class="p">}</span>
 </span><span data-line="68"><span class="p">)</span> <span class="o">|</span> <span class="n">MODULE_OVERRIDES</span>
 </span><span data-line="69">
@@ -457,7 +458,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="306">    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;bin&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span data-line="307">    <span class="n">ext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span data-line="308">    <span class="n">extract</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="309"><span class="p">):</span>
+</span><span data-line="309"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 </span><span data-line="310"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="311"><span class="sd">    Saves the contents of the given Rush object store path into the workspace folder.</span>
 </span><span data-line="312"><span class="sd">    Provides a variety of naming schemes, and supports automatically extracting tar.zst</span>
@@ -503,468 +504,480 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="352">            <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fileobj</span><span class="o">=</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">decompressed</span><span class="p">))</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
 </span><span data-line="353">                <span class="n">tar_filenames</span> <span class="o">=</span> <span class="n">tar</span><span class="o">.</span><span class="n">getnames</span><span class="p">()</span>
 </span><span data-line="354">                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tar_filenames</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-</span><span data-line="355">                    <span class="n">data</span> <span class="o">=</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">tar_filenames</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span data-line="356">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tar_filenames</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-</span><span data-line="357">            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="358">                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span data-line="355">                    <span class="n">data</span> <span class="o">=</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">tar_filenames</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+</span><span data-line="356">            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tar_filenames</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+</span><span data-line="357">                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="358">                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </span><span data-line="359">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="360">            <span class="n">filepath</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
-</span><span data-line="361">
-</span><span data-line="362">    <span class="k">return</span> <span class="n">filepath</span></div>
+</span><span data-line="360">            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="361">                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span data-line="362">
+</span><span data-line="363">    <span class="k">return</span> <span class="n">filepath</span></div>
 
-</span><span data-line="363">
 </span><span data-line="364">
-</span><span data-line="365"><span class="k">def</span><span class="w"> </span><span class="nf">_fetch_results</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="366">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="367"><span class="s2">        query GetResults($id: String!) {</span>
-</span><span data-line="368"><span class="s2">            run(id: $id) {</span>
-</span><span data-line="369"><span class="s2">                status</span>
-</span><span data-line="370"><span class="s2">                result</span>
-</span><span data-line="371"><span class="s2">                trace</span>
-</span><span data-line="372"><span class="s2">            }</span>
-</span><span data-line="373"><span class="s2">        }</span>
-</span><span data-line="374"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="375">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
-</span><span data-line="376">
-</span><span data-line="377">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-</span><span data-line="378">    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span>
-</span><span data-line="379">
+</span><span data-line="365">
+</span><span data-line="366"><span class="k">def</span><span class="w"> </span><span class="nf">_fetch_results</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="367">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="368"><span class="s2">        query GetResults($id: String!) {</span>
+</span><span data-line="369"><span class="s2">            run(id: $id) {</span>
+</span><span data-line="370"><span class="s2">                status</span>
+</span><span data-line="371"><span class="s2">                result</span>
+</span><span data-line="372"><span class="s2">                trace</span>
+</span><span data-line="373"><span class="s2">            }</span>
+</span><span data-line="374"><span class="s2">        }</span>
+</span><span data-line="375"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="376">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
+</span><span data-line="377">
+</span><span data-line="378">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</span><span data-line="379">    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span>
 </span><span data-line="380">
-</span><span data-line="381"><span class="k">def</span><span class="w"> </span><span class="nf">_print_run_trace</span><span class="p">(</span><span class="n">run</span><span class="p">):</span>
-</span><span data-line="382">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">run</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="383">
-</span><span data-line="384">    <span class="n">trace</span> <span class="o">=</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;trace&quot;</span><span class="p">]</span>
-</span><span data-line="385">    <span class="n">trace</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
-</span><span data-line="386">        <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">u\{([0-9a-fA-F]+)\}&quot;</span><span class="p">,</span>
-</span><span data-line="387">        <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">16</span><span class="p">)),</span>
-</span><span data-line="388">        <span class="n">trace</span><span class="p">,</span>
-</span><span data-line="389">    <span class="p">)</span>
-</span><span data-line="390">    <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="391">    <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
-</span><span data-line="392">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="393">        <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin-1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-</span><span data-line="394">    <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">UnicodeEncodeError</span><span class="p">):</span>
-</span><span data-line="395">        <span class="k">pass</span>
-</span><span data-line="396">
-</span><span data-line="397">    <span class="n">stdout_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;stdout: Some\(&quot;(.*?)&quot;\)&#39;</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
-</span><span data-line="398">    <span class="k">if</span> <span class="n">stdout_match</span><span class="p">:</span>
-</span><span data-line="399">        <span class="n">stdout_content</span> <span class="o">=</span> <span class="n">stdout_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="400">        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stdout:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="401">        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stdout_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
-</span><span data-line="402">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="403">    <span class="n">stderr_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;stderr: Some\(&quot;(.*?)&quot;\)&#39;</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
-</span><span data-line="404">    <span class="k">if</span> <span class="n">stderr_match</span><span class="p">:</span>
-</span><span data-line="405">        <span class="n">stderr_content</span> <span class="o">=</span> <span class="n">stderr_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="406">        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stderr:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="407">        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stderr_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
-</span><span data-line="408">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="409">        <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="410">
+</span><span data-line="381">
+</span><span data-line="382"><span class="k">def</span><span class="w"> </span><span class="nf">_print_run_trace</span><span class="p">(</span><span class="n">run</span><span class="p">):</span>
+</span><span data-line="383">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">run</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="384">
+</span><span data-line="385">    <span class="n">trace</span> <span class="o">=</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;trace&quot;</span><span class="p">]</span>
+</span><span data-line="386">    <span class="n">trace</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+</span><span data-line="387">        <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">u\{([0-9a-fA-F]+)\}&quot;</span><span class="p">,</span>
+</span><span data-line="388">        <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">16</span><span class="p">)),</span>
+</span><span data-line="389">        <span class="n">trace</span><span class="p">,</span>
+</span><span data-line="390">    <span class="p">)</span>
+</span><span data-line="391">    <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="392">    <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+</span><span data-line="393">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="394">        <span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin-1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</span><span data-line="395">    <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">UnicodeEncodeError</span><span class="p">):</span>
+</span><span data-line="396">        <span class="k">pass</span>
+</span><span data-line="397">
+</span><span data-line="398">    <span class="n">stdout_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;stdout: Some\(&quot;(.*?)&quot;\)&#39;</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+</span><span data-line="399">    <span class="k">if</span> <span class="n">stdout_match</span><span class="p">:</span>
+</span><span data-line="400">        <span class="n">stdout_content</span> <span class="o">=</span> <span class="n">stdout_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="401">        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stdout:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="402">        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stdout_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+</span><span data-line="403">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="404">    <span class="n">stderr_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;stderr: Some\(&quot;(.*?)&quot;\)&#39;</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+</span><span data-line="405">    <span class="k">if</span> <span class="n">stderr_match</span><span class="p">:</span>
+</span><span data-line="406">        <span class="n">stderr_content</span> <span class="o">=</span> <span class="n">stderr_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="407">        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stderr:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="408">        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stderr_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+</span><span data-line="409">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="410">        <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 </span><span data-line="411">
-</span><span data-line="412"><span class="nb">type</span> <span class="n">RunStatus</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;pending&quot;</span><span class="p">,</span> <span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;draft&quot;</span><span class="p">]</span>
-</span><span data-line="413">
+</span><span data-line="412">
+</span><span data-line="413"><span class="nb">type</span> <span class="n">RunStatus</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;pending&quot;</span><span class="p">,</span> <span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;draft&quot;</span><span class="p">]</span>
 </span><span data-line="414">
-</span><span data-line="415"><span class="k">def</span><span class="w"> </span><span class="nf">_build_filters</span><span class="p">(</span>
-</span><span data-line="416">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="417">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="418">    <span class="n">name_contains</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="419">    <span class="n">status</span><span class="p">:</span> <span class="n">RunStatus</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">RunStatus</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="420">    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="421"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="422"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the GraphQL filter input from Python arguments.&quot;&quot;&quot;</span>
-</span><span data-line="423">    <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="424">        <span class="c1"># We don&#39;t want to show deleted runs</span>
-</span><span data-line="425">        <span class="s2">&quot;deleted_at&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;is_null&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-</span><span data-line="426">    <span class="p">}</span>
-</span><span data-line="427">
-</span><span data-line="428">    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="429">        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ci_eq&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
-</span><span data-line="430">    <span class="k">elif</span> <span class="n">name_contains</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="431">        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ilike&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">name_contains</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">}</span>
-</span><span data-line="432">
-</span><span data-line="433">    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="434">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="435">            <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;is_in&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">}</span>
-</span><span data-line="436">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="437">            <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;eq&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">}</span>
-</span><span data-line="438">
-</span><span data-line="439">    <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="440">        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;array_contains&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">}</span>
-</span><span data-line="441">
-</span><span data-line="442">    <span class="k">return</span> <span class="n">filters</span> <span class="k">if</span> <span class="n">filters</span> <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="443">
-</span><span data-line="444">
+</span><span data-line="415">
+<div class="viewcode-block" id="RunError">
+<a class="viewcode-back" href="../../rush.client.html#rush.client.RunError">[docs]</a>
+</span><span data-line="416"><span class="nd">@dataclass</span>
+</span><span data-line="417"><span class="k">class</span><span class="w"> </span><span class="nc">RunError</span><span class="p">:</span>
+</span><span data-line="418"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a run error message, returned from failed collected runs.&quot;&quot;&quot;</span>
+</span><span data-line="419">
+</span><span data-line="420">    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span></div>
+
+</span><span data-line="421">
+</span><span data-line="422">
+</span><span data-line="423"><span class="k">def</span><span class="w"> </span><span class="nf">_build_filters</span><span class="p">(</span>
+</span><span data-line="424">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="425">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="426">    <span class="n">name_contains</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="427">    <span class="n">status</span><span class="p">:</span> <span class="n">RunStatus</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">RunStatus</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="428">    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="429"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="430"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the GraphQL filter input from Python arguments.&quot;&quot;&quot;</span>
+</span><span data-line="431">    <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="432">        <span class="c1"># We don&#39;t want to show deleted runs</span>
+</span><span data-line="433">        <span class="s2">&quot;deleted_at&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;is_null&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+</span><span data-line="434">    <span class="p">}</span>
+</span><span data-line="435">
+</span><span data-line="436">    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="437">        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ci_eq&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+</span><span data-line="438">    <span class="k">elif</span> <span class="n">name_contains</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="439">        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ilike&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">name_contains</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">}</span>
+</span><span data-line="440">
+</span><span data-line="441">    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="442">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="443">            <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;is_in&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">}</span>
+</span><span data-line="444">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="445">            <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;eq&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">}</span>
+</span><span data-line="446">
+</span><span data-line="447">    <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="448">        <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;array_contains&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">}</span>
+</span><span data-line="449">
+</span><span data-line="450">    <span class="k">return</span> <span class="n">filters</span> <span class="k">if</span> <span class="n">filters</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="451">
+</span><span data-line="452">
 <div class="viewcode-block" id="fetch_runs">
 <a class="viewcode-back" href="../../rush.client.html#rush.client.fetch_runs">[docs]</a>
-</span><span data-line="445"><span class="k">def</span><span class="w"> </span><span class="nf">fetch_runs</span><span class="p">(</span>
-</span><span data-line="446">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="447">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="448">    <span class="n">name_contains</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="449">    <span class="n">status</span><span class="p">:</span> <span class="n">RunStatus</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">RunStatus</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="450">    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="451">    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="452"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="453"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="454"><span class="sd">    Query runs and return their IDs.</span>
-</span><span data-line="455">
-</span><span data-line="456"><span class="sd">    Args:</span>
-</span><span data-line="457"><span class="sd">        name: Filter by exact run name (case-insensitive).</span>
-</span><span data-line="458"><span class="sd">        name_contains: Filter by runs whose name contains this substring.</span>
-</span><span data-line="459"><span class="sd">        status: Filter by status. Can be a single status or a list of statuses.</span>
-</span><span data-line="460"><span class="sd">        tags: Filter by tags. Returns runs that have ALL specified tags.</span>
-</span><span data-line="461"><span class="sd">        limit: Maximum number of runs to return. If None, returns all matching runs.</span>
-</span><span data-line="462">
-</span><span data-line="463"><span class="sd">    Returns:</span>
-</span><span data-line="464"><span class="sd">        A list of run IDs matching the filters.</span>
-</span><span data-line="465"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="466">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="467"><span class="s2">        query GetRuns($filters: RunFilterInput, $pagination: PaginationInput) {</span>
-</span><span data-line="468"><span class="s2">            runs(filters: $filters, pagination: $pagination) {</span>
-</span><span data-line="469"><span class="s2">                page_info {</span>
-</span><span data-line="470"><span class="s2">                    has_next_page</span>
-</span><span data-line="471"><span class="s2">                    end_cursor</span>
-</span><span data-line="472"><span class="s2">                }</span>
-</span><span data-line="473"><span class="s2">                nodes {</span>
-</span><span data-line="474"><span class="s2">                    id</span>
-</span><span data-line="475"><span class="s2">                }</span>
-</span><span data-line="476"><span class="s2">            }</span>
-</span><span data-line="477"><span class="s2">        }</span>
-</span><span data-line="478"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="479">
-</span><span data-line="480">    <span class="n">filters</span> <span class="o">=</span> <span class="n">_build_filters</span><span class="p">(</span>
-</span><span data-line="481">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-</span><span data-line="482">        <span class="n">name_contains</span><span class="o">=</span><span class="n">name_contains</span><span class="p">,</span>
-</span><span data-line="483">        <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
-</span><span data-line="484">        <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
-</span><span data-line="485">    <span class="p">)</span>
-</span><span data-line="486">
-</span><span data-line="487">    <span class="n">run_ids</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="488">    <span class="n">cursor</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="489">    <span class="n">page_limit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">limit</span> <span class="k">else</span> <span class="mi">100</span>
-</span><span data-line="490">
-</span><span data-line="491">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-</span><span data-line="492">        <span class="k">if</span> <span class="n">cursor</span><span class="p">:</span>
-</span><span data-line="493">            <span class="n">pagination</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cursor&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;cursor&quot;</span><span class="p">:</span> <span class="n">cursor</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">page_limit</span><span class="p">}}</span>
-</span><span data-line="494">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="495">            <span class="n">pagination</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">page_limit</span><span class="p">}}</span>
-</span><span data-line="496">
-</span><span data-line="497">        <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span> <span class="s2">&quot;pagination&quot;</span><span class="p">:</span> <span class="n">pagination</span><span class="p">}</span>
-</span><span data-line="498">        <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-</span><span data-line="499">
-</span><span data-line="500">        <span class="n">runs_data</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;runs&quot;</span><span class="p">]</span>
-</span><span data-line="501">        <span class="n">run_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">runs_data</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">])</span>
-</span><span data-line="502">
-</span><span data-line="503">        <span class="k">if</span> <span class="n">limit</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">run_ids</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
-</span><span data-line="504">            <span class="k">return</span> <span class="n">run_ids</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
-</span><span data-line="505">
-</span><span data-line="506">        <span class="k">if</span> <span class="ow">not</span> <span class="n">runs_data</span><span class="p">[</span><span class="s2">&quot;page_info&quot;</span><span class="p">][</span><span class="s2">&quot;has_next_page&quot;</span><span class="p">]:</span>
-</span><span data-line="507">            <span class="k">break</span>
-</span><span data-line="508">
-</span><span data-line="509">        <span class="n">cursor</span> <span class="o">=</span> <span class="n">runs_data</span><span class="p">[</span><span class="s2">&quot;page_info&quot;</span><span class="p">][</span><span class="s2">&quot;end_cursor&quot;</span><span class="p">]</span>
+</span><span data-line="453"><span class="k">def</span><span class="w"> </span><span class="nf">fetch_runs</span><span class="p">(</span>
+</span><span data-line="454">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="455">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="456">    <span class="n">name_contains</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="457">    <span class="n">status</span><span class="p">:</span> <span class="n">RunStatus</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">RunStatus</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="458">    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="459">    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="460"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="461"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="462"><span class="sd">    Query runs and return their IDs.</span>
+</span><span data-line="463">
+</span><span data-line="464"><span class="sd">    Args:</span>
+</span><span data-line="465"><span class="sd">        name: Filter by exact run name (case-insensitive).</span>
+</span><span data-line="466"><span class="sd">        name_contains: Filter by runs whose name contains this substring.</span>
+</span><span data-line="467"><span class="sd">        status: Filter by status. Can be a single status or a list of statuses.</span>
+</span><span data-line="468"><span class="sd">        tags: Filter by tags. Returns runs that have ALL specified tags.</span>
+</span><span data-line="469"><span class="sd">        limit: Maximum number of runs to return. If None, returns all matching runs.</span>
+</span><span data-line="470">
+</span><span data-line="471"><span class="sd">    Returns:</span>
+</span><span data-line="472"><span class="sd">        A list of run IDs matching the filters.</span>
+</span><span data-line="473"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="474">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="475"><span class="s2">        query GetRuns($filters: RunFilterInput, $pagination: PaginationInput) {</span>
+</span><span data-line="476"><span class="s2">            runs(filters: $filters, pagination: $pagination) {</span>
+</span><span data-line="477"><span class="s2">                page_info {</span>
+</span><span data-line="478"><span class="s2">                    has_next_page</span>
+</span><span data-line="479"><span class="s2">                    end_cursor</span>
+</span><span data-line="480"><span class="s2">                }</span>
+</span><span data-line="481"><span class="s2">                nodes {</span>
+</span><span data-line="482"><span class="s2">                    id</span>
+</span><span data-line="483"><span class="s2">                }</span>
+</span><span data-line="484"><span class="s2">            }</span>
+</span><span data-line="485"><span class="s2">        }</span>
+</span><span data-line="486"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="487">
+</span><span data-line="488">    <span class="n">filters</span> <span class="o">=</span> <span class="n">_build_filters</span><span class="p">(</span>
+</span><span data-line="489">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+</span><span data-line="490">        <span class="n">name_contains</span><span class="o">=</span><span class="n">name_contains</span><span class="p">,</span>
+</span><span data-line="491">        <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+</span><span data-line="492">        <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
+</span><span data-line="493">    <span class="p">)</span>
+</span><span data-line="494">
+</span><span data-line="495">    <span class="n">run_ids</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="496">    <span class="n">cursor</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="497">    <span class="n">page_limit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">limit</span> <span class="k">else</span> <span class="mi">100</span>
+</span><span data-line="498">
+</span><span data-line="499">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span data-line="500">        <span class="k">if</span> <span class="n">cursor</span><span class="p">:</span>
+</span><span data-line="501">            <span class="n">pagination</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cursor&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;cursor&quot;</span><span class="p">:</span> <span class="n">cursor</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">page_limit</span><span class="p">}}</span>
+</span><span data-line="502">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="503">            <span class="n">pagination</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">page_limit</span><span class="p">}}</span>
+</span><span data-line="504">
+</span><span data-line="505">        <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span> <span class="s2">&quot;pagination&quot;</span><span class="p">:</span> <span class="n">pagination</span><span class="p">}</span>
+</span><span data-line="506">        <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</span><span data-line="507">
+</span><span data-line="508">        <span class="n">runs_data</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;runs&quot;</span><span class="p">]</span>
+</span><span data-line="509">        <span class="n">run_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">runs_data</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">])</span>
 </span><span data-line="510">
-</span><span data-line="511">    <span class="k">return</span> <span class="n">run_ids</span></div>
-
-</span><span data-line="512">
+</span><span data-line="511">        <span class="k">if</span> <span class="n">limit</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">run_ids</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
+</span><span data-line="512">            <span class="k">return</span> <span class="n">run_ids</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
 </span><span data-line="513">
+</span><span data-line="514">        <span class="k">if</span> <span class="ow">not</span> <span class="n">runs_data</span><span class="p">[</span><span class="s2">&quot;page_info&quot;</span><span class="p">][</span><span class="s2">&quot;has_next_page&quot;</span><span class="p">]:</span>
+</span><span data-line="515">            <span class="k">break</span>
+</span><span data-line="516">
+</span><span data-line="517">        <span class="n">cursor</span> <span class="o">=</span> <span class="n">runs_data</span><span class="p">[</span><span class="s2">&quot;page_info&quot;</span><span class="p">][</span><span class="s2">&quot;end_cursor&quot;</span><span class="p">]</span>
+</span><span data-line="518">
+</span><span data-line="519">    <span class="k">return</span> <span class="n">run_ids</span></div>
+
+</span><span data-line="520">
+</span><span data-line="521">
 <div class="viewcode-block" id="delete_run">
 <a class="viewcode-back" href="../../rush.client.html#rush.client.delete_run">[docs]</a>
-</span><span data-line="514"><span class="k">def</span><span class="w"> </span><span class="nf">delete_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="515"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="516"><span class="sd">    Delete a run by ID.</span>
-</span><span data-line="517"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="518">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="519"><span class="s2">        mutation DeleteRun($run_id: String!) {</span>
-</span><span data-line="520"><span class="s2">            delete_run(run_id: $run_id) {</span>
-</span><span data-line="521"><span class="s2">                id</span>
-</span><span data-line="522"><span class="s2">            }</span>
-</span><span data-line="523"><span class="s2">        }</span>
-</span><span data-line="524"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="525">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
-</span><span data-line="526">
-</span><span data-line="527">    <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span></div>
+</span><span data-line="522"><span class="k">def</span><span class="w"> </span><span class="nf">delete_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="523"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="524"><span class="sd">    Delete a run by ID.</span>
+</span><span data-line="525"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="526">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="527"><span class="s2">        mutation DeleteRun($run_id: String!) {</span>
+</span><span data-line="528"><span class="s2">            delete_run(run_id: $run_id) {</span>
+</span><span data-line="529"><span class="s2">                id</span>
+</span><span data-line="530"><span class="s2">            }</span>
+</span><span data-line="531"><span class="s2">        }</span>
+</span><span data-line="532"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="533">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
+</span><span data-line="534">
+</span><span data-line="535">    <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span></div>
 
-</span><span data-line="528">
-</span><span data-line="529">
-</span><span data-line="530"><span class="k">def</span><span class="w"> </span><span class="nf">_submit_rex</span><span class="p">(</span><span class="n">project_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rex</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">()):</span>
-</span><span data-line="531">    <span class="n">mutation</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="532"><span class="s2">        mutation EvalRex($input: CreateRun!) {</span>
-</span><span data-line="533"><span class="s2">            eval(input: $input) {</span>
-</span><span data-line="534"><span class="s2">                id</span>
-</span><span data-line="535"><span class="s2">                status</span>
-</span><span data-line="536"><span class="s2">                created_at</span>
-</span><span data-line="537"><span class="s2">            }</span>
-</span><span data-line="538"><span class="s2">        }</span>
-</span><span data-line="539"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="540">    <span class="n">mutation</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="541">        <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span data-line="542">            <span class="s2">&quot;rex&quot;</span><span class="p">:</span> <span class="n">rex</span><span class="p">,</span>
-</span><span data-line="543">            <span class="s2">&quot;module_lock&quot;</span><span class="p">:</span> <span class="n">MODULE_LOCK</span><span class="p">,</span>
-</span><span data-line="544">            <span class="s2">&quot;draft&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="545">            <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
-</span><span data-line="546">        <span class="p">},</span>
-</span><span data-line="547">    <span class="p">}</span>
-</span><span data-line="548">    <span class="n">mutation</span><span class="o">.</span><span class="n">variable_values</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">|=</span> <span class="p">{</span>
-</span><span data-line="549">        <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">asdict</span><span class="p">(</span><span class="n">run_opts</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span data-line="550">    <span class="p">}</span>
-</span><span data-line="551">
-</span><span data-line="552">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mutation</span><span class="p">)</span>
-</span><span data-line="553">    <span class="n">run_id</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;eval&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-</span><span data-line="554">    <span class="n">created_at</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;eval&quot;</span><span class="p">][</span><span class="s2">&quot;created_at&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="555">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run submitted @ </span><span class="si">{</span><span class="n">created_at</span><span class="si">}</span><span class="s2"> with ID: </span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="556">
-</span><span data-line="557">    <span class="n">history_filepath</span> <span class="o">=</span> <span class="n">_get_opts</span><span class="p">()</span><span class="o">.</span><span class="n">workspace_dir</span> <span class="o">/</span> <span class="s2">&quot;history.json&quot;</span>
-</span><span data-line="558">    <span class="n">history_filepath</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="536">
+</span><span data-line="537">
+</span><span data-line="538"><span class="k">def</span><span class="w"> </span><span class="nf">_submit_rex</span><span class="p">(</span><span class="n">project_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rex</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">()):</span>
+</span><span data-line="539">    <span class="n">mutation</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="540"><span class="s2">        mutation EvalRex($input: CreateRun!) {</span>
+</span><span data-line="541"><span class="s2">            eval(input: $input) {</span>
+</span><span data-line="542"><span class="s2">                id</span>
+</span><span data-line="543"><span class="s2">                status</span>
+</span><span data-line="544"><span class="s2">                created_at</span>
+</span><span data-line="545"><span class="s2">            }</span>
+</span><span data-line="546"><span class="s2">        }</span>
+</span><span data-line="547"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="548">    <span class="n">mutation</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="549">        <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span data-line="550">            <span class="s2">&quot;rex&quot;</span><span class="p">:</span> <span class="n">rex</span><span class="p">,</span>
+</span><span data-line="551">            <span class="s2">&quot;module_lock&quot;</span><span class="p">:</span> <span class="n">MODULE_LOCK</span><span class="p">,</span>
+</span><span data-line="552">            <span class="s2">&quot;draft&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="553">            <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">project_id</span><span class="p">,</span>
+</span><span data-line="554">        <span class="p">},</span>
+</span><span data-line="555">    <span class="p">}</span>
+</span><span data-line="556">    <span class="n">mutation</span><span class="o">.</span><span class="n">variable_values</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">|=</span> <span class="p">{</span>
+</span><span data-line="557">        <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">asdict</span><span class="p">(</span><span class="n">run_opts</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="558">    <span class="p">}</span>
 </span><span data-line="559">
-</span><span data-line="560">    <span class="n">matching_modules</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="561">        <span class="n">module</span>
-</span><span data-line="562">        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">MODULE_LOCK</span>
-</span><span data-line="563">        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">_s&quot;</span> <span class="ow">in</span> <span class="n">rex</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;try_</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">rex</span>
-</span><span data-line="564">    <span class="p">]</span>
-</span><span data-line="565">    <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_modules</span><span class="p">:</span>
-</span><span data-line="566">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="567">            <span class="s2">&quot;Error: no matching module for submission, not adding to history&quot;</span><span class="p">,</span>
-</span><span data-line="568">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-</span><span data-line="569">        <span class="p">)</span>
-</span><span data-line="570">        <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="571">    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_modules</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="572">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="573">            <span class="s2">&quot;Error: &gt; 1 matching module for submission, not adding to history&quot;</span><span class="p">,</span>
-</span><span data-line="574">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-</span><span data-line="575">        <span class="p">)</span>
-</span><span data-line="576">        <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="577">
-</span><span data-line="578">    <span class="n">module</span> <span class="o">=</span> <span class="n">matching_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="579">    <span class="k">if</span> <span class="n">history_filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="580">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">history_filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="581">            <span class="n">history</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</span><span data-line="582">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="583">        <span class="n">history</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instances&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-</span><span data-line="584">
-</span><span data-line="585">    <span class="n">history</span><span class="p">[</span><span class="s2">&quot;instances&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span data-line="586">        <span class="p">{</span>
-</span><span data-line="587">            <span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">,</span>
-</span><span data-line="588">            <span class="s2">&quot;run_created_at&quot;</span><span class="p">:</span> <span class="n">created_at</span><span class="p">,</span>
-</span><span data-line="589">            <span class="s2">&quot;module_path&quot;</span><span class="p">:</span> <span class="n">MODULE_LOCK</span><span class="p">[</span><span class="n">module</span><span class="p">],</span>
-</span><span data-line="590">        <span class="p">}</span>
-</span><span data-line="591">    <span class="p">)</span>
+</span><span data-line="560">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mutation</span><span class="p">)</span>
+</span><span data-line="561">    <span class="n">run_id</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;eval&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</span><span data-line="562">    <span class="n">created_at</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;eval&quot;</span><span class="p">][</span><span class="s2">&quot;created_at&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="563">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run submitted @ </span><span class="si">{</span><span class="n">created_at</span><span class="si">}</span><span class="s2"> with ID: </span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="564">
+</span><span data-line="565">    <span class="n">history_filepath</span> <span class="o">=</span> <span class="n">_get_opts</span><span class="p">()</span><span class="o">.</span><span class="n">workspace_dir</span> <span class="o">/</span> <span class="s2">&quot;history.json&quot;</span>
+</span><span data-line="566">    <span class="n">history_filepath</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="567">
+</span><span data-line="568">    <span class="n">matching_modules</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="569">        <span class="n">module</span>
+</span><span data-line="570">        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">MODULE_LOCK</span>
+</span><span data-line="571">        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">_s&quot;</span> <span class="ow">in</span> <span class="n">rex</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;try_</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">rex</span>
+</span><span data-line="572">    <span class="p">]</span>
+</span><span data-line="573">    <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_modules</span><span class="p">:</span>
+</span><span data-line="574">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="575">            <span class="s2">&quot;Error: no matching module for submission, not adding to history&quot;</span><span class="p">,</span>
+</span><span data-line="576">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="577">        <span class="p">)</span>
+</span><span data-line="578">        <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="579">    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_modules</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="580">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="581">            <span class="s2">&quot;Error: &gt; 1 matching module for submission, not adding to history&quot;</span><span class="p">,</span>
+</span><span data-line="582">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="583">        <span class="p">)</span>
+</span><span data-line="584">        <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="585">
+</span><span data-line="586">    <span class="n">module</span> <span class="o">=</span> <span class="n">matching_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="587">    <span class="k">if</span> <span class="n">history_filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="588">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">history_filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="589">            <span class="n">history</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="590">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="591">        <span class="n">history</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instances&quot;</span><span class="p">:</span> <span class="p">[]}</span>
 </span><span data-line="592">
-</span><span data-line="593">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">history_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="594">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="595">
-</span><span data-line="596">    <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="597">
-</span><span data-line="598">
+</span><span data-line="593">    <span class="n">history</span><span class="p">[</span><span class="s2">&quot;instances&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="594">        <span class="p">{</span>
+</span><span data-line="595">            <span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">,</span>
+</span><span data-line="596">            <span class="s2">&quot;run_created_at&quot;</span><span class="p">:</span> <span class="n">created_at</span><span class="p">,</span>
+</span><span data-line="597">            <span class="s2">&quot;module_path&quot;</span><span class="p">:</span> <span class="n">MODULE_LOCK</span><span class="p">[</span><span class="n">module</span><span class="p">],</span>
+</span><span data-line="598">        <span class="p">}</span>
+</span><span data-line="599">    <span class="p">)</span>
+</span><span data-line="600">
+</span><span data-line="601">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">history_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="602">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="603">
+</span><span data-line="604">    <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="605">
+</span><span data-line="606">
 <div class="viewcode-block" id="RushRun">
 <a class="viewcode-back" href="../../rush.client.html#rush.client.RushRun">[docs]</a>
-</span><span data-line="599"><span class="nd">@dataclass</span>
-</span><span data-line="600"><span class="k">class</span><span class="w"> </span><span class="nc">RushRun</span><span class="p">:</span>
-</span><span data-line="601"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="602"><span class="sd">    Print it out to see a nicely-formatted summary of a run!</span>
-</span><span data-line="603"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="604">
-</span><span data-line="605">    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="606">    <span class="n">created_at</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="607">    <span class="n">updated_at</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="608">    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="609">    <span class="n">deleted_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="610">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="611">    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="612">    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="613">    <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="614">    <span class="n">trace</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="615">    <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="616">
-</span><span data-line="617">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="618">        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="619">            <span class="sa">f</span><span class="s2">&quot;RushRun: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;(unnamed)&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="620">            <span class="sa">f</span><span class="s2">&quot;  id:          </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="621">            <span class="sa">f</span><span class="s2">&quot;  status:      </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="622">            <span class="sa">f</span><span class="s2">&quot;  created_at:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">created_at</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="623">            <span class="sa">f</span><span class="s2">&quot;  updated_at:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">updated_at</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="624">        <span class="p">]</span>
-</span><span data-line="625">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleted_at</span><span class="p">:</span>
-</span><span data-line="626">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  deleted_at:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">deleted_at</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="627">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-</span><span data-line="628">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  description: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="629">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
-</span><span data-line="630">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  tags:        </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="631">        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</span><span data-line="607"><span class="nd">@dataclass</span>
+</span><span data-line="608"><span class="k">class</span><span class="w"> </span><span class="nc">RushRun</span><span class="p">:</span>
+</span><span data-line="609"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="610"><span class="sd">    Print it out to see a nicely-formatted summary of a run!</span>
+</span><span data-line="611"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="612">
+</span><span data-line="613">    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="614">    <span class="n">created_at</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="615">    <span class="n">updated_at</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="616">    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="617">    <span class="n">deleted_at</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="618">    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="619">    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="620">    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="621">    <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="622">    <span class="n">trace</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="623">    <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="624">
+</span><span data-line="625">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="626">        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="627">            <span class="sa">f</span><span class="s2">&quot;RushRun: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;(unnamed)&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="628">            <span class="sa">f</span><span class="s2">&quot;  id:          </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="629">            <span class="sa">f</span><span class="s2">&quot;  status:      </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="630">            <span class="sa">f</span><span class="s2">&quot;  created_at:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">created_at</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="631">            <span class="sa">f</span><span class="s2">&quot;  updated_at:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">updated_at</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="632">        <span class="p">]</span>
+</span><span data-line="633">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleted_at</span><span class="p">:</span>
+</span><span data-line="634">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  deleted_at:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">deleted_at</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="635">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+</span><span data-line="636">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  description: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="637">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+</span><span data-line="638">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  tags:        </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="639">        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
-</span><span data-line="632">
-</span><span data-line="633">
+</span><span data-line="640">
+</span><span data-line="641">
 <div class="viewcode-block" id="fetch_run_info">
 <a class="viewcode-back" href="../../rush.client.html#rush.client.fetch_run_info">[docs]</a>
-</span><span data-line="634"><span class="k">def</span><span class="w"> </span><span class="nf">fetch_run_info</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RushRun</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="635"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="636"><span class="sd">    Fetch all info for a run by ID.</span>
-</span><span data-line="637">
-</span><span data-line="638"><span class="sd">    Returns `None` if the run doesn&#39;t exist.</span>
-</span><span data-line="639"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="640">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="641"><span class="s2">        query GetRun($id: String!) {</span>
-</span><span data-line="642"><span class="s2">            run(id: $id) {</span>
-</span><span data-line="643"><span class="s2">                created_at</span>
-</span><span data-line="644"><span class="s2">                deleted_at</span>
-</span><span data-line="645"><span class="s2">                updated_at</span>
-</span><span data-line="646"><span class="s2">                name</span>
-</span><span data-line="647"><span class="s2">                description</span>
-</span><span data-line="648"><span class="s2">                tags</span>
-</span><span data-line="649"><span class="s2">                result</span>
-</span><span data-line="650"><span class="s2">                status</span>
-</span><span data-line="651"><span class="s2">                trace</span>
-</span><span data-line="652"><span class="s2">                stdout</span>
-</span><span data-line="653"><span class="s2">            }</span>
-</span><span data-line="654"><span class="s2">        }</span>
-</span><span data-line="655"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="656">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
-</span><span data-line="657">
-</span><span data-line="658">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-</span><span data-line="659">    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="660">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="661">
-</span><span data-line="662">    <span class="k">return</span> <span class="n">RushRun</span><span class="p">(</span><span class="o">**</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">})</span></div>
+</span><span data-line="642"><span class="k">def</span><span class="w"> </span><span class="nf">fetch_run_info</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RushRun</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="643"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="644"><span class="sd">    Fetch all info for a run by ID.</span>
+</span><span data-line="645">
+</span><span data-line="646"><span class="sd">    Returns `None` if the run doesn&#39;t exist.</span>
+</span><span data-line="647"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="648">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="649"><span class="s2">        query GetRun($id: String!) {</span>
+</span><span data-line="650"><span class="s2">            run(id: $id) {</span>
+</span><span data-line="651"><span class="s2">                created_at</span>
+</span><span data-line="652"><span class="s2">                deleted_at</span>
+</span><span data-line="653"><span class="s2">                updated_at</span>
+</span><span data-line="654"><span class="s2">                name</span>
+</span><span data-line="655"><span class="s2">                description</span>
+</span><span data-line="656"><span class="s2">                tags</span>
+</span><span data-line="657"><span class="s2">                result</span>
+</span><span data-line="658"><span class="s2">                status</span>
+</span><span data-line="659"><span class="s2">                trace</span>
+</span><span data-line="660"><span class="s2">                stdout</span>
+</span><span data-line="661"><span class="s2">            }</span>
+</span><span data-line="662"><span class="s2">        }</span>
+</span><span data-line="663"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="664">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
+</span><span data-line="665">
+</span><span data-line="666">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</span><span data-line="667">    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="668">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="669">
+</span><span data-line="670">    <span class="k">return</span> <span class="n">RushRun</span><span class="p">(</span><span class="o">**</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">})</span></div>
 
-</span><span data-line="663">
-</span><span data-line="664">
-</span><span data-line="665"><span class="k">def</span><span class="w"> </span><span class="nf">_poll_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">):</span>
-</span><span data-line="666">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="667"><span class="s2">        query GetStatus($id: String!) {</span>
-</span><span data-line="668"><span class="s2">            run(id: $id) {</span>
-</span><span data-line="669"><span class="s2">                status</span>
-</span><span data-line="670"><span class="s2">                module_instances {</span>
-</span><span data-line="671"><span class="s2">                    nodes {</span>
-</span><span data-line="672"><span class="s2">                        created_at</span>
-</span><span data-line="673"><span class="s2">                        admitted_at</span>
-</span><span data-line="674"><span class="s2">                        dispatched_at</span>
-</span><span data-line="675"><span class="s2">                        queued_at</span>
-</span><span data-line="676"><span class="s2">                        run_at</span>
-</span><span data-line="677"><span class="s2">                        completed_at</span>
-</span><span data-line="678"><span class="s2">                        deleted_at</span>
-</span><span data-line="679"><span class="s2">                        status</span>
-</span><span data-line="680"><span class="s2">                        failure_reason</span>
-</span><span data-line="681"><span class="s2">                        failure_context {</span>
-</span><span data-line="682"><span class="s2">                            stdout</span>
-</span><span data-line="683"><span class="s2">                            stderr</span>
-</span><span data-line="684"><span class="s2">                            syserr</span>
-</span><span data-line="685"><span class="s2">                        }</span>
-</span><span data-line="686"><span class="s2">                    }</span>
-</span><span data-line="687"><span class="s2">                }</span>
-</span><span data-line="688"><span class="s2">            }</span>
-</span><span data-line="689"><span class="s2">        }</span>
-</span><span data-line="690"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="691">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
-</span><span data-line="692">
-</span><span data-line="693">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span data-line="694">    <span class="n">poll_interval</span> <span class="o">=</span> <span class="n">INITIAL_POLL_INTERVAL</span>
-</span><span data-line="695">    <span class="n">last_status</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="696">    <span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
-</span><span data-line="697">        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
-</span><span data-line="698">
-</span><span data-line="699">        <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-</span><span data-line="700">        <span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
-</span><span data-line="701">        <span class="n">module_instances</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;module_instances&quot;</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
-</span><span data-line="702">        <span class="k">if</span> <span class="n">module_instances</span><span class="p">:</span>
-</span><span data-line="703">            <span class="n">curr_status</span> <span class="o">=</span> <span class="n">module_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
-</span><span data-line="704">            <span class="k">if</span> <span class="n">curr_status</span> <span class="o">==</span> <span class="s2">&quot;running&quot;</span><span class="p">:</span>
-</span><span data-line="705">                <span class="n">curr_status</span> <span class="o">=</span> <span class="s2">&quot;run&quot;</span>
-</span><span data-line="706">            <span class="k">if</span> <span class="p">(</span>
-</span><span data-line="707">                <span class="n">curr_status</span>
-</span><span data-line="708">                <span class="ow">in</span> <span class="p">[</span>
-</span><span data-line="709">                    <span class="s2">&quot;admitted&quot;</span><span class="p">,</span>
-</span><span data-line="710">                    <span class="s2">&quot;dispatched&quot;</span><span class="p">,</span>
-</span><span data-line="711">                    <span class="s2">&quot;queued&quot;</span><span class="p">,</span>
-</span><span data-line="712">                    <span class="s2">&quot;run&quot;</span><span class="p">,</span>
-</span><span data-line="713">                    <span class="s2">&quot;completed&quot;</span><span class="p">,</span>
-</span><span data-line="714">                    <span class="s2">&quot;deleted&quot;</span><span class="p">,</span>
-</span><span data-line="715">                <span class="p">]</span>
-</span><span data-line="716">                <span class="ow">and</span> <span class="n">curr_status</span> <span class="o">!=</span> <span class="n">last_status</span>
-</span><span data-line="717">            <span class="p">):</span>
-</span><span data-line="718">                <span class="n">curr_status_time</span> <span class="o">=</span> <span class="n">module_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">curr_status</span><span class="si">}</span><span class="s2">_at&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span>
-</span><span data-line="719">                    <span class="mi">0</span>
-</span><span data-line="720">                <span class="p">]</span>
-</span><span data-line="721">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;• </span><span class="si">{</span><span class="n">curr_status</span><span class="si">:</span><span class="s2">11</span><span class="si">}</span><span class="s2"> @ </span><span class="si">{</span><span class="n">curr_status_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="722">                <span class="n">poll_interval</span> <span class="o">=</span> <span class="n">INITIAL_POLL_INTERVAL</span>
-</span><span data-line="723">                <span class="n">last_status</span> <span class="o">=</span> <span class="n">curr_status</span>
-</span><span data-line="724">            <span class="n">poll_interval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">poll_interval</span> <span class="o">*</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="n">MAX_POLL_INTERVAL</span><span class="p">)</span>
-</span><span data-line="725">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="726">            <span class="n">poll_interval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">poll_interval</span> <span class="o">*</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span><span data-line="727">
-</span><span data-line="728">        <span class="k">if</span> <span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">]:</span>
-</span><span data-line="729">            <span class="k">if</span> <span class="ow">not</span> <span class="n">last_status</span><span class="p">:</span>
-</span><span data-line="730">                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Restored already-completed run&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="731">            <span class="k">return</span> <span class="n">status</span>
-</span><span data-line="732">
-</span><span data-line="733">        <span class="n">poll_interval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">poll_interval</span> <span class="o">*</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="n">MAX_POLL_INTERVAL</span><span class="p">)</span>
-</span><span data-line="734">
-</span><span data-line="735">    <span class="k">return</span> <span class="n">status</span>
-</span><span data-line="736">
-</span><span data-line="737">
+</span><span data-line="671">
+</span><span data-line="672">
+</span><span data-line="673"><span class="k">def</span><span class="w"> </span><span class="nf">_poll_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">):</span>
+</span><span data-line="674">    <span class="n">query</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="675"><span class="s2">        query GetStatus($id: String!) {</span>
+</span><span data-line="676"><span class="s2">            run(id: $id) {</span>
+</span><span data-line="677"><span class="s2">                status</span>
+</span><span data-line="678"><span class="s2">                module_instances {</span>
+</span><span data-line="679"><span class="s2">                    nodes {</span>
+</span><span data-line="680"><span class="s2">                        created_at</span>
+</span><span data-line="681"><span class="s2">                        admitted_at</span>
+</span><span data-line="682"><span class="s2">                        dispatched_at</span>
+</span><span data-line="683"><span class="s2">                        queued_at</span>
+</span><span data-line="684"><span class="s2">                        run_at</span>
+</span><span data-line="685"><span class="s2">                        completed_at</span>
+</span><span data-line="686"><span class="s2">                        deleted_at</span>
+</span><span data-line="687"><span class="s2">                        status</span>
+</span><span data-line="688"><span class="s2">                        failure_reason</span>
+</span><span data-line="689"><span class="s2">                        failure_context {</span>
+</span><span data-line="690"><span class="s2">                            stdout</span>
+</span><span data-line="691"><span class="s2">                            stderr</span>
+</span><span data-line="692"><span class="s2">                            syserr</span>
+</span><span data-line="693"><span class="s2">                        }</span>
+</span><span data-line="694"><span class="s2">                    }</span>
+</span><span data-line="695"><span class="s2">                }</span>
+</span><span data-line="696"><span class="s2">            }</span>
+</span><span data-line="697"><span class="s2">        }</span>
+</span><span data-line="698"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="699">    <span class="n">query</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">}</span>
+</span><span data-line="700">
+</span><span data-line="701">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span data-line="702">    <span class="n">poll_interval</span> <span class="o">=</span> <span class="n">INITIAL_POLL_INTERVAL</span>
+</span><span data-line="703">    <span class="n">last_status</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="704">    <span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">max_wait_time</span><span class="p">:</span>
+</span><span data-line="705">        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span>
+</span><span data-line="706">
+</span><span data-line="707">        <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</span><span data-line="708">        <span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
+</span><span data-line="709">        <span class="n">module_instances</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="s2">&quot;module_instances&quot;</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
+</span><span data-line="710">        <span class="k">if</span> <span class="n">module_instances</span><span class="p">:</span>
+</span><span data-line="711">            <span class="n">curr_status</span> <span class="o">=</span> <span class="n">module_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
+</span><span data-line="712">            <span class="k">if</span> <span class="n">curr_status</span> <span class="o">==</span> <span class="s2">&quot;running&quot;</span><span class="p">:</span>
+</span><span data-line="713">                <span class="n">curr_status</span> <span class="o">=</span> <span class="s2">&quot;run&quot;</span>
+</span><span data-line="714">            <span class="k">if</span> <span class="p">(</span>
+</span><span data-line="715">                <span class="n">curr_status</span>
+</span><span data-line="716">                <span class="ow">in</span> <span class="p">[</span>
+</span><span data-line="717">                    <span class="s2">&quot;admitted&quot;</span><span class="p">,</span>
+</span><span data-line="718">                    <span class="s2">&quot;dispatched&quot;</span><span class="p">,</span>
+</span><span data-line="719">                    <span class="s2">&quot;queued&quot;</span><span class="p">,</span>
+</span><span data-line="720">                    <span class="s2">&quot;run&quot;</span><span class="p">,</span>
+</span><span data-line="721">                    <span class="s2">&quot;completed&quot;</span><span class="p">,</span>
+</span><span data-line="722">                    <span class="s2">&quot;deleted&quot;</span><span class="p">,</span>
+</span><span data-line="723">                <span class="p">]</span>
+</span><span data-line="724">                <span class="ow">and</span> <span class="n">curr_status</span> <span class="o">!=</span> <span class="n">last_status</span>
+</span><span data-line="725">            <span class="p">):</span>
+</span><span data-line="726">                <span class="n">curr_status_time</span> <span class="o">=</span> <span class="n">module_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">curr_status</span><span class="si">}</span><span class="s2">_at&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span>
+</span><span data-line="727">                    <span class="mi">0</span>
+</span><span data-line="728">                <span class="p">]</span>
+</span><span data-line="729">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;• </span><span class="si">{</span><span class="n">curr_status</span><span class="si">:</span><span class="s2">11</span><span class="si">}</span><span class="s2"> @ </span><span class="si">{</span><span class="n">curr_status_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="730">                <span class="n">poll_interval</span> <span class="o">=</span> <span class="n">INITIAL_POLL_INTERVAL</span>
+</span><span data-line="731">                <span class="n">last_status</span> <span class="o">=</span> <span class="n">curr_status</span>
+</span><span data-line="732">            <span class="n">poll_interval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">poll_interval</span> <span class="o">*</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="n">MAX_POLL_INTERVAL</span><span class="p">)</span>
+</span><span data-line="733">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="734">            <span class="n">poll_interval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">poll_interval</span> <span class="o">*</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span data-line="735">
+</span><span data-line="736">        <span class="k">if</span> <span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">]:</span>
+</span><span data-line="737">            <span class="k">if</span> <span class="ow">not</span> <span class="n">last_status</span><span class="p">:</span>
+</span><span data-line="738">                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Restored already-completed run&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="739">            <span class="k">return</span> <span class="n">status</span>
+</span><span data-line="740">
+</span><span data-line="741">        <span class="n">poll_interval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">poll_interval</span> <span class="o">*</span> <span class="n">BACKOFF_FACTOR</span><span class="p">,</span> <span class="n">MAX_POLL_INTERVAL</span><span class="p">)</span>
+</span><span data-line="742">
+</span><span data-line="743">    <span class="k">return</span> <span class="n">status</span>
+</span><span data-line="744">
+</span><span data-line="745">
 <div class="viewcode-block" id="collect_run">
 <a class="viewcode-back" href="../../rush.client.html#rush.client.collect_run">[docs]</a>
-</span><span data-line="738"><span class="k">def</span><span class="w"> </span><span class="nf">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="739"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="740"><span class="sd">    Waits until the run finishes, or `max_wait_time` elapses, and returns either the</span>
-</span><span data-line="741"><span class="sd">    actual result of the run, an error string if the run failed, or a string indicating</span>
-</span><span data-line="742"><span class="sd">    that the run timed out.</span>
-</span><span data-line="743"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="744">    <span class="n">status</span> <span class="o">=</span> <span class="n">_poll_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">)</span>
-</span><span data-line="745">    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">]:</span>
-</span><span data-line="746">        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Run timed out: did not complete within </span><span class="si">{</span><span class="n">max_wait_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span>
-</span><span data-line="747">        <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="748">        <span class="k">return</span> <span class="n">err</span>
-</span><span data-line="749">
-</span><span data-line="750">    <span class="n">run</span> <span class="o">=</span> <span class="n">_fetch_results</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
-</span><span data-line="751">    <span class="k">if</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">:</span>
-</span><span data-line="752">        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cancelled: </span><span class="si">{</span><span class="n">run</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="753">        <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="754">        <span class="k">return</span> <span class="n">err</span>
-</span><span data-line="755">    <span class="k">elif</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
-</span><span data-line="756">        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">run</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="757">        <span class="n">_print_run_trace</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
-</span><span data-line="758">        <span class="k">return</span> <span class="n">err</span>
-</span><span data-line="759">
-</span><span data-line="760">    <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
-</span><span data-line="761">
-</span><span data-line="762">    <span class="k">def</span><span class="w"> </span><span class="nf">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
-</span><span data-line="763">        <span class="k">return</span> <span class="p">(</span>
-</span><span data-line="764">            <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-</span><span data-line="765">            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-</span><span data-line="766">            <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">or</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">)</span>
-</span><span data-line="767">        <span class="p">)</span>
-</span><span data-line="768">
-</span><span data-line="769">    <span class="c1"># outer error: for tengu-level failures (should exist for try-prefixed rex fns)</span>
-</span><span data-line="770">    <span class="k">if</span> <span class="n">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
-</span><span data-line="771">        <span class="k">if</span> <span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-</span><span data-line="772">            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;Ok&quot;</span><span class="p">]</span>
-</span><span data-line="773">        <span class="k">elif</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-</span><span data-line="774">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Err&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="775">            <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;Err&quot;</span><span class="p">]</span>
+</span><span data-line="746"><span class="k">def</span><span class="w"> </span><span class="nf">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">:</span>
+</span><span data-line="747"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="748"><span class="sd">    Waits until the run finishes, or `max_wait_time` elapses, and returns either the</span>
+</span><span data-line="749"><span class="sd">    actual result of the run, an error string if the run failed, or a string indicating</span>
+</span><span data-line="750"><span class="sd">    that the run timed out.</span>
+</span><span data-line="751"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="752">    <span class="n">status</span> <span class="o">=</span> <span class="n">_poll_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">,</span> <span class="n">max_wait_time</span><span class="p">)</span>
+</span><span data-line="753">    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">]:</span>
+</span><span data-line="754">        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Run timed out: did not complete within </span><span class="si">{</span><span class="n">max_wait_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span>
+</span><span data-line="755">        <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="756">        <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span><span data-line="757">
+</span><span data-line="758">    <span class="n">run</span> <span class="o">=</span> <span class="n">_fetch_results</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+</span><span data-line="759">    <span class="k">if</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">:</span>
+</span><span data-line="760">        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cancelled: </span><span class="si">{</span><span class="n">run</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="761">        <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="762">        <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span><span data-line="763">    <span class="k">elif</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+</span><span data-line="764">        <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">run</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="765">        <span class="n">_print_run_trace</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+</span><span data-line="766">        <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span><span data-line="767">
+</span><span data-line="768">    <span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+</span><span data-line="769">
+</span><span data-line="770">    <span class="k">def</span><span class="w"> </span><span class="nf">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+</span><span data-line="771">        <span class="k">return</span> <span class="p">(</span>
+</span><span data-line="772">            <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="773">            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+</span><span data-line="774">            <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">or</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">)</span>
+</span><span data-line="775">        <span class="p">)</span>
 </span><span data-line="776">
-</span><span data-line="777">    <span class="c1"># inner error: for logic-level failures (may not exist, but should)</span>
+</span><span data-line="777">    <span class="c1"># outer error: for tengu-level failures (should exist for try-prefixed rex fns)</span>
 </span><span data-line="778">    <span class="k">if</span> <span class="n">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
 </span><span data-line="779">        <span class="k">if</span> <span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
 </span><span data-line="780">            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;Ok&quot;</span><span class="p">]</span>
 </span><span data-line="781">        <span class="k">elif</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
 </span><span data-line="782">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Err&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="783">            <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;Err&quot;</span><span class="p">]</span>
+</span><span data-line="783">            <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;Err&quot;</span><span class="p">])</span>
 </span><span data-line="784">
-</span><span data-line="785">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="786">        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="787">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="788">        <span class="k">return</span> <span class="n">result</span></div>
+</span><span data-line="785">    <span class="c1"># inner error: for logic-level failures (may not exist, but should)</span>
+</span><span data-line="786">    <span class="k">if</span> <span class="n">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+</span><span data-line="787">        <span class="k">if</span> <span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+</span><span data-line="788">            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;Ok&quot;</span><span class="p">]</span>
+</span><span data-line="789">        <span class="k">elif</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+</span><span data-line="790">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;Err&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="791">            <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;Err&quot;</span><span class="p">])</span>
+</span><span data-line="792">
+</span><span data-line="793">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="794">        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="795">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="796">        <span class="k">return</span> <span class="n">result</span></div>
 
-</span><span data-line="789">
-</span><span data-line="790">
-</span><span data-line="791"><span class="c1">#: All self-explanatory: pending runs are queued for submission to a target.</span>
-</span><span data-line="792"><span class="n">RunStatus</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
-</span><span data-line="793">    <span class="s2">&quot;pending&quot;</span><span class="p">,</span> <span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;draft&quot;</span>
-</span><span data-line="794"><span class="p">]</span>
-</span><span data-line="795">
-</span><span data-line="796"><span class="c1">#: Valid values for the `target` field of `RunSpec`.</span>
-</span><span data-line="797"><span class="n">Target</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;Bullet&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet2&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet3&quot;</span><span class="p">,</span> <span class="s2">&quot;Gadi&quot;</span><span class="p">,</span> <span class="s2">&quot;Setonix&quot;</span><span class="p">]</span>
+</span><span data-line="797">
 </span><span data-line="798">
-</span><span data-line="799"><span class="c1">#: Valid values for the `storage_units` field of `RunSpec`.</span>
-</span><span data-line="800"><span class="n">StorageUnit</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;KB&quot;</span><span class="p">,</span> <span class="s2">&quot;MB&quot;</span><span class="p">,</span> <span class="s2">&quot;GB&quot;</span><span class="p">]</span>
+</span><span data-line="799"><span class="c1">#: All self-explanatory: pending runs are queued for submission to a target.</span>
+</span><span data-line="800"><span class="n">RunStatus</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
+</span><span data-line="801">    <span class="s2">&quot;pending&quot;</span><span class="p">,</span> <span class="s2">&quot;running&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;cancelled&quot;</span><span class="p">,</span> <span class="s2">&quot;draft&quot;</span>
+</span><span data-line="802"><span class="p">]</span>
+</span><span data-line="803">
+</span><span data-line="804">
+</span><span data-line="805"><span class="c1">#: Valid values for the `target` field of `RunSpec`.</span>
+</span><span data-line="806"><span class="n">Target</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;Bullet&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet2&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet3&quot;</span><span class="p">,</span> <span class="s2">&quot;Gadi&quot;</span><span class="p">,</span> <span class="s2">&quot;Setonix&quot;</span><span class="p">]</span>
+</span><span data-line="807">
+</span><span data-line="808"><span class="c1">#: Valid values for the `storage_units` field of `RunSpec`.</span>
+</span><span data-line="809"><span class="n">StorageUnit</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;KB&quot;</span><span class="p">,</span> <span class="s2">&quot;MB&quot;</span><span class="p">,</span> <span class="s2">&quot;GB&quot;</span><span class="p">]</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -993,7 +1006,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

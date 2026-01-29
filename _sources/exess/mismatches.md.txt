@@ -24,7 +24,7 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - `Topology` includes `waters` (water range) and `stereochemistry` in libqdx.hpp; these fields are not present in the Rust `Topology` struct.
 - `GuessSCF` uses `bf_cutoff_threshold` in libqdx.hpp but `bt_cutoff_threshold` in libqdx Rust.
 - `ssfd_only_converge_in_bsp_basis` has a trailing space in the libqdx.hpp JSON key (`"ssfd_only_converge_in_bsp_basis "`).
-- `ks_dft.grid` is free-form JSON in libqdx.hpp, but the Rust schema uses a fixed `XCGridParameters` struct (no octree/space-filling fields).
+- `ks_dft.grid` is free-form JSON in libqdx.hpp, but the Rust schema uses a fixed `XCGridParameters` struct.
 - `model.method` and `model.basis` are required in libqdx.hpp, but libqdx Rust provides defaults (`RestrictedHF`, `cc-pVDZ`) when omitted.
 
 **libqdx C++ vs EXESS core defaults**
@@ -41,7 +41,7 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - rush-py exposes a limited `MethodT` list and does not include `RestrictedRICCSD`.
 - rush-py `BasisT` / `AuxBasisT` lists are narrower than the EXESS basis set lists.
 - rush-py `Model` only exposes `standard_orientation` and `force_cartesian_basis_sets`; `method`/`basis` are function parameters.
-- rush-py does not expose `external_charges`, `rtat`, `integrals`, or `ks_dft` keyword groups.
+- rush-py does not expose `external_charges`, `rtat`, or `integrals` keyword groups.
 - rush-py `StandardDescriptorGrid` accepts `SG1`/`SG2`, while the schema uses `FINE`/`ULTRAFINE`/`SUPERFINE`/`TREUTLER_GM*`.
 - rush-py `OptimizationKeywords` does not pass `constraints` to REX (marked TODO in code).
 - rush-py `Topology` does not expose `stereochemistry`, `fragment_multiplicities`, or `waters`.

@@ -6,7 +6,8 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,10 +145,10 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="13">
 </span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
 </span><span data-line="15">
-</span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_json</span><span class="p">,</span> <span class="n">from_pdb</span><span class="p">,</span> <span class="n">to_pdb</span>
+</span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_json</span><span class="p">,</span> <span class="n">from_pdb</span><span class="p">,</span> <span class="n">to_pdb</span><span class="p">,</span> <span class="n">TRC</span>
 </span><span data-line="17"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
 </span><span data-line="18">    <span class="n">RunOpts</span><span class="p">,</span>
-</span><span data-line="19">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="19">    <span class="n">RunSpec</span><span class="p">,</span> <span class="n">RunError</span><span class="p">,</span>
 </span><span data-line="20"><span class="p">)</span>
 </span><span data-line="21"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.prepare_protein</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_protein</span> <span class="k">as</span> <span class="n">run_prepare_protein</span>
 </span><span data-line="22"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.prepare_protein</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_outputs</span> <span class="k">as</span> <span class="n">save_prepare_protein_outputs</span>
@@ -263,7 +264,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="130">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(),</span>
 </span><span data-line="131">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
 </span><span data-line="132">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="133"><span class="p">):</span>
+</span><span data-line="133"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">:</span>
 </span><span data-line="134"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="135"><span class="sd">    Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.</span>
 </span><span data-line="136"><span class="sd">    &quot;&quot;&quot;</span>
@@ -294,20 +295,15 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="161">        <span class="n">run_opts</span><span class="p">,</span>
 </span><span data-line="162">        <span class="n">collect</span><span class="p">,</span>
 </span><span data-line="163">    <span class="p">)</span>
-</span><span data-line="164">    <span class="n">trc_p_files</span> <span class="o">=</span> <span class="n">save_prepare_protein_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-</span><span data-line="165">    <span class="n">trc_p</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">trc_p_files</span><span class="p">)</span>
-</span><span data-line="166">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="167">        <span class="n">trc_p</span> <span class="o">=</span> <span class="n">trc_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="168">
-</span><span data-line="169">    <span class="n">trc_c</span> <span class="o">=</span> <span class="n">merge_trcs</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="n">trc_l</span><span class="p">)</span>
-</span><span data-line="170">    <span class="k">return</span> <span class="n">trc_c</span></div>
-
-</span><span data-line="171">
-</span><span data-line="172">
-<div class="viewcode-block" id="save_outputs">
-<a class="viewcode-back" href="../../rush.prepare_complex.html#rush.prepare_complex.save_outputs">[docs]</a>
-</span><span data-line="173"><span class="k">def</span><span class="w"> </span><span class="nf">save_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
-</span><span data-line="174">    <span class="k">return</span> <span class="n">res</span></div>
+</span><span data-line="164">    <span class="n">trc_p_output</span> <span class="o">=</span> <span class="n">save_prepare_protein_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span><span data-line="165">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">,</span> <span class="n">RunError</span><span class="p">):</span>
+</span><span data-line="166">        <span class="k">return</span> <span class="n">trc_p_output</span>
+</span><span data-line="167">    <span class="n">trc_p</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">)</span>
+</span><span data-line="168">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="169">        <span class="n">trc_p</span> <span class="o">=</span> <span class="n">trc_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="170">
+</span><span data-line="171">    <span class="n">trc_c</span> <span class="o">=</span> <span class="n">merge_trcs</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="n">trc_l</span><span class="p">)</span>
+</span><span data-line="172">    <span class="k">return</span> <span class="n">trc_c</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -337,7 +333,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

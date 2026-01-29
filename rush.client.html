@@ -96,7 +96,56 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.client.RunError"><code class="docutils literal notranslate"><span class="pre">RunError</span></code></a><ul>
+<li><a class="reference internal" href="#rush.client.RunError.message"><code class="docutils literal notranslate">message</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.client.RunOpts"><code class="docutils literal notranslate"><span class="pre">RunOpts</span></code></a><ul>
+<li><a class="reference internal" href="#rush.client.RunOpts.description"><code class="docutils literal notranslate">description</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunOpts.email"><code class="docutils literal notranslate">email</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunOpts.name"><code class="docutils literal notranslate">name</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunOpts.tags"><code class="docutils literal notranslate">tags</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.client.RunSpec"><code class="docutils literal notranslate"><span class="pre">RunSpec</span></code></a><ul>
+<li><a class="reference internal" href="#rush.client.RunSpec.cpus"><code class="docutils literal notranslate">cpus</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunSpec.gpus"><code class="docutils literal notranslate">gpus</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunSpec.nodes"><code class="docutils literal notranslate">nodes</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunSpec.storage"><code class="docutils literal notranslate">storage</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunSpec.storage_units"><code class="docutils literal notranslate">storage_units</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunSpec.target"><code class="docutils literal notranslate">target</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunSpec.walltime"><code class="docutils literal notranslate">walltime</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.client.RushRun"><code class="docutils literal notranslate"><span class="pre">RushRun</span></code></a><ul>
+<li><a class="reference internal" href="#rush.client.RushRun.created_at"><code class="docutils literal notranslate">created_at</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.deleted_at"><code class="docutils literal notranslate">deleted_at</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.description"><code class="docutils literal notranslate">description</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.id"><code class="docutils literal notranslate">id</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.name"><code class="docutils literal notranslate">name</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.result"><code class="docutils literal notranslate">result</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.status"><code class="docutils literal notranslate">status</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.stdout"><code class="docutils literal notranslate">stdout</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.tags"><code class="docutils literal notranslate">tags</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.trace"><code class="docutils literal notranslate">trace</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RushRun.updated_at"><code class="docutils literal notranslate">updated_at</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.client.collect_run"><code class="docutils literal notranslate"><span class="pre">collect_run()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.delete_run"><code class="docutils literal notranslate"><span class="pre">delete_run()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.download_object"><code class="docutils literal notranslate"><span class="pre">download_object()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.fetch_run_info"><code class="docutils literal notranslate"><span class="pre">fetch_run_info()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.fetch_runs"><code class="docutils literal notranslate"><span class="pre">fetch_runs()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.save_json"><code class="docutils literal notranslate"><span class="pre">save_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.save_object"><code class="docutils literal notranslate"><span class="pre">save_object()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.set_opts"><code class="docutils literal notranslate"><span class="pre">set_opts()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.upload_object"><code class="docutils literal notranslate"><span class="pre">upload_object()</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunStatus"><code class="docutils literal notranslate"><span class="pre">RunStatus</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.StorageUnit"><code class="docutils literal notranslate"><span class="pre">StorageUnit</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.Target"><code class="docutils literal notranslate"><span class="pre">Target</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -129,8 +178,384 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="rush-client">
-<h1>rush.client<a class="headerlink" href="#rush-client" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.client">
+<span id="rush-client"></span><h1>rush.client<a class="headerlink" href="#module-rush.client" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.client.RunError">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RunError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#RunError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.RunError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a run error message, returned from failed collected runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunError.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rush.client.RunError.message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.client.RunOpts">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RunOpts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#RunOpts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.RunOpts" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The description currently doesn’t show up anywhere.
+The tags will also show up in the Rush UI and will (eventually) allow for run searching and filtering.
+The email flag, if set to True, will cause an email to be sent to you upon run completion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>description</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>tags</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>email</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunOpts.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunOpts.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunOpts.email">
+<span class="sig-name descname"><span class="pre">email</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunOpts.email" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunOpts.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunOpts.name" title="Link to this definition">¶</a></dt>
+<dd><p>Shows up as the name (i.e. title) of the run in the Rush UI.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunOpts.tags">
+<span class="sig-name descname"><span class="pre">tags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunOpts.tags" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.client.RunSpec">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RunSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walltime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MB'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#RunSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.RunSpec" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The run specification: configuration for the target and resources of a run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<a class="reference internal" href="#rush.client.Target" title="rush.client.Target"><em>Target</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>walltime</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>storage</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>storage_units</strong> (<a class="reference internal" href="#rush.client.StorageUnit" title="rush.client.StorageUnit"><em>StorageUnit</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>cpus</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>gpus</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>nodes</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.cpus">
+<span class="sig-name descname"><span class="pre">cpus</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunSpec.cpus" title="Link to this definition">¶</a></dt>
+<dd><p>The number of CPUs for the run. Default is module-specific.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.gpus">
+<span class="sig-name descname"><span class="pre">gpus</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunSpec.gpus" title="Link to this definition">¶</a></dt>
+<dd><p>The number of GPUs for the run. Default is module-specific.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunSpec.nodes" title="Link to this definition">¶</a></dt>
+<dd><p>The number of nodes for the run. Only relevant for supercomputer targets.
+Default is module-specific.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.storage">
+<span class="sig-name descname"><span class="pre">storage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></span><a class="headerlink" href="#rush.client.RunSpec.storage" title="Link to this definition">¶</a></dt>
+<dd><p>Max storage in the specified storage units for the run.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.storage_units">
+<span class="sig-name descname"><span class="pre">storage_units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.client.StorageUnit" title="rush.client.StorageUnit"><span class="pre">StorageUnit</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MB'</span></span><a class="headerlink" href="#rush.client.RunSpec.storage_units" title="Link to this definition">¶</a></dt>
+<dd><p>The storage units for the run.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.target">
+<span class="sig-name descname"><span class="pre">target</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.client.Target" title="rush.client.Target"><span class="pre">Target</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunSpec.target" title="Link to this definition">¶</a></dt>
+<dd><p>The Rush-specified hardware that the run will be submitted to.
+By default, randomly chooses a cloud compute “Bullet” node of the three available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunSpec.walltime">
+<span class="sig-name descname"><span class="pre">walltime</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RunSpec.walltime" title="Link to this definition">¶</a></dt>
+<dd><p>Max walltime in minutes for the run.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.client.RushRun">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RushRun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updated_at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deleted_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#RushRun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.RushRun" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Print it out to see a nicely-formatted summary of a run!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em>)</p></li>
+<li><p><strong>created_at</strong> (<em>str</em>)</p></li>
+<li><p><strong>updated_at</strong> (<em>str</em>)</p></li>
+<li><p><strong>status</strong> (<em>str</em>)</p></li>
+<li><p><strong>deleted_at</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>description</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>tags</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>result</strong> (<em>dict</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>trace</strong> (<em>dict</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>stdout</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rush.client.RushRun.created_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.deleted_at">
+<span class="sig-name descname"><span class="pre">deleted_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.deleted_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rush.client.RushRun.id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.status">
+<span class="sig-name descname"><span class="pre">status</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rush.client.RushRun.status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.stdout">
+<span class="sig-name descname"><span class="pre">stdout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.stdout" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.tags">
+<span class="sig-name descname"><span class="pre">tags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.tags" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.trace">
+<span class="sig-name descname"><span class="pre">trace</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.client.RushRun.trace" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RushRun.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rush.client.RushRun.updated_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.collect_run">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">collect_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_wait_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#collect_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.collect_run" title="Link to this definition">¶</a></dt>
+<dd><p>Waits until the run finishes, or <cite>max_wait_time</cite> elapses, and returns either the
+actual result of the run, an error string if the run failed, or a string indicating
+that the run timed out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_id</strong> (<em>str</em>)</p></li>
+<li><p><strong>max_wait_time</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em> | <a class="reference internal" href="#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.delete_run">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">delete_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#delete_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.delete_run" title="Link to this definition">¶</a></dt>
+<dd><p>Delete a run by ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>run_id</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.download_object">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">download_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#download_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.download_object" title="Link to this definition">¶</a></dt>
+<dd><p>Downloads the contents of the given Rush object store path directly into a variable.
+Be careful, if the contents are too large it might not fit into memory!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.fetch_run_info">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">fetch_run_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#fetch_run_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.fetch_run_info" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch all info for a run by ID.</p>
+<p>Returns <cite>None</cite> if the run doesn’t exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>run_id</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#rush.client.RushRun" title="rush.client.RushRun"><em>RushRun</em></a> | <em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.fetch_runs">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">fetch_runs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_contains</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#fetch_runs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.fetch_runs" title="Link to this definition">¶</a></dt>
+<dd><p>Query runs and return their IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Filter by exact run name (case-insensitive).</p></li>
+<li><p><strong>name_contains</strong> (<em>str</em><em> | </em><em>None</em>) – Filter by runs whose name contains this substring.</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="#rush.client.RunStatus" title="rush.client.RunStatus"><em>RunStatus</em></a><em> | </em><em>list</em><em>[</em><a class="reference internal" href="#rush.client.RunStatus" title="rush.client.RunStatus"><em>RunStatus</em></a><em>] </em><em>| </em><em>None</em>) – Filter by status. Can be a single status or a list of statuses.</p></li>
+<li><p><strong>tags</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Filter by tags. Returns runs that have ALL specified tags.</p></li>
+<li><p><strong>limit</strong> (<em>int</em><em> | </em><em>None</em>) – Maximum number of runs to return. If None, returns all matching runs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of run IDs matching the filters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<em>str</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.save_json">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">save_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#save_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.save_json" title="Link to this definition">¶</a></dt>
+<dd><p>Save a JSON file into the workspace folder.
+Convenient for saving non-object JSON output from a module run alongside
+the object outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d</strong> (<em>dict</em>)</p></li>
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.save_object">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">save_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#save_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.save_object" title="Link to this definition">¶</a></dt>
+<dd><p>Saves the contents of the given Rush object store path into the workspace folder.
+Provides a variety of naming schemes, and supports automatically extracting tar.zst
+archives (which are sometimes used for module outputs).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <cite>filepath</cite> and <cite>name</cite> parameters are mutually exculsive.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The Rush object store path to save.</p></li>
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em>) – Overrides the path to save to.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Sets the name of the file to save to.</p></li>
+<li><p><strong>type</strong> (<em>Literal</em><em>[</em><em>'json'</em><em>, </em><em>'bin'</em><em>] </em><em>| </em><em>None</em>) – Manually specify the type of object (usually not necessary).</p></li>
+<li><p><strong>ext</strong> (<em>str</em><em> | </em><em>None</em>) – Manually the filetype extension to use (otherwise, based on <cite>type</cite>).</p></li>
+<li><p><strong>extract</strong> (<em>bool</em>) – Automatically extract tar.zst files before saving.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.set_opts">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">set_opts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#set_opts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.set_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Sets Rush options. Currently, only allows setting the workspace directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>workspace_dir</strong> (<em>Path</em><em> | </em><em>None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.client.upload_object">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">upload_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#upload_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.upload_object" title="Link to this definition">¶</a></dt>
+<dd><p>Upload an object at the filepath to the current project. Usually not necessary; the
+module functions should handle this automatically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rush.client.RunStatus">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RunStatus</span></span><a class="headerlink" href="#rush.client.RunStatus" title="Link to this definition">¶</a></dt>
+<dd><p>pending runs are queued for submission to a target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>All self-explanatory</p>
+</dd>
+</dl>
+<p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Literal</span></code>[‘pending’, ‘running’, ‘done’, ‘error’, ‘cancelled’, ‘draft’]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rush.client.StorageUnit">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">StorageUnit</span></span><a class="headerlink" href="#rush.client.StorageUnit" title="Link to this definition">¶</a></dt>
+<dd><p>Valid values for the <cite>storage_units</cite> field of <cite>RunSpec</cite>.</p>
+<p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Literal</span></code>[‘KB’, ‘MB’, ‘GB’]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rush.client.Target">
+<span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">Target</span></span><a class="headerlink" href="#rush.client.Target" title="Link to this definition">¶</a></dt>
+<dd><p>Valid values for the <cite>target</cite> field of <cite>RunSpec</cite>.</p>
+<p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Literal</span></code>[‘Bullet’, ‘Bullet2’, ‘Bullet3’, ‘Gadi’, ‘Setonix’]</p>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -159,7 +584,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

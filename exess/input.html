@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Input format - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Keyword reference" href="keywords.html" /><link rel="prev" title="Running EXESS" href="running.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Input format - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Topologies and residues" href="topologies.html" /><link rel="prev" title="Running EXESS" href="running.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -62,6 +62,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="electronic-structure-methods.html">Electronic Structure Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running.html">Running EXESS</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topologies.html">Topologies and residues</a></li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">Keyword reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
@@ -81,28 +82,20 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#schema-overview">Schema overview</a></li>
-<li><a class="reference internal" href="#default-resolution-order">Default resolution order</a></li>
-<li><a class="reference internal" href="#topologies">topologies</a><ul>
-<li><a class="reference internal" href="#topology-fields">topology fields</a><ul>
-<li><a class="reference internal" href="#geometry">geometry</a></li>
-<li><a class="reference internal" href="#symbols">symbols</a></li>
-<li><a class="reference internal" href="#xyz">xyz</a></li>
-<li><a class="reference internal" href="#connectivity">connectivity</a></li>
-<li><a class="reference internal" href="#stereochemistry">stereochemistry</a></li>
-<li><a class="reference internal" href="#fragments">fragments</a></li>
-<li><a class="reference internal" href="#fragment-formal-charges-fragment-multiplicities">fragment_formal_charges / fragment_multiplicities</a></li>
-<li><a class="reference internal" href="#topology-validation-checks">topology validation checks</a></li>
-<li><a class="reference internal" href="#waters">waters</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#input-system-specification">Input System Specification</a><ul>
+<li><a class="reference internal" href="#topologies">topologies</a></li>
 <li><a class="reference internal" href="#residues">residues</a></li>
 <li><a class="reference internal" href="#external-charges">external_charges</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration">Configuration</a><ul>
 <li><a class="reference internal" href="#driver">driver</a></li>
 <li><a class="reference internal" href="#model">model</a></li>
 <li><a class="reference internal" href="#system">system</a></li>
 <li><a class="reference internal" href="#keywords">keywords</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#default-resolution-order">Default resolution order</a></li>
 <li><a class="reference internal" href="#rush-py-input-mapping">Rush-py input mapping</a></li>
 <li><a class="reference internal" href="#rush-py-defaults">Rush-py defaults</a></li>
 <li><a class="reference internal" href="#input-conversion-tools">Input conversion tools</a></li>
@@ -136,74 +129,396 @@ data-aria-dark="Switch to auto color mode">
 <h1>Input format<a class="headerlink" href="#input-format" title="Link to this heading">¶</a></h1>
 <p>EXESS inputs are JSON files loosely based on MolSSI QCSchema. In EXESS, the molecular group is called <code class="docutils literal notranslate"><span class="pre">topology</span></code>, and input files use a <code class="docutils literal notranslate"><span class="pre">topologies</span></code> array to allow batched runs (multiple systems evaluated with the same driver/model/keywords).</p>
 <p>The upstream manual organizes its contents by the same top-level input groups (<code class="docutils literal notranslate"><span class="pre">topologies</span></code>, <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">system</span></code>, <code class="docutils literal notranslate"><span class="pre">keywords</span></code>, <code class="docutils literal notranslate"><span class="pre">driver</span></code>), and EXESS tries to follow the QC-JSON conventions where possible.</p>
-<p>The schema below is compiled from the upstream EXESS docs, the EXESS/libqdx C++ schema (<code class="docutils literal notranslate"><span class="pre">libqdx.hpp</span></code>), the libqdx Rust types, and the rush-py interface.</p>
 <section id="schema-overview">
 <h2>Schema overview<a class="headerlink" href="#schema-overview" title="Link to this heading">¶</a></h2>
 <p>Top-level EXESS input fields (as parsed by EXESS/libqdx):</p>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Required</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">schema_version</span></code></p></td>
-<td><p>string</p></td>
-<td><p>No</p></td>
-<td><p>Defaults to <code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">topologies</span></code></p></td>
-<td><p>array of Topology</p></td>
-<td><p>Yes</p></td>
-<td><p>One or more molecular systems.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">residues</span></code></p></td>
-<td><p>array of Residues</p></td>
-<td><p>No</p></td>
-<td><p>TRC residue definitions, usually aligned to <code class="docutils literal notranslate"><span class="pre">topologies</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">external_charges</span></code></p></td>
-<td><p>object</p></td>
-<td><p>No</p></td>
-<td><p>External point charges (positions + charges).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
-<td><p>object</p></td>
-<td><p>Yes</p></td>
-<td><p>Method + basis configuration.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">system</span></code></p></td>
-<td><p>object</p></td>
-<td><p>No</p></td>
-<td><p>Hardware configuration.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">keywords</span></code></p></td>
-<td><p>object</p></td>
-<td><p>Yes</p></td>
-<td><p>Calculation parameters; may be <code class="docutils literal notranslate"><span class="pre">{}</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">driver</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Yes</p></td>
-<td><p>Calculation type (Energy, Gradient, Dynamics, Optimization, Hessian, QMMM).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">title</span></code></p></td>
-<td><p>string</p></td>
-<td><p>No</p></td>
-<td><p>Printed in output files.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">check_schema</span></code></p></td>
-<td><p>bool</p></td>
-<td><p>No</p></td>
-<td><p>Defaults to true when schema checks are enabled.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<div class="param-dropdowns docutils container">
+<div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>topologies</code> — <code>array[Topology]</code> (default: <span class="param-default-text">required</span>)</span><span class="param-brief">One or more molecular systems.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>residues</code> — <code>array[Residues]</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">TRC residue definitions aligned to <code class="docutils literal notranslate"><span class="pre">topologies</span></code>.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>external_charges</code> — <code>object</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">External point charges (positions + charges).</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>driver</code> — <code>string</code> (default: <span class="param-default-text">required</span>)</span><span class="param-brief">Calculation type (Energy, Gradient, Dynamics, Optimization, Hessian, QMMM).</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>model</code> — <code>object</code> (default: <span class="param-default-text">required</span>)</span><span class="param-brief">Level of theory (method) + basis configuration.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>system</code> — <code>object</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">Hardware configuration.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>keywords</code> — <code>object</code> (default: <span class="param-default-text">required</span>)</span><span class="param-brief">Calculation parameters; may be <code class="docutils literal notranslate"><span class="pre">{}</span></code>.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>schema_version</code> — <code>string</code> (default: <code>0.2.0</code>)</span><span class="param-brief">Input schema version.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>title</code> — <code>string</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">Printed in output files.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>check_schema</code> — <code>bool</code> (default: <span class="param-default-text">true (when enabled)</span>)</span><span class="param-brief">Enable schema validation when supported.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div></div>
 <p><code class="docutils literal notranslate"><span class="pre">keywords</span></code> is required in the C++ schema, but can be an empty object because defaults are applied by the parser. <code class="docutils literal notranslate"><span class="pre">check_schema</span></code> is only honored when EXESS is built with configurable schema checks; otherwise it is ignored.</p>
+<p>Icon key:</p>
+<div class="exess-icon-key">
+  <span class="exess-icon-key__item"><span class="param-note param-note--info" aria-hidden="true"></span> Tip</span>
+  <span class="exess-icon-key__item"><span class="param-note param-note--expert" aria-hidden="true"></span> Expert</span>
+</div></section>
+<section id="input-system-specification">
+<h2>Input System Specification<a class="headerlink" href="#input-system-specification" title="Link to this heading">¶</a></h2>
+<section id="topologies">
+<h3>topologies<a class="headerlink" href="#topologies" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">topologies</span></code> is an array of <code class="docutils literal notranslate"><span class="pre">topology</span></code> objects. Each <code class="docutils literal notranslate"><span class="pre">topology</span></code> provides molecular
+data and optional fragmentation/connectivity. See <a class="reference internal" href="topologies.html#topologies"><span class="std std-ref">topologies</span></a> for the full schema
+and validation rules.</p>
+<p>Example with inline geometry and symbols:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">config.json</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">],</span>
+</span><span data-line="5"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-1.1570</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0630</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.4817</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-1.1570</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8180</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0766</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">        </span><span class="mf">-1.1570</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.6920</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0766</span>
+</span><span data-line="9"><span class="w">      </span><span class="p">]</span>
+</span><span data-line="10"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="11"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="12"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="14"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span data-line="15"><span class="p">}</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Python</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">run.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.exess</span><span class="w"> </span><span class="kn">import</span> <span class="n">energy</span>
+</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span>
+</span><span data-line="7">    <span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">],</span>
+</span><span data-line="8">    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
+</span><span data-line="9">        <span class="o">-</span><span class="mf">1.1570</span><span class="p">,</span> <span class="mf">0.0630</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4817</span><span class="p">,</span>
+</span><span data-line="10">        <span class="o">-</span><span class="mf">1.1570</span><span class="p">,</span> <span class="mf">0.8180</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0766</span><span class="p">,</span>
+</span><span data-line="11">        <span class="o">-</span><span class="mf">1.1570</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6920</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0766</span><span class="p">,</span>
+</span><span data-line="12">    <span class="p">],</span>
+</span><span data-line="13"><span class="p">)</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="n">energy</span><span class="p">(</span><span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>Example using an XYZ file:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">config.json</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;molecule.xyz&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span data-line="4"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="7"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span data-line="8"><span class="p">}</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Python</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">run.py</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.exess</span><span class="w"> </span><span class="kn">import</span> <span class="n">energy</span>
+</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="n">lines</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule.xyz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span data-line="7"><span class="n">symbols</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="8"><span class="n">geometry</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="9"><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+</span><span data-line="10">    <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="11">        <span class="k">continue</span>
+</span><span data-line="12">    <span class="n">symbol</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="mi">4</span><span class="p">]</span>
+</span><span data-line="13">    <span class="n">symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Element</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="n">symbol</span><span class="p">))</span>
+</span><span data-line="14">    <span class="n">geometry</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">)</span>
+</span><span data-line="17"><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="n">energy</span><span class="p">(</span><span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="residues">
+<h3>residues<a class="headerlink" href="#residues" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is typically aligned one-to-one with <code class="docutils literal notranslate"><span class="pre">topologies</span></code> (same index). It is
+required for QMMM and other workflows that rely on residues. See <a class="reference internal" href="topologies.html#residues"><span class="std std-ref">residues</span></a> for the
+full schema.</p>
+<p>Example:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">config.json</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;molecule.xyz&quot;</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">      </span><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]]</span>
+</span><span data-line="6"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="7"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="8"><span class="w">  </span><span class="nt">&quot;residues&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="9"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="10"><span class="w">      </span><span class="nt">&quot;residues&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]],</span>
+</span><span data-line="11"><span class="w">      </span><span class="nt">&quot;seqs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;HOH&quot;</span><span class="p">],</span>
+</span><span data-line="12"><span class="w">      </span><span class="nt">&quot;seq_ns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+</span><span data-line="13"><span class="w">      </span><span class="nt">&quot;insertion_codes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+</span><span data-line="14"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="15"><span class="w">  </span><span class="p">],</span>
+</span><span data-line="16"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;QMMM&quot;</span><span class="p">,</span>
+</span><span data-line="17"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STO-3G&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="18"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="19"><span class="w">    </span><span class="nt">&quot;regions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="20"><span class="w">      </span><span class="nt">&quot;qm_fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+</span><span data-line="21"><span class="w">      </span><span class="nt">&quot;mm_fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="22"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="23"><span class="w">    </span><span class="nt">&quot;qmmm&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="24"><span class="w">      </span><span class="nt">&quot;n_timesteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
+</span><span data-line="25"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="26"><span class="w">  </span><span class="p">}</span>
+</span><span data-line="27"><span class="p">}</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+Python</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">run.py</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.exess</span><span class="w"> </span><span class="kn">import</span> <span class="n">qmmm</span>
+</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">Residue</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span>
+</span><span data-line="7">    <span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">],</span>
+</span><span data-line="8">    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
+</span><span data-line="9">        <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="10">        <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="11">        <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="12">        <span class="mf">2.8000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="13">        <span class="mf">3.5570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="14">        <span class="mf">2.0430</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="15">    <span class="p">],</span>
+</span><span data-line="16">    <span class="n">fragments</span><span class="o">=</span><span class="p">[</span><span class="n">Fragment</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Fragment</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
+</span><span data-line="17"><span class="p">)</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="n">residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="p">(</span>
+</span><span data-line="20">    <span class="n">residues</span><span class="o">=</span><span class="p">[</span><span class="n">Residue</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Residue</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
+</span><span data-line="21">    <span class="n">seqs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span> <span class="s2">&quot;HOH&quot;</span><span class="p">],</span>
+</span><span data-line="22">    <span class="n">seq_ns</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+</span><span data-line="23">    <span class="n">insertion_codes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">],</span>
+</span><span data-line="24"><span class="p">)</span>
+</span><span data-line="25">
+</span><span data-line="26"><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+</span><span data-line="27"><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+</span><span data-line="28">
+</span><span data-line="29"><span class="n">qmmm</span><span class="p">(</span>
+</span><span data-line="30">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="31">    <span class="n">residues_path</span><span class="o">=</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">,</span>
+</span><span data-line="32">    <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="33">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+</span><span data-line="34">    <span class="n">mm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+</span><span data-line="35"><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="external-charges">
+<h3>external_charges<a class="headerlink" href="#external-charges" title="Link to this heading">¶</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">config.json</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;molecule.xyz&quot;</span><span class="w"> </span><span class="p">}],</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;external_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">    </span><span class="nt">&quot;positions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">&quot;charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">]</span>
+</span><span data-line="6"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="7"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="9"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span data-line="10"><span class="p">}</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
+Python</label><div class="sd-tab-content docutils">
+<p>Not supported.</p>
+</div>
+</div>
+<div class="param-dropdowns docutils container">
+<details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>positions</code> — <code>array[float]</code> (default: <span class="param-default-text">required</span>)</span><span class="param-brief">Flat XYZ list of charge positions.</span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p>The positions length must be <span class="math notranslate nohighlight">\(3 \times \mathrm{len}(charges)\)</span>.</p>
+</div></details><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>charges</code> — <code>array[float]</code> (default: <span class="param-default-text">required</span>)</span><span class="param-brief">Charge values aligned to <code class="docutils literal notranslate"><span class="pre">positions</span></code>.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div></div>
+</section>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<section id="driver">
+<h3>driver<a class="headerlink" href="#driver" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">driver</span></code> field selects the calculation type:</p>
+<dl class="simple myst">
+<dt><code class="docutils literal notranslate"><span class="pre">Energy</span></code></dt><dd><p>Single-point energy and related properties.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Optimization</span></code></dt><dd><p>Geometry optimization. See <a class="reference internal" href="keywords.html#optimization"><span class="std std-ref">optimization</span></a>, plus <a class="reference internal" href="keywords.html#regions"><span class="std std-ref">regions</span></a> when using Q4ML regions.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">QMMM</span></code></dt><dd><p>QM/MM or QM/ML/MM workflows. See <a class="reference internal" href="keywords.html#qmmm"><span class="std std-ref">qmmm</span></a>, plus <a class="reference internal" href="keywords.html#regions"><span class="std std-ref">regions</span></a> as needed.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Gradient</span></code></dt><dd><p>Analytic or finite-difference gradients. See <a class="reference internal" href="keywords.html#gradient"><span class="std std-ref">gradient</span></a> for gradient options.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Hessian</span></code></dt><dd><p>Hessian and vibrational analysis. See <a class="reference internal" href="keywords.html#hessian"><span class="std std-ref">hessian</span></a>, plus SCF/DFT keywords as needed.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Dynamics</span></code></dt><dd><p>Molecular dynamics. See <a class="reference internal" href="keywords.html#dynamics"><span class="std std-ref">dynamics</span></a> and <a class="reference internal" href="keywords.html#force-field"><span class="std std-ref">force_field</span></a>.</p>
+</dd>
+</dl>
+</section>
+<section id="model">
+<h3>model<a class="headerlink" href="#model" title="Link to this heading">¶</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">config.json</span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;molecule.xyz&quot;</span><span class="w"> </span><span class="p">}],</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">    </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;aux_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">    </span><span class="nt">&quot;standard_orientation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">    </span><span class="nt">&quot;force_cartesian_basis_sets&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+</span><span data-line="10"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="11"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span data-line="12"><span class="p">}</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
+Python</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">run.py</span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.exess</span><span class="w"> </span><span class="kn">import</span> <span class="n">energy</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">energy</span><span class="p">(</span>
+</span><span data-line="4">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
+</span><span data-line="6">    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
+</span><span data-line="7">    <span class="n">aux_basis</span><span class="o">=</span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span><span class="p">,</span>
+</span><span data-line="8">    <span class="n">standard_orientation</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>  <span class="c1"># String value, not None.</span>
+</span><span data-line="9">    <span class="n">force_cartesian_basis_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span data-line="10"><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="param-dropdowns docutils container">
+<details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>method</code> — <code>string</code> (default: <code>RestrictedHF</code>)</span><span class="param-brief">Level of theory (RestrictedHF, UnrestrictedHF, RestrictedKSDFT, RestrictedRIMP2, UnrestrictedRIMP2, RestrictedRICCSD).</span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p>Level-of-theory descriptions:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code></dt><dd><p>Restricted Hartree-Fock (closed-shell).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">UnrestrictedHF</span></code></dt><dd><p>Unrestricted Hartree-Fock (open-shell).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">RestrictedKSDFT</span></code></dt><dd><p>Restricted Kohn-Sham density functional theory.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">RestrictedRIMP2</span></code></dt><dd><p>Restricted RI Moller-Plesset second-order perturbation theory.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">UnrestrictedRIMP2</span></code></dt><dd><p>Unrestricted RI Moller-Plesset second-order perturbation theory.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">RestrictedRICCSD</span></code></dt><dd><p>Restricted RI coupled cluster singles and doubles.</p>
+</dd>
+</dl>
+<p>HF methods support multiple integral build types, while MP2 is only implemented
+via RI (resolution-of-identity).</p>
+<p>Upstream docs list <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code>, <code class="docutils literal notranslate"><span class="pre">UnrestrictedHF</span></code>, and <code class="docutils literal notranslate"><span class="pre">RestrictedRIMP2</span></code>
+as the core methods; EXESS adds KSDFT and RI-CCSD support in the schema.</p>
+</div></details><details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>basis</code> — <code>string</code> (default: <code>cc-pVDZ</code>)</span><span class="param-brief">Primary basis set. See <a class="reference internal" href="reference.html#basis-sets"><span class="std std-ref">basis sets</span></a>.</span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p>libqdx defaults <code class="docutils literal notranslate"><span class="pre">basis</span></code> to <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> if omitted.</p>
+</div></details><div class="param-row"><div class="param-row-header"><span class="param-row-text"><span class="param-line"><code>aux_basis</code> — <code>string</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">Auxiliary basis for RI methods. See <a class="reference internal" href="reference.html#basis-sets"><span class="std std-ref">basis sets</span></a>.</span></span><span class="param-row-chevron" aria-hidden="true"></span></div></div><details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>standard_orientation</code> — <code>string</code> (default: <code>FullSystem</code>)</span><span class="param-brief">Orientation selection (<code class="docutils literal notranslate"><span class="pre">FullSystem</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">PerFragment</span></code>).</span></span><span class="param-note-group"><span class="param-note param-note--info" aria-label="Tip" title="Tip"></span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p><code class="docutils literal notranslate"><span class="pre">PerFragment</span></code> rotates each fragment independently; upstream docs warn that this
+can cause inconsistent energies and energy differences in fragmented runs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">None</span></code> prevents translation and rotation, which can make it easier to compare
+an optimization trajectory to the input conformation.</p>
+</div></details><details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>force_cartesian_basis_sets</code> — <code>bool</code> (default: <code>true</code>)</span><span class="param-brief">Force Cartesian basis functions.</span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p>For d orbitals this yields components like <span class="math notranslate nohighlight">\(x^2, xy, xz, y^2, yz, z^2\)</span>.</p>
+</div></details></div>
+</section>
+<section id="system">
+<h3>system<a class="headerlink" href="#system" title="Link to this heading">¶</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
+EXESS CLI</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">config.json</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;molecule.xyz&quot;</span><span class="w"> </span><span class="p">}],</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Energy&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="6"><span class="w">    </span><span class="nt">&quot;max_gpu_memory_mb&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24000</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">&quot;teams_per_node&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">    </span><span class="nt">&quot;gpus_per_team&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+</span><span data-line="9"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="10"><span class="w">  </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span data-line="11"><span class="p">}</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
+Python</label><div class="sd-tab-content docutils">
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">run.py</span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.exess</span><span class="w"> </span><span class="kn">import</span> <span class="n">System</span><span class="p">,</span> <span class="n">energy</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">energy</span><span class="p">(</span>
+</span><span data-line="4">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">system</span><span class="o">=</span><span class="n">System</span><span class="p">(</span>
+</span><span data-line="6">        <span class="n">max_gpu_memory_mb</span><span class="o">=</span><span class="mi">24000</span><span class="p">,</span>
+</span><span data-line="7">        <span class="n">teams_per_node</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+</span><span data-line="8">        <span class="n">gpus_per_team</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span data-line="9">    <span class="p">),</span>
+</span><span data-line="10"><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="param-dropdowns docutils container">
+<details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>max_gpu_memory_mb</code> — <code>uint64</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">Max GPU memory per process in MB.</span></span><span class="param-note-group"><span class="param-note param-note--info" aria-label="Tip" title="Tip"></span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p>EXESS will crash if you request more memory than is available. libqdx notes a
+dynamic default of ~75% of GPU memory when unset.</p>
+</div></details><details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>oversubscribe_gpus</code> — <code>bool</code> (default: <code>false</code>)</span><span class="param-brief">Allow multiple processes per GPU.</span></span><span class="param-note-group"><span class="param-note param-note--expert" aria-label="Expert" title="Expert"></span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p>Expert setting to allow multiple processes per GPU.</p>
+</div></details><details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>teams_per_node</code> — <code>uint32</code> (default: <code>1</code>)</span><span class="param-brief">Worker teams per node.</span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p><code class="docutils literal notranslate"><span class="pre">teams_per_node</span></code> and <code class="docutils literal notranslate"><span class="pre">gpus_per_team</span></code> control fragmentation scaling; one team
+handles one fragment queue.</p>
+</div></details><details class="sd-sphinx-override sd-dropdown sd-card param-dropdown"><summary class="sd-summary-title sd-card-header"><span class="sd-summary-text"><span class="param-line"><code>gpus_per_team</code> — <code>uint32</code> (default: <span class="param-default-text">unset</span>)</span><span class="param-brief">GPUs per team (overridable by <code class="docutils literal notranslate"><span class="pre">MBE_NGPUS</span></code>).</span></span><span class="param-note-group"><span class="param-note param-note--info" aria-label="Tip" title="Tip"></span></span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body param-details"><p><code class="docutils literal notranslate"><span class="pre">gpus_per_team</span></code> can be overridden by the <code class="docutils literal notranslate"><span class="pre">MBE_NGPUS</span></code> environment variable.</p>
+</div></details></div>
+</section>
+<section id="keywords">
+<h3>keywords<a class="headerlink" href="#keywords" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">keywords</span></code> contains method- and run-specific settings. See the <a class="reference internal" href="keywords.html"><span class="doc">keyword reference</span></a> for full details. The C++ schema expects <code class="docutils literal notranslate"><span class="pre">keywords</span></code> to be present even if empty.</p>
+</section>
 </section>
 <section id="default-resolution-order">
 <h2>Default resolution order<a class="headerlink" href="#default-resolution-order" title="Link to this heading">¶</a></h2>
@@ -214,435 +529,6 @@ data-aria-dark="Switch to auto color mode">
 <li><p>EXESS internal defaults for values that remain unset after parsing.</p></li>
 </ol>
 </section>
-<section id="topologies">
-<h2>topologies<a class="headerlink" href="#topologies" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">topologies</span></code> is an array of <code class="docutils literal notranslate"><span class="pre">topology</span></code> objects. Each <code class="docutils literal notranslate"><span class="pre">topology</span></code> contains the molecular data, fragmentation, and connectivity for a single system. Batched mode is achieved by listing multiple topologies with a shared driver/model/keywords configuration.</p>
-<section id="topology-fields">
-<h3>topology fields<a class="headerlink" href="#topology-fields" title="Link to this heading">¶</a></h3>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Required</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">schema_version</span></code></p></td>
-<td><p>string</p></td>
-<td><p>No</p></td>
-<td><p>Defaults to <code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">symbols</span></code></p></td>
-<td><p>array of string</p></td>
-<td><p>Yes*</p></td>
-<td><p>Atomic symbols (“H”, “C”, etc). Required if <code class="docutils literal notranslate"><span class="pre">xyz</span></code> is not provided.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code></p></td>
-<td><p>array of float</p></td>
-<td><p>Yes*</p></td>
-<td><p>Flat XYZ array (length = 3 * atoms). Required if <code class="docutils literal notranslate"><span class="pre">xyz</span></code> is not provided.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">xyz</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Yes*</p></td>
-<td><p>Path to XYZ file; EXESS will read it instead of <code class="docutils literal notranslate"><span class="pre">symbols</span></code> + <code class="docutils literal notranslate"><span class="pre">geometry</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code></p></td>
-<td><p>array of float</p></td>
-<td><p>No</p></td>
-<td><p>Flat XYZ velocity array (Angstrom/ps).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">labels</span></code></p></td>
-<td><p>array of string</p></td>
-<td><p>No</p></td>
-<td><p>Atom labels.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">partial_charges</span></code></p></td>
-<td><p>array of float</p></td>
-<td><p>No</p></td>
-<td><p>Per-atom partial charges.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">formal_charges</span></code></p></td>
-<td><p>array of int</p></td>
-<td><p>No</p></td>
-<td><p>Per-atom formal charges. Defaults to 0 for all atoms.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code></p></td>
-<td><p>array of bonds</p></td>
-<td><p>No</p></td>
-<td><p>Bond list for covalent fragmentation.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code></p></td>
-<td><p>array of int</p></td>
-<td><p>No</p></td>
-<td><p>One entry per bond.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code></p></td>
-<td><p>array of arrays</p></td>
-<td><p>No</p></td>
-<td><p>Zero-indexed atom indices per fragment. If omitted, EXESS assumes a single fragment containing all atoms.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code></p></td>
-<td><p>array of int</p></td>
-<td><p>No</p></td>
-<td><p>Per-fragment formal charges. Defaults to 0 per fragment if omitted.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fragment_partial_charges</span></code></p></td>
-<td><p>array of float</p></td>
-<td><p>No</p></td>
-<td><p>Per-fragment partial charges.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code></p></td>
-<td><p>array of int</p></td>
-<td><p>No</p></td>
-<td><p>Per-fragment multiplicities (open-shell systems). Defaults to 1 per fragment if omitted.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">waters</span></code></p></td>
-<td><p>array of two ints</p></td>
-<td><p>No</p></td>
-<td><p>First/last water molecule treated classically.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The EXESS C++ schema requires either <code class="docutils literal notranslate"><span class="pre">symbols</span></code> + <code class="docutils literal notranslate"><span class="pre">geometry</span></code> or <code class="docutils literal notranslate"><span class="pre">xyz</span></code>, but not both.</p>
-<p>Notes from upstream docs and libqdx Rust types:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> can be used to annotate specific atoms (e.g., alpha carbons in residues).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">labels</span></code> must match the length of <code class="docutils literal notranslate"><span class="pre">symbols</span></code> if provided. <code class="docutils literal notranslate"><span class="pre">partial_charges</span></code> are in atomic units.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is a perceived bond list and should not be treated as a definitive source of bond information.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> is only valid if <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is present and must match its length.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> are used for dynamics; they are present only in v1 inputs but are supported by the schema.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code> must include each atom exactly once when provided.</p></li>
-</ul>
-<section id="geometry">
-<h4>geometry<a class="headerlink" href="#geometry" title="Link to this heading">¶</a></h4>
-<p>Example layout:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="2"><span class="w">  </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
-</span><span data-line="3"><span class="w">  </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
-</span><span data-line="4"><span class="w">  </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
-</span><span data-line="5"><span class="p">]</span>
-</span></pre></div>
-</div>
-</section>
-<section id="symbols">
-<h4>symbols<a class="headerlink" href="#symbols" title="Link to this heading">¶</a></h4>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
-</span></pre></div>
-</div>
-</section>
-<section id="xyz">
-<h4>xyz<a class="headerlink" href="#xyz" title="Link to this heading">¶</a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">xyz</span></code> can be used instead of <code class="docutils literal notranslate"><span class="pre">geometry</span></code> and <code class="docutils literal notranslate"><span class="pre">symbols</span></code>, including for fragmented systems (it is compatible with fragmentation keywords). Standard XYZ files begin with the atom count, followed by a comment line and then element + XYZ positions:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">3
-</span><span data-line="2">
-</span><span data-line="3">O -1.1570 0.0630 -0.4817
-</span><span data-line="4">H -1.1570 0.8180 -1.0766
-</span><span data-line="5">H -1.1570 -0.6920 -1.0766
-</span></pre></div>
-</div>
-<p>Example usage in EXESS:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
-</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="3"><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/water.xyz&quot;</span><span class="w"> </span><span class="p">}</span>
-</span><span data-line="4"><span class="w">  </span><span class="p">]</span>
-</span><span data-line="5"><span class="p">}</span>
-</span></pre></div>
-</div>
-</section>
-<section id="connectivity">
-<h4>connectivity<a class="headerlink" href="#connectivity" title="Link to this heading">¶</a></h4>
-<p>Connectivity is required when a covalent bond is broken across fragments. EXESS will add hydrogen caps to satisfy valences and remove them after the calculation.</p>
-<p>A bond entry is <code class="docutils literal notranslate"><span class="pre">[atom_index_1,</span> <span class="pre">atom_index_2,</span> <span class="pre">bond_order]</span></code>.</p>
-<p>EXESS/libqdx defines the following bond order values (the upstream docs emphasize single/double/triple bonds as the common values):</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: Unspecified</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Single</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Double</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: Triple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code>: Quadruple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">5</span></code>: Quintuple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">6</span></code>: Sextuple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">250</span></code>: FiveAndAHalf</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">251</span></code>: FourAndAHalf</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">252</span></code>: ThreeAndAHalf</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">253</span></code>: TwoAndAHalf</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">254</span></code>: OneAndAHalf</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">255</span></code>: Ring</p></li>
-</ul>
-<p>Example:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;connectivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="2"><span class="w">  </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
-</span><span data-line="3"><span class="w">  </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span>
-</span><span data-line="4"><span class="p">]</span>
-</span></pre></div>
-</div>
-<p>Upstream docs include a covalent fragmentation example with two ethane fragments connected across a C-C bond, where <code class="docutils literal notranslate"><span class="pre">connectivity:</span> <span class="pre">[[1,</span> <span class="pre">4,</span> <span class="pre">1]]</span></code> signals a single bond between atom indices 1 and 4. EXESS uses this information to apply hydrogen caps on broken valences during fragmentation and removes them after the calculation.</p>
-</section>
-<section id="stereochemistry">
-<h4>stereochemistry<a class="headerlink" href="#stereochemistry" title="Link to this heading">¶</a></h4>
-<p>EXESS/libqdx accepts a list of integers aligned with the <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> list:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: None</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Up</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">-1</span></code>: Down</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Either</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: CisOrTrans</p></li>
-</ul>
-</section>
-<section id="fragments">
-<h4>fragments<a class="headerlink" href="#fragments" title="Link to this heading">¶</a></h4>
-<p>Fragment indices are zero-indexed. Example for five water fragments:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="2"><span class="w">  </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
-</span><span data-line="3"><span class="w">  </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">],</span>
-</span><span data-line="4"><span class="w">  </span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span>
-</span><span data-line="5"><span class="w">  </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">],</span>
-</span><span data-line="6"><span class="w">  </span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">]</span>
-</span><span data-line="7"><span class="p">]</span>
-</span></pre></div>
-</div>
-</section>
-<section id="fragment-formal-charges-fragment-multiplicities">
-<h4>fragment_formal_charges / fragment_multiplicities<a class="headerlink" href="#fragment-formal-charges-fragment-multiplicities" title="Link to this heading">¶</a></h4>
-<ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code> is omitted, EXESS sets fragment charges to the sum of per-atom <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code> when provided, otherwise 0.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code> is omitted, EXESS sets multiplicity to 1 for every fragment.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">fragments</span></code> is omitted, EXESS assumes a single fragment containing all atoms and derives defaults accordingly.</p></li>
-</ul>
-<p>Example for a single, unfragmented system:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
-</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
-</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span data-line="5"><span class="w">        </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
-</span><span data-line="6"><span class="w">        </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
-</span><span data-line="7"><span class="w">        </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
-</span><span data-line="8"><span class="w">      </span><span class="p">],</span>
-</span><span data-line="9"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">],</span>
-</span><span data-line="10"><span class="w">      </span><span class="nt">&quot;fragment_formal_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-</span><span data-line="11"><span class="w">      </span><span class="nt">&quot;fragment_multiplicities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span><span data-line="12"><span class="w">    </span><span class="p">}</span>
-</span><span data-line="13"><span class="w">  </span><span class="p">]</span>
-</span><span data-line="14"><span class="p">}</span>
-</span></pre></div>
-</div>
-</section>
-<section id="topology-validation-checks">
-<h4>topology validation checks<a class="headerlink" href="#topology-validation-checks" title="Link to this heading">¶</a></h4>
-<p>The libqdx Rust types expose validation logic that is useful when constructing inputs:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code> must match <code class="docutils literal notranslate"><span class="pre">symbols</span></code> length if present.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code> atom indices must be valid and may not reference the same atom twice.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> is only valid when <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is present and must be the same length.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code> if present.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code> must not duplicate atoms; each atom should appear in exactly one fragment.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">fragment_partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code> must match <code class="docutils literal notranslate"><span class="pre">fragments</span></code> length when provided.</p></li>
-</ul>
-</section>
-<section id="waters">
-<h4>waters<a class="headerlink" href="#waters" title="Link to this heading">¶</a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">waters</span></code> is a two-element array identifying the first and last water molecule to be treated classically (used by some QMMM/Q4ML workflows).</p>
-</section>
-</section>
-</section>
-<section id="residues">
-<h2>residues<a class="headerlink" href="#residues" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is an optional array of residue definitions used for TRC-based workflows and QMMM. Each element is a <code class="docutils literal notranslate"><span class="pre">Residues</span></code> object:</p>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">labeled</span></code></p></td>
-<td><p>array[int]</p></td>
-<td><p>Optional list of residue indices with labels.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">labels</span></code></p></td>
-<td><p>array of array[string]</p></td>
-<td><p>Optional labels per residue.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">residues</span></code></p></td>
-<td><p>array of array[int]</p></td>
-<td><p>Atom indices per residue.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seqs</span></code></p></td>
-<td><p>array[string]</p></td>
-<td><p>Residue names.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seq_ns</span></code></p></td>
-<td><p>array[int]</p></td>
-<td><p>Residue numbers.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">insertion_codes</span></code></p></td>
-<td><p>array[string]</p></td>
-<td><p>PDB-style insertion codes.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is typically aligned one-to-one with <code class="docutils literal notranslate"><span class="pre">topologies</span></code> (same index). It is required for QMMM and other workflows that rely on residues, and it is often generated by converting PDB/TRC inputs.</p>
-</section>
-<section id="external-charges">
-<h2>external_charges<a class="headerlink" href="#external-charges" title="Link to this heading">¶</a></h2>
-<p>External charges are represented as:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;external_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;positions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
-</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">]</span>
-</span><span data-line="4"><span class="p">}</span>
-</span></pre></div>
-</div>
-<p>The positions array is a flat XYZ list, with one charge per position. The positions length must be 3 * <code class="docutils literal notranslate"><span class="pre">len(charges)</span></code>.</p>
-</section>
-<section id="driver">
-<h2>driver<a class="headerlink" href="#driver" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">driver</span></code> field selects the calculation type:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">Energy</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Gradient</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Dynamics</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Optimization</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Hessian</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">QMMM</span></code></p></li>
-</ul>
-<p>The parser also accepts common aliases and case variants, including:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">Energy</span></code>: <code class="docutils literal notranslate"><span class="pre">ENERGY</span></code>, <code class="docutils literal notranslate"><span class="pre">Energy</span></code>, <code class="docutils literal notranslate"><span class="pre">energy</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Gradient</span></code>: <code class="docutils literal notranslate"><span class="pre">GRADIENT</span></code>, <code class="docutils literal notranslate"><span class="pre">Gradient</span></code>, <code class="docutils literal notranslate"><span class="pre">gradient</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Dynamics</span></code>: <code class="docutils literal notranslate"><span class="pre">DYNAMICS</span></code>, <code class="docutils literal notranslate"><span class="pre">Dynamics</span></code>, <code class="docutils literal notranslate"><span class="pre">dynamics</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Optimization</span></code>: <code class="docutils literal notranslate"><span class="pre">OPTIMIZATION</span></code>, <code class="docutils literal notranslate"><span class="pre">Optimization</span></code>, <code class="docutils literal notranslate"><span class="pre">optimization</span></code>, <code class="docutils literal notranslate"><span class="pre">OPTIMISATION</span></code>, <code class="docutils literal notranslate"><span class="pre">Optimisation</span></code>, <code class="docutils literal notranslate"><span class="pre">optimisation</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Hessian</span></code>: <code class="docutils literal notranslate"><span class="pre">HESSIAN</span></code>, <code class="docutils literal notranslate"><span class="pre">Hessian</span></code>, <code class="docutils literal notranslate"><span class="pre">hessian</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">QMMM</span></code>: <code class="docutils literal notranslate"><span class="pre">QMMM</span></code>, <code class="docutils literal notranslate"><span class="pre">Qmmm</span></code>, <code class="docutils literal notranslate"><span class="pre">qmmm</span></code></p></li>
-</ul>
-</section>
-<section id="model">
-<h2>model<a class="headerlink" href="#model" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">model</span></code> group controls the level of theory and basis sets:</p>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">method</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Method used for the calculation (see below).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">basis</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Primary basis set.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">aux_basis</span></code></p></td>
-<td><p>string</p></td>
-<td><p>Auxiliary basis for RI methods.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">standard_orientation</span></code></p></td>
-<td><p>string</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">FullSystem</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, or <code class="docutils literal notranslate"><span class="pre">PerFragment</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">FullSystem</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">force_cartesian_basis_sets</span></code></p></td>
-<td><p>bool</p></td>
-<td><p>Default: true.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Methods in the EXESS/libqdx schema:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">UnrestrictedHF</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedKSDFT</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedRIMP2</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">UnrestrictedRIMP2</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedRICCSD</span></code></p></li>
-</ul>
-<p>The libqdx Rust parser accepts common aliases like <code class="docutils literal notranslate"><span class="pre">RHF</span></code>, <code class="docutils literal notranslate"><span class="pre">UHF</span></code>, <code class="docutils literal notranslate"><span class="pre">KSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">RIMP2</span></code>, and <code class="docutils literal notranslate"><span class="pre">RICCSD</span></code>.</p>
-<p>Full method alias list accepted by libqdx (case-sensitive variants shown as defined in the parser):</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code>: <code class="docutils literal notranslate"><span class="pre">RESTRICTEDHF</span></code>, <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code>, <code class="docutils literal notranslate"><span class="pre">restrictedhf</span></code>, <code class="docutils literal notranslate"><span class="pre">RESTRICTED-HF</span></code>, <code class="docutils literal notranslate"><span class="pre">Restricted-HF</span></code>, <code class="docutils literal notranslate"><span class="pre">restricted-hf</span></code>, <code class="docutils literal notranslate"><span class="pre">RHF</span></code>, <code class="docutils literal notranslate"><span class="pre">rhf</span></code>, <code class="docutils literal notranslate"><span class="pre">R-HF</span></code>, <code class="docutils literal notranslate"><span class="pre">r-hf</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">UnrestrictedHF</span></code>: <code class="docutils literal notranslate"><span class="pre">UNRESTRICTEDHF</span></code>, <code class="docutils literal notranslate"><span class="pre">UnrestrictedHF</span></code>, <code class="docutils literal notranslate"><span class="pre">unrestrictedhf</span></code>, <code class="docutils literal notranslate"><span class="pre">UNRESTRICTED-HF</span></code>, <code class="docutils literal notranslate"><span class="pre">Unrestricted-HF</span></code>, <code class="docutils literal notranslate"><span class="pre">unrestricted-hf</span></code>, <code class="docutils literal notranslate"><span class="pre">UHF</span></code>, <code class="docutils literal notranslate"><span class="pre">uhf</span></code>, <code class="docutils literal notranslate"><span class="pre">U-HF</span></code>, <code class="docutils literal notranslate"><span class="pre">u-hf</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedKSDFT</span></code>: <code class="docutils literal notranslate"><span class="pre">RESTRICTEDKSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">RestrictedKSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">restrictedksdft</span></code>, <code class="docutils literal notranslate"><span class="pre">RESTRICTED-KSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">Restricted-KSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">restricted-ksdft</span></code>, <code class="docutils literal notranslate"><span class="pre">RKSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">rksdft</span></code>, <code class="docutils literal notranslate"><span class="pre">R-KSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">r-ksdft</span></code>, <code class="docutils literal notranslate"><span class="pre">KSDFT</span></code>, <code class="docutils literal notranslate"><span class="pre">ksdft</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedRIMP2</span></code>: <code class="docutils literal notranslate"><span class="pre">RESTRICTEDRIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">RestrictedRIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">restrictedrimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">RESTRICTED-RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">Restricted-RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">restricted-rimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">RRIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">rrimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">R-RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">r-rimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">rimp2</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">UnrestrictedRIMP2</span></code>: <code class="docutils literal notranslate"><span class="pre">UNRESTRICTEDRIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">UnrestrictedRIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">unrestrictedrimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">UNRESTRICTED-RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">Unrestricted-RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">unrestricted-rimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">URIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">urimp2</span></code>, <code class="docutils literal notranslate"><span class="pre">U-RIMP2</span></code>, <code class="docutils literal notranslate"><span class="pre">u-rimp2</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RestrictedRICCSD</span></code>: <code class="docutils literal notranslate"><span class="pre">RESTRICTEDRICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">RestrictedRICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">restrictedriccsd</span></code>, <code class="docutils literal notranslate"><span class="pre">RESTRICTED-RICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">Restricted-RICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">restricted-riccsd</span></code>, <code class="docutils literal notranslate"><span class="pre">RRICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">rriccsd</span></code>, <code class="docutils literal notranslate"><span class="pre">R-RICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">r-riccsd</span></code>, <code class="docutils literal notranslate"><span class="pre">RICCSD</span></code>, <code class="docutils literal notranslate"><span class="pre">riccsd</span></code></p></li>
-</ul>
-<p>Notes from upstream docs and libqdx Rust types:</p>
-<ul class="simple">
-<li><p>Upstream docs list <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code>, <code class="docutils literal notranslate"><span class="pre">UnrestrictedHF</span></code>, and <code class="docutils literal notranslate"><span class="pre">RestrictedRIMP2</span></code> as the core methods; EXESS adds KSDFT and RI-CCSD support in the schema.</p></li>
-<li><p>libqdx defaults <code class="docutils literal notranslate"><span class="pre">method</span></code> to <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code> and <code class="docutils literal notranslate"><span class="pre">basis</span></code> to <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> if omitted.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">standard_orientation=&quot;PerFragment&quot;</span></code> rotates each fragment independently; upstream docs warn that this can cause inconsistent energies and energy differences in fragmented runs.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">force_cartesian_basis_sets</span></code> forces Cartesian functions; for d orbitals this yields components like <code class="docutils literal notranslate"><span class="pre">x^2,</span> <span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">y^2,</span> <span class="pre">yz,</span> <span class="pre">z^2</span></code>.</p></li>
-</ul>
-<p><code class="docutils literal notranslate"><span class="pre">standard_orientation</span></code> also accepts case variants:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: <code class="docutils literal notranslate"><span class="pre">NONE</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FullSystem</span></code>: <code class="docutils literal notranslate"><span class="pre">FULLSYSTEM</span></code>, <code class="docutils literal notranslate"><span class="pre">FullSystem</span></code>, <code class="docutils literal notranslate"><span class="pre">fullsystem</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">PerFragment</span></code>: <code class="docutils literal notranslate"><span class="pre">PERFRAGMENT</span></code>, <code class="docutils literal notranslate"><span class="pre">PerFragment</span></code>, <code class="docutils literal notranslate"><span class="pre">perfragment</span></code></p></li>
-</ul>
-</section>
-<section id="system">
-<h2>system<a class="headerlink" href="#system" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">system</span></code> group controls hardware usage:</p>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Notes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_gpu_memory_mb</span></code></p></td>
-<td><p>uint64</p></td>
-<td><p>Max GPU memory per process in MB.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">oversubscribe_gpus</span></code></p></td>
-<td><p>bool</p></td>
-<td><p>Allow multiple processes per GPU. Default: false.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">teams_per_node</span></code></p></td>
-<td><p>uint32</p></td>
-<td><p>Worker teams per node. Default: 1.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gpus_per_team</span></code></p></td>
-<td><p>uint32</p></td>
-<td><p>GPUs per team (overridable by <code class="docutils literal notranslate"><span class="pre">MBE_NGPUS</span></code>).</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Notes from upstream docs and libqdx Rust types:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">max_gpu_memory_mb</span></code>: EXESS will crash if you request more memory than is available. libqdx notes a dynamic default of ~75% of GPU memory when unset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">oversubscribe_gpus</span></code>: expert setting to allow multiple processes per GPU.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">teams_per_node</span></code> and <code class="docutils literal notranslate"><span class="pre">gpus_per_team</span></code> control fragmentation scaling; one team handles one fragment queue.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpus_per_team</span></code> can be overridden by the <code class="docutils literal notranslate"><span class="pre">MBE_NGPUS</span></code> environment variable.</p></li>
-</ul>
-<p>Example (4 GPUs per node, 1 GPU per fragment team):</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;max_gpu_memory_mb&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24000</span><span class="p">,</span>
-</span><span data-line="3"><span class="w">  </span><span class="nt">&quot;teams_per_node&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
-</span><span data-line="4"><span class="w">  </span><span class="nt">&quot;gpus_per_team&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-</span><span data-line="5"><span class="p">}</span>
-</span></pre></div>
-</div>
-<p>This creates four teams per node, each using one GPU. If your fragments fit on a single GPU, this can yield near-linear speedups.</p>
-</section>
-<section id="keywords">
-<h2>keywords<a class="headerlink" href="#keywords" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">keywords</span></code> contains method- and run-specific settings. See the keyword reference page for full details. The C++ schema expects <code class="docutils literal notranslate"><span class="pre">keywords</span></code> to be present even if empty.</p>
-</section>
 <section id="rush-py-input-mapping">
 <h2>Rush-py input mapping<a class="headerlink" href="#rush-py-input-mapping" title="Link to this heading">¶</a></h2>
 <p>The Rush Python client does not submit the full EXESS input JSON directly. Instead, it accepts a topology path (and sometimes residues path) plus keyword objects and constructs the EXESS params internally.</p>
@@ -651,7 +537,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p><code class="docutils literal notranslate"><span class="pre">Model</span></code> in rush-py only includes <code class="docutils literal notranslate"><span class="pre">standard_orientation</span></code> and <code class="docutils literal notranslate"><span class="pre">force_cartesian_basis_sets</span></code>; <code class="docutils literal notranslate"><span class="pre">method</span></code>, <code class="docutils literal notranslate"><span class="pre">basis</span></code>, and <code class="docutils literal notranslate"><span class="pre">aux_basis</span></code> are function parameters.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">keywords</span></code> in rush-py are passed as Python dataclasses (for <code class="docutils literal notranslate"><span class="pre">SCFKeywords</span></code>, <code class="docutils literal notranslate"><span class="pre">FragKeywords</span></code>, <code class="docutils literal notranslate"><span class="pre">ExportKeywords</span></code>, <code class="docutils literal notranslate"><span class="pre">OptimizationKeywords</span></code>, etc.).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">frag_keywords</span></code> defaults to a dimer fragmentation setup; pass <code class="docutils literal notranslate"><span class="pre">frag_keywords=None</span></code> to run a full-system calculation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">external_charges</span></code> and some keyword groups (e.g., <code class="docutils literal notranslate"><span class="pre">rtat</span></code>, <code class="docutils literal notranslate"><span class="pre">integrals</span></code>, <code class="docutils literal notranslate"><span class="pre">ks_dft</span></code>) are not yet exposed in the rush-py API.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">external_charges</span></code> and some keyword groups (e.g., <code class="docutils literal notranslate"><span class="pre">rtat</span></code>, <code class="docutils literal notranslate"><span class="pre">integrals</span></code>) are not yet exposed in the rush-py API.</p></li>
 </ul>
 <p>See the Rush guides for TRC objects and conversions: <a class="reference internal" href="../guides/03-objects-and-trc-files.html"><span class="doc std std-doc">Objects and TRC Files</span></a>.</p>
 </section>
@@ -673,7 +559,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p><code class="docutils literal notranslate"><span class="pre">parley.py</span></code> (https://github.com/JorgeG94/parley_exess) converts between XYZ and EXESS JSON. It can also add minimal defaults for <code class="docutils literal notranslate"><span class="pre">Dynamics</span></code> and <code class="docutils literal notranslate"><span class="pre">Optimization</span></code> drivers.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tools/input_transformer/create_json_input.jl</span></code> in the EXESS repo is a Julia helper for generating RHF inputs:</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">julia<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;include(&quot;create_json_input.jl&quot;); create_input_rhf(&quot;input.xyz&quot;, &quot;BASIS&quot;)&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">julia<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;include(&quot;create_json_input.jl&quot;); create_input_rhf(&quot;molecule.xyz&quot;, &quot;BASIS&quot;)&#39;</span>
 </span></pre></div>
 </div>
 </section>
@@ -691,7 +577,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with
@@ -709,5 +595,6 @@ data-aria-dark="Switch to auto color mode">
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script></body>
 </html>

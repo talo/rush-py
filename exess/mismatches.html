@@ -62,6 +62,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="electronic-structure-methods.html">Electronic Structure Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running.html">Running EXESS</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topologies.html">Topologies and residues</a></li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">Keyword reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
@@ -131,7 +132,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p><code class="docutils literal notranslate"><span class="pre">Topology</span></code> includes <code class="docutils literal notranslate"><span class="pre">waters</span></code> (water range) and <code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> in libqdx.hpp; these fields are not present in the Rust <code class="docutils literal notranslate"><span class="pre">Topology</span></code> struct.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">GuessSCF</span></code> uses <code class="docutils literal notranslate"><span class="pre">bf_cutoff_threshold</span></code> in libqdx.hpp but <code class="docutils literal notranslate"><span class="pre">bt_cutoff_threshold</span></code> in libqdx Rust.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ssfd_only_converge_in_bsp_basis</span></code> has a trailing space in the libqdx.hpp JSON key (<code class="docutils literal notranslate"><span class="pre">&quot;ssfd_only_converge_in_bsp_basis</span> <span class="pre">&quot;</span></code>).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ks_dft.grid</span></code> is free-form JSON in libqdx.hpp, but the Rust schema uses a fixed <code class="docutils literal notranslate"><span class="pre">XCGridParameters</span></code> struct (no octree/space-filling fields).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ks_dft.grid</span></code> is free-form JSON in libqdx.hpp, but the Rust schema uses a fixed <code class="docutils literal notranslate"><span class="pre">XCGridParameters</span></code> struct.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model.method</span></code> and <code class="docutils literal notranslate"><span class="pre">model.basis</span></code> are required in libqdx.hpp, but libqdx Rust provides defaults (<code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code>, <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code>) when omitted.</p></li>
 </ul>
 <p><strong>libqdx C++ vs EXESS core defaults</strong></p>
@@ -150,7 +151,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p>rush-py exposes a limited <code class="docutils literal notranslate"><span class="pre">MethodT</span></code> list and does not include <code class="docutils literal notranslate"><span class="pre">RestrictedRICCSD</span></code>.</p></li>
 <li><p>rush-py <code class="docutils literal notranslate"><span class="pre">BasisT</span></code> / <code class="docutils literal notranslate"><span class="pre">AuxBasisT</span></code> lists are narrower than the EXESS basis set lists.</p></li>
 <li><p>rush-py <code class="docutils literal notranslate"><span class="pre">Model</span></code> only exposes <code class="docutils literal notranslate"><span class="pre">standard_orientation</span></code> and <code class="docutils literal notranslate"><span class="pre">force_cartesian_basis_sets</span></code>; <code class="docutils literal notranslate"><span class="pre">method</span></code>/<code class="docutils literal notranslate"><span class="pre">basis</span></code> are function parameters.</p></li>
-<li><p>rush-py does not expose <code class="docutils literal notranslate"><span class="pre">external_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">rtat</span></code>, <code class="docutils literal notranslate"><span class="pre">integrals</span></code>, or <code class="docutils literal notranslate"><span class="pre">ks_dft</span></code> keyword groups.</p></li>
+<li><p>rush-py does not expose <code class="docutils literal notranslate"><span class="pre">external_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">rtat</span></code>, or <code class="docutils literal notranslate"><span class="pre">integrals</span></code> keyword groups.</p></li>
 <li><p>rush-py <code class="docutils literal notranslate"><span class="pre">StandardDescriptorGrid</span></code> accepts <code class="docutils literal notranslate"><span class="pre">SG1</span></code>/<code class="docutils literal notranslate"><span class="pre">SG2</span></code>, while the schema uses <code class="docutils literal notranslate"><span class="pre">FINE</span></code>/<code class="docutils literal notranslate"><span class="pre">ULTRAFINE</span></code>/<code class="docutils literal notranslate"><span class="pre">SUPERFINE</span></code>/<code class="docutils literal notranslate"><span class="pre">TREUTLER_GM*</span></code>.</p></li>
 <li><p>rush-py <code class="docutils literal notranslate"><span class="pre">OptimizationKeywords</span></code> does not pass <code class="docutils literal notranslate"><span class="pre">constraints</span></code> to REX (marked TODO in code).</p></li>
 <li><p>rush-py <code class="docutils literal notranslate"><span class="pre">Topology</span></code> does not expose <code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code>, <code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code>, or <code class="docutils literal notranslate"><span class="pre">waters</span></code>.</p></li>
@@ -176,7 +177,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

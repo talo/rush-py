@@ -96,7 +96,11 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.prepare_protein.prepare_protein"><code class="docutils literal notranslate"><span class="pre">prepare_protein()</span></code></a></li>
+<li><a class="reference internal" href="#rush.prepare_protein.save_outputs"><code class="docutils literal notranslate"><span class="pre">save_outputs()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -129,8 +133,46 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="prepare-protein">
-<h1>Prepare Protein<a class="headerlink" href="#prepare-protein" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.prepare_protein">
+<span id="prepare-protein"></span><h1>Prepare Protein<a class="headerlink" href="#module-rush.prepare_protein" title="Link to this heading">¶</a></h1>
+<p>Protein preparation module for the Rush Python client.</p>
+<p>This module supports system preparation workflows such as converting PDB inputs
+to TRC, protonating and optimizing hydrogen positions, and augmenting
+structures with connectivity and formal charge information before downstream
+calculations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.prepare_protein.prepare_protein">
+<span class="sig-prename descclassname"><span class="pre">rush.prepare_protein.</span></span><span class="sig-name descname"><span class="pre">prepare_protein</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_protein.html#prepare_protein"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_protein.prepare_protein" title="Link to this definition">¶</a></dt>
+<dd><p>Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_path</strong> (<em>Path</em><em> | </em><em>str</em>)</p></li>
+<li><p><strong>ph</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>naming_scheme</strong> (<em>Literal</em><em>[</em><em>'AMBER'</em><em>, </em><em>'CHARMM'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>capping_style</strong> (<em>Literal</em><em>[</em><em>'never'</em><em>, </em><em>'truncated'</em><em>, </em><em>'always'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>truncation_threshold</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>debump</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.prepare_protein.save_outputs">
+<span class="sig-prename descclassname"><span class="pre">rush.prepare_protein.</span></span><span class="sig-name descname"><span class="pre">save_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_protein.html#save_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_protein.save_outputs" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>res</strong> (<em>dict</em><em> | </em><a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>tuple</em>[<em>Path</em>, <em>Path</em>, <em>Path</em>] | <a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -159,7 +201,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

@@ -6,7 +6,8 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,7 +247,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="104">            <span class="k">if</span> <span class="n">template_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.pdb&quot;</span><span class="p">:</span>
 </span><span data-line="105">                <span class="n">trc</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </span><span data-line="106">                <span class="n">trc_str</span> <span class="o">=</span> <span class="n">to_json</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span>
-</span><span data-line="107">                <span class="n">trc_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">trc_str</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="107">                <span class="n">trc_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">trc_str</span><span class="p">)</span>
 </span><span data-line="108">            <span class="k">else</span><span class="p">:</span>
 </span><span data-line="109">                <span class="n">trc_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </span><span data-line="110">        <span class="k">with</span> <span class="p">(</span>
@@ -363,7 +364,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

@@ -96,7 +96,16 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.nnxtb.NnxtbResults"><code class="docutils literal notranslate"><span class="pre">NnxtbResults</span></code></a><ul>
+<li><a class="reference internal" href="#rush.nnxtb.NnxtbResults.energy_mev"><code class="docutils literal notranslate">energy_mev</span></code></a></li>
+<li><a class="reference internal" href="#rush.nnxtb.NnxtbResults.forces_mev_per_angstrom"><code class="docutils literal notranslate">forces_mev_per_angstrom</span></code></a></li>
+<li><a class="reference internal" href="#rush.nnxtb.NnxtbResults.frequencies_inv_cm"><code class="docutils literal notranslate">frequencies_inv_cm</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.nnxtb.nnxtb"><code class="docutils literal notranslate"><span class="pre">nnxtb()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -129,8 +138,69 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="nn-xtb">
-<h1>NN-xTB<a class="headerlink" href="#nn-xtb" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.nnxtb">
+<span id="nn-xtb"></span><h1>NN-xTB<a class="headerlink" href="#module-rush.nnxtb" title="Link to this heading">¶</a></h1>
+<p>NN-xTB module helpers for the Rush Python client.</p>
+<p>NN-xTB reparameterizes xTB with a neural network to approach DFT-level accuracy
+while keeping xTB-like speed. It supports arbitrary charge and spin states and
+is well-suited for large-scale screening where fast, per-atom forces or
+vibrational frequencies are needed. Frequency calculations are more expensive.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.nnxtb.</span></span><span class="sig-name descname"><span class="pre">NnxtbResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_mev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces_mev_per_angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies_inv_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/nnxtb.html#NnxtbResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.nnxtb.NnxtbResults" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Parsed nn-xTB results.</p>
+<p>Use this to load JSON output from the Rush object store. When calling
+<cite>nnxtb(…, collect=True)</cite>, the return value includes a <cite>path</cite> to the JSON
+output. After reading the json into a dict, you can pass it to this class
+like <cite>NnxtbResults(**data)</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy_mev</strong> (<em>float</em>)</p></li>
+<li><p><strong>forces_mev_per_angstrom</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>frequencies_inv_cm</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults.energy_mev">
+<span class="sig-name descname"><span class="pre">energy_mev</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.nnxtb.NnxtbResults.energy_mev" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults.forces_mev_per_angstrom">
+<span class="sig-name descname"><span class="pre">forces_mev_per_angstrom</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.nnxtb.NnxtbResults.forces_mev_per_angstrom" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults.frequencies_inv_cm">
+<span class="sig-name descname"><span class="pre">frequencies_inv_cm</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.nnxtb.NnxtbResults.frequencies_inv_cm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.nnxtb.nnxtb">
+<span class="sig-prename descclassname"><span class="pre">rush.nnxtb.</span></span><span class="sig-name descname"><span class="pre">nnxtb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_forces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_frequencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1,</span> <span class="pre">storage=100)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/nnxtb.html#nnxtb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.nnxtb.nnxtb" title="Link to this definition">¶</a></dt>
+<dd><p>Run NN-xTB on the system in the QDX topology file at <cite>topology_path</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology_path</strong> (<em>Path</em><em> | </em><em>str</em>) – Path to a TRC topology JSON file.</p></li>
+<li><p><strong>compute_forces</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to compute per-atom forces.
+Defaults to true.</p></li>
+<li><p><strong>compute_frequencies</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to compute vibrational frequencies.
+Defaults to false.</p></li>
+<li><p><strong>multiplicity</strong> (<em>int</em><em> | </em><em>None</em>) – Spin multiplicity. Defaults to 1 (singlet).</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>) – Rush compute resources to request.</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>) – Rush run metadata.</p></li>
+<li><p><strong>collect</strong> – Whether to wait for completion and return outputs.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -159,7 +229,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

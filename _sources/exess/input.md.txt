@@ -4,26 +4,517 @@ EXESS inputs are JSON files loosely based on MolSSI QCSchema. In EXESS, the mole
 
 The upstream manual organizes its contents by the same top-level input groups (`topologies`, `model`, `system`, `keywords`, `driver`), and EXESS tries to follow the QC-JSON conventions where possible.
 
-The schema below is compiled from the upstream EXESS docs, the EXESS/libqdx C++ schema (`libqdx.hpp`), the libqdx Rust types, and the rush-py interface.
-
 ## Schema overview
 
 Top-level EXESS input fields (as parsed by EXESS/libqdx):
 
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `schema_version` | string | No | Defaults to `0.2.0`. |
-| `topologies` | array of Topology | Yes | One or more molecular systems. |
-| `residues` | array of Residues | No | TRC residue definitions, usually aligned to `topologies`. |
-| `external_charges` | object | No | External point charges (positions + charges). |
-| `model` | object | Yes | Method + basis configuration. |
-| `system` | object | No | Hardware configuration. |
-| `keywords` | object | Yes | Calculation parameters; may be `{}`. |
-| `driver` | string | Yes | Calculation type (Energy, Gradient, Dynamics, Optimization, Hessian, QMMM). |
-| `title` | string | No | Printed in output files. |
-| `check_schema` | bool | No | Defaults to true when schema checks are enabled. |
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: topologies
+      :type: array[Topology]
+      :default: required
+      :brief: One or more molecular systems.
+
+   .. exess-param:: residues
+      :type: array[Residues]
+      :default: unset
+      :brief: TRC residue definitions aligned to ``topologies``.
+
+   .. exess-param:: external_charges
+      :type: object
+      :default: unset
+      :brief: External point charges (positions + charges).
+
+   .. exess-param:: driver
+      :type: string
+      :default: required
+      :brief: Calculation type (Energy, Gradient, Dynamics, Optimization, Hessian, QMMM).
+
+   .. exess-param:: model
+      :type: object
+      :default: required
+      :brief: Level of theory (method) + basis configuration.
+
+   .. exess-param:: system
+      :type: object
+      :default: unset
+      :brief: Hardware configuration.
+
+   .. exess-param:: keywords
+      :type: object
+      :default: required
+      :brief: Calculation parameters; may be ``{}``.
+
+   .. exess-param:: schema_version
+      :type: string
+      :default: 0.2.0
+      :brief: Input schema version.
+
+   .. exess-param:: title
+      :type: string
+      :default: unset
+      :brief: Printed in output files.
+
+   .. exess-param:: check_schema
+      :type: bool
+      :default: true (when enabled)
+      :brief: Enable schema validation when supported.
+```
 
 `keywords` is required in the C++ schema, but can be an empty object because defaults are applied by the parser. `check_schema` is only honored when EXESS is built with configurable schema checks; otherwise it is ignored.
+
+Icon key:
+
+```{eval-rst}
+.. raw:: html
+
+   <div class="exess-icon-key">
+     <span class="exess-icon-key__item"><span class="param-note param-note--info" aria-hidden="true"></span> Tip</span>
+     <span class="exess-icon-key__item"><span class="param-note param-note--expert" aria-hidden="true"></span> Expert</span>
+   </div>
+```
+
+## Input System Specification
+
+### topologies
+
+``topologies`` is an array of ``topology`` objects. Each ``topology`` provides molecular
+data and optional fragmentation/connectivity. See {ref}`topologies` for the full schema
+and validation rules.
+
+Example with inline geometry and symbols:
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [
+             {
+               "symbols": ["O", "H", "H"],
+               "geometry": [
+                 -1.1570, 0.0630, -0.4817,
+                 -1.1570, 0.8180, -1.0766,
+                 -1.1570, -0.6920, -1.0766
+               ]
+             }
+           ],
+           "driver": "Energy",
+           "model": { "method": "RestrictedHF", "basis": "cc-pVDZ" },
+           "keywords": {}
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from pathlib import Path
+
+         from rush.exess import energy
+         from rush.mol import Element, Topology
+
+         topology = Topology(
+             symbols=[Element.O, Element.H, Element.H],
+             geometry=[
+                 -1.1570, 0.0630, -0.4817,
+                 -1.1570, 0.8180, -1.0766,
+                 -1.1570, -0.6920, -1.0766,
+             ],
+         )
+
+         Path("molecule_t.json").write_text(topology.to_json())
+
+         energy(topology_path="molecule_t.json")
+```
+
+Example using an XYZ file:
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [
+             { "xyz": "molecule.xyz" }
+           ],
+           "driver": "Energy",
+           "model": { "method": "RestrictedHF", "basis": "cc-pVDZ" },
+           "keywords": {}
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from pathlib import Path
+
+         from rush.exess import energy
+         from rush.mol import Element, Topology
+
+         lines = Path("molecule.xyz").read_text().splitlines()
+         symbols = []
+         geometry = []
+         for line in lines[2:]:
+             if not line.strip():
+                 continue
+             symbol, x, y, z = line.split()[:4]
+             symbols.append(Element.from_str(symbol))
+             geometry.extend([float(x), float(y), float(z)])
+
+         topology = Topology(symbols=symbols, geometry=geometry)
+         Path("molecule_t.json").write_text(topology.to_json())
+
+         energy(topology_path="molecule_t.json")
+```
+
+### residues
+
+``residues`` is typically aligned one-to-one with ``topologies`` (same index). It is
+required for QMMM and other workflows that rely on residues. See {ref}`residues` for the
+full schema.
+
+Example:
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [
+             {
+               "xyz": "molecule.xyz",
+               "fragments": [[0, 1, 2], [3, 4, 5]]
+             }
+           ],
+           "residues": [
+             {
+               "residues": [[0, 1, 2], [3, 4, 5]],
+               "seqs": ["HOH", "HOH"],
+               "seq_ns": [1, 2],
+               "insertion_codes": ["", ""]
+             }
+           ],
+           "driver": "QMMM",
+           "model": { "method": "RestrictedHF", "basis": "STO-3G" },
+           "keywords": {
+             "regions": {
+               "qm_fragments": [0],
+               "mm_fragments": [1]
+             },
+             "qmmm": {
+               "n_timesteps": 100
+             }
+           }
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from pathlib import Path
+
+         from rush.exess import qmmm
+         from rush.mol import Element, Fragment, Residue, Residues, Topology
+
+         topology = Topology(
+             symbols=[Element.O, Element.H, Element.H, Element.O, Element.H, Element.H],
+             geometry=[
+                 0.0000, 0.0000, 0.0000,
+                 0.7570, 0.5860, 0.0000,
+                 -0.7570, 0.5860, 0.0000,
+                 2.8000, 0.0000, 0.0000,
+                 3.5570, 0.5860, 0.0000,
+                 2.0430, 0.5860, 0.0000,
+             ],
+             fragments=[Fragment([0, 1, 2]), Fragment([3, 4, 5])],
+         )
+
+         residues = Residues(
+             residues=[Residue([0, 1, 2]), Residue([3, 4, 5])],
+             seqs=["HOH", "HOH"],
+             seq_ns=[1, 2],
+             insertion_codes=["", ""],
+         )
+
+         Path("molecule_t.json").write_text(topology.to_json())
+         Path("molecule_r.json").write_text(residues.to_json())
+
+         qmmm(
+             topology_path="molecule_t.json",
+             residues_path="molecule_r.json",
+             n_timesteps=100,
+             qm_fragments=[0],
+             mm_fragments=[1],
+         )
+```
+
+### external_charges
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "external_charges": {
+             "positions": [0.0, 0.0, 0.0, 1.5, 0.0, 0.0],
+             "charges": [0.5, -0.5]
+           },
+           "driver": "Energy",
+           "model": { "method": "RestrictedHF", "basis": "cc-pVDZ" },
+           "keywords": {}
+         }
+
+   .. tab-item:: Python
+
+      Not supported.
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: positions
+      :type: array[float]
+      :default: required
+      :brief: Flat XYZ list of charge positions.
+
+      The positions length must be :math:`3 \times \mathrm{len}(charges)`.
+
+   .. exess-param:: charges
+      :type: array[float]
+      :default: required
+      :brief: Charge values aligned to ``positions``.
+```
+
+## Configuration
+
+### driver
+
+The `driver` field selects the calculation type:
+
+`Energy`
+: Single-point energy and related properties.
+
+`Optimization`
+: Geometry optimization. See {ref}`optimization`, plus {ref}`regions` when using Q4ML regions.
+
+`QMMM`
+: QM/MM or QM/ML/MM workflows. See {ref}`qmmm`, plus {ref}`regions` as needed.
+
+`Gradient`
+: Analytic or finite-difference gradients. See {ref}`gradient` for gradient options.
+
+`Hessian`
+: Hessian and vibrational analysis. See {ref}`hessian`, plus SCF/DFT keywords as needed.
+
+`Dynamics`
+: Molecular dynamics. See {ref}`dynamics` and {ref}`force_field`.
+
+### model
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": {
+             "method": "RestrictedRIMP2",
+             "basis": "cc-pVDZ",
+             "aux_basis": "cc-pVDZ-RIFIT",
+             "standard_orientation": "None",
+             "force_cartesian_basis_sets": false
+           },
+           "keywords": {}
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import energy
+
+         energy(
+             topology_path="molecule_t.json",
+             method="RestrictedRIMP2",
+             basis="cc-pVDZ",
+             aux_basis="cc-pVDZ-RIFIT",
+             standard_orientation="None",  # String value, not None.
+             force_cartesian_basis_sets=False,
+         )
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: method
+      :type: string
+      :default: RestrictedHF
+      :brief: Level of theory (RestrictedHF, UnrestrictedHF, RestrictedKSDFT, RestrictedRIMP2, UnrestrictedRIMP2, RestrictedRICCSD).
+
+      Level-of-theory descriptions:
+
+      ``RestrictedHF``
+        Restricted Hartree-Fock (closed-shell).
+
+      ``UnrestrictedHF``
+        Unrestricted Hartree-Fock (open-shell).
+
+      ``RestrictedKSDFT``
+        Restricted Kohn-Sham density functional theory.
+
+      ``RestrictedRIMP2``
+        Restricted RI Moller-Plesset second-order perturbation theory.
+
+      ``UnrestrictedRIMP2``
+        Unrestricted RI Moller-Plesset second-order perturbation theory.
+
+      ``RestrictedRICCSD``
+        Restricted RI coupled cluster singles and doubles.
+
+      HF methods support multiple integral build types, while MP2 is only implemented
+      via RI (resolution-of-identity).
+
+      Upstream docs list ``RestrictedHF``, ``UnrestrictedHF``, and ``RestrictedRIMP2``
+      as the core methods; EXESS adds KSDFT and RI-CCSD support in the schema.
+
+   .. exess-param:: basis
+      :type: string
+      :default: cc-pVDZ
+      :brief: Primary basis set. See :ref:`basis sets <basis_sets>`.
+
+      libqdx defaults ``basis`` to ``cc-pVDZ`` if omitted.
+
+   .. exess-param:: aux_basis
+      :type: string
+      :default: unset
+      :brief: Auxiliary basis for RI methods. See :ref:`basis sets <basis_sets>`.
+
+   .. exess-param:: standard_orientation
+      :type: string
+      :default: FullSystem
+      :brief: Orientation selection (``FullSystem``, ``None``, ``PerFragment``).
+      :note: info
+
+      ``PerFragment`` rotates each fragment independently; upstream docs warn that this
+      can cause inconsistent energies and energy differences in fragmented runs.
+
+      ``None`` prevents translation and rotation, which can make it easier to compare
+      an optimization trajectory to the input conformation.
+
+   .. exess-param:: force_cartesian_basis_sets
+      :type: bool
+      :default: true
+      :brief: Force Cartesian basis functions.
+
+      For d orbitals this yields components like :math:`x^2, xy, xz, y^2, yz, z^2`.
+```
+
+### system
+
+```{eval-rst}
+.. tab-set::
+
+   .. tab-item:: EXESS CLI
+
+      .. code-block:: json
+         :caption: config.json
+
+         {
+           "topologies": [{ "xyz": "molecule.xyz" }],
+           "driver": "Energy",
+           "model": { "method": "RestrictedHF", "basis": "cc-pVDZ" },
+           "system": {
+             "max_gpu_memory_mb": 24000,
+             "teams_per_node": 4,
+             "gpus_per_team": 1
+           },
+           "keywords": {}
+         }
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+         :caption: run.py
+
+         from rush.exess import System, energy
+
+         energy(
+             topology_path="molecule_t.json",
+             system=System(
+                 max_gpu_memory_mb=24000,
+                 teams_per_node=4,
+                 gpus_per_team=1,
+             ),
+         )
+```
+
+```{eval-rst}
+.. exess-params::
+
+   .. exess-param:: max_gpu_memory_mb
+      :type: uint64
+      :default: unset
+      :brief: Max GPU memory per process in MB.
+      :note: info
+
+      EXESS will crash if you request more memory than is available. libqdx notes a
+      dynamic default of ~75% of GPU memory when unset.
+
+   .. exess-param:: oversubscribe_gpus
+      :type: bool
+      :default: false
+      :brief: Allow multiple processes per GPU.
+      :note: expert
+
+      Expert setting to allow multiple processes per GPU.
+
+   .. exess-param:: teams_per_node
+      :type: uint32
+      :default: 1
+      :brief: Worker teams per node.
+
+      ``teams_per_node`` and ``gpus_per_team`` control fragmentation scaling; one team
+      handles one fragment queue.
+
+   .. exess-param:: gpus_per_team
+      :type: uint32
+      :default: unset
+      :brief: GPUs per team (overridable by ``MBE_NGPUS``).
+      :note: info
+
+      ``gpus_per_team`` can be overridden by the ``MBE_NGPUS`` environment variable.
+```
+
+### keywords
+
+`keywords` contains method- and run-specific settings. See the {doc}`keyword reference <keywords>` for full details. The C++ schema expects `keywords` to be present even if empty.
 
 ## Default resolution order
 
@@ -32,307 +523,6 @@ Defaults are applied in the following order:
 1. rush-py defaults: any non-`None` values set in Python (function defaults or dataclass defaults) are explicit values.
 2. EXESS/libqdx JSON parser defaults (as defined in `libqdx.hpp`) for omitted fields.
 3. EXESS internal defaults for values that remain unset after parsing.
-
-## topologies
-
-`topologies` is an array of `topology` objects. Each `topology` contains the molecular data, fragmentation, and connectivity for a single system. Batched mode is achieved by listing multiple topologies with a shared driver/model/keywords configuration.
-
-### topology fields
-
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `schema_version` | string | No | Defaults to `0.2.0`. |
-| `symbols` | array of string | Yes* | Atomic symbols ("H", "C", etc). Required if `xyz` is not provided. |
-| `geometry` | array of float | Yes* | Flat XYZ array (length = 3 * atoms). Required if `xyz` is not provided. |
-| `xyz` | string | Yes* | Path to XYZ file; EXESS will read it instead of `symbols` + `geometry`. |
-| `velocities` | array of float | No | Flat XYZ velocity array (Angstrom/ps). |
-| `labels` | array of string | No | Atom labels. |
-| `partial_charges` | array of float | No | Per-atom partial charges. |
-| `formal_charges` | array of int | No | Per-atom formal charges. Defaults to 0 for all atoms. |
-| `connectivity` | array of bonds | No | Bond list for covalent fragmentation. |
-| `stereochemistry` | array of int | No | One entry per bond. |
-| `fragments` | array of arrays | No | Zero-indexed atom indices per fragment. If omitted, EXESS assumes a single fragment containing all atoms. |
-| `fragment_formal_charges` | array of int | No | Per-fragment formal charges. Defaults to 0 per fragment if omitted. |
-| `fragment_partial_charges` | array of float | No | Per-fragment partial charges. |
-| `fragment_multiplicities` | array of int | No | Per-fragment multiplicities (open-shell systems). Defaults to 1 per fragment if omitted. |
-| `waters` | array of two ints | No | First/last water molecule treated classically. |
-
-
-The EXESS C++ schema requires either `symbols` + `geometry` or `xyz`, but not both.
-
-Notes from upstream docs and libqdx Rust types:
-
-- `labels` can be used to annotate specific atoms (e.g., alpha carbons in residues).
-- `partial_charges`, `formal_charges`, and `labels` must match the length of `symbols` if provided. `partial_charges` are in atomic units.
-- `connectivity` is a perceived bond list and should not be treated as a definitive source of bond information.
-- `stereochemistry` is only valid if `connectivity` is present and must match its length.
-- `velocities` are used for dynamics; they are present only in v1 inputs but are supported by the schema.
-- `fragments` must include each atom exactly once when provided.
-
-#### geometry
-
-Example layout:
-
-```json
-"geometry": [
-  -4.3997, 1.0764, 7.7009,
-  -3.9597, 0.2664, 7.3109,
-  -4.4297, 0.9964, 8.7009
-]
-```
-
-#### symbols
-
-```json
-"symbols": ["O", "H", "H"]
-```
-
-#### xyz
-
-`xyz` can be used instead of `geometry` and `symbols`, including for fragmented systems (it is compatible with fragmentation keywords). Standard XYZ files begin with the atom count, followed by a comment line and then element + XYZ positions:
-
-```text
-3
-
-O -1.1570 0.0630 -0.4817
-H -1.1570 0.8180 -1.0766
-H -1.1570 -0.6920 -1.0766
-```
-
-Example usage in EXESS:
-
-```json
-{
-  "topologies": [
-    { "xyz": "/path/to/water.xyz" }
-  ]
-}
-```
-
-#### connectivity
-
-Connectivity is required when a covalent bond is broken across fragments. EXESS will add hydrogen caps to satisfy valences and remove them after the calculation.
-
-A bond entry is `[atom_index_1, atom_index_2, bond_order]`.
-
-EXESS/libqdx defines the following bond order values (the upstream docs emphasize single/double/triple bonds as the common values):
-
-- `0`: Unspecified
-- `1`: Single
-- `2`: Double
-- `3`: Triple
-- `4`: Quadruple
-- `5`: Quintuple
-- `6`: Sextuple
-- `250`: FiveAndAHalf
-- `251`: FourAndAHalf
-- `252`: ThreeAndAHalf
-- `253`: TwoAndAHalf
-- `254`: OneAndAHalf
-- `255`: Ring
-
-Example:
-
-```json
-"connectivity": [
-  [1, 4, 1],
-  [9, 12, 1]
-]
-```
-
-Upstream docs include a covalent fragmentation example with two ethane fragments connected across a C-C bond, where `connectivity: [[1, 4, 1]]` signals a single bond between atom indices 1 and 4. EXESS uses this information to apply hydrogen caps on broken valences during fragmentation and removes them after the calculation.
-
-#### stereochemistry
-
-EXESS/libqdx accepts a list of integers aligned with the `connectivity` list:
-
-- `0`: None
-- `1`: Up
-- `-1`: Down
-- `2`: Either
-- `3`: CisOrTrans
-
-#### fragments
-
-Fragment indices are zero-indexed. Example for five water fragments:
-
-```json
-"fragments": [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [9, 10, 11],
-  [12, 13, 14]
-]
-```
-
-#### fragment_formal_charges / fragment_multiplicities
-
-- If `fragment_formal_charges` is omitted, EXESS sets fragment charges to the sum of per-atom `formal_charges` when provided, otherwise 0.
-- If `fragment_multiplicities` is omitted, EXESS sets multiplicity to 1 for every fragment.
-- If `fragments` is omitted, EXESS assumes a single fragment containing all atoms and derives defaults accordingly.
-
-Example for a single, unfragmented system:
-
-```json
-{
-  "topologies": [
-    {
-      "geometry": [
-        -4.3997, 1.0764, 7.7009,
-        -3.9597, 0.2664, 7.3109,
-        -4.4297, 0.9964, 8.7009
-      ],
-      "symbols": ["O", "H", "H"],
-      "fragment_formal_charges": [0],
-      "fragment_multiplicities": [1]
-    }
-  ]
-}
-```
-
-#### topology validation checks
-
-The libqdx Rust types expose validation logic that is useful when constructing inputs:
-
-- `geometry` must be length `3 * len(symbols)`.
-- `labels`, `partial_charges`, and `formal_charges` must match `symbols` length if present.
-- `connectivity` atom indices must be valid and may not reference the same atom twice.
-- `stereochemistry` is only valid when `connectivity` is present and must be the same length.
-- `velocities` must be length `3 * len(symbols)` if present.
-- `fragments` must not duplicate atoms; each atom should appear in exactly one fragment.
-- `fragment_formal_charges`, `fragment_partial_charges`, and `fragment_multiplicities` must match `fragments` length when provided.
-
-#### waters
-
-`waters` is a two-element array identifying the first and last water molecule to be treated classically (used by some QMMM/Q4ML workflows).
-
-## residues
-
-`residues` is an optional array of residue definitions used for TRC-based workflows and QMMM. Each element is a `Residues` object:
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `labeled` | array[int] | Optional list of residue indices with labels. |
-| `labels` | array of array[string] | Optional labels per residue. |
-| `residues` | array of array[int] | Atom indices per residue. |
-| `seqs` | array[string] | Residue names. |
-| `seq_ns` | array[int] | Residue numbers. |
-| `insertion_codes` | array[string] | PDB-style insertion codes. |
-
-`residues` is typically aligned one-to-one with `topologies` (same index). It is required for QMMM and other workflows that rely on residues, and it is often generated by converting PDB/TRC inputs.
-
-## external_charges
-
-External charges are represented as:
-
-```json
-"external_charges": {
-  "positions": [0.0, 0.0, 0.0, 1.5, 0.0, 0.0],
-  "charges": [0.5, -0.5]
-}
-```
-
-The positions array is a flat XYZ list, with one charge per position. The positions length must be 3 * `len(charges)`.
-
-## driver
-
-The `driver` field selects the calculation type:
-
-- `Energy`
-- `Gradient`
-- `Dynamics`
-- `Optimization`
-- `Hessian`
-- `QMMM`
-
-The parser also accepts common aliases and case variants, including:
-
-- `Energy`: `ENERGY`, `Energy`, `energy`
-- `Gradient`: `GRADIENT`, `Gradient`, `gradient`
-- `Dynamics`: `DYNAMICS`, `Dynamics`, `dynamics`
-- `Optimization`: `OPTIMIZATION`, `Optimization`, `optimization`, `OPTIMISATION`, `Optimisation`, `optimisation`
-- `Hessian`: `HESSIAN`, `Hessian`, `hessian`
-- `QMMM`: `QMMM`, `Qmmm`, `qmmm`
-
-## model
-
-The `model` group controls the level of theory and basis sets:
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `method` | string | Method used for the calculation (see below). |
-| `basis` | string | Primary basis set. |
-| `aux_basis` | string | Auxiliary basis for RI methods. |
-| `standard_orientation` | string | `FullSystem`, `None`, or `PerFragment`. Default: `FullSystem`. |
-| `force_cartesian_basis_sets` | bool | Default: true. |
-
-Methods in the EXESS/libqdx schema:
-
-- `RestrictedHF`
-- `UnrestrictedHF`
-- `RestrictedKSDFT`
-- `RestrictedRIMP2`
-- `UnrestrictedRIMP2`
-- `RestrictedRICCSD`
-
-The libqdx Rust parser accepts common aliases like `RHF`, `UHF`, `KSDFT`, `RIMP2`, and `RICCSD`.
-
-Full method alias list accepted by libqdx (case-sensitive variants shown as defined in the parser):
-
-- `RestrictedHF`: `RESTRICTEDHF`, `RestrictedHF`, `restrictedhf`, `RESTRICTED-HF`, `Restricted-HF`, `restricted-hf`, `RHF`, `rhf`, `R-HF`, `r-hf`
-- `UnrestrictedHF`: `UNRESTRICTEDHF`, `UnrestrictedHF`, `unrestrictedhf`, `UNRESTRICTED-HF`, `Unrestricted-HF`, `unrestricted-hf`, `UHF`, `uhf`, `U-HF`, `u-hf`
-- `RestrictedKSDFT`: `RESTRICTEDKSDFT`, `RestrictedKSDFT`, `restrictedksdft`, `RESTRICTED-KSDFT`, `Restricted-KSDFT`, `restricted-ksdft`, `RKSDFT`, `rksdft`, `R-KSDFT`, `r-ksdft`, `KSDFT`, `ksdft`
-- `RestrictedRIMP2`: `RESTRICTEDRIMP2`, `RestrictedRIMP2`, `restrictedrimp2`, `RESTRICTED-RIMP2`, `Restricted-RIMP2`, `restricted-rimp2`, `RRIMP2`, `rrimp2`, `R-RIMP2`, `r-rimp2`, `RIMP2`, `rimp2`
-- `UnrestrictedRIMP2`: `UNRESTRICTEDRIMP2`, `UnrestrictedRIMP2`, `unrestrictedrimp2`, `UNRESTRICTED-RIMP2`, `Unrestricted-RIMP2`, `unrestricted-rimp2`, `URIMP2`, `urimp2`, `U-RIMP2`, `u-rimp2`
-- `RestrictedRICCSD`: `RESTRICTEDRICCSD`, `RestrictedRICCSD`, `restrictedriccsd`, `RESTRICTED-RICCSD`, `Restricted-RICCSD`, `restricted-riccsd`, `RRICCSD`, `rriccsd`, `R-RICCSD`, `r-riccsd`, `RICCSD`, `riccsd`
-
-Notes from upstream docs and libqdx Rust types:
-
-- Upstream docs list `RestrictedHF`, `UnrestrictedHF`, and `RestrictedRIMP2` as the core methods; EXESS adds KSDFT and RI-CCSD support in the schema.
-- libqdx defaults `method` to `RestrictedHF` and `basis` to `cc-pVDZ` if omitted.
-- `standard_orientation="PerFragment"` rotates each fragment independently; upstream docs warn that this can cause inconsistent energies and energy differences in fragmented runs.
-- `force_cartesian_basis_sets` forces Cartesian functions; for d orbitals this yields components like `x^2, xy, xz, y^2, yz, z^2`.
-
-`standard_orientation` also accepts case variants:
-
-- `None`: `NONE`, `None`, `none`
-- `FullSystem`: `FULLSYSTEM`, `FullSystem`, `fullsystem`
-- `PerFragment`: `PERFRAGMENT`, `PerFragment`, `perfragment`
-
-## system
-
-The `system` group controls hardware usage:
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `max_gpu_memory_mb` | uint64 | Max GPU memory per process in MB. |
-| `oversubscribe_gpus` | bool | Allow multiple processes per GPU. Default: false. |
-| `teams_per_node` | uint32 | Worker teams per node. Default: 1. |
-| `gpus_per_team` | uint32 | GPUs per team (overridable by `MBE_NGPUS`). |
-
-Notes from upstream docs and libqdx Rust types:
-
-- `max_gpu_memory_mb`: EXESS will crash if you request more memory than is available. libqdx notes a dynamic default of ~75% of GPU memory when unset.
-- `oversubscribe_gpus`: expert setting to allow multiple processes per GPU.
-- `teams_per_node` and `gpus_per_team` control fragmentation scaling; one team handles one fragment queue.
-- `gpus_per_team` can be overridden by the `MBE_NGPUS` environment variable.
-
-Example (4 GPUs per node, 1 GPU per fragment team):
-
-```json
-"system": {
-  "max_gpu_memory_mb": 24000,
-  "teams_per_node": 4,
-  "gpus_per_team": 1
-}
-```
-
-This creates four teams per node, each using one GPU. If your fragments fit on a single GPU, this can yield near-linear speedups.
-
-## keywords
-
-`keywords` contains method- and run-specific settings. See the keyword reference page for full details. The C++ schema expects `keywords` to be present even if empty.
 
 ## Rush-py input mapping
 
@@ -343,7 +533,7 @@ Key differences:
 - `Model` in rush-py only includes `standard_orientation` and `force_cartesian_basis_sets`; `method`, `basis`, and `aux_basis` are function parameters.
 - `keywords` in rush-py are passed as Python dataclasses (for `SCFKeywords`, `FragKeywords`, `ExportKeywords`, `OptimizationKeywords`, etc.).
 - `frag_keywords` defaults to a dimer fragmentation setup; pass `frag_keywords=None` to run a full-system calculation.
-- `external_charges` and some keyword groups (e.g., `rtat`, `integrals`, `ks_dft`) are not yet exposed in the rush-py API.
+- `external_charges` and some keyword groups (e.g., `rtat`, `integrals`) are not yet exposed in the rush-py API.
 
 See the Rush guides for TRC objects and conversions: [Objects and TRC Files](../guides/03-objects-and-trc-files).
 
@@ -366,5 +556,5 @@ The upstream docs mention several helpers for building EXESS inputs:
 - `tools/input_transformer/create_json_input.jl` in the EXESS repo is a Julia helper for generating RHF inputs:
 
 ```bash
-julia -E 'include("create_json_input.jl"); create_input_rhf("input.xyz", "BASIS")'
+julia -E 'include("create_json_input.jl"); create_input_rhf("molecule.xyz", "BASIS")'
 ```
