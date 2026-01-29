@@ -329,7 +329,7 @@ Notes from the rush-py tutorial:
 
 ## Post-processing
 
-The EXESS repo includes a Julia-based Ovito exporter for iterative trajectories:
+The EXESS GitHub repository includes a Julia-based Ovito exporter for iterative trajectories:
 
 ```bash
 cd tools/export

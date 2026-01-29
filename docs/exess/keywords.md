@@ -1,12 +1,12 @@
 # Keyword reference
 
-Keywords live under the top-level `keywords` object. The groups recognized by the EXESS/libqdx schema are:
+Keywords live under the top-level `keywords` object. Recognized groups include:
 
 `scf`, `frag`, `ks_dft`, `export`, `regions`, `optimization`, `qmmm`, `gradient`, `guess`, `integrals`, `rtat`, `hessian`, `dynamics`, `boundary`, `machine_learning`, `force_field`, `log`, `debug`.
 
 Defaults in the parameter listings below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.
 
-The upstream manual describes `keywords` as the main set of controls for the calculation. In practice, you will spend most of your time in `scf`, `frag`, `ks_dft`, and the driver-specific groups (`optimization`, `dynamics`, `qmmm`).
+In practice, you will spend most of your time in `scf`, `frag`, `ks_dft`, and the driver-specific groups (`optimization`, `dynamics`, `qmmm`).
 
 Icon key:
 
@@ -91,7 +91,7 @@ Icon key:
       :brief: Shell-pair batches per bin; use multiples of 128.
       :note: info
 
-      Do not go below 128. Upstream docs cite 10.1021/acs.jctc.0c00768, 10.1021/acs.jctc.1c00720, and 10.1080/00268976.2022.2112987 for details on the shell-pair batch bin container.
+      Do not go below 128. For details on the shell-pair batch bin container, see 10.1021/acs.jctc.0c00768, 10.1021/acs.jctc.1c00720, and 10.1080/00268976.2022.2112987.
 
    .. exess-param:: convergence_metric
       :type: string
@@ -104,7 +104,7 @@ Icon key:
       :brief: SCF convergence threshold; tighten for higher-order fragmentation or tighter energy targets.
       :note: info
 
-      Suggested values from upstream docs:
+      Suggested values:
 
       - ``1e-6`` for non-fragmented RHF + RI-MP2 with ``Density``/``DIIS``.
       - ``1e-8`` for non-fragmented RHF + RI-MP2 with ``Energy``.
@@ -118,7 +118,7 @@ Icon key:
       :brief: Density screening threshold; affects SCF cost and accuracy.
       :note: info
 
-      Lower values speed up SCF with potential accuracy loss. Upstream guidance suggests exploring ``1e-8`` to ``1e-12`` and validating accuracy; too-large values can lead to NaNs.
+      Lower values speed up SCF with potential accuracy loss. Explore ``1e-8`` to ``1e-12`` and validate accuracy; too-large values can lead to NaNs.
 
       Increasing to ``1e-11`` or ``1e-12`` will slow SCF but can improve accuracy for higher-order fragmentation (e.g., tetramers) and produce crisper MP2 orbitals. Validate results against the default before adopting more aggressive thresholds.
 
@@ -336,15 +336,14 @@ Icon key:
       :brief: Experimental queue optimization.
       :note: experimental
 
-      Experimental queue optimization intended for AIMD workflows (upstream docs
-      label this "broom broom").
+      Experimental queue optimization intended for AIMD workflows; avoid unless you can validate against a baseline.
 ```
 
 
 (ks_dft)=
 ### ks_dft
 
-KSDFT is used when `model.method` is `RestrictedKSDFT`. Upstream docs recommend reading about the KSDFT methodologies in the following paper:
+KSDFT is used when `model.method` is `RestrictedKSDFT`. The KSDFT methodologies are described in the following paper:
 
 Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation of the DFT Exchange-Correlation Functional. J. Chem. Theory Comput. 2025. [https://doi.org/10.1021/acs.jctc.5c01229](https://doi.org/10.1021/acs.jctc.5c01229).
 
@@ -450,7 +449,7 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
 
       .. rubric:: Grid quality parameters
 
-      libqdx schema; defaults shown where applicable.
+      Defaults shown where applicable.
 
       ``radial_quad`` (default: ``MuraKnowles``)
         ``MuraKnowles``, ``MurrayHandyLaming``, ``TreutlerAldrichs``.
@@ -617,7 +616,9 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export relaxed MP2 density correction.
 
-      Rush-py source comments flag this as undocumented; validate outputs before production use.
+      .. only:: internal
+
+         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
    .. exess-param:: export_fock
       :type: bool
@@ -656,7 +657,9 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export MO coefficients.
 
-      Rush-py source comments flag this as undocumented; validate outputs before production use.
+      .. only:: internal
+
+         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
    .. exess-param:: export_gradient
       :type: bool
@@ -687,7 +690,9 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export bond orders.
 
-      Rush-py source comments describe this as a pass-through of input connectivity.
+      .. only:: internal
+
+         Rush-py source comments describe this as a pass-through of input connectivity.
 
    .. exess-param:: export_h_caps
       :type: bool
@@ -719,7 +724,9 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export basis labels.
 
-      Rush-py source comments flag this as undocumented; validate outputs before production use.
+      .. only:: internal
+
+         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
    .. exess-param:: export_hessian
       :type: bool
@@ -733,7 +740,9 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export mass-weighted hessian.
 
-      Rush-py source comments flag this as undocumented; validate outputs before production use.
+      .. only:: internal
+
+         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
       Requires a Hessian calculation.
 
@@ -742,7 +751,9 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export hessian frequencies.
 
-      Rush-py source comments flag this as undocumented; validate outputs before production use.
+      .. only:: internal
+
+         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
       Requires a Hessian calculation.
 
@@ -774,7 +785,7 @@ Export controls what is written to HDF5 output files:
       :brief: Grid for descriptor exports.
       :note: info
 
-      ``descriptor_grid`` can be one of the following structures (libqdx):
+      ``descriptor_grid`` can be one of the following structures:
 
       ``standard``
         ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
@@ -847,7 +858,7 @@ Rules and defaults:
 - Provide at least two of the three lists; the remaining region is inferred as the fragments not mentioned elsewhere.
 - If all three lists are provided, they must be disjoint and cover all fragments.
 - Supplying only one list is invalid.
-- If `regions` is omitted in JSON, libqdx defaults to `mm_fragments=[]` and `ml_fragments=[]` and EXESS infers `qm_fragments` as all fragments (pure QM).
+- If `regions` is omitted in JSON, `mm_fragments` and `ml_fragments` default to empty and `qm_fragments` is inferred as all fragments (pure QM).
 - If any non-QM region exists, residues must be provided; with no residues, the entire system must be QM.
 - Non-QM regions are only supported for `QMMM` and `Optimization`; other drivers (including `Energy`) require pure QM regions.
 - Non-QM regions are not supported for batched topology inputs.
@@ -1043,7 +1054,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
       - ``decrease_threshold`` — ``float`` (default: ``0.25``)
       - ``rejection_threshold`` — ``float`` (default: ``0.0``)
 
-      The defaults have been optimized in upstream testing; changing them is not recommended unless you have a validated use case.
+      The defaults have been optimized; changing them is not recommended unless you have a validated use case.
 
    .. exess-param:: frozen_distance_slippage_tolerance_angstroms
       :type: float
@@ -1447,7 +1458,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 
 RTAT is a runtime auto-tuner for matrix operations.
 
-Upstream docs note that RTAT is the open-source [rtatblas](https://github.com/csnowdon2/rtatblas) library. When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
+RTAT is the open-source [rtatblas](https://github.com/csnowdon2/rtatblas) library. When enabled, EXESS uses it to auto-tune GPU BLAS configurations for matrix operations.
 
 ```{eval-rst}
 .. tab-set::
@@ -1590,7 +1601,7 @@ Upstream docs note that RTAT is the open-source [rtatblas](https://github.com/cs
       :default: required
       :brief: Timestep size in ps.
 
-      Upstream docs cite 1 fs (``0.001`` ps) as a typical value, but the schema requires you to set ``dt`` explicitly.
+      A typical value is 1 fs (``0.001`` ps); you must set ``dt`` explicitly.
 
    .. exess-param:: reuse_orbitals
       :type: bool

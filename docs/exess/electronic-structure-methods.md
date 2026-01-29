@@ -10,7 +10,7 @@
 | Dunning | cc-pVDZ, cc-pVTZ, aug-cc-pVDZ | RIFIT auxiliary variants available. |
 | def2 | def2-SVP, def2-TZVP, def2-TZVPP | RIFIT auxiliary variants available. |
 | STO-nG | STO-2G, STO-3G, STO-6G | Minimal basis sets. |
-| pcseg | pcseg-0, pcseg-1 | Segmented basis sets. |
+| PCSeg | PCSeg-0, PCSeg-1 | Segmented basis sets. |
 
 For the full list, see the [reference page](reference).
 
@@ -42,14 +42,14 @@ Some examples of commonly used supported functionals include:
 ### Correlated methods
 
 - RI-MP2 (`RestrictedRIMP2`) is the supported MP2 implementation.
-- The schema also exposes `RestrictedRICCSD`; check deployment support before relying on it.
+- `RestrictedRICCSD` is available in the method list; check deployment support before relying on it.
 
 ### Dynamics capabilities
 
 - Born-Oppenheimer AIMD with a Verlet integrator (microcanonical only).
 - QMMM dynamics with NVT or NPT control via `qmmm.temperature_kelvin` and `qmmm.pressure_atm`.
 - Periodic boundary conditions.
-- Water-only classical solvent support (as documented upstream).
+- Water-only classical solvent support.
 
 ## How to choose settings (practical guidance)
 
@@ -127,9 +127,9 @@ RI reduces computational cost but increases memory use because integrals are sto
 
 ## KSDFT
 
-Restricted KSDFT is supported via LibXC functionals. LDA, GGA, meta-GGA, and hybrid functionals are available through LibXC, but upstream docs note that meta-GGA and double-hybrid functionals are experimental. Range-separated functionals are not supported. KSDFT gradients are not available in EXESS at present.
+Restricted KSDFT is supported via LibXC functionals. LDA, GGA, meta-GGA, and hybrid functionals are available through LibXC, but meta-GGA and double-hybrid functionals are experimental. Range-separated functionals are not supported. KSDFT gradients are not available in EXESS at present.
 
-Upstream docs summarize method support as follows:
+Method support summary:
 
 | Calculation | RHF | UHF | RI-HF | RI-MP2 | RestrictedKSDFT |
 | --- | --- | --- | --- | --- | --- |
@@ -147,7 +147,7 @@ EXESS implements a Many-Body Expansion (MBE) for non-covalent and covalent syste
 
 Covalent fragmentation uses hydrogen capping for broken single bonds. If you cut covalent bonds, provide `connectivity` so EXESS can cap and restore bonds correctly.
 
-Upstream docs recommend the MBE reviews at https://doi.org/10.1063/1.5126216 and https://doi.org/10.1021/cr200093j for background and accuracy considerations.
+For background and accuracy considerations, see https://doi.org/10.1063/1.5126216 and https://doi.org/10.1021/cr200093j.
 
 ## Gradients, dynamics, and optimization
 

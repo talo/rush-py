@@ -1,6 +1,6 @@
 # Citations
 
-EXESS prints a citation summary at the end of each calculation. The following citations are documented upstream, including BibTeX entries.
+EXESS prints a citation summary at the end of each calculation. The complete set of citations is provided below, along with their BibTeX entries.
 
 ## Main EXESS citation
 
@@ -243,9 +243,10 @@ EXESS prints a citation summary at the end of each calculation. The following ci
 }
 ```
 
-## Commented in upstream docs
+:::{only} internal
+## Commented citation block
 
-The upstream citation page includes a commented Q-Next citation block. It is reproduced here for completeness:
+The citation page includes a commented Q-Next citation block. It is reproduced here for completeness:
 
 - Seidl, C.; Barca, G. M. J. Q-Next: A Fast, Parallel, and Diagonalization-Free Alternative to Direct Inversion of the Iterative Subspace. J. Chem. Theory Comput. 2022, 18 (7), 4164-4176. https://doi.org/10.1021/acs.jctc.2c00073.
 
@@ -266,4 +267,5 @@ The upstream citation page includes a commented Q-Next citation block. It is rep
   note = {Publisher: American Chemical Society},
   pages = {4164--4176}
 }
+:::
 ```
