@@ -2,11 +2,11 @@
 
 EXESS inputs are JSON files loosely based on MolSSI QCSchema. In EXESS, the molecular group is called `topology`, and input files use a `topologies` array to allow batched runs (multiple systems evaluated with the same driver/model/keywords).
 
-The upstream manual organizes its contents by the same top-level input groups (`topologies`, `model`, `system`, `keywords`, `driver`), and EXESS tries to follow the QC-JSON conventions where possible.
+This page is organized by the top-level input groups (`topologies`, `model`, `system`, `keywords`, `driver`) and follows QC-JSON conventions where possible.
 
 ## Schema overview
 
-Top-level EXESS input fields (as parsed by EXESS/libqdx):
+Top-level EXESS input fields:
 
 ```{eval-rst}
 .. exess-params::
@@ -62,7 +62,7 @@ Top-level EXESS input fields (as parsed by EXESS/libqdx):
       :brief: Enable schema validation when supported.
 ```
 
-`keywords` is required in the C++ schema, but can be an empty object because defaults are applied by the parser. `check_schema` is only honored when EXESS is built with configurable schema checks; otherwise it is ignored.
+In the EXESS CLI JSON, `keywords` is required, but can be an empty object because defaults are applied by the parser. `check_schema` is only honored when schema checks are enabled; otherwise it is ignored.
 
 Icon key:
 
@@ -80,8 +80,8 @@ Icon key:
 ### topologies
 
 ``topologies`` is an array of ``topology`` objects. Each ``topology`` provides molecular
-data and optional fragmentation/connectivity. See {ref}`topologies` for the full schema
-and validation rules.
+data and optional fragmentation/connectivity. See {ref}`topologies` for the full
+reference and validation rules.
 
 Example with inline geometry and symbols:
 
@@ -182,7 +182,7 @@ Example using an XYZ file:
 
 ``residues`` is typically aligned one-to-one with ``topologies`` (same index). It is
 required for QMMM and other workflows that rely on residues. See {ref}`residues` for the
-full schema.
+full reference.
 
 Example:
 
@@ -375,7 +375,7 @@ The `driver` field selects the calculation type:
 
    .. exess-param:: method
       :type: string
-      :default: RestrictedHF
+      :default: required
       :brief: Level of theory (RestrictedHF, UnrestrictedHF, RestrictedKSDFT, RestrictedRIMP2, UnrestrictedRIMP2, RestrictedRICCSD).
 
       Level-of-theory descriptions:
@@ -401,15 +401,14 @@ The `driver` field selects the calculation type:
       HF methods support multiple integral build types, while MP2 is only implemented
       via RI (resolution-of-identity).
 
-      Upstream docs list ``RestrictedHF``, ``UnrestrictedHF``, and ``RestrictedRIMP2``
-      as the core methods; EXESS adds KSDFT and RI-CCSD support in the schema.
+      When running through rush-py, ``method`` defaults to ``RestrictedHF`` if omitted.
 
    .. exess-param:: basis
       :type: string
-      :default: cc-pVDZ
+      :default: required
       :brief: Primary basis set. See :ref:`basis sets <basis_sets>`.
 
-      libqdx defaults ``basis`` to ``cc-pVDZ`` if omitted.
+      When running through rush-py, ``basis`` defaults to ``cc-pVDZ`` if omitted.
 
    .. exess-param:: aux_basis
       :type: string
@@ -422,8 +421,8 @@ The `driver` field selects the calculation type:
       :brief: Orientation selection (``FullSystem``, ``None``, ``PerFragment``).
       :note: info
 
-      ``PerFragment`` rotates each fragment independently; upstream docs warn that this
-      can cause inconsistent energies and energy differences in fragmented runs.
+      ``PerFragment`` rotates each fragment independently; this can cause inconsistent
+      energies and energy differences in fragmented runs.
 
       ``None`` prevents translation and rotation, which can make it easier to compare
       an optimization trajectory to the input conformation.
@@ -484,8 +483,8 @@ The `driver` field selects the calculation type:
       :brief: Max GPU memory per process in MB.
       :note: info
 
-      EXESS will crash if you request more memory than is available. libqdx notes a
-      dynamic default of ~75% of GPU memory when unset.
+      EXESS will crash if you request more memory than is available. When unset, a
+      dynamic default of ~75% of GPU memory is used.
 
    .. exess-param:: oversubscribe_gpus
       :type: bool
@@ -514,8 +513,9 @@ The `driver` field selects the calculation type:
 
 ### keywords
 
-`keywords` contains method- and run-specific settings. See the {doc}`keyword reference <keywords>` for full details. The C++ schema expects `keywords` to be present even if empty.
+`keywords` contains method- and run-specific settings. See the {doc}`keyword reference <keywords>` for full details. In the EXESS CLI JSON, `keywords` must be present even if empty; rush-py supplies defaults when omitted.
 
+:::{only} internal
 ## Default resolution order
 
 Defaults are applied in the following order:
@@ -523,6 +523,7 @@ Defaults are applied in the following order:
 1. rush-py defaults: any non-`None` values set in Python (function defaults or dataclass defaults) are explicit values.
 2. EXESS/libqdx JSON parser defaults (as defined in `libqdx.hpp`) for omitted fields.
 3. EXESS internal defaults for values that remain unset after parsing.
+:::
 
 ## Rush-py input mapping
 
@@ -550,10 +551,10 @@ Keyword defaults for rush-py are documented in the keyword reference page.
 
 ## Input conversion tools
 
-The upstream docs mention several helpers for building EXESS inputs:
+Several helpers can generate EXESS inputs:
 
 - `parley.py` (https://github.com/JorgeG94/parley_exess) converts between XYZ and EXESS JSON. It can also add minimal defaults for `Dynamics` and `Optimization` drivers.
-- `tools/input_transformer/create_json_input.jl` in the EXESS repo is a Julia helper for generating RHF inputs:
+- `tools/input_transformer/create_json_input.jl` in the EXESS GitHub repository is a Julia helper for generating RHF inputs:
 
 ```bash
 julia -E 'include("create_json_input.jl"); create_input_rhf("molecule.xyz", "BASIS")'

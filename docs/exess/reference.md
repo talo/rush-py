@@ -3,81 +3,76 @@
 (basis_sets)=
 ## Supported basis sets
 
-The upstream docs contain two overlapping lists. Both are reproduced here for completeness.
+Supported basis sets include:
 
-### From EXESS/docs/basis_sets.md
+### Pople
 
 - 3-21G
 - 4-31G
 - 5-21G
 - 6-21G
 - 6-31G
-- 6-311G
-- 6-31G(2df,p)
-- 6-31G(3df,3pd)
 - 6-31G*
 - 6-31G**
-- 6-31G**-RIFIT (only as aux basis set)
+- 6-31G(2df,p)
+- 6-31G(3df,3pd)
 - 6-31+G
 - 6-31+G*
 - 6-31+G**
 - 6-31++G
 - 6-31++G*
 - 6-31++G**
-- 6-311G**-RIFIT (only as aux basis set)
+- 6-311G
+
+Auxiliary (RIFIT):
+
+- 6-31G**-RIFIT (aux basis only)
+- 6-311G**-RIFIT (aux basis only)
+
+### Dunning
+
+- cc-pVDZ
+- cc-pVTZ
+- aug-cc-pVDZ
+- aug-cc-pVTZ
+
+Auxiliary (RIFIT):
+
+- cc-pVDZ-RIFIT (aux basis only)
+- cc-pVTZ-RIFIT (aux basis only)
+- aug-cc-pVDZ-RIFIT (aux basis only)
+- aug-cc-pVTZ-RIFIT (aux basis only)
+
+### def2
+
+- def2-SVP
+- def2-SVPD
+- def2-TZVP
+- def2-TZVPD
+- def2-TZVPP
+- def2-TZVPPD
+
+Auxiliary (RIFIT):
+
+- def2-SVP-RIFIT (aux basis only)
+- def2-SVPD-RIFIT (aux basis only)
+- def2-TZVP-RIFIT (aux basis only)
+- def2-TZVPD-RIFIT (aux basis only)
+- def2-TZVPP-RIFIT (aux basis only)
+- def2-TZVPPD-RIFIT (aux basis only)
+
+### STO-nG
+
+- STO-2G
+- STO-3G
+- STO-4G
+- STO-5G
+- STO-6G
+
+### PCSeg
+
 - PCSeg-0
 - PCSeg-1
-- STO-2G
-- STO-3G
-- STO-4G
-- STO-5G
-- STO-6G
-- aug-cc-pVDZ-RIFIT (only as aux basis set)
-- aug-cc-pVDZ
-- aug-cc-pVTZ-RIFIT (only as aux basis set)
-- aug-cc-pVTZ
-- cc-pVDZ-RIFIT (only as aux basis set)
-- cc-pVDZ
-- cc-pVTZ-RIFIT (only as aux basis set)
-- cc-pVTZ
-
-### From docs_exess manual
-
-- 3-21G
-- 4-31G
-- 5-21G
-- 6-21G
-- 6-311G
-- 6-311G**-RIFIT
-- 6-31G
-- 6-31G(2df,p)
-- 6-31G(3df,3pd)
-- 6-31G*
-- 6-31G**-RIFIT
-- 6-31G**
-- 6-31+G
-- 6-31+G*
-- 6-31+G**
-- 6-31++G
-- 6-31++G*
-- 6-31++G**
-- STO-2G
-- STO-3G
-- STO-4G
-- STO-5G
-- STO-6G
-- aug-cc-pVDZ / RIFIT
-- aug-cc-pVTZ / RIFIT
-- cc-pVDZ / RIFIT
-- cc-pVTZ / RIFIT
-- def2-SVP / RIFIT
-- def2-SVPD / RIFIT
-- def2-TZVP / RIFIT
-- def2-TZVPD / RIFIT
-- def2-TZVPP / RIFIT
-- def2-TZVPPD / RIFIT
-- pcseg-0
-- pcseg-1
 
 ## Lebedev grids
 
@@ -120,7 +115,7 @@ Mapping of Lebedev grid sizes to maximum spherical harmonic degree:
 
 ## Environment variables
 
-From EXESS docs:
+Runtime variables:
 
 | Name | Brief |
 | --- | --- |
@@ -130,7 +125,7 @@ From EXESS docs:
 | `MBE_NGPUS` | GPUs per node for fragmented runs; overrides `ngpus_per_node` in input. |
 | `USE_COLORED_LOG_LEVELS` | Colorize log levels. |
 
-From the installation docs:
+Build/install variables:
 
 - `EXESS_PATH`: root path for EXESS.
 - `EXESS_RECORDS_PATH`: records directory.
@@ -138,7 +133,7 @@ From the installation docs:
 
 ## Installation (HPC build notes)
 
-The upstream installation guide targets HPC system administrators building EXESS from source. Key dependencies:
+The installation guide targets HPC system administrators building EXESS from source. Key dependencies:
 
 - C/C++ compiler with C++17 support
 - CUDA or ROCm compiler
@@ -147,7 +142,7 @@ The upstream installation guide targets HPC system administrators building EXESS
 - HDF5
 - MAGMA with HIP support (AMD systems)
 
-Upstream notes: EXESS has a minimal dependency set, but the team cannot guarantee out-of-the-box builds for non-standard compilers that they cannot test.
+Notes: EXESS has a minimal dependency set, but the team cannot guarantee out-of-the-box builds for non-standard compilers that they cannot test.
 
 Example build on Gadi (NCI):
 
@@ -188,7 +183,7 @@ make -j install
 
 After installation, the runtime requires `EXESS_RECORDS_PATH` plus the `run.sh` and `runexess` scripts; other source tree content can be removed.
 
-Custom installer templates live under `modulefiles/` in the upstream repo (for Gadi/Setonix). GNU is the recommended build environment, but Cray, NVHPC, and Intel compilers are known to work; report compilation issues with compiler/MPI/CUDA/ROCm versions to the EXESS team.
+Custom installer templates live under `modulefiles/` in the EXESS GitHub repository (for Gadi/Setonix). GNU is the recommended build environment, but Cray, NVHPC, and Intel compilers are known to work; report compilation issues with compiler/MPI/CUDA/ROCm versions to the EXESS team.
 
 ## Hardware considerations
 
@@ -200,7 +195,7 @@ Custom installer templates live under `modulefiles/` in the upstream repo (for G
 - CUDA 11.1+ supported.
 - NVHPC toolkit supported.
 - Performance scales with the GPU's double-precision throughput.
-- If you have access to newer NVIDIA hardware, upstream docs ask that you open an issue.
+- If you have access to newer NVIDIA hardware, please open an issue.
 
 ### AMD
 
@@ -213,7 +208,7 @@ Custom installer templates live under `modulefiles/` in the upstream repo (for G
 ## Known issues
 
 - NVIDIA: no issues listed.
-- AMD: out-of-resources errors can occur; reduce `max_gpu_memory_mb` or use RI in `fock_build_type`. Upstream docs include this example error:
+- AMD: out-of-resources errors can occur; reduce `max_gpu_memory_mb` or use RI in `fock_build_type`. Example error:
 
 ```text
 :0:rocdevice.cpp
@@ -230,9 +225,11 @@ Before reporting issues, consult the known issues above. Report bugs to placehol
 
 For licensing questions, contact placeholder@qdx.co.
 
+:::{only} internal
 ## Performance
 
-The upstream performance page currently contains a placeholder line: "vroom vroom we're faster than everyone else".
+The performance page currently contains a placeholder line: "vroom vroom we're faster than everyone else".
+:::
 
 ## Release notes (v4.0.0-beta)
 

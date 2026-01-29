@@ -26,7 +26,7 @@ This page covers both the EXESS executable and the rush-py interface. The input 
 
 ### Environment and installation
 
-EXESS needs the records directory and optional validation directory to be discoverable at runtime. The upstream installation guide describes these environment variables:
+EXESS needs the records directory and optional validation directory to be discoverable at runtime. Set these environment variables:
 
 ```bash
 export EXESS_PATH="$YOUR_PATH/exess"
@@ -56,7 +56,7 @@ usage: parley.py [-h] [--input_format {xyz,json}] [--output_format {json,xyz}] -
                  [--basis_set BASIS_SET] [--aux_basis_set AUX_BASIS_SET] [--driver DRIVER] [--method METHOD]
 ```
 
-Defaults (as documented upstream):
+Defaults:
 
 - `input_format`: `xyz`
 - `output_format`: `json`

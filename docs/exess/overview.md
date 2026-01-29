@@ -71,6 +71,6 @@ EXESS is built around four practical ideas:
 1. **GPU-first execution.** Methods and kernels are designed to run efficiently on NVIDIA (CUDA) and AMD (HIP) GPUs.
 2. **Fragmentation as a primary scaling strategy.** Many-Body Expansion enables accurate calculations on systems that are otherwise too large for full-system QM.
 3. **Region-aware modeling.** The `regions` keyword assigns fragments to QM, MM, or ML partitions for QMMM and optimization workflows, with MM driven by OpenMM force fields and ML driven by AIMNet.
-4. **Automation-friendly inputs.** The JSON schema supports batched topologies, which is useful for screening or dataset generation.
+4. **Automation-friendly inputs.** The input format supports batched topologies, which is useful for screening or dataset generation.
 
 This philosophy shapes how you should approach method choice, fragmentation, and performance tuning.
