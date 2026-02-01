@@ -28,13 +28,20 @@ GRAPHQL_ENDPOINT = getenv(
     "https://tengu-server-prod-api-519406798674.asia-southeast1.run.app",
 )
 
-API_KEY = getenv("RUSH_TOKEN")
-if not API_KEY:
-    raise Exception("RUSH_TOKEN must be set")
 
-PROJECT_ID = getenv("RUSH_PROJECT")
-if not PROJECT_ID:
-    raise Exception("RUSH_PROJECT must be set")
+def _get_api_key() -> str:
+    api_key = getenv("RUSH_TOKEN")
+    if not api_key:
+        raise Exception("RUSH_TOKEN must be set")
+    return api_key
+
+
+def _get_project_id() -> str:
+    project_id = getenv("RUSH_PROJECT")
+    if not project_id:
+        raise Exception("RUSH_PROJECT must be set")
+    return project_id
+
 
 MODULE_OVERRIDES = getenv("RUSH_MODULE_LOCK")
 MODULE_OVERRIDES = json.loads(MODULE_OVERRIDES) if MODULE_OVERRIDES else {}
@@ -111,7 +118,7 @@ def _get_client() -> Client:
         _rush_client = Client(
             transport=RequestsHTTPTransport(
                 url=GRAPHQL_ENDPOINT,
-                headers={"Authorization": f"Bearer {API_KEY}"},
+                headers={"Authorization": f"Bearer {_get_api_key()}"},
             )
         )
 
@@ -213,6 +220,7 @@ def upload_object(filepath: Path | str):
     if isinstance(filepath, str):
         filepath = Path(filepath)
     with filepath.open(mode="rb") as f:
+        project_id = _get_project_id()
         if filepath.suffix == ".json":
             mutation.variable_values = {
                 "file": FileVar(f),
@@ -221,7 +229,7 @@ def upload_object(filepath: Path | str):
                     "k": "record",
                     "t": {},
                 },
-                "project_id": PROJECT_ID,
+                "project_id": project_id,
             }
         else:
             mutation.variable_values = {
@@ -238,7 +246,7 @@ def upload_object(filepath: Path | str):
                     },
                     "n": "Object",
                 },
-                "project_id": PROJECT_ID,
+                "project_id": project_id,
             }
         result = _get_client().execute(mutation, upload_files=True)
 
@@ -289,8 +297,9 @@ def save_json(d: dict, filepath: Path | str | None = None, name: str | None = No
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
-    elif filepath is None and name is not None and PROJECT_ID is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{name}.json"
+    elif filepath is None and name is not None:
+        project_id = _get_project_id()
+        filepath = _get_opts().workspace_dir / project_id / f"{name}.json"
     else:
         raise Exception("Must specify either filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -332,10 +341,12 @@ def save_object(
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
-    elif filepath is None and name is not None and PROJECT_ID is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{name}." + ext)
-    elif filepath is None and name is None and PROJECT_ID is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{path}." + ext)
+    elif filepath is None and name is not None:
+        project_id = _get_project_id()
+        filepath = _get_opts().workspace_dir / project_id / (f"{name}." + ext)
+    elif filepath is None and name is None:
+        project_id = _get_project_id()
+        filepath = _get_opts().workspace_dir / project_id / (f"{path}." + ext)
     else:
         raise Exception("Cannot specify both filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)

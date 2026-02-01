@@ -12,9 +12,9 @@ from rush.convert.json import to_json
 from rush.convert.pdb import from_pdb
 
 from .client import (
-    PROJECT_ID,
     RunOpts,
     RunSpec,
+    _get_project_id,
     _submit_rex,
     collect_run,
     upload_object,
@@ -182,7 +182,7 @@ in
         chains_vobj_path=chains_vobj["path"] if has_template else "",
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

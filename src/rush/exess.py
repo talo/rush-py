@@ -32,10 +32,10 @@ import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    PROJECT_ID,
     RunError,
     RunOpts,
     RunSpec,
+    _get_project_id,
     _submit_rex,
     collect_run,
     download_object,
@@ -1018,7 +1018,7 @@ in
         driver=driver,
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -1187,7 +1187,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -1295,7 +1295,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             result = collect_run(run_id)
             if isinstance(result, dict):
@@ -1481,7 +1481,7 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -1807,7 +1807,7 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
