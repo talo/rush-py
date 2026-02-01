@@ -274,11 +274,11 @@ class Topology:
     # Optional atom labels
     labels: list[str] | None = None
 
-    # Optional partial charges
-    partial_charges: list[PartialCharge] | None = None
-
     # Optional formal charges
     formal_charges: list[FormalCharge] | None = None
+
+    # Optional partial charges
+    partial_charges: list[PartialCharge] | None = None
 
     # Optional connectivity
     connectivity: list[Bond] | None = None
@@ -375,6 +375,52 @@ class Topology:
             ]
 
         return topology
+
+    def to_json(self) -> dict[str, object]:
+        topology_dict: dict[str, object] = {
+            "schema_version": "0.2.0",
+            "symbols": [str(symbol) for symbol in self.symbols],
+            "geometry": self.geometry,
+        }
+
+        if self.labels is not None:
+            topology_dict["labels"] = self.labels
+
+        if self.formal_charges is not None:
+            topology_dict["formal_charges"] = [c.charge for c in self.formal_charges]
+
+        if self.partial_charges is not None:
+            topology_dict["partial_charges"] = [c.charge for c in self.partial_charges]
+
+        if self.connectivity is not None:
+            topology_dict["connectivity"] = [
+                [bond.atom1.value, bond.atom2.value, bond.order.value]
+                for bond in self.connectivity
+            ]
+        else:
+            topology_dict["connectivity"] = []
+
+        if self.velocities is not None:
+            topology_dict["velocities"] = self.velocities
+
+        if self.fragments is not None:
+            topology_dict["fragments"] = [fragment.atoms for fragment in self.fragments]
+        else:
+            topology_dict["fragments"] = []
+
+        if self.fragment_formal_charges is not None:
+            topology_dict["fragment_formal_charges"] = [
+                c.charge for c in self.fragment_formal_charges
+            ]
+        else:
+            topology_dict["fragment_formal_charges"] = []
+
+        if self.fragment_partial_charges is not None:
+            topology_dict["fragment_partial_charges"] = [
+                c.charge for c in self.fragment_partial_charges
+            ]
+
+        return topology_dict
 
     def check(self) -> None:
         """Validate the topology structure."""
@@ -810,6 +856,22 @@ class Residues:
 
         return residues
 
+    def to_json(self) -> dict[str, object]:
+        residues_dict: dict[str, object] = {
+            "residues": [residue.atoms for residue in self.residues],
+            "seqs": self.seqs,
+            "seq_ns": self.seq_ns,
+            "insertion_codes": self.insertion_codes,
+        }
+
+        if self.labeled is not None:
+            residues_dict["labeled"] = [r.value for r in self.labeled]
+
+        if self.labels is not None:
+            residues_dict["labels"] = self.labels
+
+        return residues_dict
+
     def check(self) -> None:
         """Validate the residues structure."""
         if len(self.seqs) != len(self.residues):
@@ -990,6 +1052,25 @@ class Chains:
             chains.labels = chains_data["labels"]
 
         return chains
+
+    def to_json(self) -> dict[str, object]:
+        chains_dict: dict[str, object] = {
+            "chains": [chain.residues for chain in self.chains],
+        }
+
+        if self.alpha_helices is not None:
+            chains_dict["alpha_helices"] = [r.value for r in self.alpha_helices]
+
+        if self.beta_sheets is not None:
+            chains_dict["beta_sheets"] = [r.value for r in self.beta_sheets]
+
+        if self.labeled is not None:
+            chains_dict["labeled"] = [r.value for r in self.labeled]
+
+        if self.labels is not None:
+            chains_dict["labels"] = self.labels
+
+        return chains_dict
 
     def check(self) -> None:
         """Validate the chains structure."""
