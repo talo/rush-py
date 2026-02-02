@@ -1,6 +1,6 @@
 # EXESS Interaction Energy
 
-This tutorial walks through interaction energy calculations with EXESS using **rush-py**. The examples are adapted from the EXESS docs and the test suite, with an optional preparation flow based on the `demos/` folder.
+This tutorial walks through interaction energy calculations with EXESS using **rush-py**.
 
 :::{note}
 You still need `RUSH_TOKEN` and `RUSH_PROJECT` in your environment, but as of February 1, 2026, they are only required on first use (not at import time).
@@ -14,7 +14,7 @@ Set your Rush environment variables before running the client:
 - `RUSH_PROJECT`
 - `RUSH_ENDPOINT` (optional)
 
-All examples below reference test fixtures in `tests/data/`.
+All examples below reference test fixtures in [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data).
 
 ## Common setup
 
@@ -32,7 +32,7 @@ DATA_DIR = Path.cwd() / "tests" / "data"
 
 ## Example: fragment-based interaction energy
 
-This example follows `tests/test_exess_interaction_energy.py`. It computes interaction energy between a ligand fragment and the rest of the system, using nearby fragments for the interaction region.
+This example follows [`tests/test_exess_interaction_energy.py`](https://github.com/talo/rush-py/blob/main/tests/test_exess_interaction_energy.py). It computes interaction energy between a ligand fragment and the rest of the system, using nearby fragments for the interaction region.
 
 ```{code-block} python
 :caption: interaction_energy.py

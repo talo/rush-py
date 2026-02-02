@@ -23,9 +23,9 @@ onboard and run your first rush-py script.
    :maxdepth: 2
 
    guides
+   modules
    tutorials
    api
-   modules
 
 .. toctree::
    :hidden:
