@@ -1,6 +1,6 @@
 # EXESS QMMM
 
-This tutorial covers QM/MM/ML workflows (QMMM) with EXESS using **rush-py**. The examples are adapted from the EXESS docs and the test suite.
+This tutorial covers QM/MM/ML workflows (QMMM) with EXESS using **rush-py**.
 
 :::{note}
 You still need `RUSH_TOKEN` and `RUSH_PROJECT` in your environment, but as of February 1, 2026, they are only required on first use (not at import time).
