@@ -27,7 +27,7 @@ from .client import (
     save_object,
     upload_object,
 )
-from .convert import from_pdb, to_json
+from .convert import from_json, from_pdb
 from .utils import optional_str
 
 
@@ -52,18 +52,22 @@ def prepare_protein(
     with open(input_path) as f:
         if input_path.suffix == ".pdb":
             trc = from_pdb(f.read())
-            trc_str = to_json(trc)
-            trc_dict = json.loads(trc_str)
         else:
-            trc_dict = json.load(f)
+            trc = from_json(json.load(f))
+            if isinstance(trc, list):
+                if len(trc) != 1:
+                    raise ValueError(
+                        f"Expected 1 TRC in {input_path}, found {len(trc)}"
+                    )
+                trc = trc[0]
     with (
         NamedTemporaryFile(mode="w") as t_f,
         NamedTemporaryFile(mode="w") as r_f,
         NamedTemporaryFile(mode="w") as c_f,
     ):
-        json.dump(trc_dict["topology"], t_f)
-        json.dump(trc_dict["residues"], r_f)
-        json.dump(trc_dict["chains"], c_f)
+        json.dump(trc.topology.to_json(), t_f)
+        json.dump(trc.residues.to_json(), r_f)
+        json.dump(trc.chains.to_json(), c_f)
         t_f.seek(0)
         r_f.seek(0)
         c_f.seek(0)

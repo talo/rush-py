@@ -1347,7 +1347,6 @@ def qmmm(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = None,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     ml_fragments: list[int] | None = None,
@@ -1392,7 +1391,7 @@ def qmmm(
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks_dft = $maybe_ks_keywords,
+          ks = None,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1439,9 +1438,6 @@ in
         system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
-        ),
-        maybe_ks_keywords=(
-            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
         ),
         maybe_frag_keywords=(
             frag_keywords._to_rex() if frag_keywords is not None else "None"
@@ -1691,8 +1687,6 @@ def optimization(
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = None,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     ml_fragments: list[int] | None = None,
@@ -1737,9 +1731,9 @@ def optimization(
         system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks_dft = $maybe_ks_keywords,
+          ks = None,
           rtat = None,
-          frag = $maybe_frag_keywords,
+          frag = None,
           boundary = None,
           log = None,
           dynamics = None,

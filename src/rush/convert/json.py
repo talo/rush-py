@@ -53,9 +53,9 @@ def from_json(
 
     trcs = [
         TRC(
-            topology=Topology.from_json(data["topology"]),
-            residues=Residues.from_json(data["residues"]),
-            chains=Chains.from_json(data["chains"]),
+            topology=Topology.from_json(trc["topology"]),
+            residues=Residues.from_json(trc["residues"]),
+            chains=Chains.from_json(trc["chains"]),
         )
         for trc in data
     ]
@@ -71,7 +71,7 @@ def to_json(trcs: TRC | list[TRC]) -> dict[str, object] | list[dict[str, object]
         trcs: TRC structure or list of TRC structures
 
     Returns:
-        JSON string
+        JSON-compatible dict or list of dicts
     """
 
     if isinstance(trcs, TRC):

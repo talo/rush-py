@@ -15,6 +15,9 @@ def test_exess_energy_dft_hyb():
             functional="HYB_GGA_XC_B3LYP",
             grid=exess.XCGridParameters(
                 radial_quad="TreutlerAldrichs",
+                pruning_scheme="Treutler",
+                resolution=exess.DefaultGridResolution("TreutlerGM5"),
+                batching=exess.SpaceFillingBatching(),
             ),
             method="BatchDense",
             sp_threshold=1e-12,
@@ -42,7 +45,10 @@ def test_exess_energy_dft_dhyb():
         method="RestrictedKSDFT",
         basis="cc-pVTZ",
         aux_basis="cc-pVTZ-RIFIT",
-        ksdft_keywords=exess.KSDFTKeywords(functional="revDSD-PBEP86-D4"),
+        ksdft_keywords=exess.KSDFTKeywords(
+            functional="revDSD-PBEP86-D4",
+            grid=exess.XCGridParameters(batching=exess.SpaceFillingBatching()),
+        ),
         scf_keywords=exess.SCFKeywords(fock_build_type="RI"),
         frag_keywords=None,  # must disable frag for double hybrid
         run_opts=RunOpts(

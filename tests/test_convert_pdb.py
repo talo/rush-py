@@ -18,13 +18,13 @@ def normalize_json(obj):
 
 def test_pdb_conversion():
     """Test that all .pdb files convert to JSON matching their .pdb.json counterparts."""
-    test_cache_dir = Path(__file__).parent.parent / "test_cache"
+    fixtures_dir = Path(__file__).parent / "data"
 
     # Find all .pdb files
-    pdb_files = sorted(test_cache_dir.glob("*.pdb"))
+    pdb_files = sorted(fixtures_dir.glob("*.pdb"))
 
     if not pdb_files:
-        print("No .pdb files found in test_cache directory", file=sys.stderr)
+        print("No .pdb files found in test fixtures directory", file=sys.stderr)
         return
 
     print(f"Found {len(pdb_files)} PDB files to test", file=sys.stderr)
@@ -51,8 +51,7 @@ def test_pdb_conversion():
             trcs = from_pdb(pdb_contents)
 
             # Convert TRC structures to JSON
-            converted_json_str = to_json(trcs)
-            converted_json = json.loads(converted_json_str)
+            converted_json = to_json(trcs)
 
             # Read expected JSON
             with open(json_file, "r") as f:
@@ -88,7 +87,7 @@ def test_pdb_conversion():
     print(f"Results: {passed} passed, {failed} failed", file=sys.stderr)
     print(f"{'=' * 60}", file=sys.stderr)
 
-    return failed == 0
+    assert failed == 0
 
 
 # Run test

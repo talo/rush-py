@@ -21,7 +21,7 @@ from rush.client import (
 )
 from rush.prepare_protein import prepare_protein as run_prepare_protein
 from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
-from rush.trc.merge import merge_trcs
+from rush import merge_trcs
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
