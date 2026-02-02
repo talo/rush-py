@@ -83,11 +83,15 @@ Nmer
 `-- num_basis_fns
 
 Trajectory
+`-- frames
+
+Frame
 |-- parent
 |-- step
 |-- simulation_time
 |-- time_delta
 |-- kinetic_energy
+|-- estimated_temperature
 |-- positions
 |-- velocities
 |-- forces
@@ -104,6 +108,7 @@ For batched inputs (`topologies` length > 1), EXESS returns one `Output` object 
 
 | Name | Type | Brief |
 | --- | --- | --- |
+| `schema_version` | string | Output schema version. |
 | `calculation_time` | double | Total calculation time (seconds). |
 | `qmmbe` | optional QMMBE | QM output for a single topology. Not present for `Dynamics`. |
 | `trajectory` | optional Trajectory | Present for `Dynamics` calculations. |
@@ -113,6 +118,7 @@ For batched inputs (`topologies` length > 1), EXESS returns one `Output` object 
 
 | Name | Type | Brief |
 | --- | --- | --- |
+| `schema_version` | string | QMMBE schema version. |
 | `method` | string | Level of theory. |
 | `distance_metric` | optional string | Distance metric (if fragmented). |
 | `distance_method` | optional string | Distance method (centroid vs closest-pair). |
@@ -134,6 +140,7 @@ If `reference_fragment` is present, the expanded energies should be interpreted 
 
 | Name | Type | Brief |
 | --- | --- | --- |
+| `schema_version` | string | N-mer schema version. |
 | `fragments` | array[int] | Fragment IDs in this n-mer. |
 | `density` | optional Tensor64 | Density matrix for the n-mer (square or packed). |
 | `fock` | optional Tensor64 | Fock matrix (square or packed). |
@@ -147,6 +154,7 @@ If `reference_fragment` is present, the expanded energies should be interpreted 
 | `hf_energy` | optional double | HF energy for the n-mer. |
 | `mp2_ss_correction` | optional double | MP2 same-spin correction. |
 | `mp2_os_correction` | optional double | MP2 opposite-spin correction. |
+| `ccsd_correction` | optional double | CCSD correction. |
 | `delta_hf_energy` | optional double | HF delta energy (e.g., dimer interaction). |
 | `delta_mp2_ss_correction` | optional double | MP2 same-spin delta correction. |
 | `delta_mp2_os_correction` | optional double | MP2 opposite-spin delta correction. |
@@ -159,9 +167,17 @@ If `reference_fragment` is present, the expanded energies should be interpreted 
 | `num_iters` | int | SCF iterations to converge. |
 | `num_basis_fns` | int | Number of basis functions. |
 
-N-mer gradients are ordered by fragment, then by atom order within each fragment. If `hf_gradients` is present then `mp2_gradients` is absent (and vice versa). Hydrogen cap indices are local to the fragment, not to the full-system atom ordering, and are present whenever matrices such as density or fock are exported. Upstream comments note that `delta_hf_energy` is only exported for unrestricted calculations and can be used to assess spin contamination.
+N-mer gradients are ordered by fragment, then by atom order within each fragment. If `hf_gradients` is present then `mp2_gradients` is absent (and vice versa). Hydrogen cap indices are local to the fragment, not to the full-system atom ordering, and are present whenever matrices such as density or fock are exported.
 
 ### Trajectory
+
+| Name | Type | Brief |
+| --- | --- | --- |
+| `frames` | array[Frame] | Frame tree for the trajectory. |
+
+Frames are stored as a tree of divergent paths; frames with smaller `step` values appear before larger steps.
+
+### Frame
 
 | Name | Type | Brief |
 | --- | --- | --- |
@@ -170,12 +186,13 @@ N-mer gradients are ordered by fragment, then by atom order within each fragment
 | `simulation_time` | double | Physical simulation time. |
 | `time_delta` | double | Time since previous frame. |
 | `kinetic_energy` | double | Total kinetic energy. |
+| `estimated_temperature` | double | Estimated instantaneous temperature. |
 | `positions` | optional array[double] | Atom positions after changeset. |
 | `velocities` | optional array[double] | Atom velocities after changeset. |
 | `forces` | optional array[double] | Atom forces after changeset. |
 | `changeset` | optional Changeset | Changes applied to prior frame. |
 
-Frames are stored as a tree of divergent paths; frames with smaller `step` values appear before larger steps. Positions/velocities/forces are stored after applying each frame's changeset.
+Positions/velocities/forces are stored after applying each frame's changeset.
 
 ### Changeset
 

@@ -3,7 +3,10 @@
 (basis_sets)=
 ## Supported basis sets
 
-Supported basis sets include:
+Supported basis sets are determined by the basis-set records shipped with EXESS
+(`records/basis_sets/*.json`). EXESS normalizes basis names by replacing `+` with `p`,
+`*` with `s`, and removing parentheses/commas when looking up files. The list below
+uses the conventional spellings that EXESS resolves to those records.
 
 ### Pople
 
@@ -23,6 +26,7 @@ Supported basis sets include:
 - 6-31++G*
 - 6-31++G**
 - 6-311G
+- 6-311G**
 
 Auxiliary (RIFIT):
 
@@ -33,6 +37,7 @@ Auxiliary (RIFIT):
 
 - cc-pVDZ
 - cc-pVTZ
+- cc-pVQZ
 - aug-cc-pVDZ
 - aug-cc-pVTZ
 
@@ -40,6 +45,7 @@ Auxiliary (RIFIT):
 
 - cc-pVDZ-RIFIT (aux basis only)
 - cc-pVTZ-RIFIT (aux basis only)
+- cc-pVQZ-RIFIT (aux basis only)
 - aug-cc-pVDZ-RIFIT (aux basis only)
 - aug-cc-pVTZ-RIFIT (aux basis only)
 
@@ -51,6 +57,8 @@ Auxiliary (RIFIT):
 - def2-TZVPD
 - def2-TZVPP
 - def2-TZVPPD
+- def2-QZVP
+- def2-QZVPP
 
 Auxiliary (RIFIT):
 
@@ -60,6 +68,8 @@ Auxiliary (RIFIT):
 - def2-TZVPD-RIFIT (aux basis only)
 - def2-TZVPP-RIFIT (aux basis only)
 - def2-TZVPPD-RIFIT (aux basis only)
+- def2-QZVP-RIFIT (aux basis only)
+- def2-QZVPP-RIFIT (aux basis only)
 
 ### STO-nG
 
@@ -73,6 +83,10 @@ Auxiliary (RIFIT):
 
 - PCSeg-0
 - PCSeg-1
+
+### X2C
+
+- x2c-SVPall
 
 ## Lebedev grids
 

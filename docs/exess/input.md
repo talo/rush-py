@@ -83,6 +83,9 @@ Icon key:
 data and optional fragmentation/connectivity. See {ref}`topologies` for the full
 reference and validation rules.
 
+Rush-py accepts the JSON topology format only (symbols + geometry). It does not accept
+`xyz` paths directly.
+
 Example with inline geometry and symbols:
 
 ```{eval-rst}
@@ -184,6 +187,8 @@ Example using an XYZ file:
 required for QMMM and other workflows that rely on residues. See {ref}`residues` for the
 full reference.
 
+``insertion_codes`` is required; use empty strings when there are no insertion codes.
+
 Example:
 
 ```{eval-rst}
@@ -266,6 +271,9 @@ Example:
 
 ### external_charges
 
+External charges are supported for non-`Dynamics` drivers. EXESS errors if they are
+provided for `Dynamics`.
+
 ```{eval-rst}
 .. tab-set::
 
@@ -299,6 +307,7 @@ Example:
       :brief: Flat XYZ list of charge positions.
 
       The positions length must be :math:`3 \times \mathrm{len}(charges)`.
+      Positions are in angstroms.
 
    .. exess-param:: charges
       :type: array[float]
@@ -395,6 +404,8 @@ The `driver` field selects the calculation type:
       ``UnrestrictedRIMP2``
         Unrestricted RI Moller-Plesset second-order perturbation theory.
 
+        Not supported; EXESS errors if this is selected.
+
       ``RestrictedRICCSD``
         Restricted RI coupled cluster singles and doubles.
 
@@ -415,6 +426,8 @@ The `driver` field selects the calculation type:
       :default: unset
       :brief: Auxiliary basis for RI methods. See :ref:`basis sets <basis_sets>`.
 
+      Required for RI HF, RI MP2, RI CCSD, and double-hybrid KSDFT.
+
    .. exess-param:: standard_orientation
       :type: string
       :default: FullSystem
@@ -433,6 +446,7 @@ The `driver` field selects the calculation type:
       :brief: Force Cartesian basis functions.
 
       For d orbitals this yields components like :math:`x^2, xy, xz, y^2, yz, z^2`.
+      Setting this to ``false`` is only supported for `Energy` calculations.
 ```
 
 ### system
@@ -483,8 +497,10 @@ The `driver` field selects the calculation type:
       :brief: Max GPU memory per process in MB.
       :note: info
 
-      EXESS will crash if you request more memory than is available. When unset, a
-      dynamic default of ~75% of GPU memory is used.
+      When set, EXESS caps the requested value at 90% of free GPU memory. When unset,
+      EXESS defaults to 75% of free GPU memory. For V100 GPUs with <20 GB free, the
+      default is 50% of free memory. For non-RI gradient calculations, the default is
+      halved again.
 
    .. exess-param:: oversubscribe_gpus
       :type: bool
@@ -521,7 +537,7 @@ The `driver` field selects the calculation type:
 Defaults are applied in the following order:
 
 1. rush-py defaults: any non-`None` values set in Python (function defaults or dataclass defaults) are explicit values.
-2. EXESS/libqdx JSON parser defaults (as defined in `libqdx.hpp`) for omitted fields.
+2. EXESS JSON parser defaults (as defined in the C++ input parser) for omitted fields.
 3. EXESS internal defaults for values that remain unset after parsing.
 :::
 
@@ -554,7 +570,7 @@ Keyword defaults for rush-py are documented in the keyword reference page.
 Several helpers can generate EXESS inputs:
 
 - `parley.py` (https://github.com/JorgeG94/parley_exess) converts between XYZ and EXESS JSON. It can also add minimal defaults for `Dynamics` and `Optimization` drivers.
-- `tools/input_transformer/create_json_input.jl` in the EXESS GitHub repository is a Julia helper for generating RHF inputs:
+- `tools/input_transformer/create_json_input.jl` in the EXESS source repository is a Julia helper for generating RHF inputs:
 
 ```bash
 julia -E 'include("create_json_input.jl"); create_input_rhf("molecule.xyz", "BASIS")'
