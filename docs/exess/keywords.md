@@ -405,13 +405,14 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
       :brief: LibXC functional name.
       :note: info
 
-      Meta-GGA functionals are experimental and supported only with ``GauXC``.
+      EXESS accepts LibXC functional names and ExchCXX linear combinations. Input is
+      uppercased internally, so names are case-insensitive.
 
-      Range-separated functionals are not supported.
+      Built-in aliases include ``SVWN5``, ``B2PLYP``, ``REVDSD-PBEP86-D4``, and
+      ``REVDSD-PBEP86-D4(NOFC)``.
 
-      Only ``B2PLYP`` and ``revDSD-PBEP86-D4`` double hybrids are implemented; D4 must be added externally.
-
-      For a full list of functionals, see the LibXC documentation: https://libxc.gitlab.io/functionals
+      For a full list of functionals, see the LibXC documentation:
+      https://libxc.gitlab.io/functionals
 
    .. exess-param:: method
       :type: string
@@ -420,13 +421,13 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
       :note: info
 
       ``GauXC`` (default)
-        GPU-accelerated XC evaluation with the broadest support.
+        GauXC-backed XC evaluation.
 
       ``Dense``
-        Dense matrix evaluation; :math:`\mathcal{O}(N^3)` scaling, suitable for small to medium systems.
+        Dense matrix evaluation.
 
       ``BatchDense``
-        Batched dense evaluation; :math:`\mathcal{O}(N^2)` with ``use_C_opt=true``, :math:`\mathcal{O}(N)` with ``use_C_opt=false``.
+        Batched dense evaluation (recommended for most production runs).
 
       ``Direct``
         Direct evaluation without storing intermediates.
@@ -457,6 +458,10 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
       ``pruning_scheme`` (default: ``ROBUST``)
         ``ROBUST``, ``UNPRUNED``, ``TREUTLER``.
 
+      ``consider_weight_zero`` (default: auto)
+        Defaults to :math:`10^{-5}` times ``sp_threshold`` if set, otherwise ``dp_threshold``,
+        otherwise the SCF ``density_threshold``.
+
       .. rubric:: Grid size options
 
       Choose one:
@@ -465,24 +470,28 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
         Preset grid: ``FINE``, ``ULTRAFINE``, ``SUPERFINE``, ``TREUTLER_GM3``, ``TREUTLER_GM5``.
 
       ``radial_size``, ``angular_size``
-        Custom grid sizes (use together).
+        Custom grid sizes (use together). When set, ``default_grid`` is ignored.
 
       .. rubric:: Batching options
 
       Choose one:
 
       Closest-atom batching
-        Default when no batch settings are provided.
+        Default when no batch settings are provided (non-``GauXC`` methods).
 
       ``octree``
-        Uses ``max_size`` (default 512), ``max_depth`` (default unlimited),
-        ``max_distance`` (default unlimited).
+        Uses ``max_size`` (default ``512``), ``max_depth`` (default unlimited),
+        ``max_distance`` (default unlimited), ``combine_small_children`` (default ``true``).
 
       ``space_filling``
-        Uses the ``octree`` parameters plus ``target_batch_size`` (default 1024).
+        Uses the ``octree`` parameters plus ``target_batch_size`` (default ``1024``).
+        ``combine_small_children`` defaults to ``false`` for space-filling.
 
       ``batch_size``
-        GauXC batch size (default 512).
+        GauXC batch size (default ``512``).
+
+      If multiple batching keys are provided, EXESS prioritizes ``octree``, then ``batch_size``,
+      then ``space_filling``. For ``GauXC``, EXESS forces GauXC batching and ignores other schemes.
 
       .. rubric:: Grid guidance
 
@@ -505,7 +514,9 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
    .. exess-param:: batches_per_batch
       :type: int
       :default: 20
-      :brief: Batch batching for GauXC.
+      :brief: Batches per batch for ``BatchDense``.
+
+      Only used when ``method = "BatchDense"``.
 ```
 
 Minimal KSDFT:
@@ -616,10 +627,6 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export relaxed MP2 density correction.
 
-      .. only:: internal
-
-         Rush-py source comments flag this as undocumented; validate outputs before production use.
-
    .. exess-param:: export_fock
       :type: bool
       :default: false
@@ -657,10 +664,6 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export MO coefficients.
 
-      .. only:: internal
-
-         Rush-py source comments flag this as undocumented; validate outputs before production use.
-
    .. exess-param:: export_gradient
       :type: bool
       :default: false
@@ -690,10 +693,6 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export bond orders.
 
-      .. only:: internal
-
-         Rush-py source comments describe this as a pass-through of input connectivity.
-
    .. exess-param:: export_h_caps
       :type: bool
       :default: false
@@ -715,18 +714,11 @@ Export controls what is written to HDF5 output files:
       :type: bool
       :default: false
       :brief: Export expanded ESP descriptors.
-      :note: broken
-
-      Documented as causing memory errors; avoid enabling for production runs.
 
    .. exess-param:: export_basis_labels
       :type: bool
       :default: false
       :brief: Export basis labels.
-
-      .. only:: internal
-
-         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
    .. exess-param:: export_hessian
       :type: bool
@@ -740,20 +732,12 @@ Export controls what is written to HDF5 output files:
       :default: false
       :brief: Export mass-weighted hessian.
 
-      .. only:: internal
-
-         Rush-py source comments flag this as undocumented; validate outputs before production use.
-
       Requires a Hessian calculation.
 
    .. exess-param:: export_hessian_frequencies
       :type: bool
       :default: false
       :brief: Export hessian frequencies.
-
-      .. only:: internal
-
-         Rush-py source comments flag this as undocumented; validate outputs before production use.
 
       Requires a Hessian calculation.
 
@@ -1154,7 +1138,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 
          qmmm(
              topology_path="molecule_t.json",
-             residues_path="system.residues",
+             residues_path="molecule_r.json",
              n_timesteps=1000,
              dt_ps=0.002,
              temperature_kelvin=290.0,
@@ -1191,6 +1175,39 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
 
       If set, EXESS runs NPT; if unset, NVT is used.
 
+   .. exess-param:: biases
+      :type: array[object]
+      :default: unset
+      :brief: Bias potentials for QMMM dynamics.
+      :note: info
+
+      Each entry must provide exactly one of:
+
+      ``harmonic_cv``
+        Fields: ``k``, ``offset``, ``cv``.
+
+      ``moving_harmonic``
+        Fields: ``cv``, ``k``, ``rate_per_ps``, optional ``initial_offset``, optional
+        ``final_offset``, and ``resolution`` (default ``0.01``).
+
+      ``avoid_bonds``
+        Fields: ``index``, optional ``indices`` (default ``[]``), optional ``fragments``
+        (default ``[]``), optional ``exceptions`` (default ``[]``), ``steepness``
+        (default ``10.0``), ``height`` (default ``10000.0``).
+
+      ``cv`` objects must provide one of:
+
+      ``bond`` (fields: ``index1``, ``index2``), ``angle`` (fields: ``index1``, ``index2``,
+      ``index3``), ``dihedral`` (fields: ``index1``, ``index2``, ``index3``, ``index4``), or
+      ``linear_combination`` (field: ``scaled_cvs``, each entry has ``scale`` and ``cv``).
+
+   .. exess-param:: pbc_ang
+      :type: array[float]
+      :default: unset
+      :brief: Periodic box lengths in angstroms.
+
+      Three-element vector ``[a, b, c]`` in angstroms.
+
    .. exess-param:: minimisation
       :type: object
       :default: unset
@@ -1216,10 +1233,13 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
       - ``start`` — ``int`` (default: ``0``)
       - ``end`` — ``int`` (default: max u32)
       - ``include_waters`` — ``bool`` (default: ``false``)
+      - ``forces`` — ``string`` (default: unset)
 
       ``trajectory.format`` can be ``JSON`` or ``XYZ`` (default ``JSON``).
 
       ``trajectory.include_waters`` can be set to omit waters for smaller trajectories.
+
+      ``trajectory.forces`` can be ``all``, ``standard``, or ``biases``.
 
    .. exess-param:: energy_csv
       :type: string
@@ -1227,6 +1247,13 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
       :brief: Path for energy CSV.
 
       When set, EXESS uses a Verlet integrator and does not apply the thermostat (the temperature is not used for integration).
+
+   .. exess-param:: cv_values_csv
+      :type: string
+      :default: unset
+      :brief: Path for CV values CSV.
+
+      Requires at least one CV-based bias (``harmonic_cv`` or ``moving_harmonic``).
 
    .. exess-param:: restraints
       :type: object
@@ -1237,11 +1264,20 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
       Fields:
 
       - ``k`` — ``float`` (default: ``2000.0``)
+      - ``fixed_atoms`` — ``array[int]`` (default: unset)
+      - ``free_atoms`` — ``array[int]`` (default: unset)
+      - ``fixed_fragments`` — ``array[int]`` (default: unset)
+      - ``free_fragments`` — ``array[int]`` (default: unset)
       - ``fix_heavy`` — ``bool`` (default: ``false``)
 
       Only one of ``fixed_atoms``, ``free_atoms``, ``fixed_fragments``, or ``free_fragments`` may be specified. Set ``free_atoms = []`` to fix all atoms.
 
       ``restraints.k`` scales the restraint force; larger values mean stronger restraints.
+
+   .. exess-param:: ffs
+      :type: array[string]
+      :default: unset
+      :brief: Additional QMMM force field files.
 ```
 
 

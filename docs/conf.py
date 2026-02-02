@@ -41,7 +41,7 @@ html_static_path = ["_static"]
 
 # Shibuya theme options
 html_theme_options = {
-    "accent_color": "blue",
+    "accent_color": "iris",
     "toctree_includehidden": False,
 }
 
@@ -118,9 +118,7 @@ def add_exess_nav(app, pagename, templatename, context, doctree):
     toc_tree = TocTree(env)
     collapse = _to_bool(context.get("theme_toctree_collapse"), default=False)
     titles_only = _to_bool(context.get("theme_toctree_titles_only"), default=False)
-    includehidden = _to_bool(
-        context.get("theme_toctree_includehidden"), default=False
-    )
+    includehidden = _to_bool(context.get("theme_toctree_includehidden"), default=False)
     maxdepth = context.get("theme_toctree_maxdepth")
     try:
         maxdepth = int(maxdepth) if maxdepth not in (None, "") else 0
