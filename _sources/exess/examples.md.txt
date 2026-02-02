@@ -70,7 +70,7 @@ res = exess.energy("input_topology.json", collect=True)
 
 ### RI-HF (via `fock_build_type`)
 
-The EXESS schema does not include a distinct `RestrictedRIHF` method. Use `RestrictedHF` with `fock_build_type: "RI"`:
+RI-HF is configured by using `RestrictedHF` with `fock_build_type: "RI"`:
 
 ```json
 {
@@ -328,11 +328,11 @@ EXESS can run Born-Oppenheimer AIMD using RHF, RI-HF, or RI-MP2 gradients (fragm
 }
 ```
 
-`dt` is in ps (1 fs is 0.001 ps); the upstream docs treat 1 fs as a typical default.
+`dt` is in ps (1 fs is 0.001 ps); a typical choice is 1 fs.
 
 ## Geometry optimization
 
-Geometry optimization uses RHF, RI-HF, or RI-MP2 gradients. The upstream docs provide a simple RI-MP2 optimization example:
+Geometry optimization uses RHF, RI-HF, or RI-MP2 gradients. A simple RI-MP2 optimization example:
 
 ```json
 {

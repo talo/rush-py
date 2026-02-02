@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="blue" data-content_root="../">
+<html lang="en" data-accent-color="iris" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Topologies and residues - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Keyword reference" href="keywords.html" /><link rel="prev" title="Input format" href="input.html" /><script>
@@ -68,7 +68,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mismatches.html">Layer mismatches and alignment notes</a></li>
 </ul>
 
         </div>
@@ -125,7 +124,7 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="topologies-and-residues">
 <h1>Topologies and residues<a class="headerlink" href="#topologies-and-residues" title="Link to this heading">¶</a></h1>
-<p>This page contains the full schema reference for <code class="docutils literal notranslate"><span class="pre">topologies</span></code> and <code class="docutils literal notranslate"><span class="pre">residues</span></code>. The
+<p>This page contains the full reference for <code class="docutils literal notranslate"><span class="pre">topologies</span></code> and <code class="docutils literal notranslate"><span class="pre">residues</span></code>. The
 <a class="reference internal" href="input.html"><span class="doc std std-doc">input format page</span></a> provides a high-level summary with minimal examples.</p>
 <section id="topologies">
 <span id="id1"></span><h2>topologies<a class="headerlink" href="#topologies" title="Link to this heading">¶</a></h2>
@@ -220,15 +219,16 @@ data-aria-dark="Switch to auto color mode">
 </tbody>
 </table>
 </div>
-<p>The EXESS C++ schema requires either <code class="docutils literal notranslate"><span class="pre">symbols</span></code> + <code class="docutils literal notranslate"><span class="pre">geometry</span></code> or <code class="docutils literal notranslate"><span class="pre">xyz</span></code>, but not both.</p>
-<p>Notes from upstream docs and libqdx Rust types:</p>
+<p>Inputs require either <code class="docutils literal notranslate"><span class="pre">symbols</span></code> + <code class="docutils literal notranslate"><span class="pre">geometry</span></code> or <code class="docutils literal notranslate"><span class="pre">xyz</span></code>, but not both.</p>
+<p>Notes:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> can be used to annotate specific atoms (e.g., alpha carbons in residues).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">labels</span></code> must match the length of <code class="docutils literal notranslate"><span class="pre">symbols</span></code> if provided. <code class="docutils literal notranslate"><span class="pre">partial_charges</span></code> are in atomic units.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">labels</span></code> must match the length of <code class="docutils literal notranslate"><span class="pre">symbols</span></code> if provided.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is a perceived bond list and should not be treated as a definitive source of bond information.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> is only valid if <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is present and must match its length.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> are used for dynamics; they are present only in v1 inputs but are supported by the schema.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> are used for dynamics; they are present only in v1 inputs but are supported.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code> must include each atom exactly once when provided.</p></li>
+<li><p>rush-py expects topology JSON inputs (symbols + geometry). It does not accept <code class="docutils literal notranslate"><span class="pre">xyz</span></code> paths.</p></li>
 </ul>
 <section id="geometry">
 <h4>geometry<a class="headerlink" href="#geometry" title="Link to this heading">¶</a></h4>
@@ -270,7 +270,7 @@ data-aria-dark="Switch to auto color mode">
 <h4>connectivity<a class="headerlink" href="#connectivity" title="Link to this heading">¶</a></h4>
 <p>Connectivity is required when a covalent bond is broken across fragments. EXESS will add hydrogen caps to satisfy valences and remove them after the calculation.</p>
 <p>A bond entry is <code class="docutils literal notranslate"><span class="pre">[atom_index_1,</span> <span class="pre">atom_index_2,</span> <span class="pre">bond_order]</span></code>.</p>
-<p>EXESS/libqdx defines the following bond order values (the upstream docs emphasize single/double/triple bonds as the common values):</p>
+<p>EXESS defines the following bond order values (single/double/triple bonds are the most common values):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: Unspecified</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Single</p></li>
@@ -293,11 +293,11 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="4"><span class="p">]</span>
 </span></pre></div>
 </div>
-<p>Upstream docs include a covalent fragmentation example with two ethane fragments connected across a C-C bond, where <code class="docutils literal notranslate"><span class="pre">connectivity:</span> <span class="pre">[[1,</span> <span class="pre">4,</span> <span class="pre">1]]</span></code> signals a single bond between atom indices 1 and 4. EXESS uses this information to apply hydrogen caps on broken valences during fragmentation and removes them after the calculation.</p>
+<p>A covalent fragmentation example with two ethane fragments connected across a C-C bond uses <code class="docutils literal notranslate"><span class="pre">connectivity:</span> <span class="pre">[[1,</span> <span class="pre">4,</span> <span class="pre">1]]</span></code> to signal a single bond between atom indices 1 and 4. EXESS uses this information to apply hydrogen caps on broken valences during fragmentation and removes them after the calculation.</p>
 </section>
 <section id="stereochemistry">
 <h4>stereochemistry<a class="headerlink" href="#stereochemistry" title="Link to this heading">¶</a></h4>
-<p>EXESS/libqdx accepts a list of integers aligned with the <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> list:</p>
+<p>EXESS accepts a list of integers aligned with the <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> list:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: None</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Up</p></li>
@@ -346,7 +346,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="topology-validation-checks">
 <h4>topology validation checks<a class="headerlink" href="#topology-validation-checks" title="Link to this heading">¶</a></h4>
-<p>The libqdx Rust types expose validation logic that is useful when constructing inputs:</p>
+<p>Validation checks when constructing inputs:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code> must match <code class="docutils literal notranslate"><span class="pre">symbols</span></code> length if present.</p></li>
@@ -397,12 +397,12 @@ data-aria-dark="Switch to auto color mode">
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">insertion_codes</span></code></p></td>
 <td><p>array[string]</p></td>
-<td><p>PDB-style insertion codes.</p></td>
+<td><p>Required PDB-style insertion codes (use empty strings when not applicable).</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is typically aligned one-to-one with <code class="docutils literal notranslate"><span class="pre">topologies</span></code> (same index). It is required for QMMM and other workflows that rely on residues, and it is often generated by converting PDB/TRC inputs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is typically aligned one-to-one with <code class="docutils literal notranslate"><span class="pre">topologies</span></code> (same index). It is required for QMMM and other workflows that rely on residues, and it is often generated by converting PDB/TRC inputs. <code class="docutils literal notranslate"><span class="pre">insertion_codes</span></code> is required; use empty strings when there are no insertion codes.</p>
 </section>
 </section>
 

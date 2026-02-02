@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="blue" data-content_root="../">
+<html lang="en" data-accent-color="iris" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Examples - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Outputs" href="outputs.html" /><link rel="prev" title="Keyword reference" href="keywords.html" /><script>
@@ -68,7 +68,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mismatches.html">Layer mismatches and alignment notes</a></li>
 </ul>
 
         </div>
@@ -200,7 +199,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="ri-hf-via-fock-build-type">
 <h3>RI-HF (via <code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code>)<a class="headerlink" href="#ri-hf-via-fock-build-type" title="Link to this heading">¶</a></h3>
-<p>The EXESS schema does not include a distinct <code class="docutils literal notranslate"><span class="pre">RestrictedRIHF</span></code> method. Use <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code> with <code class="docutils literal notranslate"><span class="pre">fock_build_type:</span> <span class="pre">&quot;RI&quot;</span></code>:</p>
+<p>RI-HF is configured by using <code class="docutils literal notranslate"><span class="pre">RestrictedHF</span></code> with <code class="docutils literal notranslate"><span class="pre">fock_build_type:</span> <span class="pre">&quot;RI&quot;</span></code>:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span data-line="3"><span class="w">    </span><span class="p">{</span>
@@ -452,11 +451,11 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="61"><span class="p">}</span>
 </span></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">dt</span></code> is in ps (1 fs is 0.001 ps); the upstream docs treat 1 fs as a typical default.</p>
+<p><code class="docutils literal notranslate"><span class="pre">dt</span></code> is in ps (1 fs is 0.001 ps); a typical choice is 1 fs.</p>
 </section>
 <section id="geometry-optimization">
 <h2>Geometry optimization<a class="headerlink" href="#geometry-optimization" title="Link to this heading">¶</a></h2>
-<p>Geometry optimization uses RHF, RI-HF, or RI-MP2 gradients. The upstream docs provide a simple RI-MP2 optimization example:</p>
+<p>Geometry optimization uses RHF, RI-HF, or RI-MP2 gradients. A simple RI-MP2 optimization example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span data-line="3"><span class="w">    </span><span class="p">{</span>

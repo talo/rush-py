@@ -6,50 +6,41 @@
 
 | Family | Examples | Notes |
 | --- | --- | --- |
-| Pople | 6-31G, 6-31G*, 6-31++G** | Common split-valence sets. |
-| Dunning | cc-pVDZ, cc-pVTZ, aug-cc-pVDZ | RIFIT auxiliary variants available. |
-| def2 | def2-SVP, def2-TZVP, def2-TZVPP | RIFIT auxiliary variants available. |
+| Pople | 6-31G, 6-31G*, 6-31++G**, 6-311G** | Common split-valence sets. |
+| Dunning | cc-pVDZ, cc-pVTZ, cc-pVQZ, aug-cc-pVTZ | RIFIT auxiliary variants available. |
+| def2 | def2-SVP, def2-TZVP, def2-TZVPP, def2-QZVP | RIFIT auxiliary variants available. |
 | STO-nG | STO-2G, STO-3G, STO-6G | Minimal basis sets. |
-| pcseg | pcseg-0, pcseg-1 | Segmented basis sets. |
+| PCSeg | PCSeg-0, PCSeg-1 | Segmented basis sets. |
+| X2C | x2c-SVPall | Relativistic all-electron basis. |
 
 For the full list, see the [reference page](reference).
 
 ### DFT functionals
 
-Any functional available in libXC can be requested directly through EXESS input parameters by its standard identifier. LibXC naming is required. 
-In addition to the named functionals provided by libXC, EXESS supports user-defined hybrid and composite functionals. Users can construct custom functionals by combining libXC components with specified weights for exchange, correlation, and exact-exchange contributions. This enables the definition of arbitrary linear combinations of libXC primitives, allowing for method development and systematic functional benchmarking without modifying the EXESS source code.
+EXESS uses LibXC through ExchCXX. Any LibXC functional name accepted by the build can be
+requested directly; invalid names cause EXESS to error and print the available functionals.
 
-**Current functional support**
+EXESS also supports custom linear combinations in the ExchCXX syntax, for example:
+`0.2*gga_x_pbe+0.8*gga_x_b88+0.2*hf`.
 
-Functionals can be categorized by the density-related quantities they require as input. EXESS currently supports:
+Built-in aliases with EXESS-defined coefficients include:
 
-- **LDA (Local Density Approximation)**: functionals that depend only on the electron density ρ(r)
-- **GGA (Generalized Gradient Approximation)**: functionals that depend on the electron density and its gradient, ∇ρ(r)
-- **Hybrid functionals**: any combination of LDA, GGA, and exact exchange
-
-EXESS does not currently support:
-
-- **Meta-GGA functionals**: these require the kinetic energy density or other quantities not yet computed in EXESS
-- **Range-separated hybrid functionals**: these require special treatment of the Coulomb operator partitioning that has not been implemented
-
-Some examples of commonly used supported functionals include:
-- LDA: `LDA_X`, `LDA_C_PZ`, `LDA_XC_TETER93`
-- GGA: `GGA_XC_PBE`, `GGA_XC_PW91`
-- Meta-GGA (experimental): `MGGA_XC_TPSS`, `MGGA_XC_M06_L`
-- Hybrids: `HYB_GGA_XC_B3LYP`, `HYB_GGA_XC_PBEH`, `HYB_MGGA_XC_B98`
-- Double hybrids (experimental): `B2PLYP`, `revDSD-PBEP86-D4` (D4 is external)
+- `SVWN5` (expanded as `LDA_X+LDA_C_VWN`)
+- `B2PLYP`
+- `REVDSD-PBEP86-D4`
+- `REVDSD-PBEP86-D4(NOFC)`
 
 ### Correlated methods
 
 - RI-MP2 (`RestrictedRIMP2`) is the supported MP2 implementation.
-- The schema also exposes `RestrictedRICCSD`; check deployment support before relying on it.
+- `RestrictedRICCSD` is available in the method list; check deployment support before relying on it.
 
 ### Dynamics capabilities
 
 - Born-Oppenheimer AIMD with a Verlet integrator (microcanonical only).
 - QMMM dynamics with NVT or NPT control via `qmmm.temperature_kelvin` and `qmmm.pressure_atm`.
 - Periodic boundary conditions.
-- Water-only classical solvent support (as documented upstream).
+- Water-only classical solvent support.
 
 ## How to choose settings (practical guidance)
 
@@ -74,13 +65,12 @@ Some examples of commonly used supported functionals include:
 
 ### DFT strategy
 
-- Start with `ks_dft.method = "GauXC"` and the default grid.
-- Treat meta-GGA and double-hybrid functionals as experimental.
-- Range-separated functionals are not supported.
+- Start with `ks_dft.method = "BatchDense"` and the default grid.
+- Use `GauXC` only when you need it for compatibility or benchmarking.
 
 ### Gradients, dynamics, and optimization
 
-- Dynamics and optimization require gradients; use RHF, RI-HF, or RI-MP2.
+- Dynamics and optimization require gradients. Analytical gradients are only available for restricted HF and restricted RI-MP2; use numerical derivatives otherwise.
 - AIMD is microcanonical only, so choose timestep and total steps accordingly.
 - For thermostatted or barostatted dynamics, use QMMM and set `keywords.regions` with `qmmm.temperature_kelvin` (and optional `qmmm.pressure_atm`).
 - Geometry optimization defaults to internal coordinates; override only if you understand the tradeoffs.
@@ -114,30 +104,27 @@ Then run with the EXESS executable or the rush-py client. See the [running guide
 
 ## Hartree-Fock
 
-EXESS supports RHF and UHF energies. Gradients are available for RHF but not UHF. Non-RI HF is limited to basis sets up to D functions, and spherical Gaussians are only supported for non-RI RHF.
+EXESS supports RHF and UHF energies. Analytical gradients are available for restricted HF but not UHF. Spherical basis functions (`force_cartesian_basis_sets=false`) are only supported for `Energy` calculations.
 
 ## RI-HF and RI-MP2
 
 RI is the main path to scalable HF and MP2 in EXESS:
 
-- **RI-HF** is enabled by setting `scf.fock_build_type = "RI"` with `method = "RestrictedHF"`. RI-HF is RHF-only.
+- **RI-HF** is enabled by setting `scf.fock_build_type = "RI"` with `method = "RestrictedHF"`.
 - **RI-MP2** is the supported MP2 implementation (`method = "RestrictedRIMP2"`). MP2 runs are RI by design.
 
-RI reduces computational cost but increases memory use because integrals are stored. It also requires an auxiliary basis set. In return, RI-HF/RI-MP2 support higher angular momentum basis sets (up to F in the primary basis and G in the auxiliary basis).
+RI reduces computational cost but increases memory use because integrals are stored. RI-HF, RI-MP2, and RI-CCSD require an auxiliary basis set, and double-hybrid KSDFT functionals require one as well. In return, RI-HF/RI-MP2 support higher angular momentum basis sets (up to F in the primary basis and G in the auxiliary basis).
 
 ## KSDFT
 
-Restricted KSDFT is supported via LibXC functionals. LDA, GGA, meta-GGA, and hybrid functionals are available through LibXC, but upstream docs note that meta-GGA and double-hybrid functionals are experimental. Range-separated functionals are not supported. KSDFT gradients are not available in EXESS at present.
+Restricted KSDFT is supported via LibXC functionals (DFT support must be compiled into EXESS). Unrestricted DFT is not implemented. Analytical gradients are not available for KSDFT; use numerical derivatives when needed.
 
-Upstream docs summarize method support as follows:
+Method support summary (analytical gradients only):
 
 | Calculation | RHF | UHF | RI-HF | RI-MP2 | RestrictedKSDFT |
 | --- | --- | --- | --- | --- | --- |
 | Energy | yes | yes | yes | yes | yes |
-| Gradient | yes | no | yes | yes | no |
-| Fragmentation | yes | no | yes | yes | yes |
-
-If gradients are enabled, fragmented gradients are enabled as well.
+| Analytical gradient | yes | no | yes | yes | no |
 
 ## Fragmentation theory (MBE)
 
@@ -147,7 +134,7 @@ EXESS implements a Many-Body Expansion (MBE) for non-covalent and covalent syste
 
 Covalent fragmentation uses hydrogen capping for broken single bonds. If you cut covalent bonds, provide `connectivity` so EXESS can cap and restore bonds correctly.
 
-Upstream docs recommend the MBE reviews at https://doi.org/10.1063/1.5126216 and https://doi.org/10.1021/cr200093j for background and accuracy considerations.
+For background and accuracy considerations, see https://doi.org/10.1063/1.5126216 and https://doi.org/10.1021/cr200093j.
 
 ## Gradients, dynamics, and optimization
 
@@ -163,11 +150,21 @@ EXESS is strong when you need GPU performance and fragmentation at scale. It is 
 
 **Limitations:**
 
-- Non-RI HF supports up to F functions.
-- RI-HF/RI-MP2 up to G functions for the primary basis and corresponding auxiliary basis sets.
+- Unrestricted KSDFT is not implemented.
+- Unrestricted RI-MP2 is not supported (use `RestrictedRIMP2`).
+- The UM09 (MMD) Fock build path is not defined for UHF when using spherical basis functions.
+- Analytical gradients are limited to restricted HF and restricted RI-MP2.
 - Hydrogen capping is the only supported covalent bond-breaking scheme.
-- UHF is supported only without RI; UHF gradients are not available.
 - Plane-wave basis sets are not supported.
 - Fully ab initio AIMD is microcanonical; thermostatted/barostatted dynamics require QMMM.
+
+:::{only} internal
+Notes on provenance:
+- UHF KSDFT: `EXESS/src/methods/hf/energy/hf.cpp` ("UHF not implemented for DFT").
+- Unrestricted RI-MP2: `EXESS/src/core/calculation_input/calculation_model.cpp` (throws on `UnrestrictedRIMP2`).
+- UM09 UHF + spherical: `EXESS/src/methods/hf/energy/hf.cpp` (assert "MMD not defined for UHF").
+- Analytical gradients: `EXESS/src/core/calculation_input/calculation_types.hpp` (`supports_analytical_gradients`).
+- Spherical basis restriction: `EXESS/src/core/calculation_input/calculation_input.cpp` (driver check for `force_cartesian_basis_sets=false`).
+:::
 
 Hardware guidance and known issues are listed in the [reference page](reference).

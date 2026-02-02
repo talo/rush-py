@@ -1,3 +1,8 @@
+---
+orphan: true
+---
+
+:::{only} internal
 # Layer mismatches and alignment notes
 
 This section documents mismatches across the EXESS executable schema (libqdx.hpp), the libqdx Rust types, and the rush-py interface. It includes mismatches found in the original docs, as well as differences discovered by inspecting code.
@@ -52,3 +57,4 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - rush-py `chelpg` sets `standard_orientation="None"` and `force_cartesian_basis_sets=false`, overriding CLI defaults (`FullSystem`, `true`).
 - rush-py `qmmm` defaults to `basis="STO-3G"`, `dt_ps=0.002`, and `temperature_kelvin=290.0`.
 - rush-py `FragKeywords` auto-fills cutoffs for `Trimer` and `Tetramer` levels (100/25/10 Angstroms) when omitted.
+:::

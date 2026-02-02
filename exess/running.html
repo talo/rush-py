@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="blue" data-content_root="../">
+<html lang="en" data-accent-color="iris" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Running EXESS - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Input format" href="input.html" /><link rel="prev" title="Electronic Structure Methods" href="electronic-structure-methods.html" /><script>
@@ -68,7 +68,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mismatches.html">Layer mismatches and alignment notes</a></li>
 </ul>
 
         </div>
@@ -156,7 +155,7 @@ rush-py</label><div class="sd-tab-content docutils">
 <h2>CLI (EXESS executable)<a class="headerlink" href="#cli-exess-executable" title="Link to this heading">¶</a></h2>
 <section id="environment-and-installation">
 <h3>Environment and installation<a class="headerlink" href="#environment-and-installation" title="Link to this heading">¶</a></h3>
-<p>EXESS needs the records directory and optional validation directory to be discoverable at runtime. The upstream installation guide describes these environment variables:</p>
+<p>EXESS needs the records directory and optional validation directory to be discoverable at runtime. Set these environment variables:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nb">export</span><span class="w"> </span><span class="nv">EXESS_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$YOUR_PATH</span><span class="s2">/exess&quot;</span>
 </span><span data-line="2"><span class="nb">export</span><span class="w"> </span><span class="nv">EXESS_RECORDS_PATH</span><span class="o">=</span><span class="nv">$EXESS_PATH</span>/records
 </span><span data-line="3"><span class="nb">export</span><span class="w"> </span><span class="nv">EXESS_VALIDATION_PATH</span><span class="o">=</span><span class="nv">$EXESS_PATH</span>/validation
@@ -180,7 +179,7 @@ rush-py</label><div class="sd-tab-content docutils">
 </span><span data-line="2"><span class="w">                 </span><span class="o">[</span>--basis_set<span class="w"> </span>BASIS_SET<span class="o">]</span><span class="w"> </span><span class="o">[</span>--aux_basis_set<span class="w"> </span>AUX_BASIS_SET<span class="o">]</span><span class="w"> </span><span class="o">[</span>--driver<span class="w"> </span>DRIVER<span class="o">]</span><span class="w"> </span><span class="o">[</span>--method<span class="w"> </span>METHOD<span class="o">]</span>
 </span></pre></div>
 </div>
-<p>Defaults (as documented upstream):</p>
+<p>Defaults:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">input_format</span></code>: <code class="docutils literal notranslate"><span class="pre">xyz</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">output_format</span></code>: <code class="docutils literal notranslate"><span class="pre">json</span></code></p></li>

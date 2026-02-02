@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="blue" data-content_root="../">
+<html lang="en" data-accent-color="iris" data-content_root="../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Reference - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Citations" href="citations.html" /><link rel="prev" title="Outputs" href="outputs.html" /><script>
@@ -68,7 +68,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mismatches.html">Layer mismatches and alignment notes</a></li>
 </ul>
 
         </div>
@@ -82,8 +81,12 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#supported-basis-sets">Supported basis sets</a><ul>
-<li><a class="reference internal" href="#from-exess-docs-basis-sets-md">From EXESS/docs/basis_sets.md</a></li>
-<li><a class="reference internal" href="#from-docs-exess-manual">From docs_exess manual</a></li>
+<li><a class="reference internal" href="#pople">Pople</a></li>
+<li><a class="reference internal" href="#dunning">Dunning</a></li>
+<li><a class="reference internal" href="#def2">def2</a></li>
+<li><a class="reference internal" href="#sto-ng">STO-nG</a></li>
+<li><a class="reference internal" href="#pcseg">PCSeg</a></li>
+<li><a class="reference internal" href="#x2c">X2C</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#lebedev-grids">Lebedev grids</a></li>
@@ -135,83 +138,100 @@ data-aria-dark="Switch to auto color mode">
 <h1>Reference<a class="headerlink" href="#reference" title="Link to this heading">¶</a></h1>
 <section id="supported-basis-sets">
 <span id="basis-sets"></span><h2>Supported basis sets<a class="headerlink" href="#supported-basis-sets" title="Link to this heading">¶</a></h2>
-<p>The upstream docs contain two overlapping lists. Both are reproduced here for completeness.</p>
-<section id="from-exess-docs-basis-sets-md">
-<h3>From EXESS/docs/basis_sets.md<a class="headerlink" href="#from-exess-docs-basis-sets-md" title="Link to this heading">¶</a></h3>
+<p>Supported basis sets are determined by the basis-set records shipped with EXESS
+(<code class="docutils literal notranslate"><span class="pre">records/basis_sets/*.json</span></code>). EXESS normalizes basis names by replacing <code class="docutils literal notranslate"><span class="pre">+</span></code> with <code class="docutils literal notranslate"><span class="pre">p</span></code>,
+<code class="docutils literal notranslate"><span class="pre">*</span></code> with <code class="docutils literal notranslate"><span class="pre">s</span></code>, and removing parentheses/commas when looking up files. The list below
+uses the conventional spellings that EXESS resolves to those records.</p>
+<section id="pople">
+<h3>Pople<a class="headerlink" href="#pople" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>3-21G</p></li>
 <li><p>4-31G</p></li>
 <li><p>5-21G</p></li>
 <li><p>6-21G</p></li>
 <li><p>6-31G</p></li>
-<li><p>6-311G</p></li>
-<li><p>6-31G(2df,p)</p></li>
-<li><p>6-31G(3df,3pd)</p></li>
 <li><p>6-31G*</p></li>
 <li><p>6-31G**</p></li>
-<li><p>6-31G**-RIFIT (only as aux basis set)</p></li>
+<li><p>6-31G(2df,p)</p></li>
+<li><p>6-31G(3df,3pd)</p></li>
 <li><p>6-31+G</p></li>
 <li><p>6-31+G*</p></li>
 <li><p>6-31+G**</p></li>
 <li><p>6-31++G</p></li>
 <li><p>6-31++G*</p></li>
 <li><p>6-31++G**</p></li>
-<li><p>6-311G**-RIFIT (only as aux basis set)</p></li>
-<li><p>PCSeg-0</p></li>
-<li><p>PCSeg-1</p></li>
-<li><p>STO-2G</p></li>
-<li><p>STO-3G</p></li>
-<li><p>STO-4G</p></li>
-<li><p>STO-5G</p></li>
-<li><p>STO-6G</p></li>
-<li><p>aug-cc-pVDZ-RIFIT (only as aux basis set)</p></li>
-<li><p>aug-cc-pVDZ</p></li>
-<li><p>aug-cc-pVTZ-RIFIT (only as aux basis set)</p></li>
-<li><p>aug-cc-pVTZ</p></li>
-<li><p>cc-pVDZ-RIFIT (only as aux basis set)</p></li>
-<li><p>cc-pVDZ</p></li>
-<li><p>cc-pVTZ-RIFIT (only as aux basis set)</p></li>
-<li><p>cc-pVTZ</p></li>
+<li><p>6-311G</p></li>
+<li><p>6-311G**</p></li>
+</ul>
+<p>Auxiliary (RIFIT):</p>
+<ul class="simple">
+<li><p>6-31G**-RIFIT (aux basis only)</p></li>
+<li><p>6-311G**-RIFIT (aux basis only)</p></li>
 </ul>
 </section>
-<section id="from-docs-exess-manual">
-<h3>From docs_exess manual<a class="headerlink" href="#from-docs-exess-manual" title="Link to this heading">¶</a></h3>
+<section id="dunning">
+<h3>Dunning<a class="headerlink" href="#dunning" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p>3-21G</p></li>
-<li><p>4-31G</p></li>
-<li><p>5-21G</p></li>
-<li><p>6-21G</p></li>
-<li><p>6-311G</p></li>
-<li><p>6-311G**-RIFIT</p></li>
-<li><p>6-31G</p></li>
-<li><p>6-31G(2df,p)</p></li>
-<li><p>6-31G(3df,3pd)</p></li>
-<li><p>6-31G*</p></li>
-<li><p>6-31G**-RIFIT</p></li>
-<li><p>6-31G**</p></li>
-<li><p>6-31+G</p></li>
-<li><p>6-31+G*</p></li>
-<li><p>6-31+G**</p></li>
-<li><p>6-31++G</p></li>
-<li><p>6-31++G*</p></li>
-<li><p>6-31++G**</p></li>
+<li><p>cc-pVDZ</p></li>
+<li><p>cc-pVTZ</p></li>
+<li><p>cc-pVQZ</p></li>
+<li><p>aug-cc-pVDZ</p></li>
+<li><p>aug-cc-pVTZ</p></li>
+</ul>
+<p>Auxiliary (RIFIT):</p>
+<ul class="simple">
+<li><p>cc-pVDZ-RIFIT (aux basis only)</p></li>
+<li><p>cc-pVTZ-RIFIT (aux basis only)</p></li>
+<li><p>cc-pVQZ-RIFIT (aux basis only)</p></li>
+<li><p>aug-cc-pVDZ-RIFIT (aux basis only)</p></li>
+<li><p>aug-cc-pVTZ-RIFIT (aux basis only)</p></li>
+</ul>
+</section>
+<section id="def2">
+<h3>def2<a class="headerlink" href="#def2" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>def2-SVP</p></li>
+<li><p>def2-SVPD</p></li>
+<li><p>def2-TZVP</p></li>
+<li><p>def2-TZVPD</p></li>
+<li><p>def2-TZVPP</p></li>
+<li><p>def2-TZVPPD</p></li>
+<li><p>def2-QZVP</p></li>
+<li><p>def2-QZVPP</p></li>
+</ul>
+<p>Auxiliary (RIFIT):</p>
+<ul class="simple">
+<li><p>def2-SVP-RIFIT (aux basis only)</p></li>
+<li><p>def2-SVPD-RIFIT (aux basis only)</p></li>
+<li><p>def2-TZVP-RIFIT (aux basis only)</p></li>
+<li><p>def2-TZVPD-RIFIT (aux basis only)</p></li>
+<li><p>def2-TZVPP-RIFIT (aux basis only)</p></li>
+<li><p>def2-TZVPPD-RIFIT (aux basis only)</p></li>
+<li><p>def2-QZVP-RIFIT (aux basis only)</p></li>
+<li><p>def2-QZVPP-RIFIT (aux basis only)</p></li>
+</ul>
+</section>
+<section id="sto-ng">
+<h3>STO-nG<a class="headerlink" href="#sto-ng" title="Link to this heading">¶</a></h3>
+<ul class="simple">
 <li><p>STO-2G</p></li>
 <li><p>STO-3G</p></li>
 <li><p>STO-4G</p></li>
 <li><p>STO-5G</p></li>
 <li><p>STO-6G</p></li>
-<li><p>aug-cc-pVDZ / RIFIT</p></li>
-<li><p>aug-cc-pVTZ / RIFIT</p></li>
-<li><p>cc-pVDZ / RIFIT</p></li>
-<li><p>cc-pVTZ / RIFIT</p></li>
-<li><p>def2-SVP / RIFIT</p></li>
-<li><p>def2-SVPD / RIFIT</p></li>
-<li><p>def2-TZVP / RIFIT</p></li>
-<li><p>def2-TZVPD / RIFIT</p></li>
-<li><p>def2-TZVPP / RIFIT</p></li>
-<li><p>def2-TZVPPD / RIFIT</p></li>
-<li><p>pcseg-0</p></li>
-<li><p>pcseg-1</p></li>
+</ul>
+</section>
+<section id="pcseg">
+<h3>PCSeg<a class="headerlink" href="#pcseg" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>PCSeg-0</p></li>
+<li><p>PCSeg-1</p></li>
+</ul>
+</section>
+<section id="x2c">
+<h3>X2C<a class="headerlink" href="#x2c" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>x2c-SVPall</p></li>
 </ul>
 </section>
 </section>
@@ -328,7 +348,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="environment-variables">
 <h2>Environment variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h2>
-<p>From EXESS docs:</p>
+<p>Runtime variables:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -355,7 +375,7 @@ data-aria-dark="Switch to auto color mode">
 </tbody>
 </table>
 </div>
-<p>From the installation docs:</p>
+<p>Build/install variables:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">EXESS_PATH</span></code>: root path for EXESS.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">EXESS_RECORDS_PATH</span></code>: records directory.</p></li>
@@ -364,7 +384,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="installation-hpc-build-notes">
 <h2>Installation (HPC build notes)<a class="headerlink" href="#installation-hpc-build-notes" title="Link to this heading">¶</a></h2>
-<p>The upstream installation guide targets HPC system administrators building EXESS from source. Key dependencies:</p>
+<p>The installation guide targets HPC system administrators building EXESS from source. Key dependencies:</p>
 <ul class="simple">
 <li><p>C/C++ compiler with C++17 support</p></li>
 <li><p>CUDA or ROCm compiler</p></li>
@@ -373,7 +393,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p>HDF5</p></li>
 <li><p>MAGMA with HIP support (AMD systems)</p></li>
 </ul>
-<p>Upstream notes: EXESS has a minimal dependency set, but the team cannot guarantee out-of-the-box builds for non-standard compilers that they cannot test.</p>
+<p>Notes: EXESS has a minimal dependency set, but the team cannot guarantee out-of-the-box builds for non-standard compilers that they cannot test.</p>
 <p>Example build on Gadi (NCI):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">module<span class="w"> </span>load<span class="w"> </span>julia/1.9.1
 </span><span data-line="2">module<span class="w"> </span>load<span class="w"> </span>cuda/12.0.0
@@ -408,7 +428,7 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>After installation, the runtime requires <code class="docutils literal notranslate"><span class="pre">EXESS_RECORDS_PATH</span></code> plus the <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> and <code class="docutils literal notranslate"><span class="pre">runexess</span></code> scripts; other source tree content can be removed.</p>
-<p>Custom installer templates live under <code class="docutils literal notranslate"><span class="pre">modulefiles/</span></code> in the upstream repo (for Gadi/Setonix). GNU is the recommended build environment, but Cray, NVHPC, and Intel compilers are known to work; report compilation issues with compiler/MPI/CUDA/ROCm versions to the EXESS team.</p>
+<p>Custom installer templates live under <code class="docutils literal notranslate"><span class="pre">modulefiles/</span></code> in the EXESS GitHub repository (for Gadi/Setonix). GNU is the recommended build environment, but Cray, NVHPC, and Intel compilers are known to work; report compilation issues with compiler/MPI/CUDA/ROCm versions to the EXESS team.</p>
 </section>
 <section id="hardware-considerations">
 <h2>Hardware considerations<a class="headerlink" href="#hardware-considerations" title="Link to this heading">¶</a></h2>
@@ -421,7 +441,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p>CUDA 11.1+ supported.</p></li>
 <li><p>NVHPC toolkit supported.</p></li>
 <li><p>Performance scales with the GPU’s double-precision throughput.</p></li>
-<li><p>If you have access to newer NVIDIA hardware, upstream docs ask that you open an issue.</p></li>
+<li><p>If you have access to newer NVIDIA hardware, please open an issue.</p></li>
 </ul>
 </section>
 <section id="amd">
@@ -439,7 +459,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>Known issues<a class="headerlink" href="#known-issues" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>NVIDIA: no issues listed.</p></li>
-<li><p>AMD: out-of-resources errors can occur; reduce <code class="docutils literal notranslate"><span class="pre">max_gpu_memory_mb</span></code> or use RI in <code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code>. Upstream docs include this example error:</p></li>
+<li><p>AMD: out-of-resources errors can occur; reduce <code class="docutils literal notranslate"><span class="pre">max_gpu_memory_mb</span></code> or use RI in <code class="docutils literal notranslate"><span class="pre">fock_build_type</span></code>. Example error:</p></li>
 </ul>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">:0:rocdevice.cpp
 </span><span data-line="2">:2688: 1214497773164 us: [pid:853101 tid:0x14e50c57d700]
@@ -458,7 +478,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="performance">
 <h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h2>
-<p>The upstream performance page currently contains a placeholder line: “vroom vroom we’re faster than everyone else”.</p>
+<p>The performance page currently contains a placeholder line: “vroom vroom we’re faster than everyone else”.</p>
 </section>
 <section id="release-notes-v4-0-0-beta">
 <h2>Release notes (v4.0.0-beta)<a class="headerlink" href="#release-notes-v4-0-0-beta" title="Link to this heading">¶</a></h2>

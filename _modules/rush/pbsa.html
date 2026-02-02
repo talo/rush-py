@@ -65,6 +65,9 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/exess-interaction-energy.html">EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/exess-optimization.html">EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/exess-qmmm.html">EXESS QMMM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
 </ul>
 </li>
@@ -139,9 +142,9 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
 </span><span data-line="8">
 </span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="10">    <span class="n">PROJECT_ID</span><span class="p">,</span>
-</span><span data-line="11">    <span class="n">RunOpts</span><span class="p">,</span>
-</span><span data-line="12">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="10">    <span class="n">RunOpts</span><span class="p">,</span>
+</span><span data-line="11">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="12">    <span class="n">_get_project_id</span><span class="p">,</span>
 </span><span data-line="13">    <span class="n">_submit_rex</span><span class="p">,</span>
 </span><span data-line="14">    <span class="n">collect_run</span><span class="p">,</span>
 </span><span data-line="15">    <span class="n">upload_object</span><span class="p">,</span>
@@ -228,7 +231,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="91">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">topology_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
 </span><span data-line="92">    <span class="p">)</span>
 </span><span data-line="93">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="94">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="94">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
 </span><span data-line="95">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
 </span><span data-line="96">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
 </span><span data-line="97">        <span class="k">else</span><span class="p">:</span>
