@@ -59,4 +59,4 @@ If you find that any Rush module's Python submodule doesn't abide by these desig
 
 ## Submitting Bug Reports and Feedback
 
-If you want to submit bug reports or give us any feedback for any part of rush, you can use [this form](https://forms.gle/1DPWK91utzJ6SED47) as well!
+If you want to submit bug reports or give us any feedback for any part of Rush, you can use [this form](https://forms.gle/1DPWK91utzJ6SED47) as well!
