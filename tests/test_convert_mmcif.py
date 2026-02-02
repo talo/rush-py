@@ -51,8 +51,7 @@ def test_cif_conversion():
             trcs = from_mmcif(cif_contents)
 
             # Convert TRC structures to JSON
-            converted_json_str = to_json(trcs)
-            converted_json = json.loads(converted_json_str)
+            converted_json = to_json(trcs)
 
             # Read expected JSON
             with open(json_file, "r") as f:

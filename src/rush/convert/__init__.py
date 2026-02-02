@@ -4,6 +4,8 @@ Conversion utilities for molecular structure file formats.
 This module provides functions to convert between PDB, mmCIF, SDF, and QDX's TRC JSON formats.
 """
 
+import copy
+import json
 from pathlib import Path
 
 from ..mol import TRC
@@ -68,7 +70,9 @@ def save_structure(
             format = "pdb"  # Default
 
     if format.lower() == "json":
-        content = to_json(trcs)
+        with path.open("w") as f:
+            json.dump(to_json(trcs), f, indent=2)
+        return
     elif format.lower() == "pdb":
         if isinstance(trcs, TRC):
             trcs = [trcs]
@@ -90,6 +94,85 @@ def save_structure(
         f.write(content)
 
 
+def _load_trc(trc: TRC | str | Path) -> TRC:
+    """Load TRC from TRC object or file path."""
+    if isinstance(trc, TRC):
+        return trc
+    if isinstance(trc, (str, Path)):
+        path = Path(trc)
+        if not path.exists():
+            raise FileNotFoundError(f"TRC file not found: {trc}")
+        loaded = from_json(path)
+        if isinstance(loaded, list):
+            if len(loaded) == 1:
+                return loaded[0]
+            merged = copy.deepcopy(loaded[0])
+            for next_trc in loaded[1:]:
+                merged.extend(next_trc)
+            return merged
+        return loaded
+    raise TypeError(f"TRC must be a TRC object or file path, got {type(trc)}")
+
+
+def merge_trcs(
+    *trcs: TRC | str | Path | list[TRC | str | Path] | tuple[TRC | str | Path, ...],
+    output_file: str | Path | None = None,
+    skip_validation: bool = False,
+) -> TRC:
+    """
+    Merge TRC objects into a single TRC.
+
+    A TRC (Topology-Residues-Chains) object contains:
+    - topology: atom information (symbols, geometry, bonds, charges, etc.)
+    - residues: residue information (which atoms belong to which residues)
+    - chains: chain information (which residues belong to which chains)
+
+    When merging, atom indices, residue indices, and chain indices are renumbered
+    to ensure uniqueness in the merged structure.
+
+    Args:
+        trcs: TRC objects or file paths. If a single list/tuple is provided,
+            it is treated as the full set of inputs.
+        output_file: Optional path to write the merged TRC JSON.
+        skip_validation: If True, skip validation of the merged TRC.
+
+    Returns:
+        Merged TRC object.
+
+    Raises:
+        ValueError: If no inputs are provided or validation fails.
+        FileNotFoundError: If file paths are provided but files don't exist.
+    """
+    if len(trcs) == 1 and isinstance(trcs[0], (list, tuple)):
+        trc_inputs = list(trcs[0])
+    else:
+        trc_inputs = list(trcs)
+
+    if not trc_inputs:
+        raise ValueError("Expected at least one TRC input, found 0")
+
+    merged: TRC | None = None
+    for trc in trc_inputs:
+        trc_obj = _load_trc(trc)
+        if merged is None:
+            merged = copy.deepcopy(trc_obj)
+        else:
+            merged.extend(trc_obj)
+
+    if merged is None:
+        raise ValueError("Expected at least one TRC input, found 0")
+
+    if not skip_validation:
+        merged.check()
+
+    if output_file is not None:
+        output_path = Path(output_file)
+        with output_path.open("w") as f:
+            json.dump(to_json([merged]), f, indent=2)
+
+    return merged
+
+
 __all__ = [
     "from_json",
     "to_json",
@@ -99,4 +182,5 @@ __all__ = [
     "from_sdf",
     "load_structure",
     "save_structure",
+    "merge_trcs",
 ]

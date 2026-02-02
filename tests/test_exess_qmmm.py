@@ -9,8 +9,8 @@ def test_exess_qmmm():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.qmmm(
-        data_dir / "6a5j_t.json",
-        data_dir / "6a5j_r.json",
+        topology_path=data_dir / "6a5j_t.json",
+        residues_path=data_dir / "6a5j_r.json",
         n_timesteps=500,
         # TODO: make this work (currently having convergence issues)
         # restraints=exess.Restraints(free_fragments=[6]),

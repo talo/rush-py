@@ -32,10 +32,10 @@ import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    PROJECT_ID,
     RunError,
     RunOpts,
     RunSpec,
+    _get_project_id,
     _submit_rex,
     collect_run,
     download_object,
@@ -59,7 +59,6 @@ type BasisT = Literal[
     "5-21G",
     "6-21G",
     "6-31G",
-    "6-311G",
     "6-31G(2df,p)",
     "6-31G(3df,3pd)",
     "6-31G*",
@@ -81,15 +80,24 @@ type BasisT = Literal[
     "aug-cc-pVTZ",
     "cc-pVDZ",
     "cc-pVTZ",
+    "def2-SVP",
+    "def2-TZVP",
+    "def2-TZVPD",
+    "def2-TZVPP",
+    "def2-TZVPPD",
 ]
 
 type AuxBasisT = Literal[
     "6-31G**-RIFIT",
-    "6-311G**-RIFIT",
     "aug-cc-pVDZ-RIFIT",
     "aug-cc-pVTZ-RIFIT",
     "cc-pVDZ-RIFIT",
     "cc-pVTZ-RIFIT",
+    "def2-SVP-RIFIT",
+    "def2-TZVP-RIFIT",
+    "def2-TZVPD-RIFIT",
+    "def2-TZVPP-RIFIT",
+    "def2-TZVPPD-RIFIT",
 ]
 
 type StandardOrientationT = Literal[
@@ -382,7 +390,13 @@ class StandardDescriptorGrid:
     Constructs a "standard" descriptor grid.
     """
 
-    value: Literal["SG1", "SG2"]
+    value: Literal[
+        "Fine",  #: Default
+        "UltraFine",
+        "SuperFine",
+        "TreutlerGM3",
+        "TreutlerGM5",
+    ]
 
     def _to_rex(self):
         return Template(
@@ -621,6 +635,218 @@ class ExportKeywords:
         )
 
 
+type RadialQuadT = Literal[
+    "MuraKnowles",  #: Default
+    "MurrayHandyLaming",
+    "TreutlerAldrichs",
+]
+
+type PruningSchemeT = Literal[
+    "Unpruned",
+    "Robust",  #: Default
+    "Treutler",
+]
+
+
+@dataclass
+class DefaultGridResolution:
+    default_grid: Literal[
+        "Fine",
+        "UltraFine",  #: Default
+        "SuperFine",
+        "TreutlerGM3",
+        "TreutlerGM5",
+    ]
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCGridResolution::Default
+            exess_rex::XCGridDefaults::$default_grid
+          )"""
+        ).substitute(
+            default_grid=self.default_grid,
+        )
+
+
+@dataclass
+class CustomGridResolution:
+    radial_size: int
+    angular_size: int
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCGridResolution::Custom {
+            radial_size = $radial_size,
+            angular_size = $angular_size,
+          })"""
+        ).substitute(
+            radial_size=self.radial_size,
+            angular_size=self.angular_size,
+        )
+
+
+type XCGridResolutionT = DefaultGridResolution | CustomGridResolution
+
+
+@dataclass
+class ClosestAtomBatching:
+    def _to_rex(self):
+        return "Some (exess_rex::XCBatchingScheme::ClosestAtom)"
+
+
+@dataclass
+class Octree:
+    max_size: int | None = None
+    max_depth: int | None = None
+    max_distance: float | None = None
+    combine_small_children: bool | None = None
+
+    def _rex_fields(self):
+        return Template(
+            """max_size = $maybe_max_size,
+            max_depth = $maybe_max_depth,
+            max_distance = $maybe_max_distance,
+            combine_small_children = $maybe_combine_small_children,"""
+        ).substitute(
+            maybe_max_size=optional_str(self.max_size),
+            maybe_max_depth=optional_str(self.max_depth),
+            maybe_max_distance=optional_str(self.max_distance),
+            maybe_combine_small_children=optional_str(self.combine_small_children),
+        )
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::Octree {
+            $fields
+          })"""
+        ).substitute(fields=self._rex_fields())
+
+
+@dataclass
+class OctreeBatching(Octree):
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCBatchingScheme::Octree {
+            $fields
+          })"""
+        ).substitute(fields=self._rex_fields())
+
+
+@dataclass
+class SpaceFillingBatching:
+    # TODO: fix
+    octree: Octree | None = None
+    target_batch_size: int | None = None
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCBatchingScheme::SpaceFilling {
+            octree = $maybe_octree,
+            target_batch_size = $maybe_target_batch_size,
+          })"""
+        ).substitute(
+            maybe_octree=(self.octree._to_rex() if self.octree is not None else "None"),
+            maybe_target_batch_size=optional_str(self.target_batch_size),
+        )
+
+
+@dataclass
+class GauXCBatching:
+    batch_size: int
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCBatchingScheme::GauXC {
+            batch_size = $batch_size
+          })"""
+        ).substitute(
+            batch_size=self.batch_size,
+        )
+
+
+type XCBatchingSchemeT = (
+    ClosestAtomBatching | OctreeBatching | SpaceFillingBatching | GauXCBatching
+)
+
+
+@dataclass
+class XCGridParameters:
+    radial_quad: RadialQuadT | None = None
+    pruning_scheme: PruningSchemeT | None = None
+    consider_weight_zero: float | None = None
+    resolution: XCGridResolutionT | None = None
+    batching: XCBatchingSchemeT | None = None
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::XCGrid {
+              radial_quad = $maybe_radial_quad,
+              pruning_scheme = $maybe_pruning_scheme,
+              consider_weight_zero = $maybe_consider_weight_zero,
+              resolution = $maybe_resolution,
+              batching = $maybe_batching,
+            })"""
+        ).substitute(
+            maybe_radial_quad=optional_str(self.radial_quad, "exess_rex::RadialQuad::"),
+            maybe_pruning_scheme=optional_str(
+                self.pruning_scheme, "exess_rex::PruningScheme::"
+            ),
+            maybe_consider_weight_zero=optional_str(self.consider_weight_zero),
+            maybe_resolution=(
+                self.resolution._to_rex() if self.resolution is not None else "None"
+            ),
+            maybe_batching=(
+                self.batching._to_rex() if self.batching is not None else "None"
+            ),
+        )
+
+
+type KSDFTMethodT = Literal[
+    "GauXC",  #: Upstream default, but we want BatchDense
+    "Dense",
+    "BatchDense",
+    "Direct",
+    "SemiDirect",
+]
+
+
+@dataclass
+class KSDFTKeywords:
+    """
+    Configure runs done with the RestrictedKSDFT method.
+    """
+
+    #: KS-DFT functional to use
+    functional: str
+    grid: XCGridParameters | None = None
+    method: KSDFTMethodT | None = "BatchDense"
+    use_c_opt: bool | None = None
+    sp_threshold: float | None = None
+    dp_threshold: float | None = None
+    batches_per_batch: int | None = None
+
+    def _to_rex(self):
+        return Template(
+            """Some (exess_rex::KSDFTKeywords {
+            functional = "$functional",
+            grid = $maybe_grid,
+            method = $maybe_method,
+            use_c_opt = $maybe_use_c_opt,
+            sp_threshold = $maybe_sp_threshold,
+            dp_threshold = $maybe_dp_threshold,
+            batches_per_batch = $maybe_batches_per_batch,
+          })"""
+        ).substitute(
+            functional=f"{self.functional}",
+            maybe_grid=self.grid._to_rex() if self.grid is not None else "None",
+            maybe_method=optional_str(self.method, "exess_rex::XCMethod::"),
+            maybe_use_c_opt=optional_str(self.use_c_opt),
+            maybe_sp_threshold=optional_str(self.sp_threshold),
+            maybe_dp_threshold=optional_str(self.dp_threshold),
+            maybe_batches_per_batch=optional_str(self.batches_per_batch),
+        )
+
+
 @dataclass
 class Trajectory:
     """
@@ -705,7 +931,8 @@ def exess(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    export_keywords: ExportKeywords | None = ExportKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = None,
+    export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
@@ -740,7 +967,7 @@ def exess(
         system = $maybe_system,
         keywords = exess_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -778,6 +1005,9 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_frag_keywords=(
             frag_keywords._to_rex() if frag_keywords is not None else "None"
         ),
@@ -788,7 +1018,7 @@ in
         driver=driver,
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -809,7 +1039,8 @@ def energy(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    export_keywords: ExportKeywords | None = ExportKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = None,
+    export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
@@ -826,6 +1057,7 @@ def energy(
         force_cartesian_basis_sets,
         scf_keywords,
         frag_keywords,
+        ksdft_keywords,
         export_keywords,
         system,
         convert_hdf5_to_json,
@@ -835,11 +1067,16 @@ def energy(
     )
 
 
-def save_energy_outputs(res: dict | RunError, extract=True) -> Path | tuple[Path, Path] | RunError:
-    if isinstance(res, dict):
+def save_energy_outputs(
+    res: tuple[dict] | tuple[dict, dict] | RunError, extract=True
+) -> Path | tuple[Path, Path] | RunError:
+    if isinstance(res, RunError):
+        return res
+    elif isinstance(res, tuple):
         if len(res) == 1:
             return save_object(res[0]["path"])
         else:
+            assert len(res) > 1, "exess.energy should return 1 or 2 outputs."
             # convert_hdf5_to_json set to true
             if "Json" in res[1]:
                 return (
@@ -909,7 +1146,7 @@ def interaction_energy(
         system = $maybe_system,
         keywords = exess_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks_dft = None,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -950,7 +1187,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -997,7 +1234,7 @@ def chelpg(
         system = $system,
         keywords = exess_rex::Keywords {
           scf = $scf_keywords,
-          ks = None,
+          ks_dft = None,
           rtat = None,
           frag = $frag_keywords,
           boundary = None,
@@ -1058,7 +1295,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             result = collect_run(run_id)
             if isinstance(result, dict):
@@ -1095,8 +1332,8 @@ in
 
 def qmmm(
     topology_path: Path | str,
-    residues_path: Path | str,
     n_timesteps: int,
+    residues_path: Path | str | None = None,
     dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
@@ -1131,7 +1368,9 @@ def qmmm(
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
-    residues_vobj = upload_object(residues_path)
+    residues_vobj = None
+    if residues_path is not None:
+        residues_vobj = upload_object(residues_path)
 
     # Run rex
     rex = Template("""let
@@ -1235,10 +1474,10 @@ in
             else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
-        residues_vobj_path=residues_vobj["path"],
+        residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
@@ -1562,7 +1801,7 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:

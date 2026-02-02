@@ -5,7 +5,7 @@ from typing import Any
 
 from rush import TRC, to_json
 from rush.convert import from_json, from_sdf
-from rush.trc.merge import merge_trcs
+from rush import merge_trcs
 
 
 def test_merge_with_paths():
@@ -72,8 +72,7 @@ def test_merge_3fly():
     merged_trc = merge_trcs(protein_trc, ligand_trc)
 
     # Convert merged TRC to JSON
-    merged_json_str = to_json([merged_trc])
-    merged_json = json.loads(merged_json_str)
+    merged_json = to_json([merged_trc])
     # to_json returns an array, but expected might be a single object
     if isinstance(merged_json, list) and len(merged_json) == 1:
         merged_json = merged_json[0]

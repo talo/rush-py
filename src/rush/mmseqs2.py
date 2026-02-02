@@ -6,9 +6,9 @@ from typing import Literal
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    PROJECT_ID,
     RunOpts,
     RunSpec,
+    _get_project_id,
     _submit_rex,
     collect_run,
 )
@@ -55,7 +55,7 @@ mmseqs2_rex_s
         sequences=f"[\n        {',\n        '.join([f'"{seq}"' for seq in sequences])}]",
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
         else:
