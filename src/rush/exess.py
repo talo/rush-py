@@ -1092,12 +1092,8 @@ def save_energy_outputs(
     """
     if isinstance(res, RunError):
         return res
-    
-    # Convert list to tuple for consistent handling
-    if isinstance(res, list):
-        res = tuple(res)
-    
-    if isinstance(res, tuple):
+
+    if isinstance(res, (list, tuple)):
         if len(res) == 1:
             return (save_object(res[0]["path"]), None)
         else:
@@ -1114,7 +1110,7 @@ def save_energy_outputs(
             if "Hdf5" in res[1]:
                 # Extract JSON (required)
                 json_path = save_object(res[0]["path"])
-                
+
                 # Try to extract HDF5 (optional - skip if empty)
                 hdf5_path = None
                 try:
@@ -1130,9 +1126,9 @@ def save_energy_outputs(
                         hdf5_path = None
                     else:
                         raise  # Re-raise other extraction errors
-                
+
                 return (json_path, hdf5_path)
-            
+
             # Unknown output format
             raise ValueError(
                 f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
