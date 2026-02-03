@@ -23,7 +23,7 @@ from rush.exess import exess as run_exess
 run_exess("input_topology.json", collect=True)
 ```
 
-And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn more about EXESS capabilities, see the [EXESS documentation](../exess/index.md). To learn about QDX Topology files, check the [topologies section](../exess/topologies.md).
+And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn more about EXESS capabilities, see the {doc}`EXESS documentation<../exess/index>`. To learn about QDX Topology files, check the {doc}`Topologies section<../exess/topologies>`.
 
 You can use [the topology file for a small protein from the 1KUW structure on the PDB](https://github.com/talo/rush-py/blob/main/tests/data/1kuw_t.json) as the input, or for very quick runs, our topology files for [benzene](https://github.com/talo/rush-py/blob/main/tests/data/benzene_t.json) or [ethane](https://github.com/talo/rush-py/blob/main/tests/data/ethane_t.json).
 

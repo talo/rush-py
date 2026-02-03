@@ -151,9 +151,9 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
 </span><span data-line="17">
 </span><span data-line="18"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="19">    <span class="n">PROJECT_ID</span><span class="p">,</span>
-</span><span data-line="20">    <span class="n">RunOpts</span><span class="p">,</span>
-</span><span data-line="21">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="19">    <span class="n">RunOpts</span><span class="p">,</span>
+</span><span data-line="20">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="21">    <span class="n">_get_project_id</span><span class="p">,</span>
 </span><span data-line="22">    <span class="n">_submit_rex</span><span class="p">,</span>
 </span><span data-line="23">    <span class="n">collect_run</span><span class="p">,</span>
 </span><span data-line="24">    <span class="n">upload_object</span><span class="p">,</span>
@@ -242,7 +242,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="102">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">topology_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
 </span><span data-line="103">    <span class="p">)</span>
 </span><span data-line="104">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="105">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="105">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
 </span><span data-line="106">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
 </span><span data-line="107">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
 </span><span data-line="108">        <span class="k">else</span><span class="p">:</span>
@@ -266,7 +266,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

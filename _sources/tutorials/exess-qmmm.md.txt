@@ -1,4 +1,4 @@
-# EXESS QMMM
+# EXESS: QM/MM
 
 This tutorial covers QM/MM/ML workflows (QMMM) with EXESS using **rush-py**.
 
