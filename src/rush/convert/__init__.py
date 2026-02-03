@@ -5,7 +5,7 @@ This module provides functions to convert between PDB, mmCIF, SDF, and QDX's TRC
 """
 
 import copy
-import json
+import json as std_json
 from pathlib import Path
 
 from ..mol import TRC
@@ -71,7 +71,7 @@ def save_structure(
 
     if format.lower() == "json":
         with path.open("w") as f:
-            json.dump(to_json(trcs), f, indent=2)
+            std_json.dump(to_json(trcs), f, indent=2)
         return
     elif format.lower() == "pdb":
         if isinstance(trcs, TRC):
@@ -168,7 +168,7 @@ def merge_trcs(
     if output_file is not None:
         output_path = Path(output_file)
         with output_path.open("w") as f:
-            json.dump(to_json([merged]), f, indent=2)
+            std_json.dump(to_json([merged]), f, indent=2)
 
     return merged
 

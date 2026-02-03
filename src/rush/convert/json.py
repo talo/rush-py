@@ -53,11 +53,11 @@ def from_json(
 
     trcs = [
         TRC(
-            topology=Topology.from_json(trc["topology"]),
-            residues=Residues.from_json(trc["residues"]),
-            chains=Chains.from_json(trc["chains"]),
+            topology=Topology.from_json(trc_dict["topology"]),
+            residues=Residues.from_json(trc_dict["residues"]),
+            chains=Chains.from_json(trc_dict["chains"]),
         )
-        for trc in data
+        for trc_dict in data
     ]
 
     return trcs[0] if len(trcs) == 1 else trcs
