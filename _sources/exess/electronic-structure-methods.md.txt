@@ -136,6 +136,7 @@ Covalent fragmentation uses hydrogen capping for broken single bonds. If you cut
 
 For background and accuracy considerations, see https://doi.org/10.1063/1.5126216 and https://doi.org/10.1021/cr200093j.
 
+(exess-gradients-dynamics-optimization)=
 ## Gradients, dynamics, and optimization
 
 - Geometry optimization is supported for RHF, RI-HF, and RI-MP2.
@@ -144,6 +145,7 @@ For background and accuracy considerations, see https://doi.org/10.1063/1.512621
 - Dynamics can be combined with fragmentation for large systems.
 - Periodic boundary conditions and water-only classical solvent support are available in AIMD workflows.
 
+(exess-limitations)=
 ## Limitations
 
 EXESS is strong when you need GPU performance and fragmentation at scale. It is not a general-purpose electronic structure code with every method or model.

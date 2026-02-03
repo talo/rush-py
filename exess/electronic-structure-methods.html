@@ -101,7 +101,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#ri-hf-and-ri-mp2">RI-HF and RI-MP2</a></li>
 <li><a class="reference internal" href="#ksdft">KSDFT</a></li>
 <li><a class="reference internal" href="#fragmentation-theory-mbe">Fragmentation theory (MBE)</a></li>
-<li><a class="reference internal" href="#id1">Gradients, dynamics, and optimization</a></li>
+<li><a class="reference internal" href="#exess-gradients-dynamics-optimization">Gradients, dynamics, and optimization</a></li>
 <li><a class="reference internal" href="#limitations">Limitations</a></li>
 </ul>
 </div></div>
@@ -329,8 +329,8 @@ requested directly; invalid names cause EXESS to error and print the available f
 <p>Covalent fragmentation uses hydrogen capping for broken single bonds. If you cut covalent bonds, provide <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> so EXESS can cap and restore bonds correctly.</p>
 <p>For background and accuracy considerations, see https://doi.org/10.1063/1.5126216 and https://doi.org/10.1021/cr200093j.</p>
 </section>
-<section id="id1">
-<h2>Gradients, dynamics, and optimization<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<section id="exess-gradients-dynamics-optimization">
+<span id="id1"></span><h2>Gradients, dynamics, and optimization<a class="headerlink" href="#exess-gradients-dynamics-optimization" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Geometry optimization is supported for RHF, RI-HF, and RI-MP2.</p></li>
 <li><p>Born-Oppenheimer AIMD uses a Verlet integrator and is microcanonical only (no thermostats or barostats).</p></li>
@@ -340,7 +340,7 @@ requested directly; invalid names cause EXESS to error and print the available f
 </ul>
 </section>
 <section id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
+<span id="exess-limitations"></span><h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
 <p>EXESS is strong when you need GPU performance and fragmentation at scale. It is not a general-purpose electronic structure code with every method or model.</p>
 <p><strong>Limitations:</strong></p>
 <ul class="simple">

@@ -100,10 +100,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#common-setup">Common setup</a></li>
-<li><a class="reference internal" href="#example-qm-optimization-ri-mp2">Example: QM optimization (RI-MP2)</a></li>
-<li><a class="reference internal" href="#example-ml-mm-optimization-lbfgs">Example: ML/MM optimization (LBFGS)</a></li>
+<li><a class="reference internal" href="#qm-optimization">QM optimization</a></li>
+<li><a class="reference internal" href="#ml-optimization">ML optimization</a></li>
+<li><a class="reference internal" href="#working-with-the-output">Working with the output</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -140,105 +139,100 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="exess-geometry-opt">
 <h1>EXESS: Geometry Opt.<a class="headerlink" href="#exess-geometry-opt" title="Link to this heading">¶</a></h1>
-<p>This tutorial covers geometry optimization with EXESS using <strong>rush-py</strong>, based on the EXESS docs and the test suite.</p>
+<p>EXESS can perform geometry optimization using its ability to calculate gradients. It can do this using QM (via its core inbuilt capabilities), MM (via OpenMM), or ML (via AIMNet) techniques, dubbed Q4ML as a shorthand of QM/MM/ML.</p>
+<div class="attention admonition">
+<p class="admonition-title">Reminder</p>
+<p>Don’t forget to set <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code>!</p>
+</div>
+<section id="qm-optimization">
+<h2>QM optimization<a class="headerlink" href="#qm-optimization" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You still need <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code> in your environment, but as of February 1, 2026, they are only required on first use (not at import time).</p>
+<p>Optimization requires gradient-capable methods (RHF, RI-HF, or RI-MP2). See <a class="reference internal" href="../exess/electronic-structure-methods.html#exess-gradients-dynamics-optimization"><span class="std std-ref">the EXESS docs</span></a> for method support details.</p>
 </div>
-<section id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
-<p>Set your Rush environment variables before running the client:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_ENDPOINT</span></code> (optional)</p></li>
-</ul>
-<p>These examples use <code class="docutils literal notranslate"><span class="pre">tests/data/benzene_t.json</span></code>.</p>
-</section>
-<section id="common-setup">
-<h2>Common setup<a class="headerlink" href="#common-setup" title="Link to this heading">¶</a></h2>
+<p>The exess submodule in rush-py provides a dedicated function for doing optimization, which automatically selects EXESS’s Optimization driver. By default, it’s only necessary to provide the QDX Topology file and the number of iterations to run:</p>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">setup.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="2">
-</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
-</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">set_opts</span>
-</span><span data-line="5">
-</span><span data-line="6"><span class="n">set_opts</span><span class="p">(</span><span class="n">workspace_dir</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial-runs&quot;</span><span class="p">)</span>
-</span><span data-line="7"><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span>
+<div class="code-block-caption"><span class="caption-text">optimization_qm.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">save_object</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">optimization</span><span class="p">(</span>
+</span><span data-line="5">    <span class="s2">&quot;benzene_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="6">    <span class="mi">100</span><span class="p">,</span>  <span class="c1"># Number of optimization iterations </span>
+</span><span data-line="7">    <span class="n">standard_orientation</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+</span><span data-line="8">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Optimization using QM&quot;</span><span class="p">),</span>
+</span><span data-line="9">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="10"><span class="p">)</span>
 </span></pre></div>
 </div>
 </div>
+<div class="tip admonition">
+<p class="admonition-title">Help, my output conformer is in a totally different position!</p>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">standard_orientation=&quot;None&quot;</span></code> prevents EXESS from translating or rotating the input geometry, making direct comparisons easier.</p>
+</div>
 </section>
-<section id="example-qm-optimization-ri-mp2">
-<h2>Example: QM optimization (RI-MP2)<a class="headerlink" href="#example-qm-optimization-ri-mp2" title="Link to this heading">¶</a></h2>
-<p>This example follows <code class="docutils literal notranslate"><span class="pre">tests/test_exess_optimization_qm.py</span></code> and matches the RI-MP2 optimization model in the EXESS docs. Optimization requires <code class="docutils literal notranslate"><span class="pre">max_iters</span></code>.</p>
+<section id="ml-optimization">
+<h2>ML optimization<a class="headerlink" href="#ml-optimization" title="Link to this heading">¶</a></h2>
+<p>To use ML with the AIMNet model for the whole system, set <code class="docutils literal notranslate"><span class="pre">qm_fragments</span></code> and <code class="docutils literal notranslate"><span class="pre">mm_fragments</span></code> to the empty list. EXESS will infer that <code class="docutils literal notranslate"><span class="pre">ml_fragments</span></code> should be the remaining ones, i.e. all of them.</p>
+<p>It would also be fine to set <code class="docutils literal notranslate"><span class="pre">ml_fragments</span></code> to all the fragments as well (and in this case, it would only be necessary to set one of the other two to the empty list so that the third can be inferred), but this requires constructing that complete list which isn’t as convenient.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">optimization_qm.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">optimization_ml.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">save_object</span>
 </span><span data-line="3">
-</span><span data-line="4"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">optimization</span><span class="p">(</span>
-</span><span data-line="5">    <span class="n">max_iters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-</span><span data-line="6">    <span class="n">topology_path</span><span class="o">=</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;benzene_t.json&quot;</span><span class="p">,</span>
-</span><span data-line="7">    <span class="n">optimization_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">OptimizationKeywords</span><span class="p">(),</span>
-</span><span data-line="8">    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;RestrictedRIMP2&quot;</span><span class="p">,</span>
-</span><span data-line="9">    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;cc-pVDZ&quot;</span><span class="p">,</span>
-</span><span data-line="10">    <span class="n">aux_basis</span><span class="o">=</span><span class="s2">&quot;cc-pVDZ-RIFIT&quot;</span><span class="p">,</span>
-</span><span data-line="11">    <span class="n">standard_orientation</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
-</span><span data-line="12">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
-</span><span data-line="13">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: EXESS Optimization (QM)&quot;</span><span class="p">,</span>
-</span><span data-line="14">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;tutorial&quot;</span><span class="p">,</span> <span class="s2">&quot;optimization&quot;</span><span class="p">,</span> <span class="s2">&quot;QM&quot;</span><span class="p">],</span>
-</span><span data-line="15">    <span class="p">),</span>
-</span><span data-line="16">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="17"><span class="p">)</span>
-</span><span data-line="18">
-</span><span data-line="19"><span class="c1"># Optimization outputs are returned as a list of object-store paths</span>
-</span><span data-line="20"><span class="k">for</span> <span class="n">res_i</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
-</span><span data-line="21">    <span class="n">save_object</span><span class="p">(</span><span class="n">res_i</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
-</span></pre></div>
-</div>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Setting <code class="docutils literal notranslate"><span class="pre">standard_orientation=&quot;None&quot;</span></code> prevents EXESS from rotating/translating the input geometry.</p>
-</div>
-</section>
-<section id="example-ml-mm-optimization-lbfgs">
-<h2>Example: ML/MM optimization (LBFGS)<a class="headerlink" href="#example-ml-mm-optimization-lbfgs" title="Link to this heading">¶</a></h2>
-<p>The non-QM optimization example below follows <code class="docutils literal notranslate"><span class="pre">tests/test_exess_optimization.py</span></code>. The values shown for <code class="docutils literal notranslate"><span class="pre">optimization_keywords</span></code> are the only supported ones for non-QM runs.</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">optimization_ml.py</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">save_object</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">optimization</span><span class="p">(</span>
-</span><span data-line="5">    <span class="n">max_iters</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-</span><span data-line="6">    <span class="n">topology_path</span><span class="o">=</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;benzene_t.json&quot;</span><span class="p">,</span>
-</span><span data-line="7">    <span class="n">optimization_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">OptimizationKeywords</span><span class="p">(</span>
-</span><span data-line="8">        <span class="n">coordinate_system</span><span class="o">=</span><span class="s2">&quot;Cartesian&quot;</span><span class="p">,</span>
-</span><span data-line="9">        <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;LBFGS&quot;</span><span class="p">,</span>
-</span><span data-line="10">        <span class="n">lbfgs_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">LBFGSKeywords</span><span class="p">(),</span>
-</span><span data-line="11">    <span class="p">),</span>
-</span><span data-line="12">    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;STO-2G&quot;</span><span class="p">,</span>
+</span><span data-line="4"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">optimization</span><span class="p">(</span>
+</span><span data-line="5">    <span class="s2">&quot;benzene_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="6">    <span class="mi">100</span><span class="p">,</span>
+</span><span data-line="7">    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;STO-2G&quot;</span><span class="p">,</span>
+</span><span data-line="8">    <span class="n">optimization_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">OptimizationKeywords</span><span class="p">(</span>
+</span><span data-line="9">        <span class="n">coordinate_system</span><span class="o">=</span><span class="s2">&quot;Cartesian&quot;</span><span class="p">,</span>
+</span><span data-line="10">        <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;LBFGS&quot;</span><span class="p">,</span>
+</span><span data-line="11">        <span class="n">lbfgs_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">LBFGSKeywords</span><span class="p">(),</span>
+</span><span data-line="12">    <span class="p">),</span>
 </span><span data-line="13">    <span class="n">standard_orientation</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
 </span><span data-line="14">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[],</span>
 </span><span data-line="15">    <span class="n">mm_fragments</span><span class="o">=</span><span class="p">[],</span>
-</span><span data-line="16">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
-</span><span data-line="17">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: EXESS Optimization (ML)&quot;</span><span class="p">,</span>
-</span><span data-line="18">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;tutorial&quot;</span><span class="p">,</span> <span class="s2">&quot;optimization&quot;</span><span class="p">,</span> <span class="s2">&quot;ML&quot;</span><span class="p">],</span>
-</span><span data-line="19">    <span class="p">),</span>
-</span><span data-line="20">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="21"><span class="p">)</span>
-</span><span data-line="22">
-</span><span data-line="23"><span class="k">for</span> <span class="n">res_i</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
-</span><span data-line="24">    <span class="n">save_object</span><span class="p">(</span><span class="n">res_i</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
+</span><span data-line="16">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Optimization using ML&quot;</span><span class="p">),</span>
+</span><span data-line="17">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="18"><span class="p">)</span>
 </span></pre></div>
 </div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Optimization requires gradient-capable methods (RHF, RI-HF, or RI-MP2). See <code class="docutils literal notranslate"><span class="pre">docs/exess/electronic-structure-methods.md</span></code> for method support details.</p>
+<p>Using the smallest basis set available, i.e. STO-2G, reduces memory requirements for non-QM runs and has no effect on the calculation or results.</p>
+</div>
+<div class="tip admonition">
+<p class="admonition-title">Optimizing your optimization keywords</p>
+<p>The values shown for <code class="docutils literal notranslate"><span class="pre">optimization_keywords</span></code> are the only supported ones for non-QM runs. Setting the coordinate system to Cartesian is mandatory, and while other algorithms may work, using LBFGS is highly recommended.</p>
+</div>
+</section>
+<section id="working-with-the-output">
+<h2>Working with the output<a class="headerlink" href="#working-with-the-output" title="Link to this heading">¶</a></h2>
+<p>The first output is a vector of Topologies, one for each step, which effectively provides the optimization trajectory. The second output is a vector of dictionaries, also one for each step, containing the total energy and the max gradient component at that step. The following example shows how these can be accessed and used:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">Topology</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">out_traj_path</span><span class="p">,</span> <span class="n">out_info_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">save_object</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">out</span><span class="p">]</span>
+</span><span data-line="5"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_traj_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f1</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_info_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f2</span><span class="p">:</span>
+</span><span data-line="6">    <span class="n">out_traj</span><span class="p">,</span> <span class="n">out_info</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)]</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Num steps to convergence:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_traj</span><span class="p">))</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="n">out_traj</span> <span class="o">=</span> <span class="p">[</span><span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">out_traj</span><span class="p">]</span>
+</span><span data-line="11"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;First Atom&#39;s Coords&quot;</span><span class="p">)</span>
+</span><span data-line="12"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  First step: </span><span class="si">{</span><span class="n">out_traj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="13"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Final step: </span><span class="si">{</span><span class="n">out_traj</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="c1"># The below are only provided for QM regions</span>
+</span><span data-line="16"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final Step Info&quot;</span><span class="p">)</span>  
+</span><span data-line="17"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total energy: </span><span class="si">{</span><span class="n">out_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;total_energy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Eh&quot;</span><span class="p">)</span>
+</span><span data-line="18"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Max gradient component: </span><span class="si">{</span><span class="n">out_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;max_gradient_component&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2</span><span class="si">}</span><span class="s2"> Å&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<div class="caution admonition">
+<p class="admonition-title">Limitation</p>
+<p>The second output only provides data for QM regions; if there are none, the dictionaries will be empty.</p>
 </div>
 </section>
 </section>

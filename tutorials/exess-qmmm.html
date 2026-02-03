@@ -100,10 +100,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#common-setup">Common setup</a></li>
-<li><a class="reference internal" href="#example-qmmm-with-topology-residues">Example: QMMM with topology + residues</a></li>
-<li><a class="reference internal" href="#minimal-qmmm-input-from-exess-docs">Minimal QMMM input (from EXESS docs)</a></li>
+<li><a class="reference internal" href="#basic-qm-mm-run">Basic QM/MM run</a></li>
+<li><a class="reference internal" href="#minimal-qm-mm-input">Minimal QM/MM input</a></li>
+<li><a class="reference internal" href="#working-with-the-output">Working with the output</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -140,119 +139,124 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="exess-qm-mm">
 <h1>EXESS: QM/MM<a class="headerlink" href="#exess-qm-mm" title="Link to this heading">¶</a></h1>
-<p>This tutorial covers QM/MM/ML workflows (QMMM) with EXESS using <strong>rush-py</strong>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You still need <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code> in your environment, but as of February 1, 2026, they are only required on first use (not at import time).</p>
+<p>EXESS can use its gradient calculation and Q4ML capabilities to run simulations as well.</p>
+<div class="attention admonition">
+<p class="admonition-title">Reminder</p>
+<p>Don’t forget to set <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code>!</p>
 </div>
-<section id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
-<p>Set your Rush environment variables before running the client:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_ENDPOINT</span></code> (optional)</p></li>
-</ul>
-<p>These examples use <code class="docutils literal notranslate"><span class="pre">tests/data/6a5j_t.json</span></code> and <code class="docutils literal notranslate"><span class="pre">tests/data/6a5j_r.json</span></code>.</p>
-</section>
-<section id="common-setup">
-<h2>Common setup<a class="headerlink" href="#common-setup" title="Link to this heading">¶</a></h2>
+<section id="basic-qm-mm-run">
+<h2>Basic QM/MM run<a class="headerlink" href="#basic-qm-mm-run" title="Link to this heading">¶</a></h2>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">setup.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="2">
-</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
-</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">set_opts</span>
-</span><span data-line="5">
-</span><span data-line="6"><span class="n">set_opts</span><span class="p">(</span><span class="n">workspace_dir</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial-runs&quot;</span><span class="p">)</span>
-</span><span data-line="7"><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span>
-</span></pre></div>
-</div>
-</div>
-</section>
-<section id="example-qmmm-with-topology-residues">
-<h2>Example: QMMM with topology + residues<a class="headerlink" href="#example-qmmm-with-topology-residues" title="Link to this heading">¶</a></h2>
-<p>This example follows <code class="docutils literal notranslate"><span class="pre">tests/test_exess_qmmm.py</span></code>. QMMM requires residues; pass topology and residues JSON files.</p>
-<div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">qmmm.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">qmmm.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">save_object</span>
 </span><span data-line="3">
-</span><span data-line="4"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">qmmm</span><span class="p">(</span>
-</span><span data-line="5">    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;6a5j_t.json&quot;</span><span class="p">,</span>
-</span><span data-line="6">    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;6a5j_r.json&quot;</span><span class="p">,</span>
-</span><span data-line="7">    <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-</span><span data-line="8">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
-</span><span data-line="9">    <span class="n">ml_fragments</span><span class="o">=</span><span class="p">[],</span>
-</span><span data-line="10">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
-</span><span data-line="11">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: EXESS QMMM&quot;</span><span class="p">,</span>
-</span><span data-line="12">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;tutorial&quot;</span><span class="p">,</span> <span class="s2">&quot;qmmm&quot;</span><span class="p">],</span>
-</span><span data-line="13">    <span class="p">),</span>
-</span><span data-line="14">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="15"><span class="p">)</span>
-</span><span data-line="16">
-</span><span data-line="17"><span class="c1"># Single-output results are returned directly</span>
-</span><span data-line="18"><span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
+</span><span data-line="4"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">qmmm</span><span class="p">(</span>
+</span><span data-line="5">    <span class="s2">&quot;6a5j_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="6">    <span class="s2">&quot;6a5j_r.json&quot;</span><span class="p">,</span>
+</span><span data-line="7">    <span class="mi">500</span><span class="p">,</span>  <span class="c1"># This is the number of timesteps to run the simulation for</span>
+</span><span data-line="8">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>  <span class="c1"># QM region: just the fragment at index 6</span>
+</span><span data-line="9">    <span class="n">ml_fragments</span><span class="o">=</span><span class="p">[],</span>   <span class="c1"># ML region: empty, so rest is in the MM region</span>
+</span><span data-line="10">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: QM/MM&quot;</span><span class="p">),</span>
+</span><span data-line="11">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="12"><span class="p">)</span>
 </span></pre></div>
 </div>
-</div>
-<p><strong>Example output shape</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;uuid&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">}</span>
-</span></pre></div>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You can also pass PDB/SDF/TRC paths directly; rush-py will convert them to topology/residue objects under the hood.</p>
 </div>
 </section>
-<section id="minimal-qmmm-input-from-exess-docs">
-<h2>Minimal QMMM input (from EXESS docs)<a class="headerlink" href="#minimal-qmmm-input-from-exess-docs" title="Link to this heading">¶</a></h2>
-<p>The EXESS input docs show a minimal QMMM example using two water fragments. This is the same idea, expressed in <strong>rush-py</strong> and then written to JSON for submission.</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">minimal_qmmm.py</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<section id="minimal-qm-mm-input">
+<h2>Minimal QM/MM input<a class="headerlink" href="#minimal-qm-mm-input" title="Link to this heading">¶</a></h2>
+<p>For a taste of what information is required by QM/MM for the input system, let’s generate the Topology and Residues objects for two water molecules manually using rush-py and run a simulation using all QM fragments:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">qmmm_minimal.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 </span><span data-line="2">
-</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.exess</span><span class="w"> </span><span class="kn">import</span> <span class="n">qmmm</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
 </span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">Residue</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">Topology</span>
 </span><span data-line="5">
-</span><span data-line="6"><span class="c1"># Build a tiny system with two water fragments</span>
-</span><span data-line="7">
-</span><span data-line="8"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span>
-</span><span data-line="9">    <span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">],</span>
-</span><span data-line="10">    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
-</span><span data-line="11">        <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
-</span><span data-line="12">        <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
-</span><span data-line="13">        <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
-</span><span data-line="14">        <span class="mf">2.8000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
-</span><span data-line="15">        <span class="mf">3.5570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
-</span><span data-line="16">        <span class="mf">2.0430</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
-</span><span data-line="17">    <span class="p">],</span>
-</span><span data-line="18">    <span class="n">fragments</span><span class="o">=</span><span class="p">[</span><span class="n">Fragment</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Fragment</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
-</span><span data-line="19"><span class="p">)</span>
-</span><span data-line="20">
-</span><span data-line="21"><span class="n">residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="p">(</span>
-</span><span data-line="22">    <span class="n">residues</span><span class="o">=</span><span class="p">[</span><span class="n">Residue</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Residue</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
-</span><span data-line="23">    <span class="n">seqs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span> <span class="s2">&quot;HOH&quot;</span><span class="p">],</span>
-</span><span data-line="24">    <span class="n">seq_ns</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-</span><span data-line="25">    <span class="n">insertion_codes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">],</span>
-</span><span data-line="26"><span class="p">)</span>
+</span><span data-line="6"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span>
+</span><span data-line="7">    <span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">],</span>
+</span><span data-line="8">    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
+</span><span data-line="9">         <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="10">         <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="11">        <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="12">         <span class="mf">2.8000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="13">         <span class="mf">3.5570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="14">         <span class="mf">2.0430</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>
+</span><span data-line="15">    <span class="p">],</span>
+</span><span data-line="16">    <span class="n">fragments</span><span class="o">=</span><span class="p">[</span><span class="n">Fragment</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Fragment</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
+</span><span data-line="17"><span class="p">)</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="n">residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="p">(</span>
+</span><span data-line="20">    <span class="n">residues</span><span class="o">=</span><span class="p">[</span><span class="n">Residue</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Residue</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
+</span><span data-line="21">    <span class="n">seqs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span> <span class="s2">&quot;HOH&quot;</span><span class="p">],</span>
+</span><span data-line="22"><span class="p">)</span>
+</span><span data-line="23">
+</span><span data-line="24"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_t</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span> <span class="k">as</span> <span class="n">f_r</span><span class="p">:</span>
+</span><span data-line="25">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">f_t</span><span class="p">)</span>
+</span><span data-line="26">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">f_r</span><span class="p">)</span>
 </span><span data-line="27">
-</span><span data-line="28"><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
-</span><span data-line="29"><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
-</span><span data-line="30">
-</span><span data-line="31"><span class="n">qmmm</span><span class="p">(</span>
-</span><span data-line="32">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span>
-</span><span data-line="33">    <span class="n">residues_path</span><span class="o">=</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">,</span>
-</span><span data-line="34">    <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-</span><span data-line="35">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-</span><span data-line="36">    <span class="n">mm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+</span><span data-line="28"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">qmmm</span><span class="p">(</span>
+</span><span data-line="29">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="30">    <span class="n">residues_path</span><span class="o">=</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">,</span>
+</span><span data-line="31">    <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="32">    <span class="n">trajectory</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">Trajectory</span><span class="p">(</span><span class="n">include_waters</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span data-line="33">    <span class="n">ml_fragments</span><span class="o">=</span><span class="p">[],</span>
+</span><span data-line="34">    <span class="n">mm_fragments</span><span class="o">=</span><span class="p">[],</span>
+</span><span data-line="35">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: QM/MM with Manually-Constructed Water&quot;</span><span class="p">),</span>
+</span><span data-line="36">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 </span><span data-line="37"><span class="p">)</span>
 </span></pre></div>
 </div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">exess.qmmm</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-3G&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">temperature_kelvin=290.0</span></code> unless overridden. See <code class="docutils literal notranslate"><span class="pre">docs/exess/input.md</span></code> for defaults.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">exess.qmmm</span></code> function defaults to <code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-3G&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">temperature_kelvin=290.0</span></code> unless overridden. See the <a class="reference internal" href="../exess/input.html"><span class="doc">EXESS input reference</span></a> for its other defaults.</p>
+</div>
+</section>
+<section id="working-with-the-output">
+<h2>Working with the output<a class="headerlink" href="#working-with-the-output" title="Link to this heading">¶</a></h2>
+<p>The sole output is a vector of geometries, one for each simulation timestep, which provides the atoms’ coordinates. The geometries information is just a 1D list of floats, the same format as the <code class="docutils literal notranslate"><span class="pre">Topology.geometry</span></code> field. So, any element in it can be set directly into that field to update the coordinates to those for that timestep. Here’s an example of printing the coordinates of the atoms for both the initial system and at the end of the simulation:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">get_qmmm_trajectory.py</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">batched</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">Topology</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="n">out_file</span> <span class="o">=</span> <span class="n">save_object</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
+</span><span data-line="8"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="9">    <span class="n">out_traj</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">&quot;geometries&quot;</span><span class="p">]</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">))</span>
+</span><span data-line="12"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atoms at First Step&quot;</span><span class="p">)</span>
+</span><span data-line="13"><span class="k">for</span> <span class="n">atom_x</span><span class="p">,</span> <span class="n">atom_y</span><span class="p">,</span> <span class="n">atom_z</span> <span class="ow">in</span> <span class="n">batched</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+</span><span data-line="14">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  x: </span><span class="si">{</span><span class="n">atom_x</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, y: </span><span class="si">{</span><span class="n">atom_y</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, z: </span><span class="si">{</span><span class="n">atom_z</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">out_traj</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="17"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atoms at Final Step&quot;</span><span class="p">)</span>
+</span><span data-line="18"><span class="k">for</span> <span class="n">atom_x</span><span class="p">,</span> <span class="n">atom_y</span><span class="p">,</span> <span class="n">atom_z</span> <span class="ow">in</span> <span class="n">batched</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+</span><span data-line="19">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  x: </span><span class="si">{</span><span class="n">atom_x</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, y: </span><span class="si">{</span><span class="n">atom_y</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, z: </span><span class="si">{</span><span class="n">atom_z</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+<p>This will produce output like the following for the minimal system above:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">Atoms at First Step
+</span><span data-line="2">  x:  0.0000, y:  0.0000, z:  0.0000
+</span><span data-line="3">  x:  0.7570, y:  0.5860, z:  0.0000
+</span><span data-line="4">  x: -0.7570, y:  0.5860, z:  0.0000
+</span><span data-line="5">  x:  2.8000, y:  0.0000, z:  0.0000
+</span><span data-line="6">  x:  3.5570, y:  0.5860, z:  0.0000
+</span><span data-line="7">  x:  2.0430, y:  0.5860, z:  0.0000
+</span><span data-line="8">Atoms at Final Step
+</span><span data-line="9">  x: -3.3974, y:  0.0462, z:  0.0322
+</span><span data-line="10">  x: -3.2867, y:  1.0793, z: -0.0014
+</span><span data-line="11">  x: -4.4081, y:  0.0531, z:  0.0658
+</span><span data-line="12">  x:  3.4286, y:  0.0657, z:  0.1163
+</span><span data-line="13">  x:  3.3724, y: -0.9301, z:  0.1350
+</span><span data-line="14">  x:  4.4636, y:  0.1491, z:  0.1221
+</span></pre></div>
 </div>
 </section>
 </section>
