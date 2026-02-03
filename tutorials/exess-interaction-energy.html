@@ -142,6 +142,10 @@ data-aria-dark="Switch to auto color mode">
           <section id="exess-interaction-energy">
 <h1>EXESS: Interaction Energy<a class="headerlink" href="#exess-interaction-energy" title="Link to this heading">¶</a></h1>
 <p>EXESS can leverage its fragmentation capabilities to calculate an interaction energy between a single fragment and the rest of the system. In a receptor-ligand complex, we can place the ligand in its own fragment and use it as the reference fragment. This doesn’t constitute a binding free energy between the two, but does provide some information about the magnitude of the energy involved.</p>
+<div class="attention admonition">
+<p class="admonition-title">Reminder</p>
+<p>Don’t forget to set <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code>!</p>
+</div>
 <section id="fragment-based-interaction-energy">
 <h2>Fragment-based interaction energy<a class="headerlink" href="#fragment-based-interaction-energy" title="Link to this heading">¶</a></h2>
 <p>First, let’s do a basic interaction energy calculation between a ligand fragment and the rest of the system. You can find the QDX Topology file used in the rush-py repo’s <a class="reference external" href="https://github.com/talo/rush-py/tree/main/tests/data"><code class="docutils literal notranslate"><span class="pre">tests/data/</span></code></a> folder.</p>
@@ -175,9 +179,9 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The second output contains additional data that EXESS only calculated and exports upon request. See the <a class="reference internal" href="exess-exports.html"><span class="doc">Exports tutorial</span></a> for more info.</p>
+<div class="note admonition">
+<p class="admonition-title">The other, ignored output</p>
+<p>The second output of the module, the one being ignored as <code class="docutils literal notranslate"><span class="pre">_</span></code> from the return value of <code class="docutils literal notranslate"><span class="pre">save_energy_outputs(out)</span></code>, contains additional data that EXESS only calculates and exports upon request. See the <a class="reference internal" href="exess-exports.html"><span class="doc">Exports tutorial</span></a> for more info.</p>
 </div>
 </section>
 <section id="end-to-end-interaction-energy-caucluation-using-a-complex-from-the-pdb">
