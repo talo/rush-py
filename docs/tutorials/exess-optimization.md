@@ -1,4 +1,4 @@
-# EXESS Geometry Optimization
+# EXESS: Geometry Opt.
 
 This tutorial covers geometry optimization with EXESS using **rush-py**, based on the EXESS docs and the test suite.
 
