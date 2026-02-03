@@ -39,4 +39,4 @@ $env:RUSH_PROJECT = "your_project_id"
 There's one more environment variable, which would only need to be used if requested by a QDX employee:
 - `RUSH_ENDPOINT`: Use this to choose which Rush server to use; if omitted, defaults to our production server at https://rush.cloud. To use a different server, you'll need to be given access to it explicitly.
 
-Next, continue to [Doing Your First rush-py Run](./02-first-run.md).
+Next, continue to the {doc}`Doing Your First rush-py Run <02-first-run>`.

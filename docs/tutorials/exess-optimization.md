@@ -4,103 +4,101 @@
 # EXESS: Geometry Opt.
 >>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
 
-This tutorial covers geometry optimization with EXESS using **rush-py**, based on the EXESS docs and the test suite.
+EXESS can perform geometry optimization using its ability to calculate gradients. It can do this using QM (via its core inbuilt capabilities), MM (via OpenMM), or ML (via AIMNet) techniques, dubbed Q4ML as a shorthand of QM/MM/ML.
 
-:::{note}
-You still need `RUSH_TOKEN` and `RUSH_PROJECT` in your environment, but as of February 1, 2026, they are only required on first use (not at import time).
+:::{admonition} Reminder
+:class: attention
+Don't forget to set `RUSH_TOKEN` and `RUSH_PROJECT`!
 :::
 
-## Prerequisites
+## QM optimization
 
-Set your Rush environment variables before running the client:
+:::{note}
+Optimization requires gradient-capable methods (RHF, RI-HF, or RI-MP2). See {ref}`the EXESS docs <exess-gradients-dynamics-optimization>` for method support details.
+:::
 
-- `RUSH_TOKEN`
-- `RUSH_PROJECT`
-- `RUSH_ENDPOINT` (optional)
-
-These examples use `tests/data/benzene_t.json`.
-
-## Common setup
-
-```{code-block} python
-:caption: setup.py
-
-from pathlib import Path
-
-from rush import exess
-from rush.client import RunOpts, set_opts
-
-set_opts(workspace_dir=Path.cwd() / "tutorial-runs")
-DATA_DIR = Path.cwd() / "tests" / "data"
-```
-
-## Example: QM optimization (RI-MP2)
-
-This example follows `tests/test_exess_optimization_qm.py` and matches the RI-MP2 optimization model in the EXESS docs. Optimization requires `max_iters`.
-
+The exess submodule in rush-py provides a dedicated function for doing optimization, which automatically selects EXESS's Optimization driver. By default, it's only necessary to provide the QDX Topology file and the number of iterations to run:
 ```{code-block} python
 :caption: optimization_qm.py
-
 from rush import exess
 from rush.client import RunOpts, save_object
 
-res = exess.optimization(
-    max_iters=100,
-    topology_path=DATA_DIR / "benzene_t.json",
-    optimization_keywords=exess.OptimizationKeywords(),
-    method="RestrictedRIMP2",
-    basis="cc-pVDZ",
-    aux_basis="cc-pVDZ-RIFIT",
+out = exess.optimization(
+    "benzene_t.json",
+    100,  # Number of optimization iterations 
     standard_orientation="None",
-    run_opts=RunOpts(
-        name="Tutorial: EXESS Optimization (QM)",
-        tags=["rush-py", "tutorial", "optimization", "QM"],
-    ),
+    run_opts=RunOpts(name="Tutorial: Optimization using QM"),
     collect=True,
 )
-
-# Optimization outputs are returned as a list of object-store paths
-for res_i in res:
-    save_object(res_i["path"])
 ```
 
-:::{tip}
-Setting `standard_orientation="None"` prevents EXESS from rotating/translating the input geometry.
+:::{admonition} Help, my output conformer is in a totally different position!
+:class: tip
+Setting `standard_orientation="None"` prevents EXESS from translating or rotating the input geometry, making direct comparisons easier.
 :::
 
-## Example: ML/MM optimization (LBFGS)
+## ML optimization
 
-The non-QM optimization example below follows `tests/test_exess_optimization.py`. The values shown for `optimization_keywords` are the only supported ones for non-QM runs.
+To use ML with the AIMNet model for the whole system, set `qm_fragments` and `mm_fragments` to the empty list. EXESS will infer that `ml_fragments` should be the remaining ones, i.e. all of them.
+
+It would also be fine to set `ml_fragments` to all the fragments as well (and in this case, it would only be necessary to set one of the other two to the empty list so that the third can be inferred), but this requires constructing that complete list which isn't as convenient.
 
 ```{code-block} python
 :caption: optimization_ml.py
-
 from rush import exess
 from rush.client import RunOpts, save_object
 
-res = exess.optimization(
-    max_iters=100,
-    topology_path=DATA_DIR / "benzene_t.json",
+out = exess.optimization(
+    "benzene_t.json",
+    100,
+    basis="STO-2G",
     optimization_keywords=exess.OptimizationKeywords(
         coordinate_system="Cartesian",
         algorithm="LBFGS",
         lbfgs_keywords=exess.LBFGSKeywords(),
     ),
-    basis="STO-2G",
     standard_orientation="None",
     qm_fragments=[],
     mm_fragments=[],
-    run_opts=RunOpts(
-        name="Tutorial: EXESS Optimization (ML)",
-        tags=["rush-py", "tutorial", "optimization", "ML"],
-    ),
+    run_opts=RunOpts(name="Tutorial: Optimization using ML"),
     collect=True,
 )
+```
+    
+:::{note}
+Using the smallest basis set available, i.e. STO-2G, reduces memory requirements for non-QM runs and has no effect on the calculation or results.
+:::
 
-for res_i in res:
-    save_object(res_i["path"])
+:::{admonition} Optimizing your optimization keywords
+:class: tip
+The values shown for `optimization_keywords` are the only supported ones for non-QM runs. Setting the coordinate system to Cartesian is mandatory, and while other algorithms may work, using LBFGS is highly recommended.
+:::
+
+## Working with the output
+
+The first output is a vector of Topologies, one for each step, which effectively provides the optimization trajectory. The second output is a vector of dictionaries, also one for each step, containing the total energy and the max gradient component at that step. The following example shows how these can be accessed and used:
+```{code-block} python
+import json
+from rush import Topology
+
+out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
+with open(out_traj_path) as f1, open(out_info_path) as f2:
+    out_traj, out_info = [json.load(f) for f in (f1, f2)]
+
+print("Num steps to convergence:", len(out_traj))
+
+out_traj = [Topology.from_json(t) for t in out_traj]
+print("First Atom's Coords")
+print(f"  First step: {out_traj[0].geometry[:3]}")
+print(f"  Final step: {out_traj[-1].geometry[:3]}")
+
+# The below are only provided for QM regions
+print("Final Step Info")  
+print(f"  Total energy: {out_info[-1]['total_energy']:.5f} Eh")
+print(f"  Max gradient component: {out_info[-1]['max_gradient_component']:.2} Å")
 ```
 
-:::{note}
-Optimization requires gradient-capable methods (RHF, RI-HF, or RI-MP2). See `docs/exess/electronic-structure-methods.md` for method support details.
+:::{admonition} Limitation
+:class: caution
+The second output only provides data for QM regions; if there are none, the dictionaries will be empty.
 :::

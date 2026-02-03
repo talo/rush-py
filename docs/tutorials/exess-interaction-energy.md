@@ -65,6 +65,11 @@ res = exess.interaction_energy(
 
 EXESS can leverage its fragmentation capabilities to calculate an interaction energy between a single fragment and the rest of the system. In a receptor-ligand complex, we can place the ligand in its own fragment and use it as the reference fragment. This doesn't constitute a binding free energy between the two, but does provide some information about the magnitude of the energy involved.
 
+:::{admonition} Reminder
+:class: attention
+Don't forget to set `RUSH_TOKEN` and `RUSH_PROJECT`!
+:::
+
 ## Fragment-based interaction energy
 
 First, let's do a basic interaction energy calculation between a ligand fragment and the rest of the system. You can find the QDX Topology file used in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data) folder.
@@ -170,11 +175,12 @@ with open(out_file) as f:
 print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
 ```
 
-:::{note}
-The second output contains additional data that EXESS only calculated and exports upon request. See the {doc}`Exports tutorial<exess-exports>` for more info.
+:::{admonition} The other, ignored output
+:class: note
+The second output of the module, the one being ignored as `_` from the return value of `save_energy_outputs(out)`, contains additional data that EXESS only calculates and exports upon request. See the {doc}`Exports tutorial<exess-exports>` for more info.
 :::
 
-## End-to-end interaction energy caucluation using a complex from the PDB
+## End-to-end interaction energy calculation using a complex from the PDB
 
 ### Step 1: Prepare the system
 
@@ -182,7 +188,7 @@ Before submitting a system as input to EXESS, we have to ensure it has the corre
 - must contain all its hydrogens, and
 - that each fragment must be annotated with its formal charge.
 
-Rush contains a module called Prepare Complex` that does this for a system with at least one protein and ligand in it. The ligands are identified via their residue names (PDB) or residue labels (QDX's TRC), which correspond to each other and share the same data when converting between the formats.
+Rush contains a module called Prepare Complex that does this for a system with at least one protein and ligand in it. The ligands are identified via their residue names (PDB) or residue labels (QDX's TRC), which correspond to each other and share the same data when converting between the formats.
 ```{code-block} python
 import json
 from pathlib import Path
@@ -206,17 +212,17 @@ for i, (res_name, formal_charge) in enumerate(
         print(f"{i:>4} {res_name}: {int(formal_charge):+}")
 ```
 
-:::{admonition} Prepare Complex has more features!
-:class: tip
-This module also fills in missing atoms and residues where possible, annotates the TRC with full connectivity information, and has additional configurable behavior. See the {doc}`Prepare Complex module documentation <../rush.prepare_complex>` for more info.
-:::
-
 :::{admonition} Libraries used
 :class: note
 The Prepare Complex module uses PDBFixer and PDB2PQR to fill in missing atoms and residues and to perform protonation, and in-house routines for determining connectivity and formal charge states for proteins. For ligand components of the system, it uses RDKit.
 :::
 
-Now we have our prepared complex saved as `1hsg_trc.json` in the current working directory. To perform an accurate calculation without incurring too high an execution cost, we can use helper functions to find the set of fragments within 5Å of the ligand:
+:::{admonition} Prepare Complex has more features!
+:class: tip
+This module also fills in missing atoms and residues where possible, annotates the TRC with full connectivity information, and has additional configurable behavior. See the {doc}`Prepare Complex module documentation <../rush.prepare_complex>` for more info.
+:::
+
+To perform an accurate calculation without incurring too high an execution cost, we can use helper functions to find the set of fragments within 5Å of the ligand:
 ```{code-block} python
 # Find ligand fragment index + nearby pocket
 lig_idx = trc.residues.seqs.index("MK1")
@@ -238,7 +244,7 @@ out = exess.interaction_energy(
         level="Dimer",
         included_fragments=frag_idcs,
     ),
-    run_opts=RunOpts(name="Tutorial: E2E Interaction Energy"),
+    run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - EXESS"),
     collect=True,
 )
 
