@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # EXESS Geometry Optimization
+=======
+# EXESS: Geometry Opt.
+>>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
 
 This tutorial covers geometry optimization with EXESS using **rush-py**, based on the EXESS docs and the test suite.
 

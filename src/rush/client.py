@@ -28,13 +28,20 @@ GRAPHQL_ENDPOINT = getenv(
     "https://tengu-server-prod-api-519406798674.asia-southeast1.run.app",
 )
 
-API_KEY = getenv("RUSH_TOKEN")
-if not API_KEY:
-    raise Exception("RUSH_TOKEN must be set")
 
-PROJECT_ID = getenv("RUSH_PROJECT")
-if not PROJECT_ID:
-    raise Exception("RUSH_PROJECT must be set")
+def _get_api_key() -> str:
+    api_key = getenv("RUSH_TOKEN")
+    if not api_key:
+        raise Exception("RUSH_TOKEN must be set")
+    return api_key
+
+
+def _get_project_id() -> str:
+    project_id = getenv("RUSH_PROJECT")
+    if not project_id:
+        raise Exception("RUSH_PROJECT must be set")
+    return project_id
+
 
 MODULE_OVERRIDES = getenv("RUSH_MODULE_LOCK")
 MODULE_OVERRIDES = json.loads(MODULE_OVERRIDES) if MODULE_OVERRIDES else {}
@@ -44,7 +51,7 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
-        "exess_rex": "github:talo/tengu-exess/0e5d338b2521881a51f80c92c571681d0cc01b5c#exess_rex",
+        "exess_rex": "github:talo/tengu-exess/43203d3b9fc36c692ee405c37d548bc9e949e0af#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
         "mmseqs2_rex": "github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex",
@@ -57,7 +64,7 @@ MODULE_LOCK = (
         # prod
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
-        "exess_rex": "github:talo/tengu-exess/0e5d338b2521881a51f80c92c571681d0cc01b5c#exess_rex",
+        "exess_rex": "github:talo/tengu-exess/43203d3b9fc36c692ee405c37d548bc9e949e0af#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/d3d5a3dcf47b41ce3ed04fc7517bda8e375e5383#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex",
         "mmseqs2_rex": "github:talo/tengu-colabfold/0b6ca8b9dc97fc6380d334169a6faae51d85fac7#mmseqs2_rex",
@@ -111,7 +118,7 @@ def _get_client() -> Client:
         _rush_client = Client(
             transport=RequestsHTTPTransport(
                 url=GRAPHQL_ENDPOINT,
-                headers={"Authorization": f"Bearer {API_KEY}"},
+                headers={"Authorization": f"Bearer {_get_api_key()}"},
             )
         )
 
@@ -213,6 +220,7 @@ def upload_object(filepath: Path | str):
     if isinstance(filepath, str):
         filepath = Path(filepath)
     with filepath.open(mode="rb") as f:
+        project_id = _get_project_id()
         if filepath.suffix == ".json":
             mutation.variable_values = {
                 "file": FileVar(f),
@@ -221,7 +229,7 @@ def upload_object(filepath: Path | str):
                     "k": "record",
                     "t": {},
                 },
-                "project_id": PROJECT_ID,
+                "project_id": project_id,
             }
         else:
             mutation.variable_values = {
@@ -238,7 +246,7 @@ def upload_object(filepath: Path | str):
                     },
                     "n": "Object",
                 },
-                "project_id": PROJECT_ID,
+                "project_id": project_id,
             }
         result = _get_client().execute(mutation, upload_files=True)
 
@@ -289,8 +297,9 @@ def save_json(d: dict, filepath: Path | str | None = None, name: str | None = No
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
-    elif filepath is None and name is not None and PROJECT_ID is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / f"{name}.json"
+    elif filepath is None and name is not None:
+        project_id = _get_project_id()
+        filepath = _get_opts().workspace_dir / project_id / f"{name}.json"
     else:
         raise Exception("Must specify either filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -332,10 +341,12 @@ def save_object(
     if filepath is not None and name is None:
         if isinstance(filepath, str):
             filepath = Path(filepath)
-    elif filepath is None and name is not None and PROJECT_ID is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{name}." + ext)
-    elif filepath is None and name is None and PROJECT_ID is not None:
-        filepath = _get_opts().workspace_dir / PROJECT_ID / (f"{path}." + ext)
+    elif filepath is None and name is not None:
+        project_id = _get_project_id()
+        filepath = _get_opts().workspace_dir / project_id / (f"{name}." + ext)
+    elif filepath is None and name is None:
+        project_id = _get_project_id()
+        filepath = _get_opts().workspace_dir / project_id / (f"{path}." + ext)
     else:
         raise Exception("Cannot specify both filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)

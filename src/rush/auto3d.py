@@ -4,11 +4,12 @@ from string import Template
 from gql.transport.exceptions import TransportQueryError
 
 from rush.client import (
-    PROJECT_ID,
+    RunError,
     RunOpts,
     RunSpec,
+    _get_project_id,
     _submit_rex,
-    collect_run, RunError,
+    collect_run,
 )
 from rush.utils import bool_to_str, float_to_str
 
@@ -73,7 +74,7 @@ in
         run_spec=run_spec._to_rex(),
     )
     try:
-        run_id = _submit_rex(PROJECT_ID, rex, run_opts)
+        run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if not collect:
             return run_id
 
