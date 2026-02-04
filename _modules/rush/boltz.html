@@ -143,204 +143,201 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="8">
 </span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
 </span><span data-line="10">
-</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.convert</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_json</span><span class="p">,</span> <span class="n">from_pdb</span>
-</span><span data-line="12">
-</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="14">    <span class="n">RunOpts</span><span class="p">,</span>
-</span><span data-line="15">    <span class="n">RunSpec</span><span class="p">,</span>
-</span><span data-line="16">    <span class="n">_get_project_id</span><span class="p">,</span>
-</span><span data-line="17">    <span class="n">_submit_rex</span><span class="p">,</span>
-</span><span data-line="18">    <span class="n">collect_run</span><span class="p">,</span>
-</span><span data-line="19">    <span class="n">upload_object</span><span class="p">,</span>
-</span><span data-line="20"><span class="p">)</span>
-</span><span data-line="21"><span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">dict_to_vec_of_tuples_str</span><span class="p">,</span> <span class="n">optional_str</span>
-</span><span data-line="22">
+</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.convert.json</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_json</span>
+</span><span data-line="12"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.convert.pdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_pdb</span>
+</span><span data-line="13">
+</span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="15">    <span class="n">PROJECT_ID</span><span class="p">,</span>
+</span><span data-line="16">    <span class="n">RunOpts</span><span class="p">,</span>
+</span><span data-line="17">    <span class="n">RunSpec</span><span class="p">,</span>
+</span><span data-line="18">    <span class="n">_submit_rex</span><span class="p">,</span>
+</span><span data-line="19">    <span class="n">collect_run</span><span class="p">,</span>
+</span><span data-line="20">    <span class="n">upload_object</span><span class="p">,</span>
+</span><span data-line="21"><span class="p">)</span>
+</span><span data-line="22"><span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">dict_to_vec_of_tuples_str</span><span class="p">,</span> <span class="n">optional_str</span>
 </span><span data-line="23">
+</span><span data-line="24">
 <div class="viewcode-block" id="Modification">
 <a class="viewcode-back" href="../../rush.boltz.html#rush.boltz.Modification">[docs]</a>
-</span><span data-line="24"><span class="nd">@dataclass</span>
-</span><span data-line="25"><span class="k">class</span><span class="w"> </span><span class="nc">Modification</span><span class="p">:</span>
-</span><span data-line="26">    <span class="n">position</span><span class="p">:</span> <span class="nb">int</span>
-</span><span data-line="27">    <span class="n">ccd</span><span class="p">:</span> <span class="nb">str</span></div>
+</span><span data-line="25"><span class="nd">@dataclass</span>
+</span><span data-line="26"><span class="k">class</span><span class="w"> </span><span class="nc">Modification</span><span class="p">:</span>
+</span><span data-line="27">    <span class="n">position</span><span class="p">:</span> <span class="nb">int</span>
+</span><span data-line="28">    <span class="n">ccd</span><span class="p">:</span> <span class="nb">str</span></div>
 
-</span><span data-line="28">
 </span><span data-line="29">
+</span><span data-line="30">
 <div class="viewcode-block" id="ProteinSequence">
 <a class="viewcode-back" href="../../rush.boltz.html#rush.boltz.ProteinSequence">[docs]</a>
-</span><span data-line="30"><span class="nd">@dataclass</span>
-</span><span data-line="31"><span class="k">class</span><span class="w"> </span><span class="nc">ProteinSequence</span><span class="p">:</span>
-</span><span data-line="32">    <span class="nb">id</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-</span><span data-line="33">    <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="34">    <span class="n">msa</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span>
-</span><span data-line="35">    <span class="n">modifications</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Modification</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="36">    <span class="n">cyclic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="37">
-</span><span data-line="38">    <span class="k">def</span><span class="w"> </span><span class="nf">_to_rex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span data-line="39">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="40">            <span class="bp">self</span><span class="o">.</span><span class="n">msa</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">)</span>
-</span><span data-line="41">
-</span><span data-line="42">        <span class="k">return</span> <span class="n">Template</span><span class="p">(</span>
-</span><span data-line="43"><span class="w">            </span><span class="sd">&quot;&quot;&quot;(boltz2_rex::Sequence::Protein {</span>
-</span><span data-line="44"><span class="sd">          id = $id,</span>
-</span><span data-line="45"><span class="sd">          sequence = &quot;$sequence&quot;,</span>
-</span><span data-line="46"><span class="sd">          msa = VirtualObject { path = &quot;$msa&quot;, format = ObjectFormat::bin, size = 0 },</span>
-</span><span data-line="47"><span class="sd">          modifications = None,</span>
-</span><span data-line="48"><span class="sd">          cyclic = $cyclic,</span>
-</span><span data-line="49"><span class="sd">        })&quot;&quot;&quot;</span>
-</span><span data-line="50">        <span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
-</span><span data-line="51">            <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
-</span><span data-line="52">            <span class="n">sequence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
-</span><span data-line="53">            <span class="n">msa</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
-</span><span data-line="54">            <span class="n">cyclic</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cyclic</span><span class="p">),</span>
-</span><span data-line="55">        <span class="p">)</span></div>
+</span><span data-line="31"><span class="nd">@dataclass</span>
+</span><span data-line="32"><span class="k">class</span><span class="w"> </span><span class="nc">ProteinSequence</span><span class="p">:</span>
+</span><span data-line="33">    <span class="nb">id</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="34">    <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="35">    <span class="n">msa</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span>
+</span><span data-line="36">    <span class="n">modifications</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Modification</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="37">    <span class="n">cyclic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="38">
+</span><span data-line="39">    <span class="k">def</span><span class="w"> </span><span class="nf">_to_rex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="40">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="41">            <span class="bp">self</span><span class="o">.</span><span class="n">msa</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">)</span>
+</span><span data-line="42">
+</span><span data-line="43">        <span class="k">return</span> <span class="n">Template</span><span class="p">(</span>
+</span><span data-line="44"><span class="w">            </span><span class="sd">&quot;&quot;&quot;(boltz2_rex::Sequence::Protein {</span>
+</span><span data-line="45"><span class="sd">          id = $id,</span>
+</span><span data-line="46"><span class="sd">          sequence = &quot;$sequence&quot;,</span>
+</span><span data-line="47"><span class="sd">          msa = VirtualObject { path = &quot;$msa&quot;, format = ObjectFormat::bin, size = 0 },</span>
+</span><span data-line="48"><span class="sd">          modifications = None,</span>
+</span><span data-line="49"><span class="sd">          cyclic = $cyclic,</span>
+</span><span data-line="50"><span class="sd">        })&quot;&quot;&quot;</span>
+</span><span data-line="51">        <span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="52">            <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+</span><span data-line="53">            <span class="n">sequence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+</span><span data-line="54">            <span class="n">msa</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">msa</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
+</span><span data-line="55">            <span class="n">cyclic</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cyclic</span><span class="p">),</span>
+</span><span data-line="56">        <span class="p">)</span></div>
 
-</span><span data-line="56">
 </span><span data-line="57">
+</span><span data-line="58">
 <div class="viewcode-block" id="LigandSequence">
 <a class="viewcode-back" href="../../rush.boltz.html#rush.boltz.LigandSequence">[docs]</a>
-</span><span data-line="58"><span class="nd">@dataclass</span>
-</span><span data-line="59"><span class="k">class</span><span class="w"> </span><span class="nc">LigandSequence</span><span class="p">:</span>
-</span><span data-line="60">    <span class="nb">id</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-</span><span data-line="61">    <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="62">
-</span><span data-line="63">    <span class="k">def</span><span class="w"> </span><span class="nf">_to_rex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span data-line="64">        <span class="k">return</span> <span class="n">Template</span><span class="p">(</span>
-</span><span data-line="65"><span class="w">            </span><span class="sd">&quot;&quot;&quot;(boltz2_rex::Sequence::Ligand {</span>
-</span><span data-line="66"><span class="sd">          id = $id,</span>
-</span><span data-line="67"><span class="sd">          smiles = &quot;$smiles&quot;,</span>
-</span><span data-line="68"><span class="sd">        })&quot;&quot;&quot;</span>
-</span><span data-line="69">        <span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
-</span><span data-line="70">            <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
-</span><span data-line="71">            <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span>
-</span><span data-line="72">        <span class="p">)</span></div>
+</span><span data-line="59"><span class="nd">@dataclass</span>
+</span><span data-line="60"><span class="k">class</span><span class="w"> </span><span class="nc">LigandSequence</span><span class="p">:</span>
+</span><span data-line="61">    <span class="nb">id</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="62">    <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="63">
+</span><span data-line="64">    <span class="k">def</span><span class="w"> </span><span class="nf">_to_rex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="65">        <span class="k">return</span> <span class="n">Template</span><span class="p">(</span>
+</span><span data-line="66"><span class="w">            </span><span class="sd">&quot;&quot;&quot;(boltz2_rex::Sequence::Ligand {</span>
+</span><span data-line="67"><span class="sd">          id = $id,</span>
+</span><span data-line="68"><span class="sd">          smiles = &quot;$smiles&quot;,</span>
+</span><span data-line="69"><span class="sd">        })&quot;&quot;&quot;</span>
+</span><span data-line="70">        <span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="71">            <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+</span><span data-line="72">            <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span>
+</span><span data-line="73">        <span class="p">)</span></div>
 
-</span><span data-line="73">
 </span><span data-line="74">
+</span><span data-line="75">
 <div class="viewcode-block" id="boltz">
 <a class="viewcode-back" href="../../rush.boltz.html#rush.boltz.boltz">[docs]</a>
-</span><span data-line="75"><span class="k">def</span><span class="w"> </span><span class="nf">boltz</span><span class="p">(</span>
-</span><span data-line="76">    <span class="n">sequences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProteinSequence</span> <span class="o">|</span> <span class="n">LigandSequence</span><span class="p">],</span>
-</span><span data-line="77">    <span class="n">recycling_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="78">    <span class="n">sampling_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="79">    <span class="n">diffusion_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="80">    <span class="n">step_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="81">    <span class="n">affinity_binder_chain_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="82">    <span class="n">affinity_mw_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="83">    <span class="n">sampling_steps_affinity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="84">    <span class="n">diffusion_samples_affinity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="85">    <span class="n">max_msa_seqs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="86">    <span class="n">subsample_msa</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="87">    <span class="n">num_subsampled_msa</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="88">    <span class="n">use_potentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="89">    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="90">    <span class="n">template_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="91">    <span class="n">template_threshold_angstroms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="92">    <span class="n">template_chain_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="93">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-</span><span data-line="94">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
-</span><span data-line="95">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="96"><span class="p">):</span>
-</span><span data-line="97">    <span class="c1"># If necessary, upload template TRC inputs</span>
-</span><span data-line="98">    <span class="n">has_template</span> <span class="o">=</span> <span class="n">template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span data-line="99">    <span class="k">if</span> <span class="n">template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="100">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="101">            <span class="n">template_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span>
-</span><span data-line="102">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="103">            <span class="k">if</span> <span class="n">template_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.pdb&quot;</span><span class="p">:</span>
-</span><span data-line="104">                <span class="n">trc</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-</span><span data-line="105">            <span class="k">else</span><span class="p">:</span>
-</span><span data-line="106">                <span class="n">trc</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
-</span><span data-line="107">                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="108">                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="109">                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="110">                            <span class="sa">f</span><span class="s2">&quot;Expected 1 TRC in </span><span class="si">{</span><span class="n">template_path</span><span class="si">}</span><span class="s2">, found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="111">                        <span class="p">)</span>
-</span><span data-line="112">                    <span class="n">trc</span> <span class="o">=</span> <span class="n">trc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="113">        <span class="k">with</span> <span class="p">(</span>
-</span><span data-line="114">            <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
-</span><span data-line="115">            <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
-</span><span data-line="116">            <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
-</span><span data-line="117">        <span class="p">):</span>
-</span><span data-line="118">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">t_f</span><span class="p">)</span>
-</span><span data-line="119">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">r_f</span><span class="p">)</span>
-</span><span data-line="120">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">c_f</span><span class="p">)</span>
-</span><span data-line="121">            <span class="n">t_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="122">            <span class="n">r_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="123">            <span class="n">c_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="124">            <span class="n">topology_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">t_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="125">            <span class="n">residues_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">r_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="126">            <span class="n">chains_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">c_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="127">
-</span><span data-line="128">    <span class="c1"># Run rex</span>
-</span><span data-line="129">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
-</span><span data-line="130"><span class="s2">  obj_j = λ j →</span>
-</span><span data-line="131"><span class="s2">    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },</span>
-</span><span data-line="132"><span class="s2">  boltz = λ topology residues chains →</span>
-</span><span data-line="133"><span class="s2">    boltz2_rex_s</span>
-</span><span data-line="134"><span class="s2">      ($run_spec)</span>
-</span><span data-line="135"><span class="s2">      (boltz2_rex::Boltz2Config {</span>
-</span><span data-line="136"><span class="s2">        recycling_steps = $maybe_recycling_steps,</span>
-</span><span data-line="137"><span class="s2">        sampling_steps = $maybe_sampling_steps,</span>
-</span><span data-line="138"><span class="s2">        diffusion_samples = $maybe_diffusion_samples,</span>
-</span><span data-line="139"><span class="s2">        step_scale = $maybe_step_scale,</span>
-</span><span data-line="140"><span class="s2">        affinity_binder_chain_id = $maybe_affinity_binder_chain_id,</span>
-</span><span data-line="141"><span class="s2">        affinity_mw_correction = $maybe_affinity_mw_correction,</span>
-</span><span data-line="142"><span class="s2">        sampling_steps_affinity = $maybe_sampling_steps_affinity,</span>
-</span><span data-line="143"><span class="s2">        diffusion_samples_affinity = $maybe_diffusion_samples_affinity,</span>
-</span><span data-line="144"><span class="s2">        max_msa_seqs = $maybe_max_msa_seqs,</span>
-</span><span data-line="145"><span class="s2">        subsample_msa = $maybe_subsample_msa,</span>
-</span><span data-line="146"><span class="s2">        num_subsampled_msa = $maybe_num_subsampled_msa,</span>
-</span><span data-line="147"><span class="s2">        use_potentials = $maybe_use_potentials,</span>
-</span><span data-line="148"><span class="s2">        seed = $maybe_seed,</span>
-</span><span data-line="149"><span class="s2">        template_threshold_angstroms = $maybe_template_threshold_angstroms,</span>
-</span><span data-line="150"><span class="s2">        template_chain_mapping = $maybe_template_chain_mapping,</span>
-</span><span data-line="151"><span class="s2">      })</span>
-</span><span data-line="152"><span class="s2">      $sequences</span>
-</span><span data-line="153"><span class="s2">      $template_trc_expr</span>
-</span><span data-line="154"><span class="s2">in</span>
-</span><span data-line="155"><span class="s2">  boltz &quot;$topology_vobj_path&quot; &quot;$residues_vobj_path&quot; &quot;$chains_vobj_path&quot;</span>
-</span><span data-line="156"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
-</span><span data-line="157">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
-</span><span data-line="158">        <span class="n">maybe_recycling_steps</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">recycling_steps</span><span class="p">),</span>
-</span><span data-line="159">        <span class="n">maybe_sampling_steps</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">sampling_steps</span><span class="p">),</span>
-</span><span data-line="160">        <span class="n">maybe_diffusion_samples</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">diffusion_samples</span><span class="p">),</span>
-</span><span data-line="161">        <span class="n">maybe_step_scale</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">step_scale</span><span class="p">),</span>
-</span><span data-line="162">        <span class="n">maybe_affinity_binder_chain_id</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">affinity_binder_chain_id</span><span class="p">),</span>
-</span><span data-line="163">        <span class="n">maybe_affinity_mw_correction</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">affinity_mw_correction</span><span class="p">),</span>
-</span><span data-line="164">        <span class="n">maybe_sampling_steps_affinity</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">sampling_steps_affinity</span><span class="p">),</span>
-</span><span data-line="165">        <span class="n">maybe_diffusion_samples_affinity</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">diffusion_samples_affinity</span><span class="p">),</span>
-</span><span data-line="166">        <span class="n">maybe_max_msa_seqs</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">max_msa_seqs</span><span class="p">),</span>
-</span><span data-line="167">        <span class="n">maybe_subsample_msa</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">subsample_msa</span><span class="p">),</span>
-</span><span data-line="168">        <span class="n">maybe_num_subsampled_msa</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">num_subsampled_msa</span><span class="p">),</span>
-</span><span data-line="169">        <span class="n">maybe_use_potentials</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">use_potentials</span><span class="p">),</span>
-</span><span data-line="170">        <span class="n">maybe_seed</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span>
-</span><span data-line="171">        <span class="n">maybe_template_threshold_angstroms</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">template_threshold_angstroms</span><span class="p">),</span>
-</span><span data-line="172">        <span class="n">maybe_template_chain_mapping</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="173">            <span class="sa">f</span><span class="s2">&quot;(Some </span><span class="si">{</span><span class="n">dict_to_vec_of_tuples_str</span><span class="p">(</span><span class="n">template_chain_mapping</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-</span><span data-line="174">            <span class="k">if</span> <span class="n">template_chain_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span data-line="175">            <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
-</span><span data-line="176">        <span class="p">),</span>
-</span><span data-line="177">        <span class="n">sequences</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="se">\n</span><span class="s2">        </span><span class="si">{</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">        &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">seq</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seq</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sequences</span><span class="p">])</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">      ]&quot;</span><span class="p">,</span>
-</span><span data-line="178">        <span class="n">template_trc_expr</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="179">            <span class="s2">&quot;(Some ((obj_j topology), (obj_j residues), (obj_j chains)) )&quot;</span>
-</span><span data-line="180">            <span class="k">if</span> <span class="n">template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span data-line="181">            <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
-</span><span data-line="182">        <span class="p">),</span>
-</span><span data-line="183">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">topology_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_template</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span data-line="184">        <span class="n">residues_vobj_path</span><span class="o">=</span><span class="n">residues_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_template</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span data-line="185">        <span class="n">chains_vobj_path</span><span class="o">=</span><span class="n">chains_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_template</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span data-line="186">    <span class="p">)</span>
-</span><span data-line="187">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="188">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
-</span><span data-line="189">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
-</span><span data-line="190">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
-</span><span data-line="191">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="192">            <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="193">
-</span><span data-line="194">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="195">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="196">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="197">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
+</span><span data-line="76"><span class="k">def</span><span class="w"> </span><span class="nf">boltz</span><span class="p">(</span>
+</span><span data-line="77">    <span class="n">sequences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ProteinSequence</span> <span class="o">|</span> <span class="n">LigandSequence</span><span class="p">],</span>
+</span><span data-line="78">    <span class="n">recycling_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="79">    <span class="n">sampling_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="80">    <span class="n">diffusion_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="81">    <span class="n">step_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="82">    <span class="n">affinity_binder_chain_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="83">    <span class="n">affinity_mw_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="84">    <span class="n">sampling_steps_affinity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="85">    <span class="n">diffusion_samples_affinity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="86">    <span class="n">max_msa_seqs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="87">    <span class="n">subsample_msa</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="88">    <span class="n">num_subsampled_msa</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="89">    <span class="n">use_potentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="90">    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="91">    <span class="n">template_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="92">    <span class="n">template_threshold_angstroms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="93">    <span class="n">template_chain_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="94">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+</span><span data-line="95">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
+</span><span data-line="96">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span data-line="97"><span class="p">):</span>
+</span><span data-line="98">    <span class="c1"># If necessary, upload template TRC inputs</span>
+</span><span data-line="99">    <span class="n">has_template</span> <span class="o">=</span> <span class="n">template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="100">    <span class="k">if</span> <span class="n">template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="101">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="102">            <span class="n">template_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span>
+</span><span data-line="103">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="104">            <span class="k">if</span> <span class="n">template_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.pdb&quot;</span><span class="p">:</span>
+</span><span data-line="105">                <span class="n">trc</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</span><span data-line="106">                <span class="n">trc_str</span> <span class="o">=</span> <span class="n">to_json</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span>
+</span><span data-line="107">                <span class="n">trc_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">trc_str</span><span class="p">)</span>
+</span><span data-line="108">            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="109">                <span class="n">trc_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="110">        <span class="k">with</span> <span class="p">(</span>
+</span><span data-line="111">            <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
+</span><span data-line="112">            <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
+</span><span data-line="113">            <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
+</span><span data-line="114">        <span class="p">):</span>
+</span><span data-line="115">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">],</span> <span class="n">t_f</span><span class="p">)</span>
+</span><span data-line="116">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">],</span> <span class="n">r_f</span><span class="p">)</span>
+</span><span data-line="117">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">],</span> <span class="n">c_f</span><span class="p">)</span>
+</span><span data-line="118">            <span class="n">t_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span data-line="119">            <span class="n">r_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span data-line="120">            <span class="n">c_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span data-line="121">            <span class="n">topology_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">t_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="122">            <span class="n">residues_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">r_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="123">            <span class="n">chains_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">c_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="124">
+</span><span data-line="125">    <span class="c1"># Run rex</span>
+</span><span data-line="126">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
+</span><span data-line="127"><span class="s2">  obj_j = λ j →</span>
+</span><span data-line="128"><span class="s2">    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },</span>
+</span><span data-line="129"><span class="s2">  boltz = λ topology residues chains →</span>
+</span><span data-line="130"><span class="s2">    boltz2_rex_s</span>
+</span><span data-line="131"><span class="s2">      ($run_spec)</span>
+</span><span data-line="132"><span class="s2">      (boltz2_rex::Boltz2Config {</span>
+</span><span data-line="133"><span class="s2">        recycling_steps = $maybe_recycling_steps,</span>
+</span><span data-line="134"><span class="s2">        sampling_steps = $maybe_sampling_steps,</span>
+</span><span data-line="135"><span class="s2">        diffusion_samples = $maybe_diffusion_samples,</span>
+</span><span data-line="136"><span class="s2">        step_scale = $maybe_step_scale,</span>
+</span><span data-line="137"><span class="s2">        affinity_binder_chain_id = $maybe_affinity_binder_chain_id,</span>
+</span><span data-line="138"><span class="s2">        affinity_mw_correction = $maybe_affinity_mw_correction,</span>
+</span><span data-line="139"><span class="s2">        sampling_steps_affinity = $maybe_sampling_steps_affinity,</span>
+</span><span data-line="140"><span class="s2">        diffusion_samples_affinity = $maybe_diffusion_samples_affinity,</span>
+</span><span data-line="141"><span class="s2">        max_msa_seqs = $maybe_max_msa_seqs,</span>
+</span><span data-line="142"><span class="s2">        subsample_msa = $maybe_subsample_msa,</span>
+</span><span data-line="143"><span class="s2">        num_subsampled_msa = $maybe_num_subsampled_msa,</span>
+</span><span data-line="144"><span class="s2">        use_potentials = $maybe_use_potentials,</span>
+</span><span data-line="145"><span class="s2">        seed = $maybe_seed,</span>
+</span><span data-line="146"><span class="s2">        template_threshold_angstroms = $maybe_template_threshold_angstroms,</span>
+</span><span data-line="147"><span class="s2">        template_chain_mapping = $maybe_template_chain_mapping,</span>
+</span><span data-line="148"><span class="s2">      })</span>
+</span><span data-line="149"><span class="s2">      $sequences</span>
+</span><span data-line="150"><span class="s2">      $template_trc_expr</span>
+</span><span data-line="151"><span class="s2">in</span>
+</span><span data-line="152"><span class="s2">  boltz &quot;$topology_vobj_path&quot; &quot;$residues_vobj_path&quot; &quot;$chains_vobj_path&quot;</span>
+</span><span data-line="153"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="154">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
+</span><span data-line="155">        <span class="n">maybe_recycling_steps</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">recycling_steps</span><span class="p">),</span>
+</span><span data-line="156">        <span class="n">maybe_sampling_steps</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">sampling_steps</span><span class="p">),</span>
+</span><span data-line="157">        <span class="n">maybe_diffusion_samples</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">diffusion_samples</span><span class="p">),</span>
+</span><span data-line="158">        <span class="n">maybe_step_scale</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">step_scale</span><span class="p">),</span>
+</span><span data-line="159">        <span class="n">maybe_affinity_binder_chain_id</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">affinity_binder_chain_id</span><span class="p">),</span>
+</span><span data-line="160">        <span class="n">maybe_affinity_mw_correction</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">affinity_mw_correction</span><span class="p">),</span>
+</span><span data-line="161">        <span class="n">maybe_sampling_steps_affinity</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">sampling_steps_affinity</span><span class="p">),</span>
+</span><span data-line="162">        <span class="n">maybe_diffusion_samples_affinity</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">diffusion_samples_affinity</span><span class="p">),</span>
+</span><span data-line="163">        <span class="n">maybe_max_msa_seqs</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">max_msa_seqs</span><span class="p">),</span>
+</span><span data-line="164">        <span class="n">maybe_subsample_msa</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">subsample_msa</span><span class="p">),</span>
+</span><span data-line="165">        <span class="n">maybe_num_subsampled_msa</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">num_subsampled_msa</span><span class="p">),</span>
+</span><span data-line="166">        <span class="n">maybe_use_potentials</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">use_potentials</span><span class="p">),</span>
+</span><span data-line="167">        <span class="n">maybe_seed</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span>
+</span><span data-line="168">        <span class="n">maybe_template_threshold_angstroms</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">template_threshold_angstroms</span><span class="p">),</span>
+</span><span data-line="169">        <span class="n">maybe_template_chain_mapping</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="170">            <span class="sa">f</span><span class="s2">&quot;(Some </span><span class="si">{</span><span class="n">dict_to_vec_of_tuples_str</span><span class="p">(</span><span class="n">template_chain_mapping</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+</span><span data-line="171">            <span class="k">if</span> <span class="n">template_chain_mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="172">            <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+</span><span data-line="173">        <span class="p">),</span>
+</span><span data-line="174">        <span class="n">sequences</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="se">\n</span><span class="s2">        </span><span class="si">{</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">        &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">seq</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seq</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sequences</span><span class="p">])</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">      ]&quot;</span><span class="p">,</span>
+</span><span data-line="175">        <span class="n">template_trc_expr</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="176">            <span class="s2">&quot;(Some ((obj_j topology), (obj_j residues), (obj_j chains)) )&quot;</span>
+</span><span data-line="177">            <span class="k">if</span> <span class="n">template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="178">            <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+</span><span data-line="179">        <span class="p">),</span>
+</span><span data-line="180">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">topology_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_template</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span data-line="181">        <span class="n">residues_vobj_path</span><span class="o">=</span><span class="n">residues_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_template</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span data-line="182">        <span class="n">chains_vobj_path</span><span class="o">=</span><span class="n">chains_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_template</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span data-line="183">    <span class="p">)</span>
+</span><span data-line="184">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="185">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="186">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
+</span><span data-line="187">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+</span><span data-line="188">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="189">            <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="190">
+</span><span data-line="191">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="192">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="193">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="194">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -355,7 +352,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with

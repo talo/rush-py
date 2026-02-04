@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="iris" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>EXESS: Interaction Energy - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="EXESS: Geometry Opt." href="exess-optimization.html" /><link rel="prev" title="Tutorials" href="../tutorials.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>EXESS Interaction Energy - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="EXESS Geometry Optimization" href="exess-optimization.html" /><link rel="prev" title="Tutorials" href="../tutorials.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -18,7 +18,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="EXESS: Interaction Energy"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="EXESS Interaction Energy"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -76,10 +76,10 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">EXESS: Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exess-optimization.html">EXESS: Geometry Opt.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exess-qmmm.html">EXESS: QM/MM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exess-exports.html">EXESS: Exporting Data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exess-optimization.html">EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exess-qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exess-exports.html">Exporting Data from EXESS</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
@@ -100,11 +100,10 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#fragment-based-interaction-energy">Fragment-based interaction energy</a></li>
-<li><a class="reference internal" href="#end-to-end-interaction-energy-calculation-using-a-complex-from-the-pdb">End-to-end interaction energy calculation using a complex from the PDB</a><ul>
-<li><a class="reference internal" href="#step-1-prepare-the-system">Step 1: Prepare the system</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#common-setup">Common setup</a></li>
+<li><a class="reference internal" href="#example-fragment-based-interaction-energy">Example: fragment-based interaction energy</a></li>
+<li><a class="reference internal" href="#optional-prepare-a-complex-from-pdb-from-demos">Optional: prepare a complex from PDB (from <code class="docutils literal notranslate"><span class="pre">demos/</span></code>)</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -126,7 +125,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">EXESS: Interaction Energy</strong>
+        <strong itemprop="name">EXESS Interaction Energy</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -140,121 +139,139 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
           <section id="exess-interaction-energy">
-<h1>EXESS: Interaction Energy<a class="headerlink" href="#exess-interaction-energy" title="Link to this heading">¶</a></h1>
-<p>EXESS can leverage its fragmentation capabilities to calculate an interaction energy between a single fragment and the rest of the system. In a receptor-ligand complex, we can place the ligand in its own fragment and use it as the reference fragment. This doesn’t constitute a binding free energy between the two, but does provide some information about the magnitude of the energy involved.</p>
-<div class="attention admonition">
-<p class="admonition-title">Reminder</p>
-<p>Don’t forget to set <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code>!</p>
+<h1>EXESS Interaction Energy<a class="headerlink" href="#exess-interaction-energy" title="Link to this heading">¶</a></h1>
+<p>This tutorial walks through interaction energy calculations with EXESS using <strong>rush-py</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You still need <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code> in your environment, but as of February 1, 2026, they are only required on first use (not at import time).</p>
 </div>
-<section id="fragment-based-interaction-energy">
-<h2>Fragment-based interaction energy<a class="headerlink" href="#fragment-based-interaction-energy" title="Link to this heading">¶</a></h2>
-<p>First, let’s do a basic interaction energy calculation between a ligand fragment and the rest of the system. You can find the QDX Topology file used in the rush-py repo’s <a class="reference external" href="https://github.com/talo/rush-py/tree/main/tests/data"><code class="docutils literal notranslate"><span class="pre">tests/data/</span></code></a> folder.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p>Set your Rush environment variables before running the client:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RUSH_ENDPOINT</span></code> (optional)</p></li>
+</ul>
+<p>All examples below reference test fixtures in <a class="reference external" href="https://github.com/talo/rush-py/tree/main/tests/data"><code class="docutils literal notranslate"><span class="pre">tests/data/</span></code></a>.</p>
+</section>
+<section id="common-setup">
+<h2>Common setup<a class="headerlink" href="#common-setup" title="Link to this heading">¶</a></h2>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">interaction_energy.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<div class="code-block-caption"><span class="caption-text">setup.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="2">
 </span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
-</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span>
+</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">set_opts</span>
 </span><span data-line="5">
-</span><span data-line="6"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">interaction_energy</span><span class="p">(</span>
-</span><span data-line="7">    <span class="s2">&quot;tyk2_ejm_31_t.json&quot;</span><span class="p">,</span>
-</span><span data-line="8">    <span class="mi">93</span><span class="p">,</span>  <span class="c1"># This is the index of the fragment that contains the ligand </span>
-</span><span data-line="9">    <span class="n">frag_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">FragKeywords</span><span class="p">(</span>
-</span><span data-line="10">        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;Trimer&quot;</span><span class="p">,</span>
-</span><span data-line="11">        <span class="n">dimer_cutoff</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
-</span><span data-line="12">        <span class="n">trimer_cutoff</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
-</span><span data-line="13">        <span class="n">cutoff_type</span><span class="o">=</span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
-</span><span data-line="14">        <span class="n">distance_metric</span><span class="o">=</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span>
-</span><span data-line="15">    <span class="p">),</span>
-</span><span data-line="16">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
-</span><span data-line="17">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Interaction Energy Basic&quot;</span><span class="p">,</span>
-</span><span data-line="18">    <span class="p">),</span>
-</span><span data-line="19">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="20"><span class="p">)</span>
-</span><span data-line="21">
-</span><span data-line="22"><span class="n">out_file</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-</span><span data-line="23"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="24">    <span class="n">out_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</span><span data-line="25"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Interaction energy: </span><span class="si">{</span><span class="n">out_data</span><span class="p">[</span><span class="s1">&#39;qmmbe&#39;</span><span class="p">][</span><span class="s1">&#39;expanded_hf_energy&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="6"><span class="n">set_opts</span><span class="p">(</span><span class="n">workspace_dir</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial-runs&quot;</span><span class="p">)</span>
+</span><span data-line="7"><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span>
 </span></pre></div>
 </div>
 </div>
-<div class="note admonition">
-<p class="admonition-title">The other, ignored output</p>
-<p>The second output of the module, the one being ignored as <code class="docutils literal notranslate"><span class="pre">_</span></code> from the return value of <code class="docutils literal notranslate"><span class="pre">save_energy_outputs(out)</span></code>, contains additional data that EXESS only calculates and exports upon request. See the <a class="reference internal" href="exess-exports.html"><span class="doc">Exports tutorial</span></a> for more info.</p>
+</section>
+<section id="example-fragment-based-interaction-energy">
+<h2>Example: fragment-based interaction energy<a class="headerlink" href="#example-fragment-based-interaction-energy" title="Link to this heading">¶</a></h2>
+<p>This example follows <a class="reference external" href="https://github.com/talo/rush-py/blob/main/tests/test_exess_interaction_energy.py"><code class="docutils literal notranslate"><span class="pre">tests/test_exess_interaction_energy.py</span></code></a>. It computes interaction energy between a ligand fragment and the rest of the system, using nearby fragments for the interaction region.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">interaction_energy.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">Topology</span><span class="p">,</span> <span class="n">exess</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">lig_idx</span> <span class="o">=</span> <span class="mi">93</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;tyk2_ejm_31_t.json&quot;</span><span class="p">)</span>
+</span><span data-line="7"><span class="n">frag_idcs</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">get_fragments_near_fragment</span><span class="p">(</span><span class="n">lig_idx</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">lig_idx</span><span class="p">]</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">interaction_energy</span><span class="p">(</span>
+</span><span data-line="10">    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;tyk2_ejm_31_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="11">    <span class="n">lig_idx</span><span class="p">,</span>
+</span><span data-line="12">    <span class="n">frag_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">FragKeywords</span><span class="p">(</span>
+</span><span data-line="13">        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;Trimer&quot;</span><span class="p">,</span>
+</span><span data-line="14">        <span class="n">dimer_cutoff</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+</span><span data-line="15">        <span class="n">trimer_cutoff</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+</span><span data-line="16">        <span class="n">cutoff_type</span><span class="o">=</span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="17">        <span class="n">distance_metric</span><span class="o">=</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span>
+</span><span data-line="18">        <span class="n">included_fragments</span><span class="o">=</span><span class="n">frag_idcs</span><span class="p">,</span>
+</span><span data-line="19">    <span class="p">),</span>
+</span><span data-line="20">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span>
+</span><span data-line="21">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: EXESS Interaction Energy&quot;</span><span class="p">,</span>
+</span><span data-line="22">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rush-py&quot;</span><span class="p">,</span> <span class="s2">&quot;tutorial&quot;</span><span class="p">,</span> <span class="s2">&quot;interaction-energy&quot;</span><span class="p">],</span>
+</span><span data-line="23">    <span class="p">),</span>
+</span><span data-line="24">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="25"><span class="p">)</span>
+</span><span data-line="26">
+</span><span data-line="27"><span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</div>
+<p><strong>Example output shape</strong> (object-store paths):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[</span>
+</span><span data-line="2">    <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;uuid&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">},</span>
+</span><span data-line="3">    <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;uuid&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;bin&quot;</span><span class="p">},</span>
+</span><span data-line="4"><span class="p">]</span>
+</span></pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Increase the pocket cutoff (e.g., 8 to 12 Angstrom) if you need a broader interaction region. The <code class="docutils literal notranslate"><span class="pre">included_fragments</span></code> list controls which fragments are considered in the interaction energy calculation.</p>
 </div>
 </section>
-<section id="end-to-end-interaction-energy-calculation-using-a-complex-from-the-pdb">
-<h2>End-to-end interaction energy calculation using a complex from the PDB<a class="headerlink" href="#end-to-end-interaction-energy-calculation-using-a-complex-from-the-pdb" title="Link to this heading">¶</a></h2>
-<section id="step-1-prepare-the-system">
-<h3>Step 1: Prepare the system<a class="headerlink" href="#step-1-prepare-the-system" title="Link to this heading">¶</a></h3>
-<p>Before submitting a system as input to EXESS, we have to ensure it has the correct protonation state, which in this context means that it:</p>
-<ul class="simple">
-<li><p>must contain all its hydrogens, and</p></li>
-<li><p>that each fragment must be annotated with its formal charge.</p></li>
-</ul>
-<p>Rush contains a module called Prepare Complex that does this for a system with at least one protein and ligand in it. The ligands are identified via their residue names (PDB) or residue labels (QDX’s TRC), which correspond to each other and share the same data when converting between the formats.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="3">
+<section id="optional-prepare-a-complex-from-pdb-from-demos">
+<h2>Optional: prepare a complex from PDB (from <code class="docutils literal notranslate"><span class="pre">demos/</span></code>)<a class="headerlink" href="#optional-prepare-a-complex-from-pdb-from-demos" title="Link to this heading">¶</a></h2>
+<p>The demo <code class="docutils literal notranslate"><span class="pre">demos/jnj_prep+interaction.py</span></code> shows a preparation pipeline using a PDB and ligand residue names. Below is a cleaned-up version that uses the current <code class="docutils literal notranslate"><span class="pre">rush</span></code> imports and feeds directly into <code class="docutils literal notranslate"><span class="pre">interaction_energy</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">prepare_and_interaction.py</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_json</span><span class="p">,</span> <span class="n">exess</span>
 </span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span>
 </span><span data-line="5"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.prepare_complex</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_complex</span>
 </span><span data-line="6">
-</span><span data-line="7"><span class="n">trc</span> <span class="o">=</span> <span class="n">prepare_complex</span><span class="p">(</span>
-</span><span data-line="8">    <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;demos/data/1hsg.pdb&quot;</span><span class="p">,</span>
-</span><span data-line="9">    <span class="n">ligand_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;MK1&quot;</span><span class="p">,</span> <span class="s2">&quot;HOH&quot;</span><span class="p">],</span>
-</span><span data-line="10">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Interaction Energy E2E - Prepare Complex&quot;</span><span class="p">),</span>
-</span><span data-line="11">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="12"><span class="p">)</span>
-</span><span data-line="13">
-</span><span data-line="14"><span class="c1"># Print the charged amino acids</span>
-</span><span data-line="15"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Charged amino acids:&quot;</span><span class="p">)</span>
-</span><span data-line="16"><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">res_name</span><span class="p">,</span> <span class="n">formal_charge</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-</span><span data-line="17">    <span class="nb">zip</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="p">,</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragment_formal_charges</span><span class="p">)</span>
-</span><span data-line="18"><span class="p">):</span>
-</span><span data-line="19">    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">formal_charge</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="20">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">res_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">formal_charge</span><span class="p">)</span><span class="si">:</span><span class="s2">+</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="7"><span class="n">pdb_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/1hsg.pdb&quot;</span><span class="p">)</span>
+</span><span data-line="8"><span class="n">ligand_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MK1&quot;</span><span class="p">,</span> <span class="s2">&quot;HOH&quot;</span><span class="p">]</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="n">trc</span> <span class="o">=</span> <span class="n">prepare_complex</span><span class="p">(</span>
+</span><span data-line="11">    <span class="n">pdb_path</span><span class="p">,</span>
+</span><span data-line="12">    <span class="n">ligand_names</span><span class="p">,</span>
+</span><span data-line="13">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Prepare Complex&quot;</span><span class="p">),</span>
+</span><span data-line="14">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="15"><span class="p">)</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="c1"># Save TRC to JSON so it can be used by EXESS</span>
+</span><span data-line="18"><span class="n">trc_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;1hsg_complex.json&quot;</span><span class="p">)</span>
+</span><span data-line="19"><span class="n">trc_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">to_json</span><span class="p">(</span><span class="n">trc</span><span class="p">))</span>
+</span><span data-line="20">
+</span><span data-line="21"><span class="c1"># Find ligand fragment index + nearby pocket</span>
+</span><span data-line="22"><span class="n">lig_idx</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;MK1&quot;</span><span class="p">)</span>
+</span><span data-line="23"><span class="n">frag_idcs</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get_fragments_near_fragment</span><span class="p">(</span><span class="n">lig_idx</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">lig_idx</span><span class="p">]</span>
+</span><span data-line="24">
+</span><span data-line="25"><span class="n">res</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">interaction_energy</span><span class="p">(</span>
+</span><span data-line="26">    <span class="n">trc_path</span><span class="p">,</span>
+</span><span data-line="27">    <span class="n">lig_idx</span><span class="p">,</span>
+</span><span data-line="28">    <span class="n">frag_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">FragKeywords</span><span class="p">(</span>
+</span><span data-line="29">        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;Trimer&quot;</span><span class="p">,</span>
+</span><span data-line="30">        <span class="n">dimer_cutoff</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span>
+</span><span data-line="31">        <span class="n">trimer_cutoff</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+</span><span data-line="32">        <span class="n">cutoff_type</span><span class="o">=</span><span class="s2">&quot;Centroid&quot;</span><span class="p">,</span>
+</span><span data-line="33">        <span class="n">distance_metric</span><span class="o">=</span><span class="s2">&quot;Min&quot;</span><span class="p">,</span>
+</span><span data-line="34">        <span class="n">included_fragments</span><span class="o">=</span><span class="n">frag_idcs</span><span class="p">,</span>
+</span><span data-line="35">    <span class="p">),</span>
+</span><span data-line="36">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Interaction Energy (Prepared Complex)&quot;</span><span class="p">),</span>
+</span><span data-line="37">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="38"><span class="p">)</span>
+</span><span data-line="39">
+</span><span data-line="40"><span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 </span></pre></div>
+</div>
 </div>
 <div class="note admonition">
-<p class="admonition-title">Libraries used</p>
-<p>The Prepare Complex module uses PDBFixer and PDB2PQR to fill in missing atoms and residues and to perform protonation, and in-house routines for determining connectivity and formal charge states for proteins. For ligand components of the system, it uses RDKit.</p>
+<p class="admonition-title">Notes</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">prepare_complex</span></code> requires RDKit and uses the same workflow as the demo.</p></li>
+<li><p>If you see a <code class="docutils literal notranslate"><span class="pre">RunError</span></code>, check the Rush UI for details or increase <code class="docutils literal notranslate"><span class="pre">run_spec</span></code> resources.</p></li>
+</ul>
 </div>
-<div class="tip admonition">
-<p class="admonition-title">Prepare Complex has more features!</p>
-<p>This module also fills in missing atoms and residues where possible, annotates the TRC with full connectivity information, and has additional configurable behavior. See the <a class="reference internal" href="../rush.prepare_complex.html"><span class="doc">Prepare Complex module documentation</span></a> for more info.</p>
-</div>
-<p>To perform an accurate calculation without incurring too high an execution cost, we can use helper functions to find the set of fragments within 5Å of the ligand:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Find ligand fragment index + nearby pocket</span>
-</span><span data-line="2"><span class="n">lig_idx</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;MK1&quot;</span><span class="p">)</span>
-</span><span data-line="3"><span class="n">frag_idcs</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get_fragments_near_fragment</span><span class="p">(</span><span class="n">lig_idx</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">lig_idx</span><span class="p">]</span>
-</span></pre></div>
-</div>
-<p>Finally, we can submit the full interaction energy calculation, using the above information to limit the simulation to only that set of fragments:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
-</span><span data-line="2">
-</span><span data-line="3"><span class="c1"># EXESS only takes the Topology, not the full TRC</span>
-</span><span data-line="4"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;1hsg_t.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="5">    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-</span><span data-line="6">
-</span><span data-line="7"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">interaction_energy</span><span class="p">(</span>
-</span><span data-line="8">    <span class="s2">&quot;1hsg_t.json&quot;</span><span class="p">,</span>
-</span><span data-line="9">    <span class="n">lig_idx</span><span class="p">,</span>
-</span><span data-line="10">    <span class="n">frag_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">FragKeywords</span><span class="p">(</span>
-</span><span data-line="11">        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;Dimer&quot;</span><span class="p">,</span>
-</span><span data-line="12">        <span class="n">included_fragments</span><span class="o">=</span><span class="n">frag_idcs</span><span class="p">,</span>
-</span><span data-line="13">    <span class="p">),</span>
-</span><span data-line="14">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: Interaction Energy E2E - EXESS&quot;</span><span class="p">),</span>
-</span><span data-line="15">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="16"><span class="p">)</span>
-</span><span data-line="17">
-</span><span data-line="18"><span class="n">out_file</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-</span><span data-line="19"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="20">    <span class="n">out_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</span><span data-line="21"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Interaction energy: </span><span class="si">{</span><span class="n">out_data</span><span class="p">[</span><span class="s1">&#39;qmmbe&#39;</span><span class="p">][</span><span class="s1">&#39;expanded_hf_energy&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-</section>
 </section>
 </section>
 
@@ -273,7 +290,7 @@ data-aria-dark="Switch to auto color mode">
     <a href="exess-optimization.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">EXESS: Geometry Opt.</div>
+        <div class="title">EXESS Geometry Optimization</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -284,7 +301,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with

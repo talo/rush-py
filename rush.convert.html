@@ -76,10 +76,10 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS: Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS: Geometry Opt.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS: QM/MM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">EXESS: Exporting Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="api.html">Core API</a><ul class="current">
@@ -105,7 +105,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rush.convert.from_pdb"><code class="docutils literal notranslate"><span class="pre">from_pdb()</span></code></a></li>
 <li><a class="reference internal" href="#rush.convert.from_sdf"><code class="docutils literal notranslate"><span class="pre">from_sdf()</span></code></a></li>
 <li><a class="reference internal" href="#rush.convert.load_structure"><code class="docutils literal notranslate"><span class="pre">load_structure()</span></code></a></li>
-<li><a class="reference internal" href="#rush.convert.merge_trcs"><code class="docutils literal notranslate"><span class="pre">merge_trcs()</span></code></a></li>
 <li><a class="reference internal" href="#rush.convert.save_structure"><code class="docutils literal notranslate"><span class="pre">save_structure()</span></code></a></li>
 <li><a class="reference internal" href="#rush.convert.to_json"><code class="docutils literal notranslate"><span class="pre">to_json()</span></code></a></li>
 <li><a class="reference internal" href="#rush.convert.to_pdb"><code class="docutils literal notranslate"><span class="pre">to_pdb()</span></code></a></li>
@@ -236,40 +235,6 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="rush.convert.merge_trcs">
-<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">merge_trcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">trcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_validation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#merge_trcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.merge_trcs" title="Link to this definition">¶</a></dt>
-<dd><p>Merge TRC objects into a single TRC.</p>
-<p>A TRC (Topology-Residues-Chains) object contains:
-- topology: atom information (symbols, geometry, bonds, charges, etc.)
-- residues: residue information (which atoms belong to which residues)
-- chains: chain information (which residues belong to which chains)</p>
-<p>When merging, atom indices, residue indices, and chain indices are renumbered
-to ensure uniqueness in the merged structure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>trcs</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em> | </em><em>list</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>tuple</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em>, </em><em>...</em><em>]</em>) – TRC objects or file paths. If a single list/tuple is provided,
-it is treated as the full set of inputs.</p></li>
-<li><p><strong>output_file</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Optional path to write the merged TRC JSON.</p></li>
-<li><p><strong>skip_validation</strong> (<em>bool</em>) – If True, skip validation of the merged TRC.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Merged TRC object.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ValueError</strong> – If no inputs are provided or validation fails.</p></li>
-<li><p><strong>FileNotFoundError</strong> – If file paths are provided but files don’t exist.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="rush.convert.save_structure">
 <span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">save_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#save_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.save_structure" title="Link to this definition">¶</a></dt>
 <dd><p>Save TRC structures to file.</p>
@@ -293,10 +258,10 @@ it is treated as the full set of inputs.</p></li>
 <dd class="field-odd"><p><strong>trcs</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>list</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em>]</em>) – TRC structure or list of TRC structures</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>JSON-compatible dict or list of dicts</p>
+<dd class="field-even"><p>JSON string</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>dict</em>[<em>str</em>, <em>object</em>] | <em>list</em>[<em>dict</em>[<em>str</em>, <em>object</em>]]</p>
+<dd class="field-odd"><p><em>str</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,7 +311,7 @@ it is treated as the full set of inputs.</p></li>
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with

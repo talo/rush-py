@@ -76,10 +76,10 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS: Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS: Geometry Opt.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS: QM/MM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">EXESS: Exporting Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Core API</a><ul>
@@ -143,7 +143,7 @@ extracting ligands from PDB inputs, adding hydrogens, and merging ligand data
 with prepared protein TRC data for downstream computations.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.prepare_complex.prepare_complex">
-<span class="sig-prename descclassname"><span class="pre">rush.prepare_complex.</span></span><span class="sig-name descname"><span class="pre">prepare_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ligand_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_complex.html#prepare_complex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_complex.prepare_complex" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rush.prepare_complex.</span></span><span class="sig-name descname"><span class="pre">prepare_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ligand_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_complex.html#prepare_complex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_complex.prepare_complex" title="Link to this definition">¶</a></dt>
 <dd><p>Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -154,7 +154,6 @@ with prepared protein TRC data for downstream computations.</p>
 <li><p><strong>naming_scheme</strong> (<em>Literal</em><em>[</em><em>'AMBER'</em><em>, </em><em>'CHARMM'</em><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>capping_style</strong> (<em>Literal</em><em>[</em><em>'never'</em><em>, </em><em>'truncated'</em><em>, </em><em>'always'</em><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>truncation_threshold</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>debump</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
 <li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
 <li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>
 </ul>
@@ -193,7 +192,7 @@ with prepared protein TRC data for downstream computations.</p>
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with

@@ -1,6 +1,6 @@
 # Examples
 
-These examples progress from minimal inputs to production-style workflows. They use the EXESS JSON input format, which is documented in the {doc}`EXESS input reference <input>`, and reference keywords defined in the {doc}`keyword reference <keywords>`.
+These examples progress from minimal inputs to production-style workflows. They use the EXESS JSON input format, which is documented in `docs/exess/input.md`, and reference keywords defined in `docs/exess/keywords.md`.
 
 ## Start here: first calculation
 

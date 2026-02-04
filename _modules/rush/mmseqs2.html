@@ -141,9 +141,9 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
 </span><span data-line="7">
 </span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="9">    <span class="n">RunOpts</span><span class="p">,</span>
-</span><span data-line="10">    <span class="n">RunSpec</span><span class="p">,</span>
-</span><span data-line="11">    <span class="n">_get_project_id</span><span class="p">,</span>
+</span><span data-line="9">    <span class="n">PROJECT_ID</span><span class="p">,</span>
+</span><span data-line="10">    <span class="n">RunOpts</span><span class="p">,</span>
+</span><span data-line="11">    <span class="n">RunSpec</span><span class="p">,</span>
 </span><span data-line="12">    <span class="n">_submit_rex</span><span class="p">,</span>
 </span><span data-line="13">    <span class="n">collect_run</span><span class="p">,</span>
 </span><span data-line="14"><span class="p">)</span>
@@ -192,7 +192,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="55">        <span class="n">sequences</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="se">\n</span><span class="s2">        </span><span class="si">{</span><span class="s1">&#39;,</span><span class="se">\n</span><span class="s1">        &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">seq</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seq</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sequences</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
 </span><span data-line="56">    <span class="p">)</span>
 </span><span data-line="57">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="58">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="58">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
 </span><span data-line="59">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
 </span><span data-line="60">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
 </span><span data-line="61">        <span class="k">else</span><span class="p">:</span>
@@ -216,7 +216,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with

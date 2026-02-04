@@ -62,7 +62,7 @@ EXESS targets:
 - Mixed-fidelity QM/MM/ML runs where fragments are assigned to regions (QMMM and optimization workflows).
 - High-throughput runs where a single input describes multiple topologies.
 
-If your workflow needs plane waves or pseudopotentials, EXESS is not the right tool (see {ref}`limitations <exess-limitations>`). Thermostatted/barostatted dynamics are supported in QMMM workflows (NVT/NPT via `qmmm.temperature_kelvin` and `qmmm.pressure_atm`), but fully ab initio AIMD is microcanonical only.
+If your workflow needs plane waves or pseudopotentials, EXESS is not the right tool (see limitations below). Thermostatted/barostatted dynamics are supported in QMMM workflows (NVT/NPT via `qmmm.temperature_kelvin` and `qmmm.pressure_atm`), but fully ab initio AIMD is microcanonical only.
 
 ## Core ideas and workflow
 
