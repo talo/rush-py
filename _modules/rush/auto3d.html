@@ -139,103 +139,104 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
 </span><span data-line="5">
 </span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="7">    <span class="n">PROJECT_ID</span><span class="p">,</span>
+</span><span data-line="7">    <span class="n">RunError</span><span class="p">,</span>
 </span><span data-line="8">    <span class="n">RunOpts</span><span class="p">,</span>
 </span><span data-line="9">    <span class="n">RunSpec</span><span class="p">,</span>
-</span><span data-line="10">    <span class="n">_submit_rex</span><span class="p">,</span>
-</span><span data-line="11">    <span class="n">collect_run</span><span class="p">,</span> <span class="n">RunError</span><span class="p">,</span>
-</span><span data-line="12"><span class="p">)</span>
-</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">bool_to_str</span><span class="p">,</span> <span class="n">float_to_str</span>
-</span><span data-line="14">
+</span><span data-line="10">    <span class="n">_get_project_id</span><span class="p">,</span>
+</span><span data-line="11">    <span class="n">_submit_rex</span><span class="p">,</span>
+</span><span data-line="12">    <span class="n">collect_run</span><span class="p">,</span>
+</span><span data-line="13"><span class="p">)</span>
+</span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">bool_to_str</span><span class="p">,</span> <span class="n">float_to_str</span>
 </span><span data-line="15">
+</span><span data-line="16">
 <div class="viewcode-block" id="auto3d">
 <a class="viewcode-back" href="../../rush.auto3d.html#rush.auto3d.auto3d">[docs]</a>
-</span><span data-line="16"><span class="k">def</span><span class="w"> </span><span class="nf">auto3d</span><span class="p">(</span>
-</span><span data-line="17">    <span class="n">smis</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-</span><span data-line="18">    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span data-line="19">    <span class="n">batchsize_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
-</span><span data-line="20">    <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
-</span><span data-line="21">    <span class="n">convergence_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.003</span><span class="p">,</span>
-</span><span data-line="22">    <span class="n">enumerate_isomer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span data-line="23">    <span class="n">enumerate_tautomer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="24">    <span class="n">max_confs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="25">    <span class="n">opt_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
-</span><span data-line="26">    <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-</span><span data-line="27">    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
-</span><span data-line="28">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(),</span>
-</span><span data-line="29">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
-</span><span data-line="30">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="31"><span class="p">):</span>
-</span><span data-line="32"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="33"><span class="sd">    Runs Auto3D on a list of SMILES strings, returning either the TRC structure</span>
-</span><span data-line="34"><span class="sd">    or an error string.</span>
-</span><span data-line="35"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="36">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
-</span><span data-line="37"><span class="s2">  auto3d = λ smis →</span>
-</span><span data-line="38"><span class="s2">    try_auto3d_rex</span>
-</span><span data-line="39"><span class="s2">      default_runspec_gpu</span>
-</span><span data-line="40"><span class="s2">      (auto3d_rex::Auto3dOptions {</span>
-</span><span data-line="41"><span class="s2">        k = Some (int $k),</span>
-</span><span data-line="42"><span class="s2">        batchsize_atoms = Some $batchsize_atoms,</span>
-</span><span data-line="43"><span class="s2">        capacity = Some $capacity,</span>
-</span><span data-line="44"><span class="s2">        convergence_threshold = Some $convergence_threshold,</span>
-</span><span data-line="45"><span class="s2">        enumerate_isomer = Some $enumerate_isomer,</span>
-</span><span data-line="46"><span class="s2">        enumerate_tautomer = Some $enumerate_tautomer,</span>
-</span><span data-line="47"><span class="s2">        job_name = None,</span>
-</span><span data-line="48"><span class="s2">        max_confs = $max_confs,</span>
-</span><span data-line="49"><span class="s2">        memory = None,</span>
-</span><span data-line="50"><span class="s2">        mpi_np = Some 4,</span>
-</span><span data-line="51"><span class="s2">        opt_steps = Some $opt_steps,</span>
-</span><span data-line="52"><span class="s2">        optimizing_engine = Some auto3d_rex::Auto3dOptimizingEngines::AIMNET,</span>
-</span><span data-line="53"><span class="s2">        patience = Some $patience,</span>
-</span><span data-line="54"><span class="s2">        threshold = Some $threshold,</span>
-</span><span data-line="55"><span class="s2">        verbose = Some false,</span>
-</span><span data-line="56"><span class="s2">        window = None,</span>
-</span><span data-line="57"><span class="s2">      })</span>
-</span><span data-line="58"><span class="s2">      $smis</span>
-</span><span data-line="59"><span class="s2">in</span>
-</span><span data-line="60"><span class="s2">  auto3d $smis</span>
-</span><span data-line="61"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
-</span><span data-line="62">        <span class="n">smis</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">smi</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">smi</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">smis</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
-</span><span data-line="63">        <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
-</span><span data-line="64">        <span class="n">batchsize_atoms</span><span class="o">=</span><span class="n">batchsize_atoms</span><span class="p">,</span>
-</span><span data-line="65">        <span class="n">capacity</span><span class="o">=</span><span class="n">capacity</span><span class="p">,</span>
-</span><span data-line="66">        <span class="n">convergence_threshold</span><span class="o">=</span><span class="n">float_to_str</span><span class="p">(</span><span class="n">convergence_threshold</span><span class="p">),</span>
-</span><span data-line="67">        <span class="n">enumerate_isomer</span><span class="o">=</span><span class="n">bool_to_str</span><span class="p">(</span><span class="n">enumerate_isomer</span><span class="p">),</span>
-</span><span data-line="68">        <span class="n">enumerate_tautomer</span><span class="o">=</span><span class="n">bool_to_str</span><span class="p">(</span><span class="n">enumerate_tautomer</span><span class="p">),</span>
-</span><span data-line="69">        <span class="n">max_confs</span><span class="o">=</span><span class="n">max_confs</span><span class="p">,</span>
-</span><span data-line="70">        <span class="n">opt_steps</span><span class="o">=</span><span class="n">opt_steps</span><span class="p">,</span>
-</span><span data-line="71">        <span class="n">patience</span><span class="o">=</span><span class="n">patience</span><span class="p">,</span>
-</span><span data-line="72">        <span class="n">threshold</span><span class="o">=</span><span class="n">float_to_str</span><span class="p">(</span><span class="n">threshold</span><span class="p">),</span>
-</span><span data-line="73">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
-</span><span data-line="74">    <span class="p">)</span>
-</span><span data-line="75">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="76">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">PROJECT_ID</span><span class="p">,</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
-</span><span data-line="77">        <span class="k">if</span> <span class="ow">not</span> <span class="n">collect</span><span class="p">:</span>
-</span><span data-line="78">            <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="79">
-</span><span data-line="80">        <span class="n">result</span> <span class="o">=</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
-</span><span data-line="81">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">RunError</span><span class="p">):</span>
-</span><span data-line="82">            <span class="k">return</span> <span class="n">result</span>
-</span><span data-line="83">
-</span><span data-line="84">        <span class="k">def</span><span class="w"> </span><span class="nf">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
-</span><span data-line="85">            <span class="k">return</span> <span class="p">(</span>
-</span><span data-line="86">                <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-</span><span data-line="87">                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-</span><span data-line="88">                <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">or</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">)</span>
-</span><span data-line="89">            <span class="p">)</span>
-</span><span data-line="90">
-</span><span data-line="91">        <span class="c1"># TODO: no special cases for Result unwrapping</span>
-</span><span data-line="92">
-</span><span data-line="93">        <span class="k">return</span> <span class="p">[</span>
-</span><span data-line="94">            <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">r_i</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="k">if</span> <span class="n">is_result_type</span><span class="p">(</span><span class="n">r_i</span><span class="p">)</span> <span class="k">else</span> <span class="n">r_i</span> <span class="k">for</span> <span class="n">r_i</span> <span class="ow">in</span> <span class="n">result</span>
-</span><span data-line="95">        <span class="p">]</span>
-</span><span data-line="96">
-</span><span data-line="97">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="98">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="99">            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="100">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="101">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
+</span><span data-line="17"><span class="k">def</span><span class="w"> </span><span class="nf">auto3d</span><span class="p">(</span>
+</span><span data-line="18">    <span class="n">smis</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+</span><span data-line="19">    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="20">    <span class="n">batchsize_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+</span><span data-line="21">    <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+</span><span data-line="22">    <span class="n">convergence_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.003</span><span class="p">,</span>
+</span><span data-line="23">    <span class="n">enumerate_isomer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span data-line="24">    <span class="n">enumerate_tautomer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="25">    <span class="n">max_confs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="26">    <span class="n">opt_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+</span><span data-line="27">    <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+</span><span data-line="28">    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+</span><span data-line="29">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(),</span>
+</span><span data-line="30">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
+</span><span data-line="31">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span data-line="32"><span class="p">):</span>
+</span><span data-line="33"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="34"><span class="sd">    Runs Auto3D on a list of SMILES strings, returning either the TRC structure</span>
+</span><span data-line="35"><span class="sd">    or an error string.</span>
+</span><span data-line="36"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="37">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
+</span><span data-line="38"><span class="s2">  auto3d = λ smis →</span>
+</span><span data-line="39"><span class="s2">    try_auto3d_rex</span>
+</span><span data-line="40"><span class="s2">      default_runspec_gpu</span>
+</span><span data-line="41"><span class="s2">      (auto3d_rex::Auto3dOptions {</span>
+</span><span data-line="42"><span class="s2">        k = Some (int $k),</span>
+</span><span data-line="43"><span class="s2">        batchsize_atoms = Some $batchsize_atoms,</span>
+</span><span data-line="44"><span class="s2">        capacity = Some $capacity,</span>
+</span><span data-line="45"><span class="s2">        convergence_threshold = Some $convergence_threshold,</span>
+</span><span data-line="46"><span class="s2">        enumerate_isomer = Some $enumerate_isomer,</span>
+</span><span data-line="47"><span class="s2">        enumerate_tautomer = Some $enumerate_tautomer,</span>
+</span><span data-line="48"><span class="s2">        job_name = None,</span>
+</span><span data-line="49"><span class="s2">        max_confs = $max_confs,</span>
+</span><span data-line="50"><span class="s2">        memory = None,</span>
+</span><span data-line="51"><span class="s2">        mpi_np = Some 4,</span>
+</span><span data-line="52"><span class="s2">        opt_steps = Some $opt_steps,</span>
+</span><span data-line="53"><span class="s2">        optimizing_engine = Some auto3d_rex::Auto3dOptimizingEngines::AIMNET,</span>
+</span><span data-line="54"><span class="s2">        patience = Some $patience,</span>
+</span><span data-line="55"><span class="s2">        threshold = Some $threshold,</span>
+</span><span data-line="56"><span class="s2">        verbose = Some false,</span>
+</span><span data-line="57"><span class="s2">        window = None,</span>
+</span><span data-line="58"><span class="s2">      })</span>
+</span><span data-line="59"><span class="s2">      $smis</span>
+</span><span data-line="60"><span class="s2">in</span>
+</span><span data-line="61"><span class="s2">  auto3d $smis</span>
+</span><span data-line="62"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="63">        <span class="n">smis</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">smi</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">smi</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">smis</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+</span><span data-line="64">        <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+</span><span data-line="65">        <span class="n">batchsize_atoms</span><span class="o">=</span><span class="n">batchsize_atoms</span><span class="p">,</span>
+</span><span data-line="66">        <span class="n">capacity</span><span class="o">=</span><span class="n">capacity</span><span class="p">,</span>
+</span><span data-line="67">        <span class="n">convergence_threshold</span><span class="o">=</span><span class="n">float_to_str</span><span class="p">(</span><span class="n">convergence_threshold</span><span class="p">),</span>
+</span><span data-line="68">        <span class="n">enumerate_isomer</span><span class="o">=</span><span class="n">bool_to_str</span><span class="p">(</span><span class="n">enumerate_isomer</span><span class="p">),</span>
+</span><span data-line="69">        <span class="n">enumerate_tautomer</span><span class="o">=</span><span class="n">bool_to_str</span><span class="p">(</span><span class="n">enumerate_tautomer</span><span class="p">),</span>
+</span><span data-line="70">        <span class="n">max_confs</span><span class="o">=</span><span class="n">max_confs</span><span class="p">,</span>
+</span><span data-line="71">        <span class="n">opt_steps</span><span class="o">=</span><span class="n">opt_steps</span><span class="p">,</span>
+</span><span data-line="72">        <span class="n">patience</span><span class="o">=</span><span class="n">patience</span><span class="p">,</span>
+</span><span data-line="73">        <span class="n">threshold</span><span class="o">=</span><span class="n">float_to_str</span><span class="p">(</span><span class="n">threshold</span><span class="p">),</span>
+</span><span data-line="74">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
+</span><span data-line="75">    <span class="p">)</span>
+</span><span data-line="76">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="77">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="78">        <span class="k">if</span> <span class="ow">not</span> <span class="n">collect</span><span class="p">:</span>
+</span><span data-line="79">            <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="80">
+</span><span data-line="81">        <span class="n">result</span> <span class="o">=</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+</span><span data-line="82">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">RunError</span><span class="p">):</span>
+</span><span data-line="83">            <span class="k">return</span> <span class="n">result</span>
+</span><span data-line="84">
+</span><span data-line="85">        <span class="k">def</span><span class="w"> </span><span class="nf">is_result_type</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+</span><span data-line="86">            <span class="k">return</span> <span class="p">(</span>
+</span><span data-line="87">                <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="88">                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+</span><span data-line="89">                <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;Ok&quot;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">or</span> <span class="s2">&quot;Err&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">)</span>
+</span><span data-line="90">            <span class="p">)</span>
+</span><span data-line="91">
+</span><span data-line="92">        <span class="c1"># TODO: no special cases for Result unwrapping</span>
+</span><span data-line="93">
+</span><span data-line="94">        <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="95">            <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">r_i</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="k">if</span> <span class="n">is_result_type</span><span class="p">(</span><span class="n">r_i</span><span class="p">)</span> <span class="k">else</span> <span class="n">r_i</span> <span class="k">for</span> <span class="n">r_i</span> <span class="ow">in</span> <span class="n">result</span>
+</span><span data-line="96">        <span class="p">]</span>
+</span><span data-line="97">
+</span><span data-line="98">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="99">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="100">            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="101">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="102">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -250,7 +251,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

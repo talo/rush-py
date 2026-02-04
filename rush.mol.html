@@ -76,10 +76,10 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS Geometry Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS QMMM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">Exporting Data from EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS: Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS: Geometry Opt.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS: QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">EXESS: Exporting Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="api.html">Core API</a><ul class="current">
@@ -130,14 +130,15 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rush.mol.Topology.symbols"><code class="docutils literal notranslate">symbols</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.geometry"><code class="docutils literal notranslate">geometry</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.labels"><code class="docutils literal notranslate">labels</span></code></a></li>
-<li><a class="reference internal" href="#rush.mol.Topology.partial_charges"><code class="docutils literal notranslate">partial_charges</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.formal_charges"><code class="docutils literal notranslate">formal_charges</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.Topology.partial_charges"><code class="docutils literal notranslate">partial_charges</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.connectivity"><code class="docutils literal notranslate">connectivity</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.velocities"><code class="docutils literal notranslate">velocities</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.fragments"><code class="docutils literal notranslate">fragments</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.fragment_formal_charges"><code class="docutils literal notranslate">fragment_formal_charges</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.fragment_partial_charges"><code class="docutils literal notranslate">fragment_partial_charges</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.from_json"><code class="docutils literal notranslate">from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.Topology.to_json"><code class="docutils literal notranslate">to_json()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.distance_between_atoms"><code class="docutils literal notranslate">distance_between_atoms()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Topology.distance_to_point"><code class="docutils literal notranslate">distance_to_point()</span></code></a></li>
@@ -164,6 +165,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rush.mol.Residues.labeled"><code class="docutils literal notranslate">labeled</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Residues.labels"><code class="docutils literal notranslate">labels</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Residues.from_json"><code class="docutils literal notranslate">from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.Residues.to_json"><code class="docutils literal notranslate">to_json()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Residues.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Residues.is_amino_acid"><code class="docutils literal notranslate">is_amino_acid()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Residues.amino_acid_indices"><code class="docutils literal notranslate">amino_acid_indices()</span></code></a></li>
@@ -183,6 +185,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rush.mol.Chains.labeled"><code class="docutils literal notranslate">labeled</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Chains.labels"><code class="docutils literal notranslate">labels</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Chains.from_json"><code class="docutils literal notranslate">from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.Chains.to_json"><code class="docutils literal notranslate">to_json()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Chains.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Chains.extend"><code class="docutils literal notranslate">extend()</span></code></a></li>
 <li><a class="reference internal" href="#rush.mol.Chains.new_chains_from_residue_subset"><code class="docutils literal notranslate">new_chains_from_residue_subset()</span></code></a></li>
@@ -417,7 +420,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py class">
 <dt class="sig sig-object py" id="rush.mol.Topology">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.mol.</span></span><span class="sig-name descname"><span class="pre">Topology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SchemaVersion.V2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formal_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment_formal_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment_partial_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#Topology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.Topology" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.mol.</span></span><span class="sig-name descname"><span class="pre">Topology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SchemaVersion.V2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formal_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment_formal_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fragment_partial_charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#Topology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.Topology" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Topology contains all atom information.</p>
 <dl class="field-list simple">
@@ -427,8 +430,8 @@ data-aria-dark="Switch to auto color mode">
 <li><p><strong>symbols</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.mol.Element" title="rush.mol.Element"><em>Element</em></a><em>]</em>)</p></li>
 <li><p><strong>geometry</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>)</p></li>
 <li><p><strong>labels</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>partial_charges</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.mol.PartialCharge" title="rush.mol.PartialCharge"><em>PartialCharge</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>formal_charges</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.mol.FormalCharge" title="rush.mol.FormalCharge"><em>FormalCharge</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>partial_charges</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.mol.PartialCharge" title="rush.mol.PartialCharge"><em>PartialCharge</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>connectivity</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.mol.Bond" title="rush.mol.Bond"><em>Bond</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>velocities</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>fragments</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.mol.Fragment" title="rush.mol.Fragment"><em>Fragment</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
@@ -453,13 +456,13 @@ data-aria-dark="Switch to auto color mode">
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="rush.mol.Topology.partial_charges">
-<span class="sig-name descname"><span class="pre">partial_charges</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rush.mol.PartialCharge" title="rush.mol.PartialCharge"><span class="pre">PartialCharge</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.mol.Topology.partial_charges" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="rush.mol.Topology.formal_charges">
+<span class="sig-name descname"><span class="pre">formal_charges</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rush.mol.FormalCharge" title="rush.mol.FormalCharge"><span class="pre">FormalCharge</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.mol.Topology.formal_charges" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="rush.mol.Topology.formal_charges">
-<span class="sig-name descname"><span class="pre">formal_charges</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rush.mol.FormalCharge" title="rush.mol.FormalCharge"><span class="pre">FormalCharge</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.mol.Topology.formal_charges" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="rush.mol.Topology.partial_charges">
+<span class="sig-name descname"><span class="pre">partial_charges</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rush.mol.PartialCharge" title="rush.mol.PartialCharge"><span class="pre">PartialCharge</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.mol.Topology.partial_charges" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -496,6 +499,16 @@ data-aria-dark="Switch to auto color mode">
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#rush.mol.Topology" title="rush.mol.Topology"><em>Topology</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.mol.Topology.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#Topology.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.Topology.to_json" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>dict</em>[<em>str</em>, <em>object</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -729,6 +742,16 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="rush.mol.Residues.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#Residues.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.Residues.to_json" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>dict</em>[<em>str</em>, <em>object</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="rush.mol.Residues.check">
 <span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#Residues.check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.Residues.check" title="Link to this definition">¶</a></dt>
 <dd><p>Validate the residues structure.</p>
@@ -880,6 +903,16 @@ data-aria-dark="Switch to auto color mode">
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#rush.mol.Chains" title="rush.mol.Chains"><em>Chains</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.mol.Chains.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#Chains.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.Chains.to_json" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>dict</em>[<em>str</em>, <em>object</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1061,7 +1094,7 @@ This is the main structure for representing molecular systems on the Rush platfo
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with

@@ -1,4 +1,4 @@
-# Exporting Data from EXESS
+# EXESS: Exporting Data
 
 EXESS provides its primary output through a JSON file, which through rush-py is its first (zeroth-indexed) output. Additional data can be requested through the `export_keywords` parameter.
 

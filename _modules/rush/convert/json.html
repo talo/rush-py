@@ -174,15 +174,15 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="33">        <span class="k">with</span> <span class="n">json_content</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
 </span><span data-line="34">            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </span><span data-line="35">    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-</span><span data-line="36">        <span class="n">data</span> <span class="o">=</span> <span class="p">[{}]</span>
+</span><span data-line="36">        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 </span><span data-line="37">        <span class="k">with</span> <span class="p">(</span>
 </span><span data-line="38">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
 </span><span data-line="39">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
 </span><span data-line="40">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
 </span><span data-line="41">        <span class="p">):</span>
-</span><span data-line="42">            <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;topology&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">t_f</span><span class="p">)</span>
-</span><span data-line="43">            <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;residues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_f</span><span class="p">)</span>
-</span><span data-line="44">            <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;chains&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c_f</span><span class="p">)</span>
+</span><span data-line="42">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">t_f</span><span class="p">)</span>
+</span><span data-line="43">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_f</span><span class="p">)</span>
+</span><span data-line="44">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c_f</span><span class="p">)</span>
 </span><span data-line="45">    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
 </span><span data-line="46">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">json_content</span><span class="p">]</span>
 </span><span data-line="47">    <span class="k">else</span><span class="p">:</span>
@@ -192,122 +192,45 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="51">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;topology&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
 </span><span data-line="52">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
 </span><span data-line="53">
-</span><span data-line="54">    <span class="n">trcs</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="55">    <span class="k">for</span> <span class="n">trc_data</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-</span><span data-line="56">        <span class="c1"># Load topology, residues, and chains</span>
-</span><span data-line="57">        <span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_data</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">])</span>
-</span><span data-line="58">        <span class="n">residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_data</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">])</span>
-</span><span data-line="59">        <span class="n">chains</span> <span class="o">=</span> <span class="n">Chains</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">])</span>
-</span><span data-line="60">
-</span><span data-line="61">        <span class="c1"># Create TRC</span>
-</span><span data-line="62">        <span class="n">trc</span> <span class="o">=</span> <span class="n">TRC</span><span class="p">(</span><span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">residues</span><span class="o">=</span><span class="n">residues</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="n">chains</span><span class="p">)</span>
-</span><span data-line="63">        <span class="n">trcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span>
-</span><span data-line="64">
-</span><span data-line="65">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trcs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="66">        <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="67">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="68">        <span class="k">return</span> <span class="n">trcs</span></div>
+</span><span data-line="54">    <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="55">        <span class="n">TRC</span><span class="p">(</span>
+</span><span data-line="56">            <span class="n">topology</span><span class="o">=</span><span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]),</span>
+</span><span data-line="57">            <span class="n">residues</span><span class="o">=</span><span class="n">Residues</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]),</span>
+</span><span data-line="58">            <span class="n">chains</span><span class="o">=</span><span class="n">Chains</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]),</span>
+</span><span data-line="59">        <span class="p">)</span>
+</span><span data-line="60">        <span class="k">for</span> <span class="n">trc_dict</span> <span class="ow">in</span> <span class="n">data</span>
+</span><span data-line="61">    <span class="p">]</span>
+</span><span data-line="62">
+</span><span data-line="63">    <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trcs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">trcs</span></div>
 
-</span><span data-line="69">
-</span><span data-line="70">
+</span><span data-line="64">
+</span><span data-line="65">
 <div class="viewcode-block" id="to_json">
 <a class="viewcode-back" href="../../../rush.convert.html#rush.convert.to_json">[docs]</a>
-</span><span data-line="71"><span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="n">trcs</span><span class="p">:</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="72"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="73"><span class="sd">    Convert TRC structures to JSON.</span>
-</span><span data-line="74">
-</span><span data-line="75"><span class="sd">    Args:</span>
-</span><span data-line="76"><span class="sd">        trcs: TRC structure or list of TRC structures</span>
-</span><span data-line="77">
-</span><span data-line="78"><span class="sd">    Returns:</span>
-</span><span data-line="79"><span class="sd">        JSON string</span>
-</span><span data-line="80"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="81">    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="82">
-</span><span data-line="83">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trcs</span><span class="p">,</span> <span class="n">TRC</span><span class="p">):</span>
-</span><span data-line="84">        <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">trcs</span><span class="p">]</span>
-</span><span data-line="85">    <span class="k">for</span> <span class="n">trc</span> <span class="ow">in</span> <span class="n">trcs</span><span class="p">:</span>
-</span><span data-line="86">        <span class="c1"># Build topology dict with only the fields that exist in expected format</span>
-</span><span data-line="87">        <span class="n">topology_dict</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="88">            <span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
-</span><span data-line="89">            <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">],</span>
-</span><span data-line="90">            <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
-</span><span data-line="91">        <span class="p">}</span>
-</span><span data-line="92">
-</span><span data-line="93">        <span class="c1"># Add optional fields only if they have data or are expected to be null</span>
-</span><span data-line="94">        <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
-</span><span data-line="95">            <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">labels</span>
-</span><span data-line="96">
-</span><span data-line="97">        <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">formal_charges</span><span class="p">:</span>
-</span><span data-line="98">            <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;formal_charges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="99">                <span class="n">c</span><span class="o">.</span><span class="n">charge</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">formal_charges</span>
-</span><span data-line="100">            <span class="p">]</span>
-</span><span data-line="101">
-</span><span data-line="102">        <span class="c1"># Always include connectivity and fragments as empty lists if not present (based on expected JSON)</span>
-</span><span data-line="103">        <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;connectivity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="104">        <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;fragments&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="105">        <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;fragment_formal_charges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="106">
-</span><span data-line="107">        <span class="n">trc_data</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="108">            <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="n">topology_dict</span><span class="p">,</span>
-</span><span data-line="109">            <span class="s2">&quot;residues&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span data-line="110">                <span class="s2">&quot;residues&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">atoms</span> <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">residues</span><span class="p">],</span>
-</span><span data-line="111">                <span class="s2">&quot;seqs&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="p">,</span>
-</span><span data-line="112">                <span class="s2">&quot;seq_ns&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seq_ns</span><span class="p">,</span>
-</span><span data-line="113">                <span class="s2">&quot;insertion_codes&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">insertion_codes</span><span class="p">,</span>
-</span><span data-line="114">                <span class="s2">&quot;labeled&quot;</span><span class="p">:</span> <span class="p">(</span>
-</span><span data-line="115">                    <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">labeled</span><span class="p">]</span>
-</span><span data-line="116">                    <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">labeled</span>
-</span><span data-line="117">                    <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="118">                <span class="p">),</span>
-</span><span data-line="119">                <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">labels</span> <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">labels</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="120">            <span class="p">},</span>
-</span><span data-line="121">            <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span data-line="122">                <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">chains</span><span class="p">],</span>
-</span><span data-line="123">                <span class="s2">&quot;alpha_helices&quot;</span><span class="p">:</span> <span class="p">(</span>
-</span><span data-line="124">                    <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">alpha_helices</span><span class="p">]</span>
-</span><span data-line="125">                    <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">alpha_helices</span>
-</span><span data-line="126">                    <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="127">                <span class="p">),</span>
-</span><span data-line="128">                <span class="s2">&quot;beta_sheets&quot;</span><span class="p">:</span> <span class="p">(</span>
-</span><span data-line="129">                    <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">beta_sheets</span><span class="p">]</span>
-</span><span data-line="130">                    <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">beta_sheets</span>
-</span><span data-line="131">                    <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="132">                <span class="p">),</span>
-</span><span data-line="133">                <span class="s2">&quot;labeled&quot;</span><span class="p">:</span> <span class="p">(</span>
-</span><span data-line="134">                    <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">labeled</span><span class="p">]</span>
-</span><span data-line="135">                    <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">labeled</span>
-</span><span data-line="136">                    <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="137">                <span class="p">),</span>
-</span><span data-line="138">                <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">labels</span> <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">labels</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="139">            <span class="p">},</span>
-</span><span data-line="140">        <span class="p">}</span>
-</span><span data-line="141">
-</span><span data-line="142">        <span class="c1"># Set connectivity if exists</span>
-</span><span data-line="143">        <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">connectivity</span><span class="p">:</span>
-</span><span data-line="144">            <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;connectivity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="145">                <span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">order</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
-</span><span data-line="146">                <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">connectivity</span>
-</span><span data-line="147">            <span class="p">]</span>
-</span><span data-line="148">
-</span><span data-line="149">        <span class="c1"># Set fragments if exists</span>
-</span><span data-line="150">        <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragments</span><span class="p">:</span>
-</span><span data-line="151">            <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;fragments&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="152">                <span class="n">fragment</span><span class="o">.</span><span class="n">atoms</span> <span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragments</span>
-</span><span data-line="153">            <span class="p">]</span>
-</span><span data-line="154">
-</span><span data-line="155">        <span class="c1"># Set fragment formal charges if exists</span>
-</span><span data-line="156">        <span class="k">if</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragment_formal_charges</span><span class="p">:</span>
-</span><span data-line="157">            <span class="n">topology_dict</span><span class="p">[</span><span class="s2">&quot;fragment_formal_charges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="158">                <span class="n">c</span><span class="o">.</span><span class="n">charge</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">fragment_formal_charges</span>
-</span><span data-line="159">            <span class="p">]</span>
-</span><span data-line="160">
-</span><span data-line="161">        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trc_data</span><span class="p">)</span>
-</span><span data-line="162">
-</span><span data-line="163">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="164">        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="165">
-</span><span data-line="166">    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+</span><span data-line="66"><span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="n">trcs</span><span class="p">:</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]:</span>
+</span><span data-line="67"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="68"><span class="sd">    Convert TRC structures to JSON.</span>
+</span><span data-line="69">
+</span><span data-line="70"><span class="sd">    Args:</span>
+</span><span data-line="71"><span class="sd">        trcs: TRC structure or list of TRC structures</span>
+</span><span data-line="72">
+</span><span data-line="73"><span class="sd">    Returns:</span>
+</span><span data-line="74"><span class="sd">        JSON-compatible dict or list of dicts</span>
+</span><span data-line="75"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="76">
+</span><span data-line="77">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trcs</span><span class="p">,</span> <span class="n">TRC</span><span class="p">):</span>
+</span><span data-line="78">        <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">trcs</span><span class="p">]</span>
+</span><span data-line="79">
+</span><span data-line="80">    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="81">        <span class="p">{</span>
+</span><span data-line="82">            <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+</span><span data-line="83">            <span class="s2">&quot;residues&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+</span><span data-line="84">            <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+</span><span data-line="85">        <span class="p">}</span>
+</span><span data-line="86">        <span class="k">for</span> <span class="n">trc</span> <span class="ow">in</span> <span class="n">trcs</span>
+</span><span data-line="87">    <span class="p">]</span>
+</span><span data-line="88">
+</span><span data-line="89">    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">data</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -322,7 +245,7 @@ data-aria-dark="Switch to auto color mode">
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>2026, QDX</p>
+      <div class="sy-foot-copyright"><p>1980, QDX</p>
   
   <p>
     Made with
