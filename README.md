@@ -29,6 +29,14 @@ Use environment variables to configure access:
 - `RUSH_PROJECT`: Put your project's UUID value here; can find it in the URL once selecting a project in the Rush UI
 - `RUSH_ENDPOINT`: Use this to choose between staging and prod; if omitted, defaults to prod
 
+You can also put `RUSH_TOKEN` and `RUSH_PROJECT` in a `.env` file instead of exporting them in every terminal session. rush-py looks for a `.env` file in the current working directory first, then falls back to `~/.rush/.env`. Environment variables always take priority over `.env` values.
+
+```
+# .env
+RUSH_TOKEN=your-token-here
+RUSH_PROJECT=your-project-id-here
+```
+
 ## Quick Start
 
 ```python

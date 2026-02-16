@@ -27,4 +27,19 @@ Use environment variables to configure access:
 There's one more environment variable, which would only need to be used if requested by a QDX employee:
 - `RUSH_ENDPOINT`: Use this to choose which Rush server to use; if omitted, defaults to our production server at https://rush.cloud. To use a different server, you'll need to be given access to it explicitly.
 
+### Using a `.env` file
+
+Instead of exporting environment variables in every terminal session, you can create a `.env` file with your credentials. rush-py will automatically load `RUSH_TOKEN` and `RUSH_PROJECT` from it.
+
+Create a `.env` file in your project directory:
+
+```
+RUSH_TOKEN=your-token-here
+RUSH_PROJECT=your-project-id-here
+```
+
+Alternatively, you can place it at `~/.rush/.env` to share credentials across all your projects. If both files exist, the one in the current directory takes precedence.
+
+Environment variables always take priority over `.env` values, so you can still override them when needed.
+
 Next, continue to [Doing Your First rush-py Run](./02-first-run.md).
