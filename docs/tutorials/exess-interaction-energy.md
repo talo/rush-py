@@ -31,6 +31,8 @@ from rush.client import RunOpts, download_object
 out = exess.interaction_energy(
     "tyk2_ejm_31_t.json",       # QDX Topology file for TYK2 + ligand EJM-31
     93,                          # Fragment index of the ligand
+    method="RestrictedHF",       # Explicit: minimal method for testing
+    basis="STO-3G",              # Explicit: minimal basis for testing
     frag_keywords=exess.FragKeywords(
         level="Trimer",          # Include up to 3-body interactions
         dimer_cutoff=10.0,       # Å — pairs within this distance

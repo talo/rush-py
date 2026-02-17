@@ -17,7 +17,6 @@ python 01_exess_exports.py
 1. Running an EXESS energy calculation with `ExportKeywords`
 2. Saving outputs (JSON + HDF5) using `save_energy_outputs`
 3. Using `RegularDescriptorGrid` for electron density and ESP descriptors
-4. Converting HDF5 exports to JSON with `convert_hdf5_to_json=True`
 
 ## Tutorial
 

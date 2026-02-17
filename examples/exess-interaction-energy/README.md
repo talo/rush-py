@@ -20,8 +20,8 @@ python 01_exess_interaction_energy.py
 
 ## Input Data
 
-- `tyk2_ejm_31_t.json` — from `tests/data/` (TYK2 protein-ligand complex topology)
-- `1hsg.pdb` — from `demos/data/` (HIV protease complex, for end-to-end example)
+- `tyk2_ejm_31_t.json` — from `examples/exess-interaction-energy/data/` (TYK2 protein-ligand complex topology)
+- `1hsg.pdb` — from `examples/exess-interaction-energy/data/` (HIV protease complex, for end-to-end example)
 
 ## Tutorial
 

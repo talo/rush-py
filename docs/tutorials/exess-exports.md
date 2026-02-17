@@ -97,7 +97,7 @@ res = exess.energy(
 files = exess.save_energy_outputs(res)
 ```
 
-This computes density and ESP at the 8 corners of a 1 Å cube. The resulting JSON looks like:
+This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`) — see the [full example script](https://github.com/talo/rush-py/tree/feat/exess-docs/examples/exess-exports) for production-ready parameters. The resulting JSON looks like:
 
 ```json
 {

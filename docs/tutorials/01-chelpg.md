@@ -62,7 +62,7 @@ For complete charge extraction, visualization (bar chart + interactive 3D), and 
 
 This includes:
 - ✅ HDF5 charge extraction
-- ✅ Bar chart with RdBu coloring (red = negative, blue = positive)
+- ✅ Bar chart with RdBu coloring (red = positive, blue = negative)
 - ✅ Interactive 3D structure visualization with charge-colored atoms
 - ✅ Summary statistics (total charge, min/max per atom)
 

@@ -363,7 +363,7 @@ else:
         print(f"  Interpolating (linear, fill_value=NaN for diagnosis)...")
         grid_values = griddata(coords, values, grid_points, method='linear', fill_value=np.nan)
         
-        # ============ DEBUG DIAGNOSTICS ============
+        # ============ Grid statistics ============
         total = len(grid_values)
         nan_count = np.sum(np.isnan(grid_values))
         finite_count = total - nan_count

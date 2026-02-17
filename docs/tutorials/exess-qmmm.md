@@ -39,7 +39,7 @@ This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand o
 
 :::{admonition} Default settings
 :class: note
-Unless overridden, EXESS uses `method="RestrictedHF"`, `basis="STO-3G"`, and `temperature_kelvin=290.0`. The STO-3G basis is a minimal basis set — fast for testing, but not suitable for production dynamics. For meaningful simulations, use a larger basis like `cc-pVDZ`.
+Unless overridden, EXESS uses `method="RestrictedHF"`, `basis="STO-3G"`, and `temperature_kelvin=300.0`. The STO-3G basis is a minimal basis set — fast for testing, but not suitable for production dynamics. For meaningful simulations, use a larger basis like `cc-pVDZ`.
 :::
 
 ---
@@ -52,7 +52,8 @@ To understand exactly what inputs QM/MM needs, let's build a system manually —
 import json
 from rush import exess
 from rush.client import RunOpts
-from rush.mol import Element, Fragment, Residue, Residues, Topology
+from rush import Topology, exess
+from rush.mol import Element, Fragment, Residue, Residues
 
 # Define two water molecules
 topology = Topology(

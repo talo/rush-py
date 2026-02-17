@@ -74,4 +74,4 @@ For aspirin:
 - Try with your own molecules by replacing `aspirin.pdb`
 - Customize visualization colors by editing `charge_to_hex()`
 - Export charges to CSV for downstream analysis
-- Link to the [CHELPG Tutorial](../docs/tutorials/01-chelpg.md) for more details
+- Link to the [CHELPG Tutorial](../../docs/tutorials/01-chelpg.md) for more details
