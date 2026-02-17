@@ -64,7 +64,17 @@ res = exess.energy(
 # Inspect the outputs
 print("Raw outputs:")
 for i, output in enumerate(res):
-    print(f"  [{i}] path={output['path']}, format={output['format']}")
+    if 'path' in output:
+        # First output: flat dict with path/format
+        print(f"  [{i}] path={output['path']}, format={output.get('format', 'unknown')}")
+    elif 'Json' in output:
+        # Type-discriminated JSON output
+        print(f"  [{i}] Json: path={output['Json']['path']}")
+    elif 'Hdf5' in output:
+        # Type-discriminated HDF5 output
+        print(f"  [{i}] Hdf5: path={output['Hdf5']['path']}")
+    else:
+        print(f"  [{i}] Unknown output type with keys: {list(output.keys())}")
 
 # Save outputs to disk (JSON + HDF5)
 files = exess.save_energy_outputs(res)
@@ -73,8 +83,15 @@ print(f"Saved files: {files}")
 # Extract total energy from Example 1 results
 total_energy = None
 for output in res:
-    if output.get("format") == "Json":
+    if 'path' in output and output.get("format") == "Json":
+        # First element: flat dict format
         json_data = output.get("data", {})
+        if "total_energy" in json_data:
+            total_energy = json_data["total_energy"]
+            break
+    elif 'Json' in output:
+        # Second element: type-discriminated format
+        json_data = output['Json'].get("data", {})
         if "total_energy" in json_data:
             total_energy = json_data["total_energy"]
             break
@@ -125,8 +142,15 @@ print("descriptor_grid coordinates, and descriptor_grid_weights.")
 # Try to get total_energy from Example 2 if not found earlier
 if total_energy is None:
     for output in res:
-        if output.get("format") == "Json":
+        if 'path' in output and output.get("format") == "Json":
+            # First element: flat dict format
             json_data = output.get("data", {})
+            if "total_energy" in json_data:
+                total_energy = json_data["total_energy"]
+                break
+        elif 'Json' in output:
+            # Second element: type-discriminated format
+            json_data = output['Json'].get("data", {})
             if "total_energy" in json_data:
                 total_energy = json_data["total_energy"]
                 break
@@ -141,8 +165,13 @@ print("=" * 60)
 # Extract descriptor grid data from the JSON output
 grid_data = None
 for output in res:
-    if output.get("format") == "Json":
+    if 'path' in output and output.get("format") == "Json":
+        # First element: flat dict format
         grid_data = output.get("data", {})
+        break
+    elif 'Json' in output:
+        # Second element: type-discriminated format
+        grid_data = output['Json'].get("data", {})
         break
 
 if grid_data is None:
