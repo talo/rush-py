@@ -29,7 +29,7 @@ CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits pa
 
 1. **rush-py** — `pip install rush-py`
 2. **A PDB file** — For this tutorial, [download `aspirin.pdb`](./aspirin.pdb) and save it to your working directory
-3. **Visualization libraries** (optional) — `matplotlib` and `numpy` for the 3D charge plot
+3. **Visualization libraries** (optional) — `matplotlib` and `py3Dmol` for the 3D charge plot
 
 ---
 
