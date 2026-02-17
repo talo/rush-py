@@ -567,11 +567,13 @@ else:
         energy_display = f"{total_energy:.8f} Eh" if total_energy is not None else "N/A"
         energy_kcal = f"{total_energy * 627.509474:.2f} kcal/mol" if total_energy is not None else ""
 
-        # Use Three.js Marching Cubes viewer instead of 3Dmol
-        # Replace __CUBE_DATA__ placeholder with the actual cube file text
-        cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
-        
-        html_content_template = f"""<!DOCTYPE html>
+        # The inline 3Dmol fallback template is kept below but only evaluated
+        # when viewer_template.html is missing (see conditional after it).
+        # Skip the f-string entirely — jump straight to the template approach.
+        html_content_template = None  # placeholder, used only in fallback
+
+        if False:  # --- BEGIN DEAD 3Dmol FALLBACK (kept for reference) ---
+            html_content_template = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -868,25 +870,26 @@ function setStyle(style) {{
 </script>
 </body>
 </html>"""
+        # --- END DEAD 3Dmol FALLBACK ---
 
-    # ---- Use Three.js Marching Cubes viewer (improved alternative to 3Dmol.js) ----
-    # Load the template and embed the cube data
-    template_path = Path(__file__).parent / "viewer_template.html"
-    if template_path.exists():
-        with open(template_path) as f:
-            html_template = f.read()
-        # Escape cube data for embedding in JavaScript template literal
-        cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
-        html_content = html_template.replace('__CUBE_DATA__', cube_text_escaped)
-        print(f"  ✓ Using Three.js Marching Cubes viewer (fast, beautiful isosurface rendering)")
-    else:
-        # Fallback to embedded 3Dmol version if template not found
-        print(f"  (Template not found, using embedded 3Dmol viewer)")
+        # ---- Use Three.js Marching Cubes viewer ----
+        # Load the template and embed the cube data
+        template_path = Path(__file__).parent / "viewer_template.html"
+        if template_path.exists():
+            with open(template_path) as f:
+                html_template = f.read()
+            # Escape cube data for embedding in JavaScript template literal
+            cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
+            html_content = html_template.replace('__CUBE_DATA__', cube_text_escaped)
+            print(f"  ✓ Using Three.js Marching Cubes viewer (fast, beautiful isosurface rendering)")
+        else:
+            print(f"  ⚠ viewer_template.html not found at {template_path}")
+            html_content = "<html><body><h1>Error: viewer_template.html not found</h1></body></html>"
 
-    html_path = OUTPUT_DIR / "density_visualization.html"
-    html_path.write_text(html_content)
-    print(f"  ✓ Visualization saved: {html_path}")
-    print(f"  Open in a browser to explore the electron density isosurface!")
+        html_path = OUTPUT_DIR / "density_visualization.html"
+        html_path.write_text(html_content)
+        print(f"  ✓ Visualization saved: {html_path}")
+        print(f"  Open in a browser to explore the electron density isosurface!")
     print()
     print("Features:")
     print("  • Rotate: click & drag | Zoom: scroll | Pan: right-click drag")
