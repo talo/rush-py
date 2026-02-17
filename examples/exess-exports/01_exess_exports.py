@@ -567,11 +567,11 @@ else:
         energy_display = f"{total_energy:.8f} Eh" if total_energy is not None else "N/A"
         energy_kcal = f"{total_energy * 627.509474:.2f} kcal/mol" if total_energy is not None else ""
 
-        cube_js = json.dumps(cube_str)
-        esp_cube_js = json.dumps(esp_cube_str) if esp_cube_str else "null"
-        xyz_js = json.dumps(xyz_str)
-
-    html_content = f"""<!DOCTYPE html>
+        # Use Three.js Marching Cubes viewer instead of 3Dmol
+        # Replace __CUBE_DATA__ placeholder with the actual cube file text
+        cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
+        
+        html_content_template = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -868,6 +868,20 @@ function setStyle(style) {{
 </script>
 </body>
 </html>"""
+
+    # ---- Use Three.js Marching Cubes viewer (improved alternative to 3Dmol.js) ----
+    # Load the template and embed the cube data
+    template_path = Path(__file__).parent / "viewer_template.html"
+    if template_path.exists():
+        with open(template_path) as f:
+            html_template = f.read()
+        # Escape cube data for embedding in JavaScript template literal
+        cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
+        html_content = html_template.replace('__CUBE_DATA__', cube_text_escaped)
+        print(f"  ✓ Using Three.js Marching Cubes viewer (fast, beautiful isosurface rendering)")
+    else:
+        # Fallback to embedded 3Dmol version if template not found
+        print(f"  (Template not found, using embedded 3Dmol viewer)")
 
     html_path = OUTPUT_DIR / "density_visualization.html"
     html_path.write_text(html_content)

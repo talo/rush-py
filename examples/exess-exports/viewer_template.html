@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Electron Density Viewer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#12121f;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+#viewer{width:100vw;height:100vh}
+#panel{position:absolute;top:12px;left:12px;z-index:10;background:rgba(18,18,31,0.92);
+  border:1px solid rgba(100,140,255,0.3);border-radius:10px;padding:16px;width:260px;
+  backdrop-filter:blur(8px)}
+#panel h2{font-size:15px;margin-bottom:10px;color:#7ab4ff}
+.ctrl{margin:8px 0}
+.ctrl label{font-size:12px;display:flex;justify-content:space-between;margin-bottom:3px}
+.ctrl input[type=range]{width:100%;accent-color:#4488ff}
+.ctrl select{width:100%;background:#1a1a2e;color:#fff;border:1px solid #444;border-radius:4px;padding:4px}
+#stats{position:absolute;bottom:12px;left:12px;z-index:10;background:rgba(18,18,31,0.9);
+  border:1px solid rgba(100,140,255,0.2);border-radius:8px;padding:10px;font-size:11px;font-family:monospace}
+.btn{background:#2a3a5c;color:#7ab4ff;border:1px solid #4466aa;border-radius:5px;
+  padding:5px 12px;cursor:pointer;font-size:12px;margin:2px}
+.btn:hover{background:#3a4a7c}
+</style>
+</head>
+<body>
+<div id="panel">
+  <h2>⚛️ Electron Density</h2>
+  <div class="ctrl">
+    <label>Isovalue <span id="isoDisp">0.15</span></label>
+    <input type="range" id="isoSlider" min="0.005" max="1.0" step="0.005" value="0.15">
+  </div>
+  <div class="ctrl">
+    <label>Opacity <span id="opDisp">0.70</span></label>
+    <input type="range" id="opSlider" min="0.1" max="1.0" step="0.05" value="0.70">
+  </div>
+  <div class="ctrl">
+    <label>Color scheme</label>
+    <select id="colorScheme">
+      <option value="blue">Blue (orbital)</option>
+      <option value="redblue">Red/Blue (±)</option>
+      <option value="rainbow">Rainbow</option>
+      <option value="thermal">Thermal</option>
+    </select>
+  </div>
+  <div class="ctrl">
+    <label><input type="checkbox" id="showNeg"> Show negative lobe</label>
+    <label><input type="checkbox" id="wireframe"> Wireframe</label>
+    <label><input type="checkbox" id="showAtoms" checked> Show atoms</label>
+  </div>
+  <div style="margin-top:8px">
+    <button class="btn" id="resetView">Reset View</button>
+    <button class="btn" id="autoRotate">Auto-Rotate</button>
+  </div>
+</div>
+<div id="stats">Loading...</div>
+<div id="viewer"></div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ========== CUBE DATA (embedded by Python) ==========
+const CUBE_TEXT = `__CUBE_DATA__`;
+
+// ========== CUBE PARSER ==========
+function parseCube(text) {
+  const lines = text.trim().split('\n');
+  let i = 2;
+  const h = lines[i].trim().split(/\s+/);
+  const natoms = Math.abs(parseInt(h[0]));
+  const origin = [+h[1], +h[2], +h[3]];
+  i++;
+  const grid = [], step = [];
+  for (let d = 0; d < 3; d++, i++) {
+    const p = lines[i].trim().split(/\s+/);
+    grid.push(parseInt(p[0]));
+    step.push([+p[1], +p[2], +p[3]]);
+  }
+  const atoms = [];
+  for (let a = 0; a < natoms; a++, i++) {
+    const p = lines[i].trim().split(/\s+/);
+    atoms.push({ z: +p[0], pos: [+p[2], +p[3], +p[4]] });
+  }
+  const data = new Float32Array(grid[0]*grid[1]*grid[2]);
+  let idx = 0;
+  for (; i < lines.length; i++) {
+    for (const v of lines[i].trim().split(/\s+/)) {
+      if (v && idx < data.length) data[idx++] = parseFloat(v);
+    }
+  }
+  let dmin=Infinity, dmax=-Infinity;
+  for (let j=0;j<data.length;j++) { if(data[j]<dmin)dmin=data[j]; if(data[j]>dmax)dmax=data[j]; }
+  return { origin, grid, step, atoms, data, dmin, dmax };
+}
+
+// ========== MARCHING CUBES ==========
+function marchingCubes(cube, iso) {
+  const [nx,ny,nz] = cube.grid;
+  const d = cube.data;
+  const sx=cube.step[0][0], sy=cube.step[1][1], sz=cube.step[2][2];
+  const ox=cube.origin[0], oy=cube.origin[1], oz=cube.origin[2];
+  const verts = [];
+
+  const V = (ix,iy,iz) => d[ix*ny*nz + iy*nz + iz];
+  const lerp = (p1,p2,v1,v2) => {
+    const t = (iso-v1)/(v2-v1);
+    return [p1[0]+t*(p2[0]-p1[0]), p1[1]+t*(p2[1]-p1[1]), p1[2]+t*(p2[2]-p1[2])];
+  };
+
+  // Edge pairs for a cube cell
+  const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  const CORNERS = [[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]];
+
+  for (let ix=0; ix<nx-1; ix++) for (let iy=0; iy<ny-1; iy++) for (let iz=0; iz<nz-1; iz++) {
+    const vals = CORNERS.map(c => V(ix+c[0], iy+c[1], iz+c[2]));
+    const pos = CORNERS.map(c => [ox+(ix+c[0])*sx, oy+(iy+c[1])*sy, oz+(iz+c[2])*sz]);
+
+    let ci = 0;
+    for (let c=0; c<8; c++) if (vals[c] >= iso) ci |= (1<<c);
+    if (ci===0 || ci===255) continue;
+
+    const ev = [];
+    for (const [a,b] of EDGES) {
+      if ((vals[a]>=iso) !== (vals[b]>=iso)) {
+        ev.push(lerp(pos[a], pos[b], vals[a], vals[b]));
+      }
+    }
+    // Fan triangulation
+    for (let t=1; t<ev.length-1; t++) {
+      verts.push(...ev[0], ...ev[t], ...ev[t+1]);
+    }
+  }
+  return new Float32Array(verts);
+}
+
+// ========== SCENE SETUP ==========
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.01, 200);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.getElementById('viewer').appendChild(renderer.domElement);
+
+const ctrl = new OrbitControls(camera, renderer.domElement);
+ctrl.enableDamping = true;
+ctrl.dampingFactor = 0.08;
+
+// Lights
+scene.add(new THREE.AmbientLight(0x404060, 1.5));
+const key = new THREE.DirectionalLight(0xffffff, 1.8); key.position.set(5,5,5); scene.add(key);
+const fill = new THREE.DirectionalLight(0x6688cc, 0.6); fill.position.set(-3,-2,-3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xaaccff, 0.4); rim.position.set(0,-5,0); scene.add(rim);
+
+// Color schemes
+const COLORS = {
+  blue: { pos: 0x3388ff, neg: 0xff4444 },
+  redblue: { pos: 0x4444ff, neg: 0xff4444 },
+  rainbow: { pos: 0x00cc88, neg: 0xff6600 },
+  thermal: { pos: 0xffaa00, neg: 0x0066ff }
+};
+
+let posMat = new THREE.MeshPhongMaterial({
+  color: 0x3388ff, transparent: true, opacity: 0.7,
+  side: THREE.DoubleSide, shininess: 60, depthWrite: false
+});
+let negMat = new THREE.MeshPhongMaterial({
+  color: 0xff4444, transparent: true, opacity: 0.7,
+  side: THREE.DoubleSide, shininess: 60, depthWrite: false
+});
+
+let posMesh = null, negMesh = null;
+const atomGroup = new THREE.Group();
+scene.add(atomGroup);
+
+// Element colors/radii
+const ELEM = {
+  1:{c:0xffffff,r:0.25,n:'H'}, 6:{c:0x444444,r:0.35,n:'C'}, 7:{c:0x2222ff,r:0.33,n:'N'},
+  8:{c:0xff2222,r:0.33,n:'O'}, 9:{c:0x22ff22,r:0.32,n:'F'}, 16:{c:0xffff22,r:0.38,n:'S'},
+  17:{c:0x22ff22,r:0.36,n:'Cl'}, 26:{c:0xcc6600,r:0.4,n:'Fe'}
+};
+
+function addAtoms(atoms) {
+  atomGroup.clear();
+  atoms.forEach(a => {
+    const e = ELEM[a.z] || {c:0x888888,r:0.3};
+    const geo = new THREE.SphereGeometry(e.r, 24, 24);
+    const mat = new THREE.MeshPhongMaterial({ color: e.c, shininess: 80 });
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(...a.pos);
+    atomGroup.add(m);
+  });
+}
+
+function updateSurface(cube, iso) {
+  const t0 = performance.now();
+
+  // Positive isosurface
+  if (posMesh) { scene.remove(posMesh); posMesh.geometry.dispose(); posMesh = null; }
+  const posV = marchingCubes(cube, iso);
+  if (posV.length > 0) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(posV, 3));
+    g.computeVertexNormals();
+    posMesh = new THREE.Mesh(g, posMat);
+    scene.add(posMesh);
+  }
+
+  // Negative isosurface
+  if (negMesh) { scene.remove(negMesh); negMesh.geometry.dispose(); negMesh = null; }
+  if (document.getElementById('showNeg').checked && cube.dmin < 0) {
+    const negV = marchingCubes({...cube, data: cube.data.map(v => -v)}, iso);
+    if (negV.length > 0) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(negV, 3));
+      g.computeVertexNormals();
+      negMesh = new THREE.Mesh(g, negMat);
+      scene.add(negMesh);
+    }
+  }
+
+  const dt = (performance.now()-t0).toFixed(0);
+  const nTri = ((posV.length + (negMesh?.geometry.attributes.position?.count||0)*3) / 9)|0;
+  document.getElementById('stats').textContent =
+    `Grid: ${cube.grid.join('×')} (${cube.data.length.toLocaleString()} pts) | ` +
+    `Triangles: ${nTri.toLocaleString()} | ${dt}ms | ` +
+    `Range: [${cube.dmin.toFixed(4)}, ${cube.dmax.toFixed(4)}]`;
+}
+
+// ========== LOAD & INIT ==========
+let cubeData;
+
+function init(text) {
+  cubeData = parseCube(text);
+
+  // Auto-set slider range
+  const sl = document.getElementById('isoSlider');
+  sl.min = (cubeData.dmax * 0.005).toFixed(5);
+  sl.max = (cubeData.dmax * 0.8).toFixed(5);
+  sl.value = (cubeData.dmax * 0.15).toFixed(5);
+  document.getElementById('isoDisp').textContent = parseFloat(sl.value).toFixed(4);
+
+  addAtoms(cubeData.atoms);
+
+  // Center camera on data
+  const cx = cubeData.origin[0] + cubeData.grid[0]*cubeData.step[0][0]/2;
+  const cy = cubeData.origin[1] + cubeData.grid[1]*cubeData.step[1][1]/2;
+  const cz = cubeData.origin[2] + cubeData.grid[2]*cubeData.step[2][2]/2;
+  const extent = Math.max(
+    cubeData.grid[0]*cubeData.step[0][0],
+    cubeData.grid[1]*cubeData.step[1][1],
+    cubeData.grid[2]*cubeData.step[2][2]
+  );
+  ctrl.target.set(cx, cy, cz);
+  camera.position.set(cx + extent, cy + extent*0.6, cz + extent);
+  ctrl.update();
+
+  updateSurface(cubeData, parseFloat(sl.value));
+}
+
+// Try embedded data first, fall back to sample generation
+if (CUBE_TEXT.includes('__CUBE' + '_DATA__')) {
+  // No embedded data - generate sample
+  const n=25, s=6/(n-1), o=-3;
+  const atoms = [{z:1,pos:[0,0,-0.7]},{z:1,pos:[0,0,0.7]}];
+  let lines = ['Sample H2','Generated'];
+  lines.push(`  2  ${o}  ${o}  ${o}`);
+  lines.push(`  ${n}  ${s}  0  0`);
+  lines.push(`  ${n}  0  ${s}  0`);
+  lines.push(`  ${n}  0  0  ${s}`);
+  lines.push(`  1  0  0  0  -0.7`);
+  lines.push(`  1  0  0  0  0.7`);
+  for(let ix=0;ix<n;ix++) for(let iy=0;iy<n;iy++) for(let iz=0;iz<n;iz++){
+    const x=o+ix*s,y=o+iy*s,z=o+iz*s;
+    lines.push(`  ${(Math.exp(-1.5*(x*x+y*y+(z+0.7)**2))+Math.exp(-1.5*(x*x+y*y+(z-0.7)**2))).toExponential(5)}`);
+  }
+  init(lines.join('\n'));
+} else {
+  init(CUBE_TEXT);
+}
+
+// ========== CONTROLS ==========
+document.getElementById('isoSlider').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('isoDisp').textContent = v.toFixed(4);
+  updateSurface(cubeData, v);
+});
+document.getElementById('opSlider').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('opDisp').textContent = v.toFixed(2);
+  posMat.opacity = v; negMat.opacity = v;
+});
+document.getElementById('wireframe').addEventListener('change', e => {
+  posMat.wireframe = negMat.wireframe = e.target.checked;
+});
+document.getElementById('showNeg').addEventListener('change', () => {
+  updateSurface(cubeData, parseFloat(document.getElementById('isoSlider').value));
+});
+document.getElementById('showAtoms').addEventListener('change', e => {
+  atomGroup.visible = e.target.checked;
+});
+document.getElementById('colorScheme').addEventListener('change', e => {
+  const c = COLORS[e.target.value];
+  posMat.color.set(c.pos); negMat.color.set(c.neg);
+});
+document.getElementById('resetView').addEventListener('click', () => {
+  const cx = cubeData.origin[0] + cubeData.grid[0]*cubeData.step[0][0]/2;
+  const cy = cubeData.origin[1] + cubeData.grid[1]*cubeData.step[1][1]/2;
+  const cz = cubeData.origin[2] + cubeData.grid[2]*cubeData.step[2][2]/2;
+  const ext = Math.max(cubeData.grid[0]*cubeData.step[0][0], cubeData.grid[1]*cubeData.step[1][1], cubeData.grid[2]*cubeData.step[2][2]);
+  ctrl.target.set(cx,cy,cz);
+  camera.position.set(cx+ext, cy+ext*0.6, cz+ext);
+});
+document.getElementById('autoRotate').addEventListener('click', () => {
+  ctrl.autoRotate = !ctrl.autoRotate;
+  ctrl.autoRotateSpeed = 2;
+});
+
+// Animation
+(function animate() {
+  requestAnimationFrame(animate);
+  ctrl.update();
+  renderer.render(scene, camera);
+})();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
