@@ -377,25 +377,79 @@ else:
         grid_x, grid_y, grid_z = np.meshgrid(xi, yi, zi, indexing='ij')
         grid_points = np.column_stack([grid_x.ravel(), grid_y.ravel(), grid_z.ravel()])
         
-        # CRITICAL FIX: Use fill_value=0.0, NOT nearest-neighbor backfill
-        # Density outside the molecular surface IS zero, not extrapolated!
-        print(f"  Interpolating (linear, fill_value=0.0 to prevent artifact slab)...")
-        grid_values = griddata(coords, values, grid_points, method='linear', fill_value=0.0)
+        # Interpolate using linear method, fill outside convex hull with NaN
+        # so we can diagnose how many points are outside the convex hull
+        print(f"  Interpolating (linear, fill_value=NaN for diagnosis)...")
+        grid_values = griddata(coords, values, grid_points, method='linear', fill_value=np.nan)
         
-        # Clip noise: values below 1e-10 are numerical artifacts from interpolation
-        noise_count = np.sum((grid_values > 0) & (grid_values < 1e-10))
-        grid_values[grid_values < 1e-10] = 0.0
-        grid_values = grid_values.astype(np.float32)
-        
-        # Statistics
+        # ============ DEBUG DIAGNOSTICS ============
         total = len(grid_values)
+        nan_count = np.sum(np.isnan(grid_values))
+        finite_count = total - nan_count
+        print(f"\n  🔍 DEBUG: Interpolation diagnostics:")
+        print(f"  Total grid points: {total}")
+        print(f"  NaN (outside convex hull): {nan_count} ({100*nan_count/total:.1f}%)")
+        print(f"  Finite (inside convex hull): {finite_count} ({100*finite_count/total:.1f}%)")
+        
+        if finite_count > 0:
+            finite_vals = grid_values[np.isfinite(grid_values)]
+            print(f"  Finite value range: [{finite_vals.min():.6e}, {finite_vals.max():.6e}]")
+            print(f"  Finite value mean: {finite_vals.mean():.6e}")
+            print(f"  Finite value median: {np.median(finite_vals):.6e}")
+            
+            # Distribution analysis
+            neg_count = np.sum(finite_vals < 0)
+            tiny_count = np.sum((finite_vals >= 0) & (finite_vals < 1e-10))
+            small_count = np.sum((finite_vals >= 1e-10) & (finite_vals < 1e-5))
+            medium_count = np.sum((finite_vals >= 1e-5) & (finite_vals < 1e-1))
+            large_count = np.sum(finite_vals >= 1e-1)
+            
+            print(f"  Distribution of finite values:")
+            print(f"    Negative:        {neg_count}")
+            print(f"    [0, 1e-10):      {tiny_count}")
+            print(f"    [1e-10, 1e-5):   {small_count}")
+            print(f"    [1e-5, 1e-1):    {medium_count}")
+            print(f"    [1e-1, ∞):       {large_count}")
+            
+            # Percentiles of finite values
+            for p in [1, 5, 10, 25, 50, 75, 90, 95, 99]:
+                print(f"    P{p:2d}: {np.percentile(finite_vals, p):.6e}")
+        
+        # Now set NaN → 0.0 (density outside molecular surface is zero)
+        grid_values = np.where(np.isnan(grid_values), 0.0, grid_values)
+        
+        # Clip noise: use percentile-based threshold instead of fixed 1e-10
+        # The old threshold of 1e-10 was wiping ALL data if values are very small!
+        if finite_count > 0:
+            finite_vals = grid_values[grid_values != 0.0]
+            if len(finite_vals) > 0:
+                # Use 1st percentile of positive values as noise floor
+                pos_vals = finite_vals[finite_vals > 0]
+                if len(pos_vals) > 0:
+                    noise_floor = np.percentile(pos_vals, 1)
+                    # But never clip above 1e-5 (safety)
+                    noise_threshold = min(noise_floor * 0.1, 1e-5)
+                else:
+                    noise_threshold = 0.0  # no positive values, skip clipping
+                print(f"  Noise threshold (adaptive): {noise_threshold:.6e}")
+                noise_count = np.sum((grid_values > 0) & (grid_values < noise_threshold))
+                grid_values[(grid_values > 0) & (grid_values < noise_threshold)] = 0.0
+                print(f"  Noise points clipped: {noise_count}")
+        
+        # Also zero out negative interpolation artifacts
+        neg_artifacts = np.sum(grid_values < 0)
+        if neg_artifacts > 0:
+            print(f"  Negative artifacts zeroed: {neg_artifacts}")
+            grid_values[grid_values < 0] = 0.0
+        
+        # Final statistics
         zero_count = np.sum(grid_values == 0.0)
         nonzero_count = total - zero_count
         
-        print(f"  ✓ Interpolated density range: [{grid_values.min():.3e}, {grid_values.max():.3e}]")
-        print(f"  Points inside convex hull: {nonzero_count} ({100*nonzero_count/total:.1f}%)")
-        print(f"  Points outside (set to 0): {zero_count} ({100*zero_count/total:.1f}%)")
-        print(f"  Noise points clipped (<1e-10): {noise_count}")
+        grid_values = grid_values.astype(np.float32)
+        print(f"\n  ✓ Final grid range: [{grid_values.min():.3e}, {grid_values.max():.3e}]")
+        print(f"  Points with data: {nonzero_count} ({100*nonzero_count/total:.1f}%)")
+        print(f"  Points zero: {zero_count} ({100*zero_count/total:.1f}%)")
         
         # Suggest isovalues
         if nonzero_count > 0:
