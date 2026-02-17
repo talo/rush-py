@@ -37,13 +37,11 @@ body{background:#12121f;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
     <label>Color scheme</label>
     <select id="colorScheme">
       <option value="blue">Blue (orbital)</option>
-      <option value="redblue">Red/Blue (±)</option>
       <option value="rainbow">Rainbow</option>
       <option value="thermal">Thermal</option>
     </select>
   </div>
   <div class="ctrl">
-    <label><input type="checkbox" id="showNeg"> Show negative lobe</label>
     <label><input type="checkbox" id="wireframe"> Wireframe</label>
     <label><input type="checkbox" id="showAtoms" checked> Show atoms</label>
   </div>
@@ -158,7 +156,6 @@ const rim = new THREE.DirectionalLight(0xaaccff, 0.4); rim.position.set(0,-5,0);
 // Color schemes
 const COLORS = {
   blue: { pos: 0x3388ff, neg: 0xff4444 },
-  redblue: { pos: 0x4444ff, neg: 0xff4444 },
   rainbow: { pos: 0x00cc88, neg: 0xff6600 },
   thermal: { pos: 0xffaa00, neg: 0x0066ff }
 };
@@ -167,12 +164,8 @@ let posMat = new THREE.MeshPhongMaterial({
   color: 0x3388ff, transparent: true, opacity: 0.7,
   side: THREE.DoubleSide, shininess: 60, depthWrite: false
 });
-let negMat = new THREE.MeshPhongMaterial({
-  color: 0xff4444, transparent: true, opacity: 0.7,
-  side: THREE.DoubleSide, shininess: 60, depthWrite: false
-});
 
-let posMesh = null, negMesh = null;
+let posMesh = null;
 const atomGroup = new THREE.Group();
 scene.add(atomGroup);
 
@@ -209,21 +202,8 @@ function updateSurface(cube, iso) {
     scene.add(posMesh);
   }
 
-  // Negative isosurface
-  if (negMesh) { scene.remove(negMesh); negMesh.geometry.dispose(); negMesh = null; }
-  if (document.getElementById('showNeg').checked && cube.dmin < 0) {
-    const negV = marchingCubes({...cube, data: cube.data.map(v => -v)}, iso);
-    if (negV.length > 0) {
-      const g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.BufferAttribute(negV, 3));
-      g.computeVertexNormals();
-      negMesh = new THREE.Mesh(g, negMat);
-      scene.add(negMesh);
-    }
-  }
-
   const dt = (performance.now()-t0).toFixed(0);
-  const nTri = ((posV.length + (negMesh?.geometry.attributes.position?.count||0)*3) / 9)|0;
+  const nTri = (posV.length / 9)|0;
   document.getElementById('stats').textContent =
     `Grid: ${cube.grid.join('×')} (${cube.data.length.toLocaleString()} pts) | ` +
     `Triangles: ${nTri.toLocaleString()} | ${dt}ms | ` +
@@ -291,20 +271,17 @@ document.getElementById('isoSlider').addEventListener('input', e => {
 document.getElementById('opSlider').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('opDisp').textContent = v.toFixed(2);
-  posMat.opacity = v; negMat.opacity = v;
+  posMat.opacity = v;
 });
 document.getElementById('wireframe').addEventListener('change', e => {
-  posMat.wireframe = negMat.wireframe = e.target.checked;
-});
-document.getElementById('showNeg').addEventListener('change', () => {
-  updateSurface(cubeData, parseFloat(document.getElementById('isoSlider').value));
+  posMat.wireframe = e.target.checked;
 });
 document.getElementById('showAtoms').addEventListener('change', e => {
   atomGroup.visible = e.target.checked;
 });
 document.getElementById('colorScheme').addEventListener('change', e => {
   const c = COLORS[e.target.value];
-  posMat.color.set(c.pos); negMat.color.set(c.neg);
+  posMat.color.set(c.pos);
 });
 document.getElementById('resetView').addEventListener('click', () => {
   const cx = cubeData.origin[0] + cubeData.grid[0]*cubeData.step[0][0]/2;
