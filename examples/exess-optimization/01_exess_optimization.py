@@ -11,7 +11,7 @@ Tutorial: docs/tutorials/exess-optimization.md
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
-    - Input file: benzene_t.json (provided in data/)
+    - Input file: h2o2_t.json (provided in data/) - planar H2O2 optimizes to show torsional changes
 
 Output files (saved to optimization-outputs/):
     - optimization_results.html: Interactive visualization with energy plot,
@@ -25,7 +25,7 @@ from rush import Topology, exess
 from rush.client import RunOpts, save_object
 
 DATA_DIR = Path(__file__).parent / "data"
-INPUT_FILE = DATA_DIR / "benzene_t.json"
+INPUT_FILE = DATA_DIR / "h2o2_t.json"
 OUTPUT_DIR = Path(__file__).parent / "optimization-outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
