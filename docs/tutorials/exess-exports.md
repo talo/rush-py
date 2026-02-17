@@ -148,6 +148,52 @@ The `expanded_esp_descriptors` export currently causes an out-of-memory error. D
 
 ---
 
+## Example 3: Working with the Output
+
+Once you have the saved files, you can load and inspect them in Python:
+
+```python
+import json
+import h5py
+
+# Load the JSON energy output
+with open(files[0]) as f:
+    energy_data = json.load(f)
+print(f"Total energy: {energy_data['total_energy']} Hartree")
+
+# Load the HDF5 export (if not using convert_hdf5_to_json)
+with h5py.File(files[1], "r") as f:
+    print("HDF5 datasets:", list(f.keys()))
+    density = f["density"][:]
+    print(f"Density shape: {density.shape}")
+```
+
+If you used `convert_hdf5_to_json=True` (as in Example 2), the second file is JSON instead:
+
+```python
+with open(files[1]) as f:
+    export_data = json.load(f)
+
+density = export_data["density_descriptors"]
+esp = export_data["esp_descriptors"]
+grid = export_data["descriptor_grid"]
+print(f"Got {len(density)} density values at {len(grid)} grid points")
+```
+
+---
+
+## Visualization
+
+The example script includes additional code to:
+
+- Download and decompress HDF5 output with zstandard
+- Interpolate scattered data onto a regular 3D grid with scipy
+- Generate an interactive 3D electron density viewer using Three.js Marching Cubes
+
+See the full [`examples/exess-exports/01_exess_exports.py`](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) script for complete details.
+
+---
+
 ## See Also
 
 - {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute energies alongside exports
