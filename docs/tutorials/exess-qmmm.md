@@ -1,0 +1,123 @@
+<<<<<<< HEAD
+# EXESS QMMM
+=======
+# EXESS: QM/MM
+>>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
+
+EXESS can use its gradient calculation and Q4ML capabilities to run simulations as well.
+
+:::{admonition} Reminder
+:class: attention
+Don't forget to set `RUSH_TOKEN` and `RUSH_PROJECT`!
+:::
+
+## Basic QM/MM run
+
+```{code-block} python
+:caption: qmmm.py
+from rush import exess
+from rush.client import RunOpts, save_object
+
+out = exess.qmmm(
+    "6a5j_t.json",
+    "6a5j_r.json",
+    500,  # This is the number of timesteps to run the simulation for
+    qm_fragments=[6],  # QM region: just the fragment at index 6
+    ml_fragments=[],   # ML region: empty, so rest is in the MM region
+    run_opts=RunOpts(name="Tutorial: QM/MM"),
+    collect=True,
+)
+```
+
+## Minimal QM/MM input
+
+For a taste of what information is required by QM/MM for the input system, let's generate the Topology and Residues objects for two water molecules manually using rush-py and run a simulation using all QM fragments:
+
+```{code-block} python
+:caption: qmmm_minimal.py
+import json
+
+from rush import exess
+from rush.mol import Element, Fragment, Residue, Residues, Topology
+
+topology = Topology(
+    symbols=[Element.O, Element.H, Element.H, Element.O, Element.H, Element.H],
+    geometry=[
+         0.0000, 0.0000, 0.0000,
+         0.7570, 0.5860, 0.0000,
+        -0.7570, 0.5860, 0.0000,
+         2.8000, 0.0000, 0.0000,
+         3.5570, 0.5860, 0.0000,
+         2.0430, 0.5860, 0.0000,
+    ],
+    fragments=[Fragment([0, 1, 2]), Fragment([3, 4, 5])],
+)
+
+residues = Residues(
+    residues=[Residue([0, 1, 2]), Residue([3, 4, 5])],
+    seqs=["HOH", "HOH"],
+)
+
+with open("molecule_t.json", "w") as f_t, open("molecule_r.json"), "w" as f_r:
+    json.dump(topology.to_json(), f_t)
+    json.dump(residues.to_json(), f_r)
+
+out = exess.qmmm(
+    topology_path="molecule_t.json",
+    residues_path="molecule_r.json",
+    n_timesteps=100,
+    trajectory=exess.Trajectory(include_waters=True),
+    ml_fragments=[],
+    mm_fragments=[],
+    run_opts=RunOpts(name="Tutorial: QM/MM with Manually-Constructed Water"),
+    collect=True,
+)
+```
+
+:::{note}
+The `exess.qmmm` function defaults to `method="RestrictedHF"`, `basis="STO-3G"`, and `temperature_kelvin=290.0` unless overridden. See the {doc}`EXESS input reference <../exess/input>` for its other defaults.
+:::
+
+## Working with the output
+
+The sole output is a vector of geometries, one for each simulation timestep, which provides the atoms' coordinates. The geometries information is just a 1D list of floats, the same format as the `Topology.geometry` field. So, any element in it can be set directly into that field to update the coordinates to those for that timestep. Here's an example of printing the coordinates of the atoms for both the initial system and at the end of the simulation:
+```{code-block} python
+:caption: get_qmmm_trajectory.py
+import json
+from itertools import batched
+from pathlib import Path
+
+from rush import Topology
+
+out_file = save_object(out["path"])
+with open(out_file) as f:
+    out_traj = json.load(f)["geometries"]
+
+topology = Topology.from_json(Path("molecule_t.json"))
+print("Atoms at First Step")
+for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
+    print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")
+
+topology.geometry = out_traj[-1]
+print("Atoms at Final Step")
+for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
+    print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")
+```
+
+This will produce output like the following for the minimal system above:
+```{code-block} text
+Atoms at First Step
+  x:  0.0000, y:  0.0000, z:  0.0000
+  x:  0.7570, y:  0.5860, z:  0.0000
+  x: -0.7570, y:  0.5860, z:  0.0000
+  x:  2.8000, y:  0.0000, z:  0.0000
+  x:  3.5570, y:  0.5860, z:  0.0000
+  x:  2.0430, y:  0.5860, z:  0.0000
+Atoms at Final Step
+  x: -3.3974, y:  0.0462, z:  0.0322
+  x: -3.2867, y:  1.0793, z: -0.0014
+  x: -4.4081, y:  0.0531, z:  0.0658
+  x:  3.4286, y:  0.0657, z:  0.1163
+  x:  3.3724, y: -0.9301, z:  0.1350
+  x:  4.4636, y:  0.1491, z:  0.1221
+```

@@ -23,9 +23,28 @@ from rush.exess import exess as run_exess
 run_exess("input_topology.json", collect=True)
 ```
 
-And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn about QDX Topology files, check the relevant section of the guide. TODO: Insert link here.
+And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn more about EXESS capabilities, see the [EXESS documentation](../exess/index.md). To learn about QDX Topology files, check the [topologies section](../exess/topologies.md).
 
 You can use [the topology file for a small protein from the 1KUW structure on the PDB](https://github.com/talo/rush-py/blob/main/tests/data/1kuw_t.json) as the input, or for very quick runs, our topology files for [benzene](https://github.com/talo/rush-py/blob/main/tests/data/benzene_t.json) or [ethane](https://github.com/talo/rush-py/blob/main/tests/data/ethane_t.json).
+
+### Getting Results
+
+Here's a complete example that runs an energy calculation and prints the result:
+
+```python
+import json
+from rush import exess
+from rush.client import save_object
+
+res = exess.energy("benzene_t.json", collect=True)
+output_file = save_object(res[0]["path"])
+
+with open(output_file) as f:
+    output_data = json.load(f)
+
+print("EXPANDED HF ENERGY:")
+print(output_data["qmmbe"]["expanded_hf_energy"])
+```
 
 ### Asynchronous Runs and Collecting Runs
 
@@ -38,6 +57,7 @@ result = collect_run(id)
 ```
 
 As shown, module calls return a "run ID" that can be used as above to collect any run that you've submitted.
+
 
 ### Supplementary Entrypoints
 

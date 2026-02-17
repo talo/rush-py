@@ -1,4 +1,4 @@
-# Exporting Data from EXESS
+# EXESS: Exporting Data
 
 EXESS provides its primary output through a JSON file, which through rush-py is its first (zeroth-indexed) output. Additional data can be requested through the `export_keywords` parameter.
 
@@ -74,7 +74,7 @@ res = exess.energy(
 )
 ```
 
-Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values and should be avoided. 
+Note that we did not use fragmentation, which complicates the interpretation of the descriptor grid values.
 
 Because the descriptor grid values aren't particularly numerous, it may be more convenient to save them as JSON. This can be done by passing `convert_hdf5_to_json=True` to exess.energy as shown above and then saving the output using `exess.save_energy_outputs`:
 ```python
@@ -128,7 +128,7 @@ After opening the saved JSON file, one might see output as follows:
 }
 ```
 
-The data for the exported values are present, and the descriptor grid coordinates are given as well. Descriptor grid weights are also present. TODO: Learn when these weights are something other than 1.0, and explain how to create these types of grids, how they behave, and what they are useful for.
+The data for the exported values are present, and the descriptor grid coordinates are given as well. Descriptor grid weights are also present.
 
 This will convert the HDF5 file to JSON and save it to the workspace with its filename as the path of the original HDF5 output, same as if the HDF5 file itself had been saved, but with the `.json` extension instead, as expected.
 
@@ -142,6 +142,4 @@ The `CustomDescriptorGrid` can be constructed by passing a single list with the 
 
 The `StandardDescriptorGrid` takes a single string keyword. Valud values are `"FINE"`, `"ULTRAFINE"`, `"SUPERFINE"`, `"TREUTLER_GM3"`, and `"TREUTLER_GM5"`. These are radial grids centered around the atom locations. `StandardDescriptorGrid("ULTRAFINE")` can serve as a good baseline if a radial grid is desired.
 
-The `DescriptorGrid` class takes three arguments to its constructor: `points_per_shell` (an int), `order` (must be either `"One"` or `"Two"`), and `scale` (a float). TODO: Learn how the grid is constructed from this and document it.
-
-TODO: The EXESS validation tests exemplify other ways of constructing descriptor grids; support them and document them as well.
+The `DescriptorGrid` class takes three arguments to its constructor: `points_per_shell` (an int), `order` (must be either `"One"` or `"Two"`), and `scale` (a float).
