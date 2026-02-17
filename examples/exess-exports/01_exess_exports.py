@@ -765,15 +765,51 @@ let spinning = false;
 viewer.addModel(xyzData, 'xyz');
 setStyle('ballstick');
 
-// Add density volume
-viewer.addVolumetricData(cubeData, 'cube');
-if (espCubeData) {{
-  viewer.addVolumetricData(espCubeData, 'cube');
+// Parse and add cube volumes
+let vol = null;
+try {{
+  // Parse cube file manually
+  vol = parseCubeToVolume(cubeData);
+}} catch(e) {{
+  console.error('Error parsing cube:', e);
 }}
 
 updateSurfaces();
 viewer.zoomTo();
 viewer.render();
+
+// Simple cube file parser
+function parseCubeToVolume(cubeStr) {{
+  const lines = cubeStr.trim().split('\\n');
+  // Skip comment lines and parse header
+  const header = lines[2].split(/\\s+/).map(Number);
+  const natoms = header[0];
+  
+  // Parse grid parameters
+  const gridX = lines[3].split(/\\s+/).slice(0, 4).map(Number);
+  const gridY = lines[4].split(/\\s+/).slice(0, 4).map(Number);
+  const gridZ = lines[5].split(/\\s+/).slice(0, 4).map(Number);
+  
+  const nx = gridX[0], ny = gridY[0], nz = gridZ[0];
+  const xstep = gridX[1], ystep = gridY[2], zstep = gridZ[3];
+  
+  // Skip atom lines and parse volumetric data
+  const dataStart = 6 + natoms;
+  const data = [];
+  for (let i = dataStart; i < lines.length; i++) {{
+    const vals = lines[i].trim().split(/\\s+/).map(Number);
+    data.push(...vals);
+  }}
+  
+  return {{
+    origin: [header[1], header[2], header[3]],
+    nX: nx, nY: ny, nZ: nz,
+    data: new Float32Array(data),
+    ystep: ystep,
+    zstep: zstep,
+    xstep: xstep
+  }};
+}}
 
 function updateIsoLabel() {{
   const slider = document.getElementById('iso-slider');
@@ -786,40 +822,19 @@ function updateSurfaces() {{
   const showDensity = document.getElementById('chk-density').checked;
   const isoVal = Math.pow(10, parseFloat(document.getElementById('iso-slider').value));
   const opacity = parseFloat(document.getElementById('opacity-slider').value);
-  const useESP = document.getElementById('chk-esp').checked && espCubeData;
-
-  if (showDensity) {{
-    const surfSpec = {{
-      isoval: isoVal,
-      smoothness: 3,
-      opacity: opacity,
-      voldata: cubeData,
-      volscheme: useESP ? new $3Dmol.Gradient.RWB(-0.05, 0.05) : undefined,
-      volformat: 'cube',
-      color: useESP ? undefined : '#3388ff',
-    }};
-
-    // If ESP coloring, use the ESP cube as the color source
-    if (useESP) {{
-      surfSpec.voldata = cubeData;
-      surfSpec.volformat = 'cube';
-      // Map ESP values to red-white-blue gradient
-      viewer.addIsosurface(cubeData, {{
+  
+  if (showDensity && vol) {{
+    try {{
+      // Add volume surface with the parsed cube data
+      viewer.addSurface($3Dmol.SurfaceType.VDW, {{
+        voldata: vol,
         isoval: isoVal,
-        smoothness: 3,
-        opacity: opacity,
-        volformat: 'cube',
-        voldata: espCubeData,
-        volscheme: new $3Dmol.Gradient.RWB(-0.05, 0.05),
-      }});
-    }} else {{
-      viewer.addIsosurface(cubeData, {{
-        isoval: isoVal,
-        smoothness: 3,
         opacity: opacity,
         color: '#4488ff',
-        volformat: 'cube',
+        smoothness: 2
       }});
+    }} catch(e) {{
+      console.error('Error adding surface:', e);
     }}
   }}
   viewer.render();
