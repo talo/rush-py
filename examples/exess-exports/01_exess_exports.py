@@ -186,9 +186,6 @@ if hdf5_path:
     
     # Debug: show what we actually got
     print(f"  Decompressed size: {len(decompressed)} bytes")
-    first_bytes = decompressed[:32]
-    print(f"  First 32 bytes (hex): {first_bytes.hex()}")
-    print(f"  First 32 bytes (repr): {repr(first_bytes)}")
     
     # Check for HDF5 magic
     HDF5_MAGIC = b'\x89HDF\r\n\x1a\n'
@@ -197,8 +194,6 @@ if hdf5_path:
     is_hdf5 = decompressed.startswith(HDF5_MAGIC)
     is_tar = len(decompressed) > 257 and decompressed[257:262] == TAR_MAGIC
     
-    print(f"  Format detection: HDF5={is_hdf5}, TAR={is_tar}")
-    
     grid_data = {}
     
     if is_hdf5:
@@ -206,18 +201,6 @@ if hdf5_path:
         print("  Reading raw HDF5 file...")
         try:
             with h5py.File(BytesIO(decompressed), "r") as h5f:
-                def print_h5_tree(group, indent=0):
-                    for key in group.keys():
-                        item = group[key]
-                        if isinstance(item, h5py.Dataset):
-                            print(f"    {'  ' * indent}Dataset '{key}': shape={item.shape}, dtype={item.dtype}")
-                        elif isinstance(item, h5py.Group):
-                            print(f"    {'  ' * indent}Group '{key}':")
-                            print_h5_tree(item, indent + 1)
-                
-                print("  HDF5 structure:")
-                print_h5_tree(h5f)
-                
                 # Try to extract known keys
                 if "density_descriptors" in h5f:
                     grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
@@ -257,7 +240,6 @@ if hdf5_path:
                     print(f"  Extracting: {h5_member.name}")
                     h5f_obj = tar.extractfile(h5_member)
                     with h5py.File(h5f_obj, "r") as h5f:
-                        print(f"  HDF5 datasets: {list(h5f.keys())}")
                         if "density_descriptors" in h5f:
                             grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
                         if "esp_descriptors" in h5f:
@@ -278,7 +260,6 @@ if hdf5_path:
             print(f"  Found HDF5 magic at offset {hdf5_offset}")
             try:
                 with h5py.File(BytesIO(decompressed[hdf5_offset:]), "r") as h5f:
-                    print(f"  HDF5 datasets: {list(h5f.keys())}")
                     if "density_descriptors" in h5f:
                         grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
                     if "esp_descriptors" in h5f:
@@ -386,34 +367,6 @@ else:
         total = len(grid_values)
         nan_count = np.sum(np.isnan(grid_values))
         finite_count = total - nan_count
-        print(f"\n  🔍 DEBUG: Interpolation diagnostics:")
-        print(f"  Total grid points: {total}")
-        print(f"  NaN (outside convex hull): {nan_count} ({100*nan_count/total:.1f}%)")
-        print(f"  Finite (inside convex hull): {finite_count} ({100*finite_count/total:.1f}%)")
-        
-        if finite_count > 0:
-            finite_vals = grid_values[np.isfinite(grid_values)]
-            print(f"  Finite value range: [{finite_vals.min():.6e}, {finite_vals.max():.6e}]")
-            print(f"  Finite value mean: {finite_vals.mean():.6e}")
-            print(f"  Finite value median: {np.median(finite_vals):.6e}")
-            
-            # Distribution analysis
-            neg_count = np.sum(finite_vals < 0)
-            tiny_count = np.sum((finite_vals >= 0) & (finite_vals < 1e-10))
-            small_count = np.sum((finite_vals >= 1e-10) & (finite_vals < 1e-5))
-            medium_count = np.sum((finite_vals >= 1e-5) & (finite_vals < 1e-1))
-            large_count = np.sum(finite_vals >= 1e-1)
-            
-            print(f"  Distribution of finite values:")
-            print(f"    Negative:        {neg_count}")
-            print(f"    [0, 1e-10):      {tiny_count}")
-            print(f"    [1e-10, 1e-5):   {small_count}")
-            print(f"    [1e-5, 1e-1):    {medium_count}")
-            print(f"    [1e-1, ∞):       {large_count}")
-            
-            # Percentiles of finite values
-            for p in [1, 5, 10, 25, 50, 75, 90, 95, 99]:
-                print(f"    P{p:2d}: {np.percentile(finite_vals, p):.6e}")
         
         # Now set NaN → 0.0 (density outside molecular surface is zero)
         grid_values = np.where(np.isnan(grid_values), 0.0, grid_values)
@@ -431,16 +384,10 @@ else:
                     noise_threshold = min(noise_floor * 0.1, 1e-5)
                 else:
                     noise_threshold = 0.0  # no positive values, skip clipping
-                print(f"  Noise threshold (adaptive): {noise_threshold:.6e}")
-                noise_count = np.sum((grid_values > 0) & (grid_values < noise_threshold))
                 grid_values[(grid_values > 0) & (grid_values < noise_threshold)] = 0.0
-                print(f"  Noise points clipped: {noise_count}")
         
         # Also zero out negative interpolation artifacts
-        neg_artifacts = np.sum(grid_values < 0)
-        if neg_artifacts > 0:
-            print(f"  Negative artifacts zeroed: {neg_artifacts}")
-            grid_values[grid_values < 0] = 0.0
+        grid_values[grid_values < 0] = 0.0
         
         # Final statistics
         zero_count = np.sum(grid_values == 0.0)
@@ -451,7 +398,7 @@ else:
         print(f"  Points with data: {nonzero_count} ({100*nonzero_count/total:.1f}%)")
         print(f"  Points zero: {zero_count} ({100*zero_count/total:.1f}%)")
         
-        # Suggest isovalues
+        # Calculate percentiles for visualization defaults
         iso_p1 = None
         iso_p10 = None
         iso_p90 = None
@@ -460,10 +407,6 @@ else:
             iso_p1 = np.percentile(nz_vals, 1)
             iso_p10 = np.percentile(nz_vals, 10)
             iso_p90 = np.percentile(nz_vals, 90)
-            print(f"  Suggested isovalues:")
-            for pct, label in [(90, "thick surface"), (50, "medium"), (10, "thin/outer")]:
-                iso = np.percentile(nz_vals, pct)
-                print(f"    {label} (P{pct}): {iso:.3e}")
         
         density_3d = grid_values.reshape((nx, ny, nz))
         
@@ -572,311 +515,6 @@ else:
         # ---- Generate interactive HTML ----
         energy_display = f"{total_energy:.8f} Eh" if total_energy is not None else "N/A"
         energy_kcal = f"{total_energy * 627.509474:.2f} kcal/mol" if total_energy is not None else ""
-
-        # The inline 3Dmol fallback template is kept below but only evaluated
-        # when viewer_template.html is missing (see conditional after it).
-        # Skip the f-string entirely — jump straight to the template approach.
-        html_content_template = None  # placeholder, used only in fallback
-
-        if False:  # --- BEGIN DEAD 3Dmol FALLBACK (kept for reference) ---
-            html_content_template = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Electron Density Visualization — Benzene</title>
-<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-<style>
-  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-  body {{ font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f0f1a; color: #e0e0e0; }}
-  .header {{
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 28px 40px;
-    border-bottom: 2px solid #0f3460;
-  }}
-  .header h1 {{ font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: #fff; }}
-  .header p {{ opacity: 0.6; margin-top: 4px; font-size: 0.85rem; }}
-  .container {{ max-width: 1400px; margin: 0 auto; padding: 24px; }}
-
-  .summary {{
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px; margin-bottom: 24px;
-  }}
-  .stat-card {{
-    background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px;
-    padding: 16px 20px;
-  }}
-  .stat-card .label {{
-    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
-    color: #8888aa; margin-bottom: 4px;
-  }}
-  .stat-card .value {{
-    font-size: 1.1rem; font-weight: 600; color: #e0e0ff;
-    font-variant-numeric: tabular-nums;
-  }}
-
-  .main-panel {{
-    display: grid; grid-template-columns: 1fr 300px; gap: 20px;
-  }}
-  .viewer-panel {{
-    background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px;
-    overflow: hidden;
-  }}
-  .viewer-header {{
-    padding: 14px 20px; border-bottom: 1px solid #2a2a4a;
-    font-weight: 600; font-size: 0.9rem; color: #aab;
-  }}
-  #viewer-container {{ width: 100%; height: 550px; }}
-
-  .controls-panel {{
-    background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px;
-    padding: 20px; display: flex; flex-direction: column; gap: 18px;
-  }}
-  .controls-panel h3 {{
-    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em;
-    color: #8888aa; margin-bottom: 8px;
-  }}
-  .control-group {{ display: flex; flex-direction: column; gap: 8px; }}
-  .control-row {{
-    display: flex; align-items: center; justify-content: space-between;
-  }}
-  .control-row label {{ font-size: 0.85rem; color: #ccc; }}
-  .control-row input[type="range"] {{ width: 120px; }}
-  .control-row .val {{ font-size: 0.75rem; color: #8888aa; min-width: 60px; text-align: right; }}
-
-  .btn {{
-    padding: 8px 16px; border: 1px solid #3a3a5a; border-radius: 6px;
-    background: #2a2a4a; color: #ddd; cursor: pointer; font-size: 0.8rem;
-    transition: all 0.15s;
-  }}
-  .btn:hover {{ background: #3a3a6a; border-color: #5a5a8a; }}
-  .btn.active {{ background: #0f3460; border-color: #1a5a9a; color: #fff; }}
-
-  .btn-group {{ display: flex; gap: 6px; flex-wrap: wrap; }}
-
-  .footer {{
-    margin-top: 24px; text-align: center; font-size: 0.75rem;
-    color: #555; padding: 16px;
-  }}
-</style>
-</head>
-<body>
-<div class="header">
-  <h1>🔬 Electron Density &amp; ESP Visualization</h1>
-  <p>Benzene (C₆H₆) — {METHOD}/{BASIS}</p>
-</div>
-<div class="container">
-
-  <div class="summary">
-    <div class="stat-card">
-      <div class="label">Method / Basis</div>
-      <div class="value">{METHOD} / {BASIS}</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Total Energy</div>
-      <div class="value">{energy_display}</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Grid Points</div>
-      <div class="value">{expected_points:,}</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Grid Spacing</div>
-      <div class="value">{GRID_SPACING[0]} Å</div>
-    </div>
-  </div>
-
-  <div class="main-panel">
-    <div class="viewer-panel">
-      <div class="viewer-header">Interactive 3D Viewer — click &amp; drag to rotate, scroll to zoom</div>
-      <div id="viewer-container"></div>
-    </div>
-
-    <div class="controls-panel">
-      <div class="control-group">
-        <h3>Isosurface</h3>
-        <div class="control-row">
-          <label>Show density</label>
-          <input type="checkbox" id="chk-density" checked onchange="updateSurfaces()">
-        </div>
-        <div class="control-row">
-          <label>Isovalue</label>
-          <input type="range" id="iso-slider" min="-5" max="-1" step="0.1" value="-3"
-                 oninput="updateIsoLabel(); updateSurfaces()">
-          <span class="val" id="iso-label">0.001</span>
-        </div>
-        <div class="control-row">
-          <label>Opacity</label>
-          <input type="range" id="opacity-slider" min="0.1" max="1.0" step="0.05" value="0.6"
-                 oninput="updateSurfaces()">
-        </div>
-      </div>
-
-      <div class="control-group">
-        <h3>ESP Coloring</h3>
-        <div class="control-row">
-          <label>Color by ESP</label>
-          <input type="checkbox" id="chk-esp" onchange="updateSurfaces()"
-                 {"" if esp_cube_str else 'disabled title="No ESP data available"'}>
-        </div>
-        <div style="font-size:0.75rem; color:#888; margin-top:4px;">
-          {"🔴 Negative (nucleophilic) → 🔵 Positive (electrophilic)" if esp_cube_str else "ESP data not available for this run"}
-        </div>
-      </div>
-
-      <div class="control-group">
-        <h3>Molecule Style</h3>
-        <div class="btn-group">
-          <button class="btn active" id="btn-ballstick" onclick="setStyle('ballstick')">Ball &amp; Stick</button>
-          <button class="btn" id="btn-stick" onclick="setStyle('stick')">Stick</button>
-          <button class="btn" id="btn-sphere" onclick="setStyle('sphere')">Space Fill</button>
-          <button class="btn" id="btn-wire" onclick="setStyle('wire')">Wire</button>
-        </div>
-      </div>
-
-      <div class="control-group">
-        <h3>Background</h3>
-        <div class="btn-group">
-          <button class="btn active" onclick="viewer.setBackgroundColor('#0f0f1a'); viewer.render();">Dark</button>
-          <button class="btn" onclick="viewer.setBackgroundColor('#ffffff'); viewer.render();">White</button>
-          <button class="btn" onclick="viewer.setBackgroundColor('#000000'); viewer.render();">Black</button>
-        </div>
-      </div>
-
-      <div class="control-group">
-        <h3>View</h3>
-        <div class="btn-group">
-          <button class="btn" onclick="viewer.zoomTo(); viewer.render();">Reset View</button>
-          <button class="btn" onclick="viewer.spin('y'); spinning=!spinning;" id="btn-spin">Spin</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
-    Generated by Rush-Py EXESS Exports example &bull; Powered by 3Dmol.js
-  </div>
-</div>
-
-<script>
-const cubeData = {cube_js};
-const espCubeData = {esp_cube_js};
-const xyzData = {xyz_js};
-
-let viewer = $3Dmol.createViewer('viewer-container', {{
-  backgroundColor: '#0f0f1a',
-  antialias: true,
-}});
-let spinning = false;
-
-// Add molecule
-viewer.addModel(xyzData, 'xyz');
-setStyle('ballstick');
-
-// Parse and add cube volumes
-let vol = null;
-try {{
-  // Parse cube file manually
-  vol = parseCubeToVolume(cubeData);
-}} catch(e) {{
-  console.error('Error parsing cube:', e);
-}}
-
-updateSurfaces();
-viewer.zoomTo();
-viewer.render();
-
-// Simple cube file parser
-function parseCubeToVolume(cubeStr) {{
-  const lines = cubeStr.trim().split('\\n');
-  // Skip comment lines and parse header
-  const header = lines[2].split(/\\s+/).map(Number);
-  const natoms = header[0];
-  
-  // Parse grid parameters
-  const gridX = lines[3].split(/\\s+/).slice(0, 4).map(Number);
-  const gridY = lines[4].split(/\\s+/).slice(0, 4).map(Number);
-  const gridZ = lines[5].split(/\\s+/).slice(0, 4).map(Number);
-  
-  const nx = gridX[0], ny = gridY[0], nz = gridZ[0];
-  const xstep = gridX[1], ystep = gridY[2], zstep = gridZ[3];
-  
-  // Skip atom lines and parse volumetric data
-  const dataStart = 6 + natoms;
-  const data = [];
-  for (let i = dataStart; i < lines.length; i++) {{
-    const vals = lines[i].trim().split(/\\s+/).map(Number);
-    data.push(...vals);
-  }}
-  
-  return {{
-    origin: [header[1], header[2], header[3]],
-    nX: nx, nY: ny, nZ: nz,
-    data: new Float32Array(data),
-    ystep: ystep,
-    zstep: zstep,
-    xstep: xstep
-  }};
-}}
-
-function updateIsoLabel() {{
-  const slider = document.getElementById('iso-slider');
-  const val = Math.pow(10, parseFloat(slider.value));
-  document.getElementById('iso-label').textContent = val.toExponential(1);
-}}
-
-function updateSurfaces() {{
-  viewer.removeAllSurfaces();
-  const showDensity = document.getElementById('chk-density').checked;
-  const isoVal = Math.pow(10, parseFloat(document.getElementById('iso-slider').value));
-  const opacity = parseFloat(document.getElementById('opacity-slider').value);
-  
-  if (showDensity && vol) {{
-    try {{
-      // Add volume surface with the parsed cube data
-      viewer.addSurface($3Dmol.SurfaceType.VDW, {{
-        voldata: vol,
-        isoval: isoVal,
-        opacity: opacity,
-        color: '#4488ff',
-        smoothness: 2
-      }});
-    }} catch(e) {{
-      console.error('Error adding surface:', e);
-    }}
-  }}
-  viewer.render();
-}}
-
-function setStyle(style) {{
-  document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
-  const btnId = 'btn-' + (style === 'ballstick' ? 'ballstick' : style);
-  const btn = document.getElementById(btnId);
-  if (btn) btn.classList.add('active');
-
-  switch(style) {{
-    case 'ballstick':
-      viewer.setStyle({{}}, {{
-        stick: {{ radius: 0.14, colorscheme: 'Jmol' }},
-        sphere: {{ scale: 0.28, colorscheme: 'Jmol' }}
-      }});
-      break;
-    case 'stick':
-      viewer.setStyle({{}}, {{ stick: {{ colorscheme: 'Jmol' }} }});
-      break;
-    case 'sphere':
-      viewer.setStyle({{}}, {{ sphere: {{ colorscheme: 'Jmol' }} }});
-      break;
-    case 'wire':
-      viewer.setStyle({{}}, {{ line: {{ colorscheme: 'Jmol' }} }});
-      break;
-  }}
-  viewer.render();
-}}
-</script>
-</body>
-</html>"""
-        # --- END DEAD 3Dmol FALLBACK ---
 
         # ---- Use Three.js Marching Cubes viewer ----
         # Load the template and embed the cube data
