@@ -51,8 +51,8 @@ residues_path = DATA_DIR / "6a5j_r.json"
 
 out = exess.qmmm(
     topology_path,
-    residues_path,
     N_TIMESTEPS,
+    residues_path,
     method=METHOD,
     basis=BASIS,
     qm_fragments=QM_FRAGMENTS,
