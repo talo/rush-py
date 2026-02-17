@@ -452,8 +452,14 @@ else:
         print(f"  Points zero: {zero_count} ({100*zero_count/total:.1f}%)")
         
         # Suggest isovalues
+        iso_p1 = None
+        iso_p10 = None
+        iso_p90 = None
         if nonzero_count > 0:
             nz_vals = grid_values[grid_values > 0]
+            iso_p1 = np.percentile(nz_vals, 1)
+            iso_p10 = np.percentile(nz_vals, 10)
+            iso_p90 = np.percentile(nz_vals, 90)
             print(f"  Suggested isovalues:")
             for pct, label in [(90, "thick surface"), (50, "medium"), (10, "thin/outer")]:
                 iso = np.percentile(nz_vals, pct)
@@ -881,6 +887,14 @@ function setStyle(style) {{
             # Escape cube data for embedding in JavaScript template literal
             cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
             html_content = html_template.replace('__CUBE_DATA__', cube_text_escaped)
+            
+            # Set isovalue slider defaults to show full outer electron density
+            # Use P1 as min (noise floor), P10 as default (full cloud), P90 as max (dense core)
+            if iso_p1 is not None and iso_p10 is not None and iso_p90 is not None:
+                html_content = html_content.replace('__ISO_MIN__', f'{iso_p1:.6e}')
+                html_content = html_content.replace('__ISO_DEFAULT__', f'{iso_p10:.6e}')
+                html_content = html_content.replace('__ISO_MAX__', f'{iso_p90:.6e}')
+            
             print(f"  ✓ Using Three.js Marching Cubes viewer (fast, beautiful isosurface rendering)")
         else:
             print(f"  ⚠ viewer_template.html not found at {template_path}")
