@@ -358,14 +358,17 @@ residues = Residues(
     seqs=["HOH", "HOH"],
 )
 
-with open("molecule_t.json", "w") as f_t:
+molecule_t_path = OUTPUT_DIR / "molecule_t.json"
+molecule_r_path = OUTPUT_DIR / "molecule_r.json"
+
+with open(molecule_t_path, "w") as f_t:
     json.dump(topology.to_json(), f_t)
-with open("molecule_r.json", "w") as f_r:
+with open(molecule_r_path, "w") as f_r:
     json.dump(residues.to_json(), f_r)
 
 out = exess.qmmm(
-    topology_path="molecule_t.json",
-    residues_path="molecule_r.json",
+    topology_path=molecule_t_path,
+    residues_path=molecule_r_path,
     n_timesteps=100,
     trajectory=exess.Trajectory(include_waters=True),
     ml_fragments=[],
@@ -385,7 +388,7 @@ out_file = save_object(out["path"])
 with open(out_file) as f:
     out_traj = json.load(f)["geometries"]
 
-topology = Topology.from_json(Path("molecule_t.json"))
+topology = Topology.from_json(molecule_t_path)
 print("Atoms at First Step")
 for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
     print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")

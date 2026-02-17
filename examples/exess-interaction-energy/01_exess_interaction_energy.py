@@ -25,6 +25,8 @@ print("Example 1: Fragment-based interaction energy")
 print("=" * 60)
 
 DATA_DIR = Path(__file__).parent / "data"
+OUTPUT_DIR = Path(__file__).parent / "interaction-energy-outputs"
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 # NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
 # This is a very fast but low-accuracy method. For production results,
@@ -85,7 +87,8 @@ lig_idx = trc.residues.seqs.index("MK1")
 frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
 
 # Step 3: Write topology and run interaction energy
-with open("1hsg_t.json", "w") as f:
+topology_path = OUTPUT_DIR / "1hsg_t.json"
+with open(topology_path, "w") as f:
     f.write(json.dumps(trc.topology.to_json(), indent=2))
 
 # NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
@@ -93,7 +96,7 @@ with open("1hsg_t.json", "w") as f:
 # use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
 
 out = exess.interaction_energy(
-    "1hsg_t.json",
+    topology_path,
     lig_idx,
     method="RestrictedHF",
     basis="STO-3G",

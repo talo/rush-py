@@ -286,6 +286,12 @@ print("=" * 60)
 print("Example 2: ML (AIMNet) Geometry Optimization")
 print("=" * 60)
 
+# Using AIMNet2 machine-learning force field for geometry optimization.
+# AIMNet2 is selected by omitting the `method` parameter and setting
+# empty `qm_fragments` and `mm_fragments`, so all atoms are treated
+# by the ML potential. This is much faster than QM but less accurate
+# for properties that depend on electronic structure.
+
 out = exess.optimization(
     INPUT_FILE,
     100,

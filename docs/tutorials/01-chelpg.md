@@ -50,7 +50,7 @@ That's it! The `result` tuple contains your charges plus metadata.
 
 ### Get the PDB file
 
-[Download `aspirin.pdb`](./aspirin.pdb) or use any PDB file from the Protein Data Bank.
+You can find the sample PDB file at [`examples/chelpg/data/aspirin.pdb`](https://github.com/talo/rush-py/blob/main/examples/chelpg/data/aspirin.pdb), or use any PDB file from the Protein Data Bank.
 
 ---
 
