@@ -6,7 +6,7 @@ First, if you don't have a Rush account, [go create one on the Rush platform's w
 
 ### Rush Token
 
-Once you've created your account and logged in, click the "Account" tab in the left sidebar and create or obtain your API token on the [accounts page](https://rush.cloud/me). This is your "Rush Token", and will let you authenticate your access to Rush from your rush-py scripts.
+Once you've created your account and logged in, click the "Overview" tab in the left sidebar and create or obtain your API token on the [accounts page](https://rush.cloud/me). This is your "Rush Token", and will let you authenticate your access to Rush from your rush-py scripts.
 
 ### Rush Projects
 
@@ -23,6 +23,18 @@ It's also possible to install using `uv`, `pdm`, `poetry`, or any other tool of 
 Use environment variables to configure access:
 - `RUSH_TOKEN`: Put your authentication token's value here.
 - `RUSH_PROJECT`: Put your project's ID here.
+
+On Linux/macOS, set these with:
+```bash
+export RUSH_TOKEN="your_token_here"
+export RUSH_PROJECT="your_project_id"
+```
+
+On Windows PowerShell, set these with:
+```powershell
+$env:RUSH_TOKEN = "your_token_here"
+$env:RUSH_PROJECT = "your_project_id"
+```
 
 There's one more environment variable, which would only need to be used if requested by a QDX employee:
 - `RUSH_ENDPOINT`: Use this to choose which Rush server to use; if omitted, defaults to our production server at https://rush.cloud. To use a different server, you'll need to be given access to it explicitly.

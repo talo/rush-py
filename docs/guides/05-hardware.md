@@ -8,4 +8,4 @@ You can pass a set of run specifications to each module function via `run_spec=r
 
 If the target is left unspecified, one of the three Bullet clusters will be chosen. 
 
-By default, modules have default resources that will be allocated to them. If supplying custom resources, be sure to provide compatible resources for the selected module: for example. if a module requires a GPU but isn't allocated one, the run will fail. 
+By default, modules have default resources that will be allocated to them. If supplying custom resources, be sure to provide compatible resources for the selected module: for example, if a module requires a GPU but isn't allocated one, the run will fail. 
