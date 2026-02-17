@@ -19,11 +19,14 @@ Output files (saved to exports-outputs/):
 
 import json
 import math
+import tarfile
 import tempfile
+from io import BytesIO
 from pathlib import Path
 
 import h5py
 import numpy as np
+import zstandard as zstd
 from rush import exess
 from rush.client import RunOpts, RunSpec, download_object
 
@@ -174,28 +177,41 @@ for output in res:
 grid_data = None
 if hdf5_path:
     print(f"  Downloading HDF5 from: {hdf5_path}")
-    hdf5_bytes = download_object(hdf5_path)
-    # Write to a temp file so h5py can read it
-    with tempfile.NamedTemporaryFile(suffix=".hdf5", delete=False) as tmp:
-        tmp.write(hdf5_bytes)
-        tmp_path = tmp.name
-
-    with h5py.File(tmp_path, "r") as h5f:
-        print(f"  HDF5 datasets: {list(h5f.keys())}")
-        grid_data = {}
-        if "density_descriptors" in h5f:
-            grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
-        if "esp_descriptors" in h5f:
-            grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
-        if "descriptor_grid" in h5f:
-            grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-        # Also check for other potentially useful datasets
-        for key in h5f.keys():
-            if key not in grid_data:
-                ds = h5f[key]
-                print(f"    Extra dataset '{key}': shape={ds.shape}, dtype={ds.dtype}")
-
-    Path(tmp_path).unlink(missing_ok=True)
+    raw_bytes = download_object(hdf5_path)
+    
+    # Decompress zstandard compression
+    print("  Decompressing zstandard archive...")
+    dctx = zstd.ZstdDecompressor()
+    decompressed = dctx.decompress(raw_bytes, max_output_size=int(1e9))
+    
+    # Extract from tar archive
+    print("  Extracting from tar archive...")
+    grid_data = {}
+    try:
+        with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+            # Find the .h5 file in the tar
+            h5_members = [m for m in tar.getmembers() if m.name.endswith('.h5')]
+            if h5_members:
+                h5_member = h5_members[0]
+                h5f_obj = tar.extractfile(h5_member)
+                with h5py.File(h5f_obj, "r") as h5f:
+                    print(f"  HDF5 datasets: {list(h5f.keys())}")
+                    if "density_descriptors" in h5f:
+                        grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+                    if "esp_descriptors" in h5f:
+                        grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+                    if "descriptor_grid" in h5f:
+                        grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
+                    # Also check for other potentially useful datasets
+                    for key in h5f.keys():
+                        if key not in grid_data:
+                            ds = h5f[key]
+                            print(f"    Extra dataset '{key}': shape={ds.shape}, dtype={ds.dtype}")
+            else:
+                print("  WARNING: No .h5 file found in tar archive")
+    except Exception as e:
+        print(f"  ERROR reading HDF5: {e}")
+    
     print(f"  Extracted keys from HDF5: {list(grid_data.keys())}")
     for key, val in grid_data.items():
         if isinstance(val, list):
