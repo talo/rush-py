@@ -19,11 +19,13 @@ Output files (saved to exports-outputs/):
 
 import json
 import math
+import tempfile
 from pathlib import Path
 
+import h5py
 import numpy as np
 from rush import exess
-from rush.client import RunOpts, RunSpec
+from rush.client import RunOpts, RunSpec, download_object
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
@@ -124,7 +126,6 @@ res = exess.energy(
             spacing=GRID_SPACING,
         ),
     ),
-    convert_hdf5_to_json=True,
     run_spec=RunSpec(storage=1000, gpus=1),
     run_opts=RunOpts(
         name="Rush-Py Tutorial: EXESS Exports 2",
@@ -162,40 +163,59 @@ print("=" * 60)
 print("Example 3: 3D Electron Density Visualization")
 print("=" * 60)
 
-# Extract descriptor grid data from the JSON output
-grid_data = None
+# Extract descriptor grid data from the HDF5 output
+# When convert_hdf5_to_json is NOT set, res[1] contains an HDF5 reference
+hdf5_path = None
 for output in res:
-    if 'path' in output and output.get("format") == "Json":
-        # First element: flat dict format
-        grid_data = output.get("data", {})
-        break
-    elif 'Json' in output:
-        # Second element: type-discriminated format
-        grid_data = output['Json'].get("data", {})
+    if isinstance(output, dict) and 'Hdf5' in output:
+        hdf5_path = output['Hdf5']['path']
         break
 
-if grid_data is None:
-    print("WARNING: No JSON output found. Looking for saved JSON files...")
+grid_data = None
+if hdf5_path:
+    print(f"  Downloading HDF5 from: {hdf5_path}")
+    hdf5_bytes = download_object(hdf5_path)
+    # Write to a temp file so h5py can read it
+    with tempfile.NamedTemporaryFile(suffix=".hdf5", delete=False) as tmp:
+        tmp.write(hdf5_bytes)
+        tmp_path = tmp.name
+
+    with h5py.File(tmp_path, "r") as h5f:
+        print(f"  HDF5 datasets: {list(h5f.keys())}")
+        grid_data = {}
+        if "density_descriptors" in h5f:
+            grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+        if "esp_descriptors" in h5f:
+            grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+        if "descriptor_grid" in h5f:
+            grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
+        # Also check for other potentially useful datasets
+        for key in h5f.keys():
+            if key not in grid_data:
+                ds = h5f[key]
+                print(f"    Extra dataset '{key}': shape={ds.shape}, dtype={ds.dtype}")
+
+    Path(tmp_path).unlink(missing_ok=True)
+    print(f"  Extracted keys from HDF5: {list(grid_data.keys())}")
+    for key, val in grid_data.items():
+        if isinstance(val, list):
+            print(f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]")
+else:
+    # Fallback: look for saved HDF5 files on disk
+    print("WARNING: No HDF5 output found in response. Looking for saved files...")
     for f in files:
-        if str(f).endswith(".json"):
-            with open(f) as jf:
-                grid_data = json.load(jf)
+        if str(f).endswith(".hdf5"):
+            with h5py.File(f, "r") as h5f:
+                grid_data = {}
+                if "density_descriptors" in h5f:
+                    grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+                if "esp_descriptors" in h5f:
+                    grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+                if "descriptor_grid" in h5f:
+                    grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
             break
 
-# DEBUG: Print structure of extracted grid_data
-print(f"\nDEBUG: grid_data type: {type(grid_data)}")
-print(f"DEBUG: grid_data keys: {list(grid_data.keys()) if isinstance(grid_data, dict) else 'NOT A DICT'}")
-if isinstance(grid_data, dict):
-    for key in grid_data.keys():
-        val = grid_data[key]
-        if isinstance(val, list):
-            print(f"  {key}: list of length {len(val)}")
-        elif isinstance(val, dict):
-            print(f"  {key}: dict with keys {list(val.keys())}")
-        else:
-            print(f"  {key}: {type(val).__name__}")
-
-if grid_data is None:
+if grid_data is None or not grid_data:
     print("ERROR: Could not find grid data. Skipping visualization.")
 else:
     # Extract density and ESP values
