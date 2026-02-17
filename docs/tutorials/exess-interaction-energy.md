@@ -1,256 +1,174 @@
-<<<<<<< HEAD
-# EXESS Interaction Energy
+# Protein–Ligand Interaction Energy
 
-This tutorial walks through interaction energy calculations with EXESS using **rush-py**.
+**What you get:** A single number (in Hartrees) quantifying how strongly a ligand interacts with its protein pocket — computed from first principles, no force field fitting required.
 
-:::{note}
-You still need `RUSH_TOKEN` and `RUSH_PROJECT` in your environment, but as of February 1, 2026, they are only required on first use (not at import time).
+| | |
+|---|---|
+| **Time** | ~2–5 minutes (cloud compute) |
+| **Skill level** | Beginner |
+| **Prerequisites** | Python 3.10+, `rush-py` installed, `RUSH_TOKEN` and `RUSH_PROJECT` set |
+
+---
+
+## Why This Matters
+
+In structure-based drug design, you constantly ask: *how tightly does this molecule sit in the binding pocket?* Docking scores approximate this with empirical potentials. Molecular mechanics (MM-GBSA, MM-PBSA) improve on it. But quantum mechanics gives you the most physically rigorous answer — it captures polarization, charge transfer, and dispersion effects that classical methods miss.
+
+The catch? QM on an entire protein is impossible. EXESS solves this with **fragment-based quantum mechanics**: it breaks your system into amino-acid-sized pieces, computes QM energies for each piece and their pairwise/three-body interactions, then assembles the result. You get a QM-quality interaction energy without needing a supercomputer.
+
+:::{admonition} What this is (and isn't)
+:class: note
+This interaction energy is **not** a binding free energy — it doesn't include entropy, solvation, or conformational sampling. Think of it as a high-quality electronic interaction energy for a single pose. It's most useful for **rank-ordering** poses or comparing ligands in the same pocket.
 :::
 
-## Prerequisites
+## Quick Start: Get an Interaction Energy in 10 Lines
 
-Set your Rush environment variables before running the client:
-
-- `RUSH_TOKEN`
-- `RUSH_PROJECT`
-- `RUSH_ENDPOINT` (optional)
-
-All examples below reference test fixtures in [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data).
-
-## Common setup
-
-```{code-block} python
-:caption: setup.py
-
-from pathlib import Path
-
-from rush import exess
-from rush.client import RunOpts, set_opts
-
-set_opts(workspace_dir=Path.cwd() / "tutorial-runs")
-DATA_DIR = Path.cwd() / "tests" / "data"
-```
-
-## Example: fragment-based interaction energy
-
-This example follows [`tests/test_exess_interaction_energy.py`](https://github.com/talo/rush-py/blob/main/tests/test_exess_interaction_energy.py). It computes interaction energy between a ligand fragment and the rest of the system, using nearby fragments for the interaction region.
-
-```{code-block} python
-:caption: interaction_energy.py
-
-from rush import Topology, exess
-from rush.client import RunOpts
-
-lig_idx = 93
-
-topology = Topology.from_json(DATA_DIR / "tyk2_ejm_31_t.json")
-frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
-
-res = exess.interaction_energy(
-    DATA_DIR / "tyk2_ejm_31_t.json",
-    lig_idx,
-    frag_keywords=exess.FragKeywords(
-        level="Trimer",
-        dimer_cutoff=5.0,
-        trimer_cutoff=1.0,
-        cutoff_type="Centroid",
-        distance_metric="Min",
-        included_fragments=frag_idcs,
-    ),
-    run_opts=RunOpts(
-        name="Tutorial: EXESS Interaction Energy",
-        tags=["rush-py", "tutorial", "interaction-energy"],
-=======
-# EXESS: Interaction Energy
-
-EXESS can leverage its fragmentation capabilities to calculate an interaction energy between a single fragment and the rest of the system. In a receptor-ligand complex, we can place the ligand in its own fragment and use it as the reference fragment. This doesn't constitute a binding free energy between the two, but does provide some information about the magnitude of the energy involved.
-
-:::{admonition} Reminder
-:class: attention
-Don't forget to set `RUSH_TOKEN` and `RUSH_PROJECT`!
-:::
-
-## Fragment-based interaction energy
-
-First, let's do a basic interaction energy calculation between a ligand fragment and the rest of the system. You can find the QDX Topology file used in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data) folder.
-```{code-block} python
-:caption: interaction_energy.py
+```python
 import json
-
 from rush import exess
-from rush.client import RunOpts
+from rush.client import RunOpts, download_object
 
 out = exess.interaction_energy(
-    "tyk2_ejm_31_t.json",
-    93,  # This is the index of the fragment that contains the ligand 
+    "tyk2_ejm_31_t.json",       # QDX Topology file for TYK2 + ligand EJM-31
+    93,                          # Fragment index of the ligand
     frag_keywords=exess.FragKeywords(
-        level="Trimer",
-        dimer_cutoff=10.0,
-        trimer_cutoff=5.0,
+        level="Trimer",          # Include up to 3-body interactions
+        dimer_cutoff=10.0,       # Å — pairs within this distance
+        trimer_cutoff=5.0,       # Å — trimers within this distance
         cutoff_type="Centroid",
         distance_metric="Min",
     ),
-    run_opts=RunOpts(
-        name="Tutorial: Interaction Energy Basic",
->>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
-    ),
+    run_opts=RunOpts(name="Tutorial: Interaction Energy"),
     collect=True,
 )
 
-<<<<<<< HEAD
-exess.save_energy_outputs(res)
+# Extract the result
+json_bytes = download_object(out[0]["path"])
+result = json.loads(json_bytes.decode())
+print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 ```
 
-**Example output shape** (object-store paths):
-
-```{code-block} python
-[
-    {"path": "<uuid>", "size": 0, "format": "json"},
-    {"path": "<uuid>", "size": 0, "format": "bin"},
-]
+**Example output:**
+```
+Interaction energy: -0.08234 Eh
 ```
 
-:::{tip}
-Increase the pocket cutoff (e.g., 8 to 12 Angstrom) if you need a broader interaction region. The `included_fragments` list controls which fragments are considered in the interaction energy calculation.
+That negative value means the ligand is stabilized by its protein environment. The magnitude tells you the strength — more negative = stronger interaction.
+
+:::{admonition} About the default method
+:class: warning
+By default, EXESS uses **RestrictedHF/STO-3G** — the simplest possible quantum chemistry method with a minimal basis set. This runs fast and is great for testing your workflow, but the absolute energies are not quantitatively meaningful. For production work, use at least `method="RestrictedHF", basis="cc-pVDZ"` or a correlated method like RI-MP2. The *relative* trends (which ligand binds more tightly) are often preserved even at low levels of theory.
 :::
 
-## Optional: prepare a complex from PDB (from `demos/`)
+### Where to get the input file
 
-The demo `demos/jnj_prep+interaction.py` shows a preparation pipeline using a PDB and ligand residue names. Below is a cleaned-up version that uses the current `rush` imports and feeds directly into `interaction_energy`.
+The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data) folder. It's a QDX Topology — a JSON format that encodes atomic coordinates, fragment definitions, charges, and connectivity.
 
-```{code-block} python
-:caption: prepare_and_interaction.py
+---
 
+## Understanding the Parameters
+
+| Parameter | What it controls | Rule of thumb |
+|---|---|---|
+| `93` (fragment index) | Which fragment is your ligand | Check your topology to find the right index |
+| `level="Trimer"` | Include 3-body corrections | More accurate but slower; `"Dimer"` is faster |
+| `dimer_cutoff=10.0` | How far out to include fragment pairs (Å) | 10 Å captures most important interactions; increase for charged systems |
+| `trimer_cutoff=5.0` | How far out for 3-body terms (Å) | Keep smaller than dimer_cutoff; 3-body terms decay faster |
+| `included_fragments` | Restrict which fragments participate | Use to limit to the binding pocket (faster, often sufficient) |
+
+---
+
+## End-to-End: From PDB to Interaction Energy
+
+Don't have a QDX Topology file? Start from a PDB. Rush's **Prepare Complex** module handles protonation, missing atoms, and charge assignment automatically.
+
+### Step 1: Prepare the system
+
+```python
+import json
 from pathlib import Path
-
-from rush import to_json, exess
 from rush.client import RunOpts
 from rush.prepare_complex import prepare_complex
 
-pdb_path = Path("data/1hsg.pdb")
-ligand_names = ["MK1", "HOH"]
-
 trc = prepare_complex(
-    pdb_path,
-    ligand_names,
+    Path("1hsg.pdb"),
+    ligand_names=["MK1", "HOH"],  # Residue names for ligands/waters
     run_opts=RunOpts(name="Tutorial: Prepare Complex"),
     collect=True,
 )
 
-# Save TRC to JSON so it can be used by EXESS
-trc_path = Path("1hsg_complex.json")
-trc_path.write_text(to_json(trc))
-
-# Find ligand fragment index + nearby pocket
-lig_idx = trc.residues.seqs.index("MK1")
-frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
-
-res = exess.interaction_energy(
-    trc_path,
-    lig_idx,
-    frag_keywords=exess.FragKeywords(
-        level="Trimer",
-        dimer_cutoff=25.0,
-        trimer_cutoff=10.0,
-        cutoff_type="Centroid",
-        distance_metric="Min",
-        included_fragments=frag_idcs,
-    ),
-    run_opts=RunOpts(name="Tutorial: Interaction Energy (Prepared Complex)"),
-    collect=True,
-)
-
-exess.save_energy_outputs(res)
-```
-
-:::{admonition} Notes
-:class: note
-- `prepare_complex` requires RDKit and uses the same workflow as the demo.
-- If you see a `RunError`, check the Rush UI for details or increase `run_spec` resources.
-:::
-=======
-out_file, _ = exess.save_energy_outputs(out)
-with open(out_file) as f:
-    out_data = json.load(f)
-print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
-```
-
-:::{admonition} The other, ignored output
-:class: note
-The second output of the module, the one being ignored as `_` from the return value of `save_energy_outputs(out)`, contains additional data that EXESS only calculates and exports upon request. See the {doc}`Exports tutorial<exess-exports>` for more info.
-:::
-
-## End-to-end interaction energy calculation using a complex from the PDB
-
-### Step 1: Prepare the system
-
-Before submitting a system as input to EXESS, we have to ensure it has the correct protonation state, which in this context means that it:
-- must contain all its hydrogens, and
-- that each fragment must be annotated with its formal charge.
-
-Rush contains a module called Prepare Complex that does this for a system with at least one protein and ligand in it. The ligands are identified via their residue names (PDB) or residue labels (QDX's TRC), which correspond to each other and share the same data when converting between the formats.
-```{code-block} python
-import json
-from pathlib import Path
-
-from rush.client import RunOpts
-from rush.prepare_complex import prepare_complex
-
-trc = prepare_complex(
-    Path(__file__).parent.parent / "demos/data/1hsg.pdb",
-    ligand_names=["MK1", "HOH"],
-    run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
-    collect=True,
-)
-
-# Print the charged amino acids
-print("Charged amino acids:")
-for i, (res_name, formal_charge) in enumerate(
+# Inspect what Prepare Complex determined about charges
+print("Charged residues:")
+for i, (name, charge) in enumerate(
     zip(trc.residues.seqs, trc.topology.fragment_formal_charges)
 ):
-    if int(formal_charge) != 0:
-        print(f"{i:>4} {res_name}: {int(formal_charge):+}")
+    if int(charge) != 0:
+        print(f"  {i:>4} {name}: {int(charge):+}")
 ```
 
-:::{admonition} Libraries used
-:class: note
-The Prepare Complex module uses PDBFixer and PDB2PQR to fill in missing atoms and residues and to perform protonation, and in-house routines for determining connectivity and formal charge states for proteins. For ligand components of the system, it uses RDKit.
-:::
-
-:::{admonition} Prepare Complex has more features!
+:::{admonition} What Prepare Complex does under the hood
 :class: tip
-This module also fills in missing atoms and residues where possible, annotates the TRC with full connectivity information, and has additional configurable behavior. See the {doc}`Prepare Complex module documentation <../rush.prepare_complex>` for more info.
+It uses **PDBFixer** to fill missing atoms/residues, **PDB2PQR** for protonation states, and **RDKit** for ligand processing. The output TRC (Topology + Residues + Coordinates) is fully annotated with connectivity and formal charges — everything EXESS needs.
 :::
 
-To perform an accurate calculation without incurring too high an execution cost, we can use helper functions to find the set of fragments within 5Å of the ligand:
-```{code-block} python
-# Find ligand fragment index + nearby pocket
+### Step 2: Focus on the binding pocket
+
+Running QM on the entire protein is wasteful. Most residues far from the ligand contribute negligibly to the interaction energy. Use `get_fragments_near_fragment` to select just the pocket:
+
+```python
+# Find fragments within 5 Å of the ligand
 lig_idx = trc.residues.seqs.index("MK1")
-frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
+pocket_frags = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
+print(f"Pocket contains {len(pocket_frags)} fragments (out of {len(trc.residues.seqs)} total)")
 ```
 
-Finally, we can submit the full interaction energy calculation, using the above information to limit the simulation to only that set of fragments:
-```{code-block} python
+### Step 3: Run the interaction energy calculation
+
+```python
 from rush import exess
 
-# EXESS only takes the Topology, not the full TRC
+# EXESS needs the Topology (not the full TRC)
 with open("1hsg_t.json", "w") as f:
-    f.write(json.dumps(trc.topology.to_json(), indent=2))
+    json.dump(trc.topology.to_json(), f, indent=2)
 
 out = exess.interaction_energy(
     "1hsg_t.json",
     lig_idx,
     frag_keywords=exess.FragKeywords(
         level="Dimer",
-        included_fragments=frag_idcs,
+        included_fragments=pocket_frags,
     ),
-    run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - EXESS"),
+    run_opts=RunOpts(name="Tutorial: Interaction Energy E2E"),
     collect=True,
 )
 
-out_file, _ = exess.save_energy_outputs(out)
-with open(out_file) as f:
-    out_data = json.load(f)
-print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
+json_bytes = download_object(out[0]["path"])
+result = json.loads(json_bytes.decode())
+print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 ```
->>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
+
+:::{admonition} The second output
+:class: note
+`exess.interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<exess-exports>` for details.
+:::
+
+---
+
+## Interpreting the Results
+
+The key value is `result['qmmbe']['expanded_hf_energy']`:
+
+- **Negative** → ligand is stabilized by the protein (favorable interaction)
+- **More negative** → stronger interaction
+- **Units are Hartrees** (1 Eh ≈ 627.5 kcal/mol)
+
+For comparing two ligands in the same pocket, the *difference* in interaction energies is more meaningful than the absolute values — especially at lower levels of theory.
+
+---
+
+## See Also
+
+- {doc}`Exports tutorial<exess-exports>` — extract electron density, ESP, and other properties
+- {doc}`Optimization tutorial<exess-optimization>` — relax geometries before computing interaction energies
+- {doc}`QM/MM tutorial<exess-qmmm>` — run dynamics simulations with mixed QM/MM
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy) — runnable version with both examples

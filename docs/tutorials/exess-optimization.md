@@ -1,104 +1,146 @@
-<<<<<<< HEAD
-# EXESS Geometry Optimization
-=======
-# EXESS: Geometry Opt.
->>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
+# Geometry Optimization: Finding the Lowest-Energy Structure
 
-EXESS can perform geometry optimization using its ability to calculate gradients. It can do this using QM (via its core inbuilt capabilities), MM (via OpenMM), or ML (via AIMNet) techniques, dubbed Q4ML as a shorthand of QM/MM/ML.
+**What you get:** Watch a molecule relax to its most stable geometry, step by step — with energies, gradients, and a full trajectory you can visualize.
 
-:::{admonition} Reminder
-:class: attention
-Don't forget to set `RUSH_TOKEN` and `RUSH_PROJECT`!
-:::
+| | |
+|---|---|
+| **Time** | ~1–5 minutes (cloud compute) |
+| **Skill level** | Beginner |
+| **Prerequisites** | Python 3.10+, `rush-py` installed, `RUSH_TOKEN` and `RUSH_PROJECT` set |
 
-## QM optimization
+---
 
-:::{note}
-Optimization requires gradient-capable methods (RHF, RI-HF, or RI-MP2). See {ref}`the EXESS docs <exess-gradients-dynamics-optimization>` for method support details.
-:::
+## Why This Matters
 
-The exess submodule in rush-py provides a dedicated function for doing optimization, which automatically selects EXESS's Optimization driver. By default, it's only necessary to provide the QDX Topology file and the number of iterations to run:
-```{code-block} python
-:caption: optimization_qm.py
+Molecules in the real world don't sit in arbitrary geometries — they settle into low-energy conformations. Before you compute any property (interaction energy, charges, spectra), you usually want the *optimized* geometry, because results from a strained or unrealistic structure are meaningless.
+
+Geometry optimization iteratively adjusts atomic positions to minimize the total energy. At each step, EXESS computes the energy gradient (the "force" on each atom) and moves atoms downhill on the potential energy surface. When the gradient is small enough, the structure has converged.
+
+EXESS gives you three engines for this:
+- **QM** — Hartree-Fock or MP2 (most accurate, slowest)
+- **ML** — AIMNet neural network potential (fast, good for organic molecules)
+- **MM** — OpenMM classical force fields (fastest, least accurate for electronic properties)
+
+---
+
+## Quick Start: Optimize Benzene with QM
+
+```python
 from rush import exess
 from rush.client import RunOpts, save_object
 
 out = exess.optimization(
     "benzene_t.json",
-    100,  # Number of optimization iterations 
-    standard_orientation="None",
-    run_opts=RunOpts(name="Tutorial: Optimization using QM"),
+    100,  # Maximum optimization steps
+    standard_orientation="None",  # Keep original frame of reference
+    run_opts=RunOpts(name="Tutorial: QM Optimization"),
     collect=True,
 )
 ```
 
-:::{admonition} Help, my output conformer is in a totally different position!
-:class: tip
-Setting `standard_orientation="None"` prevents EXESS from translating or rotating the input geometry, making direct comparisons easier.
+That's it — EXESS will iteratively relax the benzene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
+
+:::{admonition} About the defaults
+:class: warning
+The default **RestrictedHF/STO-3G** is the fastest possible QM level but gives poor absolute geometries and energies. It's ideal for testing your workflow. For production, use at least `method="RestrictedHF", basis="cc-pVDZ"` or `method="RIHF"` with a larger basis. Bond lengths with STO-3G can be off by ~0.05 Å.
 :::
 
-## ML optimization
+---
 
-To use ML with the AIMNet model for the whole system, set `qm_fragments` and `mm_fragments` to the empty list. EXESS will infer that `ml_fragments` should be the remaining ones, i.e. all of them.
+## Working with the Output
 
-It would also be fine to set `ml_fragments` to all the fragments as well (and in this case, it would only be necessary to set one of the other two to the empty list so that the third can be inferred), but this requires constructing that complete list which isn't as convenient.
+The optimization returns two objects:
+1. **Trajectory** — a list of Topology objects, one per step (the geometry at each iteration)
+2. **Step info** — a list of dictionaries with `total_energy` (Hartrees) and `max_gradient_component` (Å)
 
-```{code-block} python
-:caption: optimization_ml.py
-from rush import exess
-from rush.client import RunOpts, save_object
+```python
+import json
+from rush import Topology
 
+# Download both outputs
+out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
+with open(out_traj_path) as f1, open(out_info_path) as f2:
+    out_traj_raw, out_info = [json.load(f) for f in (f1, f2)]
+
+out_traj = [Topology.from_json(t) for t in out_traj_raw]
+
+# How quickly did it converge?
+print(f"Converged in {len(out_traj)} steps")
+
+# Energy at start vs. end
+print(f"Initial energy: {out_info[0]['total_energy']:.8f} Eh")
+print(f"Final energy:   {out_info[-1]['total_energy']:.8f} Eh")
+print(f"Energy change:  {out_info[-1]['total_energy'] - out_info[0]['total_energy']:.8f} Eh")
+
+# How "flat" is the potential at the end?
+print(f"Final max gradient: {out_info[-1]['max_gradient_component']:.2e} Å")
+
+# Compare atom positions
+print(f"First atom — start: {out_traj[0].geometry[:3]}")
+print(f"First atom — end:   {out_traj[-1].geometry[:3]}")
+```
+
+**What to look for:**
+- Energy should **decrease** monotonically (if it doesn't, something is wrong)
+- Max gradient should get very small (< 1e-4 Å for a tight optimization)
+- Fewer steps = the initial geometry was already close to optimal
+
+:::{tip}
+Set `standard_orientation="None"` to prevent EXESS from translating or rotating the molecule. This makes it easy to overlay initial and final structures for visual comparison.
+:::
+
+---
+
+## ML Optimization with AIMNet
+
+For faster optimization (especially useful for conformer searches or large organic molecules), use the AIMNet machine-learning potential instead of QM:
+
+```python
 out = exess.optimization(
     "benzene_t.json",
     100,
-    basis="STO-2G",
+    basis="STO-2G",  # Minimal basis — no effect on ML, just reduces memory overhead
     optimization_keywords=exess.OptimizationKeywords(
         coordinate_system="Cartesian",
         algorithm="LBFGS",
         lbfgs_keywords=exess.LBFGSKeywords(),
     ),
     standard_orientation="None",
-    qm_fragments=[],
-    mm_fragments=[],
-    run_opts=RunOpts(name="Tutorial: Optimization using ML"),
+    qm_fragments=[],   # No QM fragments
+    mm_fragments=[],    # No MM fragments → everything is ML
+    run_opts=RunOpts(name="Tutorial: ML Optimization"),
     collect=True,
 )
 ```
-    
-:::{note}
-Using the smallest basis set available, i.e. STO-2G, reduces memory requirements for non-QM runs and has no effect on the calculation or results.
+
+:::{admonition} How fragment assignment works
+:class: note
+EXESS assigns each fragment to QM, MM, or ML. Setting `qm_fragments=[]` and `mm_fragments=[]` tells EXESS that *all* fragments should use ML (AIMNet). The `basis="STO-2G"` is a technicality — it's the smallest possible basis set and has no effect on the ML calculation, but EXESS still requires one to be specified.
 :::
 
-:::{admonition} Optimizing your optimization keywords
+:::{admonition} ML optimization settings
 :class: tip
-The values shown for `optimization_keywords` are the only supported ones for non-QM runs. Setting the coordinate system to Cartesian is mandatory, and while other algorithms may work, using LBFGS is highly recommended.
+For ML-only runs, you **must** use `coordinate_system="Cartesian"` and `algorithm="LBFGS"`. Other combinations may fail or give poor results.
 :::
 
-## Working with the output
-
-The first output is a vector of Topologies, one for each step, which effectively provides the optimization trajectory. The second output is a vector of dictionaries, also one for each step, containing the total energy and the max gradient component at that step. The following example shows how these can be accessed and used:
-```{code-block} python
-import json
-from rush import Topology
-
-out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
-with open(out_traj_path) as f1, open(out_info_path) as f2:
-    out_traj, out_info = [json.load(f) for f in (f1, f2)]
-
-print("Num steps to convergence:", len(out_traj))
-
-out_traj = [Topology.from_json(t) for t in out_traj]
-print("First Atom's Coords")
-print(f"  First step: {out_traj[0].geometry[:3]}")
-print(f"  Final step: {out_traj[-1].geometry[:3]}")
-
-# The below are only provided for QM regions
-print("Final Step Info")  
-print(f"  Total energy: {out_info[-1]['total_energy']:.5f} Eh")
-print(f"  Max gradient component: {out_info[-1]['max_gradient_component']:.2} Å")
-```
-
-:::{admonition} Limitation
-:class: caution
-The second output only provides data for QM regions; if there are none, the dictionaries will be empty.
+:::{caution}
+The step-info output (energy, gradient) is only populated for **QM regions**. In a pure ML run, the dictionaries will be empty — you'll only get the trajectory.
 :::
+
+---
+
+## Visualization
+
+The [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization) generates an interactive HTML report with:
+- Energy convergence plot (energy vs. optimization step)
+- Side-by-side 3D views of initial and optimized structures
+- Summary statistics (method, basis, steps, energy change)
+
+---
+
+## See Also
+
+- {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute interaction energies on optimized structures
+- {doc}`QM/MM tutorial<exess-qmmm>` — run molecular dynamics after optimization
+- {doc}`Exports tutorial<exess-exports>` — extract electron density and ESP from optimized structures
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization)
