@@ -72,8 +72,16 @@ print(f"  Final step: {out_traj[-1].geometry[:3]}")
 
 # The below are only provided for QM regions
 print("Final Step Info")
-print(f"  Total energy: {out_info[-1]['total_energy']:.5f} Eh")
-print(f"  Max gradient component: {out_info[-1]['max_gradient_component']:.2} Å")
+print(f"  Available keys: {list(out_info[-1].keys())}")
+energy_key = "total_energy" if "total_energy" in out_info[-1] else "energy"
+if energy_key in out_info[-1]:
+    print(f"  Total energy: {out_info[-1][energy_key]:.5f} Eh")
+else:
+    print(f"  Energy: (not available in output)")
+if "max_gradient_component" in out_info[-1]:
+    print(f"  Max gradient component: {out_info[-1]['max_gradient_component']:.2} Å")
+else:
+    print(f"  Max gradient component: (not available in output)")
 
 
 # ===== Generate HTML Visualization =====
@@ -98,7 +106,13 @@ def topology_to_xyz(topo):
 initial_xyz = topology_to_xyz(out_traj[0])
 final_xyz = topology_to_xyz(out_traj[-1])
 
-energies = [step["total_energy"] for step in out_info]
+energy_key = "total_energy" if "total_energy" in out_info[0] else "energy"
+if energy_key not in out_info[0]:
+    raise KeyError(
+        f"Cannot find energy key in optimization output. "
+        f"Available keys: {list(out_info[0].keys())}"
+    )
+energies = [step[energy_key] for step in out_info]
 steps = list(range(len(energies)))
 initial_energy = energies[0]
 final_energy = energies[-1]
