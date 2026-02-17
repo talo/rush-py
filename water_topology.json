@@ -1,0 +1,40 @@
+{
+  "schema_version": "0.2.0",
+  "symbols": [
+    "O",
+    "H",
+    "H"
+  ],
+  "geometry": [
+    0.0,
+    0.0,
+    0.0,
+    0.957,
+    0.0,
+    0.0,
+    -0.24,
+    0.927,
+    0.0
+  ],
+  "labels": [
+    "O",
+    "H",
+    "H"
+  ],
+  "formal_charges": [
+    0,
+    0,
+    0
+  ],
+  "connectivity": [],
+  "fragments": [
+    [
+      0,
+      1,
+      2
+    ]
+  ],
+  "fragment_formal_charges": [
+    0
+  ]
+}

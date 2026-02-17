@@ -325,67 +325,137 @@ else:
 
     print(f"  Grid points: {len(density_values)}")
     if density_values:
-        print(f"  Density range: [{min(density_values):.6e}, {max(density_values):.6e}]")
-    if esp_values:
-        print(f"  ESP range: [{min(esp_values):.6e}, {max(esp_values):.6e}]")
+        dens_arr = np.array(density_values)
+        print(f"  Density range (raw): [{dens_arr.min():.6e}, {dens_arr.max():.6e}]")
+    
+    # Interpolate irregular grid onto regular 3D grid using scipy.interpolate.griddata
+    from scipy.interpolate import griddata
+    
+    if len(density_values) > 0 and len(grid_coords) > 0:
+        print(f"\n  Interpolating {len(density_values)} surface points onto regular 3D grid...")
+        
+        coords = np.array(grid_coords)
+        values = np.array(density_values)
+        
+        # Reshape coords if needed (should be Nx3)
+        if coords.ndim == 1:
+            coords = coords.reshape(-1, 3)
+        
+        # Determine grid bounds from the point cloud
+        x_min, y_min, z_min = coords.min(axis=0)
+        x_max, y_max, z_max = coords.max(axis=0)
+        
+        # Add fixed padding (3 bohr ≈ 1.6 Å beyond molecular extent)
+        padding = 3.0  # bohr
+        x_min -= padding; x_max += padding
+        y_min -= padding; y_max += padding
+        z_min -= padding; z_max += padding
+        
+        # Choose grid resolution (~0.5 bohr spacing, cap at 80 points per axis)
+        target_spacing = 0.5  # bohr
+        nx = min(80, max(10, int((x_max - x_min) / target_spacing)))
+        ny = min(80, max(10, int((y_max - y_min) / target_spacing)))
+        nz = min(80, max(10, int((z_max - z_min) / target_spacing)))
+        
+        dx = (x_max - x_min) / nx
+        dy = (y_max - y_min) / ny
+        dz = (z_max - z_min) / nz
+        
+        print(f"  Grid: {nx}×{ny}×{nz} = {nx*ny*nz} points")
+        print(f"  Bounds: x=[{x_min:.2f},{x_max:.2f}] y=[{y_min:.2f},{y_max:.2f}] z=[{z_min:.2f},{z_max:.2f}]")
+        print(f"  Spacing: ({dx:.4f}, {dy:.4f}, {dz:.4f}) bohr")
+        
+        # Create regular grid
+        xi = np.linspace(x_min, x_max, nx)
+        yi = np.linspace(y_min, y_max, ny)
+        zi = np.linspace(z_min, z_max, nz)
+        
+        grid_x, grid_y, grid_z = np.meshgrid(xi, yi, zi, indexing='ij')
+        grid_points = np.column_stack([grid_x.ravel(), grid_y.ravel(), grid_z.ravel()])
+        
+        # CRITICAL FIX: Use fill_value=0.0, NOT nearest-neighbor backfill
+        # Density outside the molecular surface IS zero, not extrapolated!
+        print(f"  Interpolating (linear, fill_value=0.0 to prevent artifact slab)...")
+        grid_values = griddata(coords, values, grid_points, method='linear', fill_value=0.0)
+        
+        # Clip noise: values below 1e-10 are numerical artifacts from interpolation
+        noise_count = np.sum((grid_values > 0) & (grid_values < 1e-10))
+        grid_values[grid_values < 1e-10] = 0.0
+        grid_values = grid_values.astype(np.float32)
+        
+        # Statistics
+        total = len(grid_values)
+        zero_count = np.sum(grid_values == 0.0)
+        nonzero_count = total - zero_count
+        
+        print(f"  ✓ Interpolated density range: [{grid_values.min():.3e}, {grid_values.max():.3e}]")
+        print(f"  Points inside convex hull: {nonzero_count} ({100*nonzero_count/total:.1f}%)")
+        print(f"  Points outside (set to 0): {zero_count} ({100*zero_count/total:.1f}%)")
+        print(f"  Noise points clipped (<1e-10): {noise_count}")
+        
+        # Suggest isovalues
+        if nonzero_count > 0:
+            nz_vals = grid_values[grid_values > 0]
+            print(f"  Suggested isovalues:")
+            for pct, label in [(90, "thick surface"), (50, "medium"), (10, "thin/outer")]:
+                iso = np.percentile(nz_vals, pct)
+                print(f"    {label} (P{pct}): {iso:.3e}")
+        
+        density_3d = grid_values.reshape((nx, ny, nz))
+        
+        # Convert bounds from bohr to angstrom for cube file
+        ANG_TO_BOHR = 1.8897259886
+        GRID_MIN = [x_min / ANG_TO_BOHR, y_min / ANG_TO_BOHR, z_min / ANG_TO_BOHR]
+        GRID_SPACING = [dx / ANG_TO_BOHR, dy / ANG_TO_BOHR, dz / ANG_TO_BOHR]
+    else:
+        print("ERROR: No grid data to interpolate. Skipping visualization.")
+        density_3d = None
+    
+    if density_3d is not None:
+        # ---- Build Gaussian Cube file from grid data ----
+        # Cube format: https://gaussian.com/cubegen/
+        # 3Dmol.js can directly parse cube files for isosurface rendering
 
-    # ---- Build Gaussian Cube file from grid data ----
-    # Cube format: https://gaussian.com/cubegen/
-    # 3Dmol.js can directly parse cube files for isosurface rendering
+        # Angstrom to Bohr conversion
+        ANG_TO_BOHR = 1.8897259886
 
-    # Angstrom to Bohr conversion
-    ANG_TO_BOHR = 1.8897259886
+        # Atomic numbers lookup
+        ATOMIC_NUMBERS = {
+            "H": 1, "He": 2, "Li": 3, "Be": 4, "B": 5, "C": 6, "N": 7,
+            "O": 8, "F": 9, "Ne": 10, "Na": 11, "Mg": 12, "Al": 13,
+            "Si": 14, "P": 15, "S": 16, "Cl": 17, "Ar": 18,
+        }
 
-    # Atomic numbers lookup
-    ATOMIC_NUMBERS = {
-        "H": 1, "He": 2, "Li": 3, "Be": 4, "B": 5, "C": 6, "N": 7,
-        "O": 8, "F": 9, "Ne": 10, "Na": 11, "Mg": 12, "Al": 13,
-        "Si": 14, "P": 15, "S": 16, "Cl": 17, "Ar": 18,
-    }
+        symbols = topology["symbols"]
+        geometry = topology["geometry"]  # flat list: [x0,y0,z0, x1,y1,z1, ...]
+        n_atoms = len(symbols)
 
-    symbols = topology["symbols"]
-    geometry = topology["geometry"]  # flat list: [x0,y0,z0, x1,y1,z1, ...]
-    n_atoms = len(symbols)
+        expected_points = nx * ny * nz
+        print(f"  Building cube file: {nx} × {ny} × {nz} = {expected_points} points")
 
-    # Grid dimensions
-    nx = int(round((GRID_MAX[0] - GRID_MIN[0]) / GRID_SPACING[0])) + 1
-    ny = int(round((GRID_MAX[1] - GRID_MIN[1]) / GRID_SPACING[1])) + 1
-    nz = int(round((GRID_MAX[2] - GRID_MIN[2]) / GRID_SPACING[2])) + 1
-    expected_points = nx * ny * nz
+        # Build the cube file string
+        origin_bohr = [v * ANG_TO_BOHR for v in GRID_MIN]
+        spacing_bohr = [v * ANG_TO_BOHR for v in GRID_SPACING]
 
-    print(f"  Grid dimensions: {nx} × {ny} × {nz} = {expected_points} points")
+        cube_lines = []
+        cube_lines.append("Electron Density")
+        cube_lines.append(f"Generated by Rush-Py EXESS Exports ({METHOD}/{BASIS})")
+        # Number of atoms, origin
+        cube_lines.append(f"{n_atoms:5d} {origin_bohr[0]:12.6f} {origin_bohr[1]:12.6f} {origin_bohr[2]:12.6f}")
+        # Number of voxels along each axis and step vector
+        cube_lines.append(f"{nx:5d} {spacing_bohr[0]:12.6f} {0.0:12.6f} {0.0:12.6f}")
+        cube_lines.append(f"{ny:5d} {0.0:12.6f} {spacing_bohr[1]:12.6f} {0.0:12.6f}")
+        cube_lines.append(f"{nz:5d} {0.0:12.6f} {0.0:12.6f} {spacing_bohr[2]:12.6f}")
+        # Atom lines
+        for i in range(n_atoms):
+            at_num = ATOMIC_NUMBERS.get(symbols[i], 0)
+            x_b = geometry[3*i] * ANG_TO_BOHR
+            y_b = geometry[3*i+1] * ANG_TO_BOHR
+            z_b = geometry[3*i+2] * ANG_TO_BOHR
+            cube_lines.append(f"{at_num:5d} {float(at_num):12.6f} {x_b:12.6f} {y_b:12.6f} {z_b:12.6f}")
 
-    if len(density_values) != expected_points:
-        print(f"  WARNING: Expected {expected_points} grid points but got {len(density_values)}")
-        print("  Attempting to proceed anyway...")
-
-    # Build the cube file string
-    origin_bohr = [v * ANG_TO_BOHR for v in GRID_MIN]
-    spacing_bohr = [v * ANG_TO_BOHR for v in GRID_SPACING]
-
-    cube_lines = []
-    cube_lines.append("Electron Density")
-    cube_lines.append(f"Generated by Rush-Py EXESS Exports ({METHOD}/{BASIS})")
-    # Number of atoms, origin
-    cube_lines.append(f"{n_atoms:5d} {origin_bohr[0]:12.6f} {origin_bohr[1]:12.6f} {origin_bohr[2]:12.6f}")
-    # Number of voxels along each axis and step vector
-    cube_lines.append(f"{nx:5d} {spacing_bohr[0]:12.6f} {0.0:12.6f} {0.0:12.6f}")
-    cube_lines.append(f"{ny:5d} {0.0:12.6f} {spacing_bohr[1]:12.6f} {0.0:12.6f}")
-    cube_lines.append(f"{nz:5d} {0.0:12.6f} {0.0:12.6f} {spacing_bohr[2]:12.6f}")
-    # Atom lines
-    for i in range(n_atoms):
-        at_num = ATOMIC_NUMBERS.get(symbols[i], 0)
-        x_b = geometry[3*i] * ANG_TO_BOHR
-        y_b = geometry[3*i+1] * ANG_TO_BOHR
-        z_b = geometry[3*i+2] * ANG_TO_BOHR
-        cube_lines.append(f"{at_num:5d} {float(at_num):12.6f} {x_b:12.6f} {y_b:12.6f} {z_b:12.6f}")
-
-    # Volumetric data (fast axis = z, then y, then x — Cube convention)
-    # Reshape density to 3D array and write in Cube order
-    density_arr = np.array(density_values[:expected_points])
-    if len(density_arr) < expected_points:
-        density_arr = np.pad(density_arr, (0, expected_points - len(density_arr)))
-    density_3d = density_arr.reshape((nx, ny, nz))
+        # Volumetric data (fast axis = z, then y, then x — Cube convention)
+        # Reshape density to 3D array and write in Cube order
 
     for ix in range(nx):
         for iy in range(ny):
