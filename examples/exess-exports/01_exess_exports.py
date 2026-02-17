@@ -26,8 +26,14 @@ print("=" * 60)
 print("Example 1: Exporting electron density")
 print("=" * 60)
 
+# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
+# This is a very fast but low-accuracy method. For production results,
+# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+
 res = exess.energy(
     TOPOLOGY_FILE,
+    method="RestrictedHF",
+    basis="STO-3G",
     export_keywords=exess.ExportKeywords(
         export_density=True,
     ),
@@ -54,8 +60,14 @@ print("=" * 60)
 print("Example 2: Descriptor grids (electron density + ESP)")
 print("=" * 60)
 
+# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
+# This is a very fast but low-accuracy method. For production results,
+# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+
 res = exess.energy(
     TOPOLOGY_FILE,
+    method="RestrictedHF",
+    basis="STO-3G",
     frag_keywords=None,  # No fragmentation; whole system calc
     export_keywords=exess.ExportKeywords(
         export_density_descriptors=True,

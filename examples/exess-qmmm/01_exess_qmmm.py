@@ -29,10 +29,16 @@ print("=" * 60)
 print("Example 1: Basic QM/MM simulation")
 print("=" * 60)
 
+# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
+# This is a very fast but low-accuracy method. For production results,
+# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+
 out = exess.qmmm(
     DATA_DIR / "6a5j_t.json",
     DATA_DIR / "6a5j_r.json",
     500,  # Number of timesteps
+    method="RestrictedHF",
+    basis="STO-3G",
     qm_fragments=[6],  # QM region: just the fragment at index 6
     ml_fragments=[],    # ML region: empty, so rest is in the MM region
     run_opts=RunOpts(name="Tutorial: QM/MM"),

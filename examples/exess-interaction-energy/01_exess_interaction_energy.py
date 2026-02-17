@@ -26,9 +26,15 @@ print("=" * 60)
 
 DATA_DIR = Path(__file__).parent / "data"
 
+# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
+# This is a very fast but low-accuracy method. For production results,
+# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+
 out = exess.interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
     93,  # This is the index of the fragment that contains the ligand
+    method="RestrictedHF",
+    basis="STO-3G",
     frag_keywords=exess.FragKeywords(
         level="Trimer",
         dimer_cutoff=10.0,
@@ -80,9 +86,15 @@ frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
 with open("1hsg_t.json", "w") as f:
     f.write(json.dumps(trc.topology.to_json(), indent=2))
 
+# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
+# This is a very fast but low-accuracy method. For production results,
+# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+
 out = exess.interaction_energy(
     "1hsg_t.json",
     lig_idx,
+    method="RestrictedHF",
+    basis="STO-3G",
     frag_keywords=exess.FragKeywords(
         level="Dimer",
         included_fragments=frag_idcs,

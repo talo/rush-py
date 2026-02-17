@@ -28,9 +28,15 @@ print("=" * 60)
 print("Example 1: QM Geometry Optimization")
 print("=" * 60)
 
+# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
+# This is a very fast but low-accuracy method. For production results,
+# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+
 out = exess.optimization(
     INPUT_FILE,
     100,  # Number of optimization iterations
+    method="RestrictedHF",
+    basis="STO-3G",
     standard_orientation="None",
     run_opts=RunOpts(name="Tutorial: Optimization using QM"),
     collect=True,
