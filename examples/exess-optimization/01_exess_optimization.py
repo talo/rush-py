@@ -264,6 +264,9 @@ function setupViewer(elementId, xyzData) {{
   viewer.addModel(xyzData, 'xyz');
   viewer.setStyle({{}}, {{ stick: {{ radius: 0.12, colorscheme: 'Jmol' }}, sphere: {{ scale: 0.25, colorscheme: 'Jmol' }} }});
   viewer.zoomTo();
+  // Lock camera so both viewers show the same angle (45° view)
+  viewer.rotate(45, 'x');
+  viewer.rotate(30, 'y');
   viewer.render();
   return viewer;
 }}
