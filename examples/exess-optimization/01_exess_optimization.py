@@ -19,7 +19,7 @@ from pathlib import Path
 from rush import Topology, exess
 from rush.client import RunOpts, save_object
 
-DATA_DIR = Path(__file__).parent.parent.parent / "tests" / "data"
+DATA_DIR = Path(__file__).parent / "data"
 INPUT_FILE = DATA_DIR / "benzene_t.json"
 
 

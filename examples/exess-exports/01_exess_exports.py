@@ -10,11 +10,15 @@ Tutorial: docs/tutorials/exess-exports.md
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
-    - Provide an input topology file (e.g., from tests/data/)
+    - Input file: benzene_t.json (provided in data/)
 """
 
+from pathlib import Path
 from rush import exess
 from rush.client import RunOpts, RunSpec
+
+DATA_DIR = Path(__file__).parent / "data"
+TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
 
 
 # ===== Example 1: Basic export with electron density =====
@@ -23,7 +27,7 @@ print("Example 1: Exporting electron density")
 print("=" * 60)
 
 res = exess.energy(
-    "input_topology.json",
+    TOPOLOGY_FILE,
     export_keywords=exess.ExportKeywords(
         export_density=True,
     ),
@@ -51,7 +55,7 @@ print("Example 2: Descriptor grids (electron density + ESP)")
 print("=" * 60)
 
 res = exess.energy(
-    "input_topology.json",
+    TOPOLOGY_FILE,
     frag_keywords=None,  # No fragmentation; whole system calc
     export_keywords=exess.ExportKeywords(
         export_density_descriptors=True,

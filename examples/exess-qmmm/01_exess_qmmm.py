@@ -21,7 +21,7 @@ from rush import Topology, exess
 from rush.client import RunOpts, save_object
 from rush.mol import Element, Fragment, Residue, Residues
 
-DATA_DIR = Path(__file__).parent.parent.parent / "tests" / "data"
+DATA_DIR = Path(__file__).parent / "data"
 
 
 # ===== Example 1: Basic QM/MM run =====

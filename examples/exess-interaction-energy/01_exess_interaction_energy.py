@@ -24,7 +24,7 @@ print("=" * 60)
 print("Example 1: Fragment-based interaction energy")
 print("=" * 60)
 
-DATA_DIR = Path(__file__).parent.parent.parent / "tests" / "data"
+DATA_DIR = Path(__file__).parent / "data"
 
 out = exess.interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
