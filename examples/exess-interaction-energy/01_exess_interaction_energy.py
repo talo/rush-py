@@ -67,6 +67,7 @@ from rush.prepare_complex import prepare_complex
 trc = prepare_complex(
     DATA_DIR / "1hsg.pdb",
     ligand_names=["MK1", "HOH"],
+    debump=None,
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
     collect=True,
 )
