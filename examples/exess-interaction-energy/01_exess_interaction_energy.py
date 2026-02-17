@@ -9,7 +9,7 @@ Tutorial: docs/tutorials/exess-interaction-energy.md
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
-    - Input files from tests/data/ (tyk2_ejm_31_t.json)
+    - Input file: tyk2_ejm_31_t.json (provided in data/)
 """
 
 import json

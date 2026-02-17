@@ -10,7 +10,7 @@ Tutorial: docs/tutorials/exess-qmmm.md
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
-    - Input files: 6a5j_t.json, 6a5j_r.json (from tests/data/)
+    - Input files: 6a5j_t.json, 6a5j_r.json (provided in data/)
 """
 
 import json

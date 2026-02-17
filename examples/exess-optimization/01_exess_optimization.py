@@ -10,7 +10,7 @@ Tutorial: docs/tutorials/exess-optimization.md
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
-    - Input file: benzene_t.json (from tests/data/)
+    - Input file: benzene_t.json (provided in data/)
 """
 
 import json

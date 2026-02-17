@@ -6,7 +6,7 @@ This script demonstrates how to:
 2. Calculate CHELPG partial charges using Rush
 3. Extract and visualize the charge distribution
 
-Run this script in a directory containing aspirin.pdb:
+Run this script from its directory:
     python 01_chelpg_aspirin.py
 
 Output files (saved to chelpg-outputs/):
@@ -32,14 +32,15 @@ import py3Dmol
 import base64
 
 
-# ===== 0. Setup output directory =====
-output_dir = Path("chelpg-outputs")
+# ===== 0. Setup paths =====
+data_dir = Path(__file__).parent / "data"
+output_dir = Path(__file__).parent / "chelpg-outputs"
 output_dir.mkdir(exist_ok=True)
 print(f"Output directory: {output_dir}")
 
 # ===== 1. Load PDB and convert to topology =====
 print("Loading aspirin.pdb...")
-pdb_content = Path("data/aspirin.pdb").read_text()
+pdb_content = (data_dir / "aspirin.pdb").read_text()
 trc = from_pdb(pdb_content)
 
 # Convert to topology JSON format
