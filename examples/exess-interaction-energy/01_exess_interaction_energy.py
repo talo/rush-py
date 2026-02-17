@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts
+from rush.client import RunOpts, download_object
 
 
 # ===== Example 1: Fragment-based interaction energy =====
@@ -48,9 +48,10 @@ out = exess.interaction_energy(
     collect=True,
 )
 
-out_file, _ = exess.save_energy_outputs(out)
-with open(out_file) as f:
-    out_data = json.load(f)
+# Extract and display results
+json_data = out[0]  # First output is JSON
+json_bytes = download_object(json_data["path"])
+out_data = json.loads(json_bytes.decode())
 print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
 
 
@@ -103,7 +104,8 @@ out = exess.interaction_energy(
     collect=True,
 )
 
-out_file, _ = exess.save_energy_outputs(out)
-with open(out_file) as f:
-    out_data = json.load(f)
+# Extract and display results
+json_data = out[0]  # First output is JSON
+json_bytes = download_object(json_data["path"])
+out_data = json.loads(json_bytes.decode())
 print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
