@@ -35,8 +35,8 @@ print("=" * 60)
 
 out = exess.qmmm(
     DATA_DIR / "6a5j_t.json",
-    DATA_DIR / "6a5j_r.json",
     500,  # Number of timesteps
+    DATA_DIR / "6a5j_r.json",
     method="RestrictedHF",
     basis="STO-3G",
     qm_fragments=[6],  # QM region: just the fragment at index 6
