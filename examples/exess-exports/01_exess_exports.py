@@ -340,6 +340,10 @@ else:
         # Reshape coords if needed (should be Nx3)
         if coords.ndim == 1:
             coords = coords.reshape(-1, 3)
+        elif coords.ndim == 2 and coords.shape[0] == 3 and coords.shape[1] > 3:
+            # HDF5 stores as (3, N) format: [x_coords, y_coords, z_coords]
+            # Transpose to (N, 3) format: [[x,y,z], [x,y,z], ...]
+            coords = coords.T
         
         # Determine grid bounds from the point cloud
         x_min, y_min, z_min = coords.min(axis=0)
