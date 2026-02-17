@@ -184,17 +184,100 @@ if hdf5_path:
     dctx = zstd.ZstdDecompressor()
     decompressed = dctx.decompress(raw_bytes, max_output_size=int(1e9))
     
-    # Extract from tar archive
-    print("  Extracting from tar archive...")
+    # Debug: show what we actually got
+    print(f"  Decompressed size: {len(decompressed)} bytes")
+    first_bytes = decompressed[:32]
+    print(f"  First 32 bytes (hex): {first_bytes.hex()}")
+    print(f"  First 32 bytes (repr): {repr(first_bytes)}")
+    
+    # Check for HDF5 magic
+    HDF5_MAGIC = b'\x89HDF\r\n\x1a\n'
+    TAR_MAGIC = b'ustar'
+    
+    is_hdf5 = decompressed.startswith(HDF5_MAGIC)
+    is_tar = len(decompressed) > 257 and decompressed[257:262] == TAR_MAGIC
+    
+    print(f"  Format detection: HDF5={is_hdf5}, TAR={is_tar}")
+    
     grid_data = {}
-    try:
-        with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-            # Find the .h5 file in the tar
-            h5_members = [m for m in tar.getmembers() if m.name.endswith('.h5')]
-            if h5_members:
-                h5_member = h5_members[0]
-                h5f_obj = tar.extractfile(h5_member)
-                with h5py.File(h5f_obj, "r") as h5f:
+    
+    if is_hdf5:
+        # Raw HDF5 file (no tar wrapper)
+        print("  Reading raw HDF5 file...")
+        try:
+            with h5py.File(BytesIO(decompressed), "r") as h5f:
+                def print_h5_tree(group, indent=0):
+                    for key in group.keys():
+                        item = group[key]
+                        if isinstance(item, h5py.Dataset):
+                            print(f"    {'  ' * indent}Dataset '{key}': shape={item.shape}, dtype={item.dtype}")
+                        elif isinstance(item, h5py.Group):
+                            print(f"    {'  ' * indent}Group '{key}':")
+                            print_h5_tree(item, indent + 1)
+                
+                print("  HDF5 structure:")
+                print_h5_tree(h5f)
+                
+                # Try to extract known keys
+                if "density_descriptors" in h5f:
+                    grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+                if "esp_descriptors" in h5f:
+                    grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+                if "descriptor_grid" in h5f:
+                    grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
+                
+                # Fallback: if no named keys, use largest float dataset
+                if not grid_data:
+                    print("  No named datasets found, looking for largest float dataset...")
+                    largest = None
+                    largest_size = 0
+                    for key in h5f.keys():
+                        ds = h5f[key]
+                        if isinstance(ds, h5py.Dataset) and np.issubdtype(ds.dtype, np.floating):
+                            size = ds.size
+                            if size > largest_size:
+                                largest = key
+                                largest_size = size
+                    if largest:
+                        print(f"  Using dataset '{largest}' (size={largest_size})")
+                        grid_data[largest] = h5f[largest][:].tolist()
+        except Exception as e:
+            print(f"  ERROR reading raw HDF5: {e}")
+    
+    elif is_tar:
+        # Tar archive containing HDF5
+        print("  Extracting from tar archive...")
+        try:
+            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+                print(f"  Tar members: {[m.name for m in tar.getmembers()]}")
+                # Find .h5 files (with or without .h5 extension)
+                h5_members = [m for m in tar.getmembers() if m.name.endswith('.h5') or m.isfile()]
+                if h5_members:
+                    h5_member = h5_members[0]
+                    print(f"  Extracting: {h5_member.name}")
+                    h5f_obj = tar.extractfile(h5_member)
+                    with h5py.File(h5f_obj, "r") as h5f:
+                        print(f"  HDF5 datasets: {list(h5f.keys())}")
+                        if "density_descriptors" in h5f:
+                            grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+                        if "esp_descriptors" in h5f:
+                            grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+                        if "descriptor_grid" in h5f:
+                            grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
+                else:
+                    print("  WARNING: No .h5 files found in tar archive")
+        except Exception as e:
+            print(f"  ERROR reading tar archive: {e}")
+    
+    else:
+        # Unknown format - search for HDF5 magic
+        print("  Unknown format, searching for HDF5 magic in first 10KB...")
+        search_bytes = decompressed[:10240]
+        hdf5_offset = search_bytes.find(HDF5_MAGIC)
+        if hdf5_offset >= 0:
+            print(f"  Found HDF5 magic at offset {hdf5_offset}")
+            try:
+                with h5py.File(BytesIO(decompressed[hdf5_offset:]), "r") as h5f:
                     print(f"  HDF5 datasets: {list(h5f.keys())}")
                     if "density_descriptors" in h5f:
                         grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
@@ -202,15 +285,10 @@ if hdf5_path:
                         grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
                     if "descriptor_grid" in h5f:
                         grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-                    # Also check for other potentially useful datasets
-                    for key in h5f.keys():
-                        if key not in grid_data:
-                            ds = h5f[key]
-                            print(f"    Extra dataset '{key}': shape={ds.shape}, dtype={ds.dtype}")
-            else:
-                print("  WARNING: No .h5 file found in tar archive")
-    except Exception as e:
-        print(f"  ERROR reading HDF5: {e}")
+            except Exception as e:
+                print(f"  ERROR reading HDF5 at offset {hdf5_offset}: {e}")
+        else:
+            print("  ERROR: Could not identify file format (no HDF5 magic found)")
     
     print(f"  Extracted keys from HDF5: {list(grid_data.keys())}")
     for key, val in grid_data.items():
