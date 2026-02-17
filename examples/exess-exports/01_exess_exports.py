@@ -182,6 +182,19 @@ if grid_data is None:
                 grid_data = json.load(jf)
             break
 
+# DEBUG: Print structure of extracted grid_data
+print(f"\nDEBUG: grid_data type: {type(grid_data)}")
+print(f"DEBUG: grid_data keys: {list(grid_data.keys()) if isinstance(grid_data, dict) else 'NOT A DICT'}")
+if isinstance(grid_data, dict):
+    for key in grid_data.keys():
+        val = grid_data[key]
+        if isinstance(val, list):
+            print(f"  {key}: list of length {len(val)}")
+        elif isinstance(val, dict):
+            print(f"  {key}: dict with keys {list(val.keys())}")
+        else:
+            print(f"  {key}: {type(val).__name__}")
+
 if grid_data is None:
     print("ERROR: Could not find grid data. Skipping visualization.")
 else:
