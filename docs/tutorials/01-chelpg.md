@@ -23,7 +23,7 @@ When designing or evaluating drug candidates, you need to understand **where cha
 - **Membrane permeability** — too much polarity and the molecule won't cross lipid bilayers
 - **Reactivity** — highly charged atoms are sites for metabolism or chemical instability
 
-CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits partial charges to reproduce the quantum-mechanical electrostatic potential on a grid around the molecule. The result is a set of atom-centered charges that faithfully represent the molecule's electrostatic "personality."
+CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits partial charges to reproduce the quantum-mechanical electrostatic potential on a grid around the molecule. The result is a set of atom-centered charges that represent the molecule's electrostatic "personality."
 
 ## What You'll Need
 
