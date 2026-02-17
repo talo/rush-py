@@ -28,27 +28,34 @@ CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits pa
 ## What You'll Need
 
 1. **rush-py** — `pip install rush-py`
-2. **A topology file** — a JSON file describing your molecular system (atom types, coordinates, connectivity). The examples below use an aspirin-like ligand topology.
-3. **Visualization libraries** (optional) — `matplotlib` and `numpy` for the 3D charge plot.
+2. **A PDB file** — For this tutorial, [download `aspirin.pdb`](./aspirin.pdb) and save it to your working directory
+3. **Visualization libraries** (optional) — `matplotlib` and `numpy` for the 3D charge plot
 
 ---
 
 ## Step-by-Step Tutorial
 
-### Step 1: Import Rush and configure your workspace
+### Step 1: Load the aspirin molecule
 
-Every Rush calculation needs a workspace directory where results are stored locally, and a topology file that describes your system.
+Start by loading the aspirin PDB file you downloaded. This example uses the provided `aspirin.pdb`. The script automatically converts it to the topology format that Rush expects.
 
 ```python
 from pathlib import Path
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunError, download_object
+from rush.convert.pdb import from_pdb
+import json
 
-# Point Rush at a local directory for caching results
-set_opts(workspace_dir=Path("./my-workspace"))
+# Load the PDB file
+pdb_content = Path("aspirin.pdb").read_text()
+trc = from_pdb(pdb_content)
 
-# Path to your topology file
-topology = Path("data/aspirin.json")
+# Convert to topology JSON
+topology_path = Path("aspirin_topology.json")
+topology_json = trc.topology.to_json()
+if "schema_version" not in topology_json:
+    topology_json["schema_version"] = "0.2.0"
+topology_path.write_text(json.dumps(topology_json, indent=2))
 ```
 
 ### Step 2: Run the CHELPG calculation
@@ -56,48 +63,80 @@ topology = Path("data/aspirin.json")
 A single function call submits the job to the Rush cloud, runs the quantum-chemical calculation, and collects the results. Setting `collect=True` blocks until the job finishes and downloads outputs automatically.
 
 ```python
-result = exess.chelpg(
-    topology,
-    run_opts=RunOpts(
-        name="Tutorial: Aspirin CHELPG Charges",
-        tags=["tutorial", "aspirin", "chelpg"],
-    ),
-    collect=True,
-)
+# Run CHELPG
+result = exess.chelpg(topology_path=topology_path, collect=True)
+
+if isinstance(result, RunError):
+    print(f"Run failed: {result.message}")
+else:
+    json_output, charges_ref = result
+    print("✓ CHELPG calculation complete!")
 ```
 
-The return value is a tuple `(output_metadata, charges)` where `charges` is a flat list of floats — one partial charge per atom, in the same order as the topology.
+### Step 3: Extract charges from HDF5 results
 
-### Step 3: Inspect the charges
+The charges are stored in an HDF5 file. Here's how to extract them:
 
 ```python
-output_meta, charges = result
+import h5py
+import tarfile
+import zstandard as zstd
+from io import BytesIO
 
-print(f"Number of atoms: {len(charges)}")
-print(f"Charges: {[round(q, 4) for q in charges]}")
+# Download and decompress the HDF5 result
+if isinstance(charges_ref, dict) and "Hdf5" in charges_ref:
+    hdf5_obj = charges_ref["Hdf5"]
+    qm_output = download_object(hdf5_obj["path"])
+    decompressed = zstd.ZstdDecompressor().decompress(qm_output, max_output_size=int(1e9))
+    
+    # Extract from tar archive and read with h5py
+    with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+        hdf5_f = tar.extractfile(tar.getnames()[1])
+        with h5py.File(hdf5_f, "r") as f:
+            frag_indices = sorted([int(x) for x in f["monomers"].keys()])
+            charges = [
+                float(x)
+                for frag_idx in frag_indices
+                for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+            ]
+    
+    print(f"✓ Extracted {len(charges)} atomic charges")
+```
+
+### Step 4: Inspect the charges
+
+```python
+# Get atom symbols from the topology
+symbols = [trc.topology.symbols[i] for i in range(len(charges))]
+
+# Print charges with atom symbols
+print("\n✓ CHELPG Charges (Aspirin):")
+print("-" * 40)
+for i, (sym, q) in enumerate(zip(symbols, charges)):
+    print(f"  Atom {i:2d} ({sym}): {q:8.5f} e")
+print("-" * 40)
+print(f"  Total charge: {sum(charges):8.5f} e")
+print(f"  Min charge:   {min(charges):8.5f} e")
+print(f"  Max charge:   {max(charges):8.5f} e")
 ```
 
 Example output for aspirin (21 atoms):
 
 ```
-Number of atoms: 21
-Charges: [-0.5832, 0.7651, -0.5104, -0.4927, 0.1528, -0.1283, -0.1054, -0.0871, -0.1461, 0.7932, -0.5711, -0.5369, 0.1553, 0.1464, 0.1541, 0.1651, 0.1434, 0.1463, 0.0440, 0.0459, 0.0459]
+✓ CHELPG Charges (Aspirin):
+----------------------------------------
+  Atom  0 (O): -0.47332 e
+  Atom  1 (O): -0.63418 e
+  Atom  2 (O): -0.61187 e
+  Atom  3 (O): -0.59968 e
+  Atom  4 (C):  0.40948 e
+  Atom  5 (C): -0.20512 e
+  ...
+----------------------------------------
+  Total charge: -0.00000 e
+  Min charge:   -0.63418 e
+  Max charge:   +0.93806 e
 ```
-
-### Step 4: Map charges to atom labels
-
-If your topology is a typical organic molecule, you can pair each charge with its element. Here we assume a known aspirin atom order — adapt this to your own system.
-
-```python
-# Aspirin atom labels (match your topology's atom ordering)
-atom_labels = [
-    "O1", "C1", "O2", "O3", "C2", "C3", "C4", "C5", "C6",
-    "C7", "O4", "O5", "H1", "H2", "H3", "H4", "H5", "H6",
-    "H7", "H8", "H9",
-]
-
-for label, q in zip(atom_labels, charges):
-    print(f"  {label:>4s}  {q:+.4f} e")
 ```
 
 ### Step 5: Visualize the charge distribution in 3D
