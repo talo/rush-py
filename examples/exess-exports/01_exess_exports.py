@@ -47,7 +47,17 @@ res = exess.energy(
 # Inspect the outputs
 print("Raw outputs:")
 for i, output in enumerate(res):
-    print(f"  [{i}] path={output['path']}, format={output['format']}")
+    if 'path' in output:
+        # First output: flat dict with path/format
+        print(f"  [{i}] path={output['path']}, format={output.get('format', 'unknown')}")
+    elif 'Json' in output:
+        # Type-discriminated JSON output
+        print(f"  [{i}] Json: path={output['Json']['path']}")
+    elif 'Hdf5' in output:
+        # Type-discriminated HDF5 output
+        print(f"  [{i}] Hdf5: path={output['Hdf5']['path']}")
+    else:
+        print(f"  [{i}] Unknown output type with keys: {list(output.keys())}")
 
 # Save outputs to disk (JSON + HDF5)
 files = exess.save_energy_outputs(res)
