@@ -514,63 +514,62 @@ else:
 
         # Volumetric data (fast axis = z, then y, then x — Cube convention)
         # Reshape density to 3D array and write in Cube order
-
-    for ix in range(nx):
-        for iy in range(ny):
-            row_vals = []
-            for iz in range(nz):
-                row_vals.append(f"{density_3d[ix, iy, iz]:13.5e}")
-                if len(row_vals) == 6:
-                    cube_lines.append(" ".join(row_vals))
-                    row_vals = []
-            if row_vals:
-                cube_lines.append(" ".join(row_vals))
-
-    cube_str = "\n".join(cube_lines)
-
-    # Also build ESP cube if available
-    esp_cube_str = None
-    if esp_values and len(esp_values) >= expected_points:
-        esp_lines = cube_lines[:6 + n_atoms]  # reuse header
-        esp_lines[0] = "Electrostatic Potential"
-        esp_arr = np.array(esp_values[:expected_points]).reshape((nx, ny, nz))
         for ix in range(nx):
             for iy in range(ny):
                 row_vals = []
                 for iz in range(nz):
-                    row_vals.append(f"{esp_arr[ix, iy, iz]:13.5e}")
+                    row_vals.append(f"{density_3d[ix, iy, iz]:13.5e}")
                     if len(row_vals) == 6:
-                        esp_lines.append(" ".join(row_vals))
+                        cube_lines.append(" ".join(row_vals))
                         row_vals = []
                 if row_vals:
-                    esp_lines.append(" ".join(row_vals))
-        esp_cube_str = "\n".join(esp_lines)
+                    cube_lines.append(" ".join(row_vals))
 
-    # Save cube files
-    cube_path = OUTPUT_DIR / "electron_density.cube"
-    cube_path.write_text(cube_str)
-    print(f"  ✓ Cube file saved: {cube_path}")
+        cube_str = "\n".join(cube_lines)
 
-    if esp_cube_str:
-        esp_cube_path = OUTPUT_DIR / "esp.cube"
-        esp_cube_path.write_text(esp_cube_str)
-        print(f"  ✓ ESP cube file saved: {esp_cube_path}")
+        # Also build ESP cube if available
+        esp_cube_str = None
+        if esp_values and len(esp_values) >= expected_points:
+            esp_lines = cube_lines[:6 + n_atoms]  # reuse header
+            esp_lines[0] = "Electrostatic Potential"
+            esp_arr = np.array(esp_values[:expected_points]).reshape((nx, ny, nz))
+            for ix in range(nx):
+                for iy in range(ny):
+                    row_vals = []
+                    for iz in range(nz):
+                        row_vals.append(f"{esp_arr[ix, iy, iz]:13.5e}")
+                        if len(row_vals) == 6:
+                            esp_lines.append(" ".join(row_vals))
+                            row_vals = []
+                    if row_vals:
+                        esp_lines.append(" ".join(row_vals))
+            esp_cube_str = "\n".join(esp_lines)
 
-    # ---- Build XYZ string for 3Dmol.js ----
-    xyz_lines = [str(n_atoms), f"{METHOD}/{BASIS} benzene"]
-    for i in range(n_atoms):
-        xyz_lines.append(
-            f"{symbols[i]}  {geometry[3*i]:.6f}  {geometry[3*i+1]:.6f}  {geometry[3*i+2]:.6f}"
-        )
-    xyz_str = "\n".join(xyz_lines)
+        # Save cube files
+        cube_path = OUTPUT_DIR / "electron_density.cube"
+        cube_path.write_text(cube_str)
+        print(f"  ✓ Cube file saved: {cube_path}")
 
-    # ---- Generate interactive HTML ----
-    energy_display = f"{total_energy:.8f} Eh" if total_energy is not None else "N/A"
-    energy_kcal = f"{total_energy * 627.509474:.2f} kcal/mol" if total_energy is not None else ""
+        if esp_cube_str:
+            esp_cube_path = OUTPUT_DIR / "esp.cube"
+            esp_cube_path.write_text(esp_cube_str)
+            print(f"  ✓ ESP cube file saved: {esp_cube_path}")
 
-    cube_js = json.dumps(cube_str)
-    esp_cube_js = json.dumps(esp_cube_str) if esp_cube_str else "null"
-    xyz_js = json.dumps(xyz_str)
+        # ---- Build XYZ string for 3Dmol.js ----
+        xyz_lines = [str(n_atoms), f"{METHOD}/{BASIS} benzene"]
+        for i in range(n_atoms):
+            xyz_lines.append(
+                f"{symbols[i]}  {geometry[3*i]:.6f}  {geometry[3*i+1]:.6f}  {geometry[3*i+2]:.6f}"
+            )
+        xyz_str = "\n".join(xyz_lines)
+
+        # ---- Generate interactive HTML ----
+        energy_display = f"{total_energy:.8f} Eh" if total_energy is not None else "N/A"
+        energy_kcal = f"{total_energy * 627.509474:.2f} kcal/mol" if total_energy is not None else ""
+
+        cube_js = json.dumps(cube_str)
+        esp_cube_js = json.dumps(esp_cube_str) if esp_cube_str else "null"
+        xyz_js = json.dumps(xyz_str)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
