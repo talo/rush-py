@@ -292,8 +292,14 @@ if hdf5_path:
     
     print(f"  Extracted keys from HDF5: {list(grid_data.keys())}")
     for key, val in grid_data.items():
-        if isinstance(val, list):
-            print(f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]")
+        if isinstance(val, list) and len(val) > 0:
+            # Check if values are scalars (1D) or coordinate tuples (2D)
+            if isinstance(val[0], (int, float)):
+                print(f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]")
+            else:
+                # Coordinate data (e.g., descriptor_grid is list of [x,y,z])
+                arr = np.array(val)
+                print(f"    {key}: {len(val)} points, shape={arr.shape}")
 else:
     # Fallback: look for saved HDF5 files on disk
     print("WARNING: No HDF5 output found in response. Looking for saved files...")
