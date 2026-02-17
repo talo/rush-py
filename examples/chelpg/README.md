@@ -18,6 +18,7 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 
 2. **Run the example:**
    ```bash
+   cd examples/chelpg
    python 01_chelpg_aspirin.py
    ```
 

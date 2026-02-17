@@ -34,7 +34,7 @@ import base64
 
 # ===== 1. Load PDB and convert to topology =====
 print("Loading aspirin.pdb...")
-pdb_content = Path("aspirin.pdb").read_text()
+pdb_content = Path("data/aspirin.pdb").read_text()
 trc = from_pdb(pdb_content)
 
 # Convert to topology JSON format
