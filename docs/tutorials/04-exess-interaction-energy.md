@@ -194,5 +194,5 @@ The data files (TYK2 topology and PDB) are included in the repository — no sep
 
 - {doc}`Exports tutorial<02-exess-exports>` — extract electron density, ESP, and other properties
 - {doc}`Optimization tutorial<03-exess-optimization>` — relax geometries before computing interaction energies
-- {doc}`QM/MM tutorial<exess-qmmm>` — run dynamics simulations with mixed QM/MM
+- {doc}`QM/MM tutorial<05-exess-qmmm>` — run dynamics simulations with mixed QM/MM
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy) — runnable version with both examples
