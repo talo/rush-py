@@ -197,7 +197,7 @@ The data files (topology and residue files) are included in the repository — n
 
 ## See Also
 
-- {doc}`Optimization tutorial<exess-optimization>` — relax structures before running dynamics
-- {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute binding energies from trajectory snapshots
-- {doc}`Exports tutorial<exess-exports>` — extract electronic properties during simulations
+- {doc}`Optimization tutorial<03-exess-optimization>` — relax structures before running dynamics
+- {doc}`Interaction energy tutorial<04-exess-interaction-energy>` — compute binding energies from trajectory snapshots
+- {doc}`Exports tutorial<02-exess-exports>` — extract electronic properties during simulations
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-qmmm)

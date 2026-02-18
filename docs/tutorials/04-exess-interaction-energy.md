@@ -151,7 +151,7 @@ print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 
 :::{admonition} The second output
 :class: note
-`exess.interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<exess-exports>` for details.
+`exess.interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<02-exess-exports>` for details.
 :::
 
 ---
@@ -192,7 +192,7 @@ The data files (TYK2 topology and PDB) are included in the repository — no sep
 
 ## See Also
 
-- {doc}`Exports tutorial<exess-exports>` — extract electron density, ESP, and other properties
-- {doc}`Optimization tutorial<exess-optimization>` — relax geometries before computing interaction energies
+- {doc}`Exports tutorial<02-exess-exports>` — extract electron density, ESP, and other properties
+- {doc}`Optimization tutorial<03-exess-optimization>` — relax geometries before computing interaction energies
 - {doc}`QM/MM tutorial<exess-qmmm>` — run dynamics simulations with mixed QM/MM
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy) — runnable version with both examples

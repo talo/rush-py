@@ -84,10 +84,10 @@ Now that you've run your first calculation, here are three paths forward:
 Learn by doing with step-by-step examples that walk you through real-world workflows:
 
 - {doc}`CHELPG Charge Analysis <../tutorials/01-chelpg>` — Understand molecular charge distributions
-- {doc}`Exporting Results <../tutorials/exess-exports>` — Get data out of Rush for downstream use
-- {doc}`Geometry Optimization <../tutorials/exess-optimization>` — Find minimum-energy structures
-- {doc}`Interaction Energy <../tutorials/exess-interaction-energy>` — Quantify binding between molecules
-- {doc}`QM/MM Calculations <../tutorials/exess-qmmm>` — Mixed quantum/classical simulations
+- {doc}`Exporting Results <../tutorials/02-exess-exports>` — Get data out of Rush for downstream use
+- {doc}`Geometry Optimization <../tutorials/03-exess-optimization>` — Find minimum-energy structures
+- {doc}`Interaction Energy <../tutorials/04-exess-interaction-energy>` — Quantify binding between molecules
+- {doc}`QM/MM Calculations <../tutorials/05-exess-qmmm>` — Mixed quantum/classical simulations
 
 ### 📖 Understand Rush-Py Core
 

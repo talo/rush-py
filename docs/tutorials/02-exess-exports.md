@@ -227,6 +227,6 @@ The data files (input topology) are included in the repository — no separate d
 
 ## See Also
 
-- {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute energies alongside exports
-- {doc}`Optimization tutorial<exess-optimization>` — optimize geometry, then export properties
+- {doc}`Interaction energy tutorial<04-exess-interaction-energy>` — compute energies alongside exports
+- {doc}`Optimization tutorial<03-exess-optimization>` — optimize geometry, then export properties
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports)
