@@ -1,4 +1,4 @@
-# Protein–Ligand Interaction Energy
+# Tutorial 4: Interaction Energy
 
 **What you get:** A single number (in Hartrees) quantifying how strongly a ligand interacts with its protein pocket — computed from first principles, no force field fitting required.
 

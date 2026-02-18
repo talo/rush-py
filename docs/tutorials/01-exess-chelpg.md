@@ -1,4 +1,4 @@
-# Tutorial 1: Understanding Your Molecule's Charge Distribution — CHELPG Analysis in 2 Minutes
+# Tutorial 1: CHELPG Charge Analysis
 
 | | |
 |---|---|
