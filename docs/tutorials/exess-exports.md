@@ -192,6 +192,12 @@ The example script includes additional code to:
 
 See the full [`examples/exess-exports/01_exess_exports.py`](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) script for complete details.
 
+### Example Output
+
+Click and drag to rotate the density isosurface. Or run the code above to generate this yourself!
+
+<iframe src="../../_static/outputs/density_visualization.html" width="100%" height="600px" frameborder="0"></iframe>
+
 ---
 
 ## See Also

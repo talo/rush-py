@@ -91,6 +91,14 @@ For drug discovery, CHELPG charges tell you:
 
 ---
 
+### Interactive CHELPG Output
+
+Run the code above to reproduce this result, or explore the pre-computed output below:
+
+<iframe src="../../_static/outputs/chelpg_aspirin.html" width="100%" height="600px" frameborder="0"></iframe>
+
+---
+
 ## See Also
 
 - [Rush Documentation](https://docs.rush.so)

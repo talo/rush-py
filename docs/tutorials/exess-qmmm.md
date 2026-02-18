@@ -165,6 +165,12 @@ The power of EXESS's Q4ML approach is flexibility in how you partition your syst
 
 The key trade-off: QM is most accurate but slowest. ML (AIMNet) is a good middle ground for organic molecules. MM is fastest but can't capture electronic effects.
 
+### Example Output
+
+Explore the QM/MM trajectory visualization. Or run the code above to generate this yourself!
+
+<iframe src="../../_static/outputs/qmmm_results.html" width="100%" height="600px" frameborder="0"></iframe>
+
 ---
 
 ## See Also
