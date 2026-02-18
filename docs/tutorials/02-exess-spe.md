@@ -95,4 +95,4 @@ You can download the files directly or clone the repository to run the full exam
 - {doc}`Exporting properties <03-exess-exports>` — extract electron density, ESP, and other properties from an energy calculation
 - {doc}`Geometry optimization <04-exess-optimization>` — find the minimum-energy structure before computing properties
 - {doc}`EXESS Documentation <../exess/index>`
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-spe){target="_blank"}
+- [Full example script](https://github.com/talo/rush-py/tree/main/examples/exess-spe){target="_blank"}

@@ -58,7 +58,7 @@ You can find the sample PDB file at [`examples/exess-chelpg/data/aspirin.pdb`](h
 
 For complete charge extraction, visualization (bar chart + interactive 3D), and interpretation, see the **full example script**:
 
-👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-chelpg){target="_blank"}**
+👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/main/examples/exess-chelpg){target="_blank"}**
 
 This includes:
 - ✅ HDF5 charge extraction
