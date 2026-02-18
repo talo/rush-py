@@ -54,21 +54,7 @@ That's it — `res` contains the energy result, and `files` has the saved JSON o
 
 ### Input File
 
-The input is a TRC (topology representation) JSON file with atomic coordinates and element symbols. See {doc}`../exess/topologies` for the full TRC format specification.
-
-```json
-{
-    "geometry": [
-        0.0000,  0.0000,  0.1173,
-        0.0000,  0.7572, -0.4692,
-        0.0000, -0.7572, -0.4692
-    ],
-    "symbols": ["O", "H", "H"],
-    "schema_version": "0.2.0"
-}
-```
-
-Coordinates are in Ångströms. You can also convert from PDB using `rush.convert.pdb.from_pdb()` (see {doc}`01-exess-chelpg` for an example).
+The input is a TRC (topology representation) JSON file with atomic coordinates and element symbols. See {doc}`../exess/topologies` for the full TRC format specification. You can also convert from PDB using `rush.convert.pdb.from_pdb()` (see {doc}`01-exess-chelpg` for an example).
 
 ---
 
