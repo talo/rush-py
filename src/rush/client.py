@@ -86,7 +86,7 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
-        "exess_rex": "github:talo/tengu-exess/c03a008abbecaf339821c4c44b3992d18efaebc4#exess_rex",
+        "exess_rex": "github:talo/tengu-exess/43203d3b9fc36c692ee405c37d548bc9e949e0af#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/af035b062ed491c09dba9c558a8418f3482fc924#exess_qmmm_rex",
         "mmseqs2_rex": "github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex",
