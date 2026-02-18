@@ -202,24 +202,18 @@ Click and drag to rotate the density isosurface. Or run the code above to genera
 
 ## Try It Yourself
 
-The complete example script and data files are in the rush-py repository:
+The complete example script and data files are available in the rush-py repository:
+
+- **Example script:** [examples/exess-exports/03_exess_exports.py](https://github.com/talo/rush-py/blob/main/examples/exess-exports/03_exess_exports.py)
+- **Data folder:** [examples/exess-exports/data/](https://github.com/talo/rush-py/tree/main/examples/exess-exports/data)
+
+You can download these files directly or clone the repository. You'll also need to install extra dependencies:
 
 ```bash
-# Clone the repo (if you haven't already)
-git clone https://github.com/talo/rush-py.git
-cd rush-py
-
-# The example script and data are at:
-#   examples/exess-exports/03_exess_exports.py
-#   examples/exess-exports/data/
-
-# Install extra dependencies for visualization
 pip install h5py zstandard scipy
-
-# Run the full example
-cd examples/exess-exports
-python 03_exess_exports.py
 ```
+
+Then run the example script.
 
 The data files (input topology) are included in the repository — no separate download needed.
 

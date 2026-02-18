@@ -154,23 +154,12 @@ Explore the energy convergence and before/after structures. Or run the code abov
 
 ## Try It Yourself
 
-The complete example script and data files are in the rush-py repository:
+The complete example script and data files are available in the rush-py repository:
 
-```bash
-# Clone the repo (if you haven't already)
-git clone https://github.com/talo/rush-py.git
-cd rush-py
+- **Example script:** [examples/exess-optimization/04_exess_optimization.py](https://github.com/talo/rush-py/blob/main/examples/exess-optimization/04_exess_optimization.py)
+- **Data folder:** [examples/exess-optimization/data/](https://github.com/talo/rush-py/tree/main/examples/exess-optimization/data)
 
-# The example script and data are at:
-#   examples/exess-optimization/04_exess_optimization.py
-#   examples/exess-optimization/data/
-
-# Run the full example
-cd examples/exess-optimization
-python 04_exess_optimization.py
-```
-
-The data files (twisted ethene topology) are included in the repository — no separate download needed.
+You can download these files directly or clone the repository to run the full example.
 
 ---
 

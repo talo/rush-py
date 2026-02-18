@@ -91,23 +91,12 @@ For drug discovery, CHELPG charges tell you:
 
 ## Try It Yourself
 
-The complete example script and data files are in the rush-py repository:
+The complete example script and data files are available in the rush-py repository:
 
-```bash
-# Clone the repo (if you haven't already)
-git clone https://github.com/talo/rush-py.git
-cd rush-py
+- **Example script:** [examples/chelpg/01_exess_chelpg_aspirin.py](https://github.com/talo/rush-py/blob/main/examples/chelpg/01_exess_chelpg_aspirin.py)
+- **Data file:** [examples/chelpg/data/aspirin.pdb](https://github.com/talo/rush-py/blob/main/examples/chelpg/data/aspirin.pdb)
 
-# The example script and data are at:
-#   examples/chelpg/01_exess_chelpg_aspirin.py
-#   examples/chelpg/data/aspirin.pdb
-
-# Run the full example
-cd examples/chelpg
-python 01_exess_chelpg_aspirin.py
-```
-
-The data files (PDB structure) are included in the repository — no separate download needed.
+You can download these files directly or clone the repository to run the full example.
 
 ---
 

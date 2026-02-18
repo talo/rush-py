@@ -81,23 +81,12 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 
 ## Try It Yourself
 
-The complete example script and data files are in the rush-py repository:
+The complete example script and data files are available in the rush-py repository:
 
-```bash
-# Clone the repo (if you haven't already)
-git clone https://github.com/talo/rush-py.git
-cd rush-py
+- **Example script:** [examples/exess-spe/02_exess_spe.py](https://github.com/talo/rush-py/blob/main/examples/exess-spe/02_exess_spe.py)
+- **Data file:** [examples/exess-spe/data/water_topology.json](https://github.com/talo/rush-py/blob/main/examples/exess-spe/data/water_topology.json)
 
-# The example script and data are at:
-#   examples/exess-spe/02_exess_spe.py
-#   examples/exess-spe/data/water_topology.json
-
-# Run the full example
-cd examples/exess-spe
-python 02_exess_spe.py
-```
-
-The data files (water topology) are included in the repository — no separate download needed.
+You can download these files directly or clone the repository to run the full example.
 
 ---
 
