@@ -97,7 +97,7 @@ res = exess.energy(
 files = exess.save_energy_outputs(res)
 ```
 
-This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`) — see the [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) for production-ready parameters. The resulting JSON looks like:
+This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`) — see the [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports){target="_blank"} for production-ready parameters. The resulting JSON looks like:
 
 ```json
 {
@@ -190,7 +190,7 @@ The example script includes additional code to:
 - Interpolate scattered data onto a regular 3D grid with scipy
 - Generate an interactive 3D electron density viewer using Three.js Marching Cubes
 
-See the full [`examples/exess-exports/03_exess_exports.py`](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) script for complete details.
+See the full [`examples/exess-exports/03_exess_exports.py`](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports){target="_blank"} script for complete details.
 
 ### Example Output
 
@@ -204,7 +204,7 @@ Click and drag to rotate the density isosurface. Or run the code above to genera
 
 The complete example is available in the rush-py repository:
 
-👉 **[examples/exess-exports/](https://github.com/talo/rush-py/tree/main/examples/exess-exports)**
+👉 **[examples/exess-exports/](https://github.com/talo/rush-py/tree/main/examples/exess-exports){target="_blank"}**
 
 You'll also need to install extra dependencies:
 
@@ -222,4 +222,4 @@ The data files (input topology) are included in the repository — no separate d
 
 - {doc}`Interaction energy tutorial<05-exess-interaction-energy>` — compute energies alongside exports
 - {doc}`Optimization tutorial<04-exess-optimization>` — optimize geometry, then export properties
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports)
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports){target="_blank"}
