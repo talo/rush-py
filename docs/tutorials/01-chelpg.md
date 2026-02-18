@@ -4,7 +4,7 @@
 |---|---|
 | **Time** | 2 minutes |
 | **Skill level** | Beginner |
-| **Prerequisites** | Python 3.10+, `rush-py` installed |
+| **Prerequisites** | Python 3.10+, `rush-py` installed, `RUSH_TOKEN` and `RUSH_PROJECT` set |
 
 ---
 
@@ -50,7 +50,7 @@ That's it! The `result` tuple contains your charges plus metadata.
 
 ### Get the PDB file
 
-[Download `aspirin.pdb`](./aspirin.pdb) or use any PDB file from the Protein Data Bank.
+You can find the sample PDB file at [`examples/chelpg/data/aspirin.pdb`](https://github.com/talo/rush-py/blob/main/examples/chelpg/data/aspirin.pdb), or use any PDB file from the Protein Data Bank.
 
 ---
 
@@ -58,11 +58,11 @@ That's it! The `result` tuple contains your charges plus metadata.
 
 For complete charge extraction, visualization (bar chart + interactive 3D), and interpretation, see the **full example script**:
 
-👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/exess-docs/examples/chelpg)**
+👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)**
 
 This includes:
 - ✅ HDF5 charge extraction
-- ✅ Bar chart with RdBu coloring (red = negative, blue = positive)
+- ✅ Bar chart with RdBu coloring (red = positive, blue = negative)
 - ✅ Interactive 3D structure visualization with charge-colored atoms
 - ✅ Summary statistics (total charge, min/max per atom)
 
@@ -91,8 +91,30 @@ For drug discovery, CHELPG charges tell you:
 
 ---
 
+## Try It Yourself
+
+The complete example script and data files are in the rush-py repository:
+
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/talo/rush-py.git
+cd rush-py
+
+# The example script and data are at:
+#   examples/chelpg/01_chelpg_aspirin.py
+#   examples/chelpg/data/aspirin.pdb
+
+# Run the full example
+cd examples/chelpg
+python 01_chelpg_aspirin.py
+```
+
+The data files (PDB structure) are included in the repository — no separate download needed.
+
+---
+
 ## See Also
 
 - [Rush Documentation](https://docs.rush.so)
 - [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG)
-- [Example Workflow](https://github.com/talo/rush-py/tree/feat/exess-docs/examples/chelpg)
+- [Example Workflow](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)

@@ -1,54 +1,70 @@
-<<<<<<< HEAD
-# EXESS QMMM
-=======
-# EXESS: QM/MM
->>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
+# QM/MM Molecular Dynamics: Simulating Motion with Quantum Accuracy
 
-EXESS can use its gradient calculation and Q4ML capabilities to run simulations as well.
+**What you get:** A trajectory of atomic positions over time — a molecular movie where the critical region (your ligand, active site, or reaction center) is treated with quantum mechanics while the rest uses fast classical force fields.
 
-:::{admonition} Reminder
-:class: attention
-Don't forget to set `RUSH_TOKEN` and `RUSH_PROJECT`!
-:::
+| | |
+|---|---|
+| **Time** | ~5–30 minutes depending on system size and timesteps |
+| **Skill level** | Intermediate |
+| **Prerequisites** | Python 3.10+, `rush-py` installed, `RUSH_TOKEN` and `RUSH_PROJECT` set |
 
-## Basic QM/MM run
+---
 
-```{code-block} python
-:caption: qmmm.py
+## Why This Matters
+
+Static structures tell you *where* atoms are. Dynamics tells you *how they move* — which bonds vibrate, which water molecules exchange, how flexible a binding pocket is. Classical molecular dynamics (MD) handles this well for proteins, but it can't describe bond breaking, charge redistribution, or electronic effects in your region of interest.
+
+**QM/MM** gives you the best of both worlds: quantum mechanics for the part that matters (a ligand, a catalytic site, a metal center) and molecular mechanics for everything else. EXESS extends this further with **Q4ML** — you can mix QM, MM, and ML (AIMNet neural network) regions in a single simulation.
+
+---
+
+## Quick Start: QM/MM on a Protein–Ligand System
+
+```python
 from rush import exess
 from rush.client import RunOpts, save_object
 
 out = exess.qmmm(
-    "6a5j_t.json",
-    "6a5j_r.json",
-    500,  # This is the number of timesteps to run the simulation for
-    qm_fragments=[6],  # QM region: just the fragment at index 6
-    ml_fragments=[],   # ML region: empty, so rest is in the MM region
+    "6a5j_t.json",    # Topology (atoms, coordinates, fragments)
+    500,               # Number of MD timesteps
+    "6a5j_r.json",    # Residues (residue names and assignments)
+    qm_fragments=[6], # Treat fragment 6 with quantum mechanics
+    ml_fragments=[],   # No ML region → everything else is MM
     run_opts=RunOpts(name="Tutorial: QM/MM"),
     collect=True,
 )
 ```
 
-## Minimal QM/MM input
+This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand or key residue) is computed with Hartree-Fock QM, and the remaining protein + solvent fragments use classical MM (OpenMM).
 
-For a taste of what information is required by QM/MM for the input system, let's generate the Topology and Residues objects for two water molecules manually using rush-py and run a simulation using all QM fragments:
+:::{admonition} Default settings
+:class: note
+Unless overridden, EXESS uses `method="RestrictedHF"`, `basis="STO-3G"`, and `temperature_kelvin=300.0`. The STO-3G basis is a minimal basis set — fast for testing, but not suitable for production dynamics. For meaningful simulations, use a larger basis like `cc-pVDZ`.
+:::
 
-```{code-block} python
-:caption: qmmm_minimal.py
+---
+
+## Minimal Example: Two Water Molecules from Scratch
+
+To understand exactly what inputs QM/MM needs, let's build a system manually — two water molecules, all treated with QM:
+
+```python
 import json
-
 from rush import exess
-from rush.mol import Element, Fragment, Residue, Residues, Topology
+from rush.client import RunOpts
+from rush import Topology, exess
+from rush.mol import Element, Fragment, Residue, Residues
 
+# Define two water molecules
 topology = Topology(
     symbols=[Element.O, Element.H, Element.H, Element.O, Element.H, Element.H],
     geometry=[
-         0.0000, 0.0000, 0.0000,
-         0.7570, 0.5860, 0.0000,
-        -0.7570, 0.5860, 0.0000,
-         2.8000, 0.0000, 0.0000,
-         3.5570, 0.5860, 0.0000,
-         2.0430, 0.5860, 0.0000,
+         0.0000, 0.0000, 0.0000,   # Water 1: O
+         0.7570, 0.5860, 0.0000,   #          H
+        -0.7570, 0.5860, 0.0000,   #          H
+         2.8000, 0.0000, 0.0000,   # Water 2: O
+         3.5570, 0.5860, 0.0000,   #          H
+         2.0430, 0.5860, 0.0000,   #          H
     ],
     fragments=[Fragment([0, 1, 2]), Fragment([3, 4, 5])],
 )
@@ -58,66 +74,130 @@ residues = Residues(
     seqs=["HOH", "HOH"],
 )
 
-with open("molecule_t.json", "w") as f_t, open("molecule_r.json"), "w" as f_r:
-    json.dump(topology.to_json(), f_t)
-    json.dump(residues.to_json(), f_r)
+# Write input files
+with open("molecule_t.json", "w") as f:
+    json.dump(topology.to_json(), f)
+with open("molecule_r.json", "w") as f:
+    json.dump(residues.to_json(), f)
 
+# Run all-QM dynamics
 out = exess.qmmm(
     topology_path="molecule_t.json",
     residues_path="molecule_r.json",
     n_timesteps=100,
     trajectory=exess.Trajectory(include_waters=True),
     ml_fragments=[],
-    mm_fragments=[],
-    run_opts=RunOpts(name="Tutorial: QM/MM with Manually-Constructed Water"),
+    mm_fragments=[],   # No ML or MM → everything is QM
+    run_opts=RunOpts(name="Tutorial: QM/MM Water Dimer"),
     collect=True,
 )
 ```
 
-:::{note}
-The `exess.qmmm` function defaults to `method="RestrictedHF"`, `basis="STO-3G"`, and `temperature_kelvin=290.0` unless overridden. See the {doc}`EXESS input reference <../exess/input>` for its other defaults.
+:::{admonition} Fragment assignment logic
+:class: tip
+EXESS requires that every fragment is assigned to exactly one of QM, MM, or ML. Setting `ml_fragments=[]` and `mm_fragments=[]` forces all fragments into the QM region. You can also explicitly set `qm_fragments=[0, 1]` for clarity.
 :::
 
-## Working with the output
+---
 
-The sole output is a vector of geometries, one for each simulation timestep, which provides the atoms' coordinates. The geometries information is just a 1D list of floats, the same format as the `Topology.geometry` field. So, any element in it can be set directly into that field to update the coordinates to those for that timestep. Here's an example of printing the coordinates of the atoms for both the initial system and at the end of the simulation:
-```{code-block} python
-:caption: get_qmmm_trajectory.py
+## Working with the Trajectory
+
+The output is a JSON object containing `geometries` — a list of coordinate arrays, one per timestep. Each geometry is a flat list of floats (`[x1, y1, z1, x2, y2, z2, ...]`), matching the order of atoms in your Topology.
+
+```python
 import json
 from itertools import batched
 from pathlib import Path
-
 from rush import Topology
 
 out_file = save_object(out["path"])
 with open(out_file) as f:
-    out_traj = json.load(f)["geometries"]
+    geometries = json.load(f)["geometries"]
 
+print(f"Trajectory has {len(geometries)} frames")
+
+# Load the original topology and compare first/last frames
 topology = Topology.from_json(Path("molecule_t.json"))
-print("Atoms at First Step")
-for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
-    print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")
 
-topology.geometry = out_traj[-1]
-print("Atoms at Final Step")
-for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
-    print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")
+print("\nAtoms at First Step:")
+for x, y, z in batched(topology.geometry, 3):
+    print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
+
+topology.geometry = geometries[-1]
+print("\nAtoms at Final Step:")
+for x, y, z in batched(topology.geometry, 3):
+    print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
 ```
 
-This will produce output like the following for the minimal system above:
-```{code-block} text
-Atoms at First Step
-  x:  0.0000, y:  0.0000, z:  0.0000
-  x:  0.7570, y:  0.5860, z:  0.0000
-  x: -0.7570, y:  0.5860, z:  0.0000
-  x:  2.8000, y:  0.0000, z:  0.0000
-  x:  3.5570, y:  0.5860, z:  0.0000
-  x:  2.0430, y:  0.5860, z:  0.0000
-Atoms at Final Step
-  x: -3.3974, y:  0.0462, z:  0.0322
-  x: -3.2867, y:  1.0793, z: -0.0014
-  x: -4.4081, y:  0.0531, z:  0.0658
-  x:  3.4286, y:  0.0657, z:  0.1163
-  x:  3.3724, y: -0.9301, z:  0.1350
-  x:  4.4636, y:  0.1491, z:  0.1221
+**Example output** (two water molecules after 100 QM timesteps):
 ```
+Atoms at First Step:
+  ( 0.0000,  0.0000,  0.0000)
+  ( 0.7570,  0.5860,  0.0000)
+  (-0.7570,  0.5860,  0.0000)
+  ( 2.8000,  0.0000,  0.0000)
+  ( 3.5570,  0.5860,  0.0000)
+  ( 2.0430,  0.5860,  0.0000)
+
+Atoms at Final Step:
+  (-3.3974,  0.0462,  0.0322)
+  (-3.2867,  1.0793, -0.0014)
+  (-4.4081,  0.0531,  0.0658)
+  ( 3.4286,  0.0657,  0.1163)
+  ( 3.3724, -0.9301,  0.1350)
+  ( 4.4636,  0.1491,  0.1221)
+```
+
+Notice the waters have drifted apart — this is expected in a gas-phase NVE simulation with no periodic boundary conditions. In a real protein system, the surrounding MM environment provides the confining forces.
+
+---
+
+## Choosing Your QM/MM/ML Partitioning
+
+The power of EXESS's Q4ML approach is flexibility in how you partition your system:
+
+| Scenario | QM | MM | ML |
+|---|---|---|---|
+| Ligand in protein pocket | Ligand fragment | Everything else | — |
+| Catalytic metal center | Metal + coordinating residues | Protein + solvent | — |
+| Fast exploratory dynamics | — | Protein backbone | Ligand + pocket |
+| All-ML dynamics | — | — | Everything |
+
+The key trade-off: QM is most accurate but slowest. ML (AIMNet) is a good middle ground for organic molecules. MM is fastest but can't capture electronic effects.
+
+### Example Output
+
+Explore the QM/MM trajectory visualization. Or run the code above to generate this yourself!
+
+<iframe src="../../_static/outputs/qmmm_results.html" width="100%" height="600px" frameborder="0"></iframe>
+
+---
+
+## Try It Yourself
+
+The complete example script and data files are in the rush-py repository:
+
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/talo/rush-py.git
+cd rush-py
+
+# The example script and data are at:
+#   examples/exess-qmmm/01_exess_qmmm.py
+#   examples/exess-qmmm/data/
+
+# Run the full example
+cd examples/exess-qmmm
+python 01_exess_qmmm.py
+```
+
+The data files (topology and residue files) are included in the repository — no separate download needed.
+
+---
+
+## See Also
+
+- {doc}`Optimization tutorial<exess-optimization>` — relax structures before running dynamics
+- {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute binding energies from trajectory snapshots
+- {doc}`Exports tutorial<exess-exports>` — extract electronic properties during simulations
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-qmmm)

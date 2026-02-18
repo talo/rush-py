@@ -6,10 +6,10 @@ This script demonstrates how to:
 2. Calculate CHELPG partial charges using Rush
 3. Extract and visualize the charge distribution
 
-Run this script in a directory containing aspirin.pdb:
+Run this script from its directory:
     python 01_chelpg_aspirin.py
 
-Output files:
+Output files (saved to chelpg-outputs/):
     - aspirin_topology.json: Converted topology
     - chelpg_charges.png: Bar chart of charges by atom
     - chelpg_aspirin.html: Interactive 3D visualization (left) + chart (right)
@@ -32,13 +32,19 @@ import py3Dmol
 import base64
 
 
+# ===== 0. Setup paths =====
+data_dir = Path(__file__).parent / "data"
+output_dir = Path(__file__).parent / "chelpg-outputs"
+output_dir.mkdir(exist_ok=True)
+print(f"Output directory: {output_dir}")
+
 # ===== 1. Load PDB and convert to topology =====
 print("Loading aspirin.pdb...")
-pdb_content = Path("data/aspirin.pdb").read_text()
+pdb_content = (data_dir / "aspirin.pdb").read_text()
 trc = from_pdb(pdb_content)
 
 # Convert to topology JSON format
-topology_path = Path("aspirin_topology.json")
+topology_path = output_dir / "aspirin_topology.json"
 topology_json = trc.topology.to_json()
 if "schema_version" not in topology_json:
     topology_json["schema_version"] = "0.2.0"
@@ -91,11 +97,12 @@ else:
         ax.set_title("CHELPG Charges – Aspirin", fontsize=13, fontweight='bold')
         ax.grid(axis='y', alpha=0.3)
         plt.tight_layout()
-        plt.savefig("chelpg_charges.png", dpi=150, bbox_inches='tight')
-        print("✓ Bar chart saved: chelpg_charges.png")
+        chart_path = output_dir / "chelpg_charges.png"
+        plt.savefig(chart_path, dpi=150, bbox_inches='tight')
+        print(f"✓ Bar chart saved: {chart_path}")
         
         # Convert to base64 for embedding
-        with open("chelpg_charges.png", "rb") as img_file:
+        with open(chart_path, "rb") as img_file:
             chart_base64 = base64.b64encode(img_file.read()).decode()
         plt.close()
         
@@ -152,9 +159,10 @@ else:
 </body>
 </html>
 """
-        with open("chelpg_aspirin.html", "w") as f:
+        html_path = output_dir / "chelpg_aspirin.html"
+        with open(html_path, "w") as f:
             f.write(combined_html)
-        print("✓ Combined visualization saved: chelpg_aspirin.html")
+        print(f"✓ Combined visualization saved: {html_path}")
         
         # ===== 7. Print summary =====
         print("\n✓ CHELPG Charges (Aspirin):")
@@ -165,6 +173,6 @@ else:
         print(f"  Total charge: {sum(charges):8.5f} e")
         print(f"  Min charge:   {min(charges):8.5f} e")
         print(f"  Max charge:   {max(charges):8.5f} e")
-        print("\n✓ All done! Open 'chelpg_aspirin.html' in a browser to view results.")
+        print(f"\n✓ All done! Open '{html_path}' in a browser to view results.")
     else:
         print(f"Unexpected charges format: {charges_ref}")
