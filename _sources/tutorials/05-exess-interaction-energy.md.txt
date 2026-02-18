@@ -64,7 +64,7 @@ By default, EXESS uses **RestrictedHF/STO-3G** — the simplest possible quantum
 
 ### Where to get the input file
 
-The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data) folder. It's a QDX Topology — a JSON format that encodes atomic coordinates, fragment definitions, charges, and connectivity.
+The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data){target="_blank"} folder. It's a QDX Topology — a JSON format that encodes atomic coordinates, fragment definitions, charges, and connectivity.
 
 ---
 
@@ -172,7 +172,7 @@ For comparing two ligands in the same pocket, the *difference* in interaction en
 
 The complete example is available in the rush-py repository:
 
-👉 **[examples/exess-interaction-energy/](https://github.com/talo/rush-py/tree/main/examples/exess-interaction-energy)**
+👉 **[examples/exess-interaction-energy/](https://github.com/talo/rush-py/tree/main/examples/exess-interaction-energy){target="_blank"}**
 
 You can download the files directly or clone the repository to run the full example.
 
@@ -183,4 +183,4 @@ You can download the files directly or clone the repository to run the full exam
 - {doc}`Exports tutorial<03-exess-exports>` — extract electron density, ESP, and other properties
 - {doc}`Optimization tutorial<04-exess-optimization>` — relax geometries before computing interaction energies
 - {doc}`QM/MM tutorial<06-exess-qmmm>` — run dynamics simulations with mixed QM/MM
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy) — runnable version with both examples
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy){target="_blank"} — runnable version with both examples

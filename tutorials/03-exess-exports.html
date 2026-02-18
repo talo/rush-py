@@ -253,7 +253,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="25"><span class="n">files</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 </span></pre></div>
 </div>
-<p>This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you’d use a larger grid that envelopes the molecule (e.g., <code class="docutils literal notranslate"><span class="pre">min=[-5.5,</span> <span class="pre">-5.5,</span> <span class="pre">-3.5]</span></code>, <code class="docutils literal notranslate"><span class="pre">max=[5.5,</span> <span class="pre">5.5,</span> <span class="pre">3.5]</span></code>, <code class="docutils literal notranslate"><span class="pre">spacing=[0.3,</span> <span class="pre">0.3,</span> <span class="pre">0.3]</span></code>) — see the <a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports">full example script</a> for production-ready parameters. The resulting JSON looks like:</p>
+<p>This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you’d use a larger grid that envelopes the molecule (e.g., <code class="docutils literal notranslate"><span class="pre">min=[-5.5,</span> <span class="pre">-5.5,</span> <span class="pre">-3.5]</span></code>, <code class="docutils literal notranslate"><span class="pre">max=[5.5,</span> <span class="pre">5.5,</span> <span class="pre">3.5]</span></code>, <code class="docutils literal notranslate"><span class="pre">spacing=[0.3,</span> <span class="pre">0.3,</span> <span class="pre">0.3]</span></code>) — see the <a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports">full example script</a>{target=”_blank”} for production-ready parameters. The resulting JSON looks like:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
 </span><span data-line="2"><span class="w">  </span><span class="nt">&quot;density_descriptors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0193</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0069</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0006</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2634</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0314</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0013</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0535</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0106</span><span class="p">],</span>
 </span><span data-line="3"><span class="w">  </span><span class="nt">&quot;esp_descriptors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">-14.74</span><span class="p">,</span><span class="w"> </span><span class="mf">-12.25</span><span class="p">,</span><span class="w"> </span><span class="mf">-8.83</span><span class="p">,</span><span class="w"> </span><span class="mf">-15.69</span><span class="p">,</span><span class="w"> </span><span class="mf">-12.00</span><span class="p">,</span><span class="w"> </span><span class="mf">-8.48</span><span class="p">,</span><span class="w"> </span><span class="mf">-11.79</span><span class="p">,</span><span class="w"> </span><span class="mf">-9.82</span><span class="p">],</span>
@@ -358,7 +358,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p>Interpolate scattered data onto a regular 3D grid with scipy</p></li>
 <li><p>Generate an interactive 3D electron density viewer using Three.js Marching Cubes</p></li>
 </ul>
-<p>See the full <a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports"><code class="docutils literal notranslate"><span class="pre">examples/exess-exports/03_exess_exports.py</span></code></a> script for complete details.</p>
+<p>See the full <a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports"><code class="docutils literal notranslate"><span class="pre">examples/exess-exports/03_exess_exports.py</span></code></a>{target=”_blank”} script for complete details.</p>
 <section id="example-output">
 <h3>Example Output<a class="headerlink" href="#example-output" title="Link to this heading">¶</a></h3>
 <p>Click and drag to rotate the density isosurface. Or run the code above to generate this yourself!</p>
@@ -369,7 +369,7 @@ data-aria-dark="Switch to auto color mode">
 <section id="try-it-yourself">
 <h2>Try It Yourself<a class="headerlink" href="#try-it-yourself" title="Link to this heading">¶</a></h2>
 <p>The complete example is available in the rush-py repository:</p>
-<p>👉 <strong><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-exports">examples/exess-exports/</a></strong></p>
+<p>👉 <strong><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-exports">examples/exess-exports/</a>{target=”_blank”}</strong></p>
 <p>You’ll also need to install extra dependencies:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>h5py<span class="w"> </span>zstandard<span class="w"> </span>scipy
 </span></pre></div>
@@ -383,7 +383,7 @@ data-aria-dark="Switch to auto color mode">
 <ul class="simple">
 <li><p><a class="reference internal" href="05-exess-interaction-energy.html"><span class="doc">Interaction energy tutorial</span></a> — compute energies alongside exports</p></li>
 <li><p><a class="reference internal" href="04-exess-optimization.html"><span class="doc">Optimization tutorial</span></a> — optimize geometry, then export properties</p></li>
-<li><p><a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports">Full example script</a></p></li>
+<li><p><a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports">Full example script</a>{target=”_blank”}</p></li>
 </ul>
 </section>
 </section>

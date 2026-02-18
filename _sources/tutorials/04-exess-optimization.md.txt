@@ -139,7 +139,7 @@ The step-info output (energy, gradient) is only populated for **QM regions**. In
 
 ## Visualization
 
-The [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization) generates an interactive HTML report with:
+The [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization){target="_blank"} generates an interactive HTML report with:
 - Energy convergence plot (energy vs. optimization step)
 - Side-by-side 3D views of initial (twisted) and optimized (planar) structures
 - Summary statistics (method, basis, steps, energy change)
@@ -156,7 +156,7 @@ Explore the energy convergence and before/after structures. Or run the code abov
 
 The complete example is available in the rush-py repository:
 
-👉 **[examples/exess-optimization/](https://github.com/talo/rush-py/tree/main/examples/exess-optimization)**
+👉 **[examples/exess-optimization/](https://github.com/talo/rush-py/tree/main/examples/exess-optimization){target="_blank"}**
 
 You can download the files directly or clone the repository to run the full example.
 
@@ -167,4 +167,4 @@ You can download the files directly or clone the repository to run the full exam
 - {doc}`Interaction energy tutorial<05-exess-interaction-energy>` — compute interaction energies on optimized structures
 - {doc}`QM/MM tutorial<06-exess-qmmm>` — run molecular dynamics after optimization
 - {doc}`Exports tutorial<03-exess-exports>` — extract electron density and ESP from optimized structures
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization)
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization){target="_blank"}

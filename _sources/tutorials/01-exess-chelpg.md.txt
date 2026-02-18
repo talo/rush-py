@@ -50,7 +50,7 @@ That's it! The `result` tuple contains your charges plus metadata.
 
 ### Get the PDB file
 
-You can find the sample PDB file at [`examples/exess-chelpg/data/aspirin.pdb`](https://github.com/talo/rush-py/blob/main/examples/exess-chelpg/data/aspirin.pdb), or use any PDB file from the Protein Data Bank.
+You can find the sample PDB file at [`examples/exess-chelpg/data/aspirin.pdb`](https://github.com/talo/rush-py/blob/main/examples/exess-chelpg/data/aspirin.pdb){target="_blank"}, or use any PDB file from the Protein Data Bank.
 
 ---
 
@@ -58,7 +58,7 @@ You can find the sample PDB file at [`examples/exess-chelpg/data/aspirin.pdb`](h
 
 For complete charge extraction, visualization (bar chart + interactive 3D), and interpretation, see the **full example script**:
 
-👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)**
+👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-chelpg){target="_blank"}**
 
 This includes:
 - ✅ HDF5 charge extraction
@@ -93,7 +93,7 @@ For drug discovery, CHELPG charges tell you:
 
 The complete example is available in the rush-py repository:
 
-👉 **[examples/exess-chelpg/](https://github.com/talo/rush-py/tree/main/examples/exess-chelpg)**
+👉 **[examples/exess-chelpg/](https://github.com/talo/rush-py/tree/main/examples/exess-chelpg){target="_blank"}**
 
 You can download the files directly or clone the repository to run the full example.
 

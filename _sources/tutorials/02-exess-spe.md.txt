@@ -73,7 +73,7 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 ## Notes
 
 - **Basis set choice** — This tutorial uses `STO-3G` for speed, but for real results use `cc-pVDZ` or larger. `RestrictedHF/STO-3G` is fast but low accuracy — good for learning and testing.
-- **Default parameters** — `exess.energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190) in `exess.py` for the complete list of defaults.
+- **Default parameters** — `exess.energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190){target="_blank"} in `exess.py` for the complete list of defaults.
 - **No fragmentation** — for a small molecule like water, the whole system is treated in one calculation. For larger systems, see fragmentation in {doc}`05-exess-interaction-energy`
 - **Geometry matters** — SPE gives you the energy at *exactly* the coordinates you provide. If the geometry is unrealistic, the energy will be too. Use {doc}`04-exess-optimization` first if you need a relaxed structure
 
@@ -83,7 +83,7 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 
 The complete example is available in the rush-py repository:
 
-👉 **[examples/exess-spe/](https://github.com/talo/rush-py/tree/main/examples/exess-spe)**
+👉 **[examples/exess-spe/](https://github.com/talo/rush-py/tree/main/examples/exess-spe){target="_blank"}**
 
 You can download the files directly or clone the repository to run the full example.
 
@@ -95,4 +95,4 @@ You can download the files directly or clone the repository to run the full exam
 - {doc}`Exporting properties <03-exess-exports>` — extract electron density, ESP, and other properties from an energy calculation
 - {doc}`Geometry optimization <04-exess-optimization>` — find the minimum-energy structure before computing properties
 - {doc}`EXESS Documentation <../exess/index>`
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-spe)
+- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-spe){target="_blank"}
