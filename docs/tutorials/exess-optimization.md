@@ -23,14 +23,16 @@ EXESS gives you three engines for this:
 
 ---
 
-## Quick Start: Optimize Benzene with QM
+## Quick Start: Optimize Twisted Ethene with QM
+
+This example uses **ethene (C₂H₄)** with an intentionally twisted starting geometry — the two CH₂ groups are rotated 90° so the hydrogen atoms are perpendicular. During optimization, the molecule relaxes to a **planar** structure because the C=C π bond requires parallel p-orbitals for maximum overlap. It's a dramatic visual change (perpendicular → flat) that illustrates a fundamental concept in chemistry.
 
 ```python
 from rush import exess
 from rush.client import RunOpts, save_object
 
 out = exess.optimization(
-    "benzene_t.json",
+    "ethene_twisted_t.json",
     100,  # Maximum optimization steps
     standard_orientation="None",  # Keep original frame of reference
     run_opts=RunOpts(name="Tutorial: QM Optimization"),
@@ -38,11 +40,16 @@ out = exess.optimization(
 )
 ```
 
-That's it — EXESS will iteratively relax the benzene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
+That's it — EXESS will iteratively relax the twisted ethene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
 
 :::{admonition} About the defaults
 :class: warning
 The default **RestrictedHF/STO-3G** is the fastest possible QM level but gives poor absolute geometries and energies. It's ideal for testing your workflow. For production, use at least `method="RestrictedHF", basis="cc-pVDZ"` or `method="RIHF"` with a larger basis. Bond lengths with STO-3G can be off by ~0.05 Å.
+:::
+
+:::{admonition} Why twisted ethene?
+:class: tip
+Ethene is the simplest molecule with a C=C double bond. Starting from a 90° twist forces the optimizer to recover the planar geometry — a direct consequence of π-bond stabilization. The energy drops significantly as the p-orbitals re-align, making it easy to see convergence in both the energy plot and the 3D structure.
 :::
 
 ---
@@ -84,6 +91,7 @@ print(f"First atom — end:   {out_traj[-1].geometry[:3]}")
 - Energy should **decrease** monotonically (if it doesn't, something is wrong)
 - Max gradient should get very small (< 1e-4 Å for a tight optimization)
 - Fewer steps = the initial geometry was already close to optimal
+- For twisted ethene, the final structure should be **planar** — both CH₂ groups in the same plane
 
 :::{tip}
 Set `standard_orientation="None"` to prevent EXESS from translating or rotating the molecule. This makes it easy to overlay initial and final structures for visual comparison.
@@ -97,7 +105,7 @@ For faster optimization (especially useful for conformer searches or large organ
 
 ```python
 out = exess.optimization(
-    "benzene_t.json",
+    "ethene_twisted_t.json",
     100,
     basis="STO-2G",  # Minimal basis — no effect on ML, just reduces memory overhead
     optimization_keywords=exess.OptimizationKeywords(
@@ -133,7 +141,7 @@ The step-info output (energy, gradient) is only populated for **QM regions**. In
 
 The [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization) generates an interactive HTML report with:
 - Energy convergence plot (energy vs. optimization step)
-- Side-by-side 3D views of initial and optimized structures
+- Side-by-side 3D views of initial (twisted) and optimized (planar) structures
 - Summary statistics (method, basis, steps, energy change)
 
 ---

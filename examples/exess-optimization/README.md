@@ -20,7 +20,7 @@ python 01_exess_optimization.py
 
 ## Input Data
 
-- `benzene_t.json` — from `tests/data/` (benzene topology)
+- `ethene_twisted_t.json` — twisted ethene (C₂H₄) with 90° dihedral angle, optimizes to planar geometry
 
 ## Tutorial
 
