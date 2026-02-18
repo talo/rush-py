@@ -70,28 +70,6 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 
 ---
 
-## Example Output
-
-When you run the example script, it prints the results to the console:
-
-```
-============================================================
-Single Point Energy Calculation: Water (H₂O)
-Method: RestrictedHF/STO-3G
-============================================================
-
-Results:
-----------------------------------------
-  Total Energy:  -74.9420799692 Hartree
-                 -47,027.0231 kcal/mol
-                 -196,598.4271 kJ/mol
-----------------------------------------
-
-✓ All done!
-```
-
----
-
 ## Notes
 
 - **Basis set choice** — This tutorial uses `STO-3G` for speed, but for real results use `cc-pVDZ` or larger. `RestrictedHF/STO-3G` is fast but low accuracy — good for learning and testing.
