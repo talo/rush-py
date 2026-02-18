@@ -154,12 +154,11 @@ Explore the energy convergence and before/after structures. Or run the code abov
 
 ## Try It Yourself
 
-The complete example script and data files are available in the rush-py repository:
+The complete example is available in the rush-py repository:
 
-- **Example script:** [examples/exess-optimization/04_exess_optimization.py](https://github.com/talo/rush-py/blob/main/examples/exess-optimization/04_exess_optimization.py)
-- **Data folder:** [examples/exess-optimization/data/](https://github.com/talo/rush-py/tree/main/examples/exess-optimization/data)
+👉 **[examples/exess-optimization/](https://github.com/talo/rush-py/tree/main/examples/exess-optimization)**
 
-You can download these files directly or clone the repository to run the full example.
+You can download the files directly or clone the repository to run the full example.
 
 ---
 

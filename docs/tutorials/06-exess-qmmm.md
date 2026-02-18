@@ -175,12 +175,11 @@ Explore the QM/MM trajectory visualization. Or run the code above to generate th
 
 ## Try It Yourself
 
-The complete example script and data files are available in the rush-py repository:
+The complete example is available in the rush-py repository:
 
-- **Example script:** [examples/exess-qmmm/06_exess_qmmm.py](https://github.com/talo/rush-py/blob/main/examples/exess-qmmm/06_exess_qmmm.py)
-- **Data folder:** [examples/exess-qmmm/data/](https://github.com/talo/rush-py/tree/main/examples/exess-qmmm/data)
+👉 **[examples/exess-qmmm/](https://github.com/talo/rush-py/tree/main/examples/exess-qmmm)**
 
-You can download these files directly or clone the repository to run the full example.
+You can download the files directly or clone the repository to run the full example.
 
 ---
 

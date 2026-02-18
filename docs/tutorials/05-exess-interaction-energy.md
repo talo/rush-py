@@ -170,12 +170,11 @@ For comparing two ligands in the same pocket, the *difference* in interaction en
 
 ## Try It Yourself
 
-The complete example script and data files are available in the rush-py repository:
+The complete example is available in the rush-py repository:
 
-- **Example script:** [examples/exess-interaction-energy/05_exess_interaction_energy.py](https://github.com/talo/rush-py/blob/main/examples/exess-interaction-energy/05_exess_interaction_energy.py)
-- **Data folder:** [examples/exess-interaction-energy/data/](https://github.com/talo/rush-py/tree/main/examples/exess-interaction-energy/data)
+👉 **[examples/exess-interaction-energy/](https://github.com/talo/rush-py/tree/main/examples/exess-interaction-energy)**
 
-You can download these files directly or clone the repository to run the full example.
+You can download the files directly or clone the repository to run the full example.
 
 ---
 
