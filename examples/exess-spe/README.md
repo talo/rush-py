@@ -14,12 +14,11 @@ python 02_exess_spe.py
 ## What This Example Covers
 
 1. Running an EXESS energy calculation with `exess.energy`
-2. Extracting total energy from the output
-3. Generating an interactive HTML visualization with 3Dmol.js
+2. Extracting and printing total energy from the output
 
 ## Input Data
 
-- `water_topology.json` — Water molecule (H₂O) in QDX topology format
+- `water_topology.json` — Water molecule (H₂O) in TRC topology format
 
 ## Tutorial
 
