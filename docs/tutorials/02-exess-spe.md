@@ -73,7 +73,7 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 ## Notes
 
 - **Basis set choice** — This tutorial uses `STO-3G` for speed, but for real results use `cc-pVDZ` or larger. `RestrictedHF/STO-3G` is fast but low accuracy — good for learning and testing.
-- **Default parameters** — `exess.energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See {doc}`../exess/keywords` for the complete list of defaults.
+- **Default parameters** — `exess.energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190) in `exess.py` for the complete list of defaults.
 - **No fragmentation** — for a small molecule like water, the whole system is treated in one calculation. For larger systems, see fragmentation in {doc}`05-exess-interaction-energy`
 - **Geometry matters** — SPE gives you the energy at *exactly* the coordinates you provide. If the geometry is unrealistic, the energy will be too. Use {doc}`04-exess-optimization` first if you need a relaxed structure
 
