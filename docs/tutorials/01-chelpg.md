@@ -4,7 +4,7 @@
 |---|---|
 | **Time** | 2 minutes |
 | **Skill level** | Beginner |
-| **Prerequisites** | Python 3.10+, `rush-py` installed |
+| **Prerequisites** | Python 3.10+, `rush-py` installed, `RUSH_TOKEN` and `RUSH_PROJECT` set |
 
 ---
 
@@ -58,7 +58,7 @@ You can find the sample PDB file at [`examples/chelpg/data/aspirin.pdb`](https:/
 
 For complete charge extraction, visualization (bar chart + interactive 3D), and interpretation, see the **full example script**:
 
-👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/exess-docs/examples/chelpg)**
+👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)**
 
 This includes:
 - ✅ HDF5 charge extraction
@@ -91,11 +91,25 @@ For drug discovery, CHELPG charges tell you:
 
 ---
 
-### Interactive CHELPG Output
+## Try It Yourself
 
-Run the code above to reproduce this result, or explore the pre-computed output below:
+The complete example script and data files are in the rush-py repository:
 
-<iframe src="../../_static/outputs/chelpg_aspirin.html" width="100%" height="600px" frameborder="0"></iframe>
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/talo/rush-py.git
+cd rush-py
+
+# The example script and data are at:
+#   examples/chelpg/01_chelpg_aspirin.py
+#   examples/chelpg/data/aspirin.pdb
+
+# Run the full example
+cd examples/chelpg
+python 01_chelpg_aspirin.py
+```
+
+The data files (PDB structure) are included in the repository — no separate download needed.
 
 ---
 
@@ -103,4 +117,4 @@ Run the code above to reproduce this result, or explore the pre-computed output 
 
 - [Rush Documentation](https://docs.rush.so)
 - [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG)
-- [Example Workflow](https://github.com/talo/rush-py/tree/feat/exess-docs/examples/chelpg)
+- [Example Workflow](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)

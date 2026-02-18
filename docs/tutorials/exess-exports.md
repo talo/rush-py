@@ -97,7 +97,7 @@ res = exess.energy(
 files = exess.save_energy_outputs(res)
 ```
 
-This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`) — see the [full example script](https://github.com/talo/rush-py/tree/feat/exess-docs/examples/exess-exports) for production-ready parameters. The resulting JSON looks like:
+This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`) — see the [full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) for production-ready parameters. The resulting JSON looks like:
 
 ```json
 {
@@ -197,6 +197,31 @@ See the full [`examples/exess-exports/01_exess_exports.py`](https://github.com/t
 Click and drag to rotate the density isosurface. Or run the code above to generate this yourself!
 
 <iframe src="../../_static/outputs/density_visualization.html" width="100%" height="600px" frameborder="0"></iframe>
+
+---
+
+## Try It Yourself
+
+The complete example script and data files are in the rush-py repository:
+
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/talo/rush-py.git
+cd rush-py
+
+# The example script and data are at:
+#   examples/exess-exports/01_exess_exports.py
+#   examples/exess-exports/data/
+
+# Install extra dependencies for visualization
+pip install h5py zstandard scipy
+
+# Run the full example
+cd examples/exess-exports
+python 01_exess_exports.py
+```
+
+The data files (input topology) are included in the repository — no separate download needed.
 
 ---
 

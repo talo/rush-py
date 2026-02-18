@@ -152,6 +152,28 @@ Explore the energy convergence and before/after structures. Or run the code abov
 
 ---
 
+## Try It Yourself
+
+The complete example script and data files are in the rush-py repository:
+
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/talo/rush-py.git
+cd rush-py
+
+# The example script and data are at:
+#   examples/exess-optimization/01_exess_optimization.py
+#   examples/exess-optimization/data/
+
+# Run the full example
+cd examples/exess-optimization
+python 01_exess_optimization.py
+```
+
+The data files (twisted ethene topology) are included in the repository — no separate download needed.
+
+---
+
 ## See Also
 
 - {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute interaction energies on optimized structures
