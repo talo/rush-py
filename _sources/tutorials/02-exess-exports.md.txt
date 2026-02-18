@@ -1,4 +1,4 @@
-# Exporting Electron Density, ESP, and Other Properties
+# Tutorial 2: Exporting Properties
 
 **What you get:** Electron density values, electrostatic potential maps, and other quantum-mechanical properties — exported as HDF5 or JSON files you can analyze with any tool.
 
