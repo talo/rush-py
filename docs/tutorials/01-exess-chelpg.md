@@ -114,5 +114,5 @@ The data files (PDB structure) are included in the repository — no separate do
 ## See Also
 
 - [Rush Documentation](https://docs.rush.so)
-- [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG)
+- [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG){target="_blank"}
 - [Example Workflow](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)
