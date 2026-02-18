@@ -188,4 +188,4 @@ You can download the files directly or clone the repository to run the full exam
 - {doc}`Optimization tutorial<04-exess-optimization>` — relax structures before running dynamics
 - {doc}`Interaction energy tutorial<05-exess-interaction-energy>` — compute binding energies from trajectory snapshots
 - {doc}`Exports tutorial<03-exess-exports>` — extract electronic properties during simulations
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-qmmm){target="_blank"}
+- [Full example script](https://github.com/talo/rush-py/tree/main/examples/exess-qmmm){target="_blank"}

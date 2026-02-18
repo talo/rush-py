@@ -244,7 +244,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Basis set choice</strong> — This tutorial uses <code class="docutils literal notranslate"><span class="pre">STO-3G</span></code> for speed, but for real results use <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. <code class="docutils literal notranslate"><span class="pre">RestrictedHF/STO-3G</span></code> is fast but low accuracy — good for learning and testing.</p></li>
-<li><p><strong>Default parameters</strong> — <code class="docutils literal notranslate"><span class="pre">exess.energy()</span></code> uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the <a class="reference external" href="https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190"><code class="docutils literal notranslate"><span class="pre">SCFKeywords</span></code> class</a>{target=”_blank”} in <code class="docutils literal notranslate"><span class="pre">exess.py</span></code> for the complete list of defaults.</p></li>
+<li><p><strong>Default parameters</strong> — <code class="docutils literal notranslate"><span class="pre">exess.energy()</span></code> uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the <a class="reference external" href="https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190" target="_blank"><code class="docutils literal notranslate"><span class="pre">SCFKeywords</span></code> class</a> in <code class="docutils literal notranslate"><span class="pre">exess.py</span></code> for the complete list of defaults.</p></li>
 <li><p><strong>No fragmentation</strong> — for a small molecule like water, the whole system is treated in one calculation. For larger systems, see fragmentation in <a class="reference internal" href="05-exess-interaction-energy.html"><span class="doc">Tutorial 5: EXESS Interaction Energy</span></a></p></li>
 <li><p><strong>Geometry matters</strong> — SPE gives you the energy at <em>exactly</em> the coordinates you provide. If the geometry is unrealistic, the energy will be too. Use <a class="reference internal" href="04-exess-optimization.html"><span class="doc">Tutorial 4: EXESS Geometry Optimization</span></a> first if you need a relaxed structure</p></li>
 </ul>
@@ -253,7 +253,7 @@ data-aria-dark="Switch to auto color mode">
 <section id="try-it-yourself">
 <h2>Try It Yourself<a class="headerlink" href="#try-it-yourself" title="Link to this heading">¶</a></h2>
 <p>The complete example is available in the rush-py repository:</p>
-<p>👉 <strong><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-spe">examples/exess-spe/</a>{target=”_blank”}</strong></p>
+<p>👉 <strong><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-spe" target="_blank">examples/exess-spe/</a></strong></p>
 <p>You can download the files directly or clone the repository to run the full example.</p>
 </section>
 <hr class="docutils" />
@@ -264,7 +264,7 @@ data-aria-dark="Switch to auto color mode">
 <li><p><a class="reference internal" href="03-exess-exports.html"><span class="doc">Exporting properties</span></a> — extract electron density, ESP, and other properties from an energy calculation</p></li>
 <li><p><a class="reference internal" href="04-exess-optimization.html"><span class="doc">Geometry optimization</span></a> — find the minimum-energy structure before computing properties</p></li>
 <li><p><a class="reference internal" href="../exess/index.html"><span class="doc">EXESS Documentation</span></a></p></li>
-<li><p><a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-spe">Full example script</a>{target=”_blank”}</p></li>
+<li><p><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-spe" target="_blank">Full example script</a></p></li>
 </ul>
 </section>
 </section>

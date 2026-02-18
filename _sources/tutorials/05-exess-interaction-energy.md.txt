@@ -183,4 +183,4 @@ You can download the files directly or clone the repository to run the full exam
 - {doc}`Exports tutorial<03-exess-exports>` — extract electron density, ESP, and other properties
 - {doc}`Optimization tutorial<04-exess-optimization>` — relax geometries before computing interaction energies
 - {doc}`QM/MM tutorial<06-exess-qmmm>` — run dynamics simulations with mixed QM/MM
-- [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy){target="_blank"} — runnable version with both examples
+- [Full example script](https://github.com/talo/rush-py/tree/main/examples/exess-interaction-energy){target="_blank"} — runnable version with both examples
