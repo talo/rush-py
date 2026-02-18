@@ -1,4 +1,4 @@
-# Tutorial 3: Geometry Optimization
+# Tutorial 3: EXESS Geometry Optimization
 
 **What you get:** Watch a molecule relax to its most stable geometry, step by step — with energies, gradients, and a full trajectory you can visualize.
 
