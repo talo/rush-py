@@ -74,3 +74,31 @@ exess.qmmm(...)
 ## View your run in the Rush Web Interface
 
 On the project page in the Rush web interface, your runs will appear on the left sidebar. To get more info, you can also go to https://rush.cloud/projects/{PROJECT_ID}/runs (after replacing the `{PROJECT_ID}` placeholder in the URL with your actual project ID) and click on any run to get debug-level information about the run.
+
+## What's Next?
+
+Now that you've run your first calculation, here are three paths forward:
+
+### 🧪 Get Started with Tutorials
+
+Learn by doing with step-by-step examples that walk you through real-world workflows:
+
+- {doc}`CHELPG Charge Analysis <../tutorials/01-chelpg>` — Understand molecular charge distributions
+- {doc}`Exporting Results <../tutorials/exess-exports>` — Get data out of Rush for downstream use
+- {doc}`Geometry Optimization <../tutorials/exess-optimization>` — Find minimum-energy structures
+- {doc}`Interaction Energy <../tutorials/exess-interaction-energy>` — Quantify binding between molecules
+- {doc}`QM/MM Calculations <../tutorials/exess-qmmm>` — Mixed quantum/classical simulations
+
+### 📖 Understand Rush-Py Core
+
+Deep dive into data structures and workflow mechanics:
+
+- {doc}`Objects and TRC Files <03-objects-and-trc-files>` — How Rush represents molecular data
+- {doc}`General Info <04-general-info>` — Platform concepts and conventions
+- {doc}`../modules` — Complete API reference for all Rush modules
+
+### 🔬 Advanced EXESS
+
+Comprehensive guide to the EXESS electronic structure system:
+
+- {doc}`EXESS Documentation <../exess/index>` — Full reference for inputs, keywords, methods, and outputs
