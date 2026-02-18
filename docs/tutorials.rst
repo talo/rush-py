@@ -4,7 +4,8 @@ Tutorials
 .. toctree::
    :maxdepth: 2
 
-   tutorials/exess-interaction-energy
-   tutorials/exess-optimization
-   tutorials/exess-qmmm
-   tutorials/exess-exports
+   tutorials/01-exess-chelpg
+   tutorials/02-exess-exports
+   tutorials/03-exess-optimization
+   tutorials/04-exess-interaction-energy
+   tutorials/05-exess-qmmm

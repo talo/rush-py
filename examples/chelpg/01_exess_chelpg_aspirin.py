@@ -7,7 +7,7 @@ This script demonstrates how to:
 3. Extract and visualize the charge distribution
 
 Run this script from its directory:
-    python 01_chelpg_aspirin.py
+    python 01_exess_chelpg_aspirin.py
 
 Output files (saved to chelpg-outputs/):
     - aspirin_topology.json: Converted topology

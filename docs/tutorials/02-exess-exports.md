@@ -190,7 +190,7 @@ The example script includes additional code to:
 - Interpolate scattered data onto a regular 3D grid with scipy
 - Generate an interactive 3D electron density viewer using Three.js Marching Cubes
 
-See the full [`examples/exess-exports/01_exess_exports.py`](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) script for complete details.
+See the full [`examples/exess-exports/02_exess_exports.py`](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports) script for complete details.
 
 ### Example Output
 
@@ -210,7 +210,7 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/exess-exports/01_exess_exports.py
+#   examples/exess-exports/02_exess_exports.py
 #   examples/exess-exports/data/
 
 # Install extra dependencies for visualization
@@ -218,7 +218,7 @@ pip install h5py zstandard scipy
 
 # Run the full example
 cd examples/exess-exports
-python 01_exess_exports.py
+python 02_exess_exports.py
 ```
 
 The data files (input topology) are included in the repository — no separate download needed.
@@ -227,6 +227,6 @@ The data files (input topology) are included in the repository — no separate d
 
 ## See Also
 
-- {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute energies alongside exports
-- {doc}`Optimization tutorial<exess-optimization>` — optimize geometry, then export properties
+- {doc}`Interaction energy tutorial<04-exess-interaction-energy>` — compute energies alongside exports
+- {doc}`Optimization tutorial<03-exess-optimization>` — optimize geometry, then export properties
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-exports)

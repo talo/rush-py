@@ -162,12 +162,12 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/exess-optimization/01_exess_optimization.py
+#   examples/exess-optimization/03_exess_optimization.py
 #   examples/exess-optimization/data/
 
 # Run the full example
 cd examples/exess-optimization
-python 01_exess_optimization.py
+python 03_exess_optimization.py
 ```
 
 The data files (twisted ethene topology) are included in the repository — no separate download needed.
@@ -176,7 +176,7 @@ The data files (twisted ethene topology) are included in the repository — no s
 
 ## See Also
 
-- {doc}`Interaction energy tutorial<exess-interaction-energy>` — compute interaction energies on optimized structures
-- {doc}`QM/MM tutorial<exess-qmmm>` — run molecular dynamics after optimization
-- {doc}`Exports tutorial<exess-exports>` — extract electron density and ESP from optimized structures
+- {doc}`Interaction energy tutorial<04-exess-interaction-energy>` — compute interaction energies on optimized structures
+- {doc}`QM/MM tutorial<05-exess-qmmm>` — run molecular dynamics after optimization
+- {doc}`Exports tutorial<02-exess-exports>` — extract electron density and ESP from optimized structures
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization)
