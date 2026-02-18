@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, RunError
+from rush.client import RunOpts, RunError, download_object
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "water_topology.json"
@@ -45,43 +45,14 @@ if isinstance(res, RunError):
     print(f"Run failed: {res.message}")
     exit(1)
 
-# Save outputs
-files = exess.save_energy_outputs(res)
-print(f"Saved files: {files}")
-
 # Extract energy from JSON output
-total_energy = None
-for output in res:
-    if isinstance(output, dict):
-        if 'path' in output and output.get("format") == "json":
-            # Flat dict format with embedded data
-            json_data = output.get("data", {})
-            if "total_energy" in json_data:
-                total_energy = json_data["total_energy"]
-                break
-        elif "Json" in output:
-            # Type-discriminated format
-            json_data = output["Json"].get("data", {})
-            if "total_energy" in json_data:
-                total_energy = json_data["total_energy"]
-                break
+# The first output is the JSON file; download it directly
+json_data = res[0]
+json_bytes = download_object(json_data["path"])
+energy_data = json.loads(json_bytes.decode())
 
-# Fallback: try loading from saved JSON file
-if total_energy is None:
-    for f in files:
-        if str(f).endswith(".json"):
-            try:
-                with open(f) as fh:
-                    energy_data = json.load(fh)
-                    # Check for total_energy at top level
-                    if "total_energy" in energy_data:
-                        total_energy = energy_data["total_energy"]
-                    # Or check for expanded_hf_energy in qmmbe object
-                    elif "qmmbe" in energy_data and "expanded_hf_energy" in energy_data["qmmbe"]:
-                        total_energy = energy_data["qmmbe"]["expanded_hf_energy"]
-                    break
-            except (json.JSONDecodeError, IOError):
-                pass
+# Access total energy from qmmbe object
+total_energy = energy_data.get("qmmbe", {}).get("expanded_hf_energy")
 
 # ===== Print results =====
 print()
