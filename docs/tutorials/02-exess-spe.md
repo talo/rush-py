@@ -72,27 +72,7 @@ Coordinates are in Ångströms. You can also convert from PDB using `rush.conver
 
 ---
 
-## Key Concepts
-
-### What is a single-point energy?
-
-"Single point" means **one geometry, one energy**. You provide fixed atomic coordinates, and EXESS computes the total energy at that geometry without moving any atoms. This contrasts with:
-
-- **Geometry optimization** ({doc}`04-exess-optimization`) — iteratively moves atoms to find the minimum-energy structure
-- **Molecular dynamics** ({doc}`06-exess-qmmm`) — propagates atoms through time using forces
-
-### Method and basis set
-
-Every QM calculation needs a **method** (how to approximate the Schrödinger equation) and a **basis set** (the mathematical functions used to describe electrons):
-
-| Parameter | Tutorial example | Production suggestion |
-|---|---|---|
-| Method | `RestrictedHF` | `RestrictedHF`, `RestrictedRIMP2`, or `RestrictedKSDFT` |
-| Basis | `STO-3G` | `cc-pVDZ` or larger |
-
-`RestrictedHF/STO-3G` is fast but low accuracy — good for learning and testing. For real results, use a larger basis set.
-
-### Reading the output
+## Reading the Output
 
 The JSON output contains the total energy in Hartrees (atomic units). Common conversions:
 
