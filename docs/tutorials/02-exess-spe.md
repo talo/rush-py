@@ -86,9 +86,25 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 
 ## Example Output
 
-The example script generates an interactive visualization with the molecular structure and computed energy:
+When you run the example script, it prints the results to the console:
 
-<iframe src="../_static/outputs/spe_results.html" width="100%" height="700"></iframe>
+```
+============================================================
+Single Point Energy Calculation: Water (H₂O)
+Method: RestrictedHF/STO-3G
+============================================================
+
+Results:
+----------------------------------------
+  Total Energy:  -74.9420799692 Hartree
+                 -47,027.0231 kcal/mol
+                 -196,598.4271 kJ/mol
+  Dipole Moment: [0.000000, 0.000000, 0.614286]
+                 |μ| = 0.614286 a.u.
+----------------------------------------
+
+✓ All done!
+```
 
 ---
 
