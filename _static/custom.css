@@ -1,0 +1,37 @@
+/* Force dark mode across all pages */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+body {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+/* Ensure dark backgrounds for common elements */
+.sphinxsidebar {
+  background: #1a1a1a;
+}
+
+.document {
+  background: #121212;
+}
+
+a {
+  color: #66b3ff;
+}
+
+a:visited {
+  color: #b3b3ff;
+}
+
+/* Code blocks */
+pre, code {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
