@@ -6,7 +6,7 @@ First, if you don't have a Rush account, [go create one on the Rush platform's w
 
 ### Rush Token
 
-Once you've created your account and logged in, click the "Account" tab in the left sidebar and create or obtain your API token on the [accounts page](https://rush.cloud/me). This is your "Rush Token", and will let you authenticate your access to Rush from your rush-py scripts.
+Once you've created your account and logged in, click the "Overview" tab in the left sidebar and create or obtain your API token on the [accounts page](https://rush.cloud/me). This is your "Rush Token", and will let you authenticate your access to Rush from your rush-py scripts.
 
 ### Rush Projects
 
@@ -24,7 +24,34 @@ Use environment variables to configure access:
 - `RUSH_TOKEN`: Put your authentication token's value here.
 - `RUSH_PROJECT`: Put your project's ID here.
 
+On Linux/macOS, set these with:
+```bash
+export RUSH_TOKEN="your_token_here"
+export RUSH_PROJECT="your_project_id"
+```
+
+On Windows PowerShell, set these with:
+```powershell
+$env:RUSH_TOKEN = "your_token_here"
+$env:RUSH_PROJECT = "your_project_id"
+```
+
 There's one more environment variable, which would only need to be used if requested by a QDX employee:
 - `RUSH_ENDPOINT`: Use this to choose which Rush server to use; if omitted, defaults to our production server at https://rush.cloud. To use a different server, you'll need to be given access to it explicitly.
+
+### Using a `.env` file
+
+Instead of exporting environment variables in every terminal session, you can create a `.env` file with your credentials. rush-py will automatically load `RUSH_TOKEN` and `RUSH_PROJECT` from it.
+
+Create a `.env` file in your project directory:
+
+```
+RUSH_TOKEN=your-token-here
+RUSH_PROJECT=your-project-id-here
+```
+
+Alternatively, you can place it at `~/.rush/.env` to share credentials across all your projects. If both files exist, the one in the current directory takes precedence.
+
+Environment variables always take priority over `.env` values, so you can still override them when needed.
 
 Next, continue to [Doing Your First rush-py Run](./02-first-run.md).

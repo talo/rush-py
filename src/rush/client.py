@@ -23,6 +23,41 @@ MAX_POLL_INTERVAL = 30
 
 BACKOFF_FACTOR = 1.5
 
+_dotenv_cache: dict[str, str] | None = None
+
+
+def _load_dotenv() -> dict[str, str]:
+    global _dotenv_cache
+    if _dotenv_cache is not None:
+        return _dotenv_cache
+
+    _dotenv_cache = {}
+    for path in [Path.cwd() / ".env", Path.home() / ".rush" / ".env"]:
+        if path.is_file():
+            with open(path) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" not in line:
+                        continue
+                    key, _, value = line.partition("=")
+                    key = key.strip()
+                    value = value.strip()
+                    if len(value) >= 2 and value[0] in ('"', "'") and value[-1] == value[0]:
+                        value = value[1:-1]
+                    _dotenv_cache.setdefault(key, value)
+            break
+    return _dotenv_cache
+
+
+def _get_env(key: str) -> str | None:
+    value = getenv(key)
+    if value is not None:
+        return value
+    return _load_dotenv().get(key)
+
+
 GRAPHQL_ENDPOINT = getenv(
     "RUSH_ENDPOINT",
     "https://tengu-server-prod-api-519406798674.asia-southeast1.run.app",
@@ -30,14 +65,14 @@ GRAPHQL_ENDPOINT = getenv(
 
 
 def _get_api_key() -> str:
-    api_key = getenv("RUSH_TOKEN")
+    api_key = _get_env("RUSH_TOKEN")
     if not api_key:
         raise Exception("RUSH_TOKEN must be set")
     return api_key
 
 
 def _get_project_id() -> str:
-    project_id = getenv("RUSH_PROJECT")
+    project_id = _get_env("RUSH_PROJECT")
     if not project_id:
         raise Exception("RUSH_PROJECT must be set")
     return project_id

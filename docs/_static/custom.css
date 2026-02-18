@@ -1,0 +1,105 @@
+/* FORCE DARK MODE - Override all light mode attempts */
+
+/* Prevent browser/OS from switching to light mode */
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: dark !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark !important;
+  }
+}
+
+/* Root and document-level dark mode */
+:root {
+  color-scheme: dark !important;
+  --color-background-primary: #121212 !important;
+  --color-background-secondary: #1a1a1a !important;
+  --color-foreground-primary: #e0e0e0 !important;
+  --color-foreground-secondary: #b0b0b0 !important;
+}
+
+html {
+  background: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+body {
+  background: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+/* Main document area */
+.document, .documentwrapper {
+  background: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+/* Sidebar */
+.sphinxsidebar {
+  background: #1a1a1a !important;
+  color: #e0e0e0 !important;
+}
+
+/* Navigation and menus */
+nav {
+  background: #1a1a1a !important;
+  color: #e0e0e0 !important;
+}
+
+/* Links */
+a {
+  color: #66b3ff !important;
+}
+
+a:visited {
+  color: #b3b3ff !important;
+}
+
+a:hover {
+  color: #99ccff !important;
+}
+
+/* Code blocks and inline code */
+pre, code {
+  background: #1e1e1e !important;
+  color: #e0e0e0 !important;
+  border-color: #333 !important;
+}
+
+/* Tables */
+table {
+  background: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+table, th, td {
+  border-color: #333 !important;
+}
+
+th {
+  background: #1a1a1a !important;
+  color: #e0e0e0 !important;
+}
+
+/* Block quotes */
+blockquote {
+  background: #1a1a1a !important;
+  color: #e0e0e0 !important;
+  border-left-color: #66b3ff !important;
+}
+
+/* Admonitions (notes, warnings, etc.) */
+.admonition {
+  background: #1a1a1a !important;
+  color: #e0e0e0 !important;
+}
+
+/* Ensure no light mode footer/header */
+.footer, .header {
+  background: #1a1a1a !important;
+  color: #e0e0e0 !important;
+}

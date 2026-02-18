@@ -23,9 +23,28 @@ from rush.exess import exess as run_exess
 run_exess("input_topology.json", collect=True)
 ```
 
-And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn about QDX Topology files, check the relevant section of the guide. TODO: Insert link here.
+And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn more about EXESS capabilities, see the [EXESS documentation](../exess/index.md). To learn about QDX Topology files, check the [topologies section](../exess/topologies.md).
 
 You can use [the topology file for a small protein from the 1KUW structure on the PDB](https://github.com/talo/rush-py/blob/main/tests/data/1kuw_t.json) as the input, or for very quick runs, our topology files for [benzene](https://github.com/talo/rush-py/blob/main/tests/data/benzene_t.json) or [ethane](https://github.com/talo/rush-py/blob/main/tests/data/ethane_t.json).
+
+### Getting Results
+
+Here's a complete example that runs an energy calculation and prints the result:
+
+```python
+import json
+from rush import exess
+from rush.client import save_object
+
+res = exess.energy("benzene_t.json", collect=True)
+output_file = save_object(res[0]["path"])
+
+with open(output_file) as f:
+    output_data = json.load(f)
+
+print("EXPANDED HF ENERGY:")
+print(output_data["qmmbe"]["expanded_hf_energy"])
+```
 
 ### Asynchronous Runs and Collecting Runs
 
@@ -38,6 +57,7 @@ result = collect_run(id)
 ```
 
 As shown, module calls return a "run ID" that can be used as above to collect any run that you've submitted.
+
 
 ### Supplementary Entrypoints
 
@@ -54,3 +74,31 @@ exess.qmmm(...)
 ## View your run in the Rush Web Interface
 
 On the project page in the Rush web interface, your runs will appear on the left sidebar. To get more info, you can also go to https://rush.cloud/projects/{PROJECT_ID}/runs (after replacing the `{PROJECT_ID}` placeholder in the URL with your actual project ID) and click on any run to get debug-level information about the run.
+
+## What's Next?
+
+Now that you've run your first calculation, here are three paths forward:
+
+### 🧪 Get Started with Tutorials
+
+Learn by doing with step-by-step examples that walk you through real-world workflows:
+
+- {doc}`CHELPG Charge Analysis <../tutorials/01-exess-chelpg>` — Understand molecular charge distributions
+- {doc}`Exporting Results <../tutorials/02-exess-exports>` — Get data out of Rush for downstream use
+- {doc}`Geometry Optimization <../tutorials/03-exess-optimization>` — Find minimum-energy structures
+- {doc}`Interaction Energy <../tutorials/04-exess-interaction-energy>` — Quantify binding between molecules
+- {doc}`QM/MM Calculations <../tutorials/05-exess-qmmm>` — Mixed quantum/classical simulations
+
+### 📖 Understand Rush-Py Core
+
+Deep dive into data structures and workflow mechanics:
+
+- {doc}`Objects and TRC Files <03-objects-and-trc-files>` — How Rush represents molecular data
+- {doc}`General Info <04-general-info>` — Platform concepts and conventions
+- {doc}`../modules` — Complete API reference for all Rush modules
+
+### 🔬 Advanced EXESS
+
+Comprehensive guide to the EXESS electronic structure system:
+
+- {doc}`EXESS Documentation <../exess/index>` — Full reference for inputs, keywords, methods, and outputs
