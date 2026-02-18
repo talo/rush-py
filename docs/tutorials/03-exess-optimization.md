@@ -148,7 +148,7 @@ The [full example script](https://github.com/talo/rush-py/tree/feat/examples-fro
 
 Explore the energy convergence and before/after structures. Or run the code above to generate this yourself!
 
-<iframe src="../../_static/outputs/optimization_results.html" width="100%" height="600px" frameborder="0"></iframe>
+<iframe src="../_static/outputs/optimization_results.html" width="100%" height="600px" frameborder="0"></iframe>
 
 ---
 

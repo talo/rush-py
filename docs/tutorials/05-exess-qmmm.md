@@ -169,7 +169,7 @@ The key trade-off: QM is most accurate but slowest. ML (AIMNet) is a good middle
 
 Explore the QM/MM trajectory visualization. Or run the code above to generate this yourself!
 
-<iframe src="../../_static/outputs/qmmm_results.html" width="100%" height="600px" frameborder="0"></iframe>
+<iframe src="../_static/outputs/qmmm_results.html" width="100%" height="600px" frameborder="0"></iframe>
 
 ---
 

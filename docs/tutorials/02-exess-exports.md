@@ -196,7 +196,7 @@ See the full [`examples/exess-exports/02_exess_exports.py`](https://github.com/t
 
 Click and drag to rotate the density isosurface. Or run the code above to generate this yourself!
 
-<iframe src="../../_static/outputs/density_visualization.html" width="100%" height="600px" frameborder="0"></iframe>
+<iframe src="../_static/outputs/density_visualization.html" width="100%" height="600px" frameborder="0"></iframe>
 
 ---
 
