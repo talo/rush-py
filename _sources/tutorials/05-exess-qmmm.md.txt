@@ -1,4 +1,4 @@
-# Tutorial 5: QM/MM Dynamics
+# Tutorial 5: EXESS QM/MM Dynamics
 
 **What you get:** A trajectory of atomic positions over time — a molecular movie where the critical region (your ligand, active site, or reaction center) is treated with quantum mechanics while the rest uses fast classical force fields.
 
