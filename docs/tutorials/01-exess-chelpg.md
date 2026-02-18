@@ -85,7 +85,7 @@ For drug discovery, CHELPG charges tell you:
 
 ## Notes
 
-- **Default parameters** — Uses RestrictedHF method with cc-pVDZ basis set (hardcoded in Rush API; no user override currently available)
+- **Default parameters** — Uses RestrictedHF method with cc-pVDZ basis set
 - **Running time** — ~30 seconds cloud-side for a small molecule
 - **Cost-effective** — CHELPG outsources QM to Rush infrastructure; you only pay for compute time
 
