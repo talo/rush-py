@@ -67,7 +67,6 @@ if not energy_data or "total_energy" not in energy_data:
             break
 
 total_energy = energy_data.get("total_energy") if energy_data else None
-dipole = energy_data.get("dipole_moment") if energy_data else None
 
 # ===== Print results =====
 print()
@@ -79,14 +78,6 @@ if total_energy is not None:
     print(f"                 {total_energy * 2625.4996:.4f} kJ/mol")
 else:
     print("  Total Energy:  (not available — check output files)")
-
-if dipole is not None:
-    if isinstance(dipole, list) and len(dipole) == 3:
-        mag = (dipole[0]**2 + dipole[1]**2 + dipole[2]**2) ** 0.5
-        print(f"  Dipole Moment: [{dipole[0]:.6f}, {dipole[1]:.6f}, {dipole[2]:.6f}]")
-        print(f"                 |μ| = {mag:.6f} a.u.")
-    else:
-        print(f"  Dipole Moment: {dipole}")
 
 print("-" * 40)
 print("\n✓ All done!")

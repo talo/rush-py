@@ -15,7 +15,7 @@
 A single-point energy (SPE) calculation is the most fundamental operation in quantum chemistry. Given a set of atomic coordinates, it solves the electronic Schrödinger equation and returns:
 
 - **Total energy** — a single number (in Hartrees) representing the electronic + nuclear repulsion energy
-- **Electronic properties** — dipole moment, orbital energies, and other wavefunction-derived quantities
+- **Electronic properties** — molecular orbital energies and optional charges (Mulliken, CHELPG)
 
 SPE calculations are the building block for everything else:
 
@@ -99,8 +99,6 @@ Results:
   Total Energy:  -74.9420799692 Hartree
                  -47,027.0231 kcal/mol
                  -196,598.4271 kJ/mol
-  Dipole Moment: [0.000000, 0.000000, 0.614286]
-                 |μ| = 0.614286 a.u.
 ----------------------------------------
 
 ✓ All done!
