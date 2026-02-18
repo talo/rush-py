@@ -162,12 +162,12 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/exess-optimization/01_exess_optimization.py
+#   examples/exess-optimization/03_exess_optimization.py
 #   examples/exess-optimization/data/
 
 # Run the full example
 cd examples/exess-optimization
-python 01_exess_optimization.py
+python 03_exess_optimization.py
 ```
 
 The data files (twisted ethene topology) are included in the repository — no separate download needed.

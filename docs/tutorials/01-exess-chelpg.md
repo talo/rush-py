@@ -101,12 +101,12 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/chelpg/01_chelpg_aspirin.py
+#   examples/chelpg/01_exess_chelpg_aspirin.py
 #   examples/chelpg/data/aspirin.pdb
 
 # Run the full example
 cd examples/chelpg
-python 01_chelpg_aspirin.py
+python 01_exess_chelpg_aspirin.py
 ```
 
 The data files (PDB structure) are included in the repository — no separate download needed.

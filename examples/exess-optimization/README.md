@@ -8,7 +8,7 @@ Demonstrates QM and ML geometry optimization with EXESS, including how to work w
 export RUSH_TOKEN="your-token"
 export RUSH_PROJECT="your-project"
 
-python 01_exess_optimization.py
+python 03_exess_optimization.py
 ```
 
 ## What This Example Covers

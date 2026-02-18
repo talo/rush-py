@@ -178,12 +178,12 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/exess-interaction-energy/01_exess_interaction_energy.py
+#   examples/exess-interaction-energy/04_exess_interaction_energy.py
 #   examples/exess-interaction-energy/data/
 
 # Run the full example
 cd examples/exess-interaction-energy
-python 01_exess_interaction_energy.py
+python 04_exess_interaction_energy.py
 ```
 
 The data files (TYK2 topology and PDB) are included in the repository — no separate download needed.

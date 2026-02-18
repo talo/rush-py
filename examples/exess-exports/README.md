@@ -9,7 +9,7 @@ export RUSH_TOKEN="your-token"
 export RUSH_PROJECT="your-project"
 
 # Provide an input topology file, then run:
-python 01_exess_exports.py
+python 02_exess_exports.py
 ```
 
 ## What This Example Covers
