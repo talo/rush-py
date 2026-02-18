@@ -8,7 +8,7 @@ Demonstrates fragment-based interaction energy calculations with EXESS, includin
 export RUSH_TOKEN="your-token"
 export RUSH_PROJECT="your-project"
 
-python 04_exess_interaction_energy.py
+python 05_exess_interaction_energy.py
 ```
 
 ## What This Example Covers

@@ -1,4 +1,4 @@
-# Tutorial 4: EXESS Interaction Energy
+# Tutorial 5: EXESS Interaction Energy
 
 **What you get:** A single number (in Hartrees) quantifying how strongly a ligand interacts with its protein pocket — computed from first principles, no force field fitting required.
 
@@ -151,7 +151,7 @@ print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 
 :::{admonition} The second output
 :class: note
-`exess.interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<02-exess-exports>` for details.
+`exess.interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<03-exess-exports>` for details.
 :::
 
 ---
@@ -178,12 +178,12 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/exess-interaction-energy/04_exess_interaction_energy.py
+#   examples/exess-interaction-energy/05_exess_interaction_energy.py
 #   examples/exess-interaction-energy/data/
 
 # Run the full example
 cd examples/exess-interaction-energy
-python 04_exess_interaction_energy.py
+python 05_exess_interaction_energy.py
 ```
 
 The data files (TYK2 topology and PDB) are included in the repository — no separate download needed.
@@ -192,7 +192,7 @@ The data files (TYK2 topology and PDB) are included in the repository — no sep
 
 ## See Also
 
-- {doc}`Exports tutorial<02-exess-exports>` — extract electron density, ESP, and other properties
-- {doc}`Optimization tutorial<03-exess-optimization>` — relax geometries before computing interaction energies
-- {doc}`QM/MM tutorial<05-exess-qmmm>` — run dynamics simulations with mixed QM/MM
+- {doc}`Exports tutorial<03-exess-exports>` — extract electron density, ESP, and other properties
+- {doc}`Optimization tutorial<04-exess-optimization>` — relax geometries before computing interaction energies
+- {doc}`QM/MM tutorial<06-exess-qmmm>` — run dynamics simulations with mixed QM/MM
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-interaction-energy) — runnable version with both examples
