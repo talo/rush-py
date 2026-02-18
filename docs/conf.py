@@ -43,11 +43,8 @@ html_static_path = ["_static"]
 html_theme_options = {
     "accent_color": "iris",
     "toctree_includehidden": False,
-<<<<<<< HEAD
     "default_color_mode": "dark",
     "light_dark_toggle": False,
-=======
->>>>>>> 01791af6000f243f0b54f3fbd35c775cd99b46f7
 }
 
 # Use a slimmer sidebar for the internal EXESS docs section.
