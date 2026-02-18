@@ -24,7 +24,7 @@ When designing or evaluating drug candidates, you need to understand **where cha
 
 CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits partial charges to reproduce the quantum-mechanical electrostatic potential on a grid around the molecule. The result is a set of atom-centered charges that represent the molecule's electrostatic "personality."
 
-## Quick Start (5 lines)
+## Quick Start
 
 ```python
 from pathlib import Path
