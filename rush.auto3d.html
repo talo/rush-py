@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Auto3D - rush documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="MMseqs2" href="rush.mmseqs2.html" /><link rel="prev" title="Prepare Complex" href="rush.prepare_complex.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
-    setColorMode(localStorage._theme||"dark");
+    setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
     <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
@@ -64,6 +64,14 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="guides/05-hardware.html">Hardware</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/01-exess-chelpg.html">Tutorial 1: Understanding Your Molecule’s Charge Distribution — CHELPG Analysis in 2 Minutes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/02-exess-exports.html">Exporting Electron Density, ESP, and Other Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/03-exess-optimization.html">Geometry Optimization: Finding the Lowest-Energy Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/04-exess-interaction-energy.html">Protein–Ligand Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/05-exess-qmmm.html">QM/MM Molecular Dynamics: Simulating Motion with Quantum Accuracy</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Rush Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="rush.exess.html">EXESS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rush.nnxtb.html">NN-xTB</a></li>
@@ -73,13 +81,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="rush.mmseqs2.html">MMseqs2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rush.boltz.html">Boltz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rush.pbsa.html">PBSA</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-interaction-energy.html">EXESS: Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-optimization.html">EXESS: Geometry Opt.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-qmmm.html">EXESS: QM/MM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/exess-exports.html">EXESS: Exporting Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Core API</a><ul>
@@ -191,7 +192,7 @@ or an error string.</p>
 <footer class="sy-foot">
   <div class="sy-foot-inner sy-container mx-auto">
     <div class="sy-foot-reserved md:flex justify-between items-center">
-      <div class="sy-foot-copyright"><p>1980, QDX</p>
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
   
   <p>
     Made with

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Geometry Optimization: Finding the Lowest-Energy Structure - rush documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Protein–Ligand Interaction Energy" href="04-exess-interaction-energy.html" /><link rel="prev" title="Exporting Electron Density, ESP, and Other Properties" href="02-exess-exports.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Geometry Optimization: Finding the Lowest-Energy Structure"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>rush</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/05-hardware.html">Hardware</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01-exess-chelpg.html">Tutorial 1: Understanding Your Molecule’s Charge Distribution — CHELPG Analysis in 2 Minutes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-exess-exports.html">Exporting Electron Density, ESP, and Other Properties</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Geometry Optimization: Finding the Lowest-Energy Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-exess-interaction-energy.html">Protein–Ligand Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-exess-qmmm.html">QM/MM Molecular Dynamics: Simulating Motion with Quantum Accuracy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare_protein.html">Prepare Protein</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare_complex.html">Prepare Complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.client.html">rush.client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mol.html">rush.mol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.convert.html">rush.convert</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#why-this-matters">Why This Matters</a></li>
+<li><a class="reference internal" href="#quick-start-optimize-twisted-ethene-with-qm">Quick Start: Optimize Twisted Ethene with QM</a></li>
+<li><a class="reference internal" href="#working-with-the-output">Working with the Output</a></li>
+<li><a class="reference internal" href="#ml-optimization-with-aimnet">ML Optimization with AIMNet</a></li>
+<li><a class="reference internal" href="#visualization">Visualization</a><ul>
+<li><a class="reference internal" href="#example-output">Example Output</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#try-it-yourself">Try It Yourself</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">rush</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../tutorials.html"><span itemprop="name">Tutorials</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Geometry Optimization: Finding the Lowest-Energy Structure</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="geometry-optimization-finding-the-lowest-energy-structure">
+<h1>Geometry Optimization: Finding the Lowest-Energy Structure<a class="headerlink" href="#geometry-optimization-finding-the-lowest-energy-structure" title="Link to this heading">¶</a></h1>
+<p><strong>What you get:</strong> Watch a molecule relax to its most stable geometry, step by step — with energies, gradients, and a full trajectory you can visualize.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Time</strong></p></td>
+<td><p>~1–5 minutes (cloud compute)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Skill level</strong></p></td>
+<td><p>Beginner</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Prerequisites</strong></p></td>
+<td><p>Python 3.10+, <code class="docutils literal notranslate"><span class="pre">rush-py</span></code> installed, <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code> set</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<section id="why-this-matters">
+<h2>Why This Matters<a class="headerlink" href="#why-this-matters" title="Link to this heading">¶</a></h2>
+<p>Molecules in the real world don’t sit in arbitrary geometries — they settle into low-energy conformations. Before you compute any property (interaction energy, charges, spectra), you usually want the <em>optimized</em> geometry, because results from a strained or unrealistic structure are meaningless.</p>
+<p>Geometry optimization iteratively adjusts atomic positions to minimize the total energy. At each step, EXESS computes the energy gradient (the “force” on each atom) and moves atoms downhill on the potential energy surface. When the gradient is small enough, the structure has converged.</p>
+<p>EXESS gives you three engines for this:</p>
+<ul class="simple">
+<li><p><strong>QM</strong> — Hartree-Fock or MP2 (most accurate, slowest)</p></li>
+<li><p><strong>ML</strong> — AIMNet neural network potential (fast, good for organic molecules)</p></li>
+<li><p><strong>MM</strong> — OpenMM classical force fields (fastest, least accurate for electronic properties)</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="quick-start-optimize-twisted-ethene-with-qm">
+<h2>Quick Start: Optimize Twisted Ethene with QM<a class="headerlink" href="#quick-start-optimize-twisted-ethene-with-qm" title="Link to this heading">¶</a></h2>
+<p>This example uses <strong>ethene (C₂H₄)</strong> with an intentionally twisted starting geometry — the two CH₂ groups are rotated 90° so the hydrogen atoms are perpendicular. During optimization, the molecule relaxes to a <strong>planar</strong> structure because the C=C π bond requires parallel p-orbitals for maximum overlap. It’s a dramatic visual change (perpendicular → flat) that illustrates a fundamental concept in chemistry.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">save_object</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">optimization</span><span class="p">(</span>
+</span><span data-line="5">    <span class="s2">&quot;ethene_twisted_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="6">    <span class="mi">100</span><span class="p">,</span>  <span class="c1"># Maximum optimization steps</span>
+</span><span data-line="7">    <span class="n">standard_orientation</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>  <span class="c1"># Keep original frame of reference</span>
+</span><span data-line="8">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: QM Optimization&quot;</span><span class="p">),</span>
+</span><span data-line="9">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="10"><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>That’s it — EXESS will iteratively relax the twisted ethene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the <strong>trajectory</strong> (one topology per step) and <strong>step info</strong> (energy + gradient at each step).</p>
+<div class="warning admonition">
+<p class="admonition-title">About the defaults</p>
+<p>The default <strong>RestrictedHF/STO-3G</strong> is the fastest possible QM level but gives poor absolute geometries and energies. It’s ideal for testing your workflow. For production, use at least <code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;,</span> <span class="pre">basis=&quot;cc-pVDZ&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">method=&quot;RIHF&quot;</span></code> with a larger basis. Bond lengths with STO-3G can be off by ~0.05 Å.</p>
+</div>
+<div class="tip admonition">
+<p class="admonition-title">Why twisted ethene?</p>
+<p>Ethene is the simplest molecule with a C=C double bond. Starting from a 90° twist forces the optimizer to recover the planar geometry — a direct consequence of π-bond stabilization. The energy drops significantly as the p-orbitals re-align, making it easy to see convergence in both the energy plot and the 3D structure.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="working-with-the-output">
+<h2>Working with the Output<a class="headerlink" href="#working-with-the-output" title="Link to this heading">¶</a></h2>
+<p>The optimization returns two objects:</p>
+<ol class="arabic simple">
+<li><p><strong>Trajectory</strong> — a list of Topology objects, one per step (the geometry at each iteration)</p></li>
+<li><p><strong>Step info</strong> — a list of dictionaries with <code class="docutils literal notranslate"><span class="pre">total_energy</span></code> (Hartrees) and <code class="docutils literal notranslate"><span class="pre">max_gradient_component</span></code> (Å)</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">Topology</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Download both outputs</span>
+</span><span data-line="5"><span class="n">out_traj_path</span><span class="p">,</span> <span class="n">out_info_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">save_object</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">out</span><span class="p">]</span>
+</span><span data-line="6"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_traj_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f1</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_info_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f2</span><span class="p">:</span>
+</span><span data-line="7">    <span class="n">out_traj_raw</span><span class="p">,</span> <span class="n">out_info</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)]</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="n">out_traj</span> <span class="o">=</span> <span class="p">[</span><span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">out_traj_raw</span><span class="p">]</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="c1"># How quickly did it converge?</span>
+</span><span data-line="12"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converged in </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">out_traj</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+</span><span data-line="13">
+</span><span data-line="14"><span class="c1"># Energy at start vs. end</span>
+</span><span data-line="15"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial energy: </span><span class="si">{</span><span class="n">out_info</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;total_energy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Eh&quot;</span><span class="p">)</span>
+</span><span data-line="16"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final energy:   </span><span class="si">{</span><span class="n">out_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;total_energy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Eh&quot;</span><span class="p">)</span>
+</span><span data-line="17"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy change:  </span><span class="si">{</span><span class="n">out_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;total_energy&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">out_info</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;total_energy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Eh&quot;</span><span class="p">)</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="c1"># How &quot;flat&quot; is the potential at the end?</span>
+</span><span data-line="20"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final max gradient: </span><span class="si">{</span><span class="n">out_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;max_gradient_component&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> Å&quot;</span><span class="p">)</span>
+</span><span data-line="21">
+</span><span data-line="22"><span class="c1"># Compare atom positions</span>
+</span><span data-line="23"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;First atom — start: </span><span class="si">{</span><span class="n">out_traj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="24"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;First atom — end:   </span><span class="si">{</span><span class="n">out_traj</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p><strong>What to look for:</strong></p>
+<ul class="simple">
+<li><p>Energy should <strong>decrease</strong> monotonically (if it doesn’t, something is wrong)</p></li>
+<li><p>Max gradient should get very small (&lt; 1e-4 Å for a tight optimization)</p></li>
+<li><p>Fewer steps = the initial geometry was already close to optimal</p></li>
+<li><p>For twisted ethene, the final structure should be <strong>planar</strong> — both CH₂ groups in the same plane</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">standard_orientation=&quot;None&quot;</span></code> to prevent EXESS from translating or rotating the molecule. This makes it easy to overlay initial and final structures for visual comparison.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="ml-optimization-with-aimnet">
+<h2>ML Optimization with AIMNet<a class="headerlink" href="#ml-optimization-with-aimnet" title="Link to this heading">¶</a></h2>
+<p>For faster optimization (especially useful for conformer searches or large organic molecules), use the AIMNet machine-learning potential instead of QM:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">optimization</span><span class="p">(</span>
+</span><span data-line="2">    <span class="s2">&quot;ethene_twisted_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="3">    <span class="mi">100</span><span class="p">,</span>
+</span><span data-line="4">    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;STO-2G&quot;</span><span class="p">,</span>  <span class="c1"># Minimal basis — no effect on ML, just reduces memory overhead</span>
+</span><span data-line="5">    <span class="n">optimization_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">OptimizationKeywords</span><span class="p">(</span>
+</span><span data-line="6">        <span class="n">coordinate_system</span><span class="o">=</span><span class="s2">&quot;Cartesian&quot;</span><span class="p">,</span>
+</span><span data-line="7">        <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;LBFGS&quot;</span><span class="p">,</span>
+</span><span data-line="8">        <span class="n">lbfgs_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">LBFGSKeywords</span><span class="p">(),</span>
+</span><span data-line="9">    <span class="p">),</span>
+</span><span data-line="10">    <span class="n">standard_orientation</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+</span><span data-line="11">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[],</span>   <span class="c1"># No QM fragments</span>
+</span><span data-line="12">    <span class="n">mm_fragments</span><span class="o">=</span><span class="p">[],</span>    <span class="c1"># No MM fragments → everything is ML</span>
+</span><span data-line="13">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: ML Optimization&quot;</span><span class="p">),</span>
+</span><span data-line="14">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="15"><span class="p">)</span>
+</span></pre></div>
+</div>
+<div class="note admonition">
+<p class="admonition-title">How fragment assignment works</p>
+<p>EXESS assigns each fragment to QM, MM, or ML. Setting <code class="docutils literal notranslate"><span class="pre">qm_fragments=[]</span></code> and <code class="docutils literal notranslate"><span class="pre">mm_fragments=[]</span></code> tells EXESS that <em>all</em> fragments should use ML (AIMNet). The <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-2G&quot;</span></code> is a technicality — it’s the smallest possible basis set and has no effect on the ML calculation, but EXESS still requires one to be specified.</p>
+</div>
+<div class="tip admonition">
+<p class="admonition-title">ML optimization settings</p>
+<p>For ML-only runs, you <strong>must</strong> use <code class="docutils literal notranslate"><span class="pre">coordinate_system=&quot;Cartesian&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">algorithm=&quot;LBFGS&quot;</span></code>. Other combinations may fail or give poor results.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The step-info output (energy, gradient) is only populated for <strong>QM regions</strong>. In a pure ML run, the dictionaries will be empty — you’ll only get the trajectory.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization">full example script</a> generates an interactive HTML report with:</p>
+<ul class="simple">
+<li><p>Energy convergence plot (energy vs. optimization step)</p></li>
+<li><p>Side-by-side 3D views of initial (twisted) and optimized (planar) structures</p></li>
+<li><p>Summary statistics (method, basis, steps, energy change)</p></li>
+</ul>
+<section id="example-output">
+<h3>Example Output<a class="headerlink" href="#example-output" title="Link to this heading">¶</a></h3>
+<p>Explore the energy convergence and before/after structures. Or run the code above to generate this yourself!</p>
+<iframe src="../../_static/outputs/optimization_results.html" width="100%" height="600px" frameborder="0"></iframe>
+</section>
+</section>
+<hr class="docutils" />
+<section id="try-it-yourself">
+<h2>Try It Yourself<a class="headerlink" href="#try-it-yourself" title="Link to this heading">¶</a></h2>
+<p>The complete example script and data files are in the rush-py repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Clone the repo (if you haven&#39;t already)</span>
+</span><span data-line="2">git<span class="w"> </span>clone<span class="w"> </span>https://github.com/talo/rush-py.git
+</span><span data-line="3"><span class="nb">cd</span><span class="w"> </span>rush-py
+</span><span data-line="4">
+</span><span data-line="5"><span class="c1"># The example script and data are at:</span>
+</span><span data-line="6"><span class="c1">#   examples/exess-optimization/03_exess_optimization.py</span>
+</span><span data-line="7"><span class="c1">#   examples/exess-optimization/data/</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="c1"># Run the full example</span>
+</span><span data-line="10"><span class="nb">cd</span><span class="w"> </span>examples/exess-optimization
+</span><span data-line="11">python<span class="w"> </span>03_exess_optimization.py
+</span></pre></div>
+</div>
+<p>The data files (twisted ethene topology) are included in the repository — no separate download needed.</p>
+</section>
+<hr class="docutils" />
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="04-exess-interaction-energy.html"><span class="doc">Interaction energy tutorial</span></a> — compute interaction energies on optimized structures</p></li>
+<li><p><a class="reference internal" href="05-exess-qmmm.html"><span class="doc">QM/MM tutorial</span></a> — run molecular dynamics after optimization</p></li>
+<li><p><a class="reference internal" href="02-exess-exports.html"><span class="doc">Exports tutorial</span></a> — extract electron density and ESP from optimized structures</p></li>
+<li><p><a class="reference external" href="https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-optimization">Full example script</a></p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="02-exess-exports.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Exporting Electron Density, ESP, and Other Properties</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="04-exess-interaction-energy.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Protein–Ligand Interaction Energy</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>
