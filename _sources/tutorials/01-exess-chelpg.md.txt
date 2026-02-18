@@ -24,7 +24,7 @@ When designing or evaluating drug candidates, you need to understand **where cha
 
 CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits partial charges to reproduce the quantum-mechanical electrostatic potential on a grid around the molecule. The result is a set of atom-centered charges that represent the molecule's electrostatic "personality."
 
-## Quick Start (5 lines)
+## Quick Start
 
 ```python
 from pathlib import Path
@@ -85,9 +85,7 @@ For drug discovery, CHELPG charges tell you:
 
 ## Notes
 
-- **Default parameters** — Uses RestrictedHF method with cc-pVDZ basis set (hardcoded in Rush API; no user override currently available)
-- **Running time** — ~30 seconds cloud-side for a small molecule
-- **Cost-effective** — CHELPG outsources QM to Rush infrastructure; you only pay for compute time
+- **Default parameters** — Uses RestrictedHF method with cc-pVDZ basis set
 
 ---
 
@@ -115,6 +113,6 @@ The data files (PDB structure) are included in the repository — no separate do
 
 ## See Also
 
-- [Rush Documentation](https://docs.rush.so)
-- [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG)
-- [Example Workflow](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/chelpg)
+- {doc}`EXESS Documentation <../exess/index>`
+- [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG){target="_blank"}
+- [Example Workflow](https://github.com/talo/rush-py/tree/main/examples/chelpg){target="_blank"}
