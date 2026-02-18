@@ -1,4 +1,4 @@
-# Tutorial 5: EXESS QM/MM Dynamics
+# Tutorial 6: EXESS QM/MM Dynamics
 
 **What you get:** A trajectory of atomic positions over time — a molecular movie where the critical region (your ligand, active site, or reaction center) is treated with quantum mechanics while the rest uses fast classical force fields.
 
@@ -183,12 +183,12 @@ git clone https://github.com/talo/rush-py.git
 cd rush-py
 
 # The example script and data are at:
-#   examples/exess-qmmm/05_exess_qmmm.py
+#   examples/exess-qmmm/06_exess_qmmm.py
 #   examples/exess-qmmm/data/
 
 # Run the full example
 cd examples/exess-qmmm
-python 05_exess_qmmm.py
+python 06_exess_qmmm.py
 ```
 
 The data files (topology and residue files) are included in the repository — no separate download needed.
@@ -197,7 +197,7 @@ The data files (topology and residue files) are included in the repository — n
 
 ## See Also
 
-- {doc}`Optimization tutorial<03-exess-optimization>` — relax structures before running dynamics
-- {doc}`Interaction energy tutorial<04-exess-interaction-energy>` — compute binding energies from trajectory snapshots
-- {doc}`Exports tutorial<02-exess-exports>` — extract electronic properties during simulations
+- {doc}`Optimization tutorial<04-exess-optimization>` — relax structures before running dynamics
+- {doc}`Interaction energy tutorial<05-exess-interaction-energy>` — compute binding energies from trajectory snapshots
+- {doc}`Exports tutorial<03-exess-exports>` — extract electronic properties during simulations
 - [Full example script](https://github.com/talo/rush-py/tree/feat/examples-from-docs/examples/exess-qmmm)

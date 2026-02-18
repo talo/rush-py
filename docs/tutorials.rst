@@ -5,7 +5,8 @@ Tutorials
    :maxdepth: 2
 
    tutorials/01-exess-chelpg
-   tutorials/02-exess-exports
-   tutorials/03-exess-optimization
-   tutorials/04-exess-interaction-energy
-   tutorials/05-exess-qmmm
+   tutorials/02-exess-spe
+   tutorials/03-exess-exports
+   tutorials/04-exess-optimization
+   tutorials/05-exess-interaction-energy
+   tutorials/06-exess-qmmm

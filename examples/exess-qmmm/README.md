@@ -8,7 +8,7 @@ Demonstrates QM/MM molecular dynamics simulations with EXESS, including building
 export RUSH_TOKEN="your-token"
 export RUSH_PROJECT="your-project"
 
-python 05_exess_qmmm.py
+python 06_exess_qmmm.py
 ```
 
 ## What This Example Covers

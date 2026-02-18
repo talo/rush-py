@@ -489,4 +489,4 @@ res = exess.energy(
 )
 ```
 
-For exports, descriptor grids, and output downloading, see the [EXESS exports tutorial](../tutorials/02-exess-exports).
+For exports, descriptor grids, and output downloading, see the [EXESS exports tutorial](../tutorials/03-exess-exports)..
