@@ -50,7 +50,7 @@ That's it! The `result` tuple contains your charges plus metadata.
 
 ### Get the PDB file
 
-You can find the sample PDB file at [`examples/chelpg/data/aspirin.pdb`](https://github.com/talo/rush-py/blob/main/examples/chelpg/data/aspirin.pdb), or use any PDB file from the Protein Data Bank.
+You can find the sample PDB file at [`examples/exess-chelpg/data/aspirin.pdb`](https://github.com/talo/rush-py/blob/main/examples/exess-chelpg/data/aspirin.pdb), or use any PDB file from the Protein Data Bank.
 
 ---
 
@@ -93,7 +93,7 @@ For drug discovery, CHELPG charges tell you:
 
 The complete example is available in the rush-py repository:
 
-👉 **[examples/chelpg/](https://github.com/talo/rush-py/tree/main/examples/chelpg)**
+👉 **[examples/exess-chelpg/](https://github.com/talo/rush-py/tree/main/examples/exess-chelpg)**
 
 You can download the files directly or clone the repository to run the full example.
 
@@ -103,4 +103,4 @@ You can download the files directly or clone the repository to run the full exam
 
 - {doc}`EXESS Documentation <../exess/index>`
 - [CHELPG Method (Chemistry)](https://en.wikipedia.org/wiki/CHELPG){target="_blank"}
-- [Example Workflow](https://github.com/talo/rush-py/tree/main/examples/chelpg){target="_blank"}
+- [Example Workflow](https://github.com/talo/rush-py/tree/main/examples/exess-chelpg){target="_blank"}

@@ -18,7 +18,7 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 
 2. **Run the example:**
    ```bash
-   cd examples/chelpg
+   cd examples/exess-chelpg
    python 01_exess_chelpg_aspirin.py
    ```
 
@@ -74,4 +74,4 @@ For aspirin:
 - Try with your own molecules by replacing `aspirin.pdb`
 - Customize visualization colors by editing `charge_to_hex()`
 - Export charges to CSV for downstream analysis
-- Link to the [CHELPG Tutorial](../../docs/tutorials/01-chelpg.md) for more details
+- Link to the [CHELPG Tutorial](../../docs/tutorials/01-exess-chelpg.md) for more details
