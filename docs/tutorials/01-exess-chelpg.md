@@ -68,7 +68,7 @@ This includes:
 
 **Quick preview** (left: 3D molecule with charges, right: bar chart by atom):
 
-<iframe src="./01-chelpg-preview.html" width="100%" height="700"></iframe>
+<iframe src="../_static/outputs/chelpg_aspirin.html" width="100%" height="700"></iframe>
 
 ---
 
