@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts
+from rush.client import RunOpts, RunError
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "water_topology.json"
@@ -41,32 +41,47 @@ res = exess.energy(
     collect=True,
 )
 
+if isinstance(res, RunError):
+    print(f"Run failed: {res.message}")
+    exit(1)
+
 # Save outputs
 files = exess.save_energy_outputs(res)
 print(f"Saved files: {files}")
 
 # Extract energy from JSON output
-energy_data = None
+total_energy = None
 for output in res:
     if isinstance(output, dict):
-        if "Json" in output:
-            json_path = output["Json"]["path"]
-            # The data may be embedded or need downloading
-            energy_data = output["Json"].get("data", {})
-            break
-        elif output.get("format") == "json":
-            energy_data = output.get("data", {})
-            break
+        if 'path' in output and output.get("format") == "json":
+            # Flat dict format with embedded data
+            json_data = output.get("data", {})
+            if "total_energy" in json_data:
+                total_energy = json_data["total_energy"]
+                break
+        elif "Json" in output:
+            # Type-discriminated format
+            json_data = output["Json"].get("data", {})
+            if "total_energy" in json_data:
+                total_energy = json_data["total_energy"]
+                break
 
-# Also try loading from saved JSON file
-if not energy_data or "total_energy" not in energy_data:
+# Fallback: try loading from saved JSON file
+if total_energy is None:
     for f in files:
         if str(f).endswith(".json"):
-            with open(f) as fh:
-                energy_data = json.load(fh)
-            break
-
-total_energy = energy_data.get("total_energy") if energy_data else None
+            try:
+                with open(f) as fh:
+                    energy_data = json.load(fh)
+                    # Check for total_energy at top level
+                    if "total_energy" in energy_data:
+                        total_energy = energy_data["total_energy"]
+                    # Or check for expanded_hf_energy in qmmbe object
+                    elif "qmmbe" in energy_data and "expanded_hf_energy" in energy_data["qmmbe"]:
+                        total_energy = energy_data["qmmbe"]["expanded_hf_energy"]
+                    break
+            except (json.JSONDecodeError, IOError):
+                pass
 
 # ===== Print results =====
 print()
