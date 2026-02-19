@@ -13,7 +13,16 @@ rush-py is the Python client library for QDX's Rush platform — a distributed c
 uv sync --dev
 
 # Run all tests (requires .env with RUSH_TOKEN, RUSH_ENDPOINT, RUSH_PROJECT)
-uv run pytest
+uv run pytest                          # auto-skips slow tests if queues busy
+uv run pytest -m "not slow"            # fast tests only (converters, merge, fetch)
+uv run pytest -m slow --run-slow-force # slow tests only, ignore queue status
+uv run pytest --run-slow-force         # all tests, ignore queue status
+
+# Via run_tests.sh (sources .env automatically)
+./run_tests.sh              # auto-skip slow if queues busy
+./run_tests.sh --quick      # fast tests only
+./run_tests.sh --slow       # slow tests only, force run
+./run_tests.sh --all        # all tests, force run
 
 # Run a single test
 uv run pytest tests/test_exess_energy.py
@@ -30,7 +39,7 @@ uv run ruff format .
 cd docs && uv run sphinx-build -b html . _build/html
 ```
 
-Tests hit the live Rush staging API — they require valid credentials in `.env` or environment variables (`RUSH_TOKEN`, `RUSH_ENDPOINT`, `RUSH_PROJECT`).
+Tests hit the live Rush staging API — they require valid credentials in `.env` or environment variables (`RUSH_TOKEN`, `RUSH_ENDPOINT`, `RUSH_PROJECT`). Slow tests (any that submit jobs) are auto-marked and skipped when Rush queues have >2 queued/admitted jobs. Per-test timeout: 300s (fast), 600s (slow).
 
 ## Architecture
 
