@@ -105,6 +105,7 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#rush.client.RunError"><code class="docutils literal notranslate"><span class="pre">RunError</span></code></a><ul>
 <li><a class="reference internal" href="#rush.client.RunError.message"><code class="docutils literal notranslate">message</span></code></a></li>
+<li><a class="reference internal" href="#rush.client.RunError.trace"><code class="docutils literal notranslate">trace</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#rush.client.RunOpts"><code class="docutils literal notranslate"><span class="pre">RunOpts</span></code></a><ul>
@@ -188,17 +189,25 @@ data-aria-dark="Switch to auto color mode">
 <span id="rush-client"></span><h1>rush.client<a class="headerlink" href="#module-rush.client" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="rush.client.RunError">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RunError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#RunError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.RunError" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.client.</span></span><span class="sig-name descname"><span class="pre">RunError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/client.html#RunError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.client.RunError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents a run error message, returned from failed collected runs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>message</strong> (<em>str</em>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>)</p></li>
+<li><p><strong>trace</strong> (<em>str</em>)</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rush.client.RunError.message">
 <span class="sig-name descname"><span class="pre">message</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#rush.client.RunError.message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.client.RunError.trace">
+<span class="sig-name descname"><span class="pre">trace</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#rush.client.RunError.trace" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

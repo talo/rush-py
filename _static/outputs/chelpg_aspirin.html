@@ -5,15 +5,15 @@
     <style>
         body { margin: 0; font-family: Arial; }
         .container { display: flex; height: 100vh; }
-        .viewer { flex: 1; }
-        .chart { flex: 1; display: flex; align-items: center; justify-content: center; background: #f5f5f5; padding: 20px; }
-        .chart img { max-width: 100%; max-height: 100%; }
+        .viewer { flex: 1; position: relative; overflow: hidden; }
+        .chart { flex: 1; display: flex; align-items: center; justify-content: center; background: #f5f5f5; padding: 10px; box-sizing: border-box; }
+        .chart img { max-width: 100%; max-height: 100%; object-fit: contain; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="viewer">
-            <div id="3dmolviewer_1771354435707666"  style="position: relative; width: 700px; height: 600px;">
+            <div id="3dmolviewer_1771354435707666"  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
         <p id="3dmolwarning_1771354435707666" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
         </div>
 <script>
