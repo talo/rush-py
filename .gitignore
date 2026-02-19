@@ -208,3 +208,7 @@ __marimo__/
 
 # test cache
 test_cache
+
+# local dev artifacts
+.direnv/
+test-runs/

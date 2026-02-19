@@ -464,6 +464,7 @@ class RunError:
     """Represents a run error message, returned from failed collected runs."""
 
     message: str
+    trace: str = ""
 
 
 def _build_filters(
@@ -826,6 +827,7 @@ def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | RunError:
             result = result["Ok"]
         elif "Err" in result:
             print(f"Error: {result['Err']}", file=sys.stderr)
+            _print_run_trace(run)
             return RunError(result["Err"])
 
     # inner error: for logic-level failures (may not exist, but should)
@@ -834,7 +836,8 @@ def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | RunError:
             result = result["Ok"]
         elif "Err" in result:
             print(f"Error: {result['Err']}", file=sys.stderr)
-            return RunError(result["Err"])
+            _print_run_trace(run)
+            return RunError(result["Err"], )
 
     if len(result) == 1:
         return result[0]
