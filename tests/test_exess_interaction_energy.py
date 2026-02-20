@@ -24,7 +24,7 @@ def test_exess_interaction_energy():
         ),
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 02: Interaction Energy w/ Frag Keywords",
-            tags=["rush-py", "test", "tyk2+ejm-31"],
+            tags=["rush-py", "test", "tyk2+ejm-31", "deploy"],
         ),
         collect=True,
     )
