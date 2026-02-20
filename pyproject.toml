@@ -1,6 +1,6 @@
 [project]
 name = "rush-py"
-version = "6.4.1"
+version = "6.5.0"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -48,6 +48,7 @@ Issues = "https://github.com/talo/rush-py/issues"
 [dependency-groups]
 dev = [
   "pytest~=9.0.2",
+  "pytest-timeout~=2.3",
   "basedpyright",
   "ruff",
   "sphinx>=8.2.3",
@@ -55,6 +56,12 @@ dev = [
   "shibuya>=2025.12.19",
   "myst-parser>=4.0.1",
   "sphinx-design>=0.6.1",
+]
+
+[tool.pytest.ini_options]
+timeout = 300
+markers = [
+  "slow: marks tests that submit jobs to the Rush API (auto-applied, skipped when queues busy)",
 ]
 
 [tool.pyright]
