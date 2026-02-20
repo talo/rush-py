@@ -1092,15 +1092,24 @@ def save_energy_outputs(
             # hdf5-to-json set to false (or not set)
             # Support new-style with the type key, and old-style without
             if "Hdf5" in res[1]:
-                hdf5_obj = res[1]["Hdf5"]
-                return (
-                    save_object(res[0]["path"]),
-                    save_object(
+                # Extract JSON (required)
+                json_path = save_object(res[0]["path"])
+                
+                # Try to extract HDF5 (optional - skip if empty)
+                try:
+                    hdf5_obj = res[1]["Hdf5"]
+                    hdf5_path = save_object(
                         hdf5_obj["path"],
                         ext="hdf5" if extract else "tar.zst",
                         extract=extract,
-                    ),
-                )
+                    )
+                    return (json_path, hdf5_path)
+                except ValueError as e:
+                    if "only directories" in str(e):
+                        # No actual files in HDF5 tar, return just JSON
+                        return json_path
+                    else:
+                        raise  # Re-raise other extraction errors
             
             # Unknown output format
             raise ValueError(
