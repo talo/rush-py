@@ -1073,11 +1073,16 @@ def save_energy_outputs(
     """
     Download and save energy calculation outputs from Rush.
 
-    Takes the result tuple from exess functions (energy(), interaction_energy(), etc.)
-    and downloads the output files to disk.
+    Takes the result from exess functions (energy(), interaction_energy(), etc.)
+    and downloads the output files to disk. The result can be either a tuple or list
+    because collect_run() returns a list when there are multiple outputs, which is
+    converted to a tuple for consistent processing.
 
     Args:
-        res: Result tuple from exess calculation with VirtualObject references
+        res: Result from exess calculation. Can be:
+            - tuple[dict]: Single output from exess function
+            - tuple[dict, dict]: Two outputs (JSON + HDF5)
+            - list[dict]: Same as tuple (collect_run returns list for multiple outputs)
         extract: Whether to extract tar.zst files (default True)
 
     Returns:
