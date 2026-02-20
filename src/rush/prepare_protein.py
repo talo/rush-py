@@ -68,9 +68,11 @@ def prepare_protein(
     json.dump(trc.residues.to_json(), r_f)
     json.dump(trc.chains.to_json(), c_f)
     
-    t_f.close()  # Close before uploading
-    r_f.close()  # Close before uploading
-    c_f.close()  # Close before uploading
+    # Important: Close temp files before uploading. Windows locks open files,
+    # causing PermissionError if upload_object() tries to access them while open.
+    t_f.close()
+    r_f.close()
+    c_f.close()
     
     topology_vobj = upload_object(t_f.name)
     residues_vobj = upload_object(r_f.name)
