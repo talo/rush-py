@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 from string import Template
-from tempfile import NamedTemporaryFile
+import tempfile
 from typing import Literal
 
 from gql.transport.exceptions import TransportQueryError
@@ -60,20 +60,21 @@ def prepare_protein(
                         f"Expected 1 TRC in {input_path}, found {len(trc)}"
                     )
                 trc = trc[0]
-    with (
-        NamedTemporaryFile(mode="w") as t_f,
-        NamedTemporaryFile(mode="w") as r_f,
-        NamedTemporaryFile(mode="w") as c_f,
-    ):
-        json.dump(trc.topology.to_json(), t_f)
-        json.dump(trc.residues.to_json(), r_f)
-        json.dump(trc.chains.to_json(), c_f)
-        t_f.seek(0)
-        r_f.seek(0)
-        c_f.seek(0)
-        topology_vobj = upload_object(t_f.name)
-        residues_vobj = upload_object(r_f.name)
-        chains_vobj = upload_object(c_f.name)
+    t_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    r_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    c_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    
+    json.dump(trc.topology.to_json(), t_f)
+    json.dump(trc.residues.to_json(), r_f)
+    json.dump(trc.chains.to_json(), c_f)
+    
+    t_f.close()  # Close before uploading
+    r_f.close()  # Close before uploading
+    c_f.close()  # Close before uploading
+    
+    topology_vobj = upload_object(t_f.name)
+    residues_vobj = upload_object(r_f.name)
+    chains_vobj = upload_object(c_f.name)
 
     # Run rex
     rex = Template("""let
