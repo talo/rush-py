@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.5.1
+
+### Changed
+- Fixed save_energy_outputs to handle list inputs
+
+### Added
+
 ## 6.5.0
 
 ### Changed

@@ -1068,11 +1068,16 @@ def energy(
 
 
 def save_energy_outputs(
-    res: tuple[dict] | tuple[dict, dict] | RunError, extract=True
+    res: tuple[dict] | tuple[dict, dict] | list[dict] | list[dict] | RunError, extract=True
 ) -> Path | tuple[Path, Path] | RunError:
     if isinstance(res, RunError):
         return res
-    elif isinstance(res, tuple):
+    
+    # Convert list to tuple for consistent handling
+    if isinstance(res, list):
+        res = tuple(res)
+    
+    if isinstance(res, tuple):
         if len(res) == 1:
             return save_object(res[0]["path"])
         else:
@@ -1088,14 +1093,19 @@ def save_energy_outputs(
             # Support new-style with the type key, and old-style without
             if "Hdf5" in res[1]:
                 hdf5_obj = res[1]["Hdf5"]
-
-            return (
-                save_object(res[0]["path"]),
-                save_object(
-                    hdf5_obj["path"],
-                    ext="hdf5" if extract else "tar.zst",
-                    extract=extract,
-                ),
+                return (
+                    save_object(res[0]["path"]),
+                    save_object(
+                        hdf5_obj["path"],
+                        ext="hdf5" if extract else "tar.zst",
+                        extract=extract,
+                    ),
+                )
+            
+            # Unknown output format
+            raise ValueError(
+                f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
+                f"but got keys: {list(res[1].keys())}"
             )
     else:
         print(res)
