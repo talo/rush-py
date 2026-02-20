@@ -69,13 +69,13 @@ print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
 out_file = save_object(out["path"])
-with open(out_file) as f:
+with open(out_file, encoding='utf-8') as f:
     out_data = json.load(f)
 
 out_traj = out_data["geometries"]
 
 # Load topology for atom info
-with open(topology_path) as f:
+with open(topology_path, encoding='utf-8') as f:
     topo_data = json.load(f)
 
 symbols = topo_data["symbols"]
@@ -329,7 +329,7 @@ viewer.render();
 </html>"""
 
 html_path = OUTPUT_DIR / "qmmm_results.html"
-html_path.write_text(html_content)
+html_path.write_text(html_content, encoding='utf-8')
 print(f"✓ Visualization saved: {html_path}")
 print(f"  Open in a browser to view the interactive trajectory.")
 
@@ -361,9 +361,9 @@ residues = Residues(
 molecule_t_path = OUTPUT_DIR / "molecule_t.json"
 molecule_r_path = OUTPUT_DIR / "molecule_r.json"
 
-with open(molecule_t_path, "w") as f_t:
+with open(molecule_t_path, "w", encoding='utf-8') as f_t:
     json.dump(topology.to_json(), f_t)
-with open(molecule_r_path, "w") as f_r:
+with open(molecule_r_path, "w", encoding='utf-8') as f_r:
     json.dump(residues.to_json(), f_r)
 
 out = exess.qmmm(
@@ -385,7 +385,7 @@ print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
 out_file = save_object(out["path"])
-with open(out_file) as f:
+with open(out_file, encoding='utf-8') as f:
     out_traj = json.load(f)["geometries"]
 
 topology = Topology.from_json(molecule_t_path)

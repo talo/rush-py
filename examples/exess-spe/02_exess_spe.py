@@ -48,7 +48,7 @@ if isinstance(res, RunError):
 # Save energy outputs to disk and load from file
 files = exess.save_energy_outputs(res)
 json_file = next((f for f in files if str(f).endswith('.json')), None)
-with open(json_file) as f:
+with open(json_file, encoding='utf-8') as f:
     energy_data = json.load(f)
 
 # Access total energy from qmmbe object

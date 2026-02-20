@@ -36,7 +36,7 @@ print(f"Output directory: {output_dir}")
 
 # ===== 1. Load PDB and convert to topology =====
 print("Loading aspirin.pdb...")
-pdb_content = (data_dir / "aspirin.pdb").read_text()
+pdb_content = (data_dir / "aspirin.pdb").read_text(encoding='utf-8')
 trc = from_pdb(pdb_content)
 
 # Convert to topology JSON format
@@ -44,7 +44,7 @@ topology_path = output_dir / "aspirin_topology.json"
 topology_json = trc.topology.to_json()
 if "schema_version" not in topology_json:
     topology_json["schema_version"] = "0.2.0"
-topology_path.write_text(json.dumps(topology_json, indent=2))
+topology_path.write_text(json.dumps(topology_json, indent=2), encoding='utf-8')
 print(f"✓ Topology saved to {topology_path}")
 
 
@@ -139,7 +139,7 @@ else:
 </html>
 """
     html_path = output_dir / "chelpg_aspirin.html"
-    with open(html_path, "w") as f:
+    with open(html_path, "w", encoding='utf-8') as f:
         f.write(combined_html)
     print(f"✓ Combined visualization saved: {html_path}")
     

@@ -32,7 +32,7 @@ OUTPUT_DIR = Path(__file__).parent / "exports-outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Load topology for later use
-with open(TOPOLOGY_FILE) as f:
+with open(TOPOLOGY_FILE, encoding='utf-8') as f:
     topology = json.load(f)
 
 METHOD = "RestrictedHF"
@@ -85,7 +85,7 @@ print(f"Saved files: {files}")
 total_energy = None
 json_file = next((f for f in files if str(f).endswith('.json')), None)
 if json_file:
-    with open(json_file) as f:
+    with open(json_file, encoding='utf-8') as f:
         json_data = json.load(f)
         total_energy = json_data.get("total_energy")
 
@@ -135,7 +135,7 @@ print("descriptor_grid coordinates, and descriptor_grid_weights.")
 if total_energy is None:
     json_file = next((f for f in files if str(f).endswith('.json')), None)
     if json_file:
-        with open(json_file) as f:
+        with open(json_file, encoding='utf-8') as f:
             json_data = json.load(f)
             total_energy = json_data.get("total_energy")
 
@@ -375,12 +375,12 @@ else:
 
         # Save cube files
         cube_path = OUTPUT_DIR / "electron_density.cube"
-        cube_path.write_text(cube_str)
+        cube_path.write_text(cube_str, encoding='utf-8')
         print(f"  ✓ Cube file saved: {cube_path}")
 
         if esp_cube_str:
             esp_cube_path = OUTPUT_DIR / "esp.cube"
-            esp_cube_path.write_text(esp_cube_str)
+            esp_cube_path.write_text(esp_cube_str, encoding='utf-8')
             print(f"  ✓ ESP cube file saved: {esp_cube_path}")
 
         # ---- Build XYZ string for 3Dmol.js ----
@@ -399,7 +399,7 @@ else:
         # Load the template and embed the cube data
         template_path = Path(__file__).parent / "viewer_template.html"
         if template_path.exists():
-            with open(template_path) as f:
+            with open(template_path, encoding='utf-8') as f:
                 html_template = f.read()
             # Escape cube data for embedding in JavaScript template literal
             cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
@@ -418,7 +418,7 @@ else:
             html_content = "<html><body><h1>Error: viewer_template.html not found</h1></body></html>"
 
         html_path = OUTPUT_DIR / "density_visualization.html"
-        html_path.write_text(html_content)
+        html_path.write_text(html_content, encoding='utf-8')
         print(f"  ✓ Visualization saved: {html_path}")
         print(f"  Open in a browser to explore the electron density isosurface!")
     print()

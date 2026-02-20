@@ -60,7 +60,7 @@ print("Working with the optimization output")
 print("=" * 60)
 
 out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
-with open(out_traj_path) as f1, open(out_info_path) as f2:
+with open(out_traj_path, encoding='utf-8') as f1, open(out_info_path, encoding='utf-8') as f2:
     out_traj_raw, out_info = [json.load(f) for f in (f1, f2)]
 
 print("Num steps to convergence:", len(out_traj_raw))
@@ -278,7 +278,7 @@ setupViewer('viewer-final', {final_xyz_js});
 </html>"""
 
 html_path = OUTPUT_DIR / "optimization_results.html"
-html_path.write_text(html_content)
+html_path.write_text(html_content, encoding='utf-8')
 print(f"✓ Visualization saved: {html_path}")
 print(f"  Open in a browser to view interactive results.")
 
