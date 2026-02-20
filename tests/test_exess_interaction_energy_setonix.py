@@ -1,11 +1,14 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 from rush import Topology, exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts, RunSpec, set_opts
 
 
-def test_exess_interaction_energy():
+@pytest.mark.timeout(1800)
+def test_exess_interaction_energy_setonix():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     topology = Topology.from_json(data_dir / "tyk2_ejm_31_t.json")
@@ -23,9 +26,10 @@ def test_exess_interaction_energy():
             included_fragments=frag_idcs,
         ),
         run_opts=RunOpts(
-            name="Rush-Py Test EXESS Energy 02: Interaction Energy w/ Frag Keywords",
-            tags=["rush-py", "test", "tyk2+ejm-31", "deploy"],
+            name="Rush-Py Test EXESS Interaction Energy: Setonix",
+            tags=["rush-py", "test", "tyk2+ejm-31", "setonix"],
         ),
+        run_spec=RunSpec(target="Setonix"),
         collect=True,
     )
     print(res, file=sys.stderr)
@@ -33,4 +37,4 @@ def test_exess_interaction_energy():
 
 
 if __name__ == "__main__":
-    test_exess_interaction_energy()
+    test_exess_interaction_energy_setonix()

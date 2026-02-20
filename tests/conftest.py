@@ -83,7 +83,8 @@ def pytest_collection_modifyitems(
     for item in items:
         if not _is_fast_test(item):
             item.add_marker(slow_marker)
-            item.add_marker(slow_timeout)
+            if not any(m.name == "timeout" for m in item.iter_markers()):
+                item.add_marker(slow_timeout)
 
 
 def pytest_runtest_setup(item: pytest.Item) -> None:
