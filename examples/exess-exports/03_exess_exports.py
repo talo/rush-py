@@ -19,16 +19,12 @@ Output files (saved to exports-outputs/):
 
 import json
 import math
-import tarfile
-import tempfile
-from io import BytesIO
 from pathlib import Path
 
 import h5py
 import numpy as np
-import zstandard as zstd
 from rush import exess
-from rush.client import RunOpts, RunSpec, download_object
+from rush.client import RunOpts, RunSpec
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
@@ -85,21 +81,13 @@ for i, output in enumerate(res):
 files = exess.save_energy_outputs(res)
 print(f"Saved files: {files}")
 
-# Extract total energy from Example 1 results
+# Load total energy from saved JSON file
 total_energy = None
-for output in res:
-    if 'path' in output and output.get("format") == "Json":
-        # First element: flat dict format
-        json_data = output.get("data", {})
-        if "total_energy" in json_data:
-            total_energy = json_data["total_energy"]
-            break
-    elif 'Json' in output:
-        # Second element: type-discriminated format
-        json_data = output['Json'].get("data", {})
-        if "total_energy" in json_data:
-            total_energy = json_data["total_energy"]
-            break
+json_file = next((f for f in files if str(f).endswith('.json')), None)
+if json_file:
+    with open(json_file) as f:
+        json_data = json.load(f)
+        total_energy = json_data.get("total_energy")
 
 
 # ===== Example 2: Descriptor grids for density and ESP =====
@@ -145,19 +133,11 @@ print("descriptor_grid coordinates, and descriptor_grid_weights.")
 
 # Try to get total_energy from Example 2 if not found earlier
 if total_energy is None:
-    for output in res:
-        if 'path' in output and output.get("format") == "Json":
-            # First element: flat dict format
-            json_data = output.get("data", {})
-            if "total_energy" in json_data:
-                total_energy = json_data["total_energy"]
-                break
-        elif 'Json' in output:
-            # Second element: type-discriminated format
-            json_data = output['Json'].get("data", {})
-            if "total_energy" in json_data:
-                total_energy = json_data["total_energy"]
-                break
+    json_file = next((f for f in files if str(f).endswith('.json')), None)
+    if json_file:
+        with open(json_file) as f:
+            json_data = json.load(f)
+            total_energy = json_data.get("total_energy")
 
 
 # ===== Example 3: Generate 3D electron density visualization =====
@@ -166,112 +146,23 @@ print("=" * 60)
 print("Example 3: 3D Electron Density Visualization")
 print("=" * 60)
 
-# Extract descriptor grid data from the HDF5 output
-# When convert_hdf5_to_json is NOT set, res[1] contains an HDF5 reference
-hdf5_path = None
-for output in res:
-    if isinstance(output, dict) and 'Hdf5' in output:
-        hdf5_path = output['Hdf5']['path']
-        break
-
+# Load descriptor grid data from the saved HDF5 file
+print("  Loading HDF5 from saved files...")
 grid_data = None
-if hdf5_path:
-    print(f"  Downloading HDF5 from: {hdf5_path}")
-    raw_bytes = download_object(hdf5_path)
+hdf5_file = next((f for f in files if str(f).endswith('.hdf5')), None)
+
+if hdf5_file:
+    with h5py.File(hdf5_file, "r") as h5f:
+        grid_data = {}
+        # Extract known keys
+        if "density_descriptors" in h5f:
+            grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+        if "esp_descriptors" in h5f:
+            grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+        if "descriptor_grid" in h5f:
+            grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
     
-    # Decompress zstandard compression
-    print("  Decompressing zstandard archive...")
-    dctx = zstd.ZstdDecompressor()
-    decompressed = dctx.decompress(raw_bytes, max_output_size=int(1e9))
-    
-    # Debug: show what we actually got
-    print(f"  Decompressed size: {len(decompressed)} bytes")
-    
-    # Check for HDF5 magic
-    HDF5_MAGIC = b'\x89HDF\r\n\x1a\n'
-    TAR_MAGIC = b'ustar'
-    
-    is_hdf5 = decompressed.startswith(HDF5_MAGIC)
-    is_tar = len(decompressed) > 257 and decompressed[257:262] == TAR_MAGIC
-    
-    grid_data = {}
-    
-    if is_hdf5:
-        # Raw HDF5 file (no tar wrapper)
-        print("  Reading raw HDF5 file...")
-        try:
-            with h5py.File(BytesIO(decompressed), "r") as h5f:
-                # Try to extract known keys
-                if "density_descriptors" in h5f:
-                    grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
-                if "esp_descriptors" in h5f:
-                    grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
-                if "descriptor_grid" in h5f:
-                    grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-                
-                # Fallback: if no named keys, use largest float dataset
-                if not grid_data:
-                    print("  No named datasets found, looking for largest float dataset...")
-                    largest = None
-                    largest_size = 0
-                    for key in h5f.keys():
-                        ds = h5f[key]
-                        if isinstance(ds, h5py.Dataset) and np.issubdtype(ds.dtype, np.floating):
-                            size = ds.size
-                            if size > largest_size:
-                                largest = key
-                                largest_size = size
-                    if largest:
-                        print(f"  Using dataset '{largest}' (size={largest_size})")
-                        grid_data[largest] = h5f[largest][:].tolist()
-        except Exception as e:
-            print(f"  ERROR reading raw HDF5: {e}")
-    
-    elif is_tar:
-        # Tar archive containing HDF5
-        print("  Extracting from tar archive...")
-        try:
-            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                print(f"  Tar members: {[m.name for m in tar.getmembers()]}")
-                # Find .h5 files (with or without .h5 extension)
-                h5_members = [m for m in tar.getmembers() if m.name.endswith('.h5') or m.isfile()]
-                if h5_members:
-                    h5_member = h5_members[0]
-                    print(f"  Extracting: {h5_member.name}")
-                    h5f_obj = tar.extractfile(h5_member)
-                    with h5py.File(h5f_obj, "r") as h5f:
-                        if "density_descriptors" in h5f:
-                            grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
-                        if "esp_descriptors" in h5f:
-                            grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
-                        if "descriptor_grid" in h5f:
-                            grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-                else:
-                    print("  WARNING: No .h5 files found in tar archive")
-        except Exception as e:
-            print(f"  ERROR reading tar archive: {e}")
-    
-    else:
-        # Unknown format - search for HDF5 magic
-        print("  Unknown format, searching for HDF5 magic in first 10KB...")
-        search_bytes = decompressed[:10240]
-        hdf5_offset = search_bytes.find(HDF5_MAGIC)
-        if hdf5_offset >= 0:
-            print(f"  Found HDF5 magic at offset {hdf5_offset}")
-            try:
-                with h5py.File(BytesIO(decompressed[hdf5_offset:]), "r") as h5f:
-                    if "density_descriptors" in h5f:
-                        grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
-                    if "esp_descriptors" in h5f:
-                        grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
-                    if "descriptor_grid" in h5f:
-                        grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-            except Exception as e:
-                print(f"  ERROR reading HDF5 at offset {hdf5_offset}: {e}")
-        else:
-            print("  ERROR: Could not identify file format (no HDF5 magic found)")
-    
-    print(f"  Extracted keys from HDF5: {list(grid_data.keys())}")
+    print(f"  ✓ Extracted keys from HDF5: {list(grid_data.keys())}")
     for key, val in grid_data.items():
         if isinstance(val, list) and len(val) > 0:
             # Check if values are scalars (1D) or coordinate tuples (2D)
@@ -282,19 +173,7 @@ if hdf5_path:
                 arr = np.array(val)
                 print(f"    {key}: {len(val)} points, shape={arr.shape}")
 else:
-    # Fallback: look for saved HDF5 files on disk
-    print("WARNING: No HDF5 output found in response. Looking for saved files...")
-    for f in files:
-        if str(f).endswith(".hdf5"):
-            with h5py.File(f, "r") as h5f:
-                grid_data = {}
-                if "density_descriptors" in h5f:
-                    grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
-                if "esp_descriptors" in h5f:
-                    grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
-                if "descriptor_grid" in h5f:
-                    grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-            break
+    print("  WARNING: No HDF5 file found in saved outputs")
 
 if grid_data is None or not grid_data:
     print("ERROR: Could not find grid data. Skipping visualization.")

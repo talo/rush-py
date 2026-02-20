@@ -17,13 +17,10 @@ Output files (saved to chelpg-outputs/):
 
 from pathlib import Path
 from rush import exess
-from rush.client import RunError, download_object
+from rush.client import RunError
 from rush.convert.pdb import from_pdb
 import json
 import h5py
-import tarfile
-import zstandard as zstd
-from io import BytesIO
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend
 import matplotlib.pyplot as plt
@@ -64,19 +61,22 @@ else:
     
     # ===== 3. Extract charges from HDF5 =====
     if isinstance(charges_ref, dict) and "Hdf5" in charges_ref:
-        hdf5_obj = charges_ref["Hdf5"]
-        qm_output = download_object(hdf5_obj["path"])
-        decompressed = zstd.ZstdDecompressor().decompress(qm_output, max_output_size=int(1e9))
+        # Save energy outputs to disk (downloads and decompresses automatically)
+        files = exess.save_energy_outputs(result)
+        print(f"✓ Saved output files: {files}")
         
-        with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-            hdf5_f = tar.extractfile(tar.getnames()[1])
-            with h5py.File(hdf5_f, "r") as f:
+        # Load charges from saved HDF5 file
+        hdf5_file = next((f for f in files if str(f).endswith('.hdf5')), None)
+        if hdf5_file:
+            with h5py.File(hdf5_file, "r") as f:
                 frag_indices = sorted([int(x) for x in f["monomers"].keys()])
                 charges = [
                     float(x)
                     for frag_idx in frag_indices
                     for x in f[f"monomers/{frag_idx}/chelpg_charges"]
                 ]
+        else:
+            raise FileNotFoundError("No HDF5 file found in saved outputs")
         
         print(f"✓ Extracted {len(charges)} atomic charges")
         symbols = [trc.topology.symbols[i] for i in range(len(charges))]

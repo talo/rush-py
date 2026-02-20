@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, RunError, download_object
+from rush.client import RunOpts, RunError
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "water_topology.json"
@@ -45,11 +45,11 @@ if isinstance(res, RunError):
     print(f"Run failed: {res.message}")
     exit(1)
 
-# Extract energy from JSON output
-# The first output is the JSON file; download it directly
-json_data = res[0]
-json_bytes = download_object(json_data["path"])
-energy_data = json.loads(json_bytes.decode())
+# Save energy outputs to disk and load from file
+files = exess.save_energy_outputs(res)
+json_file = next((f for f in files if str(f).endswith('.json')), None)
+with open(json_file) as f:
+    energy_data = json.load(f)
 
 # Access total energy from qmmbe object
 total_energy = energy_data.get("qmmbe", {}).get("expanded_hf_energy")
