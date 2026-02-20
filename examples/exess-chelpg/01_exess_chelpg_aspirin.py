@@ -20,6 +20,7 @@ from rush import exess
 from rush.client import RunError
 from rush.convert.pdb import from_pdb
 import json
+import h5py
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend
 import matplotlib.pyplot as plt
@@ -55,7 +56,21 @@ result = exess.chelpg(topology_path=topology_path, collect=True)
 if isinstance(result, RunError):
     print(f"Run failed: {result.message}")
 else:
-    json_output, charges = result
+    json_path, hdf5_path = exess.save_energy_outputs(result)
+
+    # Extract charges from HDF5 if available
+    charges = []
+    if hdf5_path:
+        with h5py.File(hdf5_path, "r") as f:
+            frag_indices = sorted([int(x) for x in f["monomers"].keys()])
+            charges = [
+                float(x)
+                for frag_idx in frag_indices
+                for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+            ]
+    else:
+        print("Warning: No charge data available in HDF5")
+    
     print("✓ CHELPG calculation complete!")
     print(f"✓ Extracted {len(charges)} atomic charges")
     symbols = [trc.topology.symbols[i] for i in range(len(charges))]
