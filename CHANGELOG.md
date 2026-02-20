@@ -3,7 +3,13 @@
 ## 6.5.1
 
 ### Changed
-- Fixed save_energy_outputs to handle list inputs
+- Fixed `save_energy_outputs()` to handle list inputs from `collect_run()`
+- Fixed `save_object()` file extraction logic—now properly writes extracted HDF5/tar files to disk
+
+### Fixed
+- `save_energy_outputs()` now includes missing return statement for HDF5 output handling
+- `save_object()` conditional write logic that prevented file extraction for single-file tar archives
+- Added error handling for unknown output formats in `save_energy_outputs()`
 
 ### Added
 
