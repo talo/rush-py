@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(jq -r '.tool_input.file_path' < /dev/stdin) && if [[ \"$FILE_PATH\" == *.env* ]]; then echo 'BLOCKED: Do not edit .env files' >&2 && exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run ruff format $CLAUDE_FILE_PATHS 2>/dev/null; uv run ruff check --fix $CLAUDE_FILE_PATHS 2>/dev/null; true"
+          }
+        ]
+      }
+    ]
+  }
+}
