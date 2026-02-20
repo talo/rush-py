@@ -1068,8 +1068,23 @@ def energy(
 
 
 def save_energy_outputs(
-    res: tuple[dict] | tuple[dict, dict] | list[dict] | list[dict] | RunError, extract=True
+    res: tuple[dict] | tuple[dict, dict] | list[dict] | RunError, extract=True
 ) -> tuple[Path, Path | None] | RunError:
+    """
+    Download and save energy calculation outputs from Rush.
+
+    Takes the result tuple from exess functions (energy(), interaction_energy(), etc.)
+    and downloads the output files to disk.
+
+    Args:
+        res: Result tuple from exess calculation with VirtualObject references
+        extract: Whether to extract tar.zst files (default True)
+
+    Returns:
+        - (json_path, hdf5_path): Tuple of local Paths to downloaded files
+        - (json_path, None): If HDF5 extraction fails or no HDF5 output
+        - RunError: If the input res is an error
+    """
     if isinstance(res, RunError):
         return res
     
