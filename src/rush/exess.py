@@ -1069,7 +1069,7 @@ def energy(
 
 def save_energy_outputs(
     res: tuple[dict] | tuple[dict, dict] | list[dict] | list[dict] | RunError, extract=True
-) -> Path | tuple[Path, Path] | RunError:
+) -> tuple[Path, Path | None] | RunError:
     if isinstance(res, RunError):
         return res
     
@@ -1079,7 +1079,7 @@ def save_energy_outputs(
     
     if isinstance(res, tuple):
         if len(res) == 1:
-            return save_object(res[0]["path"])
+            return (save_object(res[0]["path"]), None)
         else:
             assert len(res) > 1, "exess.energy should return 1 or 2 outputs."
             # convert_hdf5_to_json set to true
@@ -1096,20 +1096,22 @@ def save_energy_outputs(
                 json_path = save_object(res[0]["path"])
                 
                 # Try to extract HDF5 (optional - skip if empty)
+                hdf5_path = None
                 try:
-                    hdf5_obj = res[1]["Hdf5"]
+                    hdf5_obj = res[1].get("Hdf5") or res[1]
                     hdf5_path = save_object(
                         hdf5_obj["path"],
                         ext="hdf5" if extract else "tar.zst",
                         extract=extract,
                     )
-                    return (json_path, hdf5_path)
                 except ValueError as e:
                     if "only directories" in str(e):
-                        # No actual files in HDF5 tar, return just JSON
-                        return json_path
+                        # No actual files in HDF5 tar, return None for hdf5_path
+                        hdf5_path = None
                     else:
                         raise  # Re-raise other extraction errors
+                
+                return (json_path, hdf5_path)
             
             # Unknown output format
             raise ValueError(
