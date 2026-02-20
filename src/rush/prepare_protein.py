@@ -125,13 +125,47 @@ in
                 print(f"Error: {error['message']}", file=sys.stderr)
 
 
-def save_outputs(res: dict | RunError) -> tuple[Path, Path, Path] | RunError:
-    if isinstance(res, dict):
+def save_outputs(res: dict | list | tuple | str | RunError) -> tuple[Path, Path, Path] | str | RunError:
+    """
+    Download output files from a prepare-protein run.
+    
+    The prepare-protein rex computation returns a list/tuple of 3 VirtualObject
+    dicts (topology, residues, chains files). This function downloads each
+    file and returns Path objects that can be used with from_json().
+    
+    If collect=False was used, the input will be a run ID string, which is
+    returned as-is for later collection by the caller.
+    
+    Args:
+        res: Either:
+             - A run ID string (if collect=False was used)
+             - A list/tuple of 3 VirtualObject dicts from collect_run()
+             - A RunError
+             Each VirtualObject dict has keys: 'path', 'size', 'format'.
+        
+    Returns:
+        Either:
+        - A run ID string (if input was a run ID)
+        - Tuple of 3 downloaded file Paths (if input was VirtualObject list)
+        - RunError if input is an error
+    """
+    # Handle error case
+    if isinstance(res, RunError):
+        return res
+    
+    # Handle run ID string (collect=False case)
+    if isinstance(res, str):
+        return res
+    
+    # Handle list/tuple of VirtualObject dicts from collect_run()
+    if isinstance(res, (list, tuple)) and len(res) >= 3:
         return (
             save_object(res[0]["path"]),
             save_object(res[1]["path"]),
             save_object(res[2]["path"]),
         )
-    else:
-        print(res)
-        return res
+    
+    # Fallback: return as-is (for debugging or unexpected formats)
+    print(f"Warning: save_outputs received unexpected format: {type(res)}")
+    print(res)
+    return res

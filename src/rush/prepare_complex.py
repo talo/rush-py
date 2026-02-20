@@ -132,9 +132,26 @@ def prepare_complex(
     run_spec: RunSpec = RunSpec(),
     run_opts: RunOpts = RunOpts(),
     collect=False,
-) -> TRC | RunError:
+) -> TRC | str | RunError:
     """
-    Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.
+    Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.
+    
+    Args:
+        input_path: Path to input PDB or TRC file
+        ligand_names: List of ligand residue names to extract
+        ph: pH for protonation (optional)
+        naming_scheme: Atom naming scheme ('AMBER' or 'CHARMM')
+        capping_style: Style for capping terminal residues
+        truncation_threshold: Distance threshold for truncating chains
+        debump: Whether to perform debumping
+        run_spec: Run specification for the preparation job
+        run_opts: Run options
+        collect: If True, collects results and returns merged TRC. If False, returns run ID.
+    
+    Returns:
+        - If collect=True: Merged TRC containing prepared protein and ligand
+        - If collect=False: Run ID string for the prepare-protein job
+        - RunError if preparation fails
     """
     if isinstance(input_path, str):
         input_path = Path(input_path)
@@ -153,6 +170,7 @@ def prepare_complex(
     if isinstance(trc_l, list):
         trc_l = trc_l[0]
 
+    # Respect the collect parameter: pass it through to run_prepare_protein
     res = run_prepare_protein(
         input_path,
         ph,
@@ -162,11 +180,17 @@ def prepare_complex(
         debump,
         run_spec,
         run_opts,
-        collect,
+        collect=collect,
     )
     trc_p_output = save_prepare_protein_outputs(res)
     if isinstance(trc_p_output, RunError):
         return trc_p_output
+    
+    # If collect=False, we get a run ID (string) back - return it as-is
+    if isinstance(trc_p_output, str):
+        return trc_p_output
+    
+    # Otherwise, collect=True gave us Paths to process
     trc_p = from_json(trc_p_output)
     if isinstance(trc_p, list):
         trc_p = trc_p[0]
