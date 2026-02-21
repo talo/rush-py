@@ -1068,13 +1068,38 @@ def energy(
 
 
 def save_energy_outputs(
-    res: tuple[dict] | tuple[dict, dict] | RunError, extract=True
-) -> Path | tuple[Path, Path] | RunError:
+    res: tuple[dict] | tuple[dict, dict] | list[dict] | RunError, extract=True
+) -> tuple[Path, Path | None] | RunError:
+    """
+    Download and save energy calculation outputs from Rush.
+
+    Takes the result from exess functions (energy(), interaction_energy(), etc.)
+    and downloads the output files to disk. The result can be either a tuple or list
+    because collect_run() returns a list when there are multiple outputs, which is
+    converted to a tuple for consistent processing.
+
+    Args:
+        res: Result from exess calculation. Can be:
+            - tuple[dict]: Single output from exess function
+            - tuple[dict, dict]: Two outputs (JSON + HDF5)
+            - list[dict]: Same as tuple (collect_run returns list for multiple outputs)
+        extract: Whether to extract tar.zst files (default True)
+
+    Returns:
+        - (json_path, hdf5_path): Tuple of local Paths to downloaded files
+        - (json_path, None): If HDF5 extraction fails or no HDF5 output
+        - RunError: If the input res is an error
+    """
     if isinstance(res, RunError):
         return res
-    elif isinstance(res, tuple):
+    
+    # Convert list to tuple for consistent handling
+    if isinstance(res, list):
+        res = tuple(res)
+    
+    if isinstance(res, tuple):
         if len(res) == 1:
-            return save_object(res[0]["path"])
+            return (save_object(res[0]["path"]), None)
         else:
             assert len(res) > 1, "exess.energy should return 1 or 2 outputs."
             # convert_hdf5_to_json set to true
@@ -1087,15 +1112,31 @@ def save_energy_outputs(
             # hdf5-to-json set to false (or not set)
             # Support new-style with the type key, and old-style without
             if "Hdf5" in res[1]:
-                hdf5_obj = res[1]["Hdf5"]
-
-            return (
-                save_object(res[0]["path"]),
-                save_object(
-                    hdf5_obj["path"],
-                    ext="hdf5" if extract else "tar.zst",
-                    extract=extract,
-                ),
+                # Extract JSON (required)
+                json_path = save_object(res[0]["path"])
+                
+                # Try to extract HDF5 (optional - skip if empty)
+                hdf5_path = None
+                try:
+                    hdf5_obj = res[1].get("Hdf5") or res[1]
+                    hdf5_path = save_object(
+                        hdf5_obj["path"],
+                        ext="hdf5" if extract else "tar.zst",
+                        extract=extract,
+                    )
+                except ValueError as e:
+                    if "only directories" in str(e):
+                        # No actual files in HDF5 tar, return None for hdf5_path
+                        hdf5_path = None
+                    else:
+                        raise  # Re-raise other extraction errors
+                
+                return (json_path, hdf5_path)
+            
+            # Unknown output format
+            raise ValueError(
+                f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
+                f"but got keys: {list(res[1].keys())}"
             )
     else:
         print(res)

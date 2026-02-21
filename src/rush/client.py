@@ -401,11 +401,40 @@ def save_object(
             )
             with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
                 tar_filenames = tar.getnames()
-                if len(tar_filenames) >= 2:
-                    data = tar.extractfile(tar_filenames[1]).read()  # type: ignore
-            if len(tar_filenames) >= 2:
-                with open(filepath, "wb") as f:
-                    f.write(data)
+                
+                # Handle empty tar archives
+                if not tar_filenames:
+                    raise ValueError("Tar archive is empty - no files to extract")
+                
+                # Extract the appropriate file:
+                # - If 1 file: extract that file
+                # - If 2+ files: extract index 1 (skip index 0, which is often metadata)
+                file_index = 1 if len(tar_filenames) >= 2 else 0
+                member = tar.getmember(tar_filenames[file_index])
+                
+                # If we selected a directory, find the first actual file instead
+                if member.isdir():
+                    file_index = None
+                    for i, name in enumerate(tar_filenames):
+                        m = tar.getmember(name)
+                        if not m.isdir():
+                            file_index = i
+                            break
+                    if file_index is None:
+                        raise ValueError("Tar archive contains only directories, no files to extract")
+                
+                extracted_file = tar.extractfile(tar_filenames[file_index])
+                
+                if extracted_file is None:
+                    raise ValueError(
+                        f"Failed to extract file '{tar_filenames[file_index]}' from tar archive"
+                    )
+                
+                data = extracted_file.read()
+            
+            # Always write the extracted data to disk
+            with open(filepath, "wb") as f:
+                f.write(data)
         else:
             with open(filepath, "wb") as f:
                 f.write(data)
