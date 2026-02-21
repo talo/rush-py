@@ -107,10 +107,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#quick-start-qm-mm-on-a-proteinligand-system">Quick Start: QM/MM on a Protein&#8211;Ligand System</a></li>
 <li><a class="reference internal" href="#minimal-example-two-water-molecules-from-scratch">Minimal Example: Two Water Molecules from Scratch</a></li>
 <li><a class="reference internal" href="#working-with-the-trajectory">Working with the Trajectory</a></li>
-<li><a class="reference internal" href="#choosing-your-qm-mm-ml-partitioning">Choosing Your QM/MM/ML Partitioning</a><ul>
 <li><a class="reference internal" href="#example-output">Example Output</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#try-it-yourself">Try It Yourself</a></li>
 <li><a class="reference internal" href="#see-also">See Also</a></li>
 </ul>
@@ -280,69 +277,13 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="22">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  (</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 </span></pre></div>
 </div>
-<p><strong>Example output</strong> (two water molecules after 100 QM timesteps):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">Atoms</span> <span class="n">at</span> <span class="n">First</span> <span class="n">Step</span><span class="p">:</span>
-</span><span data-line="2">  <span class="p">(</span> <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">)</span>
-</span><span data-line="3">  <span class="p">(</span> <span class="mf">0.7570</span><span class="p">,</span>  <span class="mf">0.5860</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">)</span>
-</span><span data-line="4">  <span class="p">(</span><span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span>  <span class="mf">0.5860</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">)</span>
-</span><span data-line="5">  <span class="p">(</span> <span class="mf">2.8000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">)</span>
-</span><span data-line="6">  <span class="p">(</span> <span class="mf">3.5570</span><span class="p">,</span>  <span class="mf">0.5860</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">)</span>
-</span><span data-line="7">  <span class="p">(</span> <span class="mf">2.0430</span><span class="p">,</span>  <span class="mf">0.5860</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">)</span>
-</span><span data-line="8">
-</span><span data-line="9"><span class="n">Atoms</span> <span class="n">at</span> <span class="n">Final</span> <span class="n">Step</span><span class="p">:</span>
-</span><span data-line="10">  <span class="p">(</span><span class="o">-</span><span class="mf">3.3974</span><span class="p">,</span>  <span class="mf">0.0462</span><span class="p">,</span>  <span class="mf">0.0322</span><span class="p">)</span>
-</span><span data-line="11">  <span class="p">(</span><span class="o">-</span><span class="mf">3.2867</span><span class="p">,</span>  <span class="mf">1.0793</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0014</span><span class="p">)</span>
-</span><span data-line="12">  <span class="p">(</span><span class="o">-</span><span class="mf">4.4081</span><span class="p">,</span>  <span class="mf">0.0531</span><span class="p">,</span>  <span class="mf">0.0658</span><span class="p">)</span>
-</span><span data-line="13">  <span class="p">(</span> <span class="mf">3.4286</span><span class="p">,</span>  <span class="mf">0.0657</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">)</span>
-</span><span data-line="14">  <span class="p">(</span> <span class="mf">3.3724</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.9301</span><span class="p">,</span>  <span class="mf">0.1350</span><span class="p">)</span>
-</span><span data-line="15">  <span class="p">(</span> <span class="mf">4.4636</span><span class="p">,</span>  <span class="mf">0.1491</span><span class="p">,</span>  <span class="mf">0.1221</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p>Notice the waters have drifted apart — this is expected in a gas-phase NVE simulation with no periodic boundary conditions. In a real protein system, the surrounding MM environment provides the confining forces.</p>
+<p>This example uses <strong>6a5j</strong>, a solution NMR structure of a small peptide. During the gas-phase NVE simulation, the peptide backbone flexes and side chains reorient. The surrounding MM environment would normally provide confining forces; in this gas-phase simulation, the structure is free to explore conformational space.</p>
 </section>
 <hr class="docutils" />
-<section id="choosing-your-qm-mm-ml-partitioning">
-<h2>Choosing Your QM/MM/ML Partitioning<a class="headerlink" href="#choosing-your-qm-mm-ml-partitioning" title="Link to this heading">¶</a></h2>
-<p>The power of EXESS’s Q4ML approach is flexibility in how you partition your system:</p>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Scenario</p></th>
-<th class="head"><p>QM</p></th>
-<th class="head"><p>MM</p></th>
-<th class="head"><p>ML</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Ligand in protein pocket</p></td>
-<td><p>Ligand fragment</p></td>
-<td><p>Everything else</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p>Catalytic metal center</p></td>
-<td><p>Metal + coordinating residues</p></td>
-<td><p>Protein + solvent</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p>Fast exploratory dynamics</p></td>
-<td><p>—</p></td>
-<td><p>Protein backbone</p></td>
-<td><p>Ligand + pocket</p></td>
-</tr>
-<tr class="row-odd"><td><p>All-ML dynamics</p></td>
-<td><p>—</p></td>
-<td><p>—</p></td>
-<td><p>Everything</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The key trade-off: QM is most accurate but slowest. ML (AIMNet) is a good middle ground for organic molecules. MM is fastest but can’t capture electronic effects.</p>
 <section id="example-output">
-<h3>Example Output<a class="headerlink" href="#example-output" title="Link to this heading">¶</a></h3>
+<h2>Example Output<a class="headerlink" href="#example-output" title="Link to this heading">¶</a></h2>
 <p>Explore the QM/MM trajectory visualization. Or run the code above to generate this yourself!</p>
 <iframe src="../_static/outputs/qmmm_results.html" width="100%" height="600px" frameborder="0"></iframe>
-</section>
 </section>
 <hr class="docutils" />
 <section id="try-it-yourself">

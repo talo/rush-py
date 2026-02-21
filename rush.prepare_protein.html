@@ -169,12 +169,30 @@ calculations.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.prepare_protein.save_outputs">
 <span class="sig-prename descclassname"><span class="pre">rush.prepare_protein.</span></span><span class="sig-name descname"><span class="pre">save_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_protein.html#save_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_protein.save_outputs" title="Link to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Download output files from a prepare-protein run.</p>
+<p>The prepare-protein rex computation returns a list/tuple of 3 VirtualObject
+dicts (topology, residues, chains files). This function downloads each
+file and returns Path objects that can be used with from_json().</p>
+<p>If collect=False was used, the input will be a run ID string, which is
+returned as-is for later collection by the caller.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>res</strong> (<em>dict</em><em> | </em><a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a>)</p>
+<dd class="field-odd"><p><strong>res</strong> (<em>dict</em><em> | </em><em>list</em><em> | </em><em>tuple</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a>) – Either:
+- A run ID string (if collect=False was used)
+- A list/tuple of 3 VirtualObject dicts from collect_run()
+- A RunError
+Each VirtualObject dict has keys: ‘path’, ‘size’, ‘format’.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>tuple</em>[<em>Path</em>, <em>Path</em>, <em>Path</em>] | <a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>A run ID string (if input was a run ID)</p></li>
+<li><p>Tuple of 3 downloaded file Paths (if input was VirtualObject list)</p></li>
+<li><p>RunError if input is an error</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Either</p>
 </dd>
 </dl>
 </dd></dl>

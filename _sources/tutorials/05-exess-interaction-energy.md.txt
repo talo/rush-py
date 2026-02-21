@@ -14,14 +14,12 @@
 
 In structure-based drug design, you constantly ask: *how tightly does this molecule sit in the binding pocket?* Docking scores approximate this with empirical potentials. Molecular mechanics (MM-GBSA, MM-PBSA) improve on it. But quantum mechanics gives you the most physically rigorous answer — it captures polarization, charge transfer, and dispersion effects that classical methods miss.
 
-The catch? QM on an entire protein is impossible. EXESS solves this with **fragment-based quantum mechanics**: it breaks your system into amino-acid-sized pieces, computes QM energies for each piece and their pairwise/three-body interactions, then assembles the result. You get a QM-quality interaction energy without needing a supercomputer.
-
 :::{admonition} What this is (and isn't)
 :class: note
 This interaction energy is **not** a binding free energy — it doesn't include entropy, solvation, or conformational sampling. Think of it as a high-quality electronic interaction energy for a single pose. It's most useful for **rank-ordering** poses or comparing ligands in the same pocket.
 :::
 
-## Quick Start: Get an Interaction Energy in 10 Lines
+## Quick Start: Get an Interaction Energy
 
 ```python
 import json
@@ -29,7 +27,7 @@ from rush import exess
 from rush.client import RunOpts, download_object
 
 out = exess.interaction_energy(
-    "tyk2_ejm_31_t.json",       # QDX Topology file for TYK2 + ligand EJM-31
+    "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
     93,                          # Fragment index of the ligand
     method="RestrictedHF",       # Explicit: minimal method for testing
     basis="STO-3G",              # Explicit: minimal basis for testing
@@ -59,12 +57,12 @@ That negative value means the ligand is stabilized by its protein environment. T
 
 :::{admonition} About the default method
 :class: warning
-By default, EXESS uses **RestrictedHF/STO-3G** — the simplest possible quantum chemistry method with a minimal basis set. This runs fast and is great for testing your workflow, but the absolute energies are not quantitatively meaningful. For production work, use at least `method="RestrictedHF", basis="cc-pVDZ"` or a correlated method like RI-MP2. The *relative* trends (which ligand binds more tightly) are often preserved even at low levels of theory.
+By default, EXESS uses **RestrictedHF/cc-pVDZ**. In these tutorials, we explicitly specify `basis="STO-3G"` for speed and quick iteration, but STO-3G is a minimal basis set with significantly reduced accuracy. The absolute energies at this level are not quantitatively meaningful. For production work, use the default `basis="cc-pVDZ"` or a correlated method like RI-MP2. The *relative* trends (which ligand binds more tightly) are often preserved even at low levels of theory, but for accurate binding predictions, higher-quality methods are recommended.
 :::
 
 ### Where to get the input file
 
-The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data){target="_blank"} folder. It's a QDX Topology — a JSON format that encodes atomic coordinates, fragment definitions, charges, and connectivity.
+The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](https://github.com/talo/rush-py/tree/main/tests/data){target="_blank"} folder.
 
 ---
 
@@ -82,7 +80,7 @@ The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](
 
 ## End-to-End: From PDB to Interaction Energy
 
-Don't have a QDX Topology file? Start from a PDB. Rush's **Prepare Complex** module handles protonation, missing atoms, and charge assignment automatically.
+Don't have a TRC file? Start from a PDB. Rush's **Prepare Complex** module handles protonation, missing atoms, and charge assignment automatically.
 
 ### Step 1: Prepare the system
 
@@ -115,7 +113,7 @@ It uses **PDBFixer** to fill missing atoms/residues, **PDB2PQR** for protonation
 
 ### Step 2: Focus on the binding pocket
 
-Running QM on the entire protein is wasteful. Most residues far from the ligand contribute negligibly to the interaction energy. Use `get_fragments_near_fragment` to select just the pocket:
+Running QM on the entire protein can be wasteful. Most residues far from the ligand contribute negligibly to the interaction energy. Use `get_fragments_near_fragment` to select just the pocket:
 
 ```python
 # Find fragments within 5 Å of the ligand

@@ -104,7 +104,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#why-this-matters">Why This Matters</a></li>
-<li><a class="reference internal" href="#quick-start-get-an-interaction-energy-in-10-lines">Quick Start: Get an Interaction Energy in 10 Lines</a><ul>
+<li><a class="reference internal" href="#quick-start-get-an-interaction-energy">Quick Start: Get an Interaction Energy</a><ul>
 <li><a class="reference internal" href="#where-to-get-the-input-file">Where to get the input file</a></li>
 </ul>
 </li>
@@ -179,20 +179,19 @@ data-aria-dark="Switch to auto color mode">
 <section id="why-this-matters">
 <h2>Why This Matters<a class="headerlink" href="#why-this-matters" title="Link to this heading">¶</a></h2>
 <p>In structure-based drug design, you constantly ask: <em>how tightly does this molecule sit in the binding pocket?</em> Docking scores approximate this with empirical potentials. Molecular mechanics (MM-GBSA, MM-PBSA) improve on it. But quantum mechanics gives you the most physically rigorous answer — it captures polarization, charge transfer, and dispersion effects that classical methods miss.</p>
-<p>The catch? QM on an entire protein is impossible. EXESS solves this with <strong>fragment-based quantum mechanics</strong>: it breaks your system into amino-acid-sized pieces, computes QM energies for each piece and their pairwise/three-body interactions, then assembles the result. You get a QM-quality interaction energy without needing a supercomputer.</p>
 <div class="note admonition">
 <p class="admonition-title">What this is (and isn’t)</p>
 <p>This interaction energy is <strong>not</strong> a binding free energy — it doesn’t include entropy, solvation, or conformational sampling. Think of it as a high-quality electronic interaction energy for a single pose. It’s most useful for <strong>rank-ordering</strong> poses or comparing ligands in the same pocket.</p>
 </div>
 </section>
-<section id="quick-start-get-an-interaction-energy-in-10-lines">
-<h2>Quick Start: Get an Interaction Energy in 10 Lines<a class="headerlink" href="#quick-start-get-an-interaction-energy-in-10-lines" title="Link to this heading">¶</a></h2>
+<section id="quick-start-get-an-interaction-energy">
+<h2>Quick Start: Get an Interaction Energy<a class="headerlink" href="#quick-start-get-an-interaction-energy" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
 </span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">download_object</span>
 </span><span data-line="4">
 </span><span data-line="5"><span class="n">out</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">interaction_energy</span><span class="p">(</span>
-</span><span data-line="6">    <span class="s2">&quot;tyk2_ejm_31_t.json&quot;</span><span class="p">,</span>       <span class="c1"># QDX Topology file for TYK2 + ligand EJM-31</span>
+</span><span data-line="6">    <span class="s2">&quot;tyk2_ejm_31_t.json&quot;</span><span class="p">,</span>       <span class="c1"># TRC file for TYK2 + ligand EJM-31</span>
 </span><span data-line="7">    <span class="mi">93</span><span class="p">,</span>                          <span class="c1"># Fragment index of the ligand</span>
 </span><span data-line="8">    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;RestrictedHF&quot;</span><span class="p">,</span>       <span class="c1"># Explicit: minimal method for testing</span>
 </span><span data-line="9">    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;STO-3G&quot;</span><span class="p">,</span>              <span class="c1"># Explicit: minimal basis for testing</span>
@@ -220,11 +219,11 @@ data-aria-dark="Switch to auto color mode">
 <p>That negative value means the ligand is stabilized by its protein environment. The magnitude tells you the strength — more negative = stronger interaction.</p>
 <div class="warning admonition">
 <p class="admonition-title">About the default method</p>
-<p>By default, EXESS uses <strong>RestrictedHF/STO-3G</strong> — the simplest possible quantum chemistry method with a minimal basis set. This runs fast and is great for testing your workflow, but the absolute energies are not quantitatively meaningful. For production work, use at least <code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;,</span> <span class="pre">basis=&quot;cc-pVDZ&quot;</span></code> or a correlated method like RI-MP2. The <em>relative</em> trends (which ligand binds more tightly) are often preserved even at low levels of theory.</p>
+<p>By default, EXESS uses <strong>RestrictedHF/cc-pVDZ</strong>. In these tutorials, we explicitly specify <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-3G&quot;</span></code> for speed and quick iteration, but STO-3G is a minimal basis set with significantly reduced accuracy. The absolute energies at this level are not quantitatively meaningful. For production work, use the default <code class="docutils literal notranslate"><span class="pre">basis=&quot;cc-pVDZ&quot;</span></code> or a correlated method like RI-MP2. The <em>relative</em> trends (which ligand binds more tightly) are often preserved even at low levels of theory, but for accurate binding predictions, higher-quality methods are recommended.</p>
 </div>
 <section id="where-to-get-the-input-file">
 <h3>Where to get the input file<a class="headerlink" href="#where-to-get-the-input-file" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">tyk2_ejm_31_t.json</span></code> topology file is in the rush-py repo’s <a class="reference external" href="https://github.com/talo/rush-py/tree/main/tests/data" target="_blank"><code class="docutils literal notranslate"><span class="pre">tests/data/</span></code></a> folder. It’s a QDX Topology — a JSON format that encodes atomic coordinates, fragment definitions, charges, and connectivity.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">tyk2_ejm_31_t.json</span></code> topology file is in the rush-py repo’s <a class="reference external" href="https://github.com/talo/rush-py/tree/main/tests/data" target="_blank"><code class="docutils literal notranslate"><span class="pre">tests/data/</span></code></a> folder.</p>
 </section>
 </section>
 <hr class="docutils" />
@@ -266,7 +265,7 @@ data-aria-dark="Switch to auto color mode">
 <hr class="docutils" />
 <section id="end-to-end-from-pdb-to-interaction-energy">
 <h2>End-to-End: From PDB to Interaction Energy<a class="headerlink" href="#end-to-end-from-pdb-to-interaction-energy" title="Link to this heading">¶</a></h2>
-<p>Don’t have a QDX Topology file? Start from a PDB. Rush’s <strong>Prepare Complex</strong> module handles protonation, missing atoms, and charge assignment automatically.</p>
+<p>Don’t have a TRC file? Start from a PDB. Rush’s <strong>Prepare Complex</strong> module handles protonation, missing atoms, and charge assignment automatically.</p>
 <section id="step-1-prepare-the-system">
 <h3>Step 1: Prepare the system<a class="headerlink" href="#step-1-prepare-the-system" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -297,7 +296,7 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="step-2-focus-on-the-binding-pocket">
 <h3>Step 2: Focus on the binding pocket<a class="headerlink" href="#step-2-focus-on-the-binding-pocket" title="Link to this heading">¶</a></h3>
-<p>Running QM on the entire protein is wasteful. Most residues far from the ligand contribute negligibly to the interaction energy. Use <code class="docutils literal notranslate"><span class="pre">get_fragments_near_fragment</span></code> to select just the pocket:</p>
+<p>Running QM on the entire protein can be wasteful. Most residues far from the ligand contribute negligibly to the interaction energy. Use <code class="docutils literal notranslate"><span class="pre">get_fragments_near_fragment</span></code> to select just the pocket:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Find fragments within 5 Å of the ligand</span>
 </span><span data-line="2"><span class="n">lig_idx</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;MK1&quot;</span><span class="p">)</span>
 </span><span data-line="3"><span class="n">pocket_frags</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">get_fragments_near_fragment</span><span class="p">(</span><span class="n">lig_idx</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">lig_idx</span><span class="p">]</span>

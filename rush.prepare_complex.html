@@ -147,23 +147,32 @@ with prepared protein TRC data for downstream computations.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.prepare_complex.prepare_complex">
 <span class="sig-prename descclassname"><span class="pre">rush.prepare_complex.</span></span><span class="sig-name descname"><span class="pre">prepare_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ligand_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare_complex.html#prepare_complex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare_complex.prepare_complex" title="Link to this definition">¶</a></dt>
-<dd><p>Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.</p>
+<dd><p>Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>input_path</strong> (<em>Path</em><em> | </em><em>str</em>)</p></li>
-<li><p><strong>ligand_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>ph</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>naming_scheme</strong> (<em>Literal</em><em>[</em><em>'AMBER'</em><em>, </em><em>'CHARMM'</em><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>capping_style</strong> (<em>Literal</em><em>[</em><em>'never'</em><em>, </em><em>'truncated'</em><em>, </em><em>'always'</em><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>truncation_threshold</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>debump</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
-<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>
+<li><p><strong>input_path</strong> (<em>Path</em><em> | </em><em>str</em>) – Path to input PDB or TRC file</p></li>
+<li><p><strong>ligand_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of ligand residue names to extract</p></li>
+<li><p><strong>ph</strong> (<em>float</em><em> | </em><em>None</em>) – pH for protonation (optional)</p></li>
+<li><p><strong>naming_scheme</strong> (<em>Literal</em><em>[</em><em>'AMBER'</em><em>, </em><em>'CHARMM'</em><em>] </em><em>| </em><em>None</em>) – Atom naming scheme (‘AMBER’ or ‘CHARMM’)</p></li>
+<li><p><strong>capping_style</strong> (<em>Literal</em><em>[</em><em>'never'</em><em>, </em><em>'truncated'</em><em>, </em><em>'always'</em><em>] </em><em>| </em><em>None</em>) – Style for capping terminal residues</p></li>
+<li><p><strong>truncation_threshold</strong> (<em>int</em><em> | </em><em>None</em>) – Distance threshold for truncating chains</p></li>
+<li><p><strong>debump</strong> (<em>bool</em><em> | </em><em>None</em>) – Whether to perform debumping</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>) – Run specification for the preparation job</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>) – Run options</p></li>
+<li><p><strong>collect</strong> – If True, collects results and returns merged TRC. If False, returns run ID.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a> | <a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Merged TRC containing prepared protein and ligand
+- If collect=False: Run ID string for the prepare-protein job
+- RunError if preparation fails</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>If collect=True</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

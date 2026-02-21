@@ -1432,12 +1432,31 @@ scaled by <cite>k</cite> (larger values mean a stronger restraint).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rush.exess.save_energy_outputs">
 <span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">save_energy_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#save_energy_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.save_energy_outputs" title="Link to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Download and save energy calculation outputs from Rush.</p>
+<p>Takes the result from exess functions (energy(), interaction_energy(), etc.)
+and downloads the output files to disk. The result can be either a tuple or list
+because collect_run() returns a list when there are multiple outputs, which is
+converted to a tuple for consistent processing.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>res</strong> (<em>tuple</em><em>[</em><em>dict</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>dict</em><em>, </em><em>dict</em><em>] </em><em>| </em><a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>res</strong> (<em>tuple</em><em>[</em><em>dict</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>dict</em><em>, </em><em>dict</em><em>] </em><em>| </em><em>list</em><em>[</em><em>dict</em><em>] </em><em>| </em><a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a>) – Result from exess calculation. Can be:
+- tuple[dict]: Single output from exess function
+- tuple[dict, dict]: Two outputs (JSON + HDF5)
+- list[dict]: Same as tuple (collect_run returns list for multiple outputs)</p></li>
+<li><p><strong>extract</strong> – Whether to extract tar.zst files (default True)</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Path</em> | <em>tuple</em>[<em>Path</em>, <em>Path</em>] | <a class="reference internal" href="rush.client.html#rush.client.RunError" title="rush.client.RunError"><em>RunError</em></a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of local Paths to downloaded files
+- (json_path, None): If HDF5 extraction fails or no HDF5 output
+- RunError: If the input res is an error</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>(json_path, hdf5_path)</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

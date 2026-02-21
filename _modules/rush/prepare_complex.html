@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=67757470" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,11 +66,12 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/01-exess-chelpg.html">Tutorial 1: Understanding Your Molecule’s Charge Distribution — CHELPG Analysis in 2 Minutes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/02-exess-exports.html">Exporting Electron Density, ESP, and Other Properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/03-exess-optimization.html">Geometry Optimization: Finding the Lowest-Energy Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/04-exess-interaction-energy.html">Protein–Ligand Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/05-exess-qmmm.html">QM/MM Molecular Dynamics: Simulating Motion with Quantum Accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Rush Modules</a><ul>
@@ -270,47 +272,71 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="132">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(),</span>
 </span><span data-line="133">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
 </span><span data-line="134">    <span class="n">collect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="135"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">:</span>
+</span><span data-line="135"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">:</span>
 </span><span data-line="136"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="137"><span class="sd">    Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.</span>
-</span><span data-line="138"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="139">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="140">        <span class="n">input_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
-</span><span data-line="141">
-</span><span data-line="142">    <span class="k">if</span> <span class="n">input_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
-</span><span data-line="143">        <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdb_file</span><span class="p">:</span>
-</span><span data-line="144">            <span class="n">trc</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
-</span><span data-line="145">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="146">                <span class="n">trc</span> <span class="o">=</span> <span class="n">trc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="147">            <span class="n">pdb_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">to_pdb</span><span class="p">(</span><span class="n">trc</span><span class="p">))</span>
-</span><span data-line="148">            <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">pdb_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
-</span><span data-line="149">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="150">        <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
-</span><span data-line="151">
-</span><span data-line="152">    <span class="n">trc_l</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">pdb_l_str</span><span class="p">)</span>
-</span><span data-line="153">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_l</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="154">        <span class="n">trc_l</span> <span class="o">=</span> <span class="n">trc_l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="155">
-</span><span data-line="156">    <span class="n">res</span> <span class="o">=</span> <span class="n">run_prepare_protein</span><span class="p">(</span>
-</span><span data-line="157">        <span class="n">input_path</span><span class="p">,</span>
-</span><span data-line="158">        <span class="n">ph</span><span class="p">,</span>
-</span><span data-line="159">        <span class="n">naming_scheme</span><span class="p">,</span>
-</span><span data-line="160">        <span class="n">capping_style</span><span class="p">,</span>
-</span><span data-line="161">        <span class="n">truncation_threshold</span><span class="p">,</span>
-</span><span data-line="162">        <span class="n">debump</span><span class="p">,</span>
-</span><span data-line="163">        <span class="n">run_spec</span><span class="p">,</span>
-</span><span data-line="164">        <span class="n">run_opts</span><span class="p">,</span>
-</span><span data-line="165">        <span class="n">collect</span><span class="p">,</span>
-</span><span data-line="166">    <span class="p">)</span>
-</span><span data-line="167">    <span class="n">trc_p_output</span> <span class="o">=</span> <span class="n">save_prepare_protein_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-</span><span data-line="168">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">,</span> <span class="n">RunError</span><span class="p">):</span>
-</span><span data-line="169">        <span class="k">return</span> <span class="n">trc_p_output</span>
-</span><span data-line="170">    <span class="n">trc_p</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">)</span>
-</span><span data-line="171">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="172">        <span class="n">trc_p</span> <span class="o">=</span> <span class="n">trc_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="173">
-</span><span data-line="174">    <span class="n">trc_c</span> <span class="o">=</span> <span class="n">merge_trcs</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="n">trc_l</span><span class="p">)</span>
-</span><span data-line="175">    <span class="k">return</span> <span class="n">trc_c</span></div>
+</span><span data-line="137"><span class="sd">    Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.</span>
+</span><span data-line="138"><span class="sd">    </span>
+</span><span data-line="139"><span class="sd">    Args:</span>
+</span><span data-line="140"><span class="sd">        input_path: Path to input PDB or TRC file</span>
+</span><span data-line="141"><span class="sd">        ligand_names: List of ligand residue names to extract</span>
+</span><span data-line="142"><span class="sd">        ph: pH for protonation (optional)</span>
+</span><span data-line="143"><span class="sd">        naming_scheme: Atom naming scheme (&#39;AMBER&#39; or &#39;CHARMM&#39;)</span>
+</span><span data-line="144"><span class="sd">        capping_style: Style for capping terminal residues</span>
+</span><span data-line="145"><span class="sd">        truncation_threshold: Distance threshold for truncating chains</span>
+</span><span data-line="146"><span class="sd">        debump: Whether to perform debumping</span>
+</span><span data-line="147"><span class="sd">        run_spec: Run specification for the preparation job</span>
+</span><span data-line="148"><span class="sd">        run_opts: Run options</span>
+</span><span data-line="149"><span class="sd">        collect: If True, collects results and returns merged TRC. If False, returns run ID.</span>
+</span><span data-line="150"><span class="sd">    </span>
+</span><span data-line="151"><span class="sd">    Returns:</span>
+</span><span data-line="152"><span class="sd">        - If collect=True: Merged TRC containing prepared protein and ligand</span>
+</span><span data-line="153"><span class="sd">        - If collect=False: Run ID string for the prepare-protein job</span>
+</span><span data-line="154"><span class="sd">        - RunError if preparation fails</span>
+</span><span data-line="155"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="156">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="157">        <span class="n">input_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+</span><span data-line="158">
+</span><span data-line="159">    <span class="k">if</span> <span class="n">input_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+</span><span data-line="160">        <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdb_file</span><span class="p">:</span>
+</span><span data-line="161">            <span class="n">trc</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+</span><span data-line="162">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="163">                <span class="n">trc</span> <span class="o">=</span> <span class="n">trc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="164">            <span class="n">pdb_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">to_pdb</span><span class="p">(</span><span class="n">trc</span><span class="p">))</span>
+</span><span data-line="165">            <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">pdb_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
+</span><span data-line="166">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="167">        <span class="n">pdb_l_str</span> <span class="o">=</span> <span class="n">_extract_ligand_with_hydrogens</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">ligand_names</span><span class="p">)</span>
+</span><span data-line="168">
+</span><span data-line="169">    <span class="n">trc_l</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">pdb_l_str</span><span class="p">)</span>
+</span><span data-line="170">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_l</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="171">        <span class="n">trc_l</span> <span class="o">=</span> <span class="n">trc_l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="172">
+</span><span data-line="173">    <span class="c1"># Respect the collect parameter: pass it through to run_prepare_protein</span>
+</span><span data-line="174">    <span class="n">res</span> <span class="o">=</span> <span class="n">run_prepare_protein</span><span class="p">(</span>
+</span><span data-line="175">        <span class="n">input_path</span><span class="p">,</span>
+</span><span data-line="176">        <span class="n">ph</span><span class="p">,</span>
+</span><span data-line="177">        <span class="n">naming_scheme</span><span class="p">,</span>
+</span><span data-line="178">        <span class="n">capping_style</span><span class="p">,</span>
+</span><span data-line="179">        <span class="n">truncation_threshold</span><span class="p">,</span>
+</span><span data-line="180">        <span class="n">debump</span><span class="p">,</span>
+</span><span data-line="181">        <span class="n">run_spec</span><span class="p">,</span>
+</span><span data-line="182">        <span class="n">run_opts</span><span class="p">,</span>
+</span><span data-line="183">        <span class="n">collect</span><span class="o">=</span><span class="n">collect</span><span class="p">,</span>
+</span><span data-line="184">    <span class="p">)</span>
+</span><span data-line="185">    <span class="n">trc_p_output</span> <span class="o">=</span> <span class="n">save_prepare_protein_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span><span data-line="186">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">,</span> <span class="n">RunError</span><span class="p">):</span>
+</span><span data-line="187">        <span class="k">return</span> <span class="n">trc_p_output</span>
+</span><span data-line="188">    
+</span><span data-line="189">    <span class="c1"># If collect=False, we get a run ID (string) back - return it as-is</span>
+</span><span data-line="190">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="191">        <span class="k">return</span> <span class="n">trc_p_output</span>
+</span><span data-line="192">    
+</span><span data-line="193">    <span class="c1"># Otherwise, collect=True gave us Paths to process</span>
+</span><span data-line="194">    <span class="n">trc_p</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">trc_p_output</span><span class="p">)</span>
+</span><span data-line="195">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="196">        <span class="n">trc_p</span> <span class="o">=</span> <span class="n">trc_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="197">
+</span><span data-line="198">    <span class="n">trc_c</span> <span class="o">=</span> <span class="n">merge_trcs</span><span class="p">(</span><span class="n">trc_p</span><span class="p">,</span> <span class="n">trc_l</span><span class="p">)</span>
+</span><span data-line="199">    <span class="k">return</span> <span class="n">trc_c</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

@@ -129,43 +129,11 @@ for x, y, z in batched(topology.geometry, 3):
     print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
 ```
 
-**Example output** (two water molecules after 100 QM timesteps):
-```
-Atoms at First Step:
-  ( 0.0000,  0.0000,  0.0000)
-  ( 0.7570,  0.5860,  0.0000)
-  (-0.7570,  0.5860,  0.0000)
-  ( 2.8000,  0.0000,  0.0000)
-  ( 3.5570,  0.5860,  0.0000)
-  ( 2.0430,  0.5860,  0.0000)
-
-Atoms at Final Step:
-  (-3.3974,  0.0462,  0.0322)
-  (-3.2867,  1.0793, -0.0014)
-  (-4.4081,  0.0531,  0.0658)
-  ( 3.4286,  0.0657,  0.1163)
-  ( 3.3724, -0.9301,  0.1350)
-  ( 4.4636,  0.1491,  0.1221)
-```
-
-Notice the waters have drifted apart — this is expected in a gas-phase NVE simulation with no periodic boundary conditions. In a real protein system, the surrounding MM environment provides the confining forces.
+This example uses **6a5j**, a solution NMR structure of a small peptide. During the gas-phase NVE simulation, the peptide backbone flexes and side chains reorient. The surrounding MM environment would normally provide confining forces; in this gas-phase simulation, the structure is free to explore conformational space.
 
 ---
 
-## Choosing Your QM/MM/ML Partitioning
-
-The power of EXESS's Q4ML approach is flexibility in how you partition your system:
-
-| Scenario | QM | MM | ML |
-|---|---|---|---|
-| Ligand in protein pocket | Ligand fragment | Everything else | — |
-| Catalytic metal center | Metal + coordinating residues | Protein + solvent | — |
-| Fast exploratory dynamics | — | Protein backbone | Ligand + pocket |
-| All-ML dynamics | — | — | Everything |
-
-The key trade-off: QM is most accurate but slowest. ML (AIMNet) is a good middle ground for organic molecules. MM is fastest but can't capture electronic effects.
-
-### Example Output
+## Example Output
 
 Explore the QM/MM trajectory visualization. Or run the code above to generate this yourself!
 

@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=67757470" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,11 +66,12 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/01-exess-chelpg.html">Tutorial 1: Understanding Your Molecule’s Charge Distribution — CHELPG Analysis in 2 Minutes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/02-exess-exports.html">Exporting Electron Density, ESP, and Other Properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/03-exess-optimization.html">Geometry Optimization: Finding the Lowest-Energy Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/04-exess-interaction-energy.html">Protein–Ligand Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/05-exess-qmmm.html">QM/MM Molecular Dynamics: Simulating Motion with Quantum Accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">Rush Modules</a><ul>
@@ -148,7 +150,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="12"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 </span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
-</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+</span><span data-line="15"><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 </span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 </span><span data-line="17">
 </span><span data-line="18"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
@@ -198,81 +200,118 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="60">                        <span class="sa">f</span><span class="s2">&quot;Expected 1 TRC in </span><span class="si">{</span><span class="n">input_path</span><span class="si">}</span><span class="s2">, found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span data-line="61">                    <span class="p">)</span>
 </span><span data-line="62">                <span class="n">trc</span> <span class="o">=</span> <span class="n">trc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="63">    <span class="k">with</span> <span class="p">(</span>
-</span><span data-line="64">        <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
-</span><span data-line="65">        <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
-</span><span data-line="66">        <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
-</span><span data-line="67">    <span class="p">):</span>
-</span><span data-line="68">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">t_f</span><span class="p">)</span>
-</span><span data-line="69">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">r_f</span><span class="p">)</span>
-</span><span data-line="70">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">c_f</span><span class="p">)</span>
-</span><span data-line="71">        <span class="n">t_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="72">        <span class="n">r_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="73">        <span class="n">c_f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="74">        <span class="n">topology_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">t_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="75">        <span class="n">residues_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">r_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="76">        <span class="n">chains_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">c_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="77">
-</span><span data-line="78">    <span class="c1"># Run rex</span>
-</span><span data-line="79">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
-</span><span data-line="80"><span class="s2">  obj_j = λ j →</span>
-</span><span data-line="81"><span class="s2">    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },</span>
-</span><span data-line="82"><span class="s2">  prepare_protein = λ topology residues chains →</span>
-</span><span data-line="83"><span class="s2">    prepare_protein_rex_s</span>
-</span><span data-line="84"><span class="s2">      ($run_spec)</span>
-</span><span data-line="85"><span class="s2">      (prepare_protein_rex::PrepareProteinOptions {</span>
-</span><span data-line="86"><span class="s2">        ph = $ph,</span>
-</span><span data-line="87"><span class="s2">        naming_scheme = $naming_scheme,</span>
-</span><span data-line="88"><span class="s2">        capping_style = $capping_style,</span>
-</span><span data-line="89"><span class="s2">        truncation_threshold = $truncation_threshold,</span>
-</span><span data-line="90"><span class="s2">        debump = $debump,</span>
-</span><span data-line="91"><span class="s2">      })</span>
-</span><span data-line="92"><span class="s2">      [( (obj_j topology), (obj_j residues), (obj_j chains) )]</span>
-</span><span data-line="93"><span class="s2">in</span>
-</span><span data-line="94"><span class="s2">  prepare_protein &quot;$topology_vobj_path&quot; &quot;$residues_vobj_path&quot; &quot;$chains_vobj_path&quot;</span>
-</span><span data-line="95"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
-</span><span data-line="96">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
-</span><span data-line="97">        <span class="n">ph</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">ph</span><span class="p">),</span>
-</span><span data-line="98">        <span class="n">naming_scheme</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span>
-</span><span data-line="99">            <span class="n">naming_scheme</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">naming_scheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="100">            <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;prepare_protein_rex::NamingScheme::&quot;</span><span class="p">,</span>
-</span><span data-line="101">        <span class="p">),</span>
-</span><span data-line="102">        <span class="n">capping_style</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span>
-</span><span data-line="103">            <span class="n">capping_style</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">capping_style</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="104">            <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;prepare_protein_rex::CappingStyle::&quot;</span><span class="p">,</span>
-</span><span data-line="105">        <span class="p">),</span>
-</span><span data-line="106">        <span class="n">truncation_threshold</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">truncation_threshold</span><span class="p">),</span>
-</span><span data-line="107">        <span class="n">debump</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">debump</span><span class="p">),</span>
-</span><span data-line="108">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">topology_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
-</span><span data-line="109">        <span class="n">residues_vobj_path</span><span class="o">=</span><span class="n">residues_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
-</span><span data-line="110">        <span class="n">chains_vobj_path</span><span class="o">=</span><span class="n">chains_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
-</span><span data-line="111">    <span class="p">)</span>
-</span><span data-line="112">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="113">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
-</span><span data-line="114">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
-</span><span data-line="115">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
-</span><span data-line="116">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="117">            <span class="k">return</span> <span class="n">run_id</span>
-</span><span data-line="118">
-</span><span data-line="119">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="120">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="121">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-</span><span data-line="122">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
+</span><span data-line="63">    <span class="n">t_f</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="64">    <span class="n">r_f</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="65">    <span class="n">c_f</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="66">    
+</span><span data-line="67">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">t_f</span><span class="p">)</span>
+</span><span data-line="68">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">r_f</span><span class="p">)</span>
+</span><span data-line="69">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">c_f</span><span class="p">)</span>
+</span><span data-line="70">    
+</span><span data-line="71">    <span class="c1"># Important: Close temp files before uploading. Windows locks open files,</span>
+</span><span data-line="72">    <span class="c1"># causing PermissionError if upload_object() tries to access them while open.</span>
+</span><span data-line="73">    <span class="n">t_f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span data-line="74">    <span class="n">r_f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span data-line="75">    <span class="n">c_f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span data-line="76">    
+</span><span data-line="77">    <span class="n">topology_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">t_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="78">    <span class="n">residues_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">r_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="79">    <span class="n">chains_vobj</span> <span class="o">=</span> <span class="n">upload_object</span><span class="p">(</span><span class="n">c_f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="80">
+</span><span data-line="81">    <span class="c1"># Run rex</span>
+</span><span data-line="82">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
+</span><span data-line="83"><span class="s2">  obj_j = λ j →</span>
+</span><span data-line="84"><span class="s2">    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },</span>
+</span><span data-line="85"><span class="s2">  prepare_protein = λ topology residues chains →</span>
+</span><span data-line="86"><span class="s2">    prepare_protein_rex_s</span>
+</span><span data-line="87"><span class="s2">      ($run_spec)</span>
+</span><span data-line="88"><span class="s2">      (prepare_protein_rex::PrepareProteinOptions {</span>
+</span><span data-line="89"><span class="s2">        ph = $ph,</span>
+</span><span data-line="90"><span class="s2">        naming_scheme = $naming_scheme,</span>
+</span><span data-line="91"><span class="s2">        capping_style = $capping_style,</span>
+</span><span data-line="92"><span class="s2">        truncation_threshold = $truncation_threshold,</span>
+</span><span data-line="93"><span class="s2">        debump = $debump,</span>
+</span><span data-line="94"><span class="s2">      })</span>
+</span><span data-line="95"><span class="s2">      [( (obj_j topology), (obj_j residues), (obj_j chains) )]</span>
+</span><span data-line="96"><span class="s2">in</span>
+</span><span data-line="97"><span class="s2">  prepare_protein &quot;$topology_vobj_path&quot; &quot;$residues_vobj_path&quot; &quot;$chains_vobj_path&quot;</span>
+</span><span data-line="98"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="99">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
+</span><span data-line="100">        <span class="n">ph</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">ph</span><span class="p">),</span>
+</span><span data-line="101">        <span class="n">naming_scheme</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span>
+</span><span data-line="102">            <span class="n">naming_scheme</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">naming_scheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="103">            <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;prepare_protein_rex::NamingScheme::&quot;</span><span class="p">,</span>
+</span><span data-line="104">        <span class="p">),</span>
+</span><span data-line="105">        <span class="n">capping_style</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span>
+</span><span data-line="106">            <span class="n">capping_style</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">capping_style</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="107">            <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;prepare_protein_rex::CappingStyle::&quot;</span><span class="p">,</span>
+</span><span data-line="108">        <span class="p">),</span>
+</span><span data-line="109">        <span class="n">truncation_threshold</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">truncation_threshold</span><span class="p">),</span>
+</span><span data-line="110">        <span class="n">debump</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">debump</span><span class="p">),</span>
+</span><span data-line="111">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">topology_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
+</span><span data-line="112">        <span class="n">residues_vobj_path</span><span class="o">=</span><span class="n">residues_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
+</span><span data-line="113">        <span class="n">chains_vobj_path</span><span class="o">=</span><span class="n">chains_vobj</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
+</span><span data-line="114">    <span class="p">)</span>
+</span><span data-line="115">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="116">        <span class="n">run_id</span> <span class="o">=</span> <span class="n">_submit_rex</span><span class="p">(</span><span class="n">_get_project_id</span><span class="p">(),</span> <span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">)</span>
+</span><span data-line="117">        <span class="k">if</span> <span class="n">collect</span><span class="p">:</span>
+</span><span data-line="118">            <span class="k">return</span> <span class="n">collect_run</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+</span><span data-line="119">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="120">            <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="121">
+</span><span data-line="122">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="123">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="124">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="125">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
 
-</span><span data-line="123">
-</span><span data-line="124">
+</span><span data-line="126">
+</span><span data-line="127">
 <div class="viewcode-block" id="save_outputs">
 <a class="viewcode-back" href="../../rush.prepare_protein.html#rush.prepare_protein.save_outputs">[docs]</a>
-</span><span data-line="125"><span class="k">def</span><span class="w"> </span><span class="nf">save_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">:</span>
-</span><span data-line="126">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span data-line="127">        <span class="k">return</span> <span class="p">(</span>
-</span><span data-line="128">            <span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]),</span>
-</span><span data-line="129">            <span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]),</span>
-</span><span data-line="130">            <span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]),</span>
-</span><span data-line="131">        <span class="p">)</span>
-</span><span data-line="132">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="133">        <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-</span><span data-line="134">        <span class="k">return</span> <span class="n">res</span></div>
+</span><span data-line="128"><span class="k">def</span><span class="w"> </span><span class="nf">save_outputs</span><span class="p">(</span><span class="n">res</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">RunError</span><span class="p">:</span>
+</span><span data-line="129"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="130"><span class="sd">    Download output files from a prepare-protein run.</span>
+</span><span data-line="131"><span class="sd">    </span>
+</span><span data-line="132"><span class="sd">    The prepare-protein rex computation returns a list/tuple of 3 VirtualObject</span>
+</span><span data-line="133"><span class="sd">    dicts (topology, residues, chains files). This function downloads each</span>
+</span><span data-line="134"><span class="sd">    file and returns Path objects that can be used with from_json().</span>
+</span><span data-line="135"><span class="sd">    </span>
+</span><span data-line="136"><span class="sd">    If collect=False was used, the input will be a run ID string, which is</span>
+</span><span data-line="137"><span class="sd">    returned as-is for later collection by the caller.</span>
+</span><span data-line="138"><span class="sd">    </span>
+</span><span data-line="139"><span class="sd">    Args:</span>
+</span><span data-line="140"><span class="sd">        res: Either:</span>
+</span><span data-line="141"><span class="sd">             - A run ID string (if collect=False was used)</span>
+</span><span data-line="142"><span class="sd">             - A list/tuple of 3 VirtualObject dicts from collect_run()</span>
+</span><span data-line="143"><span class="sd">             - A RunError</span>
+</span><span data-line="144"><span class="sd">             Each VirtualObject dict has keys: &#39;path&#39;, &#39;size&#39;, &#39;format&#39;.</span>
+</span><span data-line="145"><span class="sd">        </span>
+</span><span data-line="146"><span class="sd">    Returns:</span>
+</span><span data-line="147"><span class="sd">        Either:</span>
+</span><span data-line="148"><span class="sd">        - A run ID string (if input was a run ID)</span>
+</span><span data-line="149"><span class="sd">        - Tuple of 3 downloaded file Paths (if input was VirtualObject list)</span>
+</span><span data-line="150"><span class="sd">        - RunError if input is an error</span>
+</span><span data-line="151"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="152">    <span class="c1"># Handle error case</span>
+</span><span data-line="153">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">RunError</span><span class="p">):</span>
+</span><span data-line="154">        <span class="k">return</span> <span class="n">res</span>
+</span><span data-line="155">    
+</span><span data-line="156">    <span class="c1"># Handle run ID string (collect=False case)</span>
+</span><span data-line="157">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="158">        <span class="k">return</span> <span class="n">res</span>
+</span><span data-line="159">    
+</span><span data-line="160">    <span class="c1"># Handle list/tuple of VirtualObject dicts from collect_run()</span>
+</span><span data-line="161">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+</span><span data-line="162">        <span class="k">return</span> <span class="p">(</span>
+</span><span data-line="163">            <span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]),</span>
+</span><span data-line="164">            <span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]),</span>
+</span><span data-line="165">            <span class="n">save_object</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]),</span>
+</span><span data-line="166">        <span class="p">)</span>
+</span><span data-line="167">    
+</span><span data-line="168">    <span class="c1"># Fallback: return as-is (for debugging or unexpected formats)</span>
+</span><span data-line="169">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: save_outputs received unexpected format: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="170">    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span><span data-line="171">    <span class="k">return</span> <span class="n">res</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
