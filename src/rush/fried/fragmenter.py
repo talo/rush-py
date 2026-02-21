@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-import networkx as nx
+import networkx as nx  # type: ignore[unresolved-import]
 
 __all__ = [
     "fragment_ligand",

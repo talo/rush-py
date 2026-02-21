@@ -13,7 +13,7 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush import from_json, from_pdb, to_pdb, TRC
+from rush import TRC, from_json, from_pdb, to_pdb
 from rush.client import (
     RunOpts,
     RunSpec,
@@ -22,6 +22,7 @@ from rush.client import (
 from rush.prepare_protein import prepare_protein as run_prepare_protein
 from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
 from rush import merge_trcs
+from rush.convert import _single_trc
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
@@ -159,16 +160,14 @@ def prepare_complex(
     if input_path.suffix == ".json":
         with NamedTemporaryFile(mode="w") as pdb_file:
             trc = from_json(input_path)
-            if isinstance(trc, list):
-                trc = trc[0]
+            trc = _single_trc(trc, input_path)
             pdb_file.write(to_pdb(trc))
             pdb_l_str = _extract_ligand_with_hydrogens(pdb_file.name, ligand_names)
     else:
         pdb_l_str = _extract_ligand_with_hydrogens(input_path, ligand_names)
 
     trc_l = from_pdb(pdb_l_str)
-    if isinstance(trc_l, list):
-        trc_l = trc_l[0]
+    trc_l = _single_trc(trc_l, "ligand")
 
     # Respect the collect parameter: pass it through to run_prepare_protein
     res = run_prepare_protein(
@@ -192,8 +191,7 @@ def prepare_complex(
 
     # Otherwise, collect=True gave us Paths to process
     trc_p = from_json(trc_p_output)
-    if isinstance(trc_p, list):
-        trc_p = trc_p[0]
+    trc_p = _single_trc(trc_p, "protein")
 
     trc_c = merge_trcs(trc_p, trc_l)
     return trc_c

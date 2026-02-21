@@ -20,10 +20,14 @@ def test_merge_with_paths():
 def test_merge_with_trcs():
     """Test merging TRCs using TRC objects."""
     data_dir = Path.cwd() / "tests" / "data"
-    mk1_trc = from_json(data_dir / "1hsg_MK1_trc.json")
-    assert isinstance(mk1_trc, TRC)
-    hoh_trc = from_json(data_dir / "1hsg_HOH_trc.json")
-    assert isinstance(hoh_trc, TRC)
+    mk1_trcs = from_json(data_dir / "1hsg_MK1_trc.json")
+    assert isinstance(mk1_trcs, list)
+    assert len(mk1_trcs) == 1
+    mk1_trc = mk1_trcs[0]
+    hoh_trcs = from_json(data_dir / "1hsg_HOH_trc.json")
+    assert isinstance(hoh_trcs, list)
+    assert len(hoh_trcs) == 1
+    hoh_trc = hoh_trcs[0]
     seqs = merge_trcs(mk1_trc, hoh_trc).residues.seqs
     assert "MK1" in seqs and "HOH" in seqs
 
@@ -63,10 +67,10 @@ def test_merge_3fly():
     assert isinstance(ligand_trc, TRC), f"Expected 1 ligand TRC, got {len(ligand_trc)}"
 
     # Load protein from JSON
-    protein_trc = from_json(protein_json_file)
-    assert isinstance(protein_trc, TRC), (
-        f"Expected 1 protein TRC, got {len(protein_trc)}"
-    )
+    protein_trcs = from_json(protein_json_file)
+    assert isinstance(protein_trcs, list)
+    assert len(protein_trcs) == 1, f"Expected 1 protein TRC, got {len(protein_trcs)}"
+    protein_trc = protein_trcs[0]
 
     # Merge protein and ligand
     merged_trc = merge_trcs(protein_trc, ligand_trc)

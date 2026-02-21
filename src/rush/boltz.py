@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush.convert import from_json, from_pdb
+from rush.convert import _single_trc, from_json, from_pdb
 
 from .client import (
     RunOpts,
@@ -104,12 +104,7 @@ def boltz(
                 trc = from_pdb(f.read())
             else:
                 trc = from_json(json.load(f))
-                if isinstance(trc, list):
-                    if len(trc) != 1:
-                        raise ValueError(
-                            f"Expected 1 TRC in {template_path}, found {len(trc)}"
-                        )
-                    trc = trc[0]
+        trc = _single_trc(trc, template_path)
         with (
             NamedTemporaryFile(mode="w") as t_f,
             NamedTemporaryFile(mode="w") as r_f,

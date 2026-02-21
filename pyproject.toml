@@ -49,8 +49,8 @@ Issues = "https://github.com/talo/rush-py/issues"
 dev = [
   "pytest~=9.0.2",
   "pytest-timeout~=2.3",
-  "basedpyright",
   "ruff",
+  "ty",
   "sphinx>=8.2.3",
   "sphinx-autodoc-typehints>=3.5.2",
   "shibuya>=2025.12.19",
@@ -63,30 +63,6 @@ timeout = 300
 markers = [
   "slow: marks tests that submit jobs to the Rush API (auto-applied, skipped when queues busy)",
 ]
-
-[tool.pyright]
-exclude = [
-  "**/node_modules",
-  "**/__pycache__",
-  "**/*venv*",
-  "result",
-  "setup.py",
-]
-ignore = [
-  "**/node_modules",
-  "**/__pycache__",
-  "**/*venv*",
-  "result",
-  "setup.py",
-]
-reportIncompatibleMethodOverride = "none"
-reportIncompatibleVariableOverride = "none"
-reportMissingTypeStubs = "none"
-reportUnknownMemberType = "none"
-reportUnknownVariableType = "none"
-useLibraryCodeForTypes = true
-typeCheckingMode = "standard"
-reportAttributeAccessIssue = "none"
 
 [tool.uv.build-backend]
 module-name = "rush"
