@@ -45,6 +45,7 @@ html_css_files = ["custom.css"]
 html_theme_options = {
     "accent_color": "iris",
     "toctree_includehidden": False,
+    "color_mode": "dark",
 }
 
 # Use a slimmer sidebar for the internal EXESS docs section.
