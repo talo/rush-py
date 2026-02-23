@@ -217,10 +217,13 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>That negative value means the ligand is stabilized by its protein environment. The magnitude tells you the strength — more negative = stronger interaction.</p>
-<div class="warning admonition">
-<p class="admonition-title">About the default method</p>
-<p>By default, EXESS uses <strong>RestrictedHF/cc-pVDZ</strong>. In these tutorials, we explicitly specify <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-3G&quot;</span></code> for speed and quick iteration, but STO-3G is a minimal basis set with significantly reduced accuracy. The absolute energies at this level are not quantitatively meaningful. For production work, use the default <code class="docutils literal notranslate"><span class="pre">basis=&quot;cc-pVDZ&quot;</span></code> or a correlated method like RI-MP2. The <em>relative</em> trends (which ligand binds more tightly) are often preserved even at low levels of theory, but for accurate binding predictions, higher-quality methods are recommended.</p>
-</div>
+<blockquote>
+<div><p>⚠️ <strong>Tutorial Basis Set Warning</strong></p>
+<p>This tutorial uses <strong>STO-3G</strong>, a minimal basis set chosen purely for speed so examples
+run quickly. <strong>STO-3G is not suitable for research or production calculations.</strong> For
+meaningful results, use at least <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. See the electronic structure
+methods reference for available basis sets.</p>
+</div></blockquote>
 <section id="where-to-get-the-input-file">
 <h3>Where to get the input file<a class="headerlink" href="#where-to-get-the-input-file" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">tyk2_ejm_31_t.json</span></code> topology file is in the rush-py repo’s <a class="reference external" href="https://github.com/talo/rush-py/tree/main/tests/data" target="_blank"><code class="docutils literal notranslate"><span class="pre">tests/data/</span></code></a> folder.</p>

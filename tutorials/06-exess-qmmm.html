@@ -191,10 +191,13 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand or key residue) is computed with Hartree-Fock QM, and the remaining protein + solvent fragments use classical MM (OpenMM).</p>
-<div class="note admonition">
-<p class="admonition-title">Default settings</p>
-<p>Unless overridden, EXESS uses <code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">basis=&quot;STO-3G&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">temperature_kelvin=300.0</span></code>. The STO-3G basis is a minimal basis set — fast for testing, but not suitable for production dynamics. For meaningful simulations, use a larger basis like <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code>.</p>
-</div>
+<blockquote>
+<div><p>⚠️ <strong>Tutorial Basis Set Warning</strong></p>
+<p>This tutorial uses <strong>STO-3G</strong>, a minimal basis set chosen purely for speed so examples
+run quickly. <strong>STO-3G is not suitable for research or production calculations.</strong> For
+meaningful results, use at least <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. See the electronic structure
+methods reference for available basis sets.</p>
+</div></blockquote>
 </section>
 <hr class="docutils" />
 <section id="minimal-example-two-water-molecules-from-scratch">

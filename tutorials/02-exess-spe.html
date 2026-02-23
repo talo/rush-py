@@ -209,6 +209,13 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>That’s it — <code class="docutils literal notranslate"><span class="pre">res</span></code> contains the energy result, and <code class="docutils literal notranslate"><span class="pre">files</span></code> has the saved JSON output on disk.</p>
+<blockquote>
+<div><p>⚠️ <strong>Tutorial Basis Set Warning</strong></p>
+<p>This tutorial uses <strong>STO-3G</strong>, a minimal basis set chosen purely for speed so examples
+run quickly. <strong>STO-3G is not suitable for research or production calculations.</strong> For
+meaningful results, use at least <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. See the electronic structure
+methods reference for available basis sets.</p>
+</div></blockquote>
 <section id="input-file">
 <h3>Input File<a class="headerlink" href="#input-file" title="Link to this heading">¶</a></h3>
 <p>The input is a TRC (topology representation) JSON file with atomic coordinates and element symbols. See <a class="reference internal" href="../exess/topologies.html"><span class="doc">Topologies and residues</span></a> for the full TRC format specification. You can also convert from PDB using <code class="docutils literal notranslate"><span class="pre">rush.convert.pdb.from_pdb()</span></code> (see <a class="reference internal" href="01-exess-chelpg.html"><span class="doc">Tutorial 1: EXESS CHELPG Charge Analysis</span></a> for an example).</p>

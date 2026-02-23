@@ -199,10 +199,13 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>That’s it — EXESS will iteratively relax the twisted ethene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the <strong>trajectory</strong> (one topology per step) and <strong>step info</strong> (energy + gradient at each step).</p>
-<div class="warning admonition">
-<p class="admonition-title">About the defaults</p>
-<p>The default <strong>RestrictedHF/STO-3G</strong> is the fastest possible QM level but gives poor absolute geometries and energies. It’s ideal for testing your workflow. For production, use at least <code class="docutils literal notranslate"><span class="pre">method=&quot;RestrictedHF&quot;,</span> <span class="pre">basis=&quot;cc-pVDZ&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">method=&quot;RIHF&quot;</span></code> with a larger basis. Bond lengths with STO-3G can be off by ~0.05 Å.</p>
-</div>
+<blockquote>
+<div><p>⚠️ <strong>Tutorial Basis Set Warning</strong></p>
+<p>This tutorial uses <strong>STO-3G</strong>, a minimal basis set chosen purely for speed so examples
+run quickly. <strong>STO-3G is not suitable for research or production calculations.</strong> For
+meaningful results, use at least <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. See the electronic structure
+methods reference for available basis sets.</p>
+</div></blockquote>
 <div class="tip admonition">
 <p class="admonition-title">Why twisted ethene?</p>
 <p>Ethene is the simplest molecule with a C=C double bond. Starting from a 90° twist forces the optimizer to recover the planar geometry — a direct consequence of π-bond stabilization. The energy drops significantly as the p-orbitals re-align, making it easy to see convergence in both the energy plot and the 3D structure.</p>

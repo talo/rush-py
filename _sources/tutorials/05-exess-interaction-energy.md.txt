@@ -55,10 +55,12 @@ Interaction energy: -0.08234 Eh
 
 That negative value means the ligand is stabilized by its protein environment. The magnitude tells you the strength — more negative = stronger interaction.
 
-:::{admonition} About the default method
-:class: warning
-By default, EXESS uses **RestrictedHF/cc-pVDZ**. In these tutorials, we explicitly specify `basis="STO-3G"` for speed and quick iteration, but STO-3G is a minimal basis set with significantly reduced accuracy. The absolute energies at this level are not quantitatively meaningful. For production work, use the default `basis="cc-pVDZ"` or a correlated method like RI-MP2. The *relative* trends (which ligand binds more tightly) are often preserved even at low levels of theory, but for accurate binding predictions, higher-quality methods are recommended.
-:::
+> ⚠️ **Tutorial Basis Set Warning**
+>
+> This tutorial uses **STO-3G**, a minimal basis set chosen purely for speed so examples
+> run quickly. **STO-3G is not suitable for research or production calculations.** For
+> meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
+> methods reference for available basis sets.
 
 ### Where to get the input file
 
