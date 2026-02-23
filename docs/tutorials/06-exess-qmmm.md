@@ -37,10 +37,12 @@ out = exess.qmmm(
 
 This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand or key residue) is computed with Hartree-Fock QM, and the remaining protein + solvent fragments use classical MM (OpenMM).
 
-:::{admonition} Default settings
-:class: note
-Unless overridden, EXESS uses `method="RestrictedHF"`, `basis="STO-3G"`, and `temperature_kelvin=300.0`. The STO-3G basis is a minimal basis set — fast for testing, but not suitable for production dynamics. For meaningful simulations, use a larger basis like `cc-pVDZ`.
-:::
+> ⚠️ **Tutorial Basis Set Warning**
+>
+> This tutorial uses **STO-3G**, a minimal basis set chosen purely for speed so examples
+> run quickly. **STO-3G is not suitable for research or production calculations.** For
+> meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
+> methods reference for available basis sets.
 
 ---
 

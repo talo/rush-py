@@ -52,6 +52,13 @@ files = exess.save_energy_outputs(res)
 
 That's it — `res` contains the energy result, and `files` has the saved JSON output on disk.
 
+> ⚠️ **Tutorial Basis Set Warning**
+>
+> This tutorial uses **STO-3G**, a minimal basis set chosen purely for speed so examples
+> run quickly. **STO-3G is not suitable for research or production calculations.** For
+> meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
+> methods reference for available basis sets.
+
 ### Input File
 
 The input is a TRC (topology representation) JSON file with atomic coordinates and element symbols. See {doc}`../exess/topologies` for the full TRC format specification. You can also convert from PDB using `rush.convert.pdb.from_pdb()` (see {doc}`01-exess-chelpg` for an example).
