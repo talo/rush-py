@@ -251,7 +251,7 @@ else:
     labels = [f"{s}{i}" for i, s in enumerate(symbols)]
     q_range = max(charges) - min(charges)
     norm_charges = [(q - min(charges)) / q_range for q in charges] if q_range > 0 else [0.5] * len(charges)
-    colors = cm.RdBu([1 - c for c in norm_charges])  # Red=positive, Blue=negative
+    colors = cm.RdBu(norm_charges)  # Red=negative, Blue=positive (matches 2D structure)
     
     fig, ax = plt.subplots(figsize=(max(10, len(charges)*0.5), 6))
     ax.bar(range(len(charges)), charges, color=colors, edgecolor='black', linewidth=0.5)
@@ -277,12 +277,12 @@ else:
     view.addModel(pdb_content, "pdb")
     
     def charge_to_hex(q, q_min, q_max):
-        """Map charge value to RdBu hex color (red=positive, blue=negative)"""
+        """Map charge value to RdBu hex color (red=negative, blue=positive, matches 2D)"""
         if q_max == q_min:
             t = 0.5
         else:
             t = (q - q_min) / (q_max - q_min)
-        rgba = cm.RdBu(1 - t)
+        rgba = cm.RdBu(t)
         return '#{:02x}{:02x}{:02x}'.format(
             int(rgba[0]*255), int(rgba[1]*255), int(rgba[2]*255)
         )
