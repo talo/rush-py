@@ -90,6 +90,10 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
+        "talo_admet_ai_plot_drugbank_rex": "github:talo/admet_ai_rex/9757825d6f7a3bac632344a9af5cfdd0249ce8f0#talo_admet_ai_plot_drugbank_rex",
+        "talo_admet_ai_plot_radial_rex": "github:talo/admet_ai_rex/9757825d6f7a3bac632344a9af5cfdd0249ce8f0#talo_admet_ai_plot_radial_rex",
+        "talo_admet_ai_rex": "github:talo/admet_ai_rex/9757825d6f7a3bac632344a9af5cfdd0249ce8f0#talo_admet_ai_rex",
+        "talo_admet_ai_web_rex": "github:talo/admet_ai_rex/9757825d6f7a3bac632344a9af5cfdd0249ce8f0#talo_admet_ai_web_rex",
         "exess_rex": "github:talo/tengu-exess/ac24fadc935aa66b398aad3bacffc30f6cf3116a#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/61b1874f8df65a083e9170082250473fd8e46978#exess_qmmm_rex",
