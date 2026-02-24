@@ -40,14 +40,7 @@ out = exess.optimization(
 )
 ```
 
-That's it — EXESS will iteratively relax the twisted ethene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
-
-> ⚠️ **Tutorial Basis Set Warning**
->
-> This tutorial uses **STO-3G**, a minimal basis set chosen purely for speed so examples
-> run quickly. **STO-3G is not suitable for research or production calculations.** For
-> meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
-> methods reference for available basis sets.
+That's it — EXESS will iteratively relax the twisted ethene geometry using the defaults: **Restricted Hartree-Fock / cc-pVDZ**. You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
 
 :::{admonition} Why twisted ethene?
 :class: tip
