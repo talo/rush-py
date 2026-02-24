@@ -38,13 +38,14 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # HTML output options
 html_theme = "shibuya"
-html_static_path = ["_static"]
+html_static_path = ["_sphinx_static"]
 html_css_files = ["custom.css"]
 
 # Shibuya theme options
 html_theme_options = {
     "accent_color": "iris",
     "toctree_includehidden": False,
+    "color_mode": "dark",
 }
 
 # Use a slimmer sidebar for the internal EXESS docs section.
