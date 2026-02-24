@@ -199,6 +199,13 @@ data-aria-dark="Switch to auto color mode">
 </span></pre></div>
 </div>
 <p>That’s it — EXESS will iteratively relax the twisted ethene geometry using the defaults: <strong>Restricted Hartree-Fock / cc-pVDZ</strong>. You get back two outputs: the <strong>trajectory</strong> (one topology per step) and <strong>step info</strong> (energy + gradient at each step).</p>
+<blockquote>
+<div><p>⚠️ <strong>Tutorial Basis Set Warning</strong></p>
+<p>This tutorial <a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-optimization" target="_blank">example code</a> uses <strong>STO-3G</strong>, a minimal basis set chosen purely for speed so examples
+run quickly. <strong>STO-3G is not suitable for research or production calculations.</strong> For
+meaningful results, use at least <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. See the electronic structure
+methods reference for available basis sets.</p>
+</div></blockquote>
 <div class="tip admonition">
 <p class="admonition-title">Why twisted ethene?</p>
 <p>Ethene is the simplest molecule with a C=C double bond. Starting from a 90° twist forces the optimizer to recover the planar geometry — a direct consequence of π-bond stabilization. The energy drops significantly as the p-orbitals re-align, making it easy to see convergence in both the energy plot and the 3D structure.</p>
