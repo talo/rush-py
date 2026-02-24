@@ -5,6 +5,7 @@ Rush Modules
 
    rush.exess
    rush.nnxtb
+   rush.openbabel
    rush.prepare_protein
    rush.prepare_complex
    rush.auto3d
