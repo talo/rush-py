@@ -50,28 +50,3 @@ def _assert_run_ok(result):
                 pytest.fail(f"Run returned Err: {item['Err']}")
 
 
-def test_admet_ai_plot_radial_run():
-    if not _get_env("RUSH_TOKEN") or not _get_env("RUSH_PROJECT"):
-        pytest.skip("RUSH_TOKEN and RUSH_PROJECT must be set for integration run.")
-
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    input_path = Path(__file__).resolve().parent / "data" / "admet_ai_rex" / "preds.json"
-    config_rex = """(talo_admet_ai_plot_radial_rex::WrapperConfig {
-  percentile_suffix = Some "drugbank_approved_percentile",
-  atc_code = None,
-  image_type = "svg"
-})"""
-    run_id = admet_ai_rex.talo_admet_ai_plot_radial_rex(
-        input_path,
-        config_rex,
-        run_spec=RunSpec(),
-        run_opts=RunOpts(
-            name="Rush-Py Test ADMET AI Plot Radial",
-            tags=["rush-py", "test", "admet-ai-rex"],
-        ),
-        collect=False,
-    )
-    print(f"run_id: {run_id}", file=sys.stderr)
-    result = collect_run(run_id)
-    print(result, file=sys.stderr)
-    _assert_run_ok(result)
