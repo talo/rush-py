@@ -4,6 +4,7 @@ Rush Modules
    :maxdepth: 1
 
    rush.exess
+   rush.xtb
    rush.nnxtb
    rush.prepare_protein
    rush.prepare_complex
