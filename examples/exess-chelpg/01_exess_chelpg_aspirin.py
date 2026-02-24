@@ -27,6 +27,177 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import py3Dmol
 import base64
+import math
+from rdkit import Chem
+from rdkit.Chem import rdDepictor
+
+
+def generate_aspirin_2d_svg(pdb_content, all_charges, all_symbols, width=480, height=400):
+    """Generate a charge-colored 2D SVG of aspirin using RDKit for coordinates.
+
+    Args:
+        pdb_content: PDB file text (used for atom ordering consistency)
+        all_charges: List of charges for ALL atoms (heavy + H) from CHELPG
+        all_symbols: List of element symbols for ALL atoms
+        width, height: SVG dimensions
+    """
+    # Load molecule from PDB (heavy atoms only) for 2D layout
+    mol = Chem.MolFromPDBBlock(pdb_content, removeHs=True, sanitize=True)
+    rdDepictor.Compute2DCoords(mol)
+    conf = mol.GetConformer()
+    n_heavy = mol.GetNumAtoms()
+
+    # Aggregate charges: sum each H's charge onto its parent heavy atom
+    heavy_charges = list(all_charges[:n_heavy])  # start with heavy atom charges
+    mol_full = Chem.MolFromPDBBlock(pdb_content, removeHs=False, sanitize=True)
+    for i in range(n_heavy, len(all_charges)):
+        if all_symbols[i] == 'H':
+            for neighbor in mol_full.GetAtomWithIdx(i).GetNeighbors():
+                parent_idx = neighbor.GetIdx()
+                if parent_idx < n_heavy:
+                    heavy_charges[parent_idx] += all_charges[i]
+                break
+
+    # Extract 2D coordinates
+    coords = [(conf.GetAtomPosition(i).x, conf.GetAtomPosition(i).y)
+              for i in range(n_heavy)]
+
+    # SVG coordinate transform
+    xs, ys = [c[0] for c in coords], [c[1] for c in coords]
+    margin = 55
+    x_min, x_max = min(xs), max(xs)
+    y_min, y_max = min(ys), max(ys)
+    scale = min((width - 2 * margin) / (x_max - x_min or 1),
+                (height - 80 - 2 * margin) / (y_max - y_min or 1))  # reserve 80px for legend
+
+    def to_svg(x, y):
+        return margin + (x - x_min) * scale, margin + (y_max - y) * scale
+
+    svg_coords = [to_svg(x, y) for x, y in coords]
+
+    # Charge → color mapping (RdBu: red=negative/electron-rich, blue=positive/electron-poor)
+    q_absmax = 0.5  # fixed scale range
+
+    def charge_to_rgb(q):
+        """Map charge to RGB. Negative=red (electron-rich), Positive=blue (electron-poor)."""
+        t = max(-1.0, min(1.0, q / q_absmax))  # clamp to [-1, 1]
+        if t < 0:  # negative → red
+            r, g, b = 1.0, 1.0 + t * 0.6, 1.0 + t * 0.6
+        else:  # positive → blue
+            r, g, b = 1.0 - t * 0.6, 1.0 - t * 0.6, 1.0
+        return int(r * 255), int(g * 255), int(b * 255)
+
+    def charge_to_hex(q):
+        r, g, b = charge_to_rgb(q)
+        return f'#{r:02x}{g:02x}{b:02x}'
+
+    lines = []
+    lines.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+                 f'viewBox="0 0 {width} {height}">')
+
+    # Draw bonds
+    for bond in mol.GetBonds():
+        i, j = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+        x1, y1 = svg_coords[i]
+        x2, y2 = svg_coords[j]
+        bt = str(bond.GetBondType())
+
+        if bt == 'DOUBLE':
+            dx, dy = x2 - x1, y2 - y1
+            length = math.sqrt(dx * dx + dy * dy) or 1
+            ox, oy = -dy / length * 3, dx / length * 3
+            lines.append(f'<line x1="{x1+ox:.1f}" y1="{y1+oy:.1f}" x2="{x2+ox:.1f}" y2="{y2+oy:.1f}" stroke="#52525b" stroke-width="2"/>')
+            lines.append(f'<line x1="{x1-ox:.1f}" y1="{y1-oy:.1f}" x2="{x2-ox:.1f}" y2="{y2-oy:.1f}" stroke="#52525b" stroke-width="2"/>')
+        else:
+            lines.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="#52525b" stroke-width="2"/>')
+
+    # Aromatic ring circle
+    ring_info = mol.GetRingInfo()
+    for ring in ring_info.AtomRings():
+        if len(ring) == 6 and all(
+            mol.GetBondBetweenAtoms(ring[k], ring[(k + 1) % 6]).GetIsAromatic()
+            for k in range(6)
+        ):
+            cx = sum(svg_coords[r][0] for r in ring) / 6
+            cy = sum(svg_coords[r][1] for r in ring) / 6
+            r = 0.55 * math.sqrt((svg_coords[ring[0]][0] - cx) ** 2 +
+                                  (svg_coords[ring[0]][1] - cy) ** 2)
+            lines.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" '
+                         f'fill="none" stroke="#52525b" stroke-width="1.5" stroke-dasharray="4,3"/>')
+
+    # Draw atoms — ALL atoms get a colored circle; heteroatoms also get a label
+    for i in range(n_heavy):
+        atom = mol.GetAtomWithIdx(i)
+        sym = atom.GetSymbol()
+        x, y = svg_coords[i]
+        q = heavy_charges[i]
+        fill = charge_to_hex(q)
+        # Circle radius scales with charge magnitude
+        base_r = 14
+        mag_r = base_r + abs(q / q_absmax) * 6  # 14–20px
+
+        # Charge-colored halo (semi-transparent)
+        lines.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{mag_r:.1f}" '
+                     f'fill="{fill}" opacity="0.35"/>')
+
+        if sym != 'C':
+            # Solid background + label for heteroatoms
+            lines.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="13" fill="#18181b"/>')
+            lines.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="13" fill="{fill}" opacity="0.25"/>')
+            lines.append(f'<text x="{x:.1f}" y="{y:.1f}" text-anchor="middle" '
+                         f'dominant-baseline="central" fill="{fill}" '
+                         f'font-family="Arial, sans-serif" font-size="14" font-weight="bold">{sym}</text>')
+            # H labels on heteroatoms
+            n_h = atom.GetTotalNumHs()
+            if n_h > 0:
+                h_text = f'H{"" if n_h == 1 else n_h}'
+                lines.append(f'<text x="{x + 14:.1f}" y="{y:.1f}" text-anchor="start" '
+                             f'dominant-baseline="central" fill="{fill}" '
+                             f'font-family="Arial, sans-serif" font-size="11">{h_text}</text>')
+        else:
+            # Small dot for carbon vertices
+            lines.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{fill}" opacity="0.8"/>')
+
+        # Charge value label (small, below atom)
+        lines.append(f'<text x="{x:.1f}" y="{y + mag_r + 10:.1f}" text-anchor="middle" '
+                     f'fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">'
+                     f'{q:+.3f}</text>')
+
+    # ===== Color legend / colorbar =====
+    legend_y = height - 45
+    bar_x, bar_w, bar_h = 60, width - 120, 14
+    # Gradient definition
+    lines.append('<defs>')
+    lines.append(f'<linearGradient id="chg-grad" x1="0" x2="1" y1="0" y2="0">')
+    for pct in range(0, 101, 5):
+        q_val = -q_absmax + (pct / 100) * 2 * q_absmax
+        r, g, b = charge_to_rgb(q_val)
+        lines.append(f'  <stop offset="{pct}%" stop-color="rgb({r},{g},{b})"/>')
+    lines.append('</linearGradient>')
+    lines.append('</defs>')
+    # Bar
+    lines.append(f'<rect x="{bar_x}" y="{legend_y}" width="{bar_w}" height="{bar_h}" '
+                 f'rx="3" fill="url(#chg-grad)" opacity="0.8"/>')
+    lines.append(f'<rect x="{bar_x}" y="{legend_y}" width="{bar_w}" height="{bar_h}" '
+                 f'rx="3" fill="none" stroke="#3f3f46" stroke-width="1"/>')
+    # Labels
+    label_y = legend_y + bar_h + 14
+    mid_x = bar_x + bar_w / 2
+    lines.append(f'<text x="{bar_x:.0f}" y="{label_y}" text-anchor="middle" '
+                 f'fill="#ef4444" font-family="Arial, sans-serif" font-size="10" font-weight="bold">'
+                 f'−{q_absmax}</text>')
+    lines.append(f'<text x="{mid_x:.0f}" y="{label_y}" text-anchor="middle" '
+                 f'fill="#a1a1aa" font-family="Arial, sans-serif" font-size="10">0</text>')
+    lines.append(f'<text x="{bar_x + bar_w:.0f}" y="{label_y}" text-anchor="middle" '
+                 f'fill="#60a5fa" font-family="Arial, sans-serif" font-size="10" font-weight="bold">'
+                 f'+{q_absmax}</text>')
+    # Title
+    lines.append(f'<text x="{mid_x:.0f}" y="{legend_y - 6}" text-anchor="middle" '
+                 f'fill="#71717a" font-family="Arial, sans-serif" font-size="10">'
+                 f'CHELPG Charge (e) — red: electron-rich · blue: electron-poor</text>')
+
+    lines.append('</svg>')
+    return '\n'.join(lines)
 
 
 # ===== 0. Setup paths =====
@@ -128,21 +299,51 @@ else:
     view.zoomTo()
     html = view._make_html()
     
-    # ===== 5. Create combined HTML visualization =====
+    # ===== 5. Generate 2D structure diagram =====
+    print("Generating 2D structure diagram...")
+    structure_svg = generate_aspirin_2d_svg(pdb_content, charges, symbols)
+    print("✓ 2D structure SVG generated")
+
+    # ===== 6. Create combined HTML visualization =====
     combined_html = f"""
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body {{ margin: 0; font-family: Arial; }}
-        .container {{ display: flex; height: 100vh; }}
+        body {{ margin: 0; font-family: Arial, sans-serif; background: #09090b; color: #e4e4e7; }}
+        .header {{ display: flex; align-items: center; justify-content: center; gap: 40px; padding: 24px 20px; background: #18181b; border-bottom: 1px solid #27272a; flex-wrap: wrap; }}
+        .structure-panel {{ text-align: center; }}
+        .structure-panel h2 {{ margin: 0 0 8px 0; font-size: 16px; color: #a1a1aa; font-weight: 500; letter-spacing: 0.5px; }}
+        .structure-panel .formula {{ font-size: 13px; color: #71717a; margin-bottom: 12px; }}
+        .main-content {{ display: flex; height: calc(100vh - 180px); }}
         .viewer {{ flex: 1; }}
-        .chart {{ flex: 1; display: flex; align-items: center; justify-content: center; background: #f5f5f5; padding: 20px; }}
+        .chart {{ flex: 1; display: flex; align-items: center; justify-content: center; background: #18181b; padding: 20px; }}
         .chart img {{ max-width: 100%; max-height: 100%; }}
+        .charges-table {{ max-height: 340px; overflow-y: auto; }}
+        .charges-table table {{ border-collapse: collapse; font-size: 13px; }}
+        .charges-table th, .charges-table td {{ padding: 4px 12px; text-align: right; border-bottom: 1px solid #27272a; }}
+        .charges-table th {{ color: #a1a1aa; font-weight: 600; position: sticky; top: 0; background: #18181b; }}
+        .charges-table td:first-child {{ text-align: left; font-family: monospace; }}
+        .pos {{ color: #ef4444; }}
+        .neg {{ color: #3b82f6; }}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header">
+        <div class="structure-panel">
+            <h2>Aspirin Structure</h2>
+            <div class="formula">C₉H₈O₄ — Acetylsalicylic Acid</div>
+            {structure_svg}
+        </div>
+        <div class="charges-table">
+            <table>
+                <tr><th>Atom</th><th>Charge (e)</th></tr>
+                {''.join(f'<tr><td>{symbols[i]}{i}</td><td class="{"pos" if charges[i] >= 0 else "neg"}">{charges[i]:+.5f}</td></tr>' for i in range(len(charges)))}
+                <tr style="border-top:2px solid #3f3f46"><td><b>Total</b></td><td><b>{sum(charges):+.5f}</b></td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="main-content">
         <div class="viewer">
             {html}
         </div>
@@ -158,7 +359,7 @@ else:
         f.write(combined_html)
     print(f"✓ Combined visualization saved: {html_path}")
     
-    # ===== 6. Print summary =====
+    # ===== 7. Print summary =====
     print("\n✓ CHELPG Charges (Aspirin):")
     print("-" * 40)
     for i, (sym, q) in enumerate(zip(symbols, charges)):
