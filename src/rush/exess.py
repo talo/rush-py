@@ -918,7 +918,7 @@ class Restraints:
 def exess(
     topology_path: Path | str,
     driver: str = "Energy",
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "B3LYP",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
@@ -1026,7 +1026,7 @@ in
 
 def energy(
     topology_path: Path | str,
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "B3LYP",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
@@ -1128,7 +1128,7 @@ def save_energy_outputs(
 def interaction_energy(
     topology_path: Path | str,
     reference_fragment: int,
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "B3LYP",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
@@ -1232,8 +1232,8 @@ def qmmm(
     restraints: Restraints | None = None,
     trajectory: Trajectory = Trajectory(),
     gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "RestrictedHF",
-    basis: BasisT = "STO-3G",
+    method: MethodT = "B3LYP",
+    basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
@@ -1584,7 +1584,7 @@ def optimization(
     max_iters: int,
     residues_path: Path | str | None = None,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "B3LYP",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
