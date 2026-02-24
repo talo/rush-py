@@ -231,6 +231,8 @@ RI-HF is configured by using `RestrictedHF` with `fock_build_type: "RI"`:
 }
 ```
 
+> **Note:** `STO-3G` is a minimal basis set used here for simplicity — use `cc-pVDZ` or larger for production calculations.
+
 In this example, `fragments` is an array of arrays holding zero-indexed atom IDs, and `fragment_formal_charges` lists the charge for each fragment:
 
 ```json
