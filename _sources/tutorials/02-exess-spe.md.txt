@@ -38,7 +38,7 @@ from rush.client import RunOpts
 res = exess.energy(
     "water_topology.json",
     method="RestrictedHF",
-    basis="STO-3G",
+    basis="STO-3G",  # Minimal basis set for tutorials only – use cc-pVDZ or larger for production
     run_opts=RunOpts(
         name="Tutorial: Single Point Energy",
         tags=["rush-py", "tutorial", "exess", "spe"],

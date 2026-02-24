@@ -30,7 +30,7 @@ out = exess.interaction_energy(
     "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
     93,                          # Fragment index of the ligand
     method="RestrictedHF",       # Explicit: minimal method for testing
-    basis="STO-3G",              # Explicit: minimal basis for testing
+    basis="STO-3G",              # Minimal basis set for tutorials only – use cc-pVDZ or larger for production
     frag_keywords=exess.FragKeywords(
         level="Trimer",          # Include up to 3-body interactions
         dimer_cutoff=10.0,       # Å — pairs within this distance
