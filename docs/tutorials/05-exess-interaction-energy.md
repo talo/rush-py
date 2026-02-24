@@ -57,7 +57,7 @@ That negative value means the ligand is stabilized by its protein environment. T
 
 > ⚠️ **Tutorial Basis Set Warning**
 >
-> This tutorial uses **STO-3G**, a minimal basis set chosen purely for speed so examples
+> This tutorial [example code](https://github.com/talo/rush-py/tree/main/examples/exess-interaction-energy){target="_blank"} uses **STO-3G**, a minimal basis set chosen purely for speed so examples
 > run quickly. **STO-3G is not suitable for research or production calculations.** For
 > meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
 > methods reference for available basis sets.
