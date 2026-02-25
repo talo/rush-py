@@ -1288,7 +1288,7 @@ def qmmm(
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = $maybe_ks_keywords,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1643,7 +1643,7 @@ def optimization(
         system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = $maybe_ks_keywords,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = None,
           boundary = None,
