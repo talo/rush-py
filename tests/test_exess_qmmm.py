@@ -11,6 +11,7 @@ def test_exess_qmmm():
     res = exess.qmmm(
         topology_path=data_dir / "6a5j_t.json",
         residues_path=data_dir / "6a5j_r.json",
+        basis="STO-2G",
         n_timesteps=500,
         # TODO: make this work (currently having convergence issues)
         # restraints=exess.Restraints(free_fragments=[6]),
