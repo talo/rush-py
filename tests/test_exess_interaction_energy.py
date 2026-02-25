@@ -14,6 +14,7 @@ def test_exess_interaction_energy():
     res = exess.interaction_energy(
         data_dir / "tyk2_ejm_31_t.json",
         lig_idx,
+        basis="PCSeg-0",
         frag_keywords=exess.FragKeywords(
             level="Trimer",
             dimer_cutoff=5.0,

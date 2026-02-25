@@ -18,8 +18,8 @@ def test_exess_energy_tutorial():
 def test_exess_energy():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    # Default method is ReducedHF, and default basis is cc-pVDZ
-    # Due to choice of method, no need for aux_basis (and default is None)
+    # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
+    # Using PCSeg-0 for faster test runtimes
     id = exess.energy(
         data_dir / "6a5j_t.json",
         basis="PCSeg-0",

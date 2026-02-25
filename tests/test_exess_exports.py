@@ -10,6 +10,7 @@ def test_exess_exports():
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.energy(
         data_dir / "benzene_t.json",
+        basis="PCSeg-0",
         frag_keywords=None,  # No fragmentation; whole system calc
         export_keywords=exess.ExportKeywords(
             export_density_descriptors=True,
