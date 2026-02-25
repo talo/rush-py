@@ -918,14 +918,14 @@ class Restraints:
 def exess(
     topology_path: Path | str,
     driver: str = "Energy",
-    method: MethodT = "B3LYP",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
     export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
@@ -1026,14 +1026,14 @@ in
 
 def energy(
     topology_path: Path | str,
-    method: MethodT = "B3LYP",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
     export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
@@ -1128,13 +1128,14 @@ def save_energy_outputs(
 def interaction_energy(
     topology_path: Path | str,
     reference_fragment: int,
-    method: MethodT = "B3LYP",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1169,7 +1170,7 @@ def interaction_energy(
         system = $maybe_system,
         keywords = exess_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks_dft = None,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1206,6 +1207,9 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_frag_keywords=frag_keywords._to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
@@ -1232,13 +1236,14 @@ def qmmm(
     restraints: Restraints | None = None,
     trajectory: Trajectory = Trajectory(),
     gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "B3LYP",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     # ML regions are disabled in EXESS. Uncomment when re-enabled:
@@ -1283,7 +1288,7 @@ def qmmm(
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1330,6 +1335,9 @@ in
         system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
         ),
         maybe_frag_keywords=(
             frag_keywords._to_rex() if frag_keywords is not None else "None"
@@ -1584,12 +1592,13 @@ def optimization(
     max_iters: int,
     residues_path: Path | str | None = None,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "B3LYP",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     # ML regions are disabled in EXESS. Uncomment when re-enabled:
@@ -1634,7 +1643,7 @@ def optimization(
         system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks = $maybe_ks_keywords,
           rtat = None,
           frag = None,
           boundary = None,
@@ -1669,6 +1678,9 @@ in
         maybe_system=system._to_rex() if system is not None else "None",
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
+        ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
         ),
         maybe_optimization_keywords=(
             optimization_keywords._to_rex(max_iters)
