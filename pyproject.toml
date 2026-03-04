@@ -47,15 +47,17 @@ Issues = "https://github.com/talo/rush-py/issues"
 
 [dependency-groups]
 dev = [
-  "pytest~=9.0.2",
-  "pytest-timeout~=2.3",
   "ruff",
   "ty",
-  "sphinx>=8.2.3",
-  "sphinx-autodoc-typehints>=3.5.2",
+  "pytest~=9.0",
+  "pytest-timeout~=2.3",
+  "sphinx~=8.2",
+  "sphinx-autodoc-typehints~=3.5",
+  "sphinx-design~=0.6",
+  "myst-parser~=4.0",
   "shibuya>=2025.12.19",
-  "myst-parser>=4.0.1",
-  "sphinx-design>=0.6.1",
+  "py3Dmol~=2.5",
+  "scipy~=1.17",
 ]
 
 [tool.pytest.ini_options]
