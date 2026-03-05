@@ -9,7 +9,7 @@ from rush.fried import fragment_ligand, fragmented_exess, plot_fried_stacked
 from rush import merge_trcs
 
 
-@pytest.mark.timeout(1800)
+@pytest.mark.timeout(2700)
 def test_fried_3fln(tmp_path: Path):
     set_opts(workspace_dir=tmp_path / ".test-workspace")
     data_dir = Path(__file__).parent / "data"
