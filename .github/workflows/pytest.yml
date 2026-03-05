@@ -12,20 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      RUSH_TOKEN: ${{ secrets.TENGU_STAGING_ADMIN_TOKEN }}
-      RUSH_ENDPOINT: https://tengu-server-staging-api-720805281970.asia-southeast1.run.app/
-      RUSH_PROJECT: b6761e4b-4a08-4618-be63-5e173b6991ac
+      RUSH_ENDPOINT: https://tengu-server-staging-api-720805281970.asia-southeast1.run.app
+      RUSH_TOKEN: 75fbe3f2-58dd-4b82-97a4-dd19917d72a2
+      RUSH_PROJECT: f2df7579-725d-4aca-b2fb-6e48ebf30aca
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
         run: uv sync --dev
