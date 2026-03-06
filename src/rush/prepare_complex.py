@@ -135,7 +135,7 @@ def prepare_complex(
 ) -> TRC | str | RunError:
     """
     Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.
-    
+
     Args:
         input_path: Path to input PDB or TRC file
         ligand_names: List of ligand residue names to extract
@@ -147,7 +147,7 @@ def prepare_complex(
         run_spec: Run specification for the preparation job
         run_opts: Run options
         collect: If True, collects results and returns merged TRC. If False, returns run ID.
-    
+
     Returns:
         - If collect=True: Merged TRC containing prepared protein and ligand
         - If collect=False: Run ID string for the prepare-protein job
@@ -185,11 +185,11 @@ def prepare_complex(
     trc_p_output = save_prepare_protein_outputs(res)
     if isinstance(trc_p_output, RunError):
         return trc_p_output
-    
+
     # If collect=False, we get a run ID (string) back - return it as-is
     if isinstance(trc_p_output, str):
         return trc_p_output
-    
+
     # Otherwise, collect=True gave us Paths to process
     trc_p = from_json(trc_p_output)
     if isinstance(trc_p, list):

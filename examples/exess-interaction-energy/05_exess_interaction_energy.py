@@ -52,7 +52,7 @@ out = exess.interaction_energy(
 
 # Extract and display results
 files = exess.save_energy_outputs(out)
-json_file = next((f for f in files if str(f).endswith('.json')), None)
+json_file = next((f for f in files if str(f).endswith(".json")), None)
 if json_file:
     with open(json_file) as f:
         out_data = json.load(f)
@@ -92,7 +92,7 @@ frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
 
 # Step 3: Write topology and run interaction energy
 topology_path = OUTPUT_DIR / "1hsg_t.json"
-with open(topology_path, "w", encoding='utf-8') as f:
+with open(topology_path, "w", encoding="utf-8") as f:
     f.write(json.dumps(trc.topology.to_json(), indent=2))
 
 # NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
@@ -114,9 +114,9 @@ out = exess.interaction_energy(
 
 # Extract and display results
 files = exess.save_energy_outputs(out)
-json_file = next((f for f in files if str(f).endswith('.json')), None)
+json_file = next((f for f in files if str(f).endswith(".json")), None)
 if json_file:
-    with open(json_file, encoding='utf-8') as f:
+    with open(json_file, encoding="utf-8") as f:
         out_data = json.load(f)
     print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
 else:

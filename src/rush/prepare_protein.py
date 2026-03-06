@@ -63,17 +63,17 @@ def prepare_protein(
     t_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
     r_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
     c_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    
+
     json.dump(trc.topology.to_json(), t_f)
     json.dump(trc.residues.to_json(), r_f)
     json.dump(trc.chains.to_json(), c_f)
-    
+
     # Important: Close temp files before uploading. Windows locks open files,
     # causing PermissionError if upload_object() tries to access them while open.
     t_f.close()
     r_f.close()
     c_f.close()
-    
+
     topology_vobj = upload_object(t_f.name)
     residues_vobj = upload_object(r_f.name)
     chains_vobj = upload_object(c_f.name)
@@ -125,24 +125,26 @@ in
                 print(f"Error: {error['message']}", file=sys.stderr)
 
 
-def save_outputs(res: dict | list | tuple | str | RunError) -> tuple[Path, Path, Path] | str | RunError:
+def save_outputs(
+    res: dict | list | tuple | str | RunError,
+) -> tuple[Path, Path, Path] | str | RunError:
     """
     Download output files from a prepare-protein run.
-    
+
     The prepare-protein rex computation returns a list/tuple of 3 VirtualObject
     dicts (topology, residues, chains files). This function downloads each
     file and returns Path objects that can be used with from_json().
-    
+
     If collect=False was used, the input will be a run ID string, which is
     returned as-is for later collection by the caller.
-    
+
     Args:
         res: Either:
              - A run ID string (if collect=False was used)
              - A list/tuple of 3 VirtualObject dicts from collect_run()
              - A RunError
              Each VirtualObject dict has keys: 'path', 'size', 'format'.
-        
+
     Returns:
         Either:
         - A run ID string (if input was a run ID)
@@ -152,11 +154,11 @@ def save_outputs(res: dict | list | tuple | str | RunError) -> tuple[Path, Path,
     # Handle error case
     if isinstance(res, RunError):
         return res
-    
+
     # Handle run ID string (collect=False case)
     if isinstance(res, str):
         return res
-    
+
     # Handle list/tuple of VirtualObject dicts from collect_run()
     if isinstance(res, (list, tuple)) and len(res) >= 3:
         return (
@@ -164,7 +166,7 @@ def save_outputs(res: dict | list | tuple | str | RunError) -> tuple[Path, Path,
             save_object(res[1]["path"]),
             save_object(res[2]["path"]),
         )
-    
+
     # Fallback: return as-is (for debugging or unexpected formats)
     print(f"Warning: save_outputs received unexpected format: {type(res)}")
     print(res)
