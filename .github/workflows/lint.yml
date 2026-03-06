@@ -20,11 +20,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff
-          pip install ty
+        run: uv sync --dev
 
       - name: Run ruff
         run: ruff check --output-format=github ./src ./tests
