@@ -1,4 +1,4 @@
-name: Pytest
+name: Lint (ruff & ty)
 
 on:
   push:
