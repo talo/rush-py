@@ -31,3 +31,12 @@ jobs:
 
       - name: Run ty
         run: uv run ty check --output-format=github ./src ./tests
+
+      - name: Check CHANGELOG.md updated
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          if ! git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q '^CHANGELOG.md$'; then
+            echo "::error::CHANGELOG.md was not updated. Please add an entry describing your changes."
+            exit 1
+          fi

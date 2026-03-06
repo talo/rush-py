@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- `.env` file detection now walks up parent directories from `cwd`, so examples subfolders find the repo-root `.env` automatically
+
+### Added
+- CI changelog check in lint workflow — PRs must update `CHANGELOG.md`
+
 ## 6.6.0
 
 ### Changed
