@@ -65,7 +65,7 @@ class Element(IntEnum):
     Kr = 36
 
     @classmethod
-    def from_str(cls, symbol: str) -> Self:
+    def from_str(cls, symbol: str) -> "Element":
         """Parse element from string symbol."""
         # First try the symbol as-is (for proper case like "Fe")
         try:
@@ -305,7 +305,8 @@ class Topology:
         else:
             print(
                 "WARNING: Tried to load Topology from JSON but "
-                "it wasn't a str, Path, or dict!"
+                "it wasn't a str, Path, or dict!",
+                file=sys.stderr,
             )
             topology_data = json_content
 
@@ -838,7 +839,8 @@ class Residues:
         else:
             print(
                 "WARNING: Tried to load Residues from JSON but "
-                "it wasn't a str, Path, or dict!"
+                "it wasn't a str, Path, or dict!",
+                file=sys.stderr,
             )
             residues_data = json_content
 
@@ -1031,7 +1033,8 @@ class Chains:
         else:
             print(
                 "WARNING: Tried to load Chains from JSON but "
-                "it wasn't a str, Path, or dict!"
+                "it wasn't a str, Path, or dict!",
+                file=sys.stderr,
             )
             chains_data = json_content
 

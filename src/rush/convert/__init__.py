@@ -5,8 +5,10 @@ This module provides functions to convert between PDB, mmCIF, SDF, and QDX's TRC
 """
 
 import copy
-import json
+import json as std_json
+from collections.abc import Sequence
 from pathlib import Path
+from typing import TypeGuard
 
 from ..mol import TRC
 from .json import from_json, to_json
@@ -26,14 +28,14 @@ def load_structure(file_path: str | Path) -> TRC | list[TRC]:
         TRC structure or list of TRC structures
     """
     path = Path(file_path)
-    with path.open("r") as f:
-        content = f.read()
-
     # Determine file type by extension
     suffix = path.suffix.lower()
     if suffix == ".json":
-        return from_json(content)
-    elif suffix in {".cif", ".mmcif"}:
+        return from_json(path)
+
+    with path.open("r") as f:
+        content = f.read()
+    if suffix in {".cif", ".mmcif"}:
         return from_mmcif(content)
     elif suffix == ".pdb":
         return from_pdb(content)
@@ -41,7 +43,7 @@ def load_structure(file_path: str | Path) -> TRC | list[TRC]:
         # Try to guess from content
         content_lower = content.lower()
         if content.strip().startswith("[") or content.strip().startswith("{"):
-            return from_json(content)
+            return from_json(std_json.loads(content))
         elif "data_" in content_lower and "_atom_site" in content_lower:
             return from_mmcif(content)
         else:
@@ -71,7 +73,7 @@ def save_structure(
 
     if format.lower() == "json":
         with path.open("w") as f:
-            json.dump(to_json(trcs), f, indent=2)
+            std_json.dump(to_json(trcs), f, indent=2)
         return
     elif format.lower() == "pdb":
         if isinstance(trcs, TRC):
@@ -94,7 +96,35 @@ def save_structure(
         f.write(content)
 
 
-def _load_trc(trc: TRC | str | Path) -> TRC:
+TrcInput = TRC | str | Path
+TrcInputSeq = Sequence[TrcInput]
+
+
+def _single_trc(trc: TRC | list[TRC], label: str | Path) -> TRC:
+    if _is_trc_list(trc):
+        if len(trc) != 1:
+            raise ValueError(f"Expected 1 TRC in {label}, found {len(trc)}")
+        return trc[0]
+    if isinstance(trc, list):
+        raise TypeError("Expected TRC list elements to be TRC objects")
+    return trc
+
+
+def _normalize_trc_inputs(inputs: tuple[TrcInput | TrcInputSeq, ...]) -> list[TrcInput]:
+    normalized: list[TrcInput] = []
+    for item in inputs:
+        if isinstance(item, Sequence) and not isinstance(item, (str, Path, TRC)):
+            normalized.extend(item)
+        else:
+            normalized.append(item)
+    return normalized
+
+
+def _is_trc_list(value: object) -> TypeGuard[list[TRC]]:
+    return isinstance(value, list) and all(isinstance(item, TRC) for item in value)
+
+
+def _load_trc(trc: TrcInput) -> TRC:
     """Load TRC from TRC object or file path."""
     if isinstance(trc, TRC):
         return trc
@@ -102,20 +132,22 @@ def _load_trc(trc: TRC | str | Path) -> TRC:
         path = Path(trc)
         if not path.exists():
             raise FileNotFoundError(f"TRC file not found: {trc}")
-        loaded = from_json(path)
-        if isinstance(loaded, list):
+        loaded: TRC | list[TRC] = from_json(path)
+        if _is_trc_list(loaded):
             if len(loaded) == 1:
                 return loaded[0]
             merged = copy.deepcopy(loaded[0])
             for next_trc in loaded[1:]:
                 merged.extend(next_trc)
             return merged
+        if isinstance(loaded, list):
+            raise TypeError("Expected TRC list elements to be TRC objects")
         return loaded
     raise TypeError(f"TRC must be a TRC object or file path, got {type(trc)}")
 
 
 def merge_trcs(
-    *trcs: TRC | str | Path | list[TRC | str | Path] | tuple[TRC | str | Path, ...],
+    *trcs: TrcInput | TrcInputSeq,
     output_file: str | Path | None = None,
     skip_validation: bool = False,
 ) -> TRC:
@@ -143,10 +175,7 @@ def merge_trcs(
         ValueError: If no inputs are provided or validation fails.
         FileNotFoundError: If file paths are provided but files don't exist.
     """
-    if len(trcs) == 1 and isinstance(trcs[0], (list, tuple)):
-        trc_inputs = list(trcs[0])
-    else:
-        trc_inputs = list(trcs)
+    trc_inputs = _normalize_trc_inputs(trcs)
 
     if not trc_inputs:
         raise ValueError("Expected at least one TRC input, found 0")
@@ -168,7 +197,7 @@ def merge_trcs(
     if output_file is not None:
         output_path = Path(output_file)
         with output_path.open("w") as f:
-            json.dump(to_json([merged]), f, indent=2)
+            std_json.dump(to_json([merged]), f, indent=2)
 
     return merged
 

@@ -31,7 +31,7 @@ def test_fold_inpainting():
             name="Rush-Py Test: Residue Inpainting Step 2 (Boltz)",
             tags=["rush-py", "test", "boltz", "CMET", "4r1y"],
         ),
-        run_spec=RunSpec(target="Bullet2", gpus=1),
+        run_spec=RunSpec(target="Bullet", gpus=1),
         collect=True,
     )
     print(json.dumps(res, indent=2), file=sys.stderr)

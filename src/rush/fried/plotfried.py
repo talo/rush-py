@@ -9,10 +9,10 @@ import json
 from collections import OrderedDict
 from pathlib import Path
 
-import matplotlib  # type: ignore
+import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # type: ignore
+import matplotlib.pyplot as plt
 
 HARTREE_TO_KCAL = 627.509
 
@@ -365,7 +365,7 @@ def plot_stacked(
         )
 
     if args.ylim:
-        ax.set_ylim([float(val) for val in args.ylim.split(",")[::-1]])
+        ax.set_ylim([float(val) for val in args.ylim.split(",")[::-1]])  # type: ignore
 
     xtick_labels = [entry["label"] for entry in report_data.values()]
     ax.set_xticks(range(len(xtick_labels)))

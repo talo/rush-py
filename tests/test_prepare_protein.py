@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from rush.client import RunOpts, save_object, set_opts
+from rush import TRC
+from rush.client import RunError, RunOpts, save_object, set_opts
 from rush.convert import from_json
 from rush.prepare_protein import prepare_protein
 
@@ -16,13 +17,14 @@ def test_prepare_protein():
         ),
         collect=True,
     )
+    assert not isinstance(res, RunError)
 
     # Parse into TRC object
-    trc = from_json(tuple(save_object(object["path"]) for object in res))
+    trc = from_json(tuple(save_object(obj["path"]) for obj in res))
     if isinstance(trc, list):
-        residues = trc[0].residues
-    else:
-        residues = trc.residues
+        trc = trc[0]
+    assert isinstance(trc, TRC)
+    residues = trc.residues
 
     # Ensure the output is capped as requested
     assert "ACE" == residues.seqs[0]
