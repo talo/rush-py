@@ -1,8 +1,18 @@
+import json
 import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, collect_run, set_opts
+from rush.client import RunError, RunOpts, collect_run, set_opts
+
+
+def test_exess_energy_tutorial():
+    res = exess.energy("tests/data/6a5j_t.json", collect=True)
+    output = exess.save_energy_outputs(res)
+    assert not isinstance(output, RunError)
+    output_file = output[0] if isinstance(output, tuple) else output
+    with open(output_file) as f:
+        print(json.load(f)["qmmbe"]["expanded_hf_energy"])
 
 
 def test_exess_energy():
@@ -35,4 +45,4 @@ def test_exess_energy():
 
 
 if __name__ == "__main__":
-    test_exess_energy()
+    test_exess_energy_tutorial()

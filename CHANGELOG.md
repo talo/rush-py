@@ -1,5 +1,19 @@
 # Changelog
 
+## 6.6.0
+
+### Changed
+- `from_json()` now always returns a list in the case of a single path input, which is more consistent
+  especially given the typing challenges with determining single-vs-many output types for file inputs
+
+### Fixed
+- work around json import error due to shadowing
+- gradually type, and fix incomplete or erroneous typing, in numerous places
+
+### Added
+- test for getting CHELPG charges from exess.energy (exess.chelpg to be removed soon)
+- add all deps needed for examples to pyproject.toml dev deps
+
 ## 6.5.1
 
 ### Changed

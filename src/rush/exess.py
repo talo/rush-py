@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 from string import Template
-from typing import Literal
+from typing import Any, Literal
 
 import h5py
 import zstandard as zstd
@@ -1068,7 +1068,8 @@ def energy(
 
 
 def save_energy_outputs(
-    res: tuple[dict] | tuple[dict, dict] | list[dict] | RunError, extract=True
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+    extract=True,
 ) -> tuple[Path, Path | None] | RunError:
     """
     Download and save energy calculation outputs from Rush.
@@ -1092,55 +1093,42 @@ def save_energy_outputs(
     """
     if isinstance(res, RunError):
         return res
-    
-    # Convert list to tuple for consistent handling
-    if isinstance(res, list):
-        res = tuple(res)
-    
-    if isinstance(res, tuple):
-        if len(res) == 1:
-            return (save_object(res[0]["path"]), None)
-        else:
-            assert len(res) > 1, "exess.energy should return 1 or 2 outputs."
-            # convert_hdf5_to_json set to true
-            if "Json" in res[1]:
-                return (
-                    save_object(res[0]["path"]),
-                    save_object(res[1]["Json"]["path"]),
-                )
-
-            # hdf5-to-json set to false (or not set)
-            # Support new-style with the type key, and old-style without
-            if "Hdf5" in res[1]:
-                # Extract JSON (required)
-                json_path = save_object(res[0]["path"])
-                
-                # Try to extract HDF5 (optional - skip if empty)
-                hdf5_path = None
-                try:
-                    hdf5_obj = res[1].get("Hdf5") or res[1]
-                    hdf5_path = save_object(
-                        hdf5_obj["path"],
-                        ext="hdf5" if extract else "tar.zst",
-                        extract=extract,
-                    )
-                except ValueError as e:
-                    if "only directories" in str(e):
-                        # No actual files in HDF5 tar, return None for hdf5_path
-                        hdf5_path = None
-                    else:
-                        raise  # Re-raise other extraction errors
-                
-                return (json_path, hdf5_path)
-            
-            # Unknown output format
-            raise ValueError(
-                f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
-                f"but got keys: {list(res[1].keys())}"
+    if isinstance(res, dict):
+        return (save_object(res["path"]), None)
+    if len(res) == 1:
+        return (save_object(res[0]["path"]), None)
+    if len(res) < 2:
+        raise ValueError("exess.energy should return 1 or 2 outputs.")
+    # convert_hdf5_to_json set to true
+    if "Json" in res[1]:
+        return (
+            save_object(res[0]["path"]),
+            save_object(res[1]["Json"]["path"]),
+        )
+    # hdf5-to-json set to false (or not set)
+    # Support new-style with the type key, and old-style without
+    elif "Hdf5" in res[1]:
+        hdf5_path = None
+        try:
+            hdf5_obj = res[1].get("Hdf5") or res[1]
+            hdf5_path = save_object(
+                hdf5_obj["path"],
+                ext="hdf5" if extract else "tar.zst",
+                extract=extract,
             )
+        except ValueError as e:
+            if "only directories" in str(e):
+                # No actual files in HDF5 tar, return None for hdf5_path
+                hdf5_path = None
+            else:
+                raise  # Re-raise other extraction errors
+        return (save_object(res[0]["path"]), hdf5_path)
+    # Unknown output format
     else:
-        print(res)
-        return res
+        raise ValueError(
+            f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
+            f"but got keys: {list(res[1].keys())}"
+        )
 
 
 def interaction_energy(
@@ -1339,29 +1327,36 @@ in
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             result = collect_run(run_id)
-            if isinstance(result, dict):
-                # Support new-style with the type key, and old-style without
-                if "Hdf5" in result[1]:
-                    hdf5_obj = result[1]["Hdf5"]
-                else:
-                    return (result[0], result[1]["Json"])
-                qm_output = download_object(hdf5_obj["path"])
-                decompressed = zstd.ZstdDecompressor().decompress(
-                    qm_output, max_output_size=int(1e9)
-                )
-                with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                    hdf5_f = tar.extractfile(tar.getnames()[1])
-                    with h5py.File(hdf5_f, "r") as f:
-                        frag_indices = [int(x) for x in f["monomers"].keys()]
-                        chelpg = [
-                            float(x)
-                            for frag_idx in sorted(frag_indices)
-                            for x in f[f"monomers/{frag_idx}/chelpg_charges"]
-                        ]
-                return (result[0], chelpg)
-            else:
-                # Error
+            if not isinstance(result, tuple):
                 return result
+            if len(result) < 2 or not isinstance(result[1], dict):
+                return result
+            # Support new-style with the type key, and old-style without
+            hdf5_obj = result[1].get("Hdf5")  # type: ignore[invalid-argument-type]
+            if hdf5_obj is None:
+                return (
+                    result[0],
+                    result[1].get("Json"),  # type: ignore[invalid-argument-type]
+                )
+            if not isinstance(hdf5_obj, dict):
+                return result
+            hdf5_path = hdf5_obj.get("path")
+            if not isinstance(hdf5_path, str):
+                return result
+            qm_output = download_object(hdf5_path)
+            decompressed = zstd.ZstdDecompressor().decompress(
+                qm_output, max_output_size=int(1e9)
+            )
+            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+                hdf5_f = tar.extractfile(tar.getnames()[1])
+                with h5py.File(hdf5_f, "r") as f:
+                    frag_indices = [int(x) for x in f["monomers"].keys()]
+                    chelpg = [
+                        float(x)
+                        for frag_idx in sorted(frag_indices)
+                        for x in f[f"monomers/{frag_idx}/chelpg_charges"]
+                    ]
+            return (result[0], chelpg)
         else:
             return run_id
 

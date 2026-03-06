@@ -1,6 +1,6 @@
 [project]
 name = "rush-py"
-version = "6.5.1"
+version = "6.6.0"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -47,15 +47,17 @@ Issues = "https://github.com/talo/rush-py/issues"
 
 [dependency-groups]
 dev = [
-  "pytest~=9.0.2",
-  "pytest-timeout~=2.3",
-  "basedpyright",
   "ruff",
-  "sphinx>=8.2.3",
-  "sphinx-autodoc-typehints>=3.5.2",
+  "ty",
+  "pytest~=9.0",
+  "pytest-timeout~=2.3",
+  "sphinx~=8.2",
+  "sphinx-autodoc-typehints~=3.5",
+  "sphinx-design~=0.6",
+  "myst-parser~=4.0",
   "shibuya>=2025.12.19",
-  "myst-parser>=4.0.1",
-  "sphinx-design>=0.6.1",
+  "py3Dmol~=2.5",
+  "scipy~=1.17",
 ]
 
 [tool.pytest.ini_options]
@@ -63,30 +65,6 @@ timeout = 300
 markers = [
   "slow: marks tests that submit jobs to the Rush API (auto-applied, skipped when queues busy)",
 ]
-
-[tool.pyright]
-exclude = [
-  "**/node_modules",
-  "**/__pycache__",
-  "**/*venv*",
-  "result",
-  "setup.py",
-]
-ignore = [
-  "**/node_modules",
-  "**/__pycache__",
-  "**/*venv*",
-  "result",
-  "setup.py",
-]
-reportIncompatibleMethodOverride = "none"
-reportIncompatibleVariableOverride = "none"
-reportMissingTypeStubs = "none"
-reportUnknownMemberType = "none"
-reportUnknownVariableType = "none"
-useLibraryCodeForTypes = true
-typeCheckingMode = "standard"
-reportAttributeAccessIssue = "none"
 
 [tool.uv.build-backend]
 module-name = "rush"

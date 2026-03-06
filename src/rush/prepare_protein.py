@@ -12,8 +12,8 @@ import json
 import sys
 from pathlib import Path
 from string import Template
-import tempfile
-from typing import Literal
+from tempfile import NamedTemporaryFile
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
@@ -27,7 +27,7 @@ from .client import (
     save_object,
     upload_object,
 )
-from .convert import from_json, from_pdb
+from .convert import _single_trc, from_json, from_pdb
 from .utils import optional_str
 
 
@@ -54,26 +54,21 @@ def prepare_protein(
             trc = from_pdb(f.read())
         else:
             trc = from_json(json.load(f))
-            if isinstance(trc, list):
-                if len(trc) != 1:
-                    raise ValueError(
-                        f"Expected 1 TRC in {input_path}, found {len(trc)}"
-                    )
-                trc = trc[0]
-    t_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    r_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    c_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    
+    trc = _single_trc(trc, input_path)
+    t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    r_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    c_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+
     json.dump(trc.topology.to_json(), t_f)
     json.dump(trc.residues.to_json(), r_f)
     json.dump(trc.chains.to_json(), c_f)
-    
+
     # Important: Close temp files before uploading. Windows locks open files,
     # causing PermissionError if upload_object() tries to access them while open.
     t_f.close()
     r_f.close()
     c_f.close()
-    
+
     topology_vobj = upload_object(t_f.name)
     residues_vobj = upload_object(r_f.name)
     chains_vobj = upload_object(c_f.name)
@@ -125,38 +120,41 @@ in
                 print(f"Error: {error['message']}", file=sys.stderr)
 
 
-def save_outputs(res: dict | list | tuple | str | RunError) -> tuple[Path, Path, Path] | str | RunError:
+def save_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> tuple[Path, Path, Path] | str | RunError:
     """
     Download output files from a prepare-protein run.
-    
+
     The prepare-protein rex computation returns a list/tuple of 3 VirtualObject
     dicts (topology, residues, chains files). This function downloads each
     file and returns Path objects that can be used with from_json().
-    
+
     If collect=False was used, the input will be a run ID string, which is
     returned as-is for later collection by the caller.
-    
+
     Args:
         res: Either:
              - A run ID string (if collect=False was used)
              - A list/tuple of 3 VirtualObject dicts from collect_run()
              - A RunError
              Each VirtualObject dict has keys: 'path', 'size', 'format'.
-        
+
     Returns:
         Either:
         - A run ID string (if input was a run ID)
         - Tuple of 3 downloaded file Paths (if input was VirtualObject list)
         - RunError if input is an error
     """
+
     # Handle error case
     if isinstance(res, RunError):
         return res
-    
+
     # Handle run ID string (collect=False case)
     if isinstance(res, str):
         return res
-    
+
     # Handle list/tuple of VirtualObject dicts from collect_run()
     if isinstance(res, (list, tuple)) and len(res) >= 3:
         return (
@@ -164,8 +162,7 @@ def save_outputs(res: dict | list | tuple | str | RunError) -> tuple[Path, Path,
             save_object(res[1]["path"]),
             save_object(res[2]["path"]),
         )
-    
+
     # Fallback: return as-is (for debugging or unexpected formats)
-    print(f"Warning: save_outputs received unexpected format: {type(res)}")
-    print(res)
-    return res
+    print(res, file=sys.stderr)
+    return RunError(f"Error: save_outputs received unexpected format: {type(res)}")
