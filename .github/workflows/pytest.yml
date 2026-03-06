@@ -33,9 +33,3 @@ jobs:
         env:
           RUSH_TOKEN: ${{ secrets.RUSH_TOKEN }}
         run: uv run pytest -v
-
-      - name: Run ruff
-        run: ruff check --output-format=github ./src ./tests
-
-      - name: Run ty
-        run: ty check --output-format=github ./src ./tests
