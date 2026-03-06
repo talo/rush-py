@@ -12,8 +12,8 @@ import json
 import sys
 from pathlib import Path
 from string import Template
-import tempfile
-from typing import Literal
+from tempfile import NamedTemporaryFile
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
@@ -27,7 +27,7 @@ from .client import (
     save_object,
     upload_object,
 )
-from .convert import from_json, from_pdb
+from .convert import _single_trc, from_json, from_pdb
 from .utils import optional_str
 
 
@@ -54,15 +54,10 @@ def prepare_protein(
             trc = from_pdb(f.read())
         else:
             trc = from_json(json.load(f))
-            if isinstance(trc, list):
-                if len(trc) != 1:
-                    raise ValueError(
-                        f"Expected 1 TRC in {input_path}, found {len(trc)}"
-                    )
-                trc = trc[0]
-    t_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    r_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    c_f = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    trc = _single_trc(trc, input_path)
+    t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    r_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    c_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
 
     json.dump(trc.topology.to_json(), t_f)
     json.dump(trc.residues.to_json(), r_f)
@@ -126,7 +121,7 @@ in
 
 
 def save_outputs(
-    res: dict | list | tuple | str | RunError,
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
 ) -> tuple[Path, Path, Path] | str | RunError:
     """
     Download output files from a prepare-protein run.
@@ -151,6 +146,7 @@ def save_outputs(
         - Tuple of 3 downloaded file Paths (if input was VirtualObject list)
         - RunError if input is an error
     """
+
     # Handle error case
     if isinstance(res, RunError):
         return res
@@ -168,6 +164,5 @@ def save_outputs(
         )
 
     # Fallback: return as-is (for debugging or unexpected formats)
-    print(f"Warning: save_outputs received unexpected format: {type(res)}")
-    print(res)
-    return res
+    print(res, file=sys.stderr)
+    return RunError(f"Error: save_outputs received unexpected format: {type(res)}")

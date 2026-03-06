@@ -22,6 +22,9 @@ DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "water_topology.json"
 
 METHOD = "RestrictedHF"
+# ⚠️ TUTORIAL ONLY: STO-3G is a minimal basis set used here for speed/demonstration.
+# It is NOT suitable for research or production use. For real work, use at least
+# cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 BASIS = "STO-3G"
 
 # ===== Run single-point energy calculation =====

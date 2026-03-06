@@ -35,9 +35,9 @@ print("=" * 60)
 print("Example 1: QM Geometry Optimization")
 print("=" * 60)
 
-# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
-# This is a very fast but low-accuracy method. For production results,
-# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+# ⚠️ TUTORIAL ONLY: STO-3G is a minimal basis set used here for speed/demonstration.
+# It is NOT suitable for research or production use. For real work, use at least
+# cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
 METHOD = "RestrictedHF"
 BASIS = "STO-3G"

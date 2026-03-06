@@ -28,9 +28,9 @@ DATA_DIR = Path(__file__).parent / "data"
 OUTPUT_DIR = Path(__file__).parent / "interaction-energy-outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
-# This is a very fast but low-accuracy method. For production results,
-# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+# ⚠️ TUTORIAL ONLY: STO-3G is a minimal basis set used here for speed/demonstration.
+# It is NOT suitable for research or production use. For real work, use at least
+# cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
 out = exess.interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
@@ -95,9 +95,9 @@ topology_path = OUTPUT_DIR / "1hsg_t.json"
 with open(topology_path, "w", encoding="utf-8") as f:
     f.write(json.dumps(trc.topology.to_json(), indent=2))
 
-# NOTE: Using RestrictedHF/STO-3G for demonstration purposes only.
-# This is a very fast but low-accuracy method. For production results,
-# use a higher-level method (e.g., RestrictedHF/cc-pVDZ or DFT).
+# ⚠️ TUTORIAL ONLY: STO-3G is a minimal basis set used here for speed/demonstration.
+# It is NOT suitable for research or production use. For real work, use at least
+# cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
 out = exess.interaction_energy(
     topology_path,

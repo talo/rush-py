@@ -40,12 +40,14 @@ out = exess.optimization(
 )
 ```
 
-That's it — EXESS will iteratively relax the twisted ethene geometry using Restricted Hartree-Fock / STO-3G (the defaults). You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
+That's it — EXESS will iteratively relax the twisted ethene geometry using the defaults: **Restricted Hartree-Fock / cc-pVDZ**. You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
 
-:::{admonition} About the defaults
-:class: warning
-The default **RestrictedHF/STO-3G** is the fastest possible QM level but gives poor absolute geometries and energies. It's ideal for testing your workflow. For production, use at least `method="RestrictedHF", basis="cc-pVDZ"` or `method="RIHF"` with a larger basis. Bond lengths with STO-3G can be off by ~0.05 Å.
-:::
+> ⚠️ **Tutorial Basis Set Warning**
+>
+> This tutorial [example code](https://github.com/talo/rush-py/tree/main/examples/exess-optimization){target="_blank"} uses **STO-3G**, a minimal basis set chosen purely for speed so examples
+> run quickly. **STO-3G is not suitable for research or production calculations.** For
+> meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
+> methods reference for available basis sets.
 
 :::{admonition} Why twisted ethene?
 :class: tip

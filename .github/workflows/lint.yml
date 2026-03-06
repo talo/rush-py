@@ -1,4 +1,4 @@
-name: Pytest
+name: Lint (ruff & ty)
 
 on:
   push:
@@ -10,10 +10,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      RUSH_ENDPOINT: https://tengu-server-staging-api-720805281970.asia-southeast1.run.app
-      RUSH_PROJECT: f2df7579-725d-4aca-b2fb-6e48ebf30aca
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -29,7 +26,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - name: Run tests
-        env:
-          RUSH_TOKEN: ${{ secrets.RUSH_TOKEN }}
-        run: uv run pytest -v
+      - name: Run ruff
+        run: uv run ruff check --output-format=github ./src ./tests
+
+      - name: Run ty
+        run: uv run ty check --output-format=github ./src ./tests

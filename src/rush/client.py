@@ -825,7 +825,9 @@ def _poll_run(run_id: str, max_wait_time):
     return status
 
 
-def collect_run(run_id: str, max_wait_time: int = 3600) -> dict | RunError:
+def collect_run(
+    run_id: str, max_wait_time: int = 3600
+) -> dict | tuple[dict, ...] | RunError:
     """
     Waits until the run finishes, or `max_wait_time` elapses, and returns either the
     actual result of the run, an error string if the run failed, or a string indicating
