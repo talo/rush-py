@@ -13,7 +13,6 @@ jobs:
     timeout-minutes: 60
     env:
       RUSH_ENDPOINT: https://tengu-server-staging-api-720805281970.asia-southeast1.run.app
-      RUSH_TOKEN: 75fbe3f2-58dd-4b82-97a4-dd19917d72a2
       RUSH_PROJECT: f2df7579-725d-4aca-b2fb-6e48ebf30aca
     steps:
       - name: Checkout
@@ -31,4 +30,6 @@ jobs:
         run: uv sync --dev
 
       - name: Run tests
+        env:
+          RUSH_TOKEN: ${{ secrets.RUSH_TOKEN }}
         run: uv run pytest -v
