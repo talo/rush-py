@@ -7,6 +7,7 @@
 
 ### Added
 - CI changelog check in lint workflow — PRs must update `CHANGELOG.md`
+- workflow to auto deploy docs to gh-pages and exess webapp when merged to main
 
 ## 6.6.0
 
