@@ -7,7 +7,7 @@ This script demonstrates how to:
 3. Work with the simulation trajectory output
 4. Generate an interactive HTML visualization of the trajectory
 
-Tutorial: docs/tutorials/exess-qmmm.md
+Tutorial: https://exess.qdx.co/docs/tutorials/06-exess-qmmm.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables

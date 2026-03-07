@@ -5,7 +5,7 @@ This script demonstrates how to:
 1. Run a single-point energy (SPE) calculation using Rush
 2. Extract and print the total energy and electronic properties
 
-Tutorial: docs/tutorials/02-exess-spe.md
+Tutorial: https://exess.qdx.co/docs/tutorials/02-exess-spe.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables

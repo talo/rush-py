@@ -7,7 +7,7 @@ This script demonstrates how to:
 3. Work with the optimization trajectory output
 4. Generate an interactive HTML visualization of results
 
-Tutorial: docs/tutorials/exess-optimization.md
+Tutorial: https://exess.qdx.co/docs/tutorials/04-exess-optimization.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables

@@ -6,8 +6,10 @@ This script demonstrates how to:
 2. Calculate CHELPG partial charges using Rush
 3. Extract and visualize the charge distribution
 
+Tutorial: https://exess.qdx.co/docs/tutorials/01-exess-chelpg.html
+
 Run this script from its directory:
-    python 01_exess_chelpg_aspirin.py
+    python 01_exess_chelpg.py
 
 Output files (saved to chelpg-outputs/):
     - aspirin_topology.json: Converted topology
@@ -16,6 +18,7 @@ Output files (saved to chelpg-outputs/):
 """
 
 from pathlib import Path
+from collections import Counter
 from rush import exess
 from rush.client import RunError
 from rush.convert.pdb import from_pdb
@@ -30,6 +33,25 @@ import base64
 import math
 from rdkit import Chem
 from rdkit.Chem import rdDepictor
+
+# Shared charge-to-color mapping (RdBu: red=negative/electron-rich, blue=positive/electron-poor)
+Q_ABSMAX = 0.5  # fixed scale range
+
+
+def charge_to_rgb(q):
+    """Map charge to (r,g,b) floats. Negative=red (electron-rich), Positive=blue (electron-poor)."""
+    t = max(-1.0, min(1.0, q / Q_ABSMAX))
+    if t < 0:
+        r, g, b = 1.0, 1.0 + t * 0.6, 1.0 + t * 0.6
+    else:
+        r, g, b = 1.0 - t * 0.6, 1.0 - t * 0.6, 1.0
+    return (r, g, b)
+
+
+def charge_to_hex(q):
+    """Map charge to hex color string."""
+    r, g, b = charge_to_rgb(q)
+    return f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
 
 
 def generate_aspirin_2d_svg(
@@ -58,7 +80,7 @@ def generate_aspirin_2d_svg(
                 parent_idx = neighbor.GetIdx()
                 if parent_idx < n_heavy:
                     heavy_charges[parent_idx] += all_charges[i]
-                break
+                break  # H atoms have exactly one neighbor
 
     # Extract 2D coordinates
     coords = [
@@ -79,22 +101,6 @@ def generate_aspirin_2d_svg(
         return margin + (x - x_min) * scale, margin + (y_max - y) * scale
 
     svg_coords = [to_svg(x, y) for x, y in coords]
-
-    # Charge → color mapping (RdBu: red=negative/electron-rich, blue=positive/electron-poor)
-    q_absmax = 0.5  # fixed scale range
-
-    def charge_to_rgb(q):
-        """Map charge to RGB. Negative=red (electron-rich), Positive=blue (electron-poor)."""
-        t = max(-1.0, min(1.0, q / q_absmax))  # clamp to [-1, 1]
-        if t < 0:  # negative → red
-            r, g, b = 1.0, 1.0 + t * 0.6, 1.0 + t * 0.6
-        else:  # positive → blue
-            r, g, b = 1.0 - t * 0.6, 1.0 - t * 0.6, 1.0
-        return int(r * 255), int(g * 255), int(b * 255)
-
-    def charge_to_hex(q):
-        r, g, b = charge_to_rgb(q)
-        return f"#{r:02x}{g:02x}{b:02x}"
 
     lines = []
     lines.append(
@@ -150,7 +156,7 @@ def generate_aspirin_2d_svg(
         fill = charge_to_hex(q)
         # Circle radius scales with charge magnitude
         base_r = 14
-        mag_r = base_r + abs(q / q_absmax) * 6  # 14–20px
+        mag_r = base_r + abs(q / Q_ABSMAX) * 6  # 14–20px
 
         # Charge-colored halo (semi-transparent)
         lines.append(
@@ -198,9 +204,11 @@ def generate_aspirin_2d_svg(
     lines.append("<defs>")
     lines.append('<linearGradient id="chg-grad" x1="0" x2="1" y1="0" y2="0">')
     for pct in range(0, 101, 5):
-        q_val = -q_absmax + (pct / 100) * 2 * q_absmax
+        q_val = -Q_ABSMAX + (pct / 100) * 2 * Q_ABSMAX
         r, g, b = charge_to_rgb(q_val)
-        lines.append(f'  <stop offset="{pct}%" stop-color="rgb({r},{g},{b})"/>')
+        lines.append(
+            f'  <stop offset="{pct}%" stop-color="rgb({int(r * 255)},{int(g * 255)},{int(b * 255)})"/>'
+        )
     lines.append("</linearGradient>")
     lines.append("</defs>")
     # Bar
@@ -218,7 +226,7 @@ def generate_aspirin_2d_svg(
     lines.append(
         f'<text x="{bar_x:.0f}" y="{label_y}" text-anchor="middle" '
         f'fill="#ef4444" font-family="Arial, sans-serif" font-size="10" font-weight="bold">'
-        f"−{q_absmax}</text>"
+        f"−{Q_ABSMAX}</text>"
     )
     lines.append(
         f'<text x="{mid_x:.0f}" y="{label_y}" text-anchor="middle" '
@@ -227,7 +235,7 @@ def generate_aspirin_2d_svg(
     lines.append(
         f'<text x="{bar_x + bar_w:.0f}" y="{label_y}" text-anchor="middle" '
         f'fill="#60a5fa" font-family="Arial, sans-serif" font-size="10" font-weight="bold">'
-        f"+{q_absmax}</text>"
+        f"+{Q_ABSMAX}</text>"
     )
     # Title
     lines.append(
@@ -254,8 +262,6 @@ pdb_content = pdb_path.read_text(encoding="utf-8")
 trc = from_pdb(pdb_content)
 
 # Derive molecular formula from topology (Hill order: C first, H second, then alphabetical)
-from collections import Counter
-
 elem_counts = Counter(
     str(trc.topology.symbols[i]) for i in range(len(trc.topology.symbols))
 )
@@ -298,7 +304,11 @@ result = exess.chelpg(topology_path=topology_path, collect=True)
 if isinstance(result, RunError):
     print(f"Run failed: {result.message}")
 else:
-    json_path, hdf5_path = exess.save_energy_outputs(result)
+    save_result = exess.save_energy_outputs(result)
+    if isinstance(save_result, RunError):
+        print(f"Failed to save outputs: {save_result.message}")
+        exit(1)
+    json_path, hdf5_path = save_result
 
     # Extract charges from HDF5 if available
     charges = []
@@ -321,18 +331,7 @@ else:
     print("\nGenerating bar chart...")
     labels = [f"{s}{i}" for i, s in enumerate(symbols)]
 
-    # Color each bar using the same charge→color mapping as the 2D SVG
-    q_absmax_chart = 0.5
-
-    def bar_charge_to_rgb(q):
-        t = max(-1.0, min(1.0, q / q_absmax_chart))
-        if t < 0:
-            r, g, b = 1.0, 1.0 + t * 0.6, 1.0 + t * 0.6
-        else:
-            r, g, b = 1.0 - t * 0.6, 1.0 - t * 0.6, 1.0
-        return (r, g, b)
-
-    bar_colors = [bar_charge_to_rgb(q) for q in charges]
+    bar_colors = [charge_to_rgb(q) for q in charges]
 
     fig, ax = plt.subplots(figsize=(3.5, 6.5))
     fig.patch.set_facecolor("#000000")
@@ -368,17 +367,8 @@ else:
     view = py3Dmol.view(width=700, height=600)
     view.addModel(pdb_content, "pdb")
 
-    def charge_to_hex_3d(q):
-        """Map charge to hex using the same scale as 2D/bar chart (q_absmax=0.5)."""
-        t = max(-1.0, min(1.0, q / 0.5))
-        if t < 0:
-            r, g, b = 1.0, 1.0 + t * 0.6, 1.0 + t * 0.6
-        else:
-            r, g, b = 1.0 - t * 0.6, 1.0 - t * 0.6, 1.0
-        return "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
-
     for i, q in enumerate(charges):
-        color = charge_to_hex_3d(q)
+        color = charge_to_hex(q)
         # Note: 3Dmol uses 1-based serial numbering
         view.setStyle(
             {"serial": i + 1},

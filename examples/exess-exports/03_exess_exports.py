@@ -7,7 +7,7 @@ This script demonstrates how to:
 3. Use descriptor grids for electron density and ESP values
 4. Generate an interactive 3D visualization of electron density
 
-Tutorial: docs/tutorials/exess-exports.md
+Tutorial: https://exess.qdx.co/docs/tutorials/03-exess-exports.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables

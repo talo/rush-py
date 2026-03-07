@@ -5,7 +5,7 @@ This script demonstrates how to:
 1. Compute fragment-based interaction energy between a ligand and its environment
 2. Prepare a complex from PDB and run an end-to-end interaction energy calculation
 
-Tutorial: docs/tutorials/exess-interaction-energy.md
+Tutorial: https://exess.qdx.co/docs/tutorials/05-exess-interaction-energy.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
