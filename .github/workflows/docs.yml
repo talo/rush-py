@@ -1,0 +1,49 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build docs
+        run: uv run sphinx-build -b html docs/ docs/_build/html
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/html
+
+      - name: Push docs to exess-webapp
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.DOCS_DEPLOY_PAT }}
+        with:
+          source-directory: _build/html
+          destination-github-username: talo
+          destination-repository-name: exess-webapp
+          destination-directory: public/docs
+          target-branch: docs-update
+          create-target-branch-if-needed: true
+
+      - name: Create PR in exess-webapp
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DEPLOY_PAT }}
+        run: |
+          gh pr create \
+            --repo talo/exess-webapp \
+            --head docs-update \
+            --base main \
+            --title "Update docs from rush-py" \
+            --body "Automated docs update from rush-py commit ${{ github.sha }}" \
+            || echo "PR already exists, skipping"
