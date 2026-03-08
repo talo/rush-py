@@ -5,7 +5,7 @@ This script demonstrates how to:
 1. Run a single-point energy (SPE) calculation using Rush
 2. Extract and print the total energy and electronic properties
 
-Tutorial: docs/tutorials/02-exess-spe.md
+Tutorial: https://exess.qdx.co/docs/tutorials/02-exess-spe.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
@@ -50,8 +50,8 @@ if isinstance(res, RunError):
 
 # Save energy outputs to disk and load from file
 files = exess.save_energy_outputs(res)
-json_file = next((f for f in files if str(f).endswith('.json')), None)
-with open(json_file, encoding='utf-8') as f:
+json_file = next((f for f in files if str(f).endswith(".json")), None)
+with open(json_file, encoding="utf-8") as f:
     energy_data = json.load(f)
 
 # Access total energy from qmmbe object

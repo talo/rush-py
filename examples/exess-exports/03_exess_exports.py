@@ -7,7 +7,7 @@ This script demonstrates how to:
 3. Use descriptor grids for electron density and ESP values
 4. Generate an interactive 3D visualization of electron density
 
-Tutorial: docs/tutorials/exess-exports.md
+Tutorial: https://exess.qdx.co/docs/tutorials/03-exess-exports.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
@@ -18,7 +18,6 @@ Output files (saved to exports-outputs/):
 """
 
 import json
-import math
 from pathlib import Path
 
 import h5py
@@ -32,7 +31,7 @@ OUTPUT_DIR = Path(__file__).parent / "exports-outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Load topology for later use
-with open(TOPOLOGY_FILE, encoding='utf-8') as f:
+with open(TOPOLOGY_FILE, encoding="utf-8") as f:
     topology = json.load(f)
 
 METHOD = "RestrictedHF"
@@ -65,13 +64,15 @@ res = exess.energy(
 # Inspect the outputs
 print("Raw outputs:")
 for i, output in enumerate(res):
-    if 'path' in output:
+    if "path" in output:
         # First output: flat dict with path/format
-        print(f"  [{i}] path={output['path']}, format={output.get('format', 'unknown')}")
-    elif 'Json' in output:
+        print(
+            f"  [{i}] path={output['path']}, format={output.get('format', 'unknown')}"
+        )
+    elif "Json" in output:
         # Type-discriminated JSON output
         print(f"  [{i}] Json: path={output['Json']['path']}")
-    elif 'Hdf5' in output:
+    elif "Hdf5" in output:
         # Type-discriminated HDF5 output
         print(f"  [{i}] Hdf5: path={output['Hdf5']['path']}")
     else:
@@ -83,9 +84,9 @@ print(f"Saved files: {files}")
 
 # Load total energy from saved JSON file
 total_energy = None
-json_file = next((f for f in files if str(f).endswith('.json')), None)
+json_file = next((f for f in files if str(f).endswith(".json")), None)
 if json_file:
-    with open(json_file, encoding='utf-8') as f:
+    with open(json_file, encoding="utf-8") as f:
         json_data = json.load(f)
         total_energy = json_data.get("total_energy")
 
@@ -133,9 +134,9 @@ print("descriptor_grid coordinates, and descriptor_grid_weights.")
 
 # Try to get total_energy from Example 2 if not found earlier
 if total_energy is None:
-    json_file = next((f for f in files if str(f).endswith('.json')), None)
+    json_file = next((f for f in files if str(f).endswith(".json")), None)
     if json_file:
-        with open(json_file, encoding='utf-8') as f:
+        with open(json_file, encoding="utf-8") as f:
             json_data = json.load(f)
             total_energy = json_data.get("total_energy")
 
@@ -149,7 +150,7 @@ print("=" * 60)
 # Load descriptor grid data from the saved HDF5 file
 print("  Loading HDF5 from saved files...")
 grid_data = None
-hdf5_file = next((f for f in files if str(f).endswith('.hdf5')), None)
+hdf5_file = next((f for f in files if str(f).endswith(".hdf5")), None)
 
 if hdf5_file:
     with h5py.File(hdf5_file, "r") as h5f:
@@ -161,13 +162,15 @@ if hdf5_file:
             grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
         if "descriptor_grid" in h5f:
             grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
-    
+
     print(f"  ✓ Extracted keys from HDF5: {list(grid_data.keys())}")
     for key, val in grid_data.items():
         if isinstance(val, list) and len(val) > 0:
             # Check if values are scalars (1D) or coordinate tuples (2D)
             if isinstance(val[0], (int, float)):
-                print(f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]")
+                print(
+                    f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]"
+                )
             else:
                 # Coordinate data (e.g., descriptor_grid is list of [x,y,z])
                 arr = np.array(val)
@@ -187,16 +190,18 @@ else:
     if density_values:
         dens_arr = np.array(density_values)
         print(f"  Density range (raw): [{dens_arr.min():.6e}, {dens_arr.max():.6e}]")
-    
+
     # Interpolate irregular grid onto regular 3D grid using scipy.interpolate.griddata
     from scipy.interpolate import griddata
-    
+
     if len(density_values) > 0 and len(grid_coords) > 0:
-        print(f"\n  Interpolating {len(density_values)} surface points onto regular 3D grid...")
-        
+        print(
+            f"\n  Interpolating {len(density_values)} surface points onto regular 3D grid..."
+        )
+
         coords = np.array(grid_coords)
         values = np.array(density_values)
-        
+
         # Reshape coords if needed (should be Nx3)
         if coords.ndim == 1:
             coords = coords.reshape(-1, 3)
@@ -204,52 +209,59 @@ else:
             # HDF5 stores as (3, N) format: [x_coords, y_coords, z_coords]
             # Transpose to (N, 3) format: [[x,y,z], [x,y,z], ...]
             coords = coords.T
-        
+
         # Determine grid bounds from the point cloud
         x_min, y_min, z_min = coords.min(axis=0)
         x_max, y_max, z_max = coords.max(axis=0)
-        
+
         # Add fixed padding (3 bohr ≈ 1.6 Å beyond molecular extent)
         padding = 3.0  # bohr
-        x_min -= padding; x_max += padding
-        y_min -= padding; y_max += padding
-        z_min -= padding; z_max += padding
-        
+        x_min -= padding
+        x_max += padding
+        y_min -= padding
+        y_max += padding
+        z_min -= padding
+        z_max += padding
+
         # Choose grid resolution (~0.5 bohr spacing, cap at 80 points per axis)
         target_spacing = 0.5  # bohr
         nx = min(80, max(10, int((x_max - x_min) / target_spacing)))
         ny = min(80, max(10, int((y_max - y_min) / target_spacing)))
         nz = min(80, max(10, int((z_max - z_min) / target_spacing)))
-        
+
         dx = (x_max - x_min) / nx
         dy = (y_max - y_min) / ny
         dz = (z_max - z_min) / nz
-        
-        print(f"  Grid: {nx}×{ny}×{nz} = {nx*ny*nz} points")
-        print(f"  Bounds: x=[{x_min:.2f},{x_max:.2f}] y=[{y_min:.2f},{y_max:.2f}] z=[{z_min:.2f},{z_max:.2f}]")
+
+        print(f"  Grid: {nx}×{ny}×{nz} = {nx * ny * nz} points")
+        print(
+            f"  Bounds: x=[{x_min:.2f},{x_max:.2f}] y=[{y_min:.2f},{y_max:.2f}] z=[{z_min:.2f},{z_max:.2f}]"
+        )
         print(f"  Spacing: ({dx:.4f}, {dy:.4f}, {dz:.4f}) bohr")
-        
+
         # Create regular grid
         xi = np.linspace(x_min, x_max, nx)
         yi = np.linspace(y_min, y_max, ny)
         zi = np.linspace(z_min, z_max, nz)
-        
-        grid_x, grid_y, grid_z = np.meshgrid(xi, yi, zi, indexing='ij')
+
+        grid_x, grid_y, grid_z = np.meshgrid(xi, yi, zi, indexing="ij")
         grid_points = np.column_stack([grid_x.ravel(), grid_y.ravel(), grid_z.ravel()])
-        
+
         # Interpolate using linear method, fill outside convex hull with NaN
         # so we can diagnose how many points are outside the convex hull
-        print(f"  Interpolating (linear, fill_value=NaN for diagnosis)...")
-        grid_values = griddata(coords, values, grid_points, method='linear', fill_value=np.nan)
-        
+        print("  Interpolating (linear, fill_value=NaN for diagnosis)...")
+        grid_values = griddata(
+            coords, values, grid_points, method="linear", fill_value=np.nan
+        )
+
         # ============ Grid statistics ============
         total = len(grid_values)
         nan_count = np.sum(np.isnan(grid_values))
         finite_count = total - nan_count
-        
+
         # Now set NaN → 0.0 (density outside molecular surface is zero)
         grid_values = np.where(np.isnan(grid_values), 0.0, grid_values)
-        
+
         # Clip noise: use percentile-based threshold instead of fixed 1e-10
         # The old threshold of 1e-10 was wiping ALL data if values are very small!
         if finite_count > 0:
@@ -264,19 +276,23 @@ else:
                 else:
                     noise_threshold = 0.0  # no positive values, skip clipping
                 grid_values[(grid_values > 0) & (grid_values < noise_threshold)] = 0.0
-        
+
         # Also zero out negative interpolation artifacts
         grid_values[grid_values < 0] = 0.0
-        
+
         # Final statistics
         zero_count = np.sum(grid_values == 0.0)
         nonzero_count = total - zero_count
-        
+
         grid_values = grid_values.astype(np.float32)
-        print(f"\n  ✓ Final grid range: [{grid_values.min():.3e}, {grid_values.max():.3e}]")
-        print(f"  Points with data: {nonzero_count} ({100*nonzero_count/total:.1f}%)")
-        print(f"  Points zero: {zero_count} ({100*zero_count/total:.1f}%)")
-        
+        print(
+            f"\n  ✓ Final grid range: [{grid_values.min():.3e}, {grid_values.max():.3e}]"
+        )
+        print(
+            f"  Points with data: {nonzero_count} ({100 * nonzero_count / total:.1f}%)"
+        )
+        print(f"  Points zero: {zero_count} ({100 * zero_count / total:.1f}%)")
+
         # Calculate percentiles for visualization defaults
         iso_p1 = None
         iso_p10 = None
@@ -286,9 +302,9 @@ else:
             iso_p1 = np.percentile(nz_vals, 1)
             iso_p10 = np.percentile(nz_vals, 10)
             iso_p90 = np.percentile(nz_vals, 90)
-        
+
         density_3d = grid_values.reshape((nx, ny, nz))
-        
+
         # Convert bounds from bohr to angstrom for cube file
         ANG_TO_BOHR = 1.8897259886
         GRID_MIN = [x_min / ANG_TO_BOHR, y_min / ANG_TO_BOHR, z_min / ANG_TO_BOHR]
@@ -296,7 +312,7 @@ else:
     else:
         print("ERROR: No grid data to interpolate. Skipping visualization.")
         density_3d = None
-    
+
     if density_3d is not None:
         # ---- Build Gaussian Cube file from grid data ----
         # Cube format: https://gaussian.com/cubegen/
@@ -307,9 +323,24 @@ else:
 
         # Atomic numbers lookup
         ATOMIC_NUMBERS = {
-            "H": 1, "He": 2, "Li": 3, "Be": 4, "B": 5, "C": 6, "N": 7,
-            "O": 8, "F": 9, "Ne": 10, "Na": 11, "Mg": 12, "Al": 13,
-            "Si": 14, "P": 15, "S": 16, "Cl": 17, "Ar": 18,
+            "H": 1,
+            "He": 2,
+            "Li": 3,
+            "Be": 4,
+            "B": 5,
+            "C": 6,
+            "N": 7,
+            "O": 8,
+            "F": 9,
+            "Ne": 10,
+            "Na": 11,
+            "Mg": 12,
+            "Al": 13,
+            "Si": 14,
+            "P": 15,
+            "S": 16,
+            "Cl": 17,
+            "Ar": 18,
         }
 
         symbols = topology["symbols"]
@@ -327,7 +358,9 @@ else:
         cube_lines.append("Electron Density")
         cube_lines.append(f"Generated by Rush-Py EXESS Exports ({METHOD}/{BASIS})")
         # Number of atoms, origin
-        cube_lines.append(f"{n_atoms:5d} {origin_bohr[0]:12.6f} {origin_bohr[1]:12.6f} {origin_bohr[2]:12.6f}")
+        cube_lines.append(
+            f"{n_atoms:5d} {origin_bohr[0]:12.6f} {origin_bohr[1]:12.6f} {origin_bohr[2]:12.6f}"
+        )
         # Number of voxels along each axis and step vector
         cube_lines.append(f"{nx:5d} {spacing_bohr[0]:12.6f} {0.0:12.6f} {0.0:12.6f}")
         cube_lines.append(f"{ny:5d} {0.0:12.6f} {spacing_bohr[1]:12.6f} {0.0:12.6f}")
@@ -335,10 +368,12 @@ else:
         # Atom lines
         for i in range(n_atoms):
             at_num = ATOMIC_NUMBERS.get(symbols[i], 0)
-            x_b = geometry[3*i] * ANG_TO_BOHR
-            y_b = geometry[3*i+1] * ANG_TO_BOHR
-            z_b = geometry[3*i+2] * ANG_TO_BOHR
-            cube_lines.append(f"{at_num:5d} {float(at_num):12.6f} {x_b:12.6f} {y_b:12.6f} {z_b:12.6f}")
+            x_b = geometry[3 * i] * ANG_TO_BOHR
+            y_b = geometry[3 * i + 1] * ANG_TO_BOHR
+            z_b = geometry[3 * i + 2] * ANG_TO_BOHR
+            cube_lines.append(
+                f"{at_num:5d} {float(at_num):12.6f} {x_b:12.6f} {y_b:12.6f} {z_b:12.6f}"
+            )
 
         # Volumetric data (fast axis = z, then y, then x — Cube convention)
         # Reshape density to 3D array and write in Cube order
@@ -358,7 +393,7 @@ else:
         # Also build ESP cube if available
         esp_cube_str = None
         if esp_values and len(esp_values) >= expected_points:
-            esp_lines = cube_lines[:6 + n_atoms]  # reuse header
+            esp_lines = cube_lines[: 6 + n_atoms]  # reuse header
             esp_lines[0] = "Electrostatic Potential"
             esp_arr = np.array(esp_values[:expected_points]).reshape((nx, ny, nz))
             for ix in range(nx):
@@ -375,52 +410,60 @@ else:
 
         # Save cube files
         cube_path = OUTPUT_DIR / "electron_density.cube"
-        cube_path.write_text(cube_str, encoding='utf-8')
+        cube_path.write_text(cube_str, encoding="utf-8")
         print(f"  ✓ Cube file saved: {cube_path}")
 
         if esp_cube_str:
             esp_cube_path = OUTPUT_DIR / "esp.cube"
-            esp_cube_path.write_text(esp_cube_str, encoding='utf-8')
+            esp_cube_path.write_text(esp_cube_str, encoding="utf-8")
             print(f"  ✓ ESP cube file saved: {esp_cube_path}")
 
         # ---- Build XYZ string for 3Dmol.js ----
         xyz_lines = [str(n_atoms), f"{METHOD}/{BASIS} benzene"]
         for i in range(n_atoms):
             xyz_lines.append(
-                f"{symbols[i]}  {geometry[3*i]:.6f}  {geometry[3*i+1]:.6f}  {geometry[3*i+2]:.6f}"
+                f"{symbols[i]}  {geometry[3 * i]:.6f}  {geometry[3 * i + 1]:.6f}  {geometry[3 * i + 2]:.6f}"
             )
         xyz_str = "\n".join(xyz_lines)
 
         # ---- Generate interactive HTML ----
         energy_display = f"{total_energy:.8f} Eh" if total_energy is not None else "N/A"
-        energy_kcal = f"{total_energy * 627.509474:.2f} kcal/mol" if total_energy is not None else ""
+        energy_kcal = (
+            f"{total_energy * 627.509474:.2f} kcal/mol"
+            if total_energy is not None
+            else ""
+        )
 
         # ---- Use Three.js Marching Cubes viewer ----
         # Load the template and embed the cube data
         template_path = Path(__file__).parent / "viewer_template.html"
         if template_path.exists():
-            with open(template_path, encoding='utf-8') as f:
+            with open(template_path, encoding="utf-8") as f:
                 html_template = f.read()
             # Escape cube data for embedding in JavaScript template literal
-            cube_text_escaped = cube_str.replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
-            html_content = html_template.replace('__CUBE_DATA__', cube_text_escaped)
-            
+            cube_text_escaped = (
+                cube_str.replace("\\", "\\\\").replace("`", "\\`").replace("${", "\\${")
+            )
+            html_content = html_template.replace("__CUBE_DATA__", cube_text_escaped)
+
             # Set isovalue slider defaults to show full outer electron density
             # Use P1 as min (noise floor), P10 as default (full cloud), P90 as max (dense core)
             if iso_p1 is not None and iso_p10 is not None and iso_p90 is not None:
-                html_content = html_content.replace('__ISO_MIN__', f'{iso_p1:.6e}')
-                html_content = html_content.replace('__ISO_DEFAULT__', f'{iso_p10:.6e}')
-                html_content = html_content.replace('__ISO_MAX__', f'{iso_p90:.6e}')
-            
-            print(f"  ✓ Using Three.js Marching Cubes viewer (fast, beautiful isosurface rendering)")
+                html_content = html_content.replace("__ISO_MIN__", f"{iso_p1:.6e}")
+                html_content = html_content.replace("__ISO_DEFAULT__", f"{iso_p10:.6e}")
+                html_content = html_content.replace("__ISO_MAX__", f"{iso_p90:.6e}")
+
+            print(
+                "  ✓ Using Three.js Marching Cubes viewer (fast, beautiful isosurface rendering)"
+            )
         else:
             print(f"  ⚠ viewer_template.html not found at {template_path}")
             html_content = "<html><body><h1>Error: viewer_template.html not found</h1></body></html>"
 
         html_path = OUTPUT_DIR / "density_visualization.html"
-        html_path.write_text(html_content, encoding='utf-8')
+        html_path.write_text(html_content, encoding="utf-8")
         print(f"  ✓ Visualization saved: {html_path}")
-        print(f"  Open in a browser to explore the electron density isosurface!")
+        print("  Open in a browser to explore the electron density isosurface!")
     print()
     print("Features:")
     print("  • Rotate: click & drag | Zoom: scroll | Pan: right-click drag")

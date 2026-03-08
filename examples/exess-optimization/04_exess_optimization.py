@@ -7,7 +7,7 @@ This script demonstrates how to:
 3. Work with the optimization trajectory output
 4. Generate an interactive HTML visualization of results
 
-Tutorial: docs/tutorials/exess-optimization.md
+Tutorial: https://exess.qdx.co/docs/tutorials/04-exess-optimization.html
 
 Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
@@ -60,7 +60,10 @@ print("Working with the optimization output")
 print("=" * 60)
 
 out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
-with open(out_traj_path, encoding='utf-8') as f1, open(out_info_path, encoding='utf-8') as f2:
+with (
+    open(out_traj_path, encoding="utf-8") as f1,
+    open(out_info_path, encoding="utf-8") as f2,
+):
     out_traj_raw, out_info = [json.load(f) for f in (f1, f2)]
 
 print("Num steps to convergence:", len(out_traj_raw))
@@ -77,11 +80,11 @@ energy_key = "total_energy" if "total_energy" in out_info[-1] else "energy"
 if energy_key in out_info[-1]:
     print(f"  Total energy: {out_info[-1][energy_key]:.5f} Eh")
 else:
-    print(f"  Energy: (not available in output)")
+    print("  Energy: (not available in output)")
 if "max_gradient_component" in out_info[-1]:
     print(f"  Max gradient component: {out_info[-1]['max_gradient_component']:.2} Å")
 else:
-    print(f"  Max gradient component: (not available in output)")
+    print("  Max gradient component: (not available in output)")
 
 
 # ===== Generate HTML Visualization =====
@@ -278,9 +281,9 @@ setupViewer('viewer-final', {final_xyz_js});
 </html>"""
 
 html_path = OUTPUT_DIR / "optimization_results.html"
-html_path.write_text(html_content, encoding='utf-8')
+html_path.write_text(html_content, encoding="utf-8")
 print(f"✓ Visualization saved: {html_path}")
-print(f"  Open in a browser to view interactive results.")
+print("  Open in a browser to view interactive results.")
 
 
 # ===== Example 2: ML optimization =====
