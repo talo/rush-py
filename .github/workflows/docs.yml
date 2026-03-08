@@ -38,16 +38,23 @@ jobs:
           publish_dir: docs/_build/html
 
       - name: Push docs to exess-webapp
-        uses: cpina/github-action-push-to-another-repository@v1
         env:
-          API_TOKEN_GITHUB: ${{ secrets.DOCS_DEPLOY_PAT }}
-        with:
-          source-directory: docs/_build/html
-          destination-github-username: talo
-          destination-repository-name: exess-webapp
-          destination-directory: public/docs
-          target-branch: docs-update
-          create-target-branch-if-needed: true
+          GH_TOKEN: ${{ secrets.DOCS_DEPLOY_PAT }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/talo/exess-webapp.git" /tmp/exess-webapp
+          cd /tmp/exess-webapp
+          git switch docs-update 2>/dev/null || git switch -c docs-update
+          mkdir -p public/docs
+          cp -r "$GITHUB_WORKSPACE/docs/_build/html/." public/docs/
+          git add public/docs
+          if git diff --cached --quiet; then
+            echo "No docs changes to push"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "Update docs from rush-py commit ${GITHUB_SHA}"
+            git push origin docs-update
+          fi
 
       - name: Create or update PR in exess-webapp
         env:
