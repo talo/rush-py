@@ -121,39 +121,6 @@ MODULE_LOCK = (
 _SDK_SESSION_ID = str(uuid.uuid4())
 
 
-def _get_sdk_tags(rex: str) -> list[str]:
-    """Generate SDK metadata tags for run submission."""
-    tags = []
-    
-    # Source tag (always rushpy for SDK submissions)
-    tags.append("source=rushpy")
-    
-    # SDK version
-    try:
-        version = pkg_version("rush-py")
-        tags.append(f"sdk_version={version}")
-    except Exception:
-        pass
-    
-    # SDK session ID (unique per process)
-    tags.append(f"sdk_session_id={_SDK_SESSION_ID}")
-    
-    # Python version
-    tags.append(f"sdk_python={platform.python_version()}")
-    
-    # Platform (OS/arch)
-    machine = platform.machine()
-    system = platform.system().lower()
-    tags.append(f"sdk_platform={system}/{machine}")
-    
-    # Infer which SDK function submitted this run
-    sdk_function = _infer_sdk_function()
-    if sdk_function:
-        tags.append(f"sdk_function={sdk_function}")
-    
-    return tags
-
-
 def _infer_sdk_function() -> str | None:
     """Infer which SDK function called _submit_rex() by walking the stack."""
     try:
@@ -167,6 +134,39 @@ def _infer_sdk_function() -> str | None:
     except Exception:
         pass
     return None
+
+
+def _get_sdk_tags(rex: str) -> list[str]:
+    """Generate SDK metadata tags for run submission."""
+    tags = []
+
+    # Source tag (always rushpy for SDK submissions)
+    tags.append("source=rushpy")
+
+    # SDK version
+    try:
+        version = pkg_version("rush-py")
+        tags.append(f"sdk_version={version}")
+    except Exception:
+        pass
+
+    # SDK session ID (unique per process)
+    tags.append(f"sdk_session_id={_SDK_SESSION_ID}")
+
+    # Python version
+    tags.append(f"sdk_python={platform.python_version()}")
+
+    # Platform (OS/arch)
+    machine = platform.machine()
+    system = platform.system().lower()
+    tags.append(f"sdk_platform={system}/{machine}")
+
+    # Infer which SDK function submitted this run
+    sdk_function = _infer_sdk_function()
+    if sdk_function:
+        tags.append(f"sdk_function={sdk_function}")
+
+    return tags
 
 
 @dataclass
@@ -675,13 +675,13 @@ def delete_run(run_id: str) -> None:
 def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     # Auto-generate SDK metadata tags
     auto_tags = _get_sdk_tags(rex)
-    
+
     # Merge auto-tags with user-provided tags (user tags take priority)
     if run_opts.tags:
         merged_tags = run_opts.tags + auto_tags
     else:
         merged_tags = auto_tags
-    
+
     # Create a new RunOpts with merged tags
     run_opts_with_tags = RunOpts(
         name=run_opts.name,
@@ -689,7 +689,7 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
         tags=merged_tags,
         email=run_opts.email,
     )
-    
+
     mutation = gql("""
         mutation EvalRex($input: CreateRun!) {
             eval(input: $input) {
