@@ -153,7 +153,7 @@ is well-suited for large-scale screening where fast, per-atom forces or
 vibrational frequencies are needed. Frequency calculations are more expensive.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.nnxtb.</span></span><span class="sig-name descname"><span class="pre">NnxtbResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_mev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces_mev_per_angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies_inv_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/nnxtb.html#NnxtbResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.nnxtb.NnxtbResults" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rush.nnxtb.</span></span><span class="sig-name descname"><span class="pre">NnxtbResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_mev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces_mev_per_angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies_inv_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/nnxtb.html#NnxtbResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.nnxtb.NnxtbResults" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parsed nn-xTB results.</p>
 <p>Use this to load JSON output from the Rush object store. When calling
@@ -171,17 +171,17 @@ like <cite>NnxtbResults(**data)</cite>.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults.energy_mev">
-<span class="sig-name descname"><span class="pre">energy_mev</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.nnxtb.NnxtbResults.energy_mev" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">energy_mev</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#rush.nnxtb.NnxtbResults.energy_mev" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults.forces_mev_per_angstrom">
-<span class="sig-name descname"><span class="pre">forces_mev_per_angstrom</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.nnxtb.NnxtbResults.forces_mev_per_angstrom" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">forces_mev_per_angstrom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rush.nnxtb.NnxtbResults.forces_mev_per_angstrom" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rush.nnxtb.NnxtbResults.frequencies_inv_cm">
-<span class="sig-name descname"><span class="pre">frequencies_inv_cm</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.nnxtb.NnxtbResults.frequencies_inv_cm" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">frequencies_inv_cm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rush.nnxtb.NnxtbResults.frequencies_inv_cm" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -250,8 +250,8 @@ Defaults to false.</p></li>
   </div>
 </footer>
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
       <script src="_static/shibuya.js?v=cac61aee"></script></body>
 </html>

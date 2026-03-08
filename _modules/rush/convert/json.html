@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rush.convert.json - rush documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
-    setColorMode(localStorage._theme||"auto");
+    setColorMode(localStorage._theme||"dark");
   </script><link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=e1a1ceaf" />
     <link rel="stylesheet" type="text/css" href="../../../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=67757470" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,11 +66,12 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/01-exess-chelpg.html">Tutorial 1: Understanding Your Molecule’s Charge Distribution — CHELPG Analysis in 2 Minutes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/02-exess-exports.html">Exporting Electron Density, ESP, and Other Properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/03-exess-optimization.html">Geometry Optimization: Finding the Lowest-Energy Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/04-exess-interaction-energy.html">Protein–Ligand Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/05-exess-qmmm.html">QM/MM Molecular Dynamics: Simulating Motion with Quantum Accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Rush Modules</a><ul>
@@ -143,95 +145,130 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="3"><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="4">
 </span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="7">
-</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">..mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRC</span><span class="p">,</span> <span class="n">Chains</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">Topology</span>
-</span><span data-line="9">
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathLike</span>
+</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeGuard</span><span class="p">,</span> <span class="n">overload</span>
 </span><span data-line="10">
+</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">..mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRC</span><span class="p">,</span> <span class="n">Chains</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="n">StrPath</span> <span class="o">=</span> <span class="n">PathLike</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="14">
+</span><span data-line="15">
+</span><span data-line="16"><span class="k">def</span><span class="w"> </span><span class="nf">_trcs_from_dicts</span><span class="p">(</span><span class="n">trc_dicts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
+</span><span data-line="17">    <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="18">        <span class="n">TRC</span><span class="p">(</span>
+</span><span data-line="19">            <span class="n">topology</span><span class="o">=</span><span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]),</span>
+</span><span data-line="20">            <span class="n">residues</span><span class="o">=</span><span class="n">Residues</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]),</span>
+</span><span data-line="21">            <span class="n">chains</span><span class="o">=</span><span class="n">Chains</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]),</span>
+</span><span data-line="22">        <span class="p">)</span>
+</span><span data-line="23">        <span class="k">for</span> <span class="n">trc_dict</span> <span class="ow">in</span> <span class="n">trc_dicts</span>
+</span><span data-line="24">    <span class="p">]</span>
+</span><span data-line="25">
+</span><span data-line="26">
+</span><span data-line="27"><span class="k">def</span><span class="w"> </span><span class="nf">_is_dict_list</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+</span><span data-line="28">    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+</span><span data-line="29">
+</span><span data-line="30">
+</span><span data-line="31"><span class="k">def</span><span class="w"> </span><span class="nf">_is_path_triplet</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]]:</span>
+</span><span data-line="32">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+</span><span data-line="33">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="34">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+</span><span data-line="35">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="36">    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+</span><span data-line="37">
+</span><span data-line="38">
+</span><span data-line="39"><span class="k">def</span><span class="w"> </span><span class="nf">_is_str_path</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]:</span>
+</span><span data-line="40">    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">)</span>
+</span><span data-line="41">
+</span><span data-line="42">
+</span><span data-line="43"><span class="k">def</span><span class="w"> </span><span class="nf">_normalize_trc_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span data-line="44">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;topology&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+</span><span data-line="45">        <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+</span><span data-line="46">    <span class="k">if</span> <span class="n">_is_dict_list</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+</span><span data-line="47">        <span class="k">return</span> <span class="n">data</span>
+</span><span data-line="48">    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected TRC JSON dict or list of dicts&quot;</span><span class="p">)</span>
+</span><span data-line="49">
+</span><span data-line="50">
+</span><span data-line="51"><span class="nd">@overload</span>
+</span><span data-line="52"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span><span class="p">:</span> <span class="o">...</span>
+</span><span data-line="53">
+</span><span data-line="54">
+</span><span data-line="55"><span class="nd">@overload</span>
+</span><span data-line="56"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">:</span> <span class="n">StrPath</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span> <span class="o">...</span>
+</span><span data-line="57">
+</span><span data-line="58">
 <div class="viewcode-block" id="from_json">
 <a class="viewcode-back" href="../../../rush.convert.html#rush.convert.from_json">[docs]</a>
-</span><span data-line="11"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span>
-</span><span data-line="12">    <span class="n">json_content</span><span class="p">:</span> <span class="p">(</span>
-</span><span data-line="13">        <span class="nb">str</span>
-</span><span data-line="14">        <span class="o">|</span> <span class="n">Path</span>
-</span><span data-line="15">        <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span>
-</span><span data-line="16">        <span class="o">|</span> <span class="nb">dict</span>
-</span><span data-line="17">        <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>
-</span><span data-line="18">        <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-</span><span data-line="19">    <span class="p">),</span>
-</span><span data-line="20"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
-</span><span data-line="21"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="22"><span class="sd">    Load TRC structures from JSON.</span>
-</span><span data-line="23">
-</span><span data-line="24"><span class="sd">    Args:</span>
-</span><span data-line="25"><span class="sd">        json_content: JSON string content</span>
-</span><span data-line="26">
-</span><span data-line="27"><span class="sd">    Returns:</span>
-</span><span data-line="28"><span class="sd">        TRC structure or list of TRC structures</span>
-</span><span data-line="29"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="30">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="31">        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
-</span><span data-line="32">    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
-</span><span data-line="33">        <span class="k">with</span> <span class="n">json_content</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="34">            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</span><span data-line="35">    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-</span><span data-line="36">        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span data-line="37">        <span class="k">with</span> <span class="p">(</span>
-</span><span data-line="38">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
-</span><span data-line="39">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
-</span><span data-line="40">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
-</span><span data-line="41">        <span class="p">):</span>
-</span><span data-line="42">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">t_f</span><span class="p">)</span>
-</span><span data-line="43">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_f</span><span class="p">)</span>
-</span><span data-line="44">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c_f</span><span class="p">)</span>
-</span><span data-line="45">    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span data-line="46">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">json_content</span><span class="p">]</span>
-</span><span data-line="47">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="48">        <span class="n">data</span> <span class="o">=</span> <span class="n">json_content</span>
-</span><span data-line="49">
-</span><span data-line="50">    <span class="c1"># Turn single TRCs into lists</span>
-</span><span data-line="51">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;topology&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-</span><span data-line="52">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
-</span><span data-line="53">
-</span><span data-line="54">    <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="55">        <span class="n">TRC</span><span class="p">(</span>
-</span><span data-line="56">            <span class="n">topology</span><span class="o">=</span><span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]),</span>
-</span><span data-line="57">            <span class="n">residues</span><span class="o">=</span><span class="n">Residues</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]),</span>
-</span><span data-line="58">            <span class="n">chains</span><span class="o">=</span><span class="n">Chains</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]),</span>
-</span><span data-line="59">        <span class="p">)</span>
-</span><span data-line="60">        <span class="k">for</span> <span class="n">trc</span> <span class="ow">in</span> <span class="n">data</span>
-</span><span data-line="61">    <span class="p">]</span>
-</span><span data-line="62">
-</span><span data-line="63">    <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trcs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">trcs</span></div>
-
+</span><span data-line="59"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span>
+</span><span data-line="60">    <span class="n">json_content</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">StrPath</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+</span><span data-line="61"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
+</span><span data-line="62"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="63"><span class="sd">    Load TRC structures from JSON.</span>
 </span><span data-line="64">
-</span><span data-line="65">
+</span><span data-line="65"><span class="sd">    Args:</span>
+</span><span data-line="66"><span class="sd">        json_content: JSON file path, dict, list of dicts, or (topology, residues, chains) paths</span>
+</span><span data-line="67">
+</span><span data-line="68"><span class="sd">    Returns:</span>
+</span><span data-line="69"><span class="sd">        TRC structure or list of TRC structures</span>
+</span><span data-line="70"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="71">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span data-line="72">        <span class="n">trcs</span> <span class="o">=</span> <span class="n">_trcs_from_dicts</span><span class="p">([</span><span class="n">json_content</span><span class="p">])</span>
+</span><span data-line="73">        <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="74">
+</span><span data-line="75">    <span class="k">if</span> <span class="n">_is_dict_list</span><span class="p">(</span><span class="n">json_content</span><span class="p">):</span>
+</span><span data-line="76">        <span class="k">return</span> <span class="n">_trcs_from_dicts</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
+</span><span data-line="77">
+</span><span data-line="78">    <span class="k">if</span> <span class="n">_is_path_triplet</span><span class="p">(</span><span class="n">json_content</span><span class="p">):</span>
+</span><span data-line="79">        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="80">        <span class="k">with</span> <span class="p">(</span>
+</span><span data-line="81">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
+</span><span data-line="82">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
+</span><span data-line="83">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
+</span><span data-line="84">        <span class="p">):</span>
+</span><span data-line="85">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">t_f</span><span class="p">)</span>
+</span><span data-line="86">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_f</span><span class="p">)</span>
+</span><span data-line="87">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c_f</span><span class="p">)</span>
+</span><span data-line="88">        <span class="n">trcs</span> <span class="o">=</span> <span class="n">_trcs_from_dicts</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+</span><span data-line="89">        <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="90">
+</span><span data-line="91">    <span class="k">if</span> <span class="n">_is_str_path</span><span class="p">(</span><span class="n">json_content</span><span class="p">):</span>
+</span><span data-line="92">        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
+</span><span data-line="93">        <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="94">            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="95">        <span class="n">trc_dicts</span> <span class="o">=</span> <span class="n">_normalize_trc_json</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span data-line="96">        <span class="k">return</span> <span class="n">_trcs_from_dicts</span><span class="p">(</span><span class="n">trc_dicts</span><span class="p">)</span>
+</span><span data-line="97">
+</span><span data-line="98">    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+</span><span data-line="99">        <span class="s2">&quot;Expected a path, dict, list of dicts, or (topology, residues, chains) paths&quot;</span>
+</span><span data-line="100">    <span class="p">)</span></div>
+
+</span><span data-line="101">
+</span><span data-line="102">
 <div class="viewcode-block" id="to_json">
 <a class="viewcode-back" href="../../../rush.convert.html#rush.convert.to_json">[docs]</a>
-</span><span data-line="66"><span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="n">trcs</span><span class="p">:</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]:</span>
-</span><span data-line="67"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="68"><span class="sd">    Convert TRC structures to JSON.</span>
-</span><span data-line="69">
-</span><span data-line="70"><span class="sd">    Args:</span>
-</span><span data-line="71"><span class="sd">        trcs: TRC structure or list of TRC structures</span>
-</span><span data-line="72">
-</span><span data-line="73"><span class="sd">    Returns:</span>
-</span><span data-line="74"><span class="sd">        JSON-compatible dict or list of dicts</span>
-</span><span data-line="75"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="76">
-</span><span data-line="77">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trcs</span><span class="p">,</span> <span class="n">TRC</span><span class="p">):</span>
-</span><span data-line="78">        <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">trcs</span><span class="p">]</span>
-</span><span data-line="79">
-</span><span data-line="80">    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="81">        <span class="p">{</span>
-</span><span data-line="82">            <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
-</span><span data-line="83">            <span class="s2">&quot;residues&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
-</span><span data-line="84">            <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
-</span><span data-line="85">        <span class="p">}</span>
-</span><span data-line="86">        <span class="k">for</span> <span class="n">trc</span> <span class="ow">in</span> <span class="n">trcs</span>
-</span><span data-line="87">    <span class="p">]</span>
-</span><span data-line="88">
-</span><span data-line="89">    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">data</span></div>
+</span><span data-line="103"><span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="n">trcs</span><span class="p">:</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]:</span>
+</span><span data-line="104"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="105"><span class="sd">    Convert TRC structures to JSON.</span>
+</span><span data-line="106">
+</span><span data-line="107"><span class="sd">    Args:</span>
+</span><span data-line="108"><span class="sd">        trcs: TRC structure or list of TRC structures</span>
+</span><span data-line="109">
+</span><span data-line="110"><span class="sd">    Returns:</span>
+</span><span data-line="111"><span class="sd">        JSON-compatible dict or list of dicts</span>
+</span><span data-line="112"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="113">
+</span><span data-line="114">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trcs</span><span class="p">,</span> <span class="n">TRC</span><span class="p">):</span>
+</span><span data-line="115">        <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">trcs</span><span class="p">]</span>
+</span><span data-line="116">    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="117">        <span class="p">{</span>
+</span><span data-line="118">            <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+</span><span data-line="119">            <span class="s2">&quot;residues&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+</span><span data-line="120">            <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+</span><span data-line="121">        <span class="p">}</span>
+</span><span data-line="122">        <span class="k">for</span> <span class="n">trc</span> <span class="ow">in</span> <span class="n">trcs</span>
+</span><span data-line="123">    <span class="p">]</span>
+</span><span data-line="124">    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">data</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -261,8 +298,8 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </footer>
       <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../../../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

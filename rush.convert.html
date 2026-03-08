@@ -156,7 +156,7 @@ data-aria-dark="Switch to auto color mode">
 <dd><p>Load TRC structures from JSON.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>json_content</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>tuple</em><em>[</em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>, </em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>dict</em><em> | </em><em>list</em><em>[</em><em>dict</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>Path</em><em>, </em><em>...</em><em>]</em>) – JSON string content</p>
+<dd class="field-odd"><p><strong>json_content</strong> (<em>Sequence</em><em>[</em><em>PathLike</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>dict</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>list</em><em>[</em><em>dict</em><em>]</em>) – JSON file path, dict, list of dicts, or (topology, residues, chains) paths</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>TRC structure or list of TRC structures</p>
@@ -251,7 +251,7 @@ to ensure uniqueness in the merged structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trcs</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em> | </em><em>list</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em>] </em><em>| </em><em>tuple</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em>, </em><em>...</em><em>]</em>) – TRC objects or file paths. If a single list/tuple is provided,
+<li><p><strong>trcs</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em> | </em><em>Sequence</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><em>str</em><em> | </em><em>Path</em><em>]</em>) – TRC objects or file paths. If a single list/tuple is provided,
 it is treated as the full set of inputs.</p></li>
 <li><p><strong>output_file</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Optional path to write the merged TRC JSON.</p></li>
 <li><p><strong>skip_validation</strong> (<em>bool</em>) – If True, skip validation of the merged TRC.</p></li>
@@ -364,8 +364,8 @@ it is treated as the full set of inputs.</p></li>
   </div>
 </footer>
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
       <script src="_static/shibuya.js?v=cac61aee"></script></body>
 </html>
