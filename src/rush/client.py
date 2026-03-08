@@ -36,7 +36,15 @@ def _load_dotenv() -> dict[str, str]:
         return _dotenv_cache
 
     _dotenv_cache = {}
-    for path in [Path.cwd() / ".env", Path.home() / ".rush" / ".env"]:
+
+    # Walk up from cwd to find the nearest .env, then fall back to ~/.rush/.env
+    candidates: list[Path] = []
+    cwd = Path.cwd().resolve()
+    for parent in [cwd, *cwd.parents]:
+        candidates.append(parent / ".env")
+    candidates.append(Path.home() / ".rush" / ".env")
+
+    for path in candidates:
         if path.is_file():
             with open(path) as f:
                 for line in f:

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- `.env` file detection now walks up parent directories from `cwd`, so examples subfolders find the repo-root `.env` automatically
+
+### Added
+- CI changelog check in lint workflow — PRs must update `CHANGELOG.md`
+- workflow to auto deploy docs to gh-pages and exess webapp when merged to main
+
 ## 6.6.0
 
 ### Changed
