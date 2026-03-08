@@ -27,9 +27,9 @@ if sys.platform == 'win32':
     # Try to set stdout/stderr encoding (Python 3.7+)
     try:
         if hasattr(sys.stdout, 'reconfigure'):
-            sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # type: ignore
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
         if hasattr(sys.stderr, 'reconfigure'):
-            sys.stderr.reconfigure(encoding='utf-8', errors='replace')  # type: ignore
+            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
     except (AttributeError, ValueError):
         # Fallback if reconfigure is not available
         pass
@@ -114,7 +114,7 @@ def run_example(example_path: Path, show_output: bool = True) -> tuple[bool, str
             return False, error_msg
             
     except subprocess.TimeoutExpired:
-        error_msg = f"Example timed out after 10 minutes"
+        error_msg = "Example timed out after 10 minutes"
         print(f"✗ Timeout: {example_path.name}")
         print(error_msg)
         return False, error_msg
@@ -183,12 +183,12 @@ def main():
     print(f"Failed: {len(failed)}")
     
     if successful:
-        print(f"\n✓ Successful examples:")
+        print("\n✓ Successful examples:")
         for path, _, _ in successful:
             print(f"  - {path.name}")
     
     if failed:
-        print(f"\n✗ Failed examples:")
+        print("\n✗ Failed examples:")
         for path, _, error in failed:
             print(f"  - {path.name}")
             if error and args.quiet:
