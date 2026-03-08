@@ -1,13 +1,22 @@
 # Changelog
 
-## Unreleased
+## 6.7.0
 
 ### Changed
 - `.env` file detection now walks up parent directories from `cwd`, so examples subfolders find the repo-root `.env` automatically
 
+### Fixed
+- CHELPG tutorial code and output visualisation cleanup
+- Bar chart and 3D structure colors now match 2D visualization in CHELPG output
+- Changelog CI check was only checking the latest commit
+
 ### Added
+- Add tags to rex runs with runtime and SDK metadata
+- Workflow to auto-deploy docs to gh-pages and exess-webapp when merged to main
 - CI changelog check in lint workflow — PRs must update `CHANGELOG.md`
-- workflow to auto deploy docs to gh-pages and exess webapp when merged to main
+- Script to run all examples for easier testing
+- Charge-colored 2D aspirin structure to CHELPG output
+- Docs: basis set warnings with example code links across tutorials
 
 ## 6.6.0
 
