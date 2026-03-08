@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.7.1
+### Fixed
+- fix github action for docs publishing
+
 ## 6.7.0
 
 ### Changed
