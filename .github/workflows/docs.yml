@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/rush/**'
       - 'docs/**'
+  workflow_dispatch:
 
 permissions:
   contents: write
