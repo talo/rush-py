@@ -1,9 +1,13 @@
+import inspect
 import json
+import platform
 import re
 import sys
 import tarfile
 import time
+import uuid
 from dataclasses import asdict, dataclass
+from importlib.metadata import version as pkg_version
 from io import BytesIO
 from os import getenv
 from pathlib import Path
@@ -112,6 +116,57 @@ MODULE_LOCK = (
         "prepare_protein_rex": "github:talo/tengu-prepare-protein/911d9fb69c269f8783b7cce2de3e87ee9333fb08#prepare_protein_rex",
     }
 ) | MODULE_OVERRIDES
+
+# SDK session ID — unique per process
+_SDK_SESSION_ID = str(uuid.uuid4())
+
+
+def _infer_sdk_function() -> str | None:
+    """Infer which SDK function called _submit_rex() by walking the stack."""
+    try:
+        for frame_info in inspect.stack():
+            module_path = frame_info.filename
+            # Look for files in the rush package (but not client.py itself)
+            if "/rush/" in module_path and "client.py" not in module_path:
+                module_name = Path(module_path).stem
+                func_name = frame_info.function
+                return f"{module_name}.{func_name}"
+    except Exception:
+        pass
+    return None
+
+
+def _get_sdk_tags(rex: str) -> list[str]:
+    """Generate SDK metadata tags for run submission."""
+    tags = []
+
+    # Source tag (always rushpy for SDK submissions)
+    tags.append("source=rushpy")
+
+    # SDK version
+    try:
+        version = pkg_version("rush-py")
+        tags.append(f"sdk_version={version}")
+    except Exception:
+        pass
+
+    # SDK session ID (unique per process)
+    tags.append(f"sdk_session_id={_SDK_SESSION_ID}")
+
+    # Python version
+    tags.append(f"sdk_python={platform.python_version()}")
+
+    # Platform (OS/arch)
+    machine = platform.machine()
+    system = platform.system().lower()
+    tags.append(f"sdk_platform={system}/{machine}")
+
+    # Infer which SDK function submitted this run
+    sdk_function = _infer_sdk_function()
+    if sdk_function:
+        tags.append(f"sdk_function={sdk_function}")
+
+    return tags
 
 
 @dataclass
@@ -618,6 +673,23 @@ def delete_run(run_id: str) -> None:
 
 
 def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
+    # Auto-generate SDK metadata tags
+    auto_tags = _get_sdk_tags(rex)
+
+    # Merge auto-tags with user-provided tags (user tags take priority)
+    if run_opts.tags:
+        merged_tags = run_opts.tags + auto_tags
+    else:
+        merged_tags = auto_tags
+
+    # Create a new RunOpts with merged tags
+    run_opts_with_tags = RunOpts(
+        name=run_opts.name,
+        description=run_opts.description,
+        tags=merged_tags,
+        email=run_opts.email,
+    )
+
     mutation = gql("""
         mutation EvalRex($input: CreateRun!) {
             eval(input: $input) {
@@ -636,7 +708,7 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
         },
     }
     mutation.variable_values["input"] |= {
-        k: v for k, v in asdict(run_opts).items() if v is not None
+        k: v for k, v in asdict(run_opts_with_tags).items() if v is not None
     }
 
     result = _get_client().execute(mutation)
