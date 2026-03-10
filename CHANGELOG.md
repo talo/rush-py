@@ -4,6 +4,16 @@
 ### Fixed
 - Center 2D charge map molecule in CHELPG HTML visualization
 
+### Changed
+- Update docs style to match QDX website: dark mode, logo linking to qdx.co, nav links to EXESS and Rush
+- Add QDX logo to docs sidebar
+- Add "Home" link above global toc in docs sidebar
+- Simplify docs templates: remove EXESS-specific header, breadcrumbs, sidebar, and toc overrides
+- Remove custom EXESS nav builder from docs conf.py
+- Update EXESS docs: free version access, free for academics, remove email contact in favor of request forms
+- Expand EXESS limitations documentation (relativistic, heavy elements, excited-state methods)
+- Remove x2c-SVPall from basis set table (relativistic not currently supported)
+
 ## 6.7.2
 ### Changed
 - Docs deploy now targets qdx-main-landing repo instead of exess-webapp

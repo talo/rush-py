@@ -21,11 +21,7 @@
 {%- endif -%}
 
 {%- block header -%}
-  {%- if is_exess -%}
-    {%- include "partials/site-head-exess.html" -%}
-  {%- else -%}
-    {{ super() }}
-  {%- endif -%}
+  {{ super() }}
 {%- endblock -%}
 
 {% block body %}
@@ -35,11 +31,7 @@
       <div class="sy-scrollbar p-6">
         {%- include "partials/globaltoc-above.html" %}
         <div class="globaltoc" data-expand-depth="{{ theme_globaltoc_expand_depth }}">
-          {%- if is_exess -%}
-            {%- set globaltoc = exess_globaltoc|default('') -%}
-          {%- else -%}
-            {%- set globaltoc = toctree(collapse=theme_toctree_collapse, maxdepth=theme_toctree_maxdepth, titles_only=theme_toctree_titles_only, includehidden=theme_toctree_includehidden) -%}
-          {%- endif -%}
+          {%- set globaltoc = toctree(collapse=theme_toctree_collapse, maxdepth=theme_toctree_maxdepth, titles_only=theme_toctree_titles_only, includehidden=theme_toctree_includehidden) -%}
           {{ expandtoc(globaltoc, theme_globaltoc_expand_depth) }}
         </div>
       </div>
@@ -60,11 +52,7 @@
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
-    {%- if is_exess -%}
-      {%- include "partials/exess-crumbs.html" -%}
-    {%- else -%}
-      {%- include "components/breadcrumbs.html" -%}
-    {%- endif -%}
+    {%- include "components/breadcrumbs.html" -%}
     <div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
         {%- include "components/copy-page-button.html" -%}
@@ -72,9 +60,7 @@
           {% block content %}{{ body }}{% endblock %}
         </article>
         {%- include "components/back-to-top.html" -%}
-        {%- if not is_exess -%}
-          {%- include "components/navigation.html" -%}
-        {%- endif -%}
+        {%- include "components/navigation.html" -%}
         {%- include "partials/page-bottom.html" -%}
       </div>
     </div>

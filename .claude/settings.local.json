@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(grep:*)",
-      "Bash(uv run:*)"
+      "Bash(uv run:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(python -c \"import shibuya; print\\(shibuya.__file__\\)\" 2>/dev/null || uv run python -c \"import shibuya; import os; print\\(os.path.dirname\\(shibuya.__file__\\)\\)\")"
     ]
   }
 }

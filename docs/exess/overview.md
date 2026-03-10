@@ -74,3 +74,9 @@ EXESS is built around four practical ideas:
 4. **Automation-friendly inputs.** The input format supports batched topologies, which is useful for screening or dataset generation.
 
 This philosophy shapes how you should approach method choice, fragmentation, and performance tuning.
+
+## Supported elements
+
+EXESS currently supports elements hydrogen (H) through xenon (Xe), i.e. atomic numbers 1–54. Note that transition metals are at this stage largely untested and should be treated as experimental. Users working with transition metal systems are strongly encouraged to validate results against a reference code (such as ORCA or Gaussian) before relying on EXESS for production calculations.
+
+If you do run transition metal calculations, we'd love to hear how you get on — feedback on real-world workflows is invaluable as we work toward comprehensive transition metal support. Please feel free to share results or raise issues by emailing us at hello@qdx.co, or [submit a feature request](https://exess.qdx.co/requests?tab=feature).

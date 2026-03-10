@@ -11,7 +11,6 @@
 | def2 | def2-SVP, def2-TZVP, def2-TZVPP, def2-QZVP | RIFIT auxiliary variants available. |
 | STO-nG | STO-2G, STO-3G, STO-6G | Minimal basis sets. |
 | PCSeg | PCSeg-0, PCSeg-1 | Segmented basis sets. |
-| X2C | x2c-SVPall | Relativistic all-electron basis. |
 
 For the full list, see the [reference page](reference).
 
@@ -152,13 +151,16 @@ EXESS is strong when you need GPU performance and fragmentation at scale. It is 
 
 **Limitations:**
 
-- Unrestricted KSDFT is not implemented.
-- Unrestricted RI-MP2 is not supported (use `RestrictedRIMP2`).
-- The UM09 (MMD) Fock build path is not defined for UHF when using spherical basis functions.
-- Analytical gradients are limited to restricted HF and restricted RI-MP2.
-- Hydrogen capping is the only supported covalent bond-breaking scheme.
-- Plane-wave basis sets are not supported.
-- Fully ab initio AIMD is microcanonical; thermostatted/barostatted dynamics require QMMM.
+- Unrestricted KSDFT is not currently supported.
+- Unrestricted RI-MP2 is not currently supported (use `RestrictedRIMP2`).
+- The UM09 (MMD) Fock build path is not currently defined for UHF when using spherical basis functions.
+- Analytical gradients are currently limited to restricted HF and restricted RI-MP2.
+- Hydrogen capping is currently the only supported covalent bond-breaking scheme.
+- Plane-wave basis sets are not currently supported.
+- Relativistic calculations are not currently supported.
+- Elements beyond xenon (Z > 54) are not currently supported.
+- Excited-state methods are not currently supported. EXESS does not natively implement TDDFT, excited-state coupled-cluster/response methods, transition dipoles between electronic states, or core-level XUV/X-ray spectroscopy.
+- Fully ab initio AIMD is currently microcanonical only; thermostatted/barostatted dynamics require QMMM.
 
 :::{only} internal
 Notes on provenance:

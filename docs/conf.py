@@ -39,6 +39,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # HTML output options
 html_theme = "shibuya"
 html_static_path = ["_sphinx_static"]
+html_logo = "_sphinx_static/logo.svg"
 html_css_files = ["custom.css"]
 
 # Shibuya theme options
@@ -46,11 +47,11 @@ html_theme_options = {
     "accent_color": "iris",
     "toctree_includehidden": False,
     "color_mode": "dark",
-}
-
-# Use a slimmer sidebar for the internal EXESS docs section.
-html_sidebars = {
-    "exess/**": ["sidebars/localtoc.html"],
+    "logo_target": "https://qdx.co",
+    "nav_links": [
+        {"title": "Use EXESS", "url": "https://exess.qdx.co"},
+        {"title": "Use Rush", "url": "https://qdx.co/rush"},
+    ],
 }
 
 # Napoleon settings (for Google/NumPy style docstrings)
@@ -89,71 +90,6 @@ def skip_enum_members(app, what, name, obj, skip, options):
     return skip
 
 
-def _to_bool(value, default=False):
-    if value is None:
-        return default
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        return value.strip().lower() in {"1", "true", "yes", "on"}
-    return bool(value)
-
-
-def add_exess_nav(app, pagename, templatename, context, doctree):
-    if not pagename.startswith("exess/"):
-        return
-
-    from copy import deepcopy
-
-    from sphinx import addnodes
-    from sphinx.environment.adapters.toctree import TocTree
-
-    env = app.builder.env
-    exess_index = "exess/index"
-    if exess_index not in env.all_docs:
-        return
-
-    exess_doctree = env.get_doctree(exess_index)
-    toctrees = list(exess_doctree.findall(addnodes.toctree))
-    if not toctrees:
-        return
-
-    toc_tree = TocTree(env)
-    collapse = _to_bool(context.get("theme_toctree_collapse"), default=False)
-    titles_only = _to_bool(context.get("theme_toctree_titles_only"), default=False)
-    includehidden = _to_bool(context.get("theme_toctree_includehidden"), default=False)
-    maxdepth = context.get("theme_toctree_maxdepth")
-    try:
-        maxdepth = int(maxdepth) if maxdepth not in (None, "") else 0
-    except (TypeError, ValueError):
-        maxdepth = 0
-
-    root = None
-    for toctree in toctrees:
-        resolved = toc_tree.resolve(
-            pagename,
-            app.builder,
-            deepcopy(toctree),
-            prune=True,
-            maxdepth=maxdepth,
-            titles_only=titles_only,
-            collapse=collapse,
-            includehidden=includehidden,
-        )
-        if resolved is None:
-            continue
-        if root is None:
-            root = resolved
-        else:
-            root.extend(resolved.children)
-
-    if root is None:
-        return
-
-    context["exess_globaltoc"] = app.builder.render_partial(root)["fragment"]
-
-
 def setup(app):
     """Connect the autodoc-skip-member event."""
     app.connect("autodoc-skip-member", skip_enum_members)
-    app.connect("html-page-context", add_exess_nav)
