@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.7.2
+### Changed
+- Docs deploy now targets qdx-main-landing repo instead of exess-webapp
+
 ## 6.7.1
 ### Fixed
 - fix github action for docs publishing
