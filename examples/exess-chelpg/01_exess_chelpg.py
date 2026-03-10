@@ -97,8 +97,16 @@ def generate_aspirin_2d_svg(
         (height - 80 - 2 * margin) / (y_max - y_min or 1),
     )  # reserve 80px for legend
 
+    # Center the molecule in the available SVG area
+    mol_w = (x_max - x_min) * scale
+    mol_h = (y_max - y_min) * scale
+    avail_w = width - 2 * margin
+    avail_h = height - 80 - 2 * margin  # match legend reservation
+    offset_x = margin + (avail_w - mol_w) / 2
+    offset_y = margin + (avail_h - mol_h) / 2
+
     def to_svg(x, y):
-        return margin + (x - x_min) * scale, margin + (y_max - y) * scale
+        return offset_x + (x - x_min) * scale, offset_y + (y_max - y) * scale
 
     svg_coords = [to_svg(x, y) for x, y in coords]
 

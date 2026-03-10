@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.7.3
+### Fixed
+- Center 2D charge map molecule in CHELPG HTML visualization
+
 ## 6.7.2
 ### Changed
 - Docs deploy now targets qdx-main-landing repo instead of exess-webapp
