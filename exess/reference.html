@@ -25,18 +25,23 @@
 <body><div class="sy-head">
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
-    <a class="sy-head-brand" href="index.html">
-      <strong>EXESS</strong>
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../_static/logo.svg" alt="rush" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/logo.svg" alt="rush" height="28" loading="lazy" />
+      <strong>rush</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"></nav>
-      <div class="sy-head-extra flex items-center print:hidden">
-        <form class="searchbox flex items-center" action="../search.html" method="get">
-          <input type="text" name="q" placeholder="Search" />
-          <input type="hidden" name="exess" value="1" />
-          <kbd>/</kbd>
-        </form>
-      </div>
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
     </div>
     <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
 data-aria-auto="Switch to light color mode"
@@ -56,8 +61,47 @@ data-aria-dark="Switch to auto color mode">
 <div class="sy-page sy-container flex mx-auto">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
-      <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/05-hardware.html">Hardware</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare_protein.html">Prepare Protein</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare_complex.html">Prepare Complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.client.html">rush.client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mol.html">rush.mol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.convert.html">rush.convert</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="electronic-structure-methods.html">Electronic Structure Methods</a></li>
@@ -87,7 +131,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#def2">def2</a></li>
 <li><a class="reference internal" href="#sto-ng">STO-nG</a></li>
 <li><a class="reference internal" href="#pcseg">PCSeg</a></li>
-<li><a class="reference internal" href="#x2c">X2C</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#lebedev-grids">Lebedev grids</a></li>
@@ -99,8 +142,6 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li><a class="reference internal" href="#known-issues">Known issues</a></li>
-<li><a class="reference internal" href="#reporting-issues">Reporting issues</a></li>
-<li><a class="reference internal" href="#license">License</a></li>
 <li><a class="reference internal" href="#performance">Performance</a></li>
 <li><a class="reference internal" href="#release-notes-v4-0-0-beta">Release notes (v4.0.0-beta)</a><ul>
 <li><a class="reference internal" href="#added">Added</a></li>
@@ -110,24 +151,28 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 </ul>
-</div></div>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
-  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
   <div class="sy-breadcrumbs-inner flex items-center">
     <div class="md:hidden mr-3">
       <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
         <i class="i-lucide menu"></i>
       </button>
     </div>
-    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList">
-      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">EXESS</strong>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">rush</span></a>
+        <span>/</span>
         <meta itemprop="position" content="1" />
-      </li>
-    </ol>
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Reference</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
     <div class="xl:hidden ml-1">
-      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside" aria-expanded="false">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
         <i class="i-lucide outdent"></i>
       </button>
     </div>
@@ -227,12 +272,6 @@ uses the conventional spellings that EXESS resolves to those records.</p>
 <ul class="simple">
 <li><p>PCSeg-0</p></li>
 <li><p>PCSeg-1</p></li>
-</ul>
-</section>
-<section id="x2c">
-<h3>X2C<a class="headerlink" href="#x2c" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p>x2c-SVPall</p></li>
 </ul>
 </section>
 </section>
@@ -469,14 +508,6 @@ uses the conventional spellings that EXESS resolves to those records.</p>
 </span></pre></div>
 </div>
 </section>
-<section id="reporting-issues">
-<h2>Reporting issues<a class="headerlink" href="#reporting-issues" title="Link to this heading">¶</a></h2>
-<p>Before reporting issues, consult the known issues above. Report bugs to placeholder&#64;rush.exess.co with details on hardware, software, and an input that reproduces the issue.</p>
-</section>
-<section id="license">
-<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
-<p>For licensing questions, contact placeholder&#64;qdx.co.</p>
-</section>
 <section id="performance">
 <h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h2>
 <p>The performance page currently contains a placeholder line: “vroom vroom we’re faster than everyone else”.</p>
@@ -579,7 +610,21 @@ uses the conventional spellings that EXESS resolves to those records.</p>
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
   </svg>
   <span>Back to top</span>
-</button></div>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="outputs.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Outputs</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="citations.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Citations</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
     </div>
   </main>
 </div>

@@ -232,6 +232,8 @@ If a rush-py module behaves unexpectedly or violates the documented client desig
 
 `https://github.com/talo/rush-py/issues/new`
 
+For EXESS feature requests, use the [EXESS feature request form](https://exess.qdx.co/requests?tab=feature).
+
 For general feedback across Rush, a public feedback form is also available:
 
 `https://forms.gle/1DPWK91utzJ6SED47`

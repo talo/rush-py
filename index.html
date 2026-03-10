@@ -19,19 +19,25 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="Rush Python Client"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="QDX Documentation"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
-    <a class="sy-head-brand" href="#">
-      
-      
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="_static/logo.svg" alt="rush" height="28" loading="lazy" />
+      <img class="dark-logo" src="_static/logo.svg" alt="rush" height="28" loading="lazy" />
       <strong>rush</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"></nav>
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
@@ -55,101 +61,10 @@ data-aria-dark="Switch to auto color mode">
 <div class="sy-page sy-container flex mx-auto">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
-      <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><ul>
-<li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guides/01-getting-started.html">Getting Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/02-first-run.html">Your First rush-py Run</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/04-general-info.html">General Info and Design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guides/05-hardware.html">Hardware</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Rush Modules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="rush.exess.html">EXESS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.nnxtb.html">NN-xTB</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.prepare_protein.html">Prepare Protein</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.prepare_complex.html">Prepare Complex</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.auto3d.html">Auto3D</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.mmseqs2.html">MMseqs2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.boltz.html">Boltz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.pbsa.html">PBSA</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Core API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="rush.client.html">rush.client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.mol.html">rush.mol</a></li>
-<li class="toctree-l2"><a class="reference internal" href="rush.convert.html">rush.convert</a></li>
-</ul>
-</li>
-</ul>
-
-        </div>
-      </div>
-    </div>
-  </aside>
-  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
-  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
-    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
-      <i class="i-lucide close"></i>
-    </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
-  </aside>
-  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
-  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
-<div class="sy-breadcrumbs" role="navigation">
-  <div class="sy-breadcrumbs-inner flex items-center">
-    <div class="md:hidden mr-3">
-      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
-        <i class="i-lucide menu"></i>
-      </button>
-    </div>
-    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="#"><span itemprop="name">rush</span></a>
-        <span>/</span>
-        <meta itemprop="position" content="1" />
-      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Rush Python Client</strong>
-        <meta itemprop="position" content="2" />
-      </li></ol>
-    <div class="xl:hidden ml-1">
-      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
-        aria-expanded="false">
-        <i class="i-lucide outdent"></i>
-      </button>
-    </div>
-  </div>
-</div><div class="flex flex-col break-words justify-between">
-      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
-  <article class="yue" role="main">
-          <section id="rush-python-client">
-<h1>Rush Python Client<a class="headerlink" href="#rush-python-client" title="Link to this heading">¶</a></h1>
-<p>Welcome to the rush-py docs! These docs are for people who would like programmatic access to Rush’s capabilities. If you prefer a visual interface, you can easily use EXESS <a class="reference external" href="https://exess.qdx.co/exess-flow">here</a> and everything else <a class="reference external" href="https://rush.cloud/login">here</a> with no setup required. If you prefer scripting, read on.</p>
-<p>Rush is the gateway to <a class="reference external" href="https://qdx.co">QDX</a>’s
-technology. There are two parts to Rush:</p>
-<ol class="arabic simple">
-<li><p>The <a class="reference external" href="https://rush.cloud">Rush website</a>, which provides a web-based interface
-and chatbot assistant named Walter.</p></li>
-<li><p>This Python client, for anyone who prefers writing Python scripts to access
-and use Rush.</p></li>
-</ol>
-<p>When you do something in the Rush Python client, the results will show up on the
-Rush website, which lets you easily visualize results and share them with
-colleagues.</p>
-<p>The most notable pieces of technology you can access through this API are EXESS
-and NN-xTB. You can read papers on these <a class="reference external" href="https://qdx.co/research">here</a>.</p>
-<p>Continue onto the <a class="reference internal" href="guides/01-getting-started.html"><span class="doc">Getting Started</span></a> page to
-onboard and run your first rush-py script.</p>
-<div class="toctree-wrapper compound">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="#" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="guides/01-getting-started.html">Getting Started</a></li>
@@ -186,13 +101,145 @@ onboard and run your first rush-py script.</p>
 </ul>
 </li>
 </ul>
-</div>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush-python-sdk">Rush Python SDK</a></li>
+<li><a class="reference internal" href="#exess">EXESS</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="#"><span itemprop="name">rush</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">QDX Documentation</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="qdx-documentation">
+<h1>QDX Documentation<a class="headerlink" href="#qdx-documentation" title="Link to this heading">¶</a></h1>
+<p>Welcome to QDX’s documentation hub. These docs cover both the <strong>Rush Python
+SDK</strong> for programmatic access to the <a class="reference external" href="https://qdx.co/rush">Rush platform</a>,
+which is how we make our quantum chemistry technology available along with
+vertical applications to drug discovery developed by our R&amp;D team, and the
+<strong>EXESS</strong> quantum chemistry engine that powers many of its calculations.</p>
+<p>If you prefer a visual interface over scripting, you can use EXESS directly
+<a class="reference external" href="https://exess.qdx.co/exess-flow">here</a> and the rest of Rush
+<a class="reference external" href="https://rush.cloud/login">here</a> with no setup required.</p>
+<hr class="docutils" />
+<section id="rush-python-sdk">
+<h2>Rush Python SDK<a class="headerlink" href="#rush-python-sdk" title="Link to this heading">¶</a></h2>
+<p>The Rush Python SDK (<code class="docutils literal notranslate"><span class="pre">rush-py</span></code>) lets you script and automate workflows on
+<a class="reference external" href="https://qdx.co/rush">Rush</a>. Through it you can submit quantum
+chemistry, molecular dynamics, protein folding, and other computational
+chemistry jobs, then retrieve and process results — all from Python.</p>
+<p><strong>What’s covered:</strong></p>
+<ul class="simple">
+<li><p><strong>Guides</strong> — account setup, installation, authentication, working with
+molecular structures, and hardware selection.</p></li>
+<li><p><strong>Tutorials</strong> — step-by-step walkthroughs for common workflows like
+single-point energies, geometry optimisations, CHELPG charges, interaction
+energies, and QM/MM.</p></li>
+<li><p><strong>API Reference</strong> — full documentation of the client, data model, file
+converters, and every computation module (EXESS, NN-xTB, Boltz, Auto3D,
+PBSA, and more).</p></li>
+</ul>
+<p><strong>Who is this for?</strong> Computational chemists and developers who
+want to integrate Rush into scripts, pipelines, or applications. Start with the
+<a class="reference internal" href="guides/01-getting-started.html"><span class="doc">Getting Started</span></a> guide.</p>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Rush Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Core API</a></li>
+</ul>
 </div>
+</section>
+<hr class="docutils" />
+<section id="exess">
+<h2>EXESS<a class="headerlink" href="#exess" title="Link to this heading">¶</a></h2>
+<p>EXESS (the Extreme-scale Electronic Structure System) is QDX’s GPU-accelerated
+quantum chemistry engine. It supports workflows ranging from high-throughput quantum calculations on small
+and medium systems to fragmentation-based, QM/MM (quantum mechanics/molecular
+mechanics), and <em>ab initio</em> molecular dynamics simulations of large biomolecular
+environments.</p>
+<p><strong>What’s covered:</strong></p>
+<ul class="simple">
+<li><p><strong>Concepts</strong> — the regions-based workflow model, electronic structure methods,
+basis sets, DFT functionals, and correlated methods.</p></li>
+<li><p><strong>Usage</strong> — how to run EXESS (via Rush or the CLI), input configuration, and
+keyword reference.</p></li>
+<li><p><strong>Results</strong> — output formats, export options, and worked examples.</p></li>
+<li><p><strong>Reference</strong> — complete basis set tables, grid definitions, hardware notes,
+and citations.</p></li>
+</ul>
+<p>These docs are useful for checking whether EXESS is suitable for your workflow.
+For information on how to actually run EXESS programmatically, see the
+<a class="reference internal" href="guides/01-getting-started.html"><span class="doc">Rush Python SDK</span></a> docs.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/citations.html">Citations</a></li>
+</ul>
+</div>
+<hr class="docutils" />
 <ul class="simple">
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 </ul>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
