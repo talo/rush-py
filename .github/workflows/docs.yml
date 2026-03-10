@@ -38,12 +38,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_build/html
 
-      - name: Push docs to exess-webapp
+      - name: Push docs to qdx-main-landing
         env:
           GH_TOKEN: ${{ secrets.DOCS_DEPLOY_PAT }}
         run: |
-          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/talo/exess-webapp.git" /tmp/exess-webapp
-          cd /tmp/exess-webapp
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/talo/qdx-main-landing.git" /tmp/qdx-main-landing
+          cd /tmp/qdx-main-landing
           git switch docs-update 2>/dev/null || git switch -c docs-update
           mkdir -p public/docs
           cp -r "$GITHUB_WORKSPACE/docs/_build/html/." public/docs/
@@ -57,12 +57,12 @@ jobs:
             git push origin docs-update
           fi
 
-      - name: Create or update PR in exess-webapp
+      - name: Create or update PR in qdx-main-landing
         env:
           GH_TOKEN: ${{ secrets.DOCS_DEPLOY_PAT }}
         run: |
           existing=$(gh pr list \
-            --repo talo/exess-webapp \
+            --repo talo/qdx-main-landing \
             --head docs-update \
             --base main \
             --state open \
@@ -70,11 +70,11 @@ jobs:
             --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh pr comment "$existing" \
-              --repo talo/exess-webapp \
+              --repo talo/qdx-main-landing \
               --body "Updated docs from rush-py commit ${{ github.sha }}"
           else
             gh pr create \
-              --repo talo/exess-webapp \
+              --repo talo/qdx-main-landing \
               --head docs-update \
               --base main \
               --title "Update docs from rush-py" \
