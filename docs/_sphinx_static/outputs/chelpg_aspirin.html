@@ -28,8 +28,8 @@
         .viewer-3d div { width: 100% !important; height: 100% !important; position: relative; }
         .viewer-3d iframe { width: 100% !important; height: 100% !important; position: absolute; top: 0; left: 0; border: none; }
 
-        .viewer-2d { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; width: 100%; overflow: hidden; }
-        .viewer-2d svg { display: block; width: 100%; height: 100%; }
+        .viewer-2d { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; width: 100%; }
+        .viewer-2d svg { display: block; margin: 0 auto; max-width: 100%; max-height: 100%; }
 
         .chart { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; min-height: 0; }
         .chart img { max-height: 100%; max-width: 100%; object-fit: contain; }
@@ -43,71 +43,71 @@
     <div class="panels">
         <div class="panel panel-side">
             <div class="panel-label">2D Charge Map</div>
-            <div class="viewer-2d"><svg xmlns="http://www.w3.org/2000/svg" viewBox="10 25 420 375" preserveAspectRatio="xMidYMid meet">
-<line x1="221.3" y1="190.1" x2="178.1" y2="151.0" stroke="#52525b" stroke-width="2"/>
-<line x1="221.3" y1="190.1" x2="276.8" y2="172.1" stroke="#52525b" stroke-width="2"/>
-<line x1="55.0" y1="243.9" x2="110.4" y2="226.0" stroke="#52525b" stroke-width="2"/>
-<line x1="155.7" y1="262.8" x2="112.5" y2="223.7" stroke="#52525b" stroke-width="2"/>
-<line x1="151.7" y1="267.2" x2="108.4" y2="228.2" stroke="#52525b" stroke-width="2"/>
-<line x1="286.0" y1="114.5" x2="273.8" y2="171.5" stroke="#52525b" stroke-width="2"/>
-<line x1="291.9" y1="115.8" x2="279.7" y2="172.8" stroke="#52525b" stroke-width="2"/>
-<line x1="178.1" y1="151.0" x2="122.6" y2="169.0" stroke="#52525b" stroke-width="2"/>
-<line x1="178.1" y1="151.0" x2="190.2" y2="94.0" stroke="#52525b" stroke-width="2"/>
-<line x1="122.6" y1="169.0" x2="79.4" y2="129.9" stroke="#52525b" stroke-width="2"/>
-<line x1="122.6" y1="169.0" x2="110.4" y2="226.0" stroke="#52525b" stroke-width="2"/>
-<line x1="190.2" y1="94.0" x2="147.0" y2="55.0" stroke="#52525b" stroke-width="2"/>
-<line x1="79.4" y1="129.9" x2="91.5" y2="72.9" stroke="#52525b" stroke-width="2"/>
-<line x1="147.0" y1="55.0" x2="91.5" y2="72.9" stroke="#52525b" stroke-width="2"/>
-<line x1="276.8" y1="172.1" x2="320.0" y2="211.2" stroke="#52525b" stroke-width="2"/>
-<circle cx="134.8" cy="112.0" r="32.1" fill="none" stroke="#52525b" stroke-width="1.5" stroke-dasharray="4,3"/>
-<circle cx="221.3" cy="190.1" r="19.7" fill="#ff6e6e" opacity="0.35"/>
-<circle cx="221.3" cy="190.1" r="13" fill="#18181b"/>
-<circle cx="221.3" cy="190.1" r="13" fill="#ff6e6e" opacity="0.25"/>
-<text x="221.3" y="190.1" text-anchor="middle" dominant-baseline="central" fill="#ff6e6e" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
-<text x="221.3" y="219.7" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.473</text>
-<circle cx="55.0" cy="243.9" r="21.6" fill="#ff6666" opacity="0.35"/>
-<circle cx="55.0" cy="243.9" r="13" fill="#18181b"/>
-<circle cx="55.0" cy="243.9" r="13" fill="#ff6666" opacity="0.25"/>
-<text x="55.0" y="243.9" text-anchor="middle" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
-<text x="69.0" y="243.9" text-anchor="start" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="11">H</text>
-<text x="55.0" y="275.5" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.634</text>
-<circle cx="153.7" cy="265.0" r="21.3" fill="#ff6666" opacity="0.35"/>
-<circle cx="153.7" cy="265.0" r="13" fill="#18181b"/>
-<circle cx="153.7" cy="265.0" r="13" fill="#ff6666" opacity="0.25"/>
-<text x="153.7" y="265.0" text-anchor="middle" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
-<text x="153.7" y="296.3" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.612</text>
-<circle cx="288.9" cy="115.1" r="21.2" fill="#ff6666" opacity="0.35"/>
-<circle cx="288.9" cy="115.1" r="13" fill="#18181b"/>
-<circle cx="288.9" cy="115.1" r="13" fill="#ff6666" opacity="0.25"/>
-<text x="288.9" y="115.1" text-anchor="middle" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
-<text x="288.9" y="146.3" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.600</text>
-<circle cx="178.1" cy="151.0" r="18.9" fill="#8181ff" opacity="0.35"/>
-<circle cx="178.1" cy="151.0" r="3" fill="#8181ff" opacity="0.8"/>
-<text x="178.1" y="179.9" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">+0.409</text>
-<circle cx="122.6" cy="169.0" r="16.5" fill="#ffc0c0" opacity="0.35"/>
-<circle cx="122.6" cy="169.0" r="3" fill="#ffc0c0" opacity="0.8"/>
-<text x="122.6" y="195.4" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.205</text>
-<circle cx="190.2" cy="94.0" r="17.5" fill="#ffa4a4" opacity="0.35"/>
-<circle cx="190.2" cy="94.0" r="3" fill="#ffa4a4" opacity="0.8"/>
-<text x="190.2" y="121.6" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.295</text>
-<circle cx="79.4" cy="129.9" r="14.8" fill="#ffebeb" opacity="0.35"/>
-<circle cx="79.4" cy="129.9" r="3" fill="#ffebeb" opacity="0.8"/>
-<text x="79.4" y="154.7" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.065</text>
-<circle cx="147.0" cy="55.0" r="14.4" fill="#fff3f3" opacity="0.35"/>
-<circle cx="147.0" cy="55.0" r="3" fill="#fff3f3" opacity="0.8"/>
-<text x="147.0" y="79.4" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.037</text>
-<circle cx="91.5" cy="72.9" r="16.7" fill="#ffbaba" opacity="0.35"/>
-<circle cx="91.5" cy="72.9" r="3" fill="#ffbaba" opacity="0.8"/>
-<text x="91.5" y="99.6" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.222</text>
-<circle cx="110.4" cy="226.0" r="23.9" fill="#6666ff" opacity="0.35"/>
-<circle cx="110.4" cy="226.0" r="3" fill="#6666ff" opacity="0.8"/>
-<text x="110.4" y="259.8" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">+0.822</text>
-<circle cx="276.8" cy="172.1" r="25.3" fill="#6666ff" opacity="0.35"/>
-<circle cx="276.8" cy="172.1" r="3" fill="#6666ff" opacity="0.8"/>
-<text x="276.8" y="207.4" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">+0.938</text>
-<circle cx="320.0" cy="211.2" r="20.5" fill="#ff6666" opacity="0.35"/>
-<circle cx="320.0" cy="211.2" r="3" fill="#ff6666" opacity="0.8"/>
-<text x="320.0" y="241.7" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.542</text>
+            <div class="viewer-2d"><svg xmlns="http://www.w3.org/2000/svg" width="480" height="400" viewBox="0 0 480 400">
+<line x1="273.8" y1="190.1" x2="230.5" y2="151.0" stroke="#52525b" stroke-width="2"/>
+<line x1="273.8" y1="190.1" x2="329.3" y2="172.1" stroke="#52525b" stroke-width="2"/>
+<line x1="107.5" y1="243.9" x2="162.9" y2="226.0" stroke="#52525b" stroke-width="2"/>
+<line x1="208.2" y1="262.8" x2="164.9" y2="223.7" stroke="#52525b" stroke-width="2"/>
+<line x1="204.2" y1="267.2" x2="160.9" y2="228.2" stroke="#52525b" stroke-width="2"/>
+<line x1="338.5" y1="114.5" x2="326.3" y2="171.5" stroke="#52525b" stroke-width="2"/>
+<line x1="344.4" y1="115.8" x2="332.2" y2="172.8" stroke="#52525b" stroke-width="2"/>
+<line x1="230.5" y1="151.0" x2="175.1" y2="169.0" stroke="#52525b" stroke-width="2"/>
+<line x1="230.5" y1="151.0" x2="242.7" y2="94.0" stroke="#52525b" stroke-width="2"/>
+<line x1="175.1" y1="169.0" x2="131.8" y2="129.9" stroke="#52525b" stroke-width="2"/>
+<line x1="175.1" y1="169.0" x2="162.9" y2="226.0" stroke="#52525b" stroke-width="2"/>
+<line x1="242.7" y1="94.0" x2="199.5" y2="55.0" stroke="#52525b" stroke-width="2"/>
+<line x1="131.8" y1="129.9" x2="144.0" y2="72.9" stroke="#52525b" stroke-width="2"/>
+<line x1="199.5" y1="55.0" x2="144.0" y2="72.9" stroke="#52525b" stroke-width="2"/>
+<line x1="329.3" y1="172.1" x2="372.5" y2="211.2" stroke="#52525b" stroke-width="2"/>
+<circle cx="187.3" cy="112.0" r="32.1" fill="none" stroke="#52525b" stroke-width="1.5" stroke-dasharray="4,3"/>
+<circle cx="273.8" cy="190.1" r="19.7" fill="#ff6e6e" opacity="0.35"/>
+<circle cx="273.8" cy="190.1" r="13" fill="#18181b"/>
+<circle cx="273.8" cy="190.1" r="13" fill="#ff6e6e" opacity="0.25"/>
+<text x="273.8" y="190.1" text-anchor="middle" dominant-baseline="central" fill="#ff6e6e" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
+<text x="273.8" y="219.7" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.473</text>
+<circle cx="107.5" cy="243.9" r="21.6" fill="#ff6666" opacity="0.35"/>
+<circle cx="107.5" cy="243.9" r="13" fill="#18181b"/>
+<circle cx="107.5" cy="243.9" r="13" fill="#ff6666" opacity="0.25"/>
+<text x="107.5" y="243.9" text-anchor="middle" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
+<text x="121.5" y="243.9" text-anchor="start" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="11">H</text>
+<text x="107.5" y="275.5" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.634</text>
+<circle cx="206.2" cy="265.0" r="21.3" fill="#ff6666" opacity="0.35"/>
+<circle cx="206.2" cy="265.0" r="13" fill="#18181b"/>
+<circle cx="206.2" cy="265.0" r="13" fill="#ff6666" opacity="0.25"/>
+<text x="206.2" y="265.0" text-anchor="middle" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
+<text x="206.2" y="296.3" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.612</text>
+<circle cx="341.4" cy="115.1" r="21.2" fill="#ff6666" opacity="0.35"/>
+<circle cx="341.4" cy="115.1" r="13" fill="#18181b"/>
+<circle cx="341.4" cy="115.1" r="13" fill="#ff6666" opacity="0.25"/>
+<text x="341.4" y="115.1" text-anchor="middle" dominant-baseline="central" fill="#ff6666" font-family="Arial, sans-serif" font-size="14" font-weight="bold">O</text>
+<text x="341.4" y="146.3" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.600</text>
+<circle cx="230.5" cy="151.0" r="18.9" fill="#8181ff" opacity="0.35"/>
+<circle cx="230.5" cy="151.0" r="3" fill="#8181ff" opacity="0.8"/>
+<text x="230.5" y="179.9" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">+0.409</text>
+<circle cx="175.1" cy="169.0" r="16.5" fill="#ffc0c0" opacity="0.35"/>
+<circle cx="175.1" cy="169.0" r="3" fill="#ffc0c0" opacity="0.8"/>
+<text x="175.1" y="195.4" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.205</text>
+<circle cx="242.7" cy="94.0" r="17.5" fill="#ffa4a4" opacity="0.35"/>
+<circle cx="242.7" cy="94.0" r="3" fill="#ffa4a4" opacity="0.8"/>
+<text x="242.7" y="121.6" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.295</text>
+<circle cx="131.8" cy="129.9" r="14.8" fill="#ffebeb" opacity="0.35"/>
+<circle cx="131.8" cy="129.9" r="3" fill="#ffebeb" opacity="0.8"/>
+<text x="131.8" y="154.7" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.065</text>
+<circle cx="199.5" cy="55.0" r="14.4" fill="#fff3f3" opacity="0.35"/>
+<circle cx="199.5" cy="55.0" r="3" fill="#fff3f3" opacity="0.8"/>
+<text x="199.5" y="79.4" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.037</text>
+<circle cx="144.0" cy="72.9" r="16.7" fill="#ffbaba" opacity="0.35"/>
+<circle cx="144.0" cy="72.9" r="3" fill="#ffbaba" opacity="0.8"/>
+<text x="144.0" y="99.6" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.222</text>
+<circle cx="162.9" cy="226.0" r="23.9" fill="#6666ff" opacity="0.35"/>
+<circle cx="162.9" cy="226.0" r="3" fill="#6666ff" opacity="0.8"/>
+<text x="162.9" y="259.8" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">+0.822</text>
+<circle cx="329.3" cy="172.1" r="25.3" fill="#6666ff" opacity="0.35"/>
+<circle cx="329.3" cy="172.1" r="3" fill="#6666ff" opacity="0.8"/>
+<text x="329.3" y="207.4" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">+0.938</text>
+<circle cx="372.5" cy="211.2" r="20.5" fill="#ff6666" opacity="0.35"/>
+<circle cx="372.5" cy="211.2" r="3" fill="#ff6666" opacity="0.8"/>
+<text x="372.5" y="241.7" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="9">-0.542</text>
 <defs>
 <linearGradient id="chg-grad" x1="0" x2="1" y1="0" y2="0">
   <stop offset="0%" stop-color="rgb(255,102,102)"/>
@@ -143,8 +143,8 @@
         </div>
         <div class="panel panel-center">
             <div class="panel-label">3D Structure</div>
-            <div class="viewer-3d"><div id="3dmolviewer_1772840079980111"  style="position: relative; width: 700px; height: 600px;">
-        <p id="3dmolwarning_1772840079980111" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
+            <div class="viewer-3d"><div id="3dmolviewer_17731751957859716"  style="position: relative; width: 700px; height: 600px;">
+        <p id="3dmolwarning_17731751957859716" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
         </div>
 <script>
 
@@ -175,39 +175,39 @@ $3Dmolpromise = null;
   $3Dmolpromise = loadScriptAsync('https://cdn.jsdelivr.net/npm/3dmol@2.5.4/build/3Dmol-min.js');
 }
 
-var viewer_1772840079980111 = null;
-var warn = document.getElementById("3dmolwarning_1772840079980111");
+var viewer_17731751957859716 = null;
+var warn = document.getElementById("3dmolwarning_17731751957859716");
 if(warn) {
     warn.parentNode.removeChild(warn);
 }
 $3Dmolpromise.then(function() {
-viewer_1772840079980111 = $3Dmol.createViewer(document.getElementById("3dmolviewer_1772840079980111"),{backgroundColor:"white"});
-viewer_1772840079980111.zoomTo();
-	viewer_1772840079980111.addModel("COMPND    2244 \nAUTHOR    GENERATED BY OPEN BABEL 3.1.1\nHETATM    1  O   UNL     1       1.233   0.554   0.779  1.00  0.00           O  \nHETATM    2  O   UNL     1      -0.695  -2.715  -0.750  1.00  0.00           O  \nHETATM    3  O   UNL     1       0.796  -2.184   0.869  1.00  0.00           O  \nHETATM    4  O   UNL     1       1.781   0.810  -1.482  1.00  0.00           O  \nHETATM    5  C   UNL     1      -0.086   0.609   0.440  1.00  0.00           C  \nHETATM    6  C   UNL     1      -0.793  -0.551   0.124  1.00  0.00           C  \nHETATM    7  C   UNL     1      -0.729   1.846   0.413  1.00  0.00           C  \nHETATM    8  C   UNL     1      -2.143  -0.474  -0.218  1.00  0.00           C  \nHETATM    9  C   UNL     1      -2.079   1.924   0.071  1.00  0.00           C  \nHETATM   10  C   UNL     1      -2.785   0.764  -0.245  1.00  0.00           C  \nHETATM   11  C   UNL     1      -0.141  -1.854   0.148  1.00  0.00           C  \nHETATM   12  C   UNL     1       2.109   0.671  -0.311  1.00  0.00           C  \nHETATM   13  C   UNL     1       3.530   0.600   0.164  1.00  0.00           C  \nHETATM   14  H   UNL     1      -0.185   2.755   0.659  1.00  0.00           H  \nHETATM   15  H   UNL     1      -2.725  -1.361  -0.456  1.00  0.00           H  \nHETATM   16  H   UNL     1      -2.580   2.887   0.051  1.00  0.00           H  \nHETATM   17  H   UNL     1      -3.837   0.824  -0.509  1.00  0.00           H  \nHETATM   18  H   UNL     1       3.729   1.418   0.859  1.00  0.00           H  \nHETATM   19  H   UNL     1       4.205   0.697  -0.692  1.00  0.00           H  \nHETATM   20  H   UNL     1       3.711  -0.366   0.643  1.00  0.00           H  \nHETATM   21  H   UNL     1      -0.256  -3.592  -0.734  1.00  0.00           H  \nCONECT    1    5   12                                                 \nCONECT    2   11   21                                                 \nCONECT    3   11   11                                                 \nCONECT    4   12   12                                                 \nCONECT    5    1    6    7    7                                       \nCONECT    6    5    8    8   11                                       \nCONECT    7    5    5    9   14                                       \nCONECT    8    6    6   10   15                                       \nCONECT    9    7   10   10   16                                       \nCONECT   10    8    9    9   17                                       \nCONECT   11    2    3    3    6                                       \nCONECT   12    1    4    4   13                                       \nCONECT   13   12   18   19   20                                       \nCONECT   14    7                                                      \nCONECT   15    8                                                      \nCONECT   16    9                                                      \nCONECT   17   10                                                      \nCONECT   18   13                                                      \nCONECT   19   13                                                      \nCONECT   20   13                                                      \nCONECT   21    2                                                      \nMASTER        0    0    0    0    0    0    0    0   21    0   21    0\nEND\n","pdb");
-	viewer_1772840079980111.setStyle({"serial": 1},{"sphere": {"radius": 0.4, "color": "#ff6e6e"}, "stick": {"color": "#ff6e6e"}});
-	viewer_1772840079980111.setStyle({"serial": 2},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
-	viewer_1772840079980111.setStyle({"serial": 3},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
-	viewer_1772840079980111.setStyle({"serial": 4},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
-	viewer_1772840079980111.setStyle({"serial": 5},{"sphere": {"radius": 0.4, "color": "#8181ff"}, "stick": {"color": "#8181ff"}});
-	viewer_1772840079980111.setStyle({"serial": 6},{"sphere": {"radius": 0.4, "color": "#ffc0c0"}, "stick": {"color": "#ffc0c0"}});
-	viewer_1772840079980111.setStyle({"serial": 7},{"sphere": {"radius": 0.4, "color": "#ffa4a4"}, "stick": {"color": "#ffa4a4"}});
-	viewer_1772840079980111.setStyle({"serial": 8},{"sphere": {"radius": 0.4, "color": "#ffebeb"}, "stick": {"color": "#ffebeb"}});
-	viewer_1772840079980111.setStyle({"serial": 9},{"sphere": {"radius": 0.4, "color": "#fff3f3"}, "stick": {"color": "#fff3f3"}});
-	viewer_1772840079980111.setStyle({"serial": 10},{"sphere": {"radius": 0.4, "color": "#ffbaba"}, "stick": {"color": "#ffbaba"}});
-	viewer_1772840079980111.setStyle({"serial": 11},{"sphere": {"radius": 0.4, "color": "#6666ff"}, "stick": {"color": "#6666ff"}});
-	viewer_1772840079980111.setStyle({"serial": 12},{"sphere": {"radius": 0.4, "color": "#6666ff"}, "stick": {"color": "#6666ff"}});
-	viewer_1772840079980111.setStyle({"serial": 13},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
-	viewer_1772840079980111.setStyle({"serial": 14},{"sphere": {"radius": 0.4, "color": "#cacaff"}, "stick": {"color": "#cacaff"}});
-	viewer_1772840079980111.setStyle({"serial": 15},{"sphere": {"radius": 0.4, "color": "#d0d0ff"}, "stick": {"color": "#d0d0ff"}});
-	viewer_1772840079980111.setStyle({"serial": 16},{"sphere": {"radius": 0.4, "color": "#d4d4ff"}, "stick": {"color": "#d4d4ff"}});
-	viewer_1772840079980111.setStyle({"serial": 17},{"sphere": {"radius": 0.4, "color": "#d0d0ff"}, "stick": {"color": "#d0d0ff"}});
-	viewer_1772840079980111.setStyle({"serial": 18},{"sphere": {"radius": 0.4, "color": "#d1d1ff"}, "stick": {"color": "#d1d1ff"}});
-	viewer_1772840079980111.setStyle({"serial": 19},{"sphere": {"radius": 0.4, "color": "#d3d3ff"}, "stick": {"color": "#d3d3ff"}});
-	viewer_1772840079980111.setStyle({"serial": 20},{"sphere": {"radius": 0.4, "color": "#c7c7ff"}, "stick": {"color": "#c7c7ff"}});
-	viewer_1772840079980111.setStyle({"serial": 21},{"sphere": {"radius": 0.4, "color": "#7a7aff"}, "stick": {"color": "#7a7aff"}});
-	viewer_1772840079980111.setBackgroundColor("black");
-	viewer_1772840079980111.zoomTo();
-viewer_1772840079980111.render();
+viewer_17731751957859716 = $3Dmol.createViewer(document.getElementById("3dmolviewer_17731751957859716"),{backgroundColor:"white"});
+viewer_17731751957859716.zoomTo();
+	viewer_17731751957859716.addModel("COMPND    2244 \nAUTHOR    GENERATED BY OPEN BABEL 3.1.1\nHETATM    1  O   UNL     1       1.233   0.554   0.779  1.00  0.00           O  \nHETATM    2  O   UNL     1      -0.695  -2.715  -0.750  1.00  0.00           O  \nHETATM    3  O   UNL     1       0.796  -2.184   0.869  1.00  0.00           O  \nHETATM    4  O   UNL     1       1.781   0.810  -1.482  1.00  0.00           O  \nHETATM    5  C   UNL     1      -0.086   0.609   0.440  1.00  0.00           C  \nHETATM    6  C   UNL     1      -0.793  -0.551   0.124  1.00  0.00           C  \nHETATM    7  C   UNL     1      -0.729   1.846   0.413  1.00  0.00           C  \nHETATM    8  C   UNL     1      -2.143  -0.474  -0.218  1.00  0.00           C  \nHETATM    9  C   UNL     1      -2.079   1.924   0.071  1.00  0.00           C  \nHETATM   10  C   UNL     1      -2.785   0.764  -0.245  1.00  0.00           C  \nHETATM   11  C   UNL     1      -0.141  -1.854   0.148  1.00  0.00           C  \nHETATM   12  C   UNL     1       2.109   0.671  -0.311  1.00  0.00           C  \nHETATM   13  C   UNL     1       3.530   0.600   0.164  1.00  0.00           C  \nHETATM   14  H   UNL     1      -0.185   2.755   0.659  1.00  0.00           H  \nHETATM   15  H   UNL     1      -2.725  -1.361  -0.456  1.00  0.00           H  \nHETATM   16  H   UNL     1      -2.580   2.887   0.051  1.00  0.00           H  \nHETATM   17  H   UNL     1      -3.837   0.824  -0.509  1.00  0.00           H  \nHETATM   18  H   UNL     1       3.729   1.418   0.859  1.00  0.00           H  \nHETATM   19  H   UNL     1       4.205   0.697  -0.692  1.00  0.00           H  \nHETATM   20  H   UNL     1       3.711  -0.366   0.643  1.00  0.00           H  \nHETATM   21  H   UNL     1      -0.256  -3.592  -0.734  1.00  0.00           H  \nCONECT    1    5   12                                                 \nCONECT    2   11   21                                                 \nCONECT    3   11   11                                                 \nCONECT    4   12   12                                                 \nCONECT    5    1    6    7    7                                       \nCONECT    6    5    8    8   11                                       \nCONECT    7    5    5    9   14                                       \nCONECT    8    6    6   10   15                                       \nCONECT    9    7   10   10   16                                       \nCONECT   10    8    9    9   17                                       \nCONECT   11    2    3    3    6                                       \nCONECT   12    1    4    4   13                                       \nCONECT   13   12   18   19   20                                       \nCONECT   14    7                                                      \nCONECT   15    8                                                      \nCONECT   16    9                                                      \nCONECT   17   10                                                      \nCONECT   18   13                                                      \nCONECT   19   13                                                      \nCONECT   20   13                                                      \nCONECT   21    2                                                      \nMASTER        0    0    0    0    0    0    0    0   21    0   21    0\nEND\n","pdb");
+	viewer_17731751957859716.setStyle({"serial": 1},{"sphere": {"radius": 0.4, "color": "#ff6e6e"}, "stick": {"color": "#ff6e6e"}});
+	viewer_17731751957859716.setStyle({"serial": 2},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
+	viewer_17731751957859716.setStyle({"serial": 3},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
+	viewer_17731751957859716.setStyle({"serial": 4},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
+	viewer_17731751957859716.setStyle({"serial": 5},{"sphere": {"radius": 0.4, "color": "#8181ff"}, "stick": {"color": "#8181ff"}});
+	viewer_17731751957859716.setStyle({"serial": 6},{"sphere": {"radius": 0.4, "color": "#ffc0c0"}, "stick": {"color": "#ffc0c0"}});
+	viewer_17731751957859716.setStyle({"serial": 7},{"sphere": {"radius": 0.4, "color": "#ffa4a4"}, "stick": {"color": "#ffa4a4"}});
+	viewer_17731751957859716.setStyle({"serial": 8},{"sphere": {"radius": 0.4, "color": "#ffebeb"}, "stick": {"color": "#ffebeb"}});
+	viewer_17731751957859716.setStyle({"serial": 9},{"sphere": {"radius": 0.4, "color": "#fff3f3"}, "stick": {"color": "#fff3f3"}});
+	viewer_17731751957859716.setStyle({"serial": 10},{"sphere": {"radius": 0.4, "color": "#ffbaba"}, "stick": {"color": "#ffbaba"}});
+	viewer_17731751957859716.setStyle({"serial": 11},{"sphere": {"radius": 0.4, "color": "#6666ff"}, "stick": {"color": "#6666ff"}});
+	viewer_17731751957859716.setStyle({"serial": 12},{"sphere": {"radius": 0.4, "color": "#6666ff"}, "stick": {"color": "#6666ff"}});
+	viewer_17731751957859716.setStyle({"serial": 13},{"sphere": {"radius": 0.4, "color": "#ff6666"}, "stick": {"color": "#ff6666"}});
+	viewer_17731751957859716.setStyle({"serial": 14},{"sphere": {"radius": 0.4, "color": "#cacaff"}, "stick": {"color": "#cacaff"}});
+	viewer_17731751957859716.setStyle({"serial": 15},{"sphere": {"radius": 0.4, "color": "#d0d0ff"}, "stick": {"color": "#d0d0ff"}});
+	viewer_17731751957859716.setStyle({"serial": 16},{"sphere": {"radius": 0.4, "color": "#d4d4ff"}, "stick": {"color": "#d4d4ff"}});
+	viewer_17731751957859716.setStyle({"serial": 17},{"sphere": {"radius": 0.4, "color": "#d0d0ff"}, "stick": {"color": "#d0d0ff"}});
+	viewer_17731751957859716.setStyle({"serial": 18},{"sphere": {"radius": 0.4, "color": "#d1d1ff"}, "stick": {"color": "#d1d1ff"}});
+	viewer_17731751957859716.setStyle({"serial": 19},{"sphere": {"radius": 0.4, "color": "#d3d3ff"}, "stick": {"color": "#d3d3ff"}});
+	viewer_17731751957859716.setStyle({"serial": 20},{"sphere": {"radius": 0.4, "color": "#c7c7ff"}, "stick": {"color": "#c7c7ff"}});
+	viewer_17731751957859716.setStyle({"serial": 21},{"sphere": {"radius": 0.4, "color": "#7a7aff"}, "stick": {"color": "#7a7aff"}});
+	viewer_17731751957859716.setBackgroundColor("black");
+	viewer_17731751957859716.zoomTo();
+viewer_17731751957859716.render();
 });
 </script></div>
         </div>
