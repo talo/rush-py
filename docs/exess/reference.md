@@ -84,10 +84,6 @@ Auxiliary (RIFIT):
 - PCSeg-0
 - PCSeg-1
 
-### X2C
-
-- x2c-SVPall
-
 ## Lebedev grids
 
 Mapping of Lebedev grid sizes to maximum spherical harmonic degree:
@@ -230,14 +226,6 @@ Custom installer templates live under `modulefiles/` in the EXESS GitHub reposit
 Callback: Queue 0x14dbb9800000 Aborting with error :
 HSA_STATUS_ERROR_OUT_OF_RESOURCES:
 ```
-
-## Reporting issues
-
-Before reporting issues, consult the known issues above. Report bugs to placeholder@rush.exess.co with details on hardware, software, and an input that reproduces the issue.
-
-## License
-
-For licensing questions, contact placeholder@qdx.co.
 
 :::{only} internal
 ## Performance
