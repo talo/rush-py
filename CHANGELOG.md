@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- Rename docs project to "QDX" and set html_title to "QDX Documentation"
+
 ## 6.8.0
 
 ### Changed
