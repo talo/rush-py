@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- Rename docs project to "QDX" and set html_title to "QDX Documentation"
+
 ## 6.8.0
 
 ### Changed
@@ -20,7 +25,6 @@
 - Add "Home" link above global toc in docs sidebar
 - Simplify docs templates: remove EXESS-specific header, breadcrumbs, sidebar, and toc overrides
 - Remove custom EXESS nav builder from docs conf.py
-- Rename docs project to "QDX" and set html_title to "QDX Documentation"
 - Update EXESS docs: free version access, free for academics, remove email contact in favor of request forms
 - Expand EXESS limitations documentation (relativistic, heavy elements, excited-state methods)
 - Remove x2c-SVPall from basis set table (relativistic not currently supported)
