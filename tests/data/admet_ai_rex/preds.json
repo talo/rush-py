@@ -1,0 +1,20 @@
+[
+  {
+    "columns": [
+      {"key": "BBB_Martins_drugbank_approved_percentile", "value": "10"},
+      {"key": "ClinTox_drugbank_approved_percentile", "value": "20"},
+      {"key": "Solubility_AqSolDB_drugbank_approved_percentile", "value": "30"},
+      {"key": "Bioavailability_Ma_drugbank_approved_percentile", "value": "40"},
+      {"key": "hERG_drugbank_approved_percentile", "value": "50"}
+    ]
+  },
+  {
+    "columns": [
+      {"key": "BBB_Martins_drugbank_approved_percentile", "value": "25"},
+      {"key": "ClinTox_drugbank_approved_percentile", "value": "35"},
+      {"key": "Solubility_AqSolDB_drugbank_approved_percentile", "value": "45"},
+      {"key": "Bioavailability_Ma_drugbank_approved_percentile", "value": "55"},
+      {"key": "hERG_drugbank_approved_percentile", "value": "65"}
+    ]
+  }
+]
