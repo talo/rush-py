@@ -2,7 +2,7 @@ import json
 import sys
 from dataclasses import dataclass
 from string import Template
-from typing import Generator
+from typing import Iterator
 
 from gql.transport.exceptions import TransportQueryError
 
@@ -121,13 +121,13 @@ in
                 print(f"  {error['message']}", file=sys.stderr)
 
 
-def save_outputs(res) -> list[Generator[Auto3DResult] | RunError] | str | RunError:
+def save_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunError:
     """
     Download output files from an auto3d run.
 
     The auto3d rex computation returns a Rush object store pointers for TRCs
     and stats for each conformer generated. There are up to k conformers
-    per input. Each input can either succeed, in which case a Generator[Auto3DResult]
+    per input. Each input can either succeed, in which case a Iterator[Auto3DResult]
     is returned that downloads and packages each conformer on the fly, or fail,
     in which case the run error is returned.
 
@@ -144,7 +144,7 @@ def save_outputs(res) -> list[Generator[Auto3DResult] | RunError] | str | RunErr
     Returns:
         Either:
         - A run ID string (if input was a run ID)
-        - list[Generator[Auto3dResult] | RunError], if the run succeeded
+        - list[Iterator[Auto3DResult] | RunError], if the run succeeded
         - RunError if input is an error
     """
 
@@ -159,7 +159,7 @@ def save_outputs(res) -> list[Generator[Auto3DResult] | RunError] | str | RunErr
     # Handle run output
     if isinstance(res, list):
 
-        def to_auto3dresult(res_i) -> Generator[Auto3DResult]:
+        def to_auto3dresult(res_i) -> Iterator[Auto3DResult]:
             for trc_obj, stats in res_i:
                 trc_dict = {
                     "topology": json.loads(download_object(trc_obj[0]["path"])),
