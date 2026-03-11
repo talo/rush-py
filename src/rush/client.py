@@ -100,7 +100,7 @@ MODULE_OVERRIDES = json.loads(MODULE_OVERRIDES) if MODULE_OVERRIDES else {}
 MODULE_LOCK = (
     {
         # staging
-        "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
+        "auto3d_rex": "github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
         "exess_rex": "github:talo/tengu-exess/ac24fadc935aa66b398aad3bacffc30f6cf3116a#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/f64f752732d89c47731085f1a688bfd2dee6dfc7#exess_geo_opt_rex",
@@ -113,7 +113,7 @@ MODULE_LOCK = (
     if "staging" in GRAPHQL_ENDPOINT
     else {
         # prod
-        "auto3d_rex": "github:talo/tengu-auto3d/ce81cfb6f4f2628cee07400992650c15ccec790e#auto3d_rex",
+        "auto3d_rex": "github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
         "exess_rex": "github:talo/tengu-exess/ac24fadc935aa66b398aad3bacffc30f6cf3116a#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/d3d5a3dcf47b41ce3ed04fc7517bda8e375e5383#exess_geo_opt_rex",

@@ -1,8 +1,12 @@
+import json
 import sys
+from dataclasses import dataclass
 from string import Template
+from typing import Iterator
 
 from gql.transport.exceptions import TransportQueryError
 
+from rush import TRC, from_json
 from rush.client import (
     RunError,
     RunOpts,
@@ -10,8 +14,23 @@ from rush.client import (
     _get_project_id,
     _submit_rex,
     collect_run,
+    download_object,
 )
 from rush.utils import bool_to_str, float_to_str
+
+
+@dataclass
+class Auto3DStats:
+    f_max: float
+    converged: bool
+    e_rel_kcal_mol: float
+    e_tot_hartrees: float
+
+
+@dataclass
+class Auto3DResult:
+    conformer: TRC
+    stats: Auto3DStats
 
 
 def auto3d(
@@ -100,3 +119,69 @@ in
             print("Error:", file=sys.stderr)
             for error in e.errors:
                 print(f"  {error['message']}", file=sys.stderr)
+
+
+def save_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunError:
+    """
+    Download output files from an auto3d run.
+
+    The auto3d rex computation returns a Rush object store pointers for TRCs
+    and stats for each conformer generated. There are up to k conformers
+    per input. Each input can either succeed, in which case a Iterator[Auto3DResult]
+    is returned that downloads and packages each conformer on the fly, or fail,
+    in which case the run error is returned.
+
+    If collect=False was used, the input will be a run ID string, which is
+    returned as-is for later collection by the caller.
+
+    Args:
+        res: Either:
+             - A run ID string (if collect=False was used)
+             - The successful output from auto3d()
+             - A RunError
+             Each VirtualObject dict has keys: 'path', 'size', 'format'.
+
+    Returns:
+        Either:
+        - A run ID string (if input was a run ID)
+        - list[Iterator[Auto3DResult] | RunError], if the run succeeded
+        - RunError if input is an error
+    """
+
+    # Handle error case
+    if isinstance(res, RunError):
+        return res
+
+    # Handle run ID string (collect=False case)
+    if isinstance(res, str):
+        return res
+
+    # Handle run output
+    if isinstance(res, list):
+
+        def to_auto3dresult(res_i) -> Iterator[Auto3DResult]:
+            for trc_obj, stats in res_i:
+                trc_dict = {
+                    "topology": json.loads(download_object(trc_obj[0]["path"])),
+                    "residues": json.loads(download_object(trc_obj[1]["path"])),
+                    "chains": json.loads(download_object(trc_obj[2]["path"])),
+                }
+                yield Auto3DResult(
+                    from_json(trc_dict),
+                    Auto3DStats(
+                        stats["f_max"],
+                        stats["converged"],
+                        stats["e_rel_kcal_mol"],
+                        stats["e_tot_hartrees"],
+                    ),
+                )
+
+        return [
+            RunError(res_i) if isinstance(res_i, str) else to_auto3dresult(res_i)
+            for res_i in res
+        ]
+
+    # Fallback: return as-is (for debugging or unexpected formats)
+    return RunError(
+        f"Error: prepare_protein save_outputs received unexpected format: {type(res)}"
+    )

@@ -1,8 +1,18 @@
 # Changelog
 
-## 6.7.3
+## 6.8.0
+
+### Changed
+- Bump `auto3d_rex` module revision (staging and prod)
+
+### Added
+- `Auto3DResult` and `Auto3DStats` dataclasses for structured conformer output
+- `save_outputs()` in `auto3d` module with bespoke dataclasses for the result TRCs and stats; TRCs downloaded and constructed fully in-memory
+
 ### Fixed
-- Center 2D charge map molecule in CHELPG HTML visualization
+- Disambiguate `prepare_protein` error message in `save_outputs()` fallback
+
+## 6.7.3
 
 ### Changed
 - Update docs style to match QDX website: dark mode, logo linking to qdx.co, nav links to EXESS and Rush
@@ -14,11 +24,16 @@
 - Expand EXESS limitations documentation (relativistic, heavy elements, excited-state methods)
 - Remove x2c-SVPall from basis set table (relativistic not currently supported)
 
+### Fixed
+- Center 2D charge map molecule in CHELPG HTML visualization
+
 ## 6.7.2
+
 ### Changed
 - Docs deploy now targets qdx-main-landing repo instead of exess-webapp
 
 ## 6.7.1
+
 ### Fixed
 - fix github action for docs publishing
 
@@ -26,11 +41,6 @@
 
 ### Changed
 - `.env` file detection now walks up parent directories from `cwd`, so examples subfolders find the repo-root `.env` automatically
-
-### Fixed
-- CHELPG tutorial code and output visualisation cleanup
-- Bar chart and 3D structure colors now match 2D visualization in CHELPG output
-- Changelog CI check was only checking the latest commit
 
 ### Added
 - Add tags to rex runs with runtime and SDK metadata
@@ -40,23 +50,26 @@
 - Charge-colored 2D aspirin structure to CHELPG output
 - Docs: basis set warnings with example code links across tutorials
 
+### Fixed
+- CHELPG tutorial code and output visualisation cleanup
+- Bar chart and 3D structure colors now match 2D visualization in CHELPG output
+- Changelog CI check was only checking the latest commit
+
 ## 6.6.0
 
 ### Changed
 - `from_json()` now always returns a list in the case of a single path input, which is more consistent
   especially given the typing challenges with determining single-vs-many output types for file inputs
 
-### Fixed
-- work around json import error due to shadowing
-- gradually type, and fix incomplete or erroneous typing, in numerous places
-
 ### Added
 - test for getting CHELPG charges from exess.energy (exess.chelpg to be removed soon)
 - add all deps needed for examples to pyproject.toml dev deps
 
-## 6.5.1
+### Fixed
+- work around json import error due to shadowing
+- gradually type, and fix incomplete or erroneous typing, in numerous places
 
-### Changed
+## 6.5.1
 
 ### Fixed
 - `save_energy_outputs()` now handles list inputs from `collect_run()`
@@ -70,8 +83,6 @@
 - Fixed `save_outputs()` to properly handle list/tuple results from `collect_run()`
 - Fixed `prepare_complex()` to respect the `collect` parameter when calling `run_prepare_protein()`
 - Updated CHELPG example script to use `save_energy_outputs()` for proper HDF5 extraction
-
-### Added
 
 ## 6.5.0
 

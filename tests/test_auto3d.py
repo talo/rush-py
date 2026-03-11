@@ -1,10 +1,10 @@
+import itertools
 import sys
 from pathlib import Path
-from pprint import pp
 
-from rush import from_json
 from rush.auto3d import auto3d as run_auto3d
-from rush.client import RunOpts, save_object, set_opts
+from rush.auto3d import save_outputs
+from rush.client import RunError, RunOpts, set_opts
 
 
 def test_auto3d():
@@ -19,10 +19,27 @@ def test_auto3d():
         collect=True,
     )
     # Output is a list of TRC objects in memory, or a str if auto3d failed
-    trc_obj, err = res
-    trc = from_json(tuple(save_object(o["path"]) for o in trc_obj))
-    pp(trc, width=130, compact=True, stream=sys.stderr)
-    print(err, file=sys.stderr)
+    res = save_outputs(res)
+    assert not isinstance(res, (str, RunError))
+    assert len(res) == 2
+
+    # res[0] expected to succeed
+    assert not isinstance(res[0], RunError)
+    for i, x in enumerate(res[0]):
+        print(f"Conformer {i}:")
+        for atom, coords in zip(
+            x.conformer.topology.symbols,
+            itertools.batched(x.conformer.topology.geometry, 3),
+        ):
+            print(f"  {str(atom)} {coords}", file=sys.stderr)
+        print(f"  {x.stats}", file=sys.stderr)
+    print("", file=sys.stderr)
+    n = i + 1
+    assert n == 5
+
+    # res[1] expected to fail
+    assert isinstance(res[1], RunError)
+    print(res[1])
 
 
 if __name__ == "__main__":

@@ -164,5 +164,6 @@ def save_outputs(
         )
 
     # Fallback: return as-is (for debugging or unexpected formats)
-    print(res, file=sys.stderr)
-    return RunError(f"Error: save_outputs received unexpected format: {type(res)}")
+    return RunError(
+        f"Error: prepare_protein save_outputs received unexpected format: {type(res)}"
+    )
