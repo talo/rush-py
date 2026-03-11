@@ -20,7 +20,7 @@ In the rush-py tutorial, the `size` field is currently informational only (often
 
 In rush-py, `exess.save_energy_outputs` downloads these objects to the local workspace. For export-heavy runs, the second output is stored as a compressed archive in the object store; the helper decompresses it and extracts the HDF5 file automatically. Pass `to_json=True` to convert the exported HDF5 data into JSON for easier inspection when the data volume is small (for example, descriptor grids).
 
-`save_energy_outputs` returns either a single JSON path (no exports) or a tuple of `(json_path, hdf5_path)` when exports are present. With `to_json=True`, the second path points to a JSON file instead of HDF5.
+`save_energy_outputs` returns either a single JSON path (no exports) or a tuple of `(json_path, exports_path)` when exports are present. With `to_json=True`, the second path points to a JSON file instead of HDF5.
 
 The helper uses the object store path as the filename and applies a `.hdf5` or `.json` extension as appropriate.
 

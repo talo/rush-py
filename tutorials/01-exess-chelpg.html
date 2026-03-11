@@ -228,11 +228,21 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="13"><span class="n">topology_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;aspirin_topology.json&quot;</span><span class="p">)</span>
 </span><span data-line="14"><span class="n">topology_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">topology_json</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </span><span data-line="15">
-</span><span data-line="16"><span class="c1"># 3. Run CHELPG calculation (returns charges in ~30 seconds)</span>
-</span><span data-line="17"><span class="n">result</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">chelpg</span><span class="p">(</span><span class="n">topology_path</span><span class="o">=</span><span class="n">topology_path</span><span class="p">,</span> <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="16"><span class="c1"># 3. Run energy calculation with CHELPG export (returns charges in ~30 seconds)</span>
+</span><span data-line="17"><span class="n">result</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
+</span><span data-line="18">    <span class="n">topology_path</span><span class="o">=</span><span class="n">topology_path</span><span class="p">,</span>
+</span><span data-line="19">    <span class="n">frag_keywords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># disable fragmentation for CHELPG</span>
+</span><span data-line="20">    <span class="n">export_keywords</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">ExportKeywords</span><span class="p">(</span><span class="n">export_chelpg_charges</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span data-line="21">    <span class="n">convert_hdf5_to_json</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="22">    <span class="n">collect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="23"><span class="p">)</span>
+</span><span data-line="24">
+</span><span data-line="25"><span class="c1"># 4. Extract charges from the exports JSON</span>
+</span><span data-line="26"><span class="n">json_path</span><span class="p">,</span> <span class="n">exports_path</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">save_energy_outputs</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span><span data-line="27"><span class="n">charges</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">exports_path</span><span class="p">))[</span><span class="s2">&quot;chelpg_charges&quot;</span><span class="p">]</span>
 </span></pre></div>
 </div>
-<p>That’s it! The <code class="docutils literal notranslate"><span class="pre">result</span></code> tuple contains your charges plus metadata.</p>
+<p>That’s it! <code class="docutils literal notranslate"><span class="pre">charges</span></code> is a list of CHELPG partial charges, one per atom.</p>
 <section id="get-the-pdb-file">
 <h3>Get the PDB file<a class="headerlink" href="#get-the-pdb-file" title="Link to this heading">¶</a></h3>
 <p>You can find the sample PDB file at <a class="reference external" href="https://github.com/talo/rush-py/blob/main/examples/exess-chelpg/data/aspirin.pdb" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/exess-chelpg/data/aspirin.pdb</span></code></a>, or use any PDB file from the Protein Data Bank.</p>
@@ -245,7 +255,7 @@ data-aria-dark="Switch to auto color mode">
 <p>👉 <strong><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-chelpg" target="_blank">Complete CHELPG Example</a></strong></p>
 <p>This includes:</p>
 <ul class="simple">
-<li><p>✅ HDF5 charge extraction</p></li>
+<li><p>✅ Charge extraction from exports JSON</p></li>
 <li><p>✅ Bar chart with RdBu coloring (red = negative/electron-rich, blue = positive/electron-poor)</p></li>
 <li><p>✅ Interactive 3D structure visualization with charge-colored atoms</p></li>
 <li><p>✅ Summary statistics (total charge, min/max per atom)</p></li>

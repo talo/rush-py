@@ -282,7 +282,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rush.exess.energy"><code class="docutils literal notranslate"><span class="pre">energy()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.save_energy_outputs"><code class="docutils literal notranslate"><span class="pre">save_energy_outputs()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.interaction_energy"><code class="docutils literal notranslate"><span class="pre">interaction_energy()</span></code></a></li>
-<li><a class="reference internal" href="#rush.exess.chelpg"><code class="docutils literal notranslate"><span class="pre">chelpg()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.qmmm"><code class="docutils literal notranslate"><span class="pre">qmmm()</span></code></a></li>
 <li><a class="reference internal" href="#rush.exess.OptimizationConvergenceCriteria"><code class="docutils literal notranslate"><span class="pre">OptimizationConvergenceCriteria</span></code></a><ul>
 <li><a class="reference internal" href="#rush.exess.OptimizationConvergenceCriteria.metric"><code class="docutils literal notranslate">metric</span></code></a></li>
@@ -379,7 +378,6 @@ flexible basis set selection, and configurable n-mer fragmentation levels.</p>
 <li><p><a class="reference internal" href="#rush.exess.exess" title="rush.exess.exess"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.exess()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#rush.exess.energy" title="rush.exess.energy"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.energy()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#rush.exess.interaction_energy" title="rush.exess.interaction_energy"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.interaction_energy()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#rush.exess.chelpg" title="rush.exess.chelpg"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.chelpg()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#rush.exess.qmmm" title="rush.exess.qmmm"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.qmmm()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#rush.exess.optimization" title="rush.exess.optimization"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.optimization()</span></code></a></p></li>
 </ul>
@@ -1388,7 +1386,7 @@ converted to a tuple for consistent processing.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
-<li><p>(json_path, hdf5_path)</p></li>
+<li><p>(json_path, exports_path)</p></li>
 </ul>
 </p>
 </dd>
@@ -1412,23 +1410,6 @@ in the toplogy file at <cite>topology_path</cite>.</p>
 <li><p><strong>force_cartesian_basis_sets</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
 <li><p><strong>scf_keywords</strong> (<a class="reference internal" href="#rush.exess.SCFKeywords" title="rush.exess.SCFKeywords"><em>SCFKeywords</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>frag_keywords</strong> (<a class="reference internal" href="#rush.exess.FragKeywords" title="rush.exess.FragKeywords"><em>FragKeywords</em></a>)</p></li>
-<li><p><strong>system</strong> (<a class="reference internal" href="#rush.exess.System" title="rush.exess.System"><em>System</em></a><em> | </em><em>None</em>)</p></li>
-<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
-<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>
-<li><p><strong>collect</strong> (<em>bool</em>)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rush.exess.chelpg">
-<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">chelpg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess.html#chelpg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.chelpg" title="Link to this definition">¶</a></dt>
-<dd><p>Compute the CHELPG partial charges for all atoms of the system in the topology file at <cite>topology_path</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topology_path</strong> (<em>Path</em><em> | </em><em>str</em>)</p></li>
 <li><p><strong>system</strong> (<a class="reference internal" href="#rush.exess.System" title="rush.exess.System"><em>System</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunSpec" title="rush.client.RunSpec"><em>RunSpec</em></a>)</p></li>
 <li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.client.html#rush.client.RunOpts" title="rush.client.RunOpts"><em>RunOpts</em></a>)</p></li>

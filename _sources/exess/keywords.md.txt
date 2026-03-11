@@ -1945,10 +1945,6 @@ Default keyword behavior for the common entry points:
   - `scf_keywords`: unset (EXESS defaults apply).
   - `frag_keywords`: `FragKeywords()` (level `Dimer`, `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`, `cutoff_type=None`, `distance_metric=None`).
   - `export_keywords`: `ExportKeywords()` (all fields unset; no exports requested).
-- `exess.chelpg`:
-  - `scf_keywords`: `SCFKeywords(max_diis_history_length=12, convergence_threshold=1e-8)`.
-  - `frag_keywords`: `FragKeywords(level="Monomer")`.
-  - `export`: CHELPG charges and bond orders enabled.
 - `exess.qmmm`:
   - `scf_keywords`: unset (EXESS defaults apply).
   - `frag_keywords`: `FragKeywords()` (same defaults as above).
@@ -1960,9 +1956,6 @@ Rush-py entrypoint defaults (non-keyword parameters):
 
 - `exess.exess` / `exess.energy` / `exess.interaction_energy`:
   - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
-- `exess.chelpg`:
-  - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
-  - Overrides `standard_orientation="None"` and `force_cartesian_basis_sets=false`.
 - `exess.qmmm`:
   - `method="RestrictedHF"`, `basis="STO-3G"`, `aux_basis=None`.
   - `dt_ps=0.002`, `temperature_kelvin=290.0`, `pressure_atm=None`.

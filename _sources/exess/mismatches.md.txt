@@ -53,8 +53,6 @@ This section documents mismatches across the EXESS executable schema (libqdx.hpp
 - rush-py `BondOrder` only covers a subset of EXESS bond-order values and remaps legacy values 254/255.
 - rush-py uses Topology paths rather than full EXESS input JSON, so `schema_version`, `title`, and some top-level input fields are not directly set by users.
 - rush-py defaults `frag_keywords` to `FragKeywords()` (dimer-level cutoffs), while the EXESS schema has no fragmentation defaults unless `frag` is provided.
-- rush-py `chelpg` overrides SCF defaults (`max_diis_history_length=12`, `convergence_threshold=1e-8`), sets `frag.level=Monomer`, and enables CHELPG + bond-order exports.
-- rush-py `chelpg` sets `standard_orientation="None"` and `force_cartesian_basis_sets=false`, overriding CLI defaults (`FullSystem`, `true`).
 - rush-py `qmmm` defaults to `basis="STO-3G"`, `dt_ps=0.002`, and `temperature_kelvin=290.0`.
 - rush-py `FragKeywords` auto-fills cutoffs for `Trimer` and `Tetramer` levels (100/25/10 Angstroms) when omitted.
 :::
