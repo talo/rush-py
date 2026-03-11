@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("_ext"))
 
 # Project information
-project = "rush"
+project = "QDX"
 copyright = "2026, QDX"
 author = "Sean L"
 
@@ -37,6 +37,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # HTML output options
+html_title = "QDX Documentation"
 html_theme = "shibuya"
 html_static_path = ["_sphinx_static"]
 html_logo = "_sphinx_static/logo.svg"
