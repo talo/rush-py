@@ -1,9 +1,21 @@
 # Changelog
 
-## 6.10.0
+## Unreleased
+
+### Removed
+- remove ML mentions since it's disabled (for now) in upstream EXESS
+
+### Changed
+- **Breaking:** Default level of theory changed from RestrictedHF to RestrictedKSDFT with B3LYP/cc-pVDZ across all EXESS functions (`exess`, `energy`, `interaction_energy`, `qmmm`, `optimization`)
+- Default basis set for `qmmm` changed from STO-3G to cc-pVDZ
 
 ### Added
 - nnxtb docs, tutorial, and example script
+- `ksdft_keywords` parameter to `interaction_energy`, `qmmm`, and `optimization` functions
+
+### Fixed
+- Update `ks` keyword to `ks_dft` in `qmmm` and `optimization` REX DSL templates
+- Add force push to docs deploy workflow to avoid out of sync issues (don't care about maintaining history on bot managed branch)
 
 ## 6.9.0
 
@@ -12,11 +24,7 @@
 
 ### Changed
 - CHELPG example and tutorial updated to use `exess.energy()` with export keywords and JSON output
-- Rename docs project to "QDX" and set html_title to "QDX Documentation"
-- remove ML mentions since disabled in EXESS
-
-### Fixed
-- Add force push to docs deploy workflow to avoid out of sync issues (don't care about maintaining history on bot managed branch)
+- Rename docs project to "QDX" and set html\_title to "QDX Documentation"
 
 ## 6.8.0
 
