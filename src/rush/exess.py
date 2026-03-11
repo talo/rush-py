@@ -14,7 +14,6 @@ Quick Links
 - :func:`rush.exess.exess`
 - :func:`rush.exess.energy`
 - :func:`rush.exess.interaction_energy`
-- :func:`rush.exess.chelpg`
 - :func:`rush.exess.qmmm`
 - :func:`rush.exess.optimization`
 """
@@ -1082,7 +1081,7 @@ def save_energy_outputs(
         extract: Whether to extract tar.zst files (default True)
 
     Returns:
-        - (json_path, hdf5_path): Tuple of local Paths to downloaded files
+        - (json_path, exports_path): Tuple of local Paths to downloaded files
         - (json_path, None): If HDF5 extraction fails or no HDF5 output
         - RunError: If the input res is an error
     """

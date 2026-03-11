@@ -66,7 +66,6 @@ Or, call one of the other supplementary EXESS entry points, built to facilitate 
 from rush import exess
 exess.energy(...)
 exess.interaction_energy(...)
-exess.chelpg(...)
 exess.optimization(...)
 exess.qmmm(...)
 ```

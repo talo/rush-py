@@ -6,7 +6,7 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 
 - Load a molecule from a PDB file
 - Calculate CHELPG charges using Rush
-- Extract charges from HDF5 results
+- Extract charges from exports JSON
 - Visualize charge distribution with a bar chart and interactive 3D plot
 
 ## Quick Start
@@ -19,7 +19,7 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 2. **Run the example:**
    ```bash
    cd examples/exess-chelpg
-   python 01_exess_chelpg_aspirin.py
+   python 01_exess_chelpg.py
    ```
 
 3. **View results:**
@@ -32,7 +32,7 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 1. Loads `aspirin.pdb` using `from_pdb()`
 2. Converts to topology JSON format
 3. Submits CHELPG calculation to Rush
-4. Extracts charges from HDF5 results
+4. Extracts charges from exports JSON
 5. Generates:
    - Bar chart with RdBu coloring (red=positive, blue=negative)
    - Interactive 3D view of the molecule with charge-colored atoms

@@ -137,7 +137,6 @@ exess.exess("input_topology.json", collect=True)
 # Convenience wrappers
 exess.energy(...)
 exess.interaction_energy(...)
-exess.chelpg(...)
 exess.optimization(...)
 exess.qmmm(...)
 ```
