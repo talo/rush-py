@@ -329,8 +329,9 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="164">        <span class="p">)</span>
 </span><span data-line="165">
 </span><span data-line="166">    <span class="c1"># Fallback: return as-is (for debugging or unexpected formats)</span>
-</span><span data-line="167">    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="168">    <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: save_outputs received unexpected format: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</span><span data-line="167">    <span class="k">return</span> <span class="n">RunError</span><span class="p">(</span>
+</span><span data-line="168">        <span class="sa">f</span><span class="s2">&quot;Error: prepare_protein save_outputs received unexpected format: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="169">    <span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
