@@ -1,8 +1,12 @@
 # Changelog
 
-## Unreleased
+## 6.9.0
+
+### Removed
+- `exess.chelpg()` function — use `exess.energy()` with `ExportKeywords(export_chelpg_charges=True)` instead
 
 ### Changed
+- CHELPG example and tutorial updated to use `exess.energy()` with export keywords and JSON output
 - Rename docs project to "QDX" and set html_title to "QDX Documentation"
 
 ## 6.8.0

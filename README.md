@@ -58,8 +58,13 @@ Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current workin
 # For interaction_energy, second argument is reference fragment
 result = exess.interaction_energy(topology_path, 1, collect=True)
 
-# For chelpg, charges are extracted from the HDF5 output and returned as a list
-output_info, charges = exess.chelpg(topology_path, collect=True)
+# Use export keywords to obtain additional information
+result = exess.energy(
+    topology_path,
+    frag_keywords=None,  # MBE is not supported for CHELPG charges
+    export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
+    collect=True,
+)
 
 # QMMM requires Residues too
 md_topology_path = "./6a5j_t.json"
@@ -78,7 +83,6 @@ result = collect_run(id)
 # Get the full list of parameters and default arguments for a function
 help(exess.energy)
 help(exess.interaction_energy)
-help(exess.chelpg)
 help(exess.qmmm)
 ```
 

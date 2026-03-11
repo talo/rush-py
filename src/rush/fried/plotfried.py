@@ -365,7 +365,8 @@ def plot_stacked(
         )
 
     if args.ylim:
-        ax.set_ylim([float(val) for val in args.ylim.split(",")[::-1]])  # type: ignore
+        v = [float(val) for val in args.ylim.split(",")[::-1]]
+        ax.set_ylim((v[0], v[1]))
 
     xtick_labels = [entry["label"] for entry in report_data.values()]
     ax.set_xticks(range(len(xtick_labels)))

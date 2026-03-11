@@ -42,11 +42,21 @@ topology_json["schema_version"] = "0.2.0"
 topology_path = Path("aspirin_topology.json")
 topology_path.write_text(json.dumps(topology_json, indent=2))
 
-# 3. Run CHELPG calculation (returns charges in ~30 seconds)
-result = exess.chelpg(topology_path=topology_path, collect=True)
+# 3. Run energy calculation with CHELPG export (returns charges in ~30 seconds)
+result = exess.energy(
+    topology_path=topology_path,
+    frag_keywords=None,  # disable fragmentation for CHELPG
+    export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
+    convert_hdf5_to_json=True,
+    collect=True,
+)
+
+# 4. Extract charges from the exports JSON
+json_path, exports_path = exess.save_energy_outputs(result)
+charges = json.load(open(exports_path))["chelpg_charges"]
 ```
 
-That's it! The `result` tuple contains your charges plus metadata.
+That's it! `charges` is a list of CHELPG partial charges, one per atom.
 
 ### Get the PDB file
 
@@ -61,7 +71,7 @@ For complete charge extraction, visualization (bar chart + interactive 3D), and 
 👉 **[Complete CHELPG Example](https://github.com/talo/rush-py/tree/main/examples/exess-chelpg){target="_blank"}**
 
 This includes:
-- ✅ HDF5 charge extraction
+- ✅ Charge extraction from exports JSON
 - ✅ Bar chart with RdBu coloring (red = negative/electron-rich, blue = positive/electron-poor)
 - ✅ Interactive 3D structure visualization with charge-colored atoms
 - ✅ Summary statistics (total charge, min/max per atom)

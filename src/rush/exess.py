@@ -14,21 +14,16 @@ Quick Links
 - :func:`rush.exess.exess`
 - :func:`rush.exess.energy`
 - :func:`rush.exess.interaction_energy`
-- :func:`rush.exess.chelpg`
 - :func:`rush.exess.qmmm`
 - :func:`rush.exess.optimization`
 """
 
 import sys
-import tarfile
 from dataclasses import dataclass
-from io import BytesIO
 from pathlib import Path
 from string import Template
 from typing import Any, Literal
 
-import h5py
-import zstandard as zstd
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
@@ -38,7 +33,6 @@ from .client import (
     _get_project_id,
     _submit_rex,
     collect_run,
-    download_object,
     save_object,
     upload_object,
 )
@@ -1087,7 +1081,7 @@ def save_energy_outputs(
         extract: Whether to extract tar.zst files (default True)
 
     Returns:
-        - (json_path, hdf5_path): Tuple of local Paths to downloaded files
+        - (json_path, exports_path): Tuple of local Paths to downloaded files
         - (json_path, None): If HDF5 extraction fails or no HDF5 output
         - RunError: If the input res is an error
     """
@@ -1099,17 +1093,11 @@ def save_energy_outputs(
         return (save_object(res[0]["path"]), None)
     if len(res) < 2:
         raise ValueError("exess.energy should return 1 or 2 outputs.")
-    # convert_hdf5_to_json set to true
-    if "Json" in res[1]:
-        return (
-            save_object(res[0]["path"]),
-            save_object(res[1]["Json"]["path"]),
-        )
-    # hdf5-to-json set to false (or not set)
-    # Support new-style with the type key, and old-style without
-    elif "Hdf5" in res[1]:
+    # convert_hdf5_to_json set to false (or not set)
+    if "Hdf5" in res[1]:
         hdf5_path = None
         try:
+            # Support new-style with the type key, and old-style without
             hdf5_obj = res[1].get("Hdf5") or res[1]
             hdf5_path = save_object(
                 hdf5_obj["path"],
@@ -1123,6 +1111,12 @@ def save_energy_outputs(
             else:
                 raise  # Re-raise other extraction errors
         return (save_object(res[0]["path"]), hdf5_path)
+    # convert_hdf5_to_json set to true
+    elif "Json" in res[1]:
+        return (
+            save_object(res[0]["path"]),
+            save_object(res[1]["Json"]["path"]),
+        )
     # Unknown output format
     else:
         raise ValueError(
@@ -1219,144 +1213,6 @@ in
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
         if collect:
             return collect_run(run_id)
-        else:
-            return run_id
-
-    except TransportQueryError as e:
-        if e.errors:
-            for error in e.errors:
-                print(f"Error: {error['message']}", file=sys.stderr)
-
-
-def chelpg(
-    topology_path: Path | str,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-):
-    """
-    Compute the CHELPG partial charges for all atoms of the system in the topology file at `topology_path`.
-    """
-
-    # Upload inputs
-    topology_vobj = upload_object(topology_path)
-
-    # Run rex
-    rex = Template("""let
-  obj_j = λ j →
-    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
-    exess_rex_s
-      ($run_spec)
-      (exess_rex::ExessParams {
-        schema_version = "0.2.0",
-        external_charges = None,
-        convert_hdf5_to_json = None,
-        model = Some (exess_rex::Model {
-          method = exess_rex::Method::RestrictedHF,
-          basis = "cc-pVDZ",
-          aux_basis = None,
-          standard_orientation = Some exess_rex::StandardOrientation::None,
-          force_cartesian_basis_sets = Some false,
-        }),
-        system = $system,
-        keywords = exess_rex::Keywords {
-          scf = $scf_keywords,
-          ks_dft = None,
-          rtat = None,
-          frag = $frag_keywords,
-          boundary = None,
-          log = None,
-          dynamics = None,
-          integrals = None,
-          debug = None,
-          export = Some (exess_rex::ExportKeywords {
-            export_density = None,
-            export_relaxed_mp2_density_correction = None,
-            export_fock = None,
-            export_overlap = None,
-            export_h_core = None,
-            export_expanded_density = None,
-            export_expanded_gradient = None,
-            export_molecular_orbital_coeffs = None,
-            export_gradient = None,
-            export_external_charge_gradient = None,
-            export_mulliken_charges = None,
-            export_chelpg_charges = Some true,
-            export_bond_orders = Some true,
-            export_h_caps = None,
-            export_density_descriptors = None,
-            export_esp_descriptors = None,
-            export_expanded_esp_descriptors = None,
-            export_basis_labels = None,
-            export_hessian = None,
-            export_mass_weighted_hessian = None,
-            export_hessian_frequencies = None,
-            flatten_symmetric = None,
-            light_json = None,
-            concatenate_hdf5_files = None,
-            training_db = None,
-            descriptor_grid = None,
-          }),
-          guess = None,
-          force_field = None,
-          optimization = None,
-          hessian = None,
-          gradient = None,
-          qmmm = None,
-          machine_learning = None,
-          regions = None,
-        },
-        driver = exess_rex::Driver::Energy,
-      })
-      [ (obj_j topology) ]
-      None
-in
-  exess "$topology_vobj_path"
-""").substitute(
-        run_spec=run_spec._to_rex(),
-        system=system._to_rex() if system is not None else "None",
-        scf_keywords=SCFKeywords(
-            max_diis_history_length=12, convergence_threshold=1e-8
-        )._to_rex(),
-        frag_keywords=FragKeywords(level="Monomer")._to_rex(),
-        topology_vobj_path=topology_vobj["path"],
-    )
-    try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            result = collect_run(run_id)
-            if not isinstance(result, tuple):
-                return result
-            if len(result) < 2 or not isinstance(result[1], dict):
-                return result
-            # Support new-style with the type key, and old-style without
-            hdf5_obj = result[1].get("Hdf5")  # type: ignore[invalid-argument-type]
-            if hdf5_obj is None:
-                return (
-                    result[0],
-                    result[1].get("Json"),  # type: ignore[invalid-argument-type]
-                )
-            if not isinstance(hdf5_obj, dict):
-                return result
-            hdf5_path = hdf5_obj.get("path")
-            if not isinstance(hdf5_path, str):
-                return result
-            qm_output = download_object(hdf5_path)
-            decompressed = zstd.ZstdDecompressor().decompress(
-                qm_output, max_output_size=int(1e9)
-            )
-            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                hdf5_f = tar.extractfile(tar.getnames()[1])
-                with h5py.File(hdf5_f, "r") as f:
-                    frag_indices = [int(x) for x in f["monomers"].keys()]
-                    chelpg = [
-                        float(x)
-                        for frag_idx in sorted(frag_indices)
-                        for x in f[f"monomers/{frag_idx}/chelpg_charges"]
-                    ]
-            return (result[0], chelpg)
         else:
             return run_id
 
