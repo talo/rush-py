@@ -34,7 +34,7 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 3. Submits CHELPG calculation to Rush
 4. Extracts charges from exports JSON
 5. Generates:
-   - Bar chart with RdBu coloring (red=positive, blue=negative)
+   - Bar chart with RdBu coloring (red=negative, blue=positive)
    - Interactive 3D view of the molecule with charge-colored atoms
    - Combined HTML visualization
 
@@ -60,8 +60,8 @@ This example demonstrates how to use Rush to calculate and visualize CHELPG part
 
 ## Interpretation
 
-- **Red atoms (positive charges):** Electron-poor regions, good H-bond donors
-- **Blue atoms (negative charges):** Electron-rich regions, good H-bond acceptors
+- **Red atoms (negative charges):** Electron-rich regions, good H-bond acceptors
+- **Blue atoms (positive charges):** Electron-poor regions, good H-bond donors
 - **Gray atoms (near-zero):** Neutral, hydrophobic character
 
 For aspirin:
