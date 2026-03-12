@@ -1,6 +1,7 @@
 import inspect
 import json
 import platform
+import random
 import re
 import sys
 import tarfile
@@ -77,6 +78,12 @@ def _get_env(key: str) -> str | None:
 GRAPHQL_ENDPOINT = getenv(
     "RUSH_ENDPOINT",
     "https://tengu-server-prod-api-519406798674.asia-southeast1.run.app",
+)
+
+DEFAULT_TARGETS = (
+    ("Bullet", "Bullet2", "Bullet3")
+    if "staging" in GRAPHQL_ENDPOINT
+    else ("Bullet", "Bullet3")
 )
 
 
@@ -281,7 +288,10 @@ class RunSpec:
             cpus=optional_str(self.cpus),
             gpus=optional_str(self.gpus),
             nodes=optional_str(self.nodes),
-            target=optional_str(self.target, "ModuleInstanceTarget::"),
+            target=optional_str(
+                self.target or random.choice(DEFAULT_TARGETS),
+                "ModuleInstanceTarget::",
+            ),
         )
 
 
