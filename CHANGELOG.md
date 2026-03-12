@@ -8,6 +8,7 @@
 ### Changed
 - CHELPG example and tutorial updated to use `exess.energy()` with export keywords and JSON output
 - Rename docs project to "QDX" and set html_title to "QDX Documentation"
+- remove ML mentions since disabled in EXESS
 
 ## 6.8.0
 
