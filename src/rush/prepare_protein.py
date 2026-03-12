@@ -37,8 +37,9 @@ def prepare_protein(
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
     capping_style: Literal["never", "truncated", "always"] | None = None,
     truncation_threshold: int | None = None,
+    opt: bool | None = None,
     debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
@@ -85,6 +86,7 @@ def prepare_protein(
         naming_scheme = $naming_scheme,
         capping_style = $capping_style,
         truncation_threshold = $truncation_threshold,
+        opt = $opt,
         debump = $debump,
       })
       [( (obj_j topology), (obj_j residues), (obj_j chains) )]
@@ -102,6 +104,7 @@ in
             prefix="prepare_protein_rex::CappingStyle::",
         ),
         truncation_threshold=optional_str(truncation_threshold),
+        opt=optional_str(opt),
         debump=optional_str(debump),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"],

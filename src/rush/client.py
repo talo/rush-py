@@ -108,7 +108,7 @@ MODULE_LOCK = (
         "mmseqs2_rex": "github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
-        "prepare_protein_rex": "github:talo/tengu-prepare-protein/911d9fb69c269f8783b7cce2de3e87ee9333fb08#prepare_protein_rex",
+        "prepare_protein_rex": "github:talo/tengu-prepare-protein/64dc3a9f37384508498c087f4c919673616302cc#prepare_protein_rex",
     }
     if "staging" in GRAPHQL_ENDPOINT
     else {
@@ -121,7 +121,7 @@ MODULE_LOCK = (
         "mmseqs2_rex": "github:talo/tengu-colabfold/0b6ca8b9dc97fc6380d334169a6faae51d85fac7#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
-        "prepare_protein_rex": "github:talo/tengu-prepare-protein/911d9fb69c269f8783b7cce2de3e87ee9333fb08#prepare_protein_rex",
+        "prepare_protein_rex": "github:talo/tengu-prepare-protein/64dc3a9f37384508498c087f4c919673616302cc#prepare_protein_rex",
     }
 ) | MODULE_OVERRIDES
 
