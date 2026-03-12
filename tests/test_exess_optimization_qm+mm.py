@@ -17,7 +17,6 @@ def test_exess_optimization_qm_mm():
             algorithm="LBFGS",
             lbfgs_keywords=exess.LBFGSKeywords(),
         ),
-        basis="STO-2G",
         standard_orientation="None",
         qm_fragments=[0],
         run_opts=RunOpts(
