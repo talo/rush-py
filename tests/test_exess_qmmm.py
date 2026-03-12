@@ -15,7 +15,6 @@ def test_exess_qmmm():
         # TODO: make this work (currently having convergence issues)
         # restraints=exess.Restraints(free_fragments=[6]),
         qm_fragments=[6],
-        ml_fragments=[],
         run_opts=RunOpts(
             name="Rush-Py Test EXESS QMMM 01: QM+MM",
             tags=["rush-py", "test", "6a5j"],

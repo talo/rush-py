@@ -1241,7 +1241,8 @@ def qmmm(
     frag_keywords: FragKeywords = FragKeywords(),
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
-    ml_fragments: list[int] | None = None,
+    # ML regions are disabled in EXESS. Uncomment when re-enabled:
+    # ml_fragments: list[int] | None = None,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1252,10 +1253,9 @@ def qmmm(
 
     Specifying the numberof timesteps is mandatory.
     If pressure is None, an NVT ensemble is used; if pressure is specified, an NPT ensemble is used.
-    Fragments can be specified as QM, MM, or ML fragments via the respective parameters.
-    If two fragment list parameters are specified, the rest of the fragments are inferred to be of the other type.
-    If three fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
-    It is invalid to specify one fragment list parameter.
+    Fragments can be specified as QM or MM fragments via the respective parameters.
+    If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
+    If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
     """
 
     # Upload inputs
@@ -1343,26 +1343,37 @@ in
         maybe_pressure_atm=optional_str(pressure_atm),
         trajectory=trajectory._to_rex(),
         maybe_restraints=restraints._to_rex() if restraints is not None else "None",
-        maybe_machine_learning=(
-            "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
-            if ml_fragments is not None
-            else "None"
-        ),
+        # ML regions are disabled in EXESS. Uncomment when re-enabled:
+        # maybe_machine_learning=(
+        #     "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
+        #     if ml_fragments is not None
+        #     else "None"
+        # ),
+        maybe_machine_learning="None",
         maybe_regions=(
             Template(
                 """Some (exess_qmmm_rex::RegionKeywords {
             qm_fragments = $maybe_qm_fragments,
             mm_fragments = $maybe_mm_fragments,
-            ml_fragments = $maybe_ml_fragments,
+            ml_fragments = None,
           })"""
+                # ML regions are disabled in EXESS. Uncomment when re-enabled:
+                #     """Some (exess_qmmm_rex::RegionKeywords {
+                #     qm_fragments = $maybe_qm_fragments,
+                #     mm_fragments = $maybe_mm_fragments,
+                #     ml_fragments = $maybe_ml_fragments,
+                #   })"""
             ).substitute(
                 maybe_qm_fragments=optional_str(qm_fragments),
                 maybe_mm_fragments=optional_str(mm_fragments),
-                maybe_ml_fragments=optional_str(ml_fragments),
+                # ML regions are disabled in EXESS. Uncomment when re-enabled:
+                # maybe_ml_fragments=optional_str(ml_fragments),
             )
-            if not (
-                qm_fragments is None and mm_fragments is None and ml_fragments is None
-            )
+            if not (qm_fragments is None and mm_fragments is None)
+            # ML regions are disabled in EXESS. Uncomment when re-enabled:
+            # if not (
+            #     qm_fragments is None and mm_fragments is None and ml_fragments is None
+            # )
             else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
@@ -1581,7 +1592,8 @@ def optimization(
     scf_keywords: SCFKeywords | None = None,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
-    ml_fragments: list[int] | None = None,
+    # ML regions are disabled in EXESS. Uncomment when re-enabled:
+    # ml_fragments: list[int] | None = None,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1591,10 +1603,9 @@ def optimization(
     Run optimization on the system in the QDX topology and residues files at `topology_path`.
 
     Specifying the maximum iterations is mandatory.
-    Fragment-based QM calculation is not supported, but fragments can be used for specifying regions as QM, MM, or ML.
-    If two fragment list parameters are specified, the rest of the fragments are inferred to be of the other type.
-    If three fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
-    It is invalid to specify one fragment list parameter.
+    Fragment-based QM calculation is not supported, but fragments can be used for specifying regions as QM or MM.
+    If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
+    If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
     """
 
     # Upload inputs
@@ -1664,26 +1675,37 @@ in
             if optimization_keywords is not None
             else "None"
         ),
-        maybe_machine_learning=(
-            "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
-            if ml_fragments is not None
-            else "None"
-        ),
+        # ML regions are disabled in EXESS. Uncomment when re-enabled:
+        # maybe_machine_learning=(
+        #     "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
+        #     if ml_fragments is not None
+        #     else "None"
+        # ),
+        maybe_machine_learning="None",
         maybe_regions=(
             Template(
                 """Some (exess_qmmm_rex::RegionKeywords {
             qm_fragments = $maybe_qm_fragments,
             mm_fragments = $maybe_mm_fragments,
-            ml_fragments = $maybe_ml_fragments,
+            ml_fragments = None,
           })"""
+                # ML regions are disabled in EXESS. Uncomment when re-enabled:
+                #     """Some (exess_qmmm_rex::RegionKeywords {
+                #     qm_fragments = $maybe_qm_fragments,
+                #     mm_fragments = $maybe_mm_fragments,
+                #     ml_fragments = $maybe_ml_fragments,
+                #   })"""
             ).substitute(
                 maybe_qm_fragments=optional_str(qm_fragments),
                 maybe_mm_fragments=optional_str(mm_fragments),
-                maybe_ml_fragments=optional_str(ml_fragments),
+                # ML regions are disabled in EXESS. Uncomment when re-enabled:
+                # maybe_ml_fragments=optional_str(ml_fragments),
             )
-            if not (
-                qm_fragments is None and mm_fragments is None and ml_fragments is None
-            )
+            if not (qm_fragments is None and mm_fragments is None)
+            # ML regions are disabled in EXESS. Uncomment when re-enabled:
+            # if not (
+            #     qm_fragments is None and mm_fragments is None and ml_fragments is None
+            # )
             else "None"
         ),
         residues_expr=(

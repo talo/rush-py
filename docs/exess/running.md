@@ -143,7 +143,7 @@ exess.qmmm(...)
 
 Sample topology inputs are available in `tests/data/`, including `tests/data/1kuw_t.json` (small protein topology), `tests/data/benzene_t.json`, and `tests/data/ethane_t.json`.
 
-`exess.optimization` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM/ML regions when needed.
+`exess.optimization` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM regions when needed.
 
 To inspect function signatures and parameter docs locally, use Python's `help`:
 

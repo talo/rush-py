@@ -19,7 +19,6 @@ def test_exess_optimization_qm_mm():
         ),
         standard_orientation="None",
         qm_fragments=[0],
-        ml_fragments=[],
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Optimization 04: QM+MM",
             tags=["rush-py", "test", "6a5j", "QM+MM"],

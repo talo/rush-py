@@ -14,7 +14,7 @@
 
 Static structures tell you *where* atoms are. Dynamics tells you *how they move* — which bonds vibrate, which water molecules exchange, how flexible a binding pocket is. Classical molecular dynamics (MD) handles this well for proteins, but it can't describe bond breaking, charge redistribution, or electronic effects in your region of interest.
 
-**QM/MM** gives you the best of both worlds: quantum mechanics for the part that matters (a ligand, a catalytic site, a metal center) and molecular mechanics for everything else. EXESS extends this further with **Q4ML** — you can mix QM, MM, and ML (AIMNet neural network) regions in a single simulation.
+**QM/MM** gives you the best of both worlds: quantum mechanics for the part that matters (a ligand, a catalytic site, a metal center) and molecular mechanics for everything else.
 
 ---
 
@@ -28,8 +28,7 @@ out = exess.qmmm(
     "6a5j_t.json",    # Topology (atoms, coordinates, fragments)
     500,               # Number of MD timesteps
     "6a5j_r.json",    # Residues (residue names and assignments)
-    qm_fragments=[6], # Treat fragment 6 with quantum mechanics
-    ml_fragments=[],   # No ML region → everything else is MM
+    qm_fragments=[6], # Treat fragment 6 with quantum mechanics — everything else is MM
     run_opts=RunOpts(name="Tutorial: QM/MM"),
     collect=True,
 )
@@ -88,8 +87,7 @@ out = exess.qmmm(
     residues_path="molecule_r.json",
     n_timesteps=100,
     trajectory=exess.Trajectory(include_waters=True),
-    ml_fragments=[],
-    mm_fragments=[],   # No ML or MM → everything is QM
+    mm_fragments=[],   # No MM → everything is QM
     run_opts=RunOpts(name="Tutorial: QM/MM Water Dimer"),
     collect=True,
 )
@@ -97,7 +95,7 @@ out = exess.qmmm(
 
 :::{admonition} Fragment assignment logic
 :class: tip
-EXESS requires that every fragment is assigned to exactly one of QM, MM, or ML. Setting `ml_fragments=[]` and `mm_fragments=[]` forces all fragments into the QM region. You can also explicitly set `qm_fragments=[0, 1]` for clarity.
+EXESS requires that every fragment is assigned to either QM or MM. Setting `mm_fragments=[]` forces all fragments into the QM region. You can also explicitly set `qm_fragments=[0, 1]` for clarity.
 :::
 
 ---

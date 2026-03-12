@@ -15,7 +15,7 @@ python 06_exess_qmmm.py
 
 1. Basic QM/MM simulation with `exess.qmmm`
 2. Manually constructing `Topology` and `Residues` for a two-water system
-3. Configuring QM/ML/MM fragment regions
+3. Configuring QM/MM fragment regions
 4. Extracting and inspecting the simulation trajectory
 
 ## Input Data

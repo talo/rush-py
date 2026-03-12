@@ -325,10 +325,10 @@ The `driver` field selects the calculation type:
 : Single-point energy and related properties.
 
 `Optimization`
-: Geometry optimization. See {ref}`optimization`, plus {ref}`regions` when using Q4ML regions.
+: Geometry optimization. See {ref}`optimization`, plus {ref}`regions` when using QM/MM regions.
 
 `QMMM`
-: QM/MM or QM/ML/MM workflows. See {ref}`qmmm`, plus {ref}`regions` as needed.
+: QM/MM workflows. See {ref}`qmmm`, plus {ref}`regions` as needed.
 
 `Gradient`
 : Analytic or finite-difference gradients. See {ref}`gradient` for gradient options.

@@ -3,9 +3,8 @@ Example: EXESS Geometry Optimization
 
 This script demonstrates how to:
 1. Run QM geometry optimization
-2. Run ML (AIMNet) geometry optimization
-3. Work with the optimization trajectory output
-4. Generate an interactive HTML visualization of results
+2. Work with the optimization trajectory output
+3. Generate an interactive HTML visualization of results
 
 Tutorial: https://exess.qdx.co/docs/tutorials/04-exess-optimization.html
 
@@ -284,32 +283,3 @@ html_path = OUTPUT_DIR / "optimization_results.html"
 html_path.write_text(html_content, encoding="utf-8")
 print(f"✓ Visualization saved: {html_path}")
 print("  Open in a browser to view interactive results.")
-
-
-# ===== Example 2: ML optimization =====
-print()
-print("=" * 60)
-print("Example 2: ML (AIMNet) Geometry Optimization")
-print("=" * 60)
-
-# Using AIMNet2 machine-learning force field for geometry optimization.
-# AIMNet2 is selected by omitting the `method` parameter and setting
-# empty `qm_fragments` and `mm_fragments`, so all atoms are treated
-# by the ML potential. This is much faster than QM but less accurate
-# for properties that depend on electronic structure.
-
-out = exess.optimization(
-    INPUT_FILE,
-    100,
-    basis="STO-2G",
-    optimization_keywords=exess.OptimizationKeywords(
-        coordinate_system="Cartesian",
-        algorithm="LBFGS",
-        lbfgs_keywords=exess.LBFGSKeywords(),
-    ),
-    standard_orientation="None",
-    qm_fragments=[],
-    mm_fragments=[],
-    run_opts=RunOpts(name="Tutorial: Optimization using ML"),
-    collect=True,
-)

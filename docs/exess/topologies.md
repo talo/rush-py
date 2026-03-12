@@ -177,7 +177,7 @@ Validation checks when constructing inputs:
 
 #### waters
 
-`waters` is a two-element array identifying the first and last water molecule to be treated classically (used by some QMMM/Q4ML workflows).
+`waters` is a two-element array identifying the first and last water molecule to be treated classically (used by some QMMM workflows).
 
 (residues)=
 ## residues

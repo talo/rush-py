@@ -16,9 +16,8 @@ Molecules in the real world don't sit in arbitrary geometries — they settle in
 
 Geometry optimization iteratively adjusts atomic positions to minimize the total energy. At each step, EXESS computes the energy gradient (the "force" on each atom) and moves atoms downhill on the potential energy surface. When the gradient is small enough, the structure has converged.
 
-EXESS gives you three engines for this:
+EXESS gives you two engines for this:
 - **QM** — Hartree-Fock or MP2 (most accurate, slowest)
-- **ML** — AIMNet neural network potential (fast, good for organic molecules)
 - **MM** — OpenMM classical force fields (fastest, least accurate for electronic properties)
 
 ---
@@ -97,44 +96,6 @@ print(f"First atom — end:   {out_traj[-1].geometry[:3]}")
 
 :::{tip}
 Set `standard_orientation="None"` to prevent EXESS from translating or rotating the molecule. This makes it easy to overlay initial and final structures for visual comparison.
-:::
-
----
-
-## ML Optimization with AIMNet
-
-For faster optimization (especially useful for conformer searches or large organic molecules), use the AIMNet machine-learning potential instead of QM:
-
-```python
-out = exess.optimization(
-    "ethene_twisted_t.json",
-    100,
-    basis="STO-2G",  # Minimal basis — no effect on ML, just reduces memory overhead
-    optimization_keywords=exess.OptimizationKeywords(
-        coordinate_system="Cartesian",
-        algorithm="LBFGS",
-        lbfgs_keywords=exess.LBFGSKeywords(),
-    ),
-    standard_orientation="None",
-    qm_fragments=[],   # No QM fragments
-    mm_fragments=[],    # No MM fragments → everything is ML
-    run_opts=RunOpts(name="Tutorial: ML Optimization"),
-    collect=True,
-)
-```
-
-:::{admonition} How fragment assignment works
-:class: note
-EXESS assigns each fragment to QM, MM, or ML. Setting `qm_fragments=[]` and `mm_fragments=[]` tells EXESS that *all* fragments should use ML (AIMNet). The `basis="STO-2G"` is a technicality — it's the smallest possible basis set and has no effect on the ML calculation, but EXESS still requires one to be specified.
-:::
-
-:::{admonition} ML optimization settings
-:class: tip
-For ML-only runs, you **must** use `coordinate_system="Cartesian"` and `algorithm="LBFGS"`. Other combinations may fail or give poor results.
-:::
-
-:::{caution}
-The step-info output (energy, gradient) is only populated for **QM regions**. In a pure ML run, the dictionaries will be empty — you'll only get the trajectory.
 :::
 
 ---
