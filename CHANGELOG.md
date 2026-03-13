@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.10.0
+
+### Added
+- nnxtb docs, tutorial, and example script
+
 ## 6.9.0
 
 ### Removed
