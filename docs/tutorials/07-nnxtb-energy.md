@@ -1,0 +1,197 @@
+# Tutorial 7: NN-xTB Energy and Forces
+
+**What you get:** A fast, near-DFT-quality energy and per-atom forces for a molecular system — computed in seconds rather than minutes.
+
+| | |
+|---|---|
+| **Time** | ~10 seconds |
+| **Skill level** | Beginner |
+| **Prerequisites** | Python 3.12+, `rush-py` installed, `RUSH_TOKEN` and `RUSH_PROJECT` set |
+
+---
+
+## Why This Matters
+
+When screening hundreds or thousands of molecular structures — conformers, ligand poses, reaction intermediates — running full DFT on every one can be prohibitively expensive. You need a method that gives you quantum-level information (energies, forces) at a fraction of the cost.
+
+NN-xTB fills this niche. It reparameterizes the GFN2-xTB tight-binding Hamiltonian with a neural network, achieving near-DFT accuracy while running orders of magnitude faster. This makes it practical to:
+
+- **Rank** conformers or poses by energy before committing to DFT
+- **Filter** out high-energy structures early in a pipeline
+- **Compute forces** for large systems where DFT gradients would be too slow
+
+In this tutorial, you will compute the NN-xTB energy and per-atom forces for a small protein system, then parse and inspect the results.
+
+---
+
+## Quick Start
+
+```python
+from rush.nnxtb import nnxtb
+from rush.client import RunOpts
+
+res = nnxtb(
+    "topology.json",
+    compute_forces=True,
+    run_opts=RunOpts(
+        name="Tutorial: NN-xTB Energy",
+        tags=["rush-py", "tutorial", "nnxtb"],
+    ),
+    collect=True,
+)
+```
+
+That's it — `res` contains a reference to the JSON output with the energy and forces.
+
+### Input File
+
+The input is a TRC (topology representation) JSON file with atomic coordinates and element symbols. This is the same format used by EXESS. See {doc}`../exess/topologies` for the full TRC format specification, or convert from PDB:
+
+```python
+from rush.convert.pdb import from_pdb
+from rush.mol import save_trc
+
+trc = from_pdb("molecule.pdb")
+save_trc(trc, "molecule_t.json")
+```
+
+---
+
+## Reading the Output
+
+Download the output and parse it with `NnxtbResults`:
+
+```python
+import json
+from rush.client import save_object
+from rush.nnxtb import NnxtbResults
+
+# Download the JSON output
+output_path = save_object(res["path"])
+data = json.loads(output_path.read_text())
+
+# Parse into a structured result
+results = NnxtbResults(**data)
+
+print(f"Energy: {results.energy_mev:.2f} meV")
+```
+
+### Energy
+
+The energy is returned in **millielectronvolts (meV)**, not Hartrees as in EXESS. Common conversions:
+
+| Unit | Conversion |
+|---|---|
+| 1 eV | 1000 meV |
+| 1 eV | 23.06 kcal/mol |
+| 1 eV | 96.49 kJ/mol |
+| 1 Hartree | 27211 meV |
+
+### Forces
+
+When `compute_forces=True` (the default), you get a list of (x, y, z) force vectors in meV/A, one per atom:
+
+```python
+if results.forces_mev_per_angstrom:
+    for i, (fx, fy, fz) in enumerate(results.forces_mev_per_angstrom):
+        magnitude = (fx**2 + fy**2 + fz**2) ** 0.5
+        print(f"Atom {i}: ({fx:.2f}, {fy:.2f}, {fz:.2f}) meV/A  |F| = {magnitude:.2f}")
+```
+
+Large force magnitudes indicate atoms that are far from equilibrium — useful for identifying strained regions in a structure.
+
+---
+
+## Computing Vibrational Frequencies
+
+NN-xTB can also compute vibrational frequencies, which are useful for thermochemistry corrections and IR spectra prediction. This takes more compute than energy/forces:
+
+```python
+res = nnxtb(
+    "topology.json",
+    compute_forces=True,
+    compute_frequencies=True,
+    run_opts=RunOpts(name="Tutorial: NN-xTB Frequencies"),
+    collect=True,
+)
+
+output_path = save_object(res["path"])
+results = NnxtbResults(**json.loads(output_path.read_text()))
+
+if results.frequencies_inv_cm:
+    print(f"Number of vibrational modes: {len(results.frequencies_inv_cm)}")
+    print(f"Lowest frequency: {min(results.frequencies_inv_cm):.1f} cm^-1")
+    print(f"Highest frequency: {max(results.frequencies_inv_cm):.1f} cm^-1")
+
+    # Imaginary frequencies (negative values) indicate a saddle point
+    imaginary = [f for f in results.frequencies_inv_cm if f < 0]
+    if imaginary:
+        print(f"Warning: {len(imaginary)} imaginary frequencies detected")
+```
+
+---
+
+## Setting Charge and Multiplicity
+
+For charged or open-shell systems, specify the spin multiplicity:
+
+```python
+# Doublet radical (multiplicity = 2)
+res = nnxtb(
+    "radical_topology.json",
+    multiplicity=2,
+    run_opts=RunOpts(name="Tutorial: NN-xTB Doublet"),
+    collect=True,
+)
+```
+
+The charge is currently read from the topology file. Multiplicity defaults to 1 (singlet).
+
+---
+
+## Batch Workflow: Asynchronous Submission
+
+For screening workflows, submit many jobs asynchronously and collect results later:
+
+```python
+from rush.nnxtb import nnxtb
+from rush.client import RunOpts, collect_run
+
+# Submit a batch of structures
+topologies = ["conf_001.json", "conf_002.json", "conf_003.json"]
+run_ids = []
+
+for topo in topologies:
+    run_id = nnxtb(
+        topo,
+        compute_forces=False,   # Forces not needed for ranking
+        run_opts=RunOpts(tags=["screening"]),
+        collect=False,          # Don't wait
+    )
+    run_ids.append(run_id)
+
+# Collect all results
+for topo, run_id in zip(topologies, run_ids):
+    result = collect_run(run_id)
+    output_path = save_object(result["path"])
+    data = json.loads(output_path.read_text())
+    print(f"{topo}: {data['energy_mev']:.2f} meV")
+```
+
+---
+
+## Notes
+
+- **Default parameters** — Forces are computed by default; frequencies are not. For energy-only calculations (fastest), explicitly set `compute_forces=False`.
+- **GPU resources** — The default `RunSpec(gpus=1, storage=100)` is sufficient for most systems. NN-xTB is designed to be efficient on a single GPU.
+- **Input format** — NN-xTB uses the same TRC topology format as EXESS. Sample topologies are available in `tests/data/` in the rush-py repository.
+- **Energy units** — NN-xTB reports energy in meV, not Hartrees. Keep this in mind when comparing with EXESS results.
+
+---
+
+## See Also
+
+- {doc}`NN-xTB Overview <../nnxtb/overview>` — method details, supported features, and limitations
+- {doc}`NN-xTB Running Reference <../nnxtb/running>` — full API reference and parameter documentation
+- {doc}`EXESS Single Point Energy <02-exess-spe>` — for high-accuracy DFT/HF calculations
+- {doc}`EXESS Topologies <../exess/topologies>` — input file format specification

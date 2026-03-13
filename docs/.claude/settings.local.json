@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:chemrxiv.org)",
+      "WebSearch",
+      "WebFetch(domain:www.researchgate.net)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

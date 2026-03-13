@@ -10,3 +10,4 @@ Tutorials
    tutorials/04-exess-optimization
    tutorials/05-exess-interaction-energy
    tutorials/06-exess-qmmm
+   tutorials/07-nnxtb-energy
