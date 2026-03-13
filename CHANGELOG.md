@@ -13,6 +13,7 @@
 ### Changed
 - CHELPG example and tutorial updated to use `exess.energy()` with export keywords and JSON output
 - Rename docs project to "QDX" and set html_title to "QDX Documentation"
+- remove ML mentions since disabled in EXESS
 
 ### Fixed
 - Add force push to docs deploy workflow to avoid out of sync issues (don't care about maintaining history on bot managed branch)

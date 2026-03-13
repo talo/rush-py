@@ -56,7 +56,6 @@ out = exess.qmmm(
     method=METHOD,
     basis=BASIS,
     qm_fragments=QM_FRAGMENTS,
-    ml_fragments=[],
     run_opts=RunOpts(name="Tutorial: QM/MM"),
     collect=True,
 )
@@ -385,7 +384,6 @@ out = exess.qmmm(
     residues_path=molecule_r_path,
     n_timesteps=100,
     trajectory=exess.Trajectory(include_waters=True),
-    ml_fragments=[],
     mm_fragments=[],
     run_opts=RunOpts(name="Tutorial: QM/MM with Manually-Constructed Water"),
     collect=True,

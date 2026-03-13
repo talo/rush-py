@@ -22,7 +22,6 @@ def test_exess_optimization_mm():
         standard_orientation="None",
         # MM fragments well for uncomplicated regions and runs very quickly.
         qm_fragments=[],
-        ml_fragments=[],
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Optimization 02: MM",
             tags=["rush-py", "test", "6a5j", "MM"],

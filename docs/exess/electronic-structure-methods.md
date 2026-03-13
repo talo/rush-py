@@ -140,7 +140,7 @@ For background and accuracy considerations, see https://doi.org/10.1063/1.512621
 
 - Geometry optimization is supported for RHF, RI-HF, and RI-MP2.
 - Born-Oppenheimer AIMD uses a Verlet integrator and is microcanonical only (no thermostats or barostats).
-- QMMM dynamics support NVT/NPT via the `qmmm` block (temperature and optional pressure), with MM handled through OpenMM and ML via AIMNet.
+- QMMM dynamics support NVT/NPT via the `qmmm` block (temperature and optional pressure), with MM handled through OpenMM.
 - Dynamics can be combined with fragmentation for large systems.
 - Periodic boundary conditions and water-only classical solvent support are available in AIMD workflows.
 

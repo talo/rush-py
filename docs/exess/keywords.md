@@ -2,7 +2,7 @@
 
 Keywords live under the top-level `keywords` object. Recognized groups include:
 
-`scf`, `frag`, `ks_dft`, `export`, `regions`, `optimization`, `qmmm`, `gradient`, `guess`, `integrals`, `rtat`, `hessian`, `dynamics`, `boundary`, `machine_learning`, `force_field`, `log`, `debug`.
+`scf`, `frag`, `ks_dft`, `export`, `regions`, `optimization`, `qmmm`, `gradient`, `guess`, `integrals`, `rtat`, `hessian`, `dynamics`, `boundary`, `force_field`, `log`, `debug`.
 
 Defaults in the parameter listings below reflect the EXESS command-line behavior (JSON parser defaults plus EXESS internal defaults). Rush-py defaults are listed at the end of this page.
 
@@ -785,7 +785,7 @@ Export controls what is written to HDF5 output files:
 ```
 
 
-## Q4ML: Optimization & Simulation
+## QM/MM: Optimization & Simulation
 
 (regions)=
 ### regions
@@ -839,10 +839,9 @@ Export controls what is written to HDF5 output files:
 
 Rules and defaults:
 
-- Provide at least two of the three lists; the remaining region is inferred as the fragments not mentioned elsewhere.
-- If all three lists are provided, they must be disjoint and cover all fragments.
-- Supplying only one list is invalid.
-- If `regions` is omitted in JSON, `mm_fragments` and `ml_fragments` default to empty and `qm_fragments` is inferred as all fragments (pure QM).
+- If one list is provided, the remaining region is inferred as the fragments not mentioned.
+- If both lists are provided, they must be disjoint and cover all fragments.
+- If `regions` is omitted in JSON, `mm_fragments` defaults to empty and `qm_fragments` is inferred as all fragments (pure QM).
 - If any non-QM region exists, residues must be provided; with no residues, the entire system must be QM.
 - Non-QM regions are only supported for `QMMM` and `Optimization`; other drivers (including `Energy`) require pure QM regions.
 - Non-QM regions are not supported for batched topology inputs.
@@ -859,11 +858,6 @@ Rules and defaults:
       :type: array[int]
       :default: inferred
       :brief: Fragments treated as MM.
-
-   .. exess-param:: ml_fragments
-      :type: array[int]
-      :default: inferred
-      :brief: Fragments treated as ML.
 ```
 
 
@@ -894,10 +888,7 @@ Rules and defaults:
              },
              "regions": {
                "qm_fragments": [0],
-               "ml_fragments": [1, 2, 3]
-             },
-             "machine_learning": {
-               "ml_type": "AIMNet"
+               "mm_fragments": [1, 2, 3]
              }
            },
            "schema_version": "0.2.0"
@@ -919,11 +910,11 @@ Rules and defaults:
                  lbfgs_keywords=LBFGSKeywords(),
              ),
              qm_fragments=[0],
-             ml_fragments=[1, 2, 3],
+             mm_fragments=[1, 2, 3],
          )
 ```
 
-Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact. Residue requirements and region validation details are covered in the [regions](#regions) section.
+Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM regions intact. Residue requirements and region validation details are covered in the [regions](#regions) section.
 
 ```{eval-rst}
 .. exess-params::
@@ -1147,7 +1138,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
          )
 ```
 
-Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM/ML regions intact. Residue requirements and region validation details are covered in the [regions](#regions) section.
+Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments only the QM region and leaves MM regions intact. Residue requirements and region validation details are covered in the [regions](#regions) section.
 
 ```{eval-rst}
 .. exess-params::
@@ -1218,7 +1209,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
       - ``err_tol_kj_per_mol_nm`` — ``float`` (default: ``10``)
       - ``max_iterations`` — ``int`` (default: ``0``)
 
-      ``minimisation`` can only be used in a purely classical run (no QM/ML regions).
+      ``minimisation`` can only be used in a purely classical run (no QM regions).
 
    .. exess-param:: trajectory
       :type: object
@@ -1717,19 +1708,6 @@ Boundary conditions for periodic or truncated simulations:
       :brief: Boundary configuration for the Z axis.
 
       Same structure as ``x``.
-```
-
-
-### machine_learning
-```{eval-rst}
-.. exess-params::
-
-   .. exess-param:: ml_type
-      :type: string
-      :default: AIMNet
-      :brief: ML model type.
-
-      AIMNet is currently the only supported value.
 ```
 
 

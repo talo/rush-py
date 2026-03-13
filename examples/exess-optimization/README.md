@@ -1,6 +1,6 @@
 # EXESS Geometry Optimization Example
 
-Demonstrates QM and ML geometry optimization with EXESS, including how to work with the optimization trajectory output.
+Demonstrates QM geometry optimization with EXESS, including how to work with the optimization trajectory output.
 
 ## Quick Start
 
@@ -14,9 +14,8 @@ python 04_exess_optimization.py
 ## What This Example Covers
 
 1. QM geometry optimization with `exess.optimization`
-2. ML (AIMNet) optimization by setting `qm_fragments=[]` and `mm_fragments=[]`
-3. Using `OptimizationKeywords` (Cartesian coordinates, LBFGS algorithm)
-4. Extracting trajectory and energy/gradient info from the output
+2. Using `OptimizationKeywords` (Cartesian coordinates, LBFGS algorithm)
+3. Extracting trajectory and energy/gradient info from the output
 
 ## Input Data
 
