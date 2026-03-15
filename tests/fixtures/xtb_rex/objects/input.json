@@ -1,0 +1,62 @@
+{
+  "topology": {
+    "schema_version": "0.2.0",
+    "symbols": [
+      "O",
+      "H",
+      "H"
+    ],
+    "geometry": [
+      0.0,
+      0.0,
+      0.0,
+      0.7586,
+      0.0,
+      0.5043,
+      -0.7586,
+      0.0,
+      0.5043
+    ],
+    "labels": null,
+    "partial_charges": null,
+    "formal_charges": null,
+    "connectivity": null,
+    "stereochemistry": null,
+    "velocities": null,
+    "fragments": null,
+    "fragment_formal_charges": null,
+    "fragment_partial_charges": null,
+    "fragment_multiplicities": null
+  },
+  "residues": {
+    "residues": [
+      [
+        0,
+        1,
+        2
+      ]
+    ],
+    "seqs": [
+      "LIG"
+    ],
+    "seq_ns": [
+      1
+    ],
+    "insertion_codes": [
+      ""
+    ],
+    "labeled": null,
+    "labels": null
+  },
+  "chains": {
+    "chains": [
+      [
+        0
+      ]
+    ],
+    "alpha_helices": null,
+    "beta_sheets": null,
+    "labeled": null,
+    "labels": null
+  }
+}
