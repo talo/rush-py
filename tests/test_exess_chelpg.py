@@ -1,17 +1,25 @@
 import json
 import sys
+import tempfile
 from pathlib import Path
 from pprint import pp
 
-from rush import exess
+from rush import exess, from_json
 from rush.client import RunOpts, download_object, set_opts
 
 
-def test_exess_energy_chelpg_tyk2_ejm_31():
+def test_exess_energy_chelpg_1hsg_MK1():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
+    with (data_dir / "1hsg_MK1_trc.json").open() as f:
+        trc = from_json(json.load(f)[0])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tf:
+        json.dump(trc.topology.to_json(), tf)
+        topology_path = tf.name
+
     res = exess.energy(
-        data_dir / "tyk2_ejm_31_t.json",
+        topology_path,
         basis="PCSeg-0",
         frag_keywords=None,  # Important, to disable fragmentation
         export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
@@ -51,5 +59,5 @@ def test_exess_energy_chelpg_benzene():
 
 
 if __name__ == "__main__":
-    test_exess_energy_chelpg_tyk2_ejm_31()
+    test_exess_energy_chelpg_1hsg_MK1()
     test_exess_energy_chelpg_benzene()

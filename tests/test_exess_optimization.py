@@ -1,10 +1,13 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 from rush import exess
 from rush.client import RunOpts, save_object, set_opts
 
 
+@pytest.mark.skip(reason="ML regions are disabled upstream for now.")
 def test_exess_optimization():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
