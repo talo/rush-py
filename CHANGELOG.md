@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.10.1
+
+### Fixed
+- Make `exess.interaction_energy` a thin wrapper around `exess.energy`, homogenizing the interfaces
+- `FragKeywords` stores and allows setting `reference_fragment` directly, better conforming to upstream config design
+- CLAUDE.md updated for devs using the nix flake
+- Clean up .gitignore glitch
+
 ## 6.10.0
 
 ### Removed
