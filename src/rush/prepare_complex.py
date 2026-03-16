@@ -13,16 +13,15 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush import TRC, from_json, from_pdb, to_pdb
+from rush import TRC, from_json, from_pdb, merge_trcs, to_pdb
 from rush.client import (
+    RunError,
     RunOpts,
     RunSpec,
-    RunError,
 )
+from rush.convert import _single_trc
 from rush.prepare_protein import prepare_protein as run_prepare_protein
 from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
-from rush import merge_trcs
-from rush.convert import _single_trc
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
@@ -129,8 +128,9 @@ def prepare_complex(
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
     capping_style: Literal["never", "truncated", "always"] | None = None,
     truncation_threshold: int | None = None,
+    opt: bool | None = None,
     debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ) -> TRC | str | RunError:
@@ -176,6 +176,7 @@ def prepare_complex(
         naming_scheme,
         capping_style,
         truncation_threshold,
+        opt,
         debump,
         run_spec,
         run_opts,

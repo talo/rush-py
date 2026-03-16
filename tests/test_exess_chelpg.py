@@ -1,13 +1,41 @@
 import json
 import sys
+import tempfile
 from pathlib import Path
 from pprint import pp
 
-from rush import exess
+from rush import exess, from_json
 from rush.client import RunOpts, download_object, set_opts
 
 
-def test_exess_energy_chelpg():
+def test_exess_energy_chelpg_1hsg_MK1():
+    set_opts(workspace_dir=Path.cwd() / "test-runs")
+    data_dir = Path(__file__).parent / "data"
+    with (data_dir / "1hsg_MK1_trc.json").open() as f:
+        trc = from_json(json.load(f)[0])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tf:
+        json.dump(trc.topology.to_json(), tf)
+        topology_path = tf.name
+
+    res = exess.energy(
+        topology_path,
+        basis="PCSeg-0",
+        frag_keywords=None,  # Important, to disable fragmentation
+        export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
+        convert_hdf5_to_json=True,
+        run_opts=RunOpts(
+            name="Rush-Py Test EXESS Energy 03.1: ChelpG via Energy",
+            tags=["rush-py", "test", "tyk2+ejm-31"],
+        ),
+        collect=True,
+    )
+    print(res, file=sys.stderr)
+    charges = json.loads(download_object(res[1]["Json"]["path"]))["chelpg_charges"]
+    pp(charges, width=130, compact=True, stream=sys.stderr)
+
+
+def test_exess_energy_chelpg_benzene():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
     res = exess.energy(
@@ -20,8 +48,8 @@ def test_exess_energy_chelpg():
         export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
         convert_hdf5_to_json=True,
         run_opts=RunOpts(
-            name="Rush-Py Test EXESS Energy 03: ChelpG via Energy",
-            tags=["rush-py", "test", "tyk2+ejm-31"],
+            name="Rush-Py Test EXESS Energy 03.2: ChelpG via Energy",
+            tags=["rush-py", "test", "benzene"],
         ),
         collect=True,
     )
@@ -31,4 +59,5 @@ def test_exess_energy_chelpg():
 
 
 if __name__ == "__main__":
-    test_exess_energy_chelpg()
+    test_exess_energy_chelpg_1hsg_MK1()
+    test_exess_energy_chelpg_benzene()

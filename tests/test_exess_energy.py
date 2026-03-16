@@ -7,7 +7,17 @@ from rush.client import RunError, RunOpts, collect_run, set_opts
 
 
 def test_exess_energy_tutorial():
-    res = exess.energy("tests/data/6a5j_t.json", collect=True)
+    res = exess.energy(
+        "tests/data/6a5j_t.json",
+        method="RestrictedHF",
+        basis="PCSeg-0",
+        ksdft_keywords=None,
+        collect=True,
+        run_opts=RunOpts(
+            name="Rush-Py Test EXESS Energy 00: Tutorial",
+            tags=["rush-py", "test", "6a5j"],
+        ),
+    )
     output = exess.save_energy_outputs(res)
     assert not isinstance(output, RunError)
     output_file = output[0] if isinstance(output, tuple) else output
@@ -15,15 +25,17 @@ def test_exess_energy_tutorial():
         print(json.load(f)["qmmbe"]["expanded_hf_energy"])
 
 
-def test_exess_energy():
+def test_exess_energy_exports():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    # Default method is ReducedHF, and default basis is cc-pVDZ
-    # Due to choice of method, no need for aux_basis (and default is None)
+    # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
+    # Using PCSeg-0 for faster test runtimes
     id = exess.energy(
         data_dir / "6a5j_t.json",
+        method="RestrictedHF",
         basis="PCSeg-0",
-        system=exess.System(max_gpu_memory_mb=1000),
+        ksdft_keywords=None,
+        system=exess.System(max_gpu_memory_mb=5000),
         export_keywords=exess.ExportKeywords(
             export_density=True,
             export_molecular_orbital_coeffs=True,
@@ -46,3 +58,4 @@ def test_exess_energy():
 
 if __name__ == "__main__":
     test_exess_energy_tutorial()
+    test_exess_energy_exports()

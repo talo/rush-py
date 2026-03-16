@@ -18,7 +18,9 @@ Quick Links
 - :func:`rush.exess.optimization`
 """
 
+import enum
 import sys
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
@@ -804,6 +806,12 @@ type KSDFTMethodT = Literal[
 ]
 
 
+class _KSDFTDefault(enum.Enum):
+    """Sentinel indicating that ksdft_keywords was not explicitly passed."""
+
+    DEFAULT = enum.auto()
+
+
 @dataclass
 class KSDFTKeywords:
     """
@@ -818,6 +826,26 @@ class KSDFTKeywords:
     sp_threshold: float | None = None
     dp_threshold: float | None = None
     batches_per_batch: int | None = None
+
+    @staticmethod
+    def resolve(
+        ksdft_keywords: "KSDFTKeywords | _KSDFTDefault | None",
+        method: str,
+    ) -> "KSDFTKeywords | None":
+        """Resolve ksdft_keywords default and warn if explicitly passed with a non-KSDFT method."""
+        if isinstance(ksdft_keywords, _KSDFTDefault):
+            return (
+                KSDFTKeywords(functional="B3LYP")
+                if method == "RestrictedKSDFT"
+                else None
+            )
+        if ksdft_keywords is not None and method != "RestrictedKSDFT":
+            warnings.warn(
+                f"ksdft_keywords ignored: method is {method!r}, not 'RestrictedKSDFT'",
+                stacklevel=3,
+            )
+            return None
+        return ksdft_keywords
 
     def _to_rex(self):
         return Template(
@@ -918,14 +946,14 @@ class Restraints:
 def exess(
     topology_path: Path | str,
     driver: str = "Energy",
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
@@ -936,6 +964,7 @@ def exess(
     """
     Compute the energy of the system in the QDX topology file at `topology_path`.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1026,14 +1055,14 @@ in
 
 def energy(
     topology_path: Path | str,
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
@@ -1128,13 +1157,14 @@ def save_energy_outputs(
 def interaction_energy(
     topology_path: Path | str,
     reference_fragment: int,
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1144,6 +1174,7 @@ def interaction_energy(
     Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
     in the toplogy file at `topology_path`.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1169,7 +1200,7 @@ def interaction_energy(
         system = $maybe_system,
         keywords = exess_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks_dft = None,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1206,6 +1237,9 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_frag_keywords=frag_keywords._to_rex(reference_fragment),
         topology_vobj_path=topology_vobj["path"],
     )
@@ -1232,17 +1266,16 @@ def qmmm(
     restraints: Restraints | None = None,
     trajectory: Trajectory = Trajectory(),
     gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "RestrictedHF",
-    basis: BasisT = "STO-3G",
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
-    # ML regions are disabled in EXESS. Uncomment when re-enabled:
-    # ml_fragments: list[int] | None = None,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1251,12 +1284,13 @@ def qmmm(
     """
     Run a QMMM simulation of the system in the QDX topology and residues files at `topology_path` and `residues_path`.
 
-    Specifying the numberof timesteps is mandatory.
+    Specifying the number of timesteps is mandatory.
     If pressure is None, an NVT ensemble is used; if pressure is specified, an NPT ensemble is used.
     Fragments can be specified as QM or MM fragments via the respective parameters.
     If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
     If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1283,7 +1317,7 @@ def qmmm(
         system = $system,
         keywords = exess_qmmm_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = $maybe_frag_keywords,
           boundary = None,
@@ -1310,7 +1344,7 @@ def qmmm(
             restraints = $maybe_restraints,
             energy_csv = None,
           }),
-          machine_learning = $maybe_machine_learning,
+          machine_learning = None,
           regions = $maybe_regions,
         },
       })
@@ -1331,6 +1365,9 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_frag_keywords=(
             frag_keywords._to_rex() if frag_keywords is not None else "None"
         ),
@@ -1343,37 +1380,18 @@ in
         maybe_pressure_atm=optional_str(pressure_atm),
         trajectory=trajectory._to_rex(),
         maybe_restraints=restraints._to_rex() if restraints is not None else "None",
-        # ML regions are disabled in EXESS. Uncomment when re-enabled:
-        # maybe_machine_learning=(
-        #     "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
-        #     if ml_fragments is not None
-        #     else "None"
-        # ),
-        maybe_machine_learning="None",
         maybe_regions=(
             Template(
                 """Some (exess_qmmm_rex::RegionKeywords {
             qm_fragments = $maybe_qm_fragments,
             mm_fragments = $maybe_mm_fragments,
-            ml_fragments = None,
+            ml_fragments = Some [],
           })"""
-                # ML regions are disabled in EXESS. Uncomment when re-enabled:
-                #     """Some (exess_qmmm_rex::RegionKeywords {
-                #     qm_fragments = $maybe_qm_fragments,
-                #     mm_fragments = $maybe_mm_fragments,
-                #     ml_fragments = $maybe_ml_fragments,
-                #   })"""
             ).substitute(
                 maybe_qm_fragments=optional_str(qm_fragments),
                 maybe_mm_fragments=optional_str(mm_fragments),
-                # ML regions are disabled in EXESS. Uncomment when re-enabled:
-                # maybe_ml_fragments=optional_str(ml_fragments),
             )
             if not (qm_fragments is None and mm_fragments is None)
-            # ML regions are disabled in EXESS. Uncomment when re-enabled:
-            # if not (
-            #     qm_fragments is None and mm_fragments is None and ml_fragments is None
-            # )
             else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
@@ -1584,16 +1602,15 @@ def optimization(
     max_iters: int,
     residues_path: Path | str | None = None,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "RestrictedHF",
+    method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
-    # ML regions are disabled in EXESS. Uncomment when re-enabled:
-    # ml_fragments: list[int] | None = None,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1607,6 +1624,7 @@ def optimization(
     If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
     If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1634,7 +1652,7 @@ def optimization(
         system = $maybe_system,
         keywords = exess_geo_opt_rex::Keywords {
           scf = $maybe_scf_keywords,
-          ks = None,
+          ks_dft = $maybe_ks_keywords,
           rtat = None,
           frag = None,
           boundary = None,
@@ -1648,8 +1666,8 @@ def optimization(
           optimization = $maybe_optimization_keywords,
           hessian = None,
           gradient = None,
-          qmmm = None,
-          machine_learning = $maybe_machine_learning,
+          qmmm = $maybe_qmmm_keywords,
+          machine_learning = None,
           regions = $maybe_regions,
         },
       })
@@ -1670,42 +1688,40 @@ in
         maybe_scf_keywords=(
             scf_keywords._to_rex() if scf_keywords is not None else "None"
         ),
+        maybe_ks_keywords=(
+            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
+        ),
         maybe_optimization_keywords=(
             optimization_keywords._to_rex(max_iters)
             if optimization_keywords is not None
             else "None"
         ),
-        # ML regions are disabled in EXESS. Uncomment when re-enabled:
-        # maybe_machine_learning=(
-        #     "Some (exess_geo_opt_rex::MLKeywords { ml_type = None })"
-        #     if ml_fragments is not None
-        #     else "None"
-        # ),
-        maybe_machine_learning="None",
+        maybe_qmmm_keywords=(
+            """Some (exess_qmmm_rex::QMMMKeywords {
+            n_timesteps = 1,
+            dt_ps = 0.002,
+            temperature_kelvin = 290.0,
+            pressure_atm = None,
+            minimisation = None,
+            trajectory = None,
+            restraints = None,
+            energy_csv = None,
+          })"""
+            if mm_fragments or (qm_fragments is not None)
+            else "None"
+        ),
         maybe_regions=(
             Template(
                 """Some (exess_qmmm_rex::RegionKeywords {
             qm_fragments = $maybe_qm_fragments,
             mm_fragments = $maybe_mm_fragments,
-            ml_fragments = None,
+            ml_fragments = Some [],
           })"""
-                # ML regions are disabled in EXESS. Uncomment when re-enabled:
-                #     """Some (exess_qmmm_rex::RegionKeywords {
-                #     qm_fragments = $maybe_qm_fragments,
-                #     mm_fragments = $maybe_mm_fragments,
-                #     ml_fragments = $maybe_ml_fragments,
-                #   })"""
             ).substitute(
                 maybe_qm_fragments=optional_str(qm_fragments),
                 maybe_mm_fragments=optional_str(mm_fragments),
-                # ML regions are disabled in EXESS. Uncomment when re-enabled:
-                # maybe_ml_fragments=optional_str(ml_fragments),
             )
             if not (qm_fragments is None and mm_fragments is None)
-            # ML regions are disabled in EXESS. Uncomment when re-enabled:
-            # if not (
-            #     qm_fragments is None and mm_fragments is None and ml_fragments is None
-            # )
             else "None"
         ),
         residues_expr=(

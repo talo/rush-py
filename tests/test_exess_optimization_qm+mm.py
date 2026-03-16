@@ -10,12 +10,21 @@ def test_exess_optimization_qm_mm():
     data_dir = Path.cwd() / "tests" / "data"
     res = exess.optimization(
         max_iters=100,
-        topology_path=data_dir / "6a5j_t.json",
-        residues_path=data_dir / "6a5j_r.json",
         optimization_keywords=exess.OptimizationKeywords(
             coordinate_system="Cartesian",
             algorithm="LBFGS",
             lbfgs_keywords=exess.LBFGSKeywords(),
+        ),
+        topology_path=data_dir / "6a5j_t.json",
+        residues_path=data_dir / "6a5j_r.json",
+        ksdft_keywords=exess.KSDFTKeywords(
+            functional="B3LYP",
+            grid=exess.XCGridParameters(
+                radial_quad="TreutlerAldrichs",
+                pruning_scheme="Treutler",
+                resolution=exess.DefaultGridResolution("TreutlerGM5"),
+                batching=exess.SpaceFillingBatching(),
+            ),
         ),
         standard_orientation="None",
         qm_fragments=[0],
