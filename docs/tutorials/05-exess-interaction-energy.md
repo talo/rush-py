@@ -24,7 +24,7 @@ This interaction energy is **not** a binding free energy — it doesn't include 
 ```python
 import json
 from rush import exess
-from rush.client import RunOpts, download_object
+from rush.client import RunOpts, fetch_object
 
 out = exess.interaction_energy(
     "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
@@ -43,7 +43,7 @@ out = exess.interaction_energy(
 )
 
 # Extract the result
-json_bytes = download_object(out[0]["path"])
+json_bytes = fetch_object(out[0]["path"])
 result = json.loads(json_bytes.decode())
 print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 ```
@@ -144,7 +144,7 @@ out = exess.interaction_energy(
     collect=True,
 )
 
-json_bytes = download_object(out[0]["path"])
+json_bytes = fetch_object(out[0]["path"])
 result = json.loads(json_bytes.decode())
 print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 ```

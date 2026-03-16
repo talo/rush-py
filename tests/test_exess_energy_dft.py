@@ -34,7 +34,7 @@ def test_exess_energy_dft_hyb():
 
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 def test_exess_energy_dft_dhyb():
@@ -61,7 +61,7 @@ def test_exess_energy_dft_dhyb():
 
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 if __name__ == "__main__":

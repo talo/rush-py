@@ -34,7 +34,7 @@ def test_exess_interaction_energy_gadi():
         collect=True,
     )
     print(res, file=sys.stderr)
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 if __name__ == "__main__":

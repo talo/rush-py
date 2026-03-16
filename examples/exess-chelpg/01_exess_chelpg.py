@@ -317,7 +317,7 @@ result = exess.energy(
 if isinstance(result, RunError):
     print(f"Run failed: {result.message}")
 else:
-    save_result = exess.save_energy_outputs(result)
+    save_result = exess.save_outputs(result)
     if isinstance(save_result, RunError):
         print(f"Failed to save outputs: {save_result.message}")
         exit(1)

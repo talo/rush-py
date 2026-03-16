@@ -49,7 +49,7 @@ topology_path = Path.cwd() / "thrombin_1c_t.json"
 
 # For energy, the only mandatory argument is the Topology
 result = exess.energy(topology_path, collect=True)
-exess.save_energy_outputs(result)
+exess.save_outputs(result)
 ```
 
 Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current working directory). To customize the workspace location, call `rush.client.set_opts(workspace_dir=Path("..."))`.

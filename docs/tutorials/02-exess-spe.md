@@ -47,7 +47,7 @@ res = exess.energy(
 )
 
 # Save outputs and extract energy
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 ```
 
 That's it — `res` contains the energy result, and `files` has the saved JSON output on disk.

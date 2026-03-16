@@ -5,7 +5,7 @@ from pathlib import Path
 from pprint import pp
 
 from rush import exess, from_json
-from rush.client import RunOpts, download_object, set_opts
+from rush.client import RunOpts, fetch_object, set_opts
 
 
 def test_exess_energy_chelpg_1hsg_MK1():
@@ -31,7 +31,7 @@ def test_exess_energy_chelpg_1hsg_MK1():
         collect=True,
     )
     print(res, file=sys.stderr)
-    charges = json.loads(download_object(res[1]["Json"]["path"]))["chelpg_charges"]
+    charges = json.loads(fetch_object(res[1]["Json"]["path"]))["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
 
 
@@ -54,7 +54,7 @@ def test_exess_energy_chelpg_benzene():
         collect=True,
     )
     print(res, file=sys.stderr)
-    charges = json.loads(download_object(res[1]["Json"]["path"]))["chelpg_charges"]
+    charges = json.loads(fetch_object(res[1]["Json"]["path"]))["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
 
 

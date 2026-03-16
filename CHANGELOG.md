@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- EXESS now uses `fetch_outputs()` for in-memory results and `save_outputs()` for workspace persistence, with shared output handling between the two paths
+- Added `fetch_object()` as the in-memory object-store helper and removed `download_object()`
+- `fetch_object()` and `save_object()` now share archive extraction logic
+- Updated EXESS docs, examples, and tests to use the new fetch/save naming
+
 ## 6.10.2
 
 ### Fixed

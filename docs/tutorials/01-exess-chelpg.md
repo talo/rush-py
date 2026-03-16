@@ -52,7 +52,7 @@ result = exess.energy(
 )
 
 # 4. Extract charges from the exports JSON
-json_path, exports_path = exess.save_energy_outputs(result)
+json_path, exports_path = exess.save_outputs(result)
 charges = json.load(open(exports_path))["chelpg_charges"]
 ```
 

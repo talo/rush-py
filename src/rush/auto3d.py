@@ -14,7 +14,7 @@ from rush.client import (
     _get_project_id,
     _submit_rex,
     collect_run,
-    download_object,
+    fetch_object,
 )
 from rush.utils import bool_to_str, float_to_str
 
@@ -121,7 +121,7 @@ in
                 print(f"  {error['message']}", file=sys.stderr)
 
 
-def save_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunError:
+def fetch_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunError:
     """
     Download output files from an auto3d run.
 
@@ -162,9 +162,9 @@ def save_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunErro
         def to_auto3dresult(res_i) -> Iterator[Auto3DResult]:
             for trc_obj, stats in res_i:
                 trc_dict = {
-                    "topology": json.loads(download_object(trc_obj[0]["path"])),
-                    "residues": json.loads(download_object(trc_obj[1]["path"])),
-                    "chains": json.loads(download_object(trc_obj[2]["path"])),
+                    "topology": json.loads(fetch_object(trc_obj[0]["path"])),
+                    "residues": json.loads(fetch_object(trc_obj[1]["path"])),
+                    "chains": json.loads(fetch_object(trc_obj[2]["path"])),
                 }
                 yield Auto3DResult(
                     from_json(trc_dict),

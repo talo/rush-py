@@ -366,10 +366,52 @@ def upload_object(filepath: Path | str):
     return obj
 
 
-def download_object(path: str):
+def _extract_object_archive(data: bytes) -> bytes:
+    decompressed = zstd.ZstdDecompressor().decompress(data, max_output_size=int(1e9))
+    with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+        tar_filenames = tar.getnames()
+
+        # Handle empty tar archives
+        if not tar_filenames:
+            raise ValueError("Tar archive is empty - no files to extract")
+
+        # Extract the appropriate file:
+        # - If 1 file: extract that file
+        # - If 2+ files: extract index 1 (skip index 0, which is often metadata)
+        file_index = 1 if len(tar_filenames) >= 2 else 0
+        member = tar.getmember(tar_filenames[file_index])
+
+        # If we selected a directory, find the first actual file instead
+        if member.isdir():
+            file_index = None
+            for i, name in enumerate(tar_filenames):
+                m = tar.getmember(name)
+                if not m.isdir():
+                    file_index = i
+                    break
+            if file_index is None:
+                raise ValueError(
+                    "Tar archive contains only directories, no files to extract"
+                )
+
+        extracted_file = tar.extractfile(tar_filenames[file_index])
+        if extracted_file is None:
+            raise ValueError(
+                f"Failed to extract file '{tar_filenames[file_index]}' from tar archive"
+            )
+
+        return extracted_file.read()
+
+
+def fetch_object(path: str, extract: bool = False):
     """
-    Downloads the contents of the given Rush object store path directly into a variable.
-    Be careful, if the contents are too large it might not fit into memory!
+    Fetch the contents of the given Rush object store path directly into memory.
+
+    Be careful: if the contents are too large, they might not fit into memory.
+
+    Args:
+        path: The Rush object store path to fetch.
+        extract: Automatically extract tar.zst archives in memory before returning.
     """
     # TODO: enforce UUID type
     query = gql("""
@@ -395,7 +437,8 @@ def download_object(path: str):
     elif "url" in obj_descriptor:
         response = requests.get(obj_descriptor["url"])
         response.raise_for_status()
-        return response.content
+        data = response.content
+        return _extract_object_archive(data) if extract else data
 
     raise Exception(f"Object at path {path} has neither contents nor URL")
 
@@ -463,56 +506,13 @@ def save_object(
         raise Exception("Cannot specify both filepath or name")
     filepath.parent.mkdir(parents=True, exist_ok=True)
     if type == "json":
-        d = json.loads(download_object(path).decode())
+        d = json.loads(fetch_object(path).decode())
         with open(filepath, "w") as f:
             json.dump(clean_dict(d), f, indent=2)
     else:
-        data = download_object(path)
-        if extract:
-            decompressed = zstd.ZstdDecompressor().decompress(
-                data, max_output_size=int(1e9)
-            )
-            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                tar_filenames = tar.getnames()
-
-                # Handle empty tar archives
-                if not tar_filenames:
-                    raise ValueError("Tar archive is empty - no files to extract")
-
-                # Extract the appropriate file:
-                # - If 1 file: extract that file
-                # - If 2+ files: extract index 1 (skip index 0, which is often metadata)
-                file_index = 1 if len(tar_filenames) >= 2 else 0
-                member = tar.getmember(tar_filenames[file_index])
-
-                # If we selected a directory, find the first actual file instead
-                if member.isdir():
-                    file_index = None
-                    for i, name in enumerate(tar_filenames):
-                        m = tar.getmember(name)
-                        if not m.isdir():
-                            file_index = i
-                            break
-                    if file_index is None:
-                        raise ValueError(
-                            "Tar archive contains only directories, no files to extract"
-                        )
-
-                extracted_file = tar.extractfile(tar_filenames[file_index])
-
-                if extracted_file is None:
-                    raise ValueError(
-                        f"Failed to extract file '{tar_filenames[file_index]}' from tar archive"
-                    )
-
-                data = extracted_file.read()
-
-            # Always write the extracted data to disk
-            with open(filepath, "wb") as f:
-                f.write(data)
-        else:
-            with open(filepath, "wb") as f:
-                f.write(data)
+        data = fetch_object(path, extract=extract)
+        with open(filepath, "wb") as f:
+            f.write(data)
 
     return filepath
 

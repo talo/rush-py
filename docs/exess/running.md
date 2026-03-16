@@ -189,7 +189,7 @@ When a Rush module expects paths to Topology/Residues/Chains objects, rush-py ca
 Rush uses object store paths for inputs and outputs. You can upload, download, and save objects explicitly:
 
 ```python
-from rush.client import download_object, save_json, save_object, upload_object
+from rush.client import fetch_object, save_json, save_object, upload_object
 ```
 
 The `save_outputs` helpers download outputs to the local workspace and preserve the original output signature, replacing object store paths with local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
@@ -220,7 +220,7 @@ Replace `{PROJECT_ID}` with your actual project ID.
 Rush returns outputs as object store references (UUID paths plus format info). Use the EXESS output helpers to download the results:
 
 ```python
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 ```
 
 Details on output files and the JSON and HDF5 structures are in the [outputs page](outputs).

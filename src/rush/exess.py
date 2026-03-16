@@ -19,6 +19,7 @@ Quick Links
 """
 
 import enum
+import json
 import sys
 import warnings
 from dataclasses import dataclass, replace
@@ -35,10 +36,11 @@ from .client import (
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
     save_object,
     upload_object,
 )
-from .mol import FragmentRef
+from .mol import AtomRef, FragmentRef
 from .utils import bool_to_str, float_to_str, optional_str
 
 type MethodT = Literal[
@@ -101,6 +103,145 @@ type StandardOrientationT = Literal[
     "FullSystem",
     "PerFragment",
 ]
+
+
+type TensorLike = list[Any]
+
+
+@dataclass
+class ExessNmer:
+    schema_version: str
+    fragments: list[FragmentRef]
+    density: TensorLike | None = None
+    fock: TensorLike | None = None
+    overlap: TensorLike | None = None
+    h_core: TensorLike | None = None
+    coeffs_initial: TensorLike | None = None
+    coeffs_final: TensorLike | None = None
+    molecular_orbital_energies: list[float] | None = None
+    hf_gradients: list[float] | None = None
+    mp2_gradients: list[float] | None = None
+    hf_energy: float | None = None
+    mp2_ss_correction: float | None = None
+    mp2_os_correction: float | None = None
+    ccsd_correction: float | None = None
+    s_squared_eigenvalue: float | None = None
+    delta_hf_energy: float | None = None
+    delta_mp2_ss_correction: float | None = None
+    delta_mp2_os_correction: float | None = None
+    mulliken_charges: list[float] | None = None
+    chelpg_charges: list[float] | None = None
+    fragment_distance: float | None = None
+    bond_orders: list[list[float]] | None = None
+    h_caps: list[AtomRef] | None = None
+    num_iters: int | None = None
+    num_basis_fns: int | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExessNmer":
+        return cls(
+            schema_version=data["schema_version"],
+            fragments=[FragmentRef(fragment) for fragment in data["fragments"]],
+            density=data.get("density"),
+            fock=data.get("fock"),
+            overlap=data.get("overlap"),
+            h_core=data.get("h_core"),
+            coeffs_initial=data.get("coeffs_initial"),
+            coeffs_final=data.get("coeffs_final"),
+            molecular_orbital_energies=data.get("molecular_orbital_energies"),
+            hf_gradients=data.get("hf_gradients"),
+            mp2_gradients=data.get("mp2_gradients"),
+            hf_energy=data.get("hf_energy"),
+            mp2_ss_correction=data.get("mp2_ss_correction"),
+            mp2_os_correction=data.get("mp2_os_correction"),
+            ccsd_correction=data.get("ccsd_correction"),
+            s_squared_eigenvalue=data.get("s_squared_eigenvalue"),
+            delta_hf_energy=data.get("delta_hf_energy"),
+            delta_mp2_ss_correction=data.get("delta_mp2_ss_correction"),
+            delta_mp2_os_correction=data.get("delta_mp2_os_correction"),
+            mulliken_charges=data.get("mulliken_charges"),
+            chelpg_charges=data.get("chelpg_charges"),
+            fragment_distance=data.get("fragment_distance"),
+            bond_orders=data.get("bond_orders"),
+            h_caps=(
+                [AtomRef(atom) for atom in data["h_caps"]]
+                if data.get("h_caps") is not None
+                else None
+            ),
+            num_iters=data.get("num_iters"),
+            num_basis_fns=data.get("num_basis_fns"),
+        )
+
+
+@dataclass
+class ExessQMMBE:
+    schema_version: str
+    method: str
+    nmers: list[list[ExessNmer]]
+    distance_metric: str | None = None
+    distance_method: str | None = None
+    reference_fragment: FragmentRef | None = None
+    expanded_hf_energy: float | None = None
+    classical_water_energy: float | None = None
+    expanded_mp2_ss_correction: float | None = None
+    expanded_mp2_os_correction: float | None = None
+    expanded_ccsd_correction: float | None = None
+    expanded_density: TensorLike | None = None
+    expanded_hf_gradients: list[float] | None = None
+    expanded_mp2_gradients: list[float] | None = None
+    num_iters: int | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExessQMMBE":
+        return cls(
+            schema_version=data["schema_version"],
+            method=data["method"],
+            nmers=[
+                [ExessNmer.from_dict(nmer) for nmer in nmer_level]
+                for nmer_level in data["nmers"]
+            ],
+            distance_metric=data.get("distance_metric"),
+            distance_method=data.get("distance_method"),
+            reference_fragment=(
+                FragmentRef(data["reference_fragment"])
+                if data.get("reference_fragment") is not None
+                else None
+            ),
+            expanded_hf_energy=data.get("expanded_hf_energy"),
+            classical_water_energy=data.get("classical_water_energy"),
+            expanded_mp2_ss_correction=data.get("expanded_mp2_ss_correction"),
+            expanded_mp2_os_correction=data.get("expanded_mp2_os_correction"),
+            expanded_ccsd_correction=data.get("expanded_ccsd_correction"),
+            expanded_density=data.get("expanded_density"),
+            expanded_hf_gradients=data.get("expanded_hf_gradients"),
+            expanded_mp2_gradients=data.get("expanded_mp2_gradients"),
+            num_iters=data.get("num_iters"),
+        )
+
+
+@dataclass
+class ExessOutput:
+    schema_version: str
+    calculation_time: float
+    qmmbe: ExessQMMBE | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExessOutput":
+        return cls(
+            schema_version=data["schema_version"],
+            calculation_time=data["calculation_time"],
+            qmmbe=(
+                ExessQMMBE.from_dict(data["qmmbe"])
+                if data.get("qmmbe") is not None
+                else None
+            ),
+        )
+
+
+@dataclass
+class ExessResult:
+    output: ExessOutput
+    exports: dict[str, Any] | bytes | None = None
 
 
 @dataclass
@@ -1092,7 +1233,85 @@ def energy(
     )
 
 
-def save_energy_outputs(
+def _split_result_outputs(
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+) -> tuple[dict[str, Any], dict[str, Any] | None] | RunError:
+    if isinstance(res, RunError):
+        return res
+
+    if isinstance(res, dict):
+        return (res, None)
+
+    if len(res) == 0 or len(res) > 2:
+        raise ValueError("exess.energy should return 1 or 2 outputs.")
+
+    return (res[0], res[1] if len(res) == 2 else None)
+
+
+def _resolve_export_object(
+    exports_obj: dict[str, Any] | None,
+) -> tuple[Literal["Json", "Hdf5"], dict[str, Any]] | None:
+    if exports_obj is None:
+        return None
+    if "Json" in exports_obj:
+        return ("Json", exports_obj["Json"])
+    if "Hdf5" in exports_obj:
+        return ("Hdf5", exports_obj.get("Hdf5") or exports_obj)
+    if "path" in exports_obj:
+        if str(exports_obj.get("format", "")).lower() == "json":
+            return ("Json", exports_obj)
+        return ("Hdf5", exports_obj)
+    raise ValueError(
+        "Unknown output format in exports output. Expected 'Json' or 'Hdf5' key, "
+        f"but got keys: {list(exports_obj.keys())}"
+    )
+
+
+def fetch_outputs(
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+    extract: bool = True,
+) -> ExessResult | RunError:
+    """
+    Download EXESS outputs and convert the main JSON payload into Python dataclasses.
+
+    Exported outputs are left lightly processed for now:
+    - JSON exports are returned as a raw dict
+    - HDF5 exports are returned as extracted file bytes by default
+    - HDF5 exports are returned as raw tar.zst bytes when extract=False
+    """
+    split = _split_result_outputs(res)
+    if isinstance(split, RunError):
+        return split
+
+    output_obj, exports_obj = split
+
+    output = ExessOutput.from_dict(
+        json.loads(fetch_object(output_obj["path"]).decode())
+    )
+
+    exports: dict[str, Any] | bytes | None = None
+    export_ref = _resolve_export_object(exports_obj)
+    if export_ref is not None:
+        export_kind, export_obj = export_ref
+        if export_kind == "Json":
+            exports = json.loads(fetch_object(export_obj["path"]).decode())
+        elif export_kind == "Hdf5":
+            try:
+                exports = fetch_object(export_obj["path"], extract=extract)
+            except ValueError as e:
+                if extract and "only directories" in str(e):
+                    exports = None
+                else:
+                    raise
+        else:
+            raise ValueError(
+                f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'."
+            )
+
+    return ExessResult(output=output, exports=exports)
+
+
+def save_outputs(
     res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
     extract=True,
 ) -> tuple[Path, Path | None] | RunError:
@@ -1116,22 +1335,25 @@ def save_energy_outputs(
         - (json_path, None): If HDF5 extraction fails or no HDF5 output
         - RunError: If the input res is an error
     """
-    if isinstance(res, RunError):
-        return res
-    if isinstance(res, dict):
-        return (save_object(res["path"]), None)
-    if len(res) == 1:
-        return (save_object(res[0]["path"]), None)
-    if len(res) < 2:
-        raise ValueError("exess.energy should return 1 or 2 outputs.")
-    # convert_hdf5_to_json set to false (or not set)
-    if "Hdf5" in res[1]:
+    split = _split_result_outputs(res)
+    if isinstance(split, RunError):
+        return split
+
+    output_obj, exports_obj = split
+    json_path = save_object(output_obj["path"])
+    export_ref = _resolve_export_object(exports_obj)
+
+    if export_ref is None:
+        return (json_path, None)
+
+    export_kind, export_obj = export_ref
+    if export_kind == "Json":
+        return (json_path, save_object(export_obj["path"]))
+    elif export_kind == "Hdf5":
         hdf5_path = None
         try:
-            # Support new-style with the type key, and old-style without
-            hdf5_obj = res[1].get("Hdf5") or res[1]
             hdf5_path = save_object(
-                hdf5_obj["path"],
+                export_obj["path"],
                 ext="hdf5" if extract else "tar.zst",
                 extract=extract,
             )
@@ -1141,19 +1363,21 @@ def save_energy_outputs(
                 hdf5_path = None
             else:
                 raise  # Re-raise other extraction errors
-        return (save_object(res[0]["path"]), hdf5_path)
-    # convert_hdf5_to_json set to true
-    elif "Json" in res[1]:
-        return (
-            save_object(res[0]["path"]),
-            save_object(res[1]["Json"]["path"]),
-        )
-    # Unknown output format
-    else:
-        raise ValueError(
-            f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
-            f"but got keys: {list(res[1].keys())}"
-        )
+        return (json_path, hdf5_path)
+
+    raise ValueError(f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'.")
+
+
+def save_energy_outputs(
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+    extract=True,
+) -> tuple[Path, Path | None] | RunError:
+    warnings.warn(
+        "save_energy_outputs() is deprecated; use save_outputs() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return save_outputs(res, extract=extract)
 
 
 def interaction_energy(

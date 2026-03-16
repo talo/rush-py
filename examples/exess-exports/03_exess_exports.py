@@ -79,7 +79,7 @@ for i, output in enumerate(res):
         print(f"  [{i}] Unknown output type with keys: {list(output.keys())}")
 
 # Save outputs to disk (JSON + HDF5)
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 print(f"Saved files: {files}")
 
 # Load total energy from saved JSON file
@@ -126,7 +126,7 @@ res = exess.energy(
     collect=True,
 )
 
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 print(f"Saved files: {files}")
 print()
 print("The JSON file contains density_descriptors, esp_descriptors,")

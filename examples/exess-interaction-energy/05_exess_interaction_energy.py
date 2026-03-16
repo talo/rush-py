@@ -51,7 +51,7 @@ out = exess.interaction_energy(
 )
 
 # Extract and display results
-files = exess.save_energy_outputs(out)
+files = exess.save_outputs(out)
 json_file = next((f for f in files if str(f).endswith(".json")), None)
 if json_file:
     with open(json_file) as f:
@@ -113,7 +113,7 @@ out = exess.interaction_energy(
 )
 
 # Extract and display results
-files = exess.save_energy_outputs(out)
+files = exess.save_outputs(out)
 json_file = next((f for f in files if str(f).endswith(".json")), None)
 if json_file:
     with open(json_file, encoding="utf-8") as f:

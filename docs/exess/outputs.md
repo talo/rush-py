@@ -1,6 +1,6 @@
 # Outputs
 
-EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, outputs are returned as object store paths; use `save_*_outputs` helpers to download them locally.
+EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, outputs are returned as object store paths; use `exess.fetch_outputs` for in-memory objects or `exess.save_outputs` to download them locally.
 
 ## Rush output objects
 
@@ -18,9 +18,9 @@ For EXESS energy calculations, the first output is the JSON result. If any expor
 
 In the rush-py tutorial, the `size` field is currently informational only (often 0) but is intended to carry the output size in bytes in future revisions.
 
-In rush-py, `exess.save_energy_outputs` downloads these objects to the local workspace. For export-heavy runs, the second output is stored as a compressed archive in the object store; the helper decompresses it and extracts the HDF5 file automatically. Pass `to_json=True` to convert the exported HDF5 data into JSON for easier inspection when the data volume is small (for example, descriptor grids).
+In rush-py, `exess.fetch_outputs` converts the main EXESS JSON output into Python dataclasses in memory. `exess.save_outputs` downloads the raw output objects to the local workspace. For export-heavy runs, the second output is stored as a compressed archive in the object store; `save_outputs` decompresses it and extracts the HDF5 file automatically.
 
-`save_energy_outputs` returns either a single JSON path (no exports) or a tuple of `(json_path, exports_path)` when exports are present. With `to_json=True`, the second path points to a JSON file instead of HDF5.
+`save_outputs` returns `(json_path, exports_path)` and uses `None` for `exports_path` when no exports are present. If `convert_hdf5_to_json=True` was set on the EXESS run, the second saved path points to a JSON file instead of HDF5.
 
 The helper uses the object store path as the filename and applies a `.hdf5` or `.json` extension as appropriate.
 
@@ -308,7 +308,7 @@ res = exess.energy(
 )
 ```
 
-When `to_json=True` is passed to `save_energy_outputs`, the exported HDF5 is converted to JSON. Example JSON structure:
+When `to_json=True` is passed to `save_outputs`, the exported HDF5 is converted to JSON. Example JSON structure:
 
 ```json
 {

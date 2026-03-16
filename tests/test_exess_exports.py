@@ -30,7 +30,7 @@ def test_exess_exports():
         collect=True,
     )
     print(res, file=sys.stderr)
-    files = exess.save_energy_outputs(res)
+    files = exess.save_outputs(res)
     print(files, file=sys.stderr)
 
 

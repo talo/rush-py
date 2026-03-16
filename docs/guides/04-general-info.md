@@ -23,7 +23,7 @@ Rush module functions will return a run ID that can be used to collect the run a
 If synchronous behavior is desired, `collect=True` can be passed to the module function and collection with a 1 hour wait time will happen automatically, without the need to call `collect_run`, and the module outputs will be returned directly from the module function call as well.
 
 ## Uploading, Downloading & Saving Data
-The rush-py client provides `upload_object`, `download_object`, and `save_object` functions in the `rush.client` Python submodule. These functions upload an object from a local filesystem path, download an object via its object store path and return its data directly (either as a dict for JSON data or as bytes otherwise), and save an object into the workspace directory with arguments that allow for configuring how it gets named (run `help(rush.client.save_object)` for usage).
+The rush-py client provides `upload_object`, `fetch_object`, and `save_object` functions in the `rush.client` Python submodule. These functions upload an object from a local filesystem path, fetch an object via its object store path and return its data directly in memory, and save an object into the workspace directory with arguments that allow for configuring how it gets named (run `help(rush.client.save_object)` for usage).
 
 Also provided is a `save_json` function that allows saving a dict as JSON, by default into the workspace directory, for convenient parallel usage with `save_object`.
 

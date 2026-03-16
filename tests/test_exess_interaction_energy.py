@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from rush import Topology, exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunError, RunOpts, set_opts
 
 
 def test_exess_interaction_energy():
@@ -30,7 +30,11 @@ def test_exess_interaction_energy():
         collect=True,
     )
     print(res, file=sys.stderr)
-    exess.save_energy_outputs(res)
+    output = exess.fetch_outputs(res)
+    assert not isinstance(output, RunError)
+    assert output.output.qmmbe is not None
+    assert output.output.qmmbe.reference_fragment == exess.FragmentRef(lig_idx)
+    assert output.output.qmmbe.nmers[0][0].fragments == [exess.FragmentRef(lig_idx)]
 
 
 if __name__ == "__main__":

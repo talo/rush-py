@@ -1,4 +1,3 @@
-import json
 import sys
 from pathlib import Path
 
@@ -18,11 +17,12 @@ def test_exess_energy_tutorial():
             tags=["rush-py", "test", "6a5j"],
         ),
     )
-    output = exess.save_energy_outputs(res)
+    output = exess.fetch_outputs(res)
     assert not isinstance(output, RunError)
-    output_file = output[0] if isinstance(output, tuple) else output
-    with open(output_file) as f:
-        print(json.load(f)["qmmbe"]["expanded_hf_energy"])
+    assert output.output.qmmbe is not None
+    assert output.output.qmmbe.reference_fragment is None
+    assert output.output.qmmbe.expanded_hf_energy is not None
+    print(output.output.qmmbe.expanded_hf_energy)
 
 
 def test_exess_energy_exports():
@@ -53,7 +53,7 @@ def test_exess_energy_exports():
 
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 if __name__ == "__main__":

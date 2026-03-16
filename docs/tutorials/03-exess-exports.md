@@ -64,7 +64,7 @@ EXESS returns two outputs:
 Save both to disk with the helper function:
 
 ```python
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 # files = ("17e16a82-....json", "3f80961e-....hdf5")
 ```
 
@@ -101,7 +101,7 @@ res = exess.energy(
     collect=True,
 )
 
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 ```
 
 This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`). The resulting JSON looks like:

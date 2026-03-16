@@ -49,7 +49,7 @@ if isinstance(res, RunError):
     exit(1)
 
 # Save energy outputs to disk and load from file
-files = exess.save_energy_outputs(res)
+files = exess.save_outputs(res)
 json_file = next((f for f in files if str(f).endswith(".json")), None)
 with open(json_file, encoding="utf-8") as f:
     energy_data = json.load(f)
