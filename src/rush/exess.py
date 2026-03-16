@@ -18,7 +18,9 @@ Quick Links
 - :func:`rush.exess.optimization`
 """
 
+import enum
 import sys
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
@@ -804,6 +806,12 @@ type KSDFTMethodT = Literal[
 ]
 
 
+class _KSDFTDefault(enum.Enum):
+    """Sentinel indicating that ksdft_keywords was not explicitly passed."""
+
+    DEFAULT = enum.auto()
+
+
 @dataclass
 class KSDFTKeywords:
     """
@@ -818,6 +826,26 @@ class KSDFTKeywords:
     sp_threshold: float | None = None
     dp_threshold: float | None = None
     batches_per_batch: int | None = None
+
+    @staticmethod
+    def resolve(
+        ksdft_keywords: "KSDFTKeywords | _KSDFTDefault | None",
+        method: str,
+    ) -> "KSDFTKeywords | None":
+        """Resolve ksdft_keywords default and warn if explicitly passed with a non-KSDFT method."""
+        if isinstance(ksdft_keywords, _KSDFTDefault):
+            return (
+                KSDFTKeywords(functional="B3LYP")
+                if method == "RestrictedKSDFT"
+                else None
+            )
+        if ksdft_keywords is not None and method != "RestrictedKSDFT":
+            warnings.warn(
+                f"ksdft_keywords ignored: method is {method!r}, not 'RestrictedKSDFT'",
+                stacklevel=3,
+            )
+            return None
+        return ksdft_keywords
 
     def _to_rex(self):
         return Template(
@@ -925,7 +953,7 @@ def exess(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
@@ -936,6 +964,7 @@ def exess(
     """
     Compute the energy of the system in the QDX topology file at `topology_path`.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1033,7 +1062,7 @@ def energy(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     export_keywords: ExportKeywords | None = None,
     system: System | None = None,
     convert_hdf5_to_json: bool | None = None,
@@ -1135,7 +1164,7 @@ def interaction_energy(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
@@ -1145,6 +1174,7 @@ def interaction_energy(
     Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
     in the toplogy file at `topology_path`.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1243,7 +1273,7 @@ def qmmm(
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
     frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     system: System | None = None,
@@ -1260,6 +1290,7 @@ def qmmm(
     If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
     If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
@@ -1577,7 +1608,7 @@ def optimization(
     standard_orientation: StandardOrientationT | None = None,
     force_cartesian_basis_sets: bool | None = None,
     scf_keywords: SCFKeywords | None = None,
-    ksdft_keywords: KSDFTKeywords | None = KSDFTKeywords(functional="B3LYP"),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
     qm_fragments: list[int] | None = None,
     mm_fragments: list[int] | None = None,
     system: System | None = None,
@@ -1593,6 +1624,7 @@ def optimization(
     If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
     If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
     """
+    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
     topology_vobj = upload_object(topology_path)
