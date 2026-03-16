@@ -842,7 +842,7 @@ def fetch_run_info(run_id: str) -> RushRun | None:
     return RushRun(**result["run"] | {"id": run_id})
 
 
-def _poll_run(run_id: str, max_wait_time):
+def _poll_run(run_id: str, max_wait_time) -> tuple[str, bool]:
     query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
@@ -873,6 +873,7 @@ def _poll_run(run_id: str, max_wait_time):
     start_time = time.time()
     poll_interval = INITIAL_POLL_INTERVAL
     last_status = None
+    module_instance_created = False
     while time.time() - start_time < max_wait_time:
         time.sleep(poll_interval)
 
@@ -880,6 +881,7 @@ def _poll_run(run_id: str, max_wait_time):
         status = result["run"]["status"]
         module_instances = result["run"]["module_instances"]["nodes"]
         if module_instances:
+            module_instance_created = True
             curr_status = module_instances[0]["status"]
             if curr_status == "running":
                 curr_status = "run"
@@ -906,13 +908,11 @@ def _poll_run(run_id: str, max_wait_time):
             poll_interval = min(poll_interval * BACKOFF_FACTOR, 2)
 
         if status in ["done", "error", "cancelled"]:
-            if not last_status:
-                print("Restored already-completed run", file=sys.stderr)
-            return status
+            return status, module_instance_created
 
         poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
 
-    return status
+    return status, module_instance_created
 
 
 def collect_run(
@@ -923,7 +923,7 @@ def collect_run(
     actual result of the run, an error string if the run failed, or a string indicating
     that the run timed out.
     """
-    status = _poll_run(run_id, max_wait_time)
+    status, module_instance_created = _poll_run(run_id, max_wait_time)
     if status not in ["cancelled", "error", "done"]:
         err = f"Run timed out: did not complete within {max_wait_time} seconds"
         print(err, file=sys.stderr)
@@ -938,6 +938,8 @@ def collect_run(
         err = f"Error: {run['result']}"
         _print_run_trace(run)
         return RunError(err)
+    elif run["status"] == "done" and not module_instance_created:
+        print("Restored already-completed run", file=sys.stderr)
 
     result = run["result"]
 
