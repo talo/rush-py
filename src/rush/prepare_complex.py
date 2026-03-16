@@ -130,7 +130,7 @@ def prepare_complex(
     truncation_threshold: int | None = None,
     opt: bool | None = None,
     debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(),
+    run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ) -> TRC | str | RunError:
