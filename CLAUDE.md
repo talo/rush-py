@@ -8,6 +8,8 @@ rush-py is the Python client library for QDX's Rush platform — a distributed c
 
 ## Commands
 
+Note that some developers will use the provided nix flake to enter a devshell before starting Claude. If this is the case, Claude should use the below commands unprefixed with `uv run`, and if a devshell refresh is required, should either request that the developer do so.
+
 ```bash
 # Install dependencies
 uv sync --dev
@@ -28,12 +30,12 @@ uv run pytest --run-slow-force         # all tests, ignore queue status
 uv run pytest tests/test_exess_energy.py
 uv run pytest tests/test_exess_energy.py::test_name
 
-# Type checking
-uv run basedpyright
-
 # Linting / formatting
 uv run ruff check .
 uv run ruff format .
+
+# Type checking
+uv run ty ./src ./tests/
 
 # Build docs
 cd docs && uv run sphinx-build -b html . _build/html
