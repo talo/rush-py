@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 6.10.0
 
 ### Removed
 - remove ML mentions since it's disabled (for now) in upstream EXESS
