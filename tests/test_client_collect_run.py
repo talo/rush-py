@@ -50,3 +50,53 @@ def test_collect_run_no_mi_error(
     assert "module `exess_rex` is not available" in result.message
     assert "starting rex evaluation" in stderr
     assert "Restored already-completed run" not in stderr
+
+
+def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
+    monkeypatch.setattr(
+        "rush.client._poll_run",
+        lambda run_id, max_wait_time: ("error", False),
+    )
+    monkeypatch.setattr(
+        "rush.client._fetch_results",
+        lambda run_id: {
+            "status": "error",
+            "result": "rex evaluation failed",
+            "trace": (
+                'module_state: Some("rex_start_failed")\\n'
+                'reason: Some("module not runnable on this account tier")\\n'
+                'stdout: Some("starting rex evaluation")\\n'
+                'stderr: Some("module `exess_rex` is not available for this account tier")'
+            ),
+        },
+    )
+
+    result = collect_run("run-id")
+
+    stderr = capsys.readouterr().err
+    assert isinstance(result, RunError)
+    assert 'module_state: Some("rex_start_failed")' in stderr
+    assert 'reason: Some("module not runnable on this account tier")' in stderr
+    assert "stdout:" in stderr
+    assert "stderr:" in stderr
+    assert stderr.index("Trace:") < stderr.index("stdout:")
+    assert stderr.index("stdout:") < stderr.index("stderr:")
+
+
+def test_run_error_str_includes_trace_and_stdio_sections():
+    err = RunError(
+        "Error: rex evaluation failed",
+        (
+            'module_state: Some("rex_start_failed")\\n'
+            'stdout: Some("starting rex evaluation")\\n'
+            'stderr: Some("module `exess_rex` is not available for this account tier")'
+        ),
+    )
+
+    formatted = str(err)
+
+    assert "Error: rex evaluation failed" in formatted
+    assert 'module_state: Some("rex_start_failed")' in formatted
+    assert "stdout:" in formatted
+    assert "stderr:" in formatted
+    assert formatted.index("Trace:") < formatted.index("stdout:")
