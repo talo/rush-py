@@ -21,7 +21,7 @@ Quick Links
 import enum
 import sys
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from string import Template
 from typing import Any, Literal
@@ -311,6 +311,8 @@ class FragKeywords:
     distance_metric: DistanceMetricT | None = None
     #: Calculation will act as if only those fragments were present.
     included_fragments: list[int | FragmentRef] | None = None
+    #: Enables interaction-energy mode for the selected fragment.
+    reference_fragment: int | None = None
     enable_speed: bool | None = None
 
     def __post_init__(self):
@@ -338,7 +340,7 @@ class FragKeywords:
             if self.tetramer_cutoff is None:
                 self.tetramer_cutoff = 10.0
 
-    def _to_rex(self, reference_fragment: int | None = None):
+    def _to_rex(self):
         included_fragments = None
         if self.included_fragments:
             included_fragments = [
@@ -375,7 +377,7 @@ class FragKeywords:
             ),
             level=self.level,
             maybe_included_fragments=optional_str(included_fragments),
-            maybe_reference_fragment=optional_str(reference_fragment),
+            maybe_reference_fragment=optional_str(self.reference_fragment),
             maybe_enable_speed=optional_str(self.enable_speed),
         )
 
@@ -1174,86 +1176,24 @@ def interaction_energy(
     Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
     in the toplogy file at `topology_path`.
     """
-    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
-
-    # Upload inputs
-    topology_vobj = upload_object(topology_path)
-
-    # Run rex
-    rex = Template("""let
-  obj_j = λ j →
-    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
-    exess_rex_s
-      ($run_spec)
-      (exess_rex::ExessParams {
-        schema_version = "0.2.0",
-        external_charges = None,
-        convert_hdf5_to_json = None,
-        model = Some (exess_rex::Model {
-          method = exess_rex::Method::$method,
-          basis = "$basis",
-          aux_basis = $maybe_aux_basis,
-          standard_orientation = $maybe_standard_orientation,
-          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
-        }),
-        system = $maybe_system,
-        keywords = exess_rex::Keywords {
-          scf = $maybe_scf_keywords,
-          ks_dft = $maybe_ks_keywords,
-          rtat = None,
-          frag = $maybe_frag_keywords,
-          boundary = None,
-          log = None,
-          dynamics = None,
-          integrals = None,
-          debug = None,
-          export = None,
-          guess = None,
-          force_field = None,
-          optimization = None,
-          hessian = None,
-          gradient = None,
-          qmmm = None,
-          machine_learning = None,
-          regions = None,
-        },
-        driver = exess_rex::Driver::Energy,
-      })
-      [ (obj_j topology) ]
-      None
-in
-  exess "$topology_vobj_path"
-""").substitute(
-        run_spec=run_spec._to_rex(),
+    return energy(
+        topology_path=topology_path,
         method=method,
         basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
-        maybe_standard_orientation=optional_str(
-            standard_orientation, "exess_rex::StandardOrientation::"
+        aux_basis=aux_basis,
+        standard_orientation=standard_orientation,
+        force_cartesian_basis_sets=force_cartesian_basis_sets,
+        scf_keywords=scf_keywords,
+        frag_keywords=replace(
+            frag_keywords,
+            reference_fragment=reference_fragment,
         ),
-        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        maybe_system=system._to_rex() if system is not None else "None",
-        maybe_scf_keywords=(
-            scf_keywords._to_rex() if scf_keywords is not None else "None"
-        ),
-        maybe_ks_keywords=(
-            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
-        ),
-        maybe_frag_keywords=frag_keywords._to_rex(reference_fragment),
-        topology_vobj_path=topology_vobj["path"],
+        ksdft_keywords=ksdft_keywords,
+        system=system,
+        run_spec=run_spec,
+        run_opts=run_opts,
+        collect=collect,
     )
-    try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
-            return run_id
-
-    except TransportQueryError as e:
-        if e.errors:
-            for error in e.errors:
-                print(f"Error: {error['message']}", file=sys.stderr)
 
 
 def qmmm(
