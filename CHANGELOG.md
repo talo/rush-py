@@ -4,6 +4,7 @@
 
 ### Fixed
 - Don't print message about run being restored if the run is canceled or failed: this usually means that the module instance couldn't be started at all because the account tier doesn't support running that module instance. The other potential cause is if a module isn't available for a particular target and the user tries to use that combination.
+- Print and store `trace` field from a run properly when it's either canceled or failed
 
 ## 6.10.1
 
