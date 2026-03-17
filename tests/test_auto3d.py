@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from rush.auto3d import auto3d as run_auto3d
-from rush.auto3d import save_outputs
+from rush.auto3d import fetch_outputs
 from rush.client import RunError, RunOpts, set_opts
 
 
@@ -19,7 +19,7 @@ def test_auto3d():
         collect=True,
     )
     # Output is a list of TRC objects in memory, or a str if auto3d failed
-    res = save_outputs(res)
+    res = fetch_outputs(res)
     assert not isinstance(res, (str, RunError))
     assert len(res) == 2
 
