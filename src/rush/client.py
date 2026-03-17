@@ -533,10 +533,7 @@ def _fetch_results(run_id: str):
     return result["run"]
 
 
-def _print_run_trace(run):
-    print(f"Error: {run['result']}", file=sys.stderr)
-
-    trace = run["trace"]
+def _format_failed_run(message: str, trace: str = "") -> str:
     trace = re.sub(
         r"\\u\{([0-9a-fA-F]+)\}",
         lambda m: chr(int(m.group(1), 16)),
@@ -549,19 +546,37 @@ def _print_run_trace(run):
     except (UnicodeDecodeError, UnicodeEncodeError):
         pass
 
+    # This shouldn't be necessary, but we'll leave it in case we have
+    # a module that still manually places stdout and stderr in the trace.
     stdout_match = re.search(r'stdout: Some\("(.*?)"\)', trace, re.DOTALL)
-    if stdout_match:
-        stdout_content = stdout_match.group(1)
-        print("stdout:", file=sys.stderr)
-        for line in stdout_content.split("\n"):
-            print(f"  {line}", file=sys.stderr)
     stderr_match = re.search(r'stderr: Some\("(.*?)"\)', trace, re.DOTALL)
+    trace_without_streams = re.sub(
+        r'stdout: Some\(".*?"\)|stderr: Some\(".*?"\)',
+        "",
+        trace,
+        flags=re.DOTALL,
+    )
+    trace_lines = [line.rstrip() for line in trace_without_streams.splitlines()]
+    trace_lines = [line for line in trace_lines if line.strip()]
+    lines = [message]
+    if trace_lines:
+        lines.append("Trace:")
+        for line in trace_lines:
+            lines.append(f"  {line}")
+
+    if stdout_match:
+        lines.append("stdout:")
+        for line in stdout_match.group(1).split("\n"):
+            lines.append(f"  {line}")
     if stderr_match:
-        stderr_content = stderr_match.group(1)
-        print("stderr:", file=sys.stderr)
-        for line in stderr_content.split("\n"):
-            print(f"  {line}", file=sys.stderr)
-        print(file=sys.stderr)
+        lines.append("stderr:")
+        for line in stderr_match.group(1).split("\n"):
+            lines.append(f"  {line}")
+
+    if trace_lines or stdout_match or stderr_match:
+        lines.append("")
+
+    return "\n".join(lines)
 
 
 type RunStatus = Literal["pending", "running", "done", "error", "cancelled", "draft"]
@@ -573,6 +588,9 @@ class RunError:
 
     message: str
     trace: str = ""
+
+    def __str__(self) -> str:
+        return _format_failed_run(self.message, self.trace)
 
 
 def _build_filters(
@@ -842,7 +860,7 @@ def fetch_run_info(run_id: str) -> RushRun | None:
     return RushRun(**result["run"] | {"id": run_id})
 
 
-def _poll_run(run_id: str, max_wait_time):
+def _poll_run(run_id: str, max_wait_time) -> tuple[str, bool]:
     query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
@@ -873,6 +891,7 @@ def _poll_run(run_id: str, max_wait_time):
     start_time = time.time()
     poll_interval = INITIAL_POLL_INTERVAL
     last_status = None
+    module_instance_created = False
     while time.time() - start_time < max_wait_time:
         time.sleep(poll_interval)
 
@@ -880,6 +899,7 @@ def _poll_run(run_id: str, max_wait_time):
         status = result["run"]["status"]
         module_instances = result["run"]["module_instances"]["nodes"]
         if module_instances:
+            module_instance_created = True
             curr_status = module_instances[0]["status"]
             if curr_status == "running":
                 curr_status = "run"
@@ -906,13 +926,11 @@ def _poll_run(run_id: str, max_wait_time):
             poll_interval = min(poll_interval * BACKOFF_FACTOR, 2)
 
         if status in ["done", "error", "cancelled"]:
-            if not last_status:
-                print("Restored already-completed run", file=sys.stderr)
-            return status
+            return status, module_instance_created
 
         poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
 
-    return status
+    return status, module_instance_created
 
 
 def collect_run(
@@ -923,21 +941,23 @@ def collect_run(
     actual result of the run, an error string if the run failed, or a string indicating
     that the run timed out.
     """
-    status = _poll_run(run_id, max_wait_time)
+    status, module_instance_created = _poll_run(run_id, max_wait_time)
     if status not in ["cancelled", "error", "done"]:
         err = f"Run timed out: did not complete within {max_wait_time} seconds"
-        print(err, file=sys.stderr)
-        return RunError(err)
+        run_error = RunError(err)
+        return run_error
 
     run = _fetch_results(run_id)
     if run["status"] == "cancelled":
-        err = f"Cancelled: {run['result']}"
-        print(err, file=sys.stderr)
-        return RunError(err)
+        run_error = RunError(f"Cancelled: {run['result']}", run["trace"] or "")
+        print(run_error, file=sys.stderr)
+        return run_error
     elif run["status"] == "error":
-        err = f"Error: {run['result']}"
-        _print_run_trace(run)
-        return RunError(err)
+        run_error = RunError(f"Error: {run['result']}", run["trace"] or "")
+        print(run_error, file=sys.stderr)
+        return run_error
+    elif run["status"] == "done" and not module_instance_created:
+        print("Restored already-completed run", file=sys.stderr)
 
     result = run["result"]
 
@@ -953,20 +973,18 @@ def collect_run(
         if "Ok" in result:
             result = result["Ok"]
         elif "Err" in result:
-            print(f"Error: {result['Err']}", file=sys.stderr)
-            _print_run_trace(run)
-            return RunError(result["Err"])
+            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
+            print(run_error, file=sys.stderr)
+            return run_error
 
     # inner error: for logic-level failures (may not exist, but should)
     if is_result_type(result):
         if "Ok" in result:
             result = result["Ok"]
         elif "Err" in result:
-            print(f"Error: {result['Err']}", file=sys.stderr)
-            _print_run_trace(run)
-            return RunError(
-                result["Err"],
-            )
+            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
+            print(run_error, file=sys.stderr)
+            return run_error
 
     if len(result) == 1:
         return result[0]

@@ -9,7 +9,12 @@ import pytest
 import requests
 
 # Test files that don't submit jobs to the Rush API — always safe to run.
-FAST_TEST_PREFIXES = ("test_convert_", "test_merge", "test_fetch_runs")
+FAST_TEST_PREFIXES = (
+    "test_convert_",
+    "test_merge",
+    "test_fetch_runs",
+    "test_client_collect_run",
+)
 
 # Threshold: if any target has more than this many queued+admitted jobs, skip slow tests.
 QUEUE_BUSY_THRESHOLD = 2
