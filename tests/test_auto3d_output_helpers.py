@@ -2,7 +2,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 from rush.auto3d import Auto3DResult, Auto3DSavedResult, fetch_outputs, save_outputs
-from rush.client import RunError
+from rush.client import RunError, _json_content_name
 
 
 def test_fetch_outputs_parses_auto3d_result(monkeypatch):
@@ -75,7 +75,9 @@ def test_save_outputs_saves_auto3d_result(monkeypatch):
         Path("/tmp/res.json"),
         Path("/tmp/chains.json"),
     )
-    assert first[0].stats == Path("/tmp/top_stats.json")
+    assert first[0].stats == Path(
+        f"/tmp/{_json_content_name('auto3d_stats', res[0][0][1])}.json"
+    )
 
 
 def test_auto3d_output_helpers_passthrough_run_id_and_errors():

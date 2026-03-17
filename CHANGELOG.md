@@ -12,6 +12,7 @@
 - Updated NN-xTB docs, examples, and tests to use `NnxtbResult` and the new fetch/save helpers
 - Auto3D now provides both `fetch_outputs()` for in-memory results and `save_outputs()` for workspace files, with shared output dispatch logic
 - `prepare_protein` now provides `fetch_outputs()` for in-memory TRCs and `prepare_complex` now matches its object-store output shape, with matching fetch/save helpers
+- PBSA now provides `fetch_outputs()` for in-memory `PBSAResult` objects and `save_outputs()` for saving the direct JSON-style result into the workspace
 
 ## 6.10.2
 

@@ -1,24 +1,35 @@
 #!/usr/bin/env python3
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from string import Template
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
+    _json_content_name,
     _submit_rex,
     collect_run,
+    save_json,
     upload_object,
 )
 from .utils import float_to_str
 
 
 @dataclass
-class PBSAResults:
+class PBSAResult:
+    """
+    Parsed PBSA result.
+
+    Use `fetch_outputs(pbsa(..., collect=True))` to return this dataclass in
+    memory, or `save_outputs(pbsa(..., collect=True))` to save the same values
+    as JSON in the workspace.
+    """
+
     solvation_energy: float
     polar_solvation_energy: float
     nonpolar_solvation_energy: float
@@ -101,3 +112,37 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def _unwrap_output(
+    res: list[float] | tuple[float, ...] | str | RunError,
+) -> PBSAResult | str | RunError:
+    if isinstance(res, (str, RunError)):
+        return res
+
+    if isinstance(res, (list, tuple)) and len(res) == 3:
+        return PBSAResult(float(res[0]), float(res[1]), float(res[2]))
+
+    return RunError(
+        f"Error: pbsa output helper received unexpected format: {type(res)}"
+    )
+
+
+def fetch_outputs(
+    res: list[float] | tuple[float, ...] | str | RunError,
+) -> PBSAResult | str | RunError:
+    return _unwrap_output(res)
+
+
+def save_outputs(
+    res: list[float] | tuple[float, ...] | str | RunError,
+) -> Path | str | RunError:
+    output = fetch_outputs(res)
+    if isinstance(output, (str, RunError)):
+        return output
+
+    output_json = asdict(output)
+    return save_json(
+        output_json,
+        name=_json_content_name("pbsa_output", output_json),
+    )

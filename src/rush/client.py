@@ -443,6 +443,11 @@ def fetch_object(path: str, extract: bool = False):
     raise Exception(f"Object at path {path} has neither contents nor URL")
 
 
+def _json_content_name(prefix: str, d: dict) -> str:
+    payload = json.dumps(clean_dict(d), sort_keys=True, separators=(",", ":"))
+    return f"{prefix}_{uuid.uuid5(uuid.NAMESPACE_OID, payload)}"
+
+
 def save_json(d: dict, filepath: Path | str | None = None, name: str | None = None):
     """
     Save a JSON file into the workspace folder.

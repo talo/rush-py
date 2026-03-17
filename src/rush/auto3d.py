@@ -13,6 +13,7 @@ from rush.client import (
     RunOpts,
     RunSpec,
     _get_project_id,
+    _json_content_name,
     _submit_rex,
     collect_run,
     fetch_object,
@@ -220,7 +221,7 @@ def save_outputs(
                 ),
                 stats=save_json(
                     stats,
-                    name=f"{trc_obj[0]['path']}_stats",
+                    name=_json_content_name("auto3d_stats", stats),
                 ),
             )
 
