@@ -19,10 +19,10 @@ def test_exess_energy_tutorial():
     )
     output = exess.fetch_outputs(res)
     assert not isinstance(output, RunError)
-    assert output.output.qmmbe is not None
-    assert output.output.qmmbe.reference_fragment is None
-    assert output.output.qmmbe.expanded_hf_energy is not None
-    print(output.output.qmmbe.expanded_hf_energy)
+    assert output.calc.qmmbe is not None
+    assert output.calc.qmmbe.reference_fragment is None
+    assert output.calc.qmmbe.expanded_hf_energy is not None
+    print(output.calc.qmmbe.expanded_hf_energy)
 
 
 def test_exess_energy_exports():

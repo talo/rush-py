@@ -8,45 +8,42 @@ is well-suited for large-scale screening where fast, per-atom forces or
 vibrational frequencies are needed. Frequency calculations are more expensive.
 """
 
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
+from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
+    save_object,
     upload_object,
 )
 from .utils import optional_str
 
 
 @dataclass
-class NnxtbResults:
+class NnxtbResult:
     """
     Parsed nn-xTB results.
 
-    Use this to load JSON output from the Rush object store. When calling
-    `nnxtb(..., collect=True)`, the return value includes a `path` to the JSON
-    output. After reading the json into a dict, you can pass it to this class
-    like `NnxtbResults(**data)`.
+    Use `fetch_outputs(nnxtb(..., collect=True))` to return this dataclass in
+    memory, or `save_outputs(nnxtb(..., collect=True))` to save the raw JSON
+    output into the workspace.
     """
 
     energy_mev: float
-    forces_mev_per_angstrom: list[tuple[float, float, float]] | None
-    frequencies_inv_cm: list[float] | None
-
-    def __init__(
-        self, energy_mev, forces_mev_per_angstrom=None, frequencies_inv_cm=None
-    ):
-        self.energy_mev = energy_mev
-        self.forces_mev_per_angstrom = forces_mev_per_angstrom
-        self.frequencies_inv_cm = frequencies_inv_cm
+    forces_mev_per_angstrom: list[tuple[float, float, float]] | None = None
+    frequencies_inv_cm: list[float] | None = None
 
 
 def nnxtb(
@@ -112,3 +109,33 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def _unwrap_output(
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+) -> dict[str, Any] | RunError:
+    if isinstance(res, RunError):
+        return res
+    if isinstance(res, dict):
+        return res
+    if len(res) != 1:
+        raise ValueError("nnxtb should return exactly 1 output.")
+    return res[0]
+
+
+def fetch_outputs(
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+) -> NnxtbResult | RunError:
+    output_obj = _unwrap_output(res)
+    if isinstance(output_obj, RunError):
+        return output_obj
+    return NnxtbResult(**json.loads(fetch_object(output_obj["path"]).decode()))
+
+
+def save_outputs(
+    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
+) -> Path | RunError:
+    output_obj = _unwrap_output(res)
+    if isinstance(output_obj, RunError):
+        return output_obj
+    return save_object(output_obj["path"])

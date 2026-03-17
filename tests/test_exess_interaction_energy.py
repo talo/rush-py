@@ -32,9 +32,9 @@ def test_exess_interaction_energy():
     print(res, file=sys.stderr)
     output = exess.fetch_outputs(res)
     assert not isinstance(output, RunError)
-    assert output.output.qmmbe is not None
-    assert output.output.qmmbe.reference_fragment == exess.FragmentRef(lig_idx)
-    assert output.output.qmmbe.nmers[0][0].fragments == [exess.FragmentRef(lig_idx)]
+    assert output.calc.qmmbe is not None
+    assert output.calc.qmmbe.reference_fragment == exess.FragmentRef(lig_idx)
+    assert output.calc.qmmbe.nmers[0][0].fragments == [exess.FragmentRef(lig_idx)]
 
 
 if __name__ == "__main__":

@@ -92,21 +92,16 @@ res = nnxtb(
 
 ## Parsing results
 
-After collecting a run, download and parse the output JSON:
+After collecting a run, either fetch the parsed `NnxtbResult` in memory or save
+the raw JSON output to the workspace:
 
 ```python
-import json
-from rush.client import save_object
-from rush.nnxtb import NnxtbResults
+from rush.nnxtb import NnxtbResult, fetch_outputs, nnxtb
 
 res = nnxtb("topology.json", collect=True)
 
-# Download the output file
-output_path = save_object(res["path"])
-data = json.loads(output_path.read_text())
-
 # Parse into a structured object
-results = NnxtbResults(**data)
+results: NnxtbResult = fetch_outputs(res)
 print(f"Energy: {results.energy_mev:.2f} meV")
 
 if results.forces_mev_per_angstrom:
@@ -114,6 +109,20 @@ if results.forces_mev_per_angstrom:
 
 if results.frequencies_inv_cm:
     print(f"Number of frequencies: {len(results.frequencies_inv_cm)}")
+```
+
+`NnxtbResult` has three fields:
+- `energy_mev`
+- `forces_mev_per_angstrom`
+- `frequencies_inv_cm`
+
+To save the raw JSON output instead:
+
+```python
+from rush.nnxtb import nnxtb, save_outputs
+
+res = nnxtb("topology.json", collect=True)
+output_path = save_outputs(res)
 ```
 
 ## Error handling

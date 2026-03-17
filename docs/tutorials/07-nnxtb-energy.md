@@ -59,22 +59,22 @@ save_trc(trc, "molecule_t.json")
 
 ## Reading the Output
 
-Download the output and parse it with `NnxtbResults`:
+Fetch the parsed output directly with `fetch_outputs`. It returns a
+`NnxtbResult` dataclass:
 
 ```python
-import json
-from rush.client import save_object
-from rush.nnxtb import NnxtbResults
-
-# Download the JSON output
-output_path = save_object(res["path"])
-data = json.loads(output_path.read_text())
+from rush.nnxtb import NnxtbResult, fetch_outputs
 
 # Parse into a structured result
-results = NnxtbResults(**data)
+results: NnxtbResult = fetch_outputs(res)
 
 print(f"Energy: {results.energy_mev:.2f} meV")
 ```
+
+`NnxtbResult` has three fields:
+- `energy_mev`
+- `forces_mev_per_angstrom`
+- `frequencies_inv_cm`
 
 ### Energy
 
@@ -115,8 +115,7 @@ res = nnxtb(
     collect=True,
 )
 
-output_path = save_object(res["path"])
-results = NnxtbResults(**json.loads(output_path.read_text()))
+results = fetch_outputs(res)
 
 if results.frequencies_inv_cm:
     print(f"Number of vibrational modes: {len(results.frequencies_inv_cm)}")
@@ -173,9 +172,8 @@ for topo in topologies:
 # Collect all results
 for topo, run_id in zip(topologies, run_ids):
     result = collect_run(run_id)
-    output_path = save_object(result["path"])
-    data = json.loads(output_path.read_text())
-    print(f"{topo}: {data['energy_mev']:.2f} meV")
+    parsed = fetch_outputs(result)
+    print(f"{topo}: {parsed.energy_mev:.2f} meV")
 ```
 
 ---

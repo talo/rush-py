@@ -42,7 +42,7 @@ def test_fetch_outputs_extracts_hdf5(monkeypatch):
     )
 
     assert not isinstance(result, RunError)
-    assert result.output.calculation_time == 1.0
+    assert result.calc.calculation_time == 1.0
     assert result.exports == b"fake-hdf5"
 
 

@@ -14,7 +14,7 @@ python 07_nnxtb_energy.py
 ## What This Example Covers
 
 1. Running an NN-xTB calculation with `nnxtb()` and `compute_forces=True`
-2. Parsing results with `NnxtbResults`
+2. Fetching the parsed result with `fetch_outputs`
 3. Printing energy (in meV, eV, and kcal/mol) and per-atom forces
 
 ## Input Data

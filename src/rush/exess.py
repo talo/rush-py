@@ -174,7 +174,7 @@ class ExessNmer:
 
 
 @dataclass
-class ExessQMMBE:
+class ExessManyBodyExpansion:
     schema_version: str
     method: str
     nmers: list[list[ExessNmer]]
@@ -192,7 +192,7 @@ class ExessQMMBE:
     num_iters: int | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ExessQMMBE":
+    def from_dict(cls, data: dict[str, Any]) -> "ExessManyBodyExpansion":
         return cls(
             schema_version=data["schema_version"],
             method=data["method"],
@@ -220,18 +220,18 @@ class ExessQMMBE:
 
 
 @dataclass
-class ExessOutput:
+class ExessCalculation:
     schema_version: str
     calculation_time: float
-    qmmbe: ExessQMMBE | None = None
+    qmmbe: ExessManyBodyExpansion | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ExessOutput":
+    def from_dict(cls, data: dict[str, Any]) -> "ExessCalculation":
         return cls(
             schema_version=data["schema_version"],
             calculation_time=data["calculation_time"],
             qmmbe=(
-                ExessQMMBE.from_dict(data["qmmbe"])
+                ExessManyBodyExpansion.from_dict(data["qmmbe"])
                 if data.get("qmmbe") is not None
                 else None
             ),
@@ -240,7 +240,7 @@ class ExessOutput:
 
 @dataclass
 class ExessResult:
-    output: ExessOutput
+    calc: ExessCalculation
     exports: dict[str, Any] | bytes | None = None
 
 
@@ -1285,7 +1285,7 @@ def fetch_outputs(
 
     output_obj, exports_obj = split
 
-    output = ExessOutput.from_dict(
+    calc = ExessCalculation.from_dict(
         json.loads(fetch_object(output_obj["path"]).decode())
     )
 
@@ -1308,7 +1308,7 @@ def fetch_outputs(
                 f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'."
             )
 
-    return ExessResult(output=output, exports=exports)
+    return ExessResult(calc=calc, exports=exports)
 
 
 def save_outputs(

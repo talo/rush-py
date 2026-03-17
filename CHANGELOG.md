@@ -4,9 +4,12 @@
 
 ### Changed
 - EXESS now uses `fetch_outputs()` for in-memory results and `save_outputs()` for workspace persistence, with shared output handling between the two paths
+- EXESS parsed output types are now `ExessResult`, `ExessCalculation`, and `ExessManyBodyExpansion`, with the calculation available at `result.calc`
 - Added `fetch_object()` as the in-memory object-store helper and removed `download_object()`
 - `fetch_object()` and `save_object()` now share archive extraction logic
 - Updated EXESS docs, examples, and tests to use the new fetch/save naming
+- NN-xTB now uses `fetch_outputs()` for in-memory `NnxtbResult` objects and `save_outputs()` for saving raw JSON outputs
+- Updated NN-xTB docs, examples, and tests to use `NnxtbResult` and the new fetch/save helpers
 
 ## 6.10.2
 
