@@ -1,16 +1,29 @@
 #!/usr/bin/env python3
+"""
+MMseqs2 module helpers for the Rush Python client.
+
+MMseqs2 generates multiple-sequence alignments (MSAs) from amino acid
+sequences. The fetched output is the in-memory A3M text for each input
+sequence, while the saved output is the corresponding set of `.a3m` files in
+the workspace.
+"""
+
 import sys
+from pathlib import Path
 from string import Template
-from typing import Literal
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
+    save_object,
 )
 from .utils import optional_str
 
@@ -28,6 +41,13 @@ def mmseqs2(
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
+    """
+    Run MMseqs2 on one or more amino acid sequences.
+
+    The collected result is a list of Rush object-store paths to A3M files, one
+    per input sequence.
+    """
+
     # TODO: set use_upstream_server to `None` for prod, when it works again
     rex = Template("""
 mmseqs2_rex_s
@@ -65,3 +85,49 @@ mmseqs2_rex_s
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def _unwrap_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> list[dict[str, Any]] | str | RunError:
+    if isinstance(res, (str, RunError)):
+        return res
+
+    if isinstance(res, (list, tuple)):
+        return list(res)
+
+    return RunError(
+        f"Error: mmseqs2 output helper received unexpected format: {type(res)}"
+    )
+
+
+def fetch_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> list[str] | str | RunError:
+    """
+    Fetch MMseqs2 outputs into memory as A3M strings.
+    """
+
+    outputs = _unwrap_outputs(res)
+    if isinstance(outputs, (str, RunError)):
+        return outputs
+
+    a3ms: list[str] = []
+    for output_obj in outputs:
+        a3m = fetch_object(output_obj["path"])
+        a3ms.append(a3m.decode() if isinstance(a3m, bytes) else a3m)
+    return a3ms
+
+
+def save_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> list[Path] | str | RunError:
+    """
+    Save MMseqs2 outputs into the workspace as `.a3m` files.
+    """
+
+    outputs = _unwrap_outputs(res)
+    if isinstance(outputs, (str, RunError)):
+        return outputs
+
+    return [save_object(output_obj["path"]) for output_obj in outputs]

@@ -1,21 +1,39 @@
 #!/usr/bin/env python3
+"""
+Boltz module helpers for the Rush Python client.
+
+Boltz predicts folded structures from protein sequences, optional ligands, and
+MSA inputs. The fetched output is parsed into Python-friendly result objects,
+while the saved output writes the model and JSON artifacts into the workspace.
+"""
+
+import base64
 import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
+from typing import Any
 
+import numpy as np
+import numpy.typing as npt
 from gql.transport.exceptions import TransportQueryError
 
 from rush.convert import _single_trc, from_json, from_pdb
+from rush.mol import TRC
 
 from .client import (
+    RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
+    _json_content_name,
     _submit_rex,
     collect_run,
+    fetch_object,
+    save_json,
+    save_object,
     upload_object,
 )
 from .utils import dict_to_vec_of_tuples_str, optional_str
@@ -72,6 +90,61 @@ class LigandSequence:
         )
 
 
+@dataclass
+class BoltzMetrics:
+    """Summary confidence metrics returned by Boltz."""
+
+    confidence_score: float
+    ptm: float
+    iptm: float
+    ligand_iptm: float
+    protein_iptm: float
+    complex_plddt: float
+    complex_iplddt: float
+    complex_pde: float
+    complex_ipde: float
+
+
+@dataclass
+class BoltzAffinities:
+    """Optional affinity predictions returned for binding runs."""
+
+    affinity_pred_value: float
+    affinity_probability_binary: float
+    affinity_pred_value1: float
+    affinity_probability_binary1: float
+    affinity_pred_value2: float
+    affinity_probability_binary2: float
+
+
+@dataclass
+class BoltzResult:
+    """
+    Parsed Boltz fold result.
+
+    Use `fetch_outputs(boltz(..., collect=True))` to return these dataclasses
+    in memory, or `save_outputs(boltz(..., collect=True))` to save the model
+    and JSON outputs into the workspace.
+    """
+
+    model: TRC
+    metrics: BoltzMetrics
+    plddt: npt.NDArray[np.float32]
+    pae: npt.NDArray[np.float32]
+    affinities: BoltzAffinities | None = None
+
+
+@dataclass
+class BoltzSavedResult:
+    """Workspace paths for a saved Boltz result bundle."""
+
+    model: tuple[Path, Path, Path]
+    metrics: Path
+    plddt: Path
+    pae: Path
+    affinities: Path | None = None
+
+
 def boltz(
     sequences: list[ProteinSequence | LigandSequence],
     recycling_steps: int | None = None,
@@ -94,6 +167,14 @@ def boltz(
     run_opts: RunOpts = RunOpts(),
     collect=False,
 ):
+    """
+    Run Boltz on protein and ligand inputs.
+
+    The collected result is a list of Boltz output bundles, each containing a
+    model TRC, confidence metrics, confidence arrays, and optional affinity
+    metrics.
+    """
+
     # If necessary, upload template TRC inputs
     has_template = template_path is not None
     if template_path is not None:
@@ -190,3 +271,108 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def _decode_float_array(output: dict[str, Any]) -> npt.NDArray[np.float32]:
+    raw = base64.b64decode(output["data"])
+    shape = tuple(int(dim) for dim in output["shape"])
+    return np.frombuffer(raw, dtype=np.dtype("<f4")).reshape(shape)
+
+
+def _fetch_trc_output(model_obj: Any) -> TRC:
+    topology_obj, residues_obj, chains_obj = model_obj
+
+    def load_component(output_obj: dict[str, Any]) -> Any:
+        output = fetch_object(output_obj["path"])
+        if isinstance(output, bytes):
+            output = output.decode()
+        return json.loads(output)
+
+    return from_json(
+        {
+            "topology": load_component(topology_obj),
+            "residues": load_component(residues_obj),
+            "chains": load_component(chains_obj),
+        }
+    )
+
+
+def _fetch_output(res_i: Any) -> BoltzResult:
+    model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
+    plddt = fetch_object(plddt_obj["path"])
+    if isinstance(plddt, bytes):
+        plddt = plddt.decode()
+    pae = fetch_object(pae_obj["path"])
+    if isinstance(pae, bytes):
+        pae = pae.decode()
+
+    return BoltzResult(
+        model=_fetch_trc_output(model_obj),
+        metrics=BoltzMetrics(**metrics),
+        plddt=_decode_float_array(json.loads(plddt)),
+        pae=_decode_float_array(json.loads(pae)),
+        affinities=BoltzAffinities(**affinities) if affinities is not None else None,
+    )
+
+
+def _save_output(res_i: Any) -> BoltzSavedResult:
+    model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
+    topology_obj, residues_obj, chains_obj = model_obj
+
+    return BoltzSavedResult(
+        model=(
+            save_object(topology_obj["path"]),
+            save_object(residues_obj["path"]),
+            save_object(chains_obj["path"]),
+        ),
+        metrics=save_json(
+            metrics,
+            name=_json_content_name("boltz_metrics", metrics),
+        ),
+        plddt=save_object(plddt_obj["path"]),
+        pae=save_object(pae_obj["path"]),
+        affinities=(
+            save_json(
+                affinities,
+                name=_json_content_name("boltz_affinities", affinities),
+            )
+            if affinities is not None
+            else None
+        ),
+    )
+
+
+def _map_outputs(
+    res: list[Any] | tuple[Any, ...] | str | RunError,
+    *,
+    on_success,
+):
+    if isinstance(res, (str, RunError)):
+        return res
+
+    if isinstance(res, (list, tuple)):
+        return [on_success(res_i) for res_i in res]
+
+    return RunError(
+        f"Error: boltz output helper received unexpected format: {type(res)}"
+    )
+
+
+def fetch_outputs(
+    res: list[Any] | tuple[Any, ...] | str | RunError,
+) -> list[BoltzResult] | str | RunError:
+    """
+    Fetch Boltz outputs into parsed Python objects in memory.
+    """
+
+    return _map_outputs(res, on_success=_fetch_output)
+
+
+def save_outputs(
+    res: list[Any] | tuple[Any, ...] | str | RunError,
+) -> list[BoltzSavedResult] | str | RunError:
+    """
+    Save Boltz outputs into the workspace.
+    """
+
+    return _map_outputs(res, on_success=_save_output)
