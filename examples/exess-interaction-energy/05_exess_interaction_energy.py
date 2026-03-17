@@ -67,15 +67,17 @@ print("=" * 60)
 print("Example 2: End-to-end interaction energy from PDB")
 print("=" * 60)
 
-from rush.prepare_complex import prepare_complex
+from rush.prepare_complex import fetch_outputs, prepare_complex
 
 # Step 1: Prepare the system
-trc = prepare_complex(
-    DATA_DIR / "1hsg.pdb",
-    ligand_names=["MK1", "HOH"],
-    debump=None,
-    run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
-    collect=True,
+trc = fetch_outputs(
+    prepare_complex(
+        DATA_DIR / "1hsg.pdb",
+        ligand_names=["MK1", "HOH"],
+        debump=None,
+        run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
+        collect=True,
+    )
 )
 
 # Print the charged amino acids

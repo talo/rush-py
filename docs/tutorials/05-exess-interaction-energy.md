@@ -90,13 +90,15 @@ Don't have a TRC file? Start from a PDB. Rush's **Prepare Complex** module handl
 import json
 from pathlib import Path
 from rush.client import RunOpts
-from rush.prepare_complex import prepare_complex
+from rush.prepare_complex import fetch_outputs, prepare_complex
 
-trc = prepare_complex(
-    Path("1hsg.pdb"),
-    ligand_names=["MK1", "HOH"],  # Residue names for ligands/waters
-    run_opts=RunOpts(name="Tutorial: Prepare Complex"),
-    collect=True,
+trc = fetch_outputs(
+    prepare_complex(
+        Path("1hsg.pdb"),
+        ligand_names=["MK1", "HOH"],  # Residue names for ligands/waters
+        run_opts=RunOpts(name="Tutorial: Prepare Complex"),
+        collect=True,
+    )
 )
 
 # Inspect what Prepare Complex determined about charges

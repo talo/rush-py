@@ -1,10 +1,10 @@
 import math
 from pathlib import Path
 
-from rush.client import RunOpts, save_object, set_opts
-from rush.convert import from_json, from_pdb
+from rush.client import RunOpts, set_opts
+from rush.convert import from_pdb
 from rush.mol import Element
-from rush.prepare_protein import prepare_protein
+from rush.prepare_protein import fetch_outputs, prepare_protein
 
 
 def _as_trc(trc):
@@ -122,12 +122,8 @@ def test_prepare_protein():
     trc_unprepped = _as_trc(from_pdb((data_dir / "3fln_raw.pdb").read_text()))
 
     # Parse into TRC object
-    trc_debumped = _as_trc(
-        from_json(tuple(save_object(object["path"]) for object in res_debumped))
-    )
-    trc_nodebump = _as_trc(
-        from_json(tuple(save_object(object["path"]) for object in res_nodebump))
-    )
+    trc_debumped = fetch_outputs(res_debumped)
+    trc_nodebump = fetch_outputs(res_nodebump)
 
     rmsd_nodebump = _rmsd_for_matching_atoms(trc_unprepped, trc_nodebump)
     rmsd_debumped = _rmsd_for_matching_atoms(trc_unprepped, trc_debumped)

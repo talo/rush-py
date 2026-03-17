@@ -17,6 +17,7 @@ FAST_TEST_PREFIXES = (
     "test_exess_output_helpers",
     "test_nnxtb_output_helpers",
     "test_auto3d_output_helpers",
+    "test_prepare_output_helpers",
 )
 
 # Threshold: if any target has more than this many queued+admitted jobs, skip slow tests.

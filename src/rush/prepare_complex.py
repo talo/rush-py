@@ -20,6 +20,8 @@ from rush.client import (
     RunSpec,
 )
 from rush.convert import _single_trc
+from rush.prepare_protein import _upload_trc
+from rush.prepare_protein import fetch_outputs as fetch_prepare_protein_outputs
 from rush.prepare_protein import prepare_protein as run_prepare_protein
 from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
 
@@ -133,7 +135,7 @@ def prepare_complex(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect=False,
-) -> TRC | str | RunError:
+) -> list[dict[str, object]] | tuple[dict[str, object], ...] | str | RunError:
     """
     Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.
 
@@ -150,7 +152,7 @@ def prepare_complex(
         collect: If True, collects results and returns merged TRC. If False, returns run ID.
 
     Returns:
-        - If collect=True: Merged TRC containing prepared protein and ligand
+        - If collect=True: Uploaded T/R/C object-store triplet for the merged complex
         - If collect=False: Run ID string for the prepare-protein job
         - RunError if preparation fails
     """
@@ -182,17 +184,33 @@ def prepare_complex(
         run_opts,
         collect=collect,
     )
-    trc_p_output = save_prepare_protein_outputs(res)
-    if isinstance(trc_p_output, RunError):
-        return trc_p_output
+    trc_p = fetch_prepare_protein_outputs(res)
+    if isinstance(trc_p, RunError):
+        return trc_p
 
     # If collect=False, we get a run ID (string) back - return it as-is
-    if isinstance(trc_p_output, str):
-        return trc_p_output
-
-    # Otherwise, collect=True gave us Paths to process
-    trc_p = from_json(trc_p_output)
-    trc_p = _single_trc(trc_p, "protein")
+    if isinstance(trc_p, str):
+        return trc_p
 
     trc_c = merge_trcs(trc_p, trc_l)
-    return trc_c
+    return list(_upload_trc(trc_c))
+
+
+def fetch_outputs(
+    res: list[dict[str, object]] | tuple[dict[str, object], ...] | str | RunError,
+) -> TRC | str | RunError:
+    """
+    Fetch prepare-complex outputs into an in-memory TRC.
+    """
+
+    return fetch_prepare_protein_outputs(res)
+
+
+def save_outputs(
+    res: list[dict[str, object]] | tuple[dict[str, object], ...] | str | RunError,
+) -> tuple[Path, Path, Path] | str | RunError:
+    """
+    Save prepare-complex outputs into the workspace.
+    """
+
+    return save_prepare_protein_outputs(res)

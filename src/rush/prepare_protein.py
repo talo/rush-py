@@ -18,6 +18,7 @@ from typing import Any, Literal
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    fetch_object,
     RunError,
     RunOpts,
     RunSpec,
@@ -28,7 +29,32 @@ from .client import (
     upload_object,
 )
 from .convert import _single_trc, from_json, from_pdb
+from .mol import TRC
 from .utils import optional_str
+
+
+def _upload_trc(
+    trc: TRC,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    r_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+    c_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+
+    json.dump(trc.topology.to_json(), t_f)
+    json.dump(trc.residues.to_json(), r_f)
+    json.dump(trc.chains.to_json(), c_f)
+
+    # Important: Close temp files before uploading. Windows locks open files,
+    # causing PermissionError if upload_object() tries to access them while open.
+    t_f.close()
+    r_f.close()
+    c_f.close()
+
+    return (
+        upload_object(t_f.name),
+        upload_object(r_f.name),
+        upload_object(c_f.name),
+    )
 
 
 def prepare_protein(
@@ -56,23 +82,7 @@ def prepare_protein(
         else:
             trc = from_json(json.load(f))
     trc = _single_trc(trc, input_path)
-    t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    r_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    c_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-
-    json.dump(trc.topology.to_json(), t_f)
-    json.dump(trc.residues.to_json(), r_f)
-    json.dump(trc.chains.to_json(), c_f)
-
-    # Important: Close temp files before uploading. Windows locks open files,
-    # causing PermissionError if upload_object() tries to access them while open.
-    t_f.close()
-    r_f.close()
-    c_f.close()
-
-    topology_vobj = upload_object(t_f.name)
-    residues_vobj = upload_object(r_f.name)
-    chains_vobj = upload_object(c_f.name)
+    topology_vobj, residues_vobj, chains_vobj = _upload_trc(trc)
 
     # Run rex
     rex = Template("""let
@@ -123,6 +133,44 @@ in
                 print(f"Error: {error['message']}", file=sys.stderr)
 
 
+def _unwrap_output_triplet(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]] | str | RunError:
+    if isinstance(res, RunError):
+        return res
+
+    if isinstance(res, str):
+        return res
+
+    if isinstance(res, (list, tuple)) and len(res) >= 3:
+        return (res[0], res[1], res[2])
+
+    return RunError(
+        f"Error: prepare_protein output helper received unexpected format: {type(res)}"
+    )
+
+
+def fetch_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> TRC | str | RunError:
+    """
+    Fetch prepare-protein outputs into an in-memory TRC.
+    """
+
+    outputs = _unwrap_output_triplet(res)
+    if isinstance(outputs, (str, RunError)):
+        return outputs
+
+    topology_obj, residues_obj, chains_obj = outputs
+    return from_json(
+        {
+            "topology": json.loads(fetch_object(topology_obj["path"])),
+            "residues": json.loads(fetch_object(residues_obj["path"])),
+            "chains": json.loads(fetch_object(chains_obj["path"])),
+        }
+    )
+
+
 def save_outputs(
     res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
 ) -> tuple[Path, Path, Path] | str | RunError:
@@ -150,23 +198,13 @@ def save_outputs(
         - RunError if input is an error
     """
 
-    # Handle error case
-    if isinstance(res, RunError):
-        return res
+    outputs = _unwrap_output_triplet(res)
+    if isinstance(outputs, (str, RunError)):
+        return outputs
 
-    # Handle run ID string (collect=False case)
-    if isinstance(res, str):
-        return res
-
-    # Handle list/tuple of VirtualObject dicts from collect_run()
-    if isinstance(res, (list, tuple)) and len(res) >= 3:
-        return (
-            save_object(res[0]["path"]),
-            save_object(res[1]["path"]),
-            save_object(res[2]["path"]),
-        )
-
-    # Fallback: return as-is (for debugging or unexpected formats)
-    return RunError(
-        f"Error: prepare_protein save_outputs received unexpected format: {type(res)}"
+    topology_obj, residues_obj, chains_obj = outputs
+    return (
+        save_object(topology_obj["path"]),
+        save_object(residues_obj["path"]),
+        save_object(chains_obj["path"]),
     )

@@ -1,0 +1,107 @@
+import json
+from pathlib import Path
+
+from rush import TRC, from_json
+from rush.client import RunError
+from rush.prepare_complex import fetch_outputs as fetch_prepare_complex_outputs
+from rush.prepare_complex import save_outputs as save_prepare_complex_outputs
+from rush.prepare_protein import fetch_outputs as fetch_prepare_protein_outputs
+from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
+
+
+def _sample_trc_dict() -> dict:
+    data_path = Path(__file__).parent / "data" / "1hsg_MK1_trc.json"
+    with data_path.open() as f:
+        data = json.load(f)
+    return data[0] if isinstance(data, list) else data
+
+
+def test_prepare_protein_fetch_outputs(monkeypatch):
+    trc_dict = _sample_trc_dict()
+
+    monkeypatch.setattr(
+        "rush.prepare_protein.fetch_object",
+        lambda path: json.dumps(
+            {
+                "top": trc_dict["topology"],
+                "res": trc_dict["residues"],
+                "chains": trc_dict["chains"],
+            }[path]
+        ).encode(),
+    )
+
+    result = fetch_prepare_protein_outputs(
+        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+    )
+
+    assert isinstance(result, TRC)
+    assert result.topology.symbols
+    assert result.residues.residues
+    assert result.chains.chains
+
+
+def test_prepare_protein_save_outputs(monkeypatch):
+    monkeypatch.setattr(
+        "rush.prepare_protein.save_object",
+        lambda path: Path(f"/tmp/{path}.json"),
+    )
+
+    result = save_prepare_protein_outputs(
+        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+    )
+
+    assert result == (
+        Path("/tmp/top.json"),
+        Path("/tmp/res.json"),
+        Path("/tmp/chains.json"),
+    )
+
+
+def test_prepare_complex_fetch_outputs(monkeypatch):
+    trc_dict = _sample_trc_dict()
+
+    monkeypatch.setattr(
+        "rush.prepare_complex.fetch_prepare_protein_outputs",
+        lambda res: from_json(trc_dict),
+    )
+
+    result = fetch_prepare_complex_outputs(
+        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+    )
+
+    assert isinstance(result, TRC)
+    assert result.topology.symbols
+
+
+def test_prepare_complex_save_outputs(monkeypatch):
+    monkeypatch.setattr(
+        "rush.prepare_complex.save_prepare_protein_outputs",
+        lambda res: (
+            Path("/tmp/top.json"),
+            Path("/tmp/res.json"),
+            Path("/tmp/chains.json"),
+        ),
+    )
+
+    result = save_prepare_complex_outputs(
+        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+    )
+
+    assert result == (
+        Path("/tmp/top.json"),
+        Path("/tmp/res.json"),
+        Path("/tmp/chains.json"),
+    )
+
+
+def test_prepare_output_helpers_passthrough_errors_and_run_ids():
+    err = RunError("Error: prepare failed")
+
+    assert fetch_prepare_protein_outputs("run-id") == "run-id"
+    assert save_prepare_protein_outputs("run-id") == "run-id"
+    assert fetch_prepare_complex_outputs("run-id") == "run-id"
+    assert save_prepare_complex_outputs("run-id") == "run-id"
+    assert fetch_prepare_protein_outputs(err) is err
+    assert save_prepare_protein_outputs(err) is err
+    assert fetch_prepare_complex_outputs(err) is err
+    assert save_prepare_complex_outputs(err) is err
