@@ -12,6 +12,7 @@ Prerequisites:
     - Set RUSH_TOKEN and RUSH_PROJECT environment variables
     - Input file: 1kuw_t.json (provided in data/)
 """
+
 from pathlib import Path
 
 from rush.client import RunError, RunOpts

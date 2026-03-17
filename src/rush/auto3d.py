@@ -1,6 +1,7 @@
 import json
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from string import Template
 from typing import Iterator
 
@@ -15,6 +16,8 @@ from rush.client import (
     _submit_rex,
     collect_run,
     fetch_object,
+    save_json,
+    save_object,
 )
 from rush.utils import bool_to_str, float_to_str
 
@@ -31,6 +34,12 @@ class Auto3DStats:
 class Auto3DResult:
     conformer: TRC
     stats: Auto3DStats
+
+
+@dataclass
+class Auto3DSavedResult:
+    conformer: tuple[Path, Path, Path]
+    stats: Path
 
 
 def auto3d(
@@ -121,6 +130,28 @@ in
                 print(f"  {error['message']}", file=sys.stderr)
 
 
+def _map_outputs(
+    res,
+    *,
+    on_success,
+):
+    if isinstance(res, RunError):
+        return res
+
+    if isinstance(res, str):
+        return res
+
+    if isinstance(res, list):
+        return [
+            RunError(res_i) if isinstance(res_i, str) else on_success(res_i)
+            for res_i in res
+        ]
+
+    return RunError(
+        f"Error: auto3d output helper received unexpected format: {type(res)}"
+    )
+
+
 def fetch_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunError:
     """
     Download output files from an auto3d run.
@@ -148,40 +179,49 @@ def fetch_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunErr
         - RunError if input is an error
     """
 
-    # Handle error case
-    if isinstance(res, RunError):
-        return res
+    def to_auto3dresult(res_i) -> Iterator[Auto3DResult]:
+        for trc_obj, stats in res_i:
+            trc_dict = {
+                "topology": json.loads(fetch_object(trc_obj[0]["path"])),
+                "residues": json.loads(fetch_object(trc_obj[1]["path"])),
+                "chains": json.loads(fetch_object(trc_obj[2]["path"])),
+            }
+            yield Auto3DResult(
+                from_json(trc_dict),
+                Auto3DStats(
+                    stats["f_max"],
+                    stats["converged"],
+                    stats["e_rel_kcal_mol"],
+                    stats["e_tot_hartrees"],
+                ),
+            )
 
-    # Handle run ID string (collect=False case)
-    if isinstance(res, str):
-        return res
+    return _map_outputs(res, on_success=to_auto3dresult)
 
-    # Handle run output
-    if isinstance(res, list):
 
-        def to_auto3dresult(res_i) -> Iterator[Auto3DResult]:
-            for trc_obj, stats in res_i:
-                trc_dict = {
-                    "topology": json.loads(fetch_object(trc_obj[0]["path"])),
-                    "residues": json.loads(fetch_object(trc_obj[1]["path"])),
-                    "chains": json.loads(fetch_object(trc_obj[2]["path"])),
-                }
-                yield Auto3DResult(
-                    from_json(trc_dict),
-                    Auto3DStats(
-                        stats["f_max"],
-                        stats["converged"],
-                        stats["e_rel_kcal_mol"],
-                        stats["e_tot_hartrees"],
-                    ),
-                )
+def save_outputs(
+    res,
+) -> list[Iterator[Auto3DSavedResult] | RunError] | str | RunError:
+    """
+    Save Auto3D outputs into the workspace.
 
-        return [
-            RunError(res_i) if isinstance(res_i, str) else to_auto3dresult(res_i)
-            for res_i in res
-        ]
+    Each successful input yields an iterator of conformers. Every conformer is
+    saved as three TRC component files `(topology, residues, chains)` plus a
+    JSON file containing the associated Auto3DStats.
+    """
 
-    # Fallback: return as-is (for debugging or unexpected formats)
-    return RunError(
-        f"Error: prepare_protein save_outputs received unexpected format: {type(res)}"
-    )
+    def save_auto3dresult(res_i) -> Iterator[Auto3DSavedResult]:
+        for trc_obj, stats in res_i:
+            yield Auto3DSavedResult(
+                conformer=(
+                    save_object(trc_obj[0]["path"]),
+                    save_object(trc_obj[1]["path"]),
+                    save_object(trc_obj[2]["path"]),
+                ),
+                stats=save_json(
+                    stats,
+                    name=f"{trc_obj[0]['path']}_stats",
+                ),
+            )
+
+    return _map_outputs(res, on_success=save_auto3dresult)

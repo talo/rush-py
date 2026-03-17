@@ -10,6 +10,7 @@
 - Updated EXESS docs, examples, and tests to use the new fetch/save naming
 - NN-xTB now uses `fetch_outputs()` for in-memory `NnxtbResult` objects and `save_outputs()` for saving raw JSON outputs
 - Updated NN-xTB docs, examples, and tests to use `NnxtbResult` and the new fetch/save helpers
+- Auto3D now provides both `fetch_outputs()` for in-memory results and `save_outputs()` for workspace files, with shared output dispatch logic
 
 ## 6.10.2
 
