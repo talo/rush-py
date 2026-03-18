@@ -130,4 +130,6 @@ def save_outputs(
     if isinstance(outputs, (str, RunError)):
         return outputs
 
-    return [save_object(output_obj["path"]) for output_obj in outputs]
+    return [
+        save_object(output_obj["path"], type="bin", ext="a3m") for output_obj in outputs
+    ]

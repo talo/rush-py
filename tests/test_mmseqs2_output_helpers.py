@@ -19,10 +19,10 @@ def test_fetch_outputs_decodes_a3m_objects(monkeypatch):
 def test_save_outputs_saves_a3m_objects(monkeypatch):
     monkeypatch.setattr(
         "rush.mmseqs2.save_object",
-        lambda path: Path(f"/tmp/{path}"),
+        lambda path, type="bin", ext="a3m": Path(f"/tmp/{path}.{ext}"),
     )
 
-    output = save_outputs([{"path": "0.a3m"}, {"path": "1.a3m"}])
+    output = save_outputs([{"path": "0"}, {"path": "1"}])
 
     assert output == [Path("/tmp/0.a3m"), Path("/tmp/1.a3m")]
 
