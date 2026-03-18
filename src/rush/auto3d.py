@@ -3,7 +3,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Iterator
+from typing import Any, Iterator
 
 from gql.transport.exceptions import TransportQueryError
 
@@ -132,18 +132,16 @@ in
 
 
 def _map_outputs(
-    res,
+    res: list[Any] | tuple[Any, ...] | str | RunError,
     *,
     on_success,
 ):
-    if isinstance(res, RunError):
+    if isinstance(res, (str, RunError)):
         return res
 
-    if isinstance(res, str):
-        return res
-
-    if isinstance(res, list):
+    if isinstance(res, (list, tuple)):
         return [
+            # Handle per-conformer error strings
             RunError(res_i) if isinstance(res_i, str) else on_success(res_i)
             for res_i in res
         ]
@@ -180,7 +178,7 @@ def fetch_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunErr
         - RunError if input is an error
     """
 
-    def to_auto3dresult(res_i) -> Iterator[Auto3DResult]:
+    def fetch_output(res_i) -> Iterator[Auto3DResult]:
         for trc_obj, stats in res_i:
             trc_dict = {
                 "topology": json.loads(fetch_object(trc_obj[0]["path"])),
@@ -197,7 +195,7 @@ def fetch_outputs(res) -> list[Iterator[Auto3DResult] | RunError] | str | RunErr
                 ),
             )
 
-    return _map_outputs(res, on_success=to_auto3dresult)
+    return _map_outputs(res, on_success=fetch_output)
 
 
 def save_outputs(
@@ -211,7 +209,7 @@ def save_outputs(
     JSON file containing the associated Auto3DStats.
     """
 
-    def save_auto3dresult(res_i) -> Iterator[Auto3DSavedResult]:
+    def save_output(res_i) -> Iterator[Auto3DSavedResult]:
         for trc_obj, stats in res_i:
             yield Auto3DSavedResult(
                 conformer=(
@@ -225,4 +223,4 @@ def save_outputs(
                 ),
             )
 
-    return _map_outputs(res, on_success=save_auto3dresult)
+    return _map_outputs(res, on_success=save_output)

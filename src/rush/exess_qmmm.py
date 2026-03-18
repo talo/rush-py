@@ -26,17 +26,16 @@ from typing import Any
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    fetch_object,
     RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
     save_object,
     upload_object,
 )
-from .utils import optional_str
 from .exess import (
     AuxBasisT,
     BasisT,
@@ -48,6 +47,7 @@ from .exess import (
     System,
     _KSDFTDefault,
 )
+from .utils import optional_str
 
 
 @dataclass

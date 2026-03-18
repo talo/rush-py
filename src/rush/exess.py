@@ -1161,7 +1161,7 @@ def exess_energy(
     )
 
 
-def _split_result_outputs(
+def _unwrap_outputs(
     res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
 ) -> tuple[dict[str, Any], dict[str, Any] | None] | RunError:
     if isinstance(res, RunError):
@@ -1176,7 +1176,7 @@ def _split_result_outputs(
     return (res[0], res[1] if len(res) == 2 else None)
 
 
-def _resolve_export_object(
+def _resolve_exports_object(
     exports_obj: dict[str, Any] | None,
 ) -> tuple[Literal["Json", "Hdf5"], dict[str, Any]] | None:
     if exports_obj is None:
@@ -1207,25 +1207,25 @@ def fetch_outputs(
     - HDF5 exports are returned as extracted file bytes by default
     - HDF5 exports are returned as raw tar.zst bytes when extract=False
     """
-    split = _split_result_outputs(res)
-    if isinstance(split, RunError):
-        return split
+    outputs = _unwrap_outputs(res)
+    if isinstance(outputs, RunError):
+        return outputs
 
-    output_obj, exports_obj = split
+    output_obj, exports_obj = outputs
 
     calc = ExessCalculation.from_dict(
         json.loads(fetch_object(output_obj["path"]).decode())
     )
 
     exports: dict[str, Any] | bytes | None = None
-    export_ref = _resolve_export_object(exports_obj)
-    if export_ref is not None:
-        export_kind, export_obj = export_ref
+    exports_ref = _resolve_exports_object(exports_obj)
+    if exports_ref is not None:
+        export_kind, exports_obj = exports_ref
         if export_kind == "Json":
-            exports = json.loads(fetch_object(export_obj["path"]).decode())
+            exports = json.loads(fetch_object(exports_obj["path"]).decode())
         elif export_kind == "Hdf5":
             try:
-                exports = fetch_object(export_obj["path"], extract=extract)
+                exports = fetch_object(exports_obj["path"], extract=extract)
             except ValueError as e:
                 if extract and "only directories" in str(e):
                     exports = None
@@ -1263,49 +1263,39 @@ def save_outputs(
         - (json_path, None): If HDF5 extraction fails or no HDF5 output
         - RunError: If the input res is an error
     """
-    split = _split_result_outputs(res)
-    if isinstance(split, RunError):
-        return split
+    outputs = _unwrap_outputs(res)
+    if isinstance(outputs, RunError):
+        return outputs
 
-    output_obj, exports_obj = split
-    json_path = save_object(output_obj["path"])
-    export_ref = _resolve_export_object(exports_obj)
+    output_obj, exports_obj = outputs
+    calc_path = save_object(output_obj["path"])
+    exports_ref = _resolve_exports_object(exports_obj)
 
-    if export_ref is None:
-        return (json_path, None)
+    if exports_ref is None:
+        return (calc_path, None)
 
-    export_kind, export_obj = export_ref
-    if export_kind == "Json":
-        return (json_path, save_object(export_obj["path"]))
-    elif export_kind == "Hdf5":
-        hdf5_path = None
+    exports_kind, exports_obj = exports_ref
+    if exports_kind == "Json":
+        return (calc_path, save_object(exports_obj["path"]))
+    elif exports_kind == "Hdf5":
+        exports_path = None
         try:
-            hdf5_path = save_object(
-                export_obj["path"],
+            exports_path = save_object(
+                exports_obj["path"],
                 ext="hdf5" if extract else "tar.zst",
                 extract=extract,
             )
         except ValueError as e:
             if "only directories" in str(e):
-                # No actual files in HDF5 tar, return None for hdf5_path
-                hdf5_path = None
+                # No actual files in HDF5 tar, return None for exports_path
+                exports_path = None
             else:
                 raise  # Re-raise other extraction errors
-        return (json_path, hdf5_path)
+        return (calc_path, exports_path)
 
-    raise ValueError(f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'.")
-
-
-def save_energy_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-    extract=True,
-) -> tuple[Path, Path | None] | RunError:
-    warnings.warn(
-        "save_energy_outputs() is deprecated; use save_outputs() instead.",
-        DeprecationWarning,
-        stacklevel=2,
+    raise ValueError(
+        f"Unknown export kind {exports_kind!r}. Expected 'Json' or 'Hdf5'."
     )
-    return save_outputs(res, extract=extract)
 
 
 def exess_interaction_energy(

@@ -297,51 +297,6 @@ def _fetch_trc_output(model_obj: Any) -> TRC:
     )
 
 
-def _fetch_output(res_i: Any) -> BoltzResult:
-    model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
-    plddt = fetch_object(plddt_obj["path"])
-    if isinstance(plddt, bytes):
-        plddt = plddt.decode()
-    pae = fetch_object(pae_obj["path"])
-    if isinstance(pae, bytes):
-        pae = pae.decode()
-
-    return BoltzResult(
-        model=_fetch_trc_output(model_obj),
-        metrics=BoltzMetrics(**metrics),
-        plddt=_decode_float_array(json.loads(plddt)),
-        pae=_decode_float_array(json.loads(pae)),
-        affinities=BoltzAffinities(**affinities) if affinities is not None else None,
-    )
-
-
-def _save_output(res_i: Any) -> BoltzSavedResult:
-    model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
-    topology_obj, residues_obj, chains_obj = model_obj
-
-    return BoltzSavedResult(
-        model=(
-            save_object(topology_obj["path"]),
-            save_object(residues_obj["path"]),
-            save_object(chains_obj["path"]),
-        ),
-        metrics=save_json(
-            metrics,
-            name=_json_content_name("boltz_metrics", metrics),
-        ),
-        plddt=save_object(plddt_obj["path"]),
-        pae=save_object(pae_obj["path"]),
-        affinities=(
-            save_json(
-                affinities,
-                name=_json_content_name("boltz_affinities", affinities),
-            )
-            if affinities is not None
-            else None
-        ),
-    )
-
-
 def _map_outputs(
     res: list[Any] | tuple[Any, ...] | str | RunError,
     *,
@@ -365,7 +320,26 @@ def fetch_outputs(
     Fetch Boltz outputs into parsed Python objects in memory.
     """
 
-    return _map_outputs(res, on_success=_fetch_output)
+    def fetch_output(res_i: Any) -> BoltzResult:
+        model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
+        plddt = fetch_object(plddt_obj["path"])
+        if isinstance(plddt, bytes):
+            plddt = plddt.decode()
+        pae = fetch_object(pae_obj["path"])
+        if isinstance(pae, bytes):
+            pae = pae.decode()
+
+        return BoltzResult(
+            model=_fetch_trc_output(model_obj),
+            metrics=BoltzMetrics(**metrics),
+            plddt=_decode_float_array(json.loads(plddt)),
+            pae=_decode_float_array(json.loads(pae)),
+            affinities=BoltzAffinities(**affinities)
+            if affinities is not None
+            else None,
+        )
+
+    return _map_outputs(res, on_success=fetch_output)
 
 
 def save_outputs(
@@ -375,4 +349,30 @@ def save_outputs(
     Save Boltz outputs into the workspace.
     """
 
-    return _map_outputs(res, on_success=_save_output)
+    def save_output(res_i: Any) -> BoltzSavedResult:
+        model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
+        topology_obj, residues_obj, chains_obj = model_obj
+
+        return BoltzSavedResult(
+            model=(
+                save_object(topology_obj["path"]),
+                save_object(residues_obj["path"]),
+                save_object(chains_obj["path"]),
+            ),
+            metrics=save_json(
+                metrics,
+                name=_json_content_name("boltz_metrics", metrics),
+            ),
+            plddt=save_object(plddt_obj["path"]),
+            pae=save_object(pae_obj["path"]),
+            affinities=(
+                save_json(
+                    affinities,
+                    name=_json_content_name("boltz_affinities", affinities),
+                )
+                if affinities is not None
+                else None
+            ),
+        )
+
+    return _map_outputs(res, on_success=save_output)

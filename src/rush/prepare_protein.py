@@ -18,13 +18,13 @@ from typing import Any, Literal
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    fetch_object,
     RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
     save_object,
     upload_object,
 )
@@ -133,16 +133,13 @@ in
                 print(f"Error: {error['message']}", file=sys.stderr)
 
 
-def _unwrap_output_triplet(
+def _unwrap_outputs(
     res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]] | str | RunError:
-    if isinstance(res, RunError):
+    if isinstance(res, (str, RunError)):
         return res
 
-    if isinstance(res, str):
-        return res
-
-    if isinstance(res, (list, tuple)) and len(res) >= 3:
+    if isinstance(res, (list, tuple)) and len(res) == 3:
         return (res[0], res[1], res[2])
 
     return RunError(
@@ -157,7 +154,7 @@ def fetch_outputs(
     Fetch prepare-protein outputs into an in-memory TRC.
     """
 
-    outputs = _unwrap_output_triplet(res)
+    outputs = _unwrap_outputs(res)
     if isinstance(outputs, (str, RunError)):
         return outputs
 
@@ -198,7 +195,7 @@ def save_outputs(
         - RunError if input is an error
     """
 
-    outputs = _unwrap_output_triplet(res)
+    outputs = _unwrap_outputs(res)
     if isinstance(outputs, (str, RunError)):
         return outputs
 

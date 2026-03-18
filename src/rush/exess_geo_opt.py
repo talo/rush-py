@@ -24,18 +24,16 @@ from typing import Any, Literal
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    fetch_object,
     RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
     save_object,
     upload_object,
 )
-from .mol import Topology
-from .utils import optional_str
 from .exess import (
     AuxBasisT,
     BasisT,
@@ -46,6 +44,8 @@ from .exess import (
     System,
     _KSDFTDefault,
 )
+from .mol import Topology
+from .utils import optional_str
 
 
 @dataclass
@@ -397,7 +397,7 @@ def _unwrap_outputs(
     if isinstance(res, (str, RunError)):
         return res
 
-    if isinstance(res, (list, tuple)) and len(res) >= 2:
+    if isinstance(res, (list, tuple)) and len(res) == 2:
         return (res[0], res[1])
 
     return RunError(

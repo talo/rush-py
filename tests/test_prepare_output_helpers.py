@@ -61,7 +61,7 @@ def test_prepare_complex_fetch_outputs(monkeypatch):
     trc_dict = _sample_trc_dict()
 
     monkeypatch.setattr(
-        "rush.prepare_complex.fetch_prepare_protein_outputs",
+        "rush.prepare_complex.fetch_trc_output",
         lambda res: from_json(trc_dict),
     )
 
@@ -75,7 +75,7 @@ def test_prepare_complex_fetch_outputs(monkeypatch):
 
 def test_prepare_complex_save_outputs(monkeypatch):
     monkeypatch.setattr(
-        "rush.prepare_complex.save_prepare_protein_outputs",
+        "rush.prepare_complex.save_trc_output",
         lambda res: (
             Path("/tmp/top.json"),
             Path("/tmp/res.json"),

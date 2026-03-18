@@ -21,9 +21,9 @@ from rush.client import (
 )
 from rush.convert import _single_trc
 from rush.prepare_protein import _upload_trc
-from rush.prepare_protein import fetch_outputs as fetch_prepare_protein_outputs
+from rush.prepare_protein import fetch_outputs as fetch_trc_output
 from rush.prepare_protein import prepare_protein as run_prepare_protein
-from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
+from rush.prepare_protein import save_outputs as save_trc_output
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
@@ -184,7 +184,7 @@ def prepare_complex(
         run_opts,
         collect=collect,
     )
-    trc_p = fetch_prepare_protein_outputs(res)
+    trc_p = save_trc_output(res)
     if isinstance(trc_p, RunError):
         return trc_p
 
@@ -203,7 +203,7 @@ def fetch_outputs(
     Fetch prepare-complex outputs into an in-memory TRC.
     """
 
-    return fetch_prepare_protein_outputs(res)
+    return fetch_trc_output(res)
 
 
 def save_outputs(
@@ -213,4 +213,4 @@ def save_outputs(
     Save prepare-complex outputs into the workspace.
     """
 
-    return save_prepare_protein_outputs(res)
+    return save_trc_output(res)

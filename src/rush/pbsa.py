@@ -137,7 +137,7 @@ def fetch_outputs(
 def save_outputs(
     res: list[float] | tuple[float, ...] | str | RunError,
 ) -> Path | str | RunError:
-    output = fetch_outputs(res)
+    output = _unwrap_output(res)
     if isinstance(output, (str, RunError)):
         return output
 
