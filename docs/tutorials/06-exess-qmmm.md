@@ -105,14 +105,17 @@ EXESS requires that every fragment is assigned to either QM or MM. Setting `mm_f
 The output is a JSON object containing `geometries` — a list of coordinate arrays, one per timestep. Each geometry is a flat list of floats (`[x1, y1, z1, x2, y2, z2, ...]`), matching the order of atoms in your Topology.
 
 ```python
-import json
 from itertools import batched
 from pathlib import Path
 from rush import Topology
+from rush.exess_qmmm import fetch_outputs, save_outputs
 
-out_file = save_object(out["path"])
-with open(out_file) as f:
-    geometries = json.load(f)["geometries"]
+# Save the raw JSON if you want it on disk
+saved_path = save_outputs(out)
+
+# Fetch parsed results into memory
+result = fetch_outputs(out)
+geometries = result.geometries
 
 print(f"Trajectory has {len(geometries)} frames")
 

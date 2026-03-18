@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 
-from rush.client import RunOpts, save_object, set_opts
+from rush.client import RunError, RunOpts, set_opts
+from rush.exess_qmmm import ExessQMMMResult, fetch_outputs, save_outputs
 from rush.exess_qmmm import exess_qmmm as run_exess_qmmm
 
 
@@ -25,8 +26,14 @@ def test_exess_qmmm():
         collect=True,
     )
     print(res, file=sys.stderr)
-    # Single-output results get returned direclty, not inside a list or tuple
-    save_object(res["path"])
+    fetched = fetch_outputs(res)
+    assert isinstance(fetched, ExessQMMMResult)
+    assert fetched.geometries
+
+    saved = save_outputs(res)
+    assert isinstance(saved, Path)
+
+    assert not isinstance(fetched, RunError)
 
 
 if __name__ == "__main__":

@@ -23,9 +23,9 @@ from itertools import batched
 from pathlib import Path
 
 from rush import Topology
-from rush.client import RunOpts, save_object
+from rush.client import RunError, RunOpts
 from rush.mol import Element, Fragment, Residue, Residues
-from rush.exess_qmmm import Trajectory, exess_qmmm
+from rush.exess_qmmm import Trajectory, exess_qmmm, fetch_outputs, save_outputs
 
 DATA_DIR = Path(__file__).parent / "data"
 OUTPUT_DIR = Path(__file__).parent / "qmmm-outputs"
@@ -68,11 +68,13 @@ print("=" * 60)
 print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
-out_file = save_object(out["path"])
-with open(out_file, encoding="utf-8") as f:
-    out_data = json.load(f)
+saved_path = save_outputs(out)
+assert isinstance(saved_path, Path)
+print(f"Saved file: {saved_path}")
 
-out_traj = out_data["geometries"]
+result = fetch_outputs(out)
+assert not isinstance(result, (str, RunError))
+out_traj = result.geometries
 
 # Load topology for atom info
 with open(topology_path, encoding="utf-8") as f:
@@ -397,9 +399,9 @@ print("=" * 60)
 print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
-out_file = save_object(out["path"])
-with open(out_file, encoding="utf-8") as f:
-    out_traj = json.load(f)["geometries"]
+result = fetch_outputs(out)
+assert not isinstance(result, (str, RunError))
+out_traj = result.geometries
 
 topology = Topology.from_json(molecule_t_path)
 print("Atoms at First Step")

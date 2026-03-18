@@ -2,33 +2,38 @@
 """
 EXESS QM/MM module helpers for the Rush Python client.
 
-EXESS supports simulations. It supports multiple levels of theory
-(e.g., restricted/unrestricted HF, RI-MP2, DFT), flexible basis set
-selection, and configurable QM/MM region selection.
+Run QM/MM simulations with EXESS.
 
 Quick Links
 -----------
 
 - :func:`rush.exess_qmmm.exess_qmmm`
+- :func:`rush.exess_qmmm.fetch_outputs`
+- :func:`rush.exess_qmmm.save_outputs`
 - :class:`rush.exess_qmmm.Trajectory`
 - :class:`rush.exess_qmmm.Restraints`
 - :mod:`rush.exess`
 - :mod:`rush.exess_geo_opt`
 """
 
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
+from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    fetch_object,
+    RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    save_object,
     upload_object,
 )
 from .utils import optional_str
@@ -117,6 +122,11 @@ class Restraints:
             maybe_free_fragments=optional_str(self.free_fragments),
             maybe_fix_heavy=optional_str(self.fix_heavy),
         )
+
+
+@dataclass
+class ExessQMMMResult:
+    geometries: list[list[float]]
 
 
 def exess_qmmm(
@@ -271,6 +281,40 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def fetch_outputs(
+    res: dict[str, Any] | str | RunError,
+) -> ExessQMMMResult | str | RunError:
+    """
+    Fetch EXESS QM/MM outputs into memory.
+    """
+    if isinstance(res, (str, RunError)):
+        return res
+
+    if not isinstance(res, dict) or "path" not in res:
+        return RunError(
+            f"Error: exess_qmmm output helper received unexpected format: {type(res)}"
+        )
+
+    return ExessQMMMResult(**json.loads(fetch_object(res["path"])))
+
+
+def save_outputs(
+    res: dict[str, Any] | str | RunError,
+) -> Path | str | RunError:
+    """
+    Save EXESS QM/MM outputs into the workspace.
+    """
+    if isinstance(res, (str, RunError)):
+        return res
+
+    if not isinstance(res, dict) or "path" not in res:
+        return RunError(
+            f"Error: exess_qmmm output helper received unexpected format: {type(res)}"
+        )
+
+    return save_object(res["path"])
 
 
 # TODO:

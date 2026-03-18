@@ -2,36 +2,39 @@
 """
 EXESS geometry optimization helpers for the Rush Python client.
 
-EXESS supports geometry optimization. It supports multiple levels of theory
-(e.g., restricted/unrestricted HF, RI-MP2, DFT), flexible basis set
-selection, and configurable QM/MM region selection.
+Run geometry optimization with EXESS.
 
 Quick Links
 -----------
 
 - :func:`rush.exess_geo_opt.exess_geo_opt`
-- :class:`rush.exess_geo_opt.OptimizationConvergenceCriteria`
-- :class:`rush.exess_geo_opt.OptimizationKeywords`
+- :func:`rush.exess_geo_opt.fetch_outputs`
+- :func:`rush.exess_geo_opt.save_outputs`
 - :mod:`rush.exess`
 - :mod:`rush.exess_qmmm`
 """
 
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Literal
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    fetch_object,
+    RunError,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    save_object,
     upload_object,
 )
+from .mol import Topology
 from .utils import optional_str
 from .exess import (
     AuxBasisT,
@@ -230,6 +233,18 @@ class OptimizationKeywords:
         )
 
 
+@dataclass
+class ExessGeoOptStep:
+    total_energy: float | None = None
+    max_gradient_component: float | None = None
+
+
+@dataclass
+class ExessGeoOptResult:
+    trajectory: list[Topology]
+    steps: list[ExessGeoOptStep]
+
+
 def exess_geo_opt(
     topology_path: Path | str,
     max_iters: int,
@@ -374,3 +389,55 @@ in
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+
+
+def _unwrap_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> tuple[dict[str, Any], dict[str, Any]] | str | RunError:
+    if isinstance(res, (str, RunError)):
+        return res
+
+    if isinstance(res, (list, tuple)) and len(res) >= 2:
+        return (res[0], res[1])
+
+    return RunError(
+        f"Error: exess_geo_opt output helper received unexpected format: {type(res)}"
+    )
+
+
+def fetch_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> ExessGeoOptResult | str | RunError:
+    """
+    Fetch EXESS geometry optimization outputs into memory.
+    """
+    outputs = _unwrap_outputs(res)
+    if isinstance(outputs, (str, RunError)):
+        return outputs
+
+    trajectory_obj, steps_obj = outputs
+    trajectory = [
+        Topology.from_json(topology)
+        for topology in json.loads(fetch_object(trajectory_obj["path"]))
+    ]
+    steps = [
+        ExessGeoOptStep(**step) for step in json.loads(fetch_object(steps_obj["path"]))
+    ]
+    return ExessGeoOptResult(trajectory=trajectory, steps=steps)
+
+
+def save_outputs(
+    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
+) -> tuple[Path, Path] | str | RunError:
+    """
+    Save EXESS geometry optimization outputs into the workspace.
+    """
+    outputs = _unwrap_outputs(res)
+    if isinstance(outputs, (str, RunError)):
+        return outputs
+
+    trajectory_obj, steps_obj = outputs
+    return (
+        save_object(trajectory_obj["path"]),
+        save_object(steps_obj["path"]),
+    )

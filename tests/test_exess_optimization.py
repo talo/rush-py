@@ -4,7 +4,8 @@ from pathlib import Path
 import pytest
 
 from rush import exess_geo_opt
-from rush.client import RunOpts, save_object, set_opts
+from rush.client import RunOpts, RunError, set_opts
+from rush.exess_geo_opt import ExessGeoOptResult, fetch_outputs, save_outputs
 from rush.exess_geo_opt import exess_geo_opt as run_exess_geo_opt
 
 
@@ -36,10 +37,17 @@ def test_exess_optimization():
         collect=True,
     )
     print(res, file=sys.stderr)
-    # If there's no specific `save_outputs` function,
-    # here a canonical way to save all the objects.
-    for res_i in res:
-        save_object(res_i["path"])
+    fetched = fetch_outputs(res)
+    assert isinstance(fetched, ExessGeoOptResult)
+    assert fetched.trajectory
+    assert fetched.steps
+
+    saved = save_outputs(res)
+    assert isinstance(saved, tuple)
+    for path in saved:
+        assert isinstance(path, Path)
+
+    assert not isinstance(fetched, RunError)
 
 
 if __name__ == "__main__":

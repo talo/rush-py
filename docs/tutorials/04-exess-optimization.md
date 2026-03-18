@@ -59,29 +59,29 @@ Ethene is the simplest molecule with a C=C double bond. Starting from a 90° twi
 
 The optimization returns two objects:
 1. **Trajectory** — a list of Topology objects, one per step (the geometry at each iteration)
-2. **Step info** — a list of dictionaries with `total_energy` (Hartrees) and `max_gradient_component` (Å)
+2. **Step info** — a list of parsed step records with `total_energy` (Hartrees) and `max_gradient_component` (Å)
 
 ```python
-import json
-from rush import Topology
+from rush.exess_geo_opt import fetch_outputs, save_outputs
 
-# Download both outputs
-out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
-with open(out_traj_path) as f1, open(out_info_path) as f2:
-    out_traj_raw, out_info = [json.load(f) for f in (f1, f2)]
+# Save the raw files if you want them on disk
+saved_paths = save_outputs(out)
 
-out_traj = [Topology.from_json(t) for t in out_traj_raw]
+# Fetch parsed results into memory
+result = fetch_outputs(out)
+out_traj = result.trajectory
+out_info = result.steps
 
 # How quickly did it converge?
 print(f"Converged in {len(out_traj)} steps")
 
 # Energy at start vs. end
-print(f"Initial energy: {out_info[0]['total_energy']:.8f} Eh")
-print(f"Final energy:   {out_info[-1]['total_energy']:.8f} Eh")
-print(f"Energy change:  {out_info[-1]['total_energy'] - out_info[0]['total_energy']:.8f} Eh")
+print(f"Initial energy: {out_info[0].total_energy:.8f} Eh")
+print(f"Final energy:   {out_info[-1].total_energy:.8f} Eh")
+print(f"Energy change:  {out_info[-1].total_energy - out_info[0].total_energy:.8f} Eh")
 
 # How "flat" is the potential at the end?
-print(f"Final max gradient: {out_info[-1]['max_gradient_component']:.2e} Å")
+print(f"Final max gradient: {out_info[-1].max_gradient_component:.2e} Å")
 
 # Compare atom positions
 print(f"First atom — start: {out_traj[0].geometry[:3]}")
