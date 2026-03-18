@@ -8,6 +8,7 @@ from typing import Any, Iterator
 from gql.transport.exceptions import TransportQueryError
 
 from rush import TRC, from_json
+from rush._output_types import TRCSavedResult
 from rush.client import (
     RunError,
     RunOpts,
@@ -37,9 +38,9 @@ class Auto3DResult:
     stats: Auto3DStats
 
 
-@dataclass
+@dataclass(frozen=True)
 class Auto3DSavedResult:
-    conformer: tuple[Path, Path, Path]
+    conformer: TRCSavedResult
     stats: Path
 
 
@@ -212,10 +213,10 @@ def save_outputs(
     def save_output(res_i) -> Iterator[Auto3DSavedResult]:
         for trc_obj, stats in res_i:
             yield Auto3DSavedResult(
-                conformer=(
-                    save_object(trc_obj[0]["path"]),
-                    save_object(trc_obj[1]["path"]),
-                    save_object(trc_obj[2]["path"]),
+                conformer=TRCSavedResult(
+                    topology=save_object(trc_obj[0]["path"]),
+                    residues=save_object(trc_obj[1]["path"]),
+                    chains=save_object(trc_obj[2]["path"]),
                 ),
                 stats=save_json(
                     stats,

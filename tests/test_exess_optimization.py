@@ -5,7 +5,12 @@ import pytest
 
 from rush import exess_geo_opt
 from rush.client import RunOpts, RunError, set_opts
-from rush.exess_geo_opt import ExessGeoOptResult, fetch_outputs, save_outputs
+from rush.exess_geo_opt import (
+    ExessGeoOptResult,
+    ExessGeoOptSavedResult,
+    fetch_outputs,
+    save_outputs,
+)
 from rush.exess_geo_opt import exess_geo_opt as run_exess_geo_opt
 
 
@@ -43,9 +48,9 @@ def test_exess_optimization():
     assert fetched.steps
 
     saved = save_outputs(res)
-    assert isinstance(saved, tuple)
-    for path in saved:
-        assert isinstance(path, Path)
+    assert isinstance(saved, ExessGeoOptSavedResult)
+    assert isinstance(saved.trajectory, Path)
+    assert isinstance(saved.steps, Path)
 
     assert not isinstance(fetched, RunError)
 

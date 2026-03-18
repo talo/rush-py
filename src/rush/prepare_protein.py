@@ -17,6 +17,7 @@ from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
+from ._output_types import TRCSavedResult
 from .client import (
     RunError,
     RunOpts,
@@ -170,7 +171,7 @@ def fetch_outputs(
 
 def save_outputs(
     res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> tuple[Path, Path, Path] | str | RunError:
+) -> TRCSavedResult | str | RunError:
     """
     Download output files from a prepare-protein run.
 
@@ -191,7 +192,7 @@ def save_outputs(
     Returns:
         Either:
         - A run ID string (if input was a run ID)
-        - Tuple of 3 downloaded file Paths (if input was VirtualObject list)
+        - TRCSavedResult of downloaded file Paths (if input was VirtualObject list)
         - RunError if input is an error
     """
 
@@ -200,8 +201,8 @@ def save_outputs(
         return outputs
 
     topology_obj, residues_obj, chains_obj = outputs
-    return (
-        save_object(topology_obj["path"]),
-        save_object(residues_obj["path"]),
-        save_object(chains_obj["path"]),
+    return TRCSavedResult(
+        topology=save_object(topology_obj["path"]),
+        residues=save_object(residues_obj["path"]),
+        chains=save_object(chains_obj["path"]),
     )

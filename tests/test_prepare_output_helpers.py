@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from rush import TRC, from_json
+from rush import TRC, TRCSavedResult, from_json
 from rush.client import RunError
 from rush.prepare_complex import fetch_outputs as fetch_prepare_complex_outputs
 from rush.prepare_complex import save_outputs as save_prepare_complex_outputs
@@ -50,10 +50,10 @@ def test_prepare_protein_save_outputs(monkeypatch):
         [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
     )
 
-    assert result == (
-        Path("/tmp/top.json"),
-        Path("/tmp/res.json"),
-        Path("/tmp/chains.json"),
+    assert result == TRCSavedResult(
+        topology=Path("/tmp/top.json"),
+        residues=Path("/tmp/res.json"),
+        chains=Path("/tmp/chains.json"),
     )
 
 
@@ -76,10 +76,10 @@ def test_prepare_complex_fetch_outputs(monkeypatch):
 def test_prepare_complex_save_outputs(monkeypatch):
     monkeypatch.setattr(
         "rush.prepare_complex.save_trc_output",
-        lambda res: (
-            Path("/tmp/top.json"),
-            Path("/tmp/res.json"),
-            Path("/tmp/chains.json"),
+        lambda res: TRCSavedResult(
+            topology=Path("/tmp/top.json"),
+            residues=Path("/tmp/res.json"),
+            chains=Path("/tmp/chains.json"),
         ),
     )
 
@@ -87,10 +87,10 @@ def test_prepare_complex_save_outputs(monkeypatch):
         [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
     )
 
-    assert result == (
-        Path("/tmp/top.json"),
-        Path("/tmp/res.json"),
-        Path("/tmp/chains.json"),
+    assert result == TRCSavedResult(
+        topology=Path("/tmp/top.json"),
+        residues=Path("/tmp/res.json"),
+        chains=Path("/tmp/chains.json"),
     )
 
 

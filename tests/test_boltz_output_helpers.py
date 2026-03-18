@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import numpy as np
+from rush import TRCSavedResult
 from rush.boltz import (
     BoltzResult,
     BoltzSavedResult,
@@ -110,10 +111,10 @@ def test_save_outputs_saves_boltz_result(monkeypatch):
 
     assert isinstance(output, list)
     assert isinstance(output[0], BoltzSavedResult)
-    assert output[0].model == (
-        Path("/tmp/top.json"),
-        Path("/tmp/res.json"),
-        Path("/tmp/chains.json"),
+    assert output[0].model == TRCSavedResult(
+        topology=Path("/tmp/top.json"),
+        residues=Path("/tmp/res.json"),
+        chains=Path("/tmp/chains.json"),
     )
     assert output[0].plddt == Path("/tmp/plddt.json")
     assert output[0].pae == Path("/tmp/pae.json")

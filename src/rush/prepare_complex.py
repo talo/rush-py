@@ -14,6 +14,7 @@ from typing import Literal
 from rdkit import Chem
 
 from rush import TRC, from_json, from_pdb, merge_trcs, to_pdb
+from rush._output_types import TRCSavedResult
 from rush.client import (
     RunError,
     RunOpts,
@@ -184,7 +185,7 @@ def prepare_complex(
         run_opts,
         collect=collect,
     )
-    trc_p = save_trc_output(res)
+    trc_p = fetch_trc_output(res)
     if isinstance(trc_p, RunError):
         return trc_p
 
@@ -208,7 +209,7 @@ def fetch_outputs(
 
 def save_outputs(
     res: list[dict[str, object]] | tuple[dict[str, object], ...] | str | RunError,
-) -> tuple[Path, Path, Path] | str | RunError:
+) -> TRCSavedResult | str | RunError:
     """
     Save prepare-complex outputs into the workspace.
     """

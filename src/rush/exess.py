@@ -246,6 +246,12 @@ class ExessResult:
     exports: dict[str, Any] | bytes | None = None
 
 
+@dataclass(frozen=True)
+class ExessSavedResult:
+    calc: Path
+    exports: Path | None = None
+
+
 @dataclass
 class Model:
     #: Determines if the system is tranformed into a "standard orientation"
@@ -1242,7 +1248,7 @@ def fetch_outputs(
 def save_outputs(
     res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
     extract=True,
-) -> tuple[Path, Path | None] | RunError:
+) -> ExessSavedResult | RunError:
     """
     Download and save energy calculation outputs from Rush.
 
@@ -1259,8 +1265,8 @@ def save_outputs(
         extract: Whether to extract tar.zst files (default True)
 
     Returns:
-        - (json_path, exports_path): Tuple of local Paths to downloaded files
-        - (json_path, None): If HDF5 extraction fails or no HDF5 output
+        - ExessSavedResult(calc=..., exports=...): Local Paths to downloaded files
+        - ExessSavedResult(calc=..., exports=None): If HDF5 extraction fails or no HDF5 output
         - RunError: If the input res is an error
     """
     outputs = _unwrap_outputs(res)
@@ -1272,11 +1278,14 @@ def save_outputs(
     exports_ref = _resolve_exports_object(exports_obj)
 
     if exports_ref is None:
-        return (calc_path, None)
+        return ExessSavedResult(calc=calc_path)
 
     exports_kind, exports_obj = exports_ref
     if exports_kind == "Json":
-        return (calc_path, save_object(exports_obj["path"]))
+        return ExessSavedResult(
+            calc=calc_path,
+            exports=save_object(exports_obj["path"]),
+        )
     elif exports_kind == "Hdf5":
         exports_path = None
         try:
@@ -1291,7 +1300,7 @@ def save_outputs(
                 exports_path = None
             else:
                 raise  # Re-raise other extraction errors
-        return (calc_path, exports_path)
+        return ExessSavedResult(calc=calc_path, exports=exports_path)
 
     raise ValueError(
         f"Unknown export kind {exports_kind!r}. Expected 'Json' or 'Hdf5'."

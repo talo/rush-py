@@ -23,6 +23,7 @@ from gql.transport.exceptions import TransportQueryError
 from rush.convert import _single_trc, from_json, from_pdb
 from rush.mol import TRC
 
+from ._output_types import TRCSavedResult
 from .client import (
     RunError,
     RunOpts,
@@ -134,11 +135,11 @@ class BoltzResult:
     affinities: BoltzAffinities | None = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class BoltzSavedResult:
     """Workspace paths for a saved Boltz result bundle."""
 
-    model: tuple[Path, Path, Path]
+    model: TRCSavedResult
     metrics: Path
     plddt: Path
     pae: Path
@@ -354,10 +355,10 @@ def save_outputs(
         topology_obj, residues_obj, chains_obj = model_obj
 
         return BoltzSavedResult(
-            model=(
-                save_object(topology_obj["path"]),
-                save_object(residues_obj["path"]),
-                save_object(chains_obj["path"]),
+            model=TRCSavedResult(
+                topology=save_object(topology_obj["path"]),
+                residues=save_object(residues_obj["path"]),
+                chains=save_object(chains_obj["path"]),
             ),
             metrics=save_json(
                 metrics,

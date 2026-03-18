@@ -14,6 +14,7 @@ from .convert import (
     to_json,
     to_pdb,
 )
+from ._output_types import TRCSavedResult
 from .mol import (
     TRC,
     AminoAcidSeq,
@@ -46,6 +47,7 @@ __all__ = [
     "load_structure",
     "save_structure",
     "merge_trcs",
+    "TRCSavedResult",
     # Core structures
     "TRC",
     "Topology",

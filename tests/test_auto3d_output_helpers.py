@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 from pathlib import Path
 
+from rush import TRCSavedResult
 from rush.auto3d import Auto3DResult, Auto3DSavedResult, fetch_outputs, save_outputs
 from rush.client import RunError, _json_content_name
 
@@ -70,10 +71,10 @@ def test_save_outputs_saves_auto3d_result(monkeypatch):
     first = list(first_output)
     assert len(first) == 1
     assert isinstance(first[0], Auto3DSavedResult)
-    assert first[0].conformer == (
-        Path("/tmp/top.json"),
-        Path("/tmp/res.json"),
-        Path("/tmp/chains.json"),
+    assert first[0].conformer == TRCSavedResult(
+        topology=Path("/tmp/top.json"),
+        residues=Path("/tmp/res.json"),
+        chains=Path("/tmp/chains.json"),
     )
     assert first[0].stats == Path(
         f"/tmp/{_json_content_name('auto3d_stats', res[0][0][1])}.json"

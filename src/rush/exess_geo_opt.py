@@ -245,6 +245,12 @@ class ExessGeoOptResult:
     steps: list[ExessGeoOptStep]
 
 
+@dataclass(frozen=True)
+class ExessGeoOptSavedResult:
+    trajectory: Path
+    steps: Path
+
+
 def exess_geo_opt(
     topology_path: Path | str,
     max_iters: int,
@@ -428,7 +434,7 @@ def fetch_outputs(
 
 def save_outputs(
     res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> tuple[Path, Path] | str | RunError:
+) -> ExessGeoOptSavedResult | str | RunError:
     """
     Save EXESS geometry optimization outputs into the workspace.
     """
@@ -437,7 +443,7 @@ def save_outputs(
         return outputs
 
     trajectory_obj, steps_obj = outputs
-    return (
-        save_object(trajectory_obj["path"]),
-        save_object(steps_obj["path"]),
+    return ExessGeoOptSavedResult(
+        trajectory=save_object(trajectory_obj["path"]),
+        steps=save_object(steps_obj["path"]),
     )

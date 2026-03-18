@@ -11,6 +11,7 @@ from rush.client import _extract_object_archive
 from rush.client import RunError
 from rush.exess_geo_opt import (
     ExessGeoOptResult,
+    ExessGeoOptSavedResult,
     ExessGeoOptStep,
     fetch_outputs as fetch_geo_opt_outputs,
     save_outputs as save_geo_opt_outputs,
@@ -141,7 +142,10 @@ def test_geo_opt_save_outputs(monkeypatch):
 
     result = save_geo_opt_outputs([{"path": "traj"}, {"path": "steps"}])
 
-    assert result == (Path("/tmp/traj.json"), Path("/tmp/steps.json"))
+    assert result == ExessGeoOptSavedResult(
+        trajectory=Path("/tmp/traj.json"),
+        steps=Path("/tmp/steps.json"),
+    )
 
 
 def test_qmmm_fetch_outputs(monkeypatch):
