@@ -17,9 +17,9 @@ This page covers both the EXESS executable and the rush-py interface. The input 
 
       .. code-block:: python
 
-         from rush import exess
+         from rush.exess import exess_energy
 
-         exess.energy("input.json", collect=True)
+         exess_energy("input.json", collect=True)
 ```
 
 ## CLI (EXESS executable)
@@ -126,29 +126,32 @@ Set the Rush environment variables before running the client:
 
 ### Basic usage
 
-The rush-py EXESS wrapper accepts the same topology input format (JSON), and exposes both a direct EXESS entry point and convenience wrappers:
+The rush-py EXESS wrapper accepts the same topology input format (JSON). Most users should prefer the module-specific wrappers and only use `exess.exess(...)` when they need to set the EXESS driver explicitly:
 
 ```python
 from rush import exess
+from rush.exess import exess_energy, exess_interaction_energy
+from rush.exess_geo_opt import exess_geo_opt
+from rush.exess_qmmm import exess_qmmm
 
 # Direct wrapper
-exess.exess("input_topology.json", collect=True)
+exess.exess("input_topology.json", driver="Energy", collect=True)
 
 # Convenience wrappers
-exess.energy(...)
-exess.interaction_energy(...)
-exess.optimization(...)
-exess.qmmm(...)
+exess_energy(...)
+exess_interaction_energy(...)
+exess_geo_opt(...)
+exess_qmmm(...)
 ```
 
 Sample topology inputs are available in `tests/data/`, including `tests/data/1kuw_t.json` (small protein topology), `tests/data/benzene_t.json`, and `tests/data/ethane_t.json`.
 
-`exess.optimization` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM regions when needed.
+`exess_geo_opt()` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM regions when needed.
 
 To inspect function signatures and parameter docs locally, use Python's `help`:
 
 ```python
-help(exess.energy)
+help(exess_energy)
 help(exess.FragKeywords)
 ```
 
@@ -156,9 +159,9 @@ By default, runs are asynchronous and return a run ID. Pass `collect=True` to wa
 
 ```python
 from rush.client import collect_run
-from rush.exess import exess as run_exess
+from rush.exess import exess_energy
 
-run_id = run_exess("input_topology.json")
+run_id = exess_energy("input_topology.json")
 result = collect_run(run_id)
 ```
 
@@ -170,9 +173,10 @@ Run metadata (name, tags, description, email notifications) is configured via `r
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 from rush.client import RunOpts, RunSpec
 
-res = exess.energy(
+res = exess_energy(
     "input_topology.json",
     run_opts=RunOpts(name="example", tags=["exess"], email=True),
     run_spec=RunSpec(storage=1000, gpus=1),

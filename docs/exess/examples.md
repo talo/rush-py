@@ -30,8 +30,9 @@ runexess input.json -g NGPUS
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 
-res = exess.energy("input_topology.json", collect=True)
+res = exess_energy("input_topology.json", collect=True)
 ```
 
 ## Full-system basics
@@ -484,8 +485,9 @@ Geometry optimization uses RHF, RI-HF, or RI-MP2 gradients. A simple RI-MP2 opti
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 
-res = exess.energy(
+res = exess_energy(
     "input_topology.json",
     collect=True,
 )

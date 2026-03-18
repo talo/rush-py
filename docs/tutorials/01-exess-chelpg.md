@@ -29,6 +29,7 @@ CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits pa
 ```python
 from pathlib import Path
 from rush import exess
+from rush.exess import exess_energy
 from rush.convert.pdb import from_pdb
 import json
 
@@ -43,7 +44,7 @@ topology_path = Path("aspirin_topology.json")
 topology_path.write_text(json.dumps(topology_json, indent=2))
 
 # 3. Run energy calculation with CHELPG export (returns charges in ~30 seconds)
-result = exess.energy(
+result = exess_energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),

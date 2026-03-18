@@ -24,9 +24,10 @@ The simplest export: compute an energy and also write out the electron density a
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 from rush.client import RunOpts
 
-res = exess.energy(
+res = exess_energy(
     "input_topology.json",
     export_keywords=exess.ExportKeywords(
         export_density=True,
@@ -58,7 +59,7 @@ EXESS returns two outputs:
 ]
 ```
 
-- **Output 0** — The standard JSON energy output (same as a normal `exess.energy` call)
+- **Output 0** — The standard JSON energy output (same as a normal `exess_energy` call)
 - **Output 1** — An HDF5 file containing the exported properties (electron density in this case)
 
 Save both to disk with the helper function:
@@ -78,9 +79,10 @@ Often you want property values at *specific locations* — for example, to map t
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 from rush.client import RunOpts, RunSpec
 
-res = exess.energy(
+res = exess_energy(
     "input_topology.json",
     frag_keywords=None,  # No fragmentation — whole-system calculation
     export_keywords=exess.ExportKeywords(
@@ -166,7 +168,7 @@ import h5py
 # Load the JSON energy output
 with open(files[0]) as f:
     energy_data = json.load(f)
-print(f"Total energy: {energy_data['total_energy']} Hartree")
+print(f"Total energy: {energy_data['qmmbe']['expanded_hf_energy']} Hartree")
 
 # Load the HDF5 export (if not using convert_hdf5_to_json)
 with h5py.File(files[1], "r") as f:

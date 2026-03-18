@@ -32,10 +32,11 @@ Because there's no geometry optimization loop, SPE is fast — you get your answ
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 from rush.client import RunOpts
 
 # Run a single-point energy calculation on water
-res = exess.energy(
+res = exess_energy(
     "water_topology.json",
     method="RestrictedHF",
     basis="STO-3G",  # Minimal basis set for tutorials only – use cc-pVDZ or larger for production
@@ -79,7 +80,7 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 
 ## Notes
 
-- **Default parameters** — `exess.energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190){target="_blank"} in `exess.py` for the complete list of defaults.
+- **Default parameters** — `exess_energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py){target="_blank"} in `exess.py` for the complete list of defaults.
 - **No fragmentation** — for a small molecule like water, the whole system is treated in one calculation. For larger systems, see fragmentation in {doc}`05-exess-interaction-energy`
 - **Geometry matters** — SPE gives you the energy at *exactly* the coordinates you provide. If the geometry is unrealistic, the energy will be too. Use {doc}`04-exess-optimization` first if you need a relaxed structure
 

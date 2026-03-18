@@ -17,6 +17,7 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
+from rush.exess import exess_interaction_energy
 
 
 # ===== Example 1: Fragment-based interaction energy =====
@@ -32,7 +33,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-out = exess.interaction_energy(
+out = exess_interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
     93,  # This is the index of the fragment that contains the ligand
     method="RestrictedHF",
@@ -101,7 +102,7 @@ with open(topology_path, "w", encoding="utf-8") as f:
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-out = exess.interaction_energy(
+out = exess_interaction_energy(
     topology_path,
     lig_idx,
     method="RestrictedHF",

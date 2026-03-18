@@ -7,7 +7,10 @@ The rush-py client functions have a structured form for their arguments:
 
 To see the documentation, signature, or parameters for any class or function, use Python's built-in help function:
 ```python
-help(exess.energy)
+from rush import exess
+from rush.exess import exess_energy
+
+help(exess_energy)
 help(exess.FragKeywords)
 ```
 

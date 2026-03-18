@@ -3,10 +3,11 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunError, RunOpts, collect_run, set_opts
+from rush.exess import exess_energy
 
 
 def test_exess_energy_tutorial():
-    res = exess.energy(
+    res = exess_energy(
         "tests/data/6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
@@ -30,7 +31,7 @@ def test_exess_energy_exports():
     data_dir = Path.cwd() / "tests" / "data"
     # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
     # Using PCSeg-0 for faster test runtimes
-    id = exess.energy(
+    id = exess_energy(
         data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",

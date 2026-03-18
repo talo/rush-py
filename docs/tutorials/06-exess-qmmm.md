@@ -21,10 +21,10 @@ Static structures tell you *where* atoms are. Dynamics tells you *how they move*
 ## Quick Start: QM/MM on a Protein–Ligand System
 
 ```python
-from rush import exess
+from rush.exess_qmmm import exess_qmmm
 from rush.client import RunOpts, save_object
 
-out = exess.qmmm(
+out = exess_qmmm(
     "6a5j_t.json",    # Topology (atoms, coordinates, fragments)
     500,               # Number of MD timesteps
     "6a5j_r.json",    # Residues (residue names and assignments)
@@ -51,9 +51,9 @@ To understand exactly what inputs QM/MM needs, let's build a system manually —
 
 ```python
 import json
-from rush import exess
+from rush.exess_qmmm import Trajectory, exess_qmmm
 from rush.client import RunOpts
-from rush import Topology, exess
+from rush import Topology
 from rush.mol import Element, Fragment, Residue, Residues
 
 # Define two water molecules
@@ -82,11 +82,11 @@ with open("molecule_r.json", "w") as f:
     json.dump(residues.to_json(), f)
 
 # Run all-QM dynamics
-out = exess.qmmm(
+out = exess_qmmm(
     topology_path="molecule_t.json",
     residues_path="molecule_r.json",
     n_timesteps=100,
-    trajectory=exess.Trajectory(include_waters=True),
+    trajectory=Trajectory(include_waters=True),
     mm_fragments=[],   # No MM → everything is QM
     run_opts=RunOpts(name="Tutorial: QM/MM Water Dimer"),
     collect=True,

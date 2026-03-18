@@ -18,6 +18,7 @@ from typing import Any, Iterable, Sequence
 
 from .. import exess
 from ..client import RunError, RunOpts, save_object
+from ..exess import exess_interaction_energy
 
 __all__ = [
     "fragmented_exess",
@@ -249,7 +250,7 @@ def fragmented_exess(
             continue
 
         print(f"Process {output_filename}", file=sys.stderr)
-        run_output = exess.interaction_energy(
+        run_output = exess_interaction_energy(
             topology_path,
             job.reference_fragment,
             "RestrictedRIMP2",

@@ -24,6 +24,7 @@ from rush.client import RunError
 from rush.convert.pdb import from_pdb
 import json
 import matplotlib
+from rush.exess import exess_energy
 
 matplotlib.use("Agg")  # Use non-GUI backend
 import matplotlib.pyplot as plt
@@ -306,7 +307,7 @@ print(f"✓ Topology saved to {topology_path}")
 
 # ===== 2. Run CHELPG calculation =====
 print("\nRunning CHELPG calculation...")
-result = exess.energy(
+result = exess_energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),

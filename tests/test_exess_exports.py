@@ -3,12 +3,13 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts, RunSpec, set_opts
+from rush.exess import exess_energy
 
 
 def test_exess_exports():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    res = exess.energy(
+    res = exess_energy(
         data_dir / "benzene_t.json",
         basis="PCSeg-0",
         frag_keywords=None,  # No fragmentation; whole system calc

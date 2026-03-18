@@ -24,6 +24,7 @@ import h5py
 import numpy as np
 from rush import exess
 from rush.client import RunOpts, RunSpec
+from rush.exess import exess_energy
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
@@ -47,7 +48,7 @@ print("=" * 60)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-res = exess.energy(
+res = exess_energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -88,7 +89,7 @@ json_file = next((f for f in files if str(f).endswith(".json")), None)
 if json_file:
     with open(json_file, encoding="utf-8") as f:
         json_data = json.load(f)
-        total_energy = json_data.get("total_energy")
+        total_energy = json_data.get("qmmbe", {}).get("expanded_hf_energy")
 
 
 # ===== Example 2: Descriptor grids for density and ESP =====
@@ -104,7 +105,7 @@ GRID_MIN = [-5.5, -5.5, -3.5]
 GRID_MAX = [5.5, 5.5, 3.5]
 GRID_SPACING = [0.3, 0.3, 0.3]
 
-res = exess.energy(
+res = exess_energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -138,7 +139,7 @@ if total_energy is None:
     if json_file:
         with open(json_file, encoding="utf-8") as f:
             json_data = json.load(f)
-            total_energy = json_data.get("total_energy")
+            total_energy = json_data.get("qmmbe", {}).get("expanded_hf_energy")
 
 
 # ===== Example 3: Generate 3D electron density visualization =====

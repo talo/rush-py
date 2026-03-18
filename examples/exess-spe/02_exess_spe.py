@@ -17,6 +17,7 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts, RunError
+from rush.exess import exess_energy
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "water_topology.json"
@@ -33,7 +34,7 @@ print("Single Point Energy Calculation: Water (H₂O)")
 print(f"Method: {METHOD}/{BASIS}")
 print("=" * 60)
 
-res = exess.energy(
+res = exess_energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,

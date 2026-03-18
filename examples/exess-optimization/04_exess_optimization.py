@@ -20,8 +20,9 @@ Output files (saved to optimization-outputs/):
 import json
 from pathlib import Path
 
-from rush import Topology, exess
+from rush import Topology
 from rush.client import RunOpts, save_object
+from rush.exess_geo_opt import exess_geo_opt
 
 DATA_DIR = Path(__file__).parent / "data"
 INPUT_FILE = DATA_DIR / "ethene_twisted_t.json"
@@ -41,7 +42,7 @@ print("=" * 60)
 METHOD = "RestrictedHF"
 BASIS = "STO-3G"
 
-out = exess.optimization(
+out = exess_geo_opt(
     INPUT_FILE,
     100,  # Number of optimization iterations
     method=METHOD,

@@ -22,9 +22,10 @@ import json
 from itertools import batched
 from pathlib import Path
 
-from rush import Topology, exess
+from rush import Topology
 from rush.client import RunOpts, save_object
 from rush.mol import Element, Fragment, Residue, Residues
+from rush.exess_qmmm import Trajectory, exess_qmmm
 
 DATA_DIR = Path(__file__).parent / "data"
 OUTPUT_DIR = Path(__file__).parent / "qmmm-outputs"
@@ -49,7 +50,7 @@ TEMPERATURE = 300  # Default temperature in Kelvin
 topology_path = DATA_DIR / "6a5j_t.json"
 residues_path = DATA_DIR / "6a5j_r.json"
 
-out = exess.qmmm(
+out = exess_qmmm(
     topology_path,
     N_TIMESTEPS,
     residues_path,
@@ -379,11 +380,11 @@ with open(molecule_t_path, "w", encoding="utf-8") as f_t:
 with open(molecule_r_path, "w", encoding="utf-8") as f_r:
     json.dump(residues.to_json(), f_r)
 
-out = exess.qmmm(
+out = exess_qmmm(
     topology_path=molecule_t_path,
     residues_path=molecule_r_path,
     n_timesteps=100,
-    trajectory=exess.Trajectory(include_waters=True),
+    trajectory=Trajectory(include_waters=True),
     mm_fragments=[],
     run_opts=RunOpts(name="Tutorial: QM/MM with Manually-Constructed Water"),
     collect=True,

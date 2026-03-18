@@ -13,7 +13,7 @@ python 04_exess_optimization.py
 
 ## What This Example Covers
 
-1. QM geometry optimization with `exess.optimization`
+1. QM geometry optimization with `exess_geo_opt`
 2. Using `OptimizationKeywords` (Cartesian coordinates, LBFGS algorithm)
 3. Extracting trajectory and energy/gradient info from the output
 

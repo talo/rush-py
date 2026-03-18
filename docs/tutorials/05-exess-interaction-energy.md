@@ -24,9 +24,10 @@ This interaction energy is **not** a binding free energy — it doesn't include 
 ```python
 import json
 from rush import exess
+from rush.exess import exess_interaction_energy
 from rush.client import RunOpts, fetch_object
 
-out = exess.interaction_energy(
+out = exess_interaction_energy(
     "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
     93,                          # Fragment index of the ligand
     method="RestrictedHF",       # Explicit: minimal method for testing
@@ -130,12 +131,13 @@ print(f"Pocket contains {len(pocket_frags)} fragments (out of {len(trc.residues.
 
 ```python
 from rush import exess
+from rush.exess import exess_interaction_energy
 
 # EXESS needs the Topology (not the full TRC)
 with open("1hsg_t.json", "w") as f:
     json.dump(trc.topology.to_json(), f, indent=2)
 
-out = exess.interaction_energy(
+out = exess_interaction_energy(
     "1hsg_t.json",
     lig_idx,
     frag_keywords=exess.FragKeywords(
@@ -153,7 +155,7 @@ print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
 
 :::{admonition} The second output
 :class: note
-`exess.interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<03-exess-exports>` for details.
+`exess_interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<03-exess-exports>` for details.
 :::
 
 ---

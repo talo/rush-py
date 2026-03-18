@@ -285,9 +285,10 @@ Example (regular grid with three points):
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 from rush.client import RunOpts, RunSpec
 
-res = exess.energy(
+res = exess_energy(
     "input_topology.json",
     frag_keywords=None,
     export_keywords=exess.ExportKeywords(
@@ -308,7 +309,7 @@ res = exess.energy(
 )
 ```
 
-When `to_json=True` is passed to `save_outputs`, the exported HDF5 is converted to JSON. Example JSON structure:
+When `convert_hdf5_to_json=True` is set on the EXESS run, `save_outputs` saves the exported data as JSON instead of HDF5. Example JSON structure:
 
 ```json
 {

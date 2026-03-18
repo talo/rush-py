@@ -58,9 +58,9 @@ Icon key:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import SCFKeywords, energy
+         from rush.exess import SCFKeywords, exess_energy
 
-         energy(
+         exess_energy(
              topology_path="molecule_t.json",
              scf_keywords=SCFKeywords(
                  max_iters=40,
@@ -251,9 +251,9 @@ Icon key:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import FragKeywords, energy
+         from rush.exess import FragKeywords, exess_energy
 
-         energy(
+         exess_energy(
              topology_path="molecule_t.json",
              frag_keywords=FragKeywords(
                  cutoff_type="Centroid",
@@ -380,12 +380,17 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import DefaultGridResolution, KSKeywords, XCGridParameters, energy
+         from rush.exess import (
+             DefaultGridResolution,
+             KSDFTKeywords,
+             XCGridParameters,
+             exess_energy,
+         )
 
-         energy(
+         exess_energy(
              topology_path="molecule_t.json",
              method="RestrictedKSDFT",
-             ks_keywords=KSKeywords(
+             ksdft_keywords=KSDFTKeywords(
                  functional="GGA_XC_PBE",
                  grid=XCGridParameters(
                      resolution=DefaultGridResolution("SUPERFINE"),
@@ -597,9 +602,9 @@ Export controls what is written to HDF5 output files:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import ExportKeywords, RegularDescriptorGrid, energy
+         from rush.exess import ExportKeywords, RegularDescriptorGrid, exess_energy
 
-         energy(
+         exess_energy(
              topology_path="molecule_t.json",
              export_keywords=ExportKeywords(
                  export_density=True,
@@ -824,9 +829,9 @@ Export controls what is written to HDF5 output files:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import qmmm
+         from rush.exess_qmmm import exess_qmmm
 
-         qmmm(
+         exess_qmmm(
              topology_path="molecule_t.json",
              residues_path="system.residues",
              n_timesteps=10,
@@ -899,9 +904,13 @@ Rules and defaults:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import LBFGSKeywords, OptimizationKeywords, optimization
+         from rush.exess_geo_opt import (
+             LBFGSKeywords,
+             OptimizationKeywords,
+             exess_geo_opt,
+         )
 
-         optimization(
+         exess_geo_opt(
              topology_path="molecule_t.json",
              max_iters=200,
              optimization_keywords=OptimizationKeywords(
@@ -1125,9 +1134,9 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import Restraints, Trajectory, qmmm
+         from rush.exess_qmmm import Restraints, Trajectory, exess_qmmm
 
-         qmmm(
+         exess_qmmm(
              topology_path="molecule_t.json",
              residues_path="molecule_r.json",
              n_timesteps=1000,
@@ -1919,25 +1928,25 @@ Rush-py sets some defaults in Python before submitting a run. If a `*_keywords` 
 
 Default keyword behavior for the common entry points:
 
-- `exess.exess` / `exess.energy` / `exess.interaction_energy`:
+- `exess.exess` / `exess_energy` / `exess_interaction_energy`:
   - `scf_keywords`: unset (EXESS defaults apply).
   - `frag_keywords`: `FragKeywords()` (level `Dimer`, `dimer_cutoff=100.0`, `trimer_cutoff=None`, `tetramer_cutoff=None`, `cutoff_type=None`, `distance_metric=None`).
   - `export_keywords`: `ExportKeywords()` (all fields unset; no exports requested).
-- `exess.qmmm`:
+- `exess_qmmm`:
   - `scf_keywords`: unset (EXESS defaults apply).
   - `frag_keywords`: `FragKeywords()` (same defaults as above).
   - `trajectory`: `Trajectory()` (all fields unset; EXESS defaults apply).
-- `exess.optimization`:
+- `exess_geo_opt`:
   - `optimization_keywords`: `OptimizationKeywords()` (all fields unset; EXESS defaults apply), with required `max_iters` passed separately.
 
 Rush-py entrypoint defaults (non-keyword parameters):
 
-- `exess.exess` / `exess.energy` / `exess.interaction_energy`:
+- `exess.exess` / `exess_energy` / `exess_interaction_energy`:
   - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
-- `exess.qmmm`:
+- `exess_qmmm`:
   - `method="RestrictedHF"`, `basis="STO-3G"`, `aux_basis=None`.
   - `dt_ps=0.002`, `temperature_kelvin=290.0`, `pressure_atm=None`.
-- `exess.optimization`:
+- `exess_geo_opt`:
   - `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`.
 
 `FragKeywords` defaults by level in rush-py:

@@ -27,10 +27,10 @@ EXESS gives you two engines for this:
 This example uses **ethene (C₂H₄)** with an intentionally twisted starting geometry — the two CH₂ groups are rotated 90° so the hydrogen atoms are perpendicular. During optimization, the molecule relaxes to a **planar** structure because the C=C π bond requires parallel p-orbitals for maximum overlap. It's a dramatic visual change (perpendicular → flat) that illustrates a fundamental concept in chemistry.
 
 ```python
-from rush import exess
+from rush.exess_geo_opt import exess_geo_opt
 from rush.client import RunOpts, save_object
 
-out = exess.optimization(
+out = exess_geo_opt(
     "ethene_twisted_t.json",
     100,  # Maximum optimization steps
     standard_orientation="None",  # Keep original frame of reference
@@ -39,7 +39,7 @@ out = exess.optimization(
 )
 ```
 
-That's it — EXESS will iteratively relax the twisted ethene geometry using the defaults: **Restricted Hartree-Fock / cc-pVDZ**. You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
+That's it — EXESS will iteratively relax the twisted ethene geometry using the default method and basis set. You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
 
 > ⚠️ **Tutorial Basis Set Warning**
 >

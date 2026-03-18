@@ -3,8 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from rush import exess
+from rush import exess_geo_opt
 from rush.client import RunOpts, save_object, set_opts
+from rush.exess_geo_opt import exess_geo_opt as run_exess_geo_opt
 
 
 @pytest.mark.skip(reason="ML regions are disabled upstream for now.")
@@ -15,13 +16,13 @@ def test_exess_optimization():
     # ensures the molecule doesnt get translated or rotated at all.
     # These optimization_keywords values are the only supported ones for non-QM runs.
     # Setting the `basis="STO-2G"` reduces memory requirements for non-QM runs.
-    res = exess.optimization(
+    res = run_exess_geo_opt(
         max_iters=100,
         topology_path=data_dir / "benzene_t.json",
-        optimization_keywords=exess.OptimizationKeywords(
+        optimization_keywords=exess_geo_opt.OptimizationKeywords(
             coordinate_system="Cartesian",
             algorithm="LBFGS",
-            lbfgs_keywords=exess.LBFGSKeywords(),
+            lbfgs_keywords=exess_geo_opt.LBFGSKeywords(),
         ),
         basis="STO-2G",
         standard_orientation="None",
