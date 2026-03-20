@@ -1142,7 +1142,7 @@ wheels = [
 
 [[package]]
 name = "rush-py"
-version = "6.10.2"
+version = "7.0.0b1"
 source = { editable = "." }
 dependencies = [
     { name = "gql" },

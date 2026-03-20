@@ -1,6 +1,6 @@
 [project]
 name = "rush-py"
-version = "6.10.2"
+version = "7.0.0b1"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
