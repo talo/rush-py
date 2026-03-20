@@ -100,7 +100,9 @@ def from_json(
     )
 
 
-def to_json(trcs: TRC | list[TRC]) -> dict[str, object] | list[dict[str, object]]:
+def to_json(
+    trcs: TRC | list[TRC],
+) -> dict[str, dict[str, object]] | list[dict[str, dict[str, object]]]:
     """
     Convert TRC structures to JSON.
 

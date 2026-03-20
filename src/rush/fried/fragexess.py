@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
+from rush.mol import FragmentRef
+
 from .. import RushRunError, exess
 from ..client import RunOpts, save_object
 from ..exess import exess_interaction_energy
@@ -132,11 +134,13 @@ def determine_ligand_atoms(conf: dict[str, Any]) -> tuple[set[int], list[int]]:
     return ligand_atoms, ligand_res_indices
 
 
-def collect_ligand_fragments(conf: dict[str, Any], ligand_atoms: set[int]) -> list[int]:
-    ligand_fragments: list[int] = []
+def collect_ligand_fragments(
+    conf: dict[str, Any], ligand_atoms: set[int]
+) -> list[FragmentRef]:
+    ligand_fragments: list[FragmentRef] = []
     for frag_idx, fragment in enumerate(conf["topology"]["fragments"]):
         if set(fragment) & ligand_atoms:
-            ligand_fragments.append(frag_idx)
+            ligand_fragments.append(FragmentRef(frag_idx))
     if not ligand_fragments:
         raise ValueError("Failed to match ligand atoms to fragment indices.")
     return ligand_fragments
@@ -145,7 +149,7 @@ def collect_ligand_fragments(conf: dict[str, Any], ligand_atoms: set[int]) -> li
 def compute_fragment_cutoffs(
     conf: dict[str, Any],
     ligand_atoms: set[int],
-    ligand_fragments: set[int],
+    ligand_fragments: set[FragmentRef],
     threshold: float,
 ) -> list[FragmentJob]:
     geometry = conf["topology"]["geometry"]
@@ -177,7 +181,7 @@ def compute_fragment_cutoffs(
 def build_frag_keywords(
     cutoff: int,
     reference_fragment: int,
-    included_fragments: list[int],
+    included_fragments: list[FragmentRef],
     trimer_cap: float,
 ) -> exess.FragKeywords:
     trimer_cutoff = float(min(cutoff, trimer_cap))

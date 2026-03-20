@@ -610,7 +610,7 @@ def _build_filters(
     tags: list[str] | None,
 ) -> dict | None:
     """Build the GraphQL filter input from Python arguments."""
-    filters = {
+    filters: dict[str, Any] = {
         # We don't want to show deleted runs
         "deleted_at": {"is_null": True},
     }

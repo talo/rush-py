@@ -96,7 +96,7 @@ def test_prepare_complex_save_outputs(monkeypatch):
 
 
 def test_prepare_output_helpers_reject_invalid_shapes():
-    bad_outputs = ({"path": "top"}, {"path": "res"})
+    bad_outputs = ({"path": object()}, {"path": object()})
 
     with pytest.raises(ValueError, match="unexpected format"):
         fetch_prepare_protein_outputs(bad_outputs)
