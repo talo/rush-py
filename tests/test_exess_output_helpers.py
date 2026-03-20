@@ -31,7 +31,7 @@ def _make_tar_zst(payload: bytes, filename: str = "output.hdf5") -> bytes:
 
 def test_fetch_outputs_extracts_hdf5(monkeypatch):
     output_bytes = json.dumps(
-        {"schema_version": "0.1.0", "calculation_time": 1.0, "qmmbe": None}
+        {"calculation_time": 1.0, "qmmbe": {"method": "RestrictedHF", "nmers": []}}
     ).encode()
     export_bytes = _make_tar_zst(b"fake-hdf5")
 
@@ -60,7 +60,7 @@ def test_fetch_outputs_extracts_hdf5(monkeypatch):
 
 def test_fetch_outputs_can_skip_extract(monkeypatch):
     output_bytes = json.dumps(
-        {"schema_version": "0.1.0", "calculation_time": 1.0, "qmmbe": None}
+        {"calculation_time": 1.0, "qmmbe": {"method": "RestrictedHF", "nmers": []}}
     ).encode()
     export_bytes = _make_tar_zst(b"fake-hdf5")
 
@@ -83,7 +83,7 @@ def test_fetch_outputs_can_skip_extract(monkeypatch):
 
 def test_fetch_outputs_rejects_unknown_export_wrapper(monkeypatch):
     output_bytes = json.dumps(
-        {"schema_version": "0.1.0", "calculation_time": 1.0, "qmmbe": None}
+        {"calculation_time": 1.0, "qmmbe": {"method": "RestrictedHF", "nmers": []}}
     ).encode()
     monkeypatch.setattr(exess, "fetch_object", lambda path, extract=False: output_bytes)
 

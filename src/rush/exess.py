@@ -112,7 +112,6 @@ type TensorLike = list[Any]
 
 @dataclass
 class ExessNmer:
-    schema_version: str
     fragments: list[FragmentRef]
     density: TensorLike | None = None
     fock: TensorLike | None = None
@@ -142,7 +141,6 @@ class ExessNmer:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ExessNmer":
         return cls(
-            schema_version=data["schema_version"],
             fragments=[FragmentRef(fragment) for fragment in data["fragments"]],
             density=data.get("density"),
             fock=data.get("fock"),
@@ -177,7 +175,6 @@ class ExessNmer:
 
 @dataclass
 class ExessManyBodyExpansion:
-    schema_version: str
     method: str
     nmers: list[list[ExessNmer]]
     distance_metric: str | None = None
@@ -196,7 +193,6 @@ class ExessManyBodyExpansion:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ExessManyBodyExpansion":
         return cls(
-            schema_version=data["schema_version"],
             method=data["method"],
             nmers=[
                 [ExessNmer.from_dict(nmer) for nmer in nmer_level]
@@ -223,14 +219,12 @@ class ExessManyBodyExpansion:
 
 @dataclass
 class ExessCalculation:
-    schema_version: str
     calculation_time: float
     qmmbe: ExessManyBodyExpansion
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ExessCalculation":
         return cls(
-            schema_version=data["schema_version"],
             calculation_time=data["calculation_time"],
             qmmbe=ExessManyBodyExpansion.from_dict(data["qmmbe"]),
         )
