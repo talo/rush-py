@@ -15,6 +15,7 @@ from .convert import (
     to_pdb,
 )
 from ._output_types import TRCSavedResult
+from .client import RunID, RushRunError
 from .mol import (
     TRC,
     AminoAcidSeq,
@@ -48,6 +49,8 @@ __all__ = [
     "save_structure",
     "merge_trcs",
     "TRCSavedResult",
+    "RunID",
+    "RushRunError",
     # Core structures
     "TRC",
     "Topology",

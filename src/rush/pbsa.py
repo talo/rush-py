@@ -3,11 +3,12 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from string import Template
+from typing import Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -35,6 +36,7 @@ class PBSAResult:
     nonpolar_solvation_energy: float
 
 
+@overload
 def pbsa(
     topology_path: Path | str,
     solute_dielectric: float,
@@ -50,8 +52,63 @@ def pbsa(
     box_size_factor: float,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def pbsa(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[float, float, float]: ...
+@overload
+def pbsa(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[float, float, float] | RunID: ...
+
+
+def pbsa(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[float, float, float] | RunID:
     """
     Run PBSA on the system in the QDX topology file at `topology_path`.
 
@@ -103,45 +160,48 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        assert len(out) == 3
+        assert isinstance(out[0], float)
+        assert isinstance(out[1], float)
+        assert isinstance(out[2], float)
+        return tuple(out)
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
 
 
-def _unwrap_output(
-    res: list[float] | tuple[float, ...] | str | RunError,
-) -> PBSAResult | str | RunError:
-    if isinstance(res, (str, RunError)):
-        return res
+def fetch_outputs(res: tuple[float, float, float]) -> PBSAResult:
+    """
+    Fetch PBSA outputs into memory.
 
-    if isinstance(res, (list, tuple)) and len(res) == 3:
-        return PBSAResult(float(res[0]), float(res[1]), float(res[2]))
+    Args:
+        res: Collected output from pbsa().
 
-    return RunError(
-        f"Error: pbsa output helper received unexpected format: {type(res)}"
-    )
-
-
-def fetch_outputs(
-    res: list[float] | tuple[float, ...] | str | RunError,
-) -> PBSAResult | str | RunError:
-    return _unwrap_output(res)
+    Returns:
+        Parsed PBSA result values.
+    """
+    return PBSAResult(*res)
 
 
-def save_outputs(
-    res: list[float] | tuple[float, ...] | str | RunError,
-) -> Path | str | RunError:
-    output = _unwrap_output(res)
-    if isinstance(output, (str, RunError)):
-        return output
+def save_outputs(res: tuple[float, float, float]) -> Path:
+    """
+    Save PBSA outputs into the workspace as JSON.
 
-    output_json = asdict(output)
+    Args:
+        res: Collected output from pbsa().
+
+    Returns:
+        Local path to the saved PBSA JSON file.
+    """
+    output_json = asdict(PBSAResult(*res))
     return save_json(
         output_json,
         name=_json_content_name("pbsa_output", output_json),

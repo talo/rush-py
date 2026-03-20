@@ -9,7 +9,7 @@ from rush.boltz import (
     boltz,
     fetch_outputs,
 )
-from rush.client import RunError, RunOpts, RunSpec, set_opts
+from rush.client import RunOpts, RunSpec, set_opts
 from rush.mmseqs2 import mmseqs2
 from rush.mmseqs2 import save_outputs as save_mmseqs2_outputs
 
@@ -25,10 +25,8 @@ def test_fold():
         ),
         collect=True,
     )
-    assert not isinstance(res, (str, RunError))
     print(json.dumps(res, indent=2), file=sys.stderr)
     saved_msas = save_mmseqs2_outputs(res)
-    assert not isinstance(saved_msas, (str, RunError))
     assert saved_msas[0].suffix == ".a3m"
     res = boltz(
         [
@@ -43,10 +41,10 @@ def test_fold():
         run_spec=RunSpec(target="Bullet2", gpus=1),
         collect=True,
     )
-    assert not isinstance(res, (str, RunError))
     print(json.dumps(res, indent=2), file=sys.stderr)
     output = fetch_outputs(res)
-    assert not isinstance(output, (str, RunError))
+    # One diffusion sample by default
+    assert len(output) == 1
     assert isinstance(output[0], BoltzResult)
 
 

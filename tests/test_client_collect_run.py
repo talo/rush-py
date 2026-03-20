@@ -1,4 +1,6 @@
-from rush.client import RunError, collect_run
+import pytest
+
+from rush.client import RushRunError, collect_run
 
 
 def test_collect_run_restored(monkeypatch, capsys):
@@ -17,7 +19,7 @@ def test_collect_run_restored(monkeypatch, capsys):
 
     result = collect_run("run-id")
 
-    assert result == {"path": "output.json"}
+    assert result == [{"path": "output.json"}]
     assert "Restored already-completed run" in capsys.readouterr().err
 
 
@@ -41,11 +43,11 @@ def test_collect_run_no_mi_error(monkeypatch, capsys):
         },
     )
 
-    result = collect_run("run-id")
+    with pytest.raises(RushRunError) as exc_info:
+        collect_run("run-id")
 
     stderr = capsys.readouterr().err
-    assert isinstance(result, RunError)
-    assert "module `exess_rex` is not available" in result.message
+    assert "module `exess_rex` is not available" in exc_info.value.message
     assert "starting rex evaluation" in stderr
     assert "Restored already-completed run" not in stderr
 
@@ -69,10 +71,10 @@ def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
         },
     )
 
-    result = collect_run("run-id")
+    with pytest.raises(RushRunError):
+        collect_run("run-id")
 
     stderr = capsys.readouterr().err
-    assert isinstance(result, RunError)
     assert 'module_state: Some("rex_start_failed")' in stderr
     assert 'reason: Some("module not runnable on this account tier")' in stderr
     assert "stdout:" in stderr
@@ -82,7 +84,7 @@ def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
 
 
 def test_run_error_str_includes_trace_and_stdio_sections():
-    err = RunError(
+    err = RushRunError(
         "Error: rex evaluation failed",
         (
             'module_state: Some("rex_start_failed")\\n'

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from rush.client import RunError, RunOpts, set_opts
+from rush.client import RunOpts, set_opts
 from rush.pbsa import PBSAResult, fetch_outputs, pbsa, save_outputs
 
 
@@ -27,11 +27,11 @@ def test_pbsa():
         ),
         collect=True,
     )
-    output = fetch_outputs(res)
-    assert not isinstance(output, (str, RunError))
-    assert isinstance(output, PBSAResult)
-    print(output, file=sys.stderr)
-    save_outputs(res)
+    print(res, file=sys.stderr)
+    fetched = fetch_outputs(res)
+    assert isinstance(fetched, PBSAResult)
+    print(fetched, file=sys.stderr)
+    print(save_outputs(res), file=sys.stderr)
 
 
 if __name__ == "__main__":

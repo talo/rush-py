@@ -21,12 +21,7 @@ import json
 from pathlib import Path
 
 from rush.client import RunOpts
-from rush.exess_geo_opt import (
-    ExessGeoOptResult,
-    exess_geo_opt,
-    fetch_outputs,
-    save_outputs,
-)
+from rush.exess_geo_opt import exess_geo_opt, fetch_outputs, save_outputs
 
 DATA_DIR = Path(__file__).parent / "data"
 INPUT_FILE = DATA_DIR / "ethene_twisted_t.json"
@@ -64,11 +59,9 @@ print("Working with the optimization output")
 print("=" * 60)
 
 saved_paths = save_outputs(out)
-assert isinstance(saved_paths, tuple)
 print(f"Saved files: {saved_paths}")
 
 result = fetch_outputs(out)
-assert isinstance(result, ExessGeoOptResult)
 
 out_traj = result.trajectory
 out_info = result.steps

@@ -1,7 +1,7 @@
+from rush import TRC
 from pathlib import Path
 
-from rush import TRC
-from rush.client import RunError, RunOpts, set_opts
+from rush.client import RunOpts, set_opts
 from rush.prepare_protein import fetch_outputs, prepare_protein
 
 
@@ -16,7 +16,6 @@ def test_prepare_protein():
         ),
         collect=True,
     )
-    assert not isinstance(res, RunError)
 
     trc = fetch_outputs(res)
     assert isinstance(trc, TRC)

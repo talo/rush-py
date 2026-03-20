@@ -15,7 +15,7 @@ Prerequisites:
 
 from pathlib import Path
 
-from rush.client import RunError, RunOpts
+from rush.client import RunOpts
 from rush.nnxtb import fetch_outputs, nnxtb
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -36,38 +36,28 @@ res = nnxtb(
     collect=True,
 )
 
-if isinstance(res, RunError):
-    print(f"Run failed: {res.message}")
-    exit(1)
-
 # ===== Parse results =====
-results = fetch_outputs(res)
-
-if isinstance(results, RunError):
-    print(f"Output fetch failed: {results.message}")
-    exit(1)
+result = fetch_outputs(res)
 
 # ===== Print energy =====
 print()
 print("Results:")
 print("-" * 40)
-print(f"  Energy:  {results.energy_mev:.2f} meV")
-print(f"           {results.energy_mev / 1000:.6f} eV")
-print(f"           {results.energy_mev / 1000 * 23.06:.4f} kcal/mol")
-
-# ===== Print forces =====
-if results.forces_mev_per_angstrom:
-    print()
-    print(f"  Forces ({len(results.forces_mev_per_angstrom)} atoms):")
-    print(f"  {'Atom':<6} {'Fx':>10} {'Fy':>10} {'Fz':>10} {'|F|':>10}  (meV/A)")
-    for i, (fx, fy, fz) in enumerate(results.forces_mev_per_angstrom):
-        magnitude = (fx**2 + fy**2 + fz**2) ** 0.5
-        print(f"  {i:<6} {fx:>10.2f} {fy:>10.2f} {fz:>10.2f} {magnitude:>10.2f}")
-        if i >= 9:
-            remaining = len(results.forces_mev_per_angstrom) - 10
-            if remaining > 0:
-                print(f"  ... ({remaining} more atoms)")
-            break
+print(f"  Energy:  {result.energy_mev:.2f} meV")
+print(f"           {result.energy_mev / 1000:.6f} eV")
+print(f"           {result.energy_mev / 1000 * 23.06:.4f} kcal/mol")
+print()
+assert result.forces_mev_per_angstrom, "Requested forces but didn't get them"
+print(f"  Forces ({len(result.forces_mev_per_angstrom)} atoms):")
+print(f"  {'Atom':<6} {'Fx':>10} {'Fy':>10} {'Fz':>10} {'|F|':>10}  (meV/A)")
+for i, (fx, fy, fz) in enumerate(result.forces_mev_per_angstrom):
+    magnitude = (fx**2 + fy**2 + fz**2) ** 0.5
+    print(f"  {i:<6} {fx:>10.2f} {fy:>10.2f} {fz:>10.2f} {magnitude:>10.2f}")
+    if i >= 9:
+        remaining = len(result.forces_mev_per_angstrom) - 10
+        if remaining > 0:
+            print(f"  ... ({remaining} more atoms)")
+        break
 
 print("-" * 40)
 print("\nDone!")

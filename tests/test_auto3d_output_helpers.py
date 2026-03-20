@@ -1,9 +1,11 @@
 from collections.abc import Iterator
 from pathlib import Path
 
+import pytest
+
 from rush import TRCSavedResult
 from rush.auto3d import Auto3DResult, Auto3DSavedResult, fetch_outputs, save_outputs
-from rush.client import RunError, _json_content_name
+from rush.client import _json_content_name
 
 
 def test_fetch_outputs_parses_auto3d_result(monkeypatch):
@@ -81,19 +83,36 @@ def test_save_outputs_saves_auto3d_result(monkeypatch):
     )
 
 
-def test_auto3d_output_helpers_passthrough_run_id_and_errors():
-    err = RunError("Error: auto3d failed")
-
-    assert fetch_outputs("run-id") == "run-id"
-    assert save_outputs("run-id") == "run-id"
-    assert fetch_outputs(err) is err
-    assert save_outputs(err) is err
-
-
 def test_auto3d_output_helpers_wrap_per_input_errors():
     output = fetch_outputs(["bad smiles"])
 
     assert isinstance(output, list)
     first_output = output[0]
-    assert isinstance(first_output, RunError)
-    assert first_output.message == "bad smiles"
+    assert first_output == "bad smiles"
+
+
+def test_auto3d_output_helpers_reject_malformed_conformer_payload():
+    res = [
+        [
+            (
+                [{"path": "top"}, {"path": "res"}, {"path": "chains"}],
+                {
+                    "f_max": 0.1,
+                    "converged": True,
+                    "e_rel_kcal_mol": 1.2,
+                    "e_tot_hartrees": -3.4,
+                },
+                "extra",
+            )
+        ]
+    ]
+
+    fetch_output = fetch_outputs(res)[0]
+    assert not isinstance(fetch_output, str)
+    with pytest.raises(ValueError, match="too many values to unpack"):
+        list(fetch_output)
+
+    saved_output = save_outputs(res)[0]
+    assert not isinstance(saved_output, str)
+    with pytest.raises(ValueError, match="too many values to unpack"):
+        list(saved_output)

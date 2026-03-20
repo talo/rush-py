@@ -13,12 +13,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -46,6 +46,7 @@ class NnxtbResult:
     frequencies_inv_cm: list[float] | None = None
 
 
+@overload
 def nnxtb(
     topology_path: Path | str,
     compute_forces: bool | None = None,
@@ -53,8 +54,39 @@ def nnxtb(
     multiplicity: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1, storage=100),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def nnxtb(
+    topology_path: Path | str,
+    compute_forces: bool | None = None,
+    compute_frequencies: bool | None = None,
+    multiplicity: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1, storage=100),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> dict[str, Any]: ...
+@overload
+def nnxtb(
+    topology_path: Path | str,
+    compute_forces: bool | None = None,
+    compute_frequencies: bool | None = None,
+    multiplicity: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1, storage=100),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> dict[str, Any] | RunID: ...
+
+
+def nnxtb(
+    topology_path: Path | str,
+    compute_forces: bool | None = None,
+    compute_frequencies: bool | None = None,
+    multiplicity: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1, storage=100),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> dict[str, Any] | RunID:
     """
     Run NN-xTB on the system in the QDX topology file at `topology_path`.
 
@@ -100,42 +132,44 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        out = out[0]
+        assert isinstance(out, dict)
+        return out
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
 
 
-def _unwrap_output(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-) -> dict[str, Any] | RunError:
-    if isinstance(res, RunError):
-        return res
-    if isinstance(res, dict):
-        return res
-    if len(res) != 1:
-        raise ValueError("nnxtb should return exactly 1 output.")
-    return res[0]
+def fetch_outputs(res: dict[str, Any]) -> NnxtbResult:
+    """
+    Fetch NN-xTB outputs into memory.
 
+    Args:
+        res: Collected output from nnxtb().
 
-def fetch_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-) -> NnxtbResult | RunError:
-    output_obj = _unwrap_output(res)
-    if isinstance(output_obj, RunError):
-        return output_obj
+    Returns:
+        Parsed NN-xTB result data.
+    """
+    output_obj = res
     return NnxtbResult(**json.loads(fetch_object(output_obj["path"]).decode()))
 
 
-def save_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-) -> Path | RunError:
-    output_obj = _unwrap_output(res)
-    if isinstance(output_obj, RunError):
-        return output_obj
+def save_outputs(res: dict[str, Any]) -> Path:
+    """
+    Save NN-xTB outputs into the workspace.
+
+    Args:
+        res: Collected output from nnxtb().
+
+    Returns:
+        Local path to the saved NN-xTB output file.
+    """
+    output_obj = res
     return save_object(output_obj["path"])

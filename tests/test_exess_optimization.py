@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from rush import exess_geo_opt
-from rush.client import RunOpts, RunError, set_opts
+from rush.client import RunOpts, set_opts
 from rush.exess_geo_opt import (
     ExessGeoOptResult,
     ExessGeoOptSavedResult,
@@ -51,8 +51,6 @@ def test_exess_optimization():
     assert isinstance(saved, ExessGeoOptSavedResult)
     assert isinstance(saved.trajectory, Path)
     assert isinstance(saved.steps, Path)
-
-    assert not isinstance(fetched, RunError)
 
 
 if __name__ == "__main__":

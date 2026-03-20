@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
-from typing import Any
+from typing import Any, Literal, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -25,7 +25,7 @@ from rush.mol import TRC
 
 from ._output_types import TRCSavedResult
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -146,6 +146,7 @@ class BoltzSavedResult:
     affinities: Path | None = None
 
 
+@overload
 def boltz(
     sequences: list[ProteinSequence | LigandSequence],
     recycling_steps: int | None = None,
@@ -166,8 +167,78 @@ def boltz(
     template_chain_mapping: dict[str, str] | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def boltz(
+    sequences: list[ProteinSequence | LigandSequence],
+    recycling_steps: int | None = None,
+    sampling_steps: int | None = None,
+    diffusion_samples: int | None = None,
+    step_scale: float | None = None,
+    affinity_binder_chain_id: str | None = None,
+    affinity_mw_correction: bool | None = None,
+    sampling_steps_affinity: int | None = None,
+    diffusion_samples_affinity: bool | None = None,
+    max_msa_seqs: int | None = None,
+    subsample_msa: bool | None = None,
+    num_subsampled_msa: int | None = None,
+    use_potentials: bool | None = None,
+    seed: int | None = None,
+    template_path: Path | str | None = None,
+    template_threshold_angstroms: float | None = None,
+    template_chain_mapping: dict[str, str] | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> list[tuple[Any, ...]]: ...
+@overload
+def boltz(
+    sequences: list[ProteinSequence | LigandSequence],
+    recycling_steps: int | None = None,
+    sampling_steps: int | None = None,
+    diffusion_samples: int | None = None,
+    step_scale: float | None = None,
+    affinity_binder_chain_id: str | None = None,
+    affinity_mw_correction: bool | None = None,
+    sampling_steps_affinity: int | None = None,
+    diffusion_samples_affinity: bool | None = None,
+    max_msa_seqs: int | None = None,
+    subsample_msa: bool | None = None,
+    num_subsampled_msa: int | None = None,
+    use_potentials: bool | None = None,
+    seed: int | None = None,
+    template_path: Path | str | None = None,
+    template_threshold_angstroms: float | None = None,
+    template_chain_mapping: dict[str, str] | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> list[tuple[Any, ...]] | RunID: ...
+
+
+def boltz(
+    sequences: list[ProteinSequence | LigandSequence],
+    recycling_steps: int | None = None,
+    sampling_steps: int | None = None,
+    diffusion_samples: int | None = None,
+    step_scale: float | None = None,
+    affinity_binder_chain_id: str | None = None,
+    affinity_mw_correction: bool | None = None,
+    sampling_steps_affinity: int | None = None,
+    diffusion_samples_affinity: bool | None = None,
+    max_msa_seqs: int | None = None,
+    subsample_msa: bool | None = None,
+    num_subsampled_msa: int | None = None,
+    use_potentials: bool | None = None,
+    seed: int | None = None,
+    template_path: Path | str | None = None,
+    template_threshold_angstroms: float | None = None,
+    template_chain_mapping: dict[str, str] | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> list[tuple[Any, ...]] | RunID:
     """
     Run Boltz on protein and ligand inputs.
 
@@ -263,15 +334,22 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        for out_i in out:
+            assert isinstance(out_i, list)
+        out = out[0]
+        out = [tuple(out_i) for out_i in out]
+        return out
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise
 
 
 def _decode_float_array(output: dict[str, Any]) -> npt.NDArray[np.float32]:
@@ -280,7 +358,9 @@ def _decode_float_array(output: dict[str, Any]) -> npt.NDArray[np.float32]:
     return np.frombuffer(raw, dtype=np.dtype("<f4")).reshape(shape)
 
 
-def _fetch_trc_output(model_obj: Any) -> TRC:
+def _fetch_trc_output(
+    model_obj: tuple[dict[str, Any], dict[str, Any], dict[str, Any]],
+) -> TRC:
     topology_obj, residues_obj, chains_obj = model_obj
 
     def load_component(output_obj: dict[str, Any]) -> Any:
@@ -298,30 +378,18 @@ def _fetch_trc_output(model_obj: Any) -> TRC:
     )
 
 
-def _map_outputs(
-    res: list[Any] | tuple[Any, ...] | str | RunError,
-    *,
-    on_success,
-):
-    if isinstance(res, (str, RunError)):
-        return res
-
-    if isinstance(res, (list, tuple)):
-        return [on_success(res_i) for res_i in res]
-
-    return RunError(
-        f"Error: boltz output helper received unexpected format: {type(res)}"
-    )
-
-
-def fetch_outputs(
-    res: list[Any] | tuple[Any, ...] | str | RunError,
-) -> list[BoltzResult] | str | RunError:
+def fetch_outputs(res: list[tuple[Any, ...]]) -> list[BoltzResult]:
     """
     Fetch Boltz outputs into parsed Python objects in memory.
+
+    Args:
+        res: Collected output from boltz(), one item per predicted model.
+
+    Returns:
+        Parsed BoltzResult objects in the same order as the collected outputs.
     """
 
-    def fetch_output(res_i: Any) -> BoltzResult:
+    def fetch_output(res_i: tuple[Any, ...]) -> BoltzResult:
         model_obj, metrics, plddt_obj, pae_obj, affinities = res_i
         plddt = fetch_object(plddt_obj["path"])
         if isinstance(plddt, bytes):
@@ -340,14 +408,18 @@ def fetch_outputs(
             else None,
         )
 
-    return _map_outputs(res, on_success=fetch_output)
+    return [fetch_output(res_i) for res_i in res]
 
 
-def save_outputs(
-    res: list[Any] | tuple[Any, ...] | str | RunError,
-) -> list[BoltzSavedResult] | str | RunError:
+def save_outputs(res: list[tuple[Any, ...]]) -> list[BoltzSavedResult]:
     """
     Save Boltz outputs into the workspace.
+
+    Args:
+        res: Collected output from boltz(), one item per predicted model.
+
+    Returns:
+        Saved Boltz result bundles in the same order as the collected outputs.
     """
 
     def save_output(res_i: Any) -> BoltzSavedResult:
@@ -376,4 +448,4 @@ def save_outputs(
             ),
         )
 
-    return _map_outputs(res, on_success=save_output)
+    return [save_output(res_i) for res_i in res]

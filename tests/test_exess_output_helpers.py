@@ -8,19 +8,16 @@ import zstandard as zstd
 
 from rush import exess
 from rush.client import _extract_object_archive
-from rush.client import RunError
 from rush.exess_geo_opt import (
     ExessGeoOptResult,
     ExessGeoOptSavedResult,
     ExessGeoOptStep,
-    fetch_outputs as fetch_geo_opt_outputs,
-    save_outputs as save_geo_opt_outputs,
 )
-from rush.exess_qmmm import (
-    ExessQMMMResult,
-    fetch_outputs as fetch_qmmm_outputs,
-    save_outputs as save_qmmm_outputs,
-)
+from rush.exess_geo_opt import fetch_outputs as fetch_geo_opt_outputs
+from rush.exess_geo_opt import save_outputs as save_geo_opt_outputs
+from rush.exess_qmmm import ExessQMMMResult
+from rush.exess_qmmm import fetch_outputs as fetch_qmmm_outputs
+from rush.exess_qmmm import save_outputs as save_qmmm_outputs
 
 
 def _make_tar_zst(payload: bytes, filename: str = "output.hdf5") -> bytes:
@@ -51,10 +48,12 @@ def test_fetch_outputs_extracts_hdf5(monkeypatch):
     )
 
     result = exess.fetch_outputs(
-        [{"path": "main"}, {"Hdf5": {"path": "exports", "format": "bin"}}]
+        (
+            {"path": "main"},
+            {"Hdf5": {"path": "exports", "format": "bin"}},
+        )
     )
 
-    assert not isinstance(result, RunError)
     assert result.calc.calculation_time == 1.0
     assert result.exports == b"fake-hdf5"
 
@@ -72,11 +71,13 @@ def test_fetch_outputs_can_skip_extract(monkeypatch):
     )
 
     result = exess.fetch_outputs(
-        [{"path": "main"}, {"Hdf5": {"path": "exports", "format": "bin"}}],
+        (
+            {"path": "main"},
+            {"Hdf5": {"path": "exports", "format": "bin"}},
+        ),
         extract=False,
     )
 
-    assert not isinstance(result, RunError)
     assert result.exports == export_bytes
 
 
@@ -87,7 +88,12 @@ def test_fetch_outputs_rejects_unknown_export_wrapper(monkeypatch):
     monkeypatch.setattr(exess, "fetch_object", lambda path, extract=False: output_bytes)
 
     with pytest.raises(ValueError, match="Unknown output format"):
-        exess.fetch_outputs([{"path": "main"}, {"Csv": {"path": "exports"}}])
+        exess.fetch_outputs(
+            (
+                {"path": "main"},
+                {"Csv": {"path": "exports"}},
+            )
+        )
 
 
 def test_geo_opt_fetch_outputs(monkeypatch):
@@ -114,7 +120,12 @@ def test_geo_opt_fetch_outputs(monkeypatch):
         lambda path: trajectory_json if path == "traj" else steps_json,
     )
 
-    result = fetch_geo_opt_outputs([{"path": "traj"}, {"path": "steps"}])
+    result = fetch_geo_opt_outputs(
+        (
+            {"path": "traj"},
+            {"path": "steps"},
+        )
+    )
 
     assert isinstance(result, ExessGeoOptResult)
     assert len(result.trajectory) == 1
@@ -140,7 +151,12 @@ def test_geo_opt_save_outputs(monkeypatch):
         lambda path: Path(f"/tmp/{path}.json"),
     )
 
-    result = save_geo_opt_outputs([{"path": "traj"}, {"path": "steps"}])
+    result = save_geo_opt_outputs(
+        (
+            {"path": "traj"},
+            {"path": "steps"},
+        )
+    )
 
     assert result == ExessGeoOptSavedResult(
         trajectory=Path("/tmp/traj.json"),
@@ -173,14 +189,15 @@ def test_qmmm_save_outputs(monkeypatch):
     assert result == Path("/tmp/traj.json")
 
 
-def test_geo_opt_and_qmmm_output_helpers_passthrough_run_id_and_errors():
-    err = RunError("Error: exess helper failed")
+def test_geo_opt_and_qmmm_output_helpers_reject_invalid_shapes():
+    with pytest.raises(ValueError, match="unexpected format"):
+        fetch_geo_opt_outputs(({"path": "traj"},))
 
-    assert fetch_geo_opt_outputs("run-id") == "run-id"
-    assert save_geo_opt_outputs("run-id") == "run-id"
-    assert fetch_qmmm_outputs("run-id") == "run-id"
-    assert save_qmmm_outputs("run-id") == "run-id"
-    assert fetch_geo_opt_outputs(err) is err
-    assert save_geo_opt_outputs(err) is err
-    assert fetch_qmmm_outputs(err) is err
-    assert save_qmmm_outputs(err) is err
+    with pytest.raises(ValueError, match="unexpected format"):
+        save_geo_opt_outputs(({"path": "traj"},))
+
+    with pytest.raises(ValueError, match="unexpected format"):
+        fetch_qmmm_outputs({})
+
+    with pytest.raises(ValueError, match="unexpected format"):
+        save_qmmm_outputs({})

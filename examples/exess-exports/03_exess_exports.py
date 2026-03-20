@@ -22,6 +22,7 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+
 from rush import exess
 from rush.client import RunOpts, RunSpec
 from rush.exess import exess_energy
@@ -84,12 +85,8 @@ files = exess.save_outputs(res)
 print(f"Saved files: {files}")
 
 # Load total energy from saved JSON file
-total_energy = None
-json_file = next((f for f in files if str(f).endswith(".json")), None)
-if json_file:
-    with open(json_file, encoding="utf-8") as f:
-        json_data = json.load(f)
-        total_energy = json_data.get("qmmbe", {}).get("expanded_hf_energy")
+exess_results = exess.fetch_outputs(res)
+total_energy = exess_results.calc.qmmbe.expanded_hf_energy
 
 
 # ===== Example 2: Descriptor grids for density and ESP =====
@@ -133,14 +130,6 @@ print()
 print("The JSON file contains density_descriptors, esp_descriptors,")
 print("descriptor_grid coordinates, and descriptor_grid_weights.")
 
-# Try to get total_energy from Example 2 if not found earlier
-if total_energy is None:
-    json_file = next((f for f in files if str(f).endswith(".json")), None)
-    if json_file:
-        with open(json_file, encoding="utf-8") as f:
-            json_data = json.load(f)
-            total_energy = json_data.get("qmmbe", {}).get("expanded_hf_energy")
-
 
 # ===== Example 3: Generate 3D electron density visualization =====
 print()
@@ -151,35 +140,31 @@ print("=" * 60)
 # Load descriptor grid data from the saved HDF5 file
 print("  Loading HDF5 from saved files...")
 grid_data = None
-hdf5_file = next((f for f in files if str(f).endswith(".hdf5")), None)
 
-if hdf5_file:
-    with h5py.File(hdf5_file, "r") as h5f:
-        grid_data = {}
-        # Extract known keys
-        if "density_descriptors" in h5f:
-            grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
-        if "esp_descriptors" in h5f:
-            grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
-        if "descriptor_grid" in h5f:
-            grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
+with h5py.File(files.exports, "r") as h5f:
+    grid_data = {}
+    # Extract known keys
+    if "density_descriptors" in h5f:
+        grid_data["density_descriptors"] = h5f["density_descriptors"][:].tolist()
+    if "esp_descriptors" in h5f:
+        grid_data["esp_descriptors"] = h5f["esp_descriptors"][:].tolist()
+    if "descriptor_grid" in h5f:
+        grid_data["descriptor_grid"] = h5f["descriptor_grid"][:].tolist()
 
-    print(f"  ✓ Extracted keys from HDF5: {list(grid_data.keys())}")
-    for key, val in grid_data.items():
-        if isinstance(val, list) and len(val) > 0:
-            # Check if values are scalars (1D) or coordinate tuples (2D)
-            if isinstance(val[0], (int, float)):
-                print(
-                    f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]"
-                )
-            else:
-                # Coordinate data (e.g., descriptor_grid is list of [x,y,z])
-                arr = np.array(val)
-                print(f"    {key}: {len(val)} points, shape={arr.shape}")
-else:
-    print("  WARNING: No HDF5 file found in saved outputs")
+print(f"  ✓ Extracted keys from HDF5: {list(grid_data.keys())}")
+for key, val in grid_data.items():
+    if isinstance(val, list) and len(val) > 0:
+        # Check if values are scalars (1D) or coordinate tuples (2D)
+        if isinstance(val[0], (int, float)):
+            print(
+                f"    {key}: {len(val)} values, range=[{min(val):.6e}, {max(val):.6e}]"
+            )
+        else:
+            # Coordinate data (e.g., descriptor_grid is list of [x,y,z])
+            arr = np.array(val)
+            print(f"    {key}: {len(val)} points, shape={arr.shape}")
 
-if grid_data is None or not grid_data:
+if not grid_data:
     print("ERROR: Could not find grid data. Skipping visualization.")
 else:
     # Extract density and ESP values

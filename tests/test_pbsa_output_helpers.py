@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from rush.client import RunError, _json_content_name
+from rush.client import _json_content_name
 from rush.pbsa import PBSAResult, fetch_outputs, save_outputs
 
 
 def test_fetch_outputs_parses_pbsa_result():
-    result = fetch_outputs([-1.0, -0.8, -0.2])
+    result = fetch_outputs((-1.0, -0.8, -0.2))
 
     assert isinstance(result, PBSAResult)
     assert result.solvation_energy == -1.0
@@ -27,7 +27,7 @@ def test_save_outputs_saves_pbsa_result(monkeypatch):
         fake_save_json,
     )
 
-    result = save_outputs([-1.0, -0.8, -0.2])
+    result = save_outputs((-1.0, -0.8, -0.2))
 
     assert result == Path("/tmp/pbsa_output.json")
     assert saved["data"] == {
@@ -40,19 +40,3 @@ def test_save_outputs_saves_pbsa_result(monkeypatch):
         "pbsa_output",
         saved["data"],
     )
-
-
-def test_pbsa_output_helpers_passthrough_run_id_and_errors():
-    err = RunError("Error: pbsa failed")
-
-    assert fetch_outputs("run-id") == "run-id"
-    assert save_outputs("run-id") == "run-id"
-    assert fetch_outputs(err) is err
-    assert save_outputs(err) is err
-
-
-def test_pbsa_output_helpers_reject_unexpected_shape():
-    result = fetch_outputs([1.0, 2.0])
-
-    assert isinstance(result, RunError)
-    assert "unexpected format" in result.message

@@ -11,12 +11,12 @@ the workspace.
 import sys
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -26,6 +26,50 @@ from .client import (
     save_object,
 )
 from .utils import optional_str
+
+
+@overload
+def mmseqs2(
+    sequences: list[str],
+    prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
+    sensitivity: float | None = None,
+    expand_eval: float | None = None,
+    align_eval: int | None = None,
+    diff: int | None = None,
+    qsc: float | None = None,
+    max_accept: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def mmseqs2(
+    sequences: list[str],
+    prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
+    sensitivity: float | None = None,
+    expand_eval: float | None = None,
+    align_eval: int | None = None,
+    diff: int | None = None,
+    qsc: float | None = None,
+    max_accept: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> list[dict[str, Any]]: ...
+@overload
+def mmseqs2(
+    sequences: list[str],
+    prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
+    sensitivity: float | None = None,
+    expand_eval: float | None = None,
+    align_eval: int | None = None,
+    diff: int | None = None,
+    qsc: float | None = None,
+    max_accept: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> list[dict[str, Any]] | RunID: ...
 
 
 def mmseqs2(
@@ -39,8 +83,8 @@ def mmseqs2(
     max_accept: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+    collect: bool = False,
+) -> list[dict[str, Any]] | RunID:
     """
     Run MMseqs2 on one or more amino acid sequences.
 
@@ -76,42 +120,36 @@ mmseqs2_rex_s
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        assert len(out) == len(sequences)
+        for out_i in out:
+            assert isinstance(out_i, list)
+        if len(out) == 1:
+            out = out[0]
+        return out
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
 
 
-def _unwrap_outputs(
-    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> list[dict[str, Any]] | str | RunError:
-    if isinstance(res, (str, RunError)):
-        return res
-
-    if isinstance(res, (list, tuple)):
-        return list(res)
-
-    return RunError(
-        f"Error: mmseqs2 output helper received unexpected format: {type(res)}"
-    )
-
-
-def fetch_outputs(
-    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> list[str] | str | RunError:
+def fetch_outputs(res: list[dict[str, Any]]) -> list[str]:
     """
     Fetch MMseqs2 outputs into memory as A3M strings.
+
+    Args:
+        res: Collected output from mmseqs2(), one object per input sequence.
+
+    Returns:
+        A3M text outputs in the same order as the collected outputs.
     """
-
-    outputs = _unwrap_outputs(res)
-    if isinstance(outputs, (str, RunError)):
-        return outputs
-
+    outputs = res
     a3ms: list[str] = []
     for output_obj in outputs:
         a3m = fetch_object(output_obj["path"])
@@ -119,17 +157,17 @@ def fetch_outputs(
     return a3ms
 
 
-def save_outputs(
-    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> list[Path] | str | RunError:
+def save_outputs(res: list[dict[str, Any]]) -> list[Path]:
     """
     Save MMseqs2 outputs into the workspace as `.a3m` files.
+
+    Args:
+        res: Collected output from mmseqs2(), one object per input sequence.
+
+    Returns:
+        Local `.a3m` paths in the same order as the collected outputs.
     """
-
-    outputs = _unwrap_outputs(res)
-    if isinstance(outputs, (str, RunError)):
-        return outputs
-
+    outputs = res
     return [
         save_object(output_obj["path"], type="bin", ext="a3m") for output_obj in outputs
     ]

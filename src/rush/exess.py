@@ -27,12 +27,12 @@ import warnings
 from dataclasses import dataclass, replace
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -225,18 +225,14 @@ class ExessManyBodyExpansion:
 class ExessCalculation:
     schema_version: str
     calculation_time: float
-    qmmbe: ExessManyBodyExpansion | None = None
+    qmmbe: ExessManyBodyExpansion
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ExessCalculation":
         return cls(
             schema_version=data["schema_version"],
             calculation_time=data["calculation_time"],
-            qmmbe=(
-                ExessManyBodyExpansion.from_dict(data["qmmbe"])
-                if data.get("qmmbe") is not None
-                else None
-            ),
+            qmmbe=ExessManyBodyExpansion.from_dict(data["qmmbe"]),
         )
 
 
@@ -1020,6 +1016,45 @@ class KSDFTKeywords:
         )
 
 
+@overload
+def exess(
+    topology_path: Path | str,
+    driver: str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess(
+    topology_path: Path | str,
+    driver: str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
 def exess(
     topology_path: Path | str,
     driver: str,
@@ -1037,7 +1072,27 @@ def exess(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID: ...
+
+
+def exess(
+    topology_path: Path | str,
+    driver: str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID:
     """
     Compute the energy of the system in the QDX topology file at `topology_path`.
     """
@@ -1119,15 +1174,74 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        return tuple(out)
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise
+
+
+@overload
+def exess_energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess_energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
+def exess_energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID: ...
 
 
 def exess_energy(
@@ -1146,7 +1260,7 @@ def exess_energy(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID:
     return exess(
         topology_path,
         "Energy",
@@ -1168,11 +1282,8 @@ def exess_energy(
 
 
 def _unwrap_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-) -> tuple[dict[str, Any], dict[str, Any] | None] | RunError:
-    if isinstance(res, RunError):
-        return res
-
+    res: tuple[dict[str, Any], ...],
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
     if isinstance(res, dict):
         return (res, None)
 
@@ -1201,10 +1312,7 @@ def _resolve_exports_object(
     )
 
 
-def fetch_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-    extract: bool = True,
-) -> ExessResult | RunError:
+def fetch_outputs(res: tuple[dict[str, Any], ...], extract: bool = True) -> ExessResult:
     """
     Download EXESS outputs and convert the main JSON payload into Python dataclasses.
 
@@ -1212,15 +1320,20 @@ def fetch_outputs(
     - JSON exports are returned as a raw dict
     - HDF5 exports are returned as extracted file bytes by default
     - HDF5 exports are returned as raw tar.zst bytes when extract=False
-    """
-    outputs = _unwrap_outputs(res)
-    if isinstance(outputs, RunError):
-        return outputs
 
-    output_obj, exports_obj = outputs
+    Args:
+        res: Collected output from an EXESS single-point style run. This may
+            be a single output object or a sequence containing the main
+            calculation output plus an optional export output.
+        extract: Whether to extract HDF5 tarball exports before returning them.
+
+    Returns:
+        Parsed EXESS calculation data plus an optional fetched export payload.
+    """
+    calc_obj, exports_obj = _unwrap_outputs(res)
 
     calc = ExessCalculation.from_dict(
-        json.loads(fetch_object(output_obj["path"]).decode())
+        json.loads(fetch_object(calc_obj["path"]).decode())
     )
 
     exports: dict[str, Any] | bytes | None = None
@@ -1245,36 +1358,24 @@ def fetch_outputs(
     return ExessResult(calc=calc, exports=exports)
 
 
-def save_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-    extract=True,
-) -> ExessSavedResult | RunError:
+def save_outputs(res: tuple[dict[str, Any], ...], extract=True) -> ExessSavedResult:
     """
     Download and save energy calculation outputs from Rush.
 
-    Takes the result from exess functions (`exess_energy()`, `exess_interaction_energy()`, etc.)
-    and downloads the output files to disk. The result can be either a tuple or list
-    because collect_run() returns a list when there are multiple outputs, which is
-    converted to a tuple for consistent processing.
+    Takes the collected result from EXESS functions (`exess_energy()`,
+    `exess_interaction_energy()`, etc.) and downloads the output files to disk.
 
     Args:
-        res: Result from exess calculation. Can be:
-            - tuple[dict]: Single output from exess function
-            - tuple[dict, dict]: Two outputs (JSON + HDF5)
-            - list[dict]: Same as tuple (collect_run returns list for multiple outputs)
-        extract: Whether to extract tar.zst files (default True)
+        res: Collected output from an EXESS single-point style run. This may
+            be a single output object or a sequence containing the main
+            calculation output plus an optional export output.
+        extract: Whether to extract HDF5 tarball exports before saving them.
 
     Returns:
-        - ExessSavedResult(calc=..., exports=...): Local Paths to downloaded files
-        - ExessSavedResult(calc=..., exports=None): If HDF5 extraction fails or no HDF5 output
-        - RunError: If the input res is an error
+        Local paths for the saved calculation output and optional export output.
     """
-    outputs = _unwrap_outputs(res)
-    if isinstance(outputs, RunError):
-        return outputs
-
-    output_obj, exports_obj = outputs
-    calc_path = save_object(output_obj["path"])
+    calc_obj, exports_obj = _unwrap_outputs(res)
+    calc_path = save_object(calc_obj["path"])
     exports_ref = _resolve_exports_object(exports_obj)
 
     if exports_ref is None:
@@ -1307,6 +1408,41 @@ def save_outputs(
     )
 
 
+@overload
+def exess_interaction_energy(
+    topology_path: Path | str,
+    reference_fragment: int,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess_interaction_energy(
+    topology_path: Path | str,
+    reference_fragment: int,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
 def exess_interaction_energy(
     topology_path: Path | str,
     reference_fragment: int,
@@ -1322,7 +1458,25 @@ def exess_interaction_energy(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID: ...
+
+
+def exess_interaction_energy(
+    topology_path: Path | str,
+    reference_fragment: int,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID:
     """
     Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
     in the toplogy file at `topology_path`.

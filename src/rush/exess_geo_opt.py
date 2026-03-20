@@ -19,12 +19,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -235,8 +235,8 @@ class OptimizationKeywords:
 
 @dataclass
 class ExessGeoOptStep:
-    total_energy: float | None = None
-    max_gradient_component: float | None = None
+    total_energy: float
+    max_gradient_component: float
 
 
 @dataclass
@@ -249,6 +249,68 @@ class ExessGeoOptResult:
 class ExessGeoOptSavedResult:
     trajectory: Path
     steps: Path
+
+
+@overload
+def exess_geo_opt(
+    topology_path: Path | str,
+    max_iters: int,
+    residues_path: Path | str | None = None,
+    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess_geo_opt(
+    topology_path: Path | str,
+    max_iters: int,
+    residues_path: Path | str | None = None,
+    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
+def exess_geo_opt(
+    topology_path: Path | str,
+    max_iters: int,
+    residues_path: Path | str | None = None,
+    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID: ...
 
 
 def exess_geo_opt(
@@ -269,7 +331,7 @@ def exess_geo_opt(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID:
     """
     Run optimization on the system in the QDX topology and residues files at `topology_path`.
 
@@ -386,41 +448,43 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        return tuple(out)
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
 
 
 def _unwrap_outputs(
-    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> tuple[dict[str, Any], dict[str, Any]] | str | RunError:
-    if isinstance(res, (str, RunError)):
-        return res
-
-    if isinstance(res, (list, tuple)) and len(res) == 2:
+    res: tuple[dict[str, Any], ...],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    if isinstance(res, tuple) and len(res) == 2:
         return (res[0], res[1])
 
-    return RunError(
+    raise ValueError(
         f"Error: exess_geo_opt output helper received unexpected format: {type(res)}"
     )
 
 
-def fetch_outputs(
-    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> ExessGeoOptResult | str | RunError:
+def fetch_outputs(res: tuple[dict[str, Any], ...]) -> ExessGeoOptResult:
     """
     Fetch EXESS geometry optimization outputs into memory.
+
+    Args:
+        res: Collected output from exess_geo_opt(), containing trajectory and
+            optimization-step objects.
+
+    Returns:
+        Parsed trajectory frames and optimization metadata.
     """
     outputs = _unwrap_outputs(res)
-    if isinstance(outputs, (str, RunError)):
-        return outputs
-
     trajectory_obj, steps_obj = outputs
     trajectory = [
         Topology.from_json(topology)
@@ -432,16 +496,18 @@ def fetch_outputs(
     return ExessGeoOptResult(trajectory=trajectory, steps=steps)
 
 
-def save_outputs(
-    res: list[dict[str, Any]] | tuple[dict[str, Any], ...] | str | RunError,
-) -> ExessGeoOptSavedResult | str | RunError:
+def save_outputs(res: tuple[dict[str, Any], ...]) -> ExessGeoOptSavedResult:
     """
     Save EXESS geometry optimization outputs into the workspace.
+
+    Args:
+        res: Collected output from exess_geo_opt(), containing trajectory and
+            optimization-step objects.
+
+    Returns:
+        Local paths to the saved trajectory and optimization-step files.
     """
     outputs = _unwrap_outputs(res)
-    if isinstance(outputs, (str, RunError)):
-        return outputs
-
     trajectory_obj, steps_obj = outputs
     return ExessGeoOptSavedResult(
         trajectory=save_object(trajectory_obj["path"]),

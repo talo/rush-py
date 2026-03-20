@@ -32,6 +32,7 @@ def test_exess_energy_chelpg_1hsg_MK1():
         collect=True,
     )
     print(res, file=sys.stderr)
+    assert isinstance(res, tuple)
     charges = json.loads(fetch_object(res[1]["Json"]["path"]))["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
 
@@ -55,6 +56,7 @@ def test_exess_energy_chelpg_benzene():
         collect=True,
     )
     print(res, file=sys.stderr)
+    assert isinstance(res, tuple)
     charges = json.loads(fetch_object(res[1]["Json"]["path"]))["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
 

@@ -21,12 +21,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
@@ -129,6 +129,59 @@ class ExessQMMMResult:
     geometries: list[list[float]]
 
 
+@overload
+def exess_qmmm(
+    topology_path: Path | str,
+    n_timesteps: int,
+    residues_path: Path | str | None = None,
+    dt_ps: float = 2e-3,
+    temperature_kelvin: float = 290.0,
+    pressure_atm: float | None = None,
+    restraints: Restraints | None = None,
+    trajectory: Trajectory = Trajectory(),
+    gradient_finite_difference_step_size: float | None = None,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess_qmmm(
+    topology_path: Path | str,
+    n_timesteps: int,
+    residues_path: Path | str | None = None,
+    dt_ps: float = 2e-3,
+    temperature_kelvin: float = 290.0,
+    pressure_atm: float | None = None,
+    restraints: Restraints | None = None,
+    trajectory: Trajectory = Trajectory(),
+    gradient_finite_difference_step_size: float | None = None,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> dict[str, Any]: ...
+@overload
 def exess_qmmm(
     topology_path: Path | str,
     n_timesteps: int,
@@ -153,7 +206,34 @@ def exess_qmmm(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> dict[str, Any] | RunID: ...
+
+
+def exess_qmmm(
+    topology_path: Path | str,
+    n_timesteps: int,
+    residues_path: Path | str | None = None,
+    dt_ps: float = 2e-3,
+    temperature_kelvin: float = 290.0,
+    pressure_atm: float | None = None,
+    restraints: Restraints | None = None,
+    trajectory: Trajectory = Trajectory(),
+    gradient_finite_difference_step_size: float | None = None,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    qm_fragments: list[int] | None = None,
+    mm_fragments: list[int] | None = None,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> dict[str, Any] | RunID:
     """
     Run a QMMM simulation of the system in the QDX topology and residues files at `topology_path` and `residues_path`.
 
@@ -272,45 +352,50 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, dict)
+        return out
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
 
 
-def fetch_outputs(
-    res: dict[str, Any] | str | RunError,
-) -> ExessQMMMResult | str | RunError:
+def fetch_outputs(res: dict[str, Any]) -> ExessQMMMResult:
     """
     Fetch EXESS QM/MM outputs into memory.
-    """
-    if isinstance(res, (str, RunError)):
-        return res
 
-    if not isinstance(res, dict) or "path" not in res:
-        return RunError(
+    Args:
+        res: Collected output from exess_qmmm().
+
+    Returns:
+        Parsed QM/MM trajectory data.
+    """
+    if not isinstance(res, dict) or not isinstance(res.get("path"), str):
+        raise ValueError(
             f"Error: exess_qmmm output helper received unexpected format: {type(res)}"
         )
 
     return ExessQMMMResult(**json.loads(fetch_object(res["path"])))
 
 
-def save_outputs(
-    res: dict[str, Any] | str | RunError,
-) -> Path | str | RunError:
+def save_outputs(res: dict[str, Any]) -> Path:
     """
     Save EXESS QM/MM outputs into the workspace.
-    """
-    if isinstance(res, (str, RunError)):
-        return res
 
-    if not isinstance(res, dict) or "path" not in res:
-        return RunError(
+    Args:
+        res: Collected output from exess_qmmm().
+
+    Returns:
+        Local path to the saved QM/MM output file.
+    """
+    if not isinstance(res, dict) or not isinstance(res.get("path"), str):
+        raise ValueError(
             f"Error: exess_qmmm output helper received unexpected format: {type(res)}"
         )
 

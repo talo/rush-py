@@ -13,7 +13,7 @@ from io import BytesIO
 from os import getenv
 from pathlib import Path
 from string import Template
-from typing import Literal, TypeAlias
+from typing import Any, Literal, NewType, TypeAlias, TypeGuard
 
 import requests
 import zstandard as zstd
@@ -27,6 +27,8 @@ INITIAL_POLL_INTERVAL = 0.5
 MAX_POLL_INTERVAL = 30
 
 BACKOFF_FACTOR = 1.5
+
+RunID = NewType("RunID", str)
 
 _dotenv_cache: dict[str, str] | None = None
 
@@ -448,7 +450,9 @@ def _json_content_name(prefix: str, d: dict) -> str:
     return f"{prefix}_{uuid.uuid5(uuid.NAMESPACE_OID, payload)}"
 
 
-def save_json(d: dict, filepath: Path | str | None = None, name: str | None = None):
+def save_json(
+    d: dict[str, Any], filepath: Path | str | None = None, name: str | None = None
+):
     """
     Save a JSON file into the workspace folder.
     Convenient for saving non-object JSON output from a module run alongside
@@ -588,8 +592,8 @@ type RunStatus = Literal["pending", "running", "done", "error", "cancelled", "dr
 
 
 @dataclass
-class RunError:
-    """Represents a run error message, returned from failed collected runs."""
+class RushRunError(Exception):
+    """Raised when a Rush run fails during collection."""
 
     message: str
     trace: str = ""
@@ -635,7 +639,7 @@ def fetch_runs(
     status: RunStatus | list[RunStatus] | None = None,
     tags: list[str] | None = None,
     limit: int | None = None,
-) -> list[str]:
+) -> list[RunID]:
     """
     Query runs and return their IDs.
 
@@ -670,7 +674,7 @@ def fetch_runs(
         tags=tags,
     )
 
-    run_ids = []
+    run_ids: list[RunID] = []
     cursor = None
     page_limit = min(limit, 100) if limit else 100
 
@@ -684,7 +688,7 @@ def fetch_runs(
         result = _get_client().execute(query)
 
         runs_data = result["runs"]
-        run_ids.extend(node["id"] for node in runs_data["nodes"])
+        run_ids.extend(RunID(node["id"]) for node in runs_data["nodes"])
 
         if limit and len(run_ids) >= limit:
             return run_ids[:limit]
@@ -697,7 +701,7 @@ def fetch_runs(
     return run_ids
 
 
-def delete_run(run_id: str) -> None:
+def delete_run(run_id: str | RunID) -> None:
     """
     Delete a run by ID.
     """
@@ -713,7 +717,7 @@ def delete_run(run_id: str) -> None:
     _get_client().execute(query)
 
 
-def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
+def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()) -> RunID:
     # Auto-generate SDK metadata tags
     auto_tags = _get_sdk_tags(rex)
 
@@ -753,7 +757,7 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     }
 
     result = _get_client().execute(mutation)
-    run_id = result["eval"]["id"]
+    run_id = RunID(result["eval"]["id"])
     created_at = result["eval"]["created_at"].split(".")[0]
     print(f"Run submitted @ {created_at} with ID: {run_id}", file=sys.stderr)
 
@@ -805,7 +809,7 @@ class RushRun:
     Print it out to see a nicely-formatted summary of a run!
     """
 
-    id: str
+    id: RunID
     created_at: str
     updated_at: str
     status: str
@@ -834,7 +838,7 @@ class RushRun:
         return "\n".join(lines)
 
 
-def fetch_run_info(run_id: str) -> RushRun | None:
+def fetch_run_info(run_id: str | RunID) -> RushRun | None:
     """
     Fetch all info for a run by ID.
 
@@ -862,10 +866,10 @@ def fetch_run_info(run_id: str) -> RushRun | None:
     if result["run"] is None:
         return None
 
-    return RushRun(**result["run"] | {"id": run_id})
+    return RushRun(**result["run"] | {"id": RunID(str(run_id))})
 
 
-def _poll_run(run_id: str, max_wait_time) -> tuple[str, bool]:
+def _poll_run(run_id: str | RunID, max_wait_time) -> tuple[str, bool]:
     query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
@@ -938,35 +942,33 @@ def _poll_run(run_id: str, max_wait_time) -> tuple[str, bool]:
     return status, module_instance_created
 
 
-def collect_run(
-    run_id: str, max_wait_time: int = 3600
-) -> dict | tuple[dict, ...] | RunError:
+def collect_run(run_id: str | RunID, max_wait_time: int = 3600):
     """
-    Waits until the run finishes, or `max_wait_time` elapses, and returns either the
-    actual result of the run, an error string if the run failed, or a string indicating
-    that the run timed out.
+    Wait until the run finishes and return its outputs.
+
+    Raises:
+        RushRunError: If the run times out, is cancelled, or finishes with an error.
     """
     status, module_instance_created = _poll_run(run_id, max_wait_time)
     if status not in ["cancelled", "error", "done"]:
         err = f"Run timed out: did not complete within {max_wait_time} seconds"
-        run_error = RunError(err)
-        return run_error
+        raise RushRunError(err)
 
     run = _fetch_results(run_id)
     if run["status"] == "cancelled":
-        run_error = RunError(f"Cancelled: {run['result']}", run["trace"] or "")
+        run_error = RushRunError(f"Cancelled: {run['result']}", run["trace"] or "")
         print(run_error, file=sys.stderr)
-        return run_error
+        raise run_error
     elif run["status"] == "error":
-        run_error = RunError(f"Error: {run['result']}", run["trace"] or "")
+        run_error = RushRunError(f"Error: {run['result']}", run["trace"] or "")
         print(run_error, file=sys.stderr)
-        return run_error
+        raise run_error
     elif run["status"] == "done" and not module_instance_created:
         print("Restored already-completed run", file=sys.stderr)
 
     result = run["result"]
 
-    def is_result_type(result):
+    def is_result_type(result: Any) -> TypeGuard[dict[str, Any]]:
         return (
             isinstance(result, dict)
             and len(result) == 1
@@ -978,23 +980,20 @@ def collect_run(
         if "Ok" in result:
             result = result["Ok"]
         elif "Err" in result:
-            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
+            run_error = RushRunError(f"Error: {result['Err']}", run["trace"] or "")
             print(run_error, file=sys.stderr)
-            return run_error
+            raise run_error
 
     # inner error: for logic-level failures (may not exist, but should)
     if is_result_type(result):
         if "Ok" in result:
             result = result["Ok"]
         elif "Err" in result:
-            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
+            run_error = RushRunError(f"Error: {result['Err']}", run["trace"] or "")
             print(run_error, file=sys.stderr)
-            return run_error
+            raise run_error
 
-    if len(result) == 1:
-        return result[0]
-    else:
-        return result
+    return result
 
 
 #: All self-explanatory: pending runs are queued for submission to a target.

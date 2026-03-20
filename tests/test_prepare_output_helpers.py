@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from rush import TRC, TRCSavedResult, from_json
-from rush.client import RunError
 from rush.prepare_complex import fetch_outputs as fetch_prepare_complex_outputs
 from rush.prepare_complex import save_outputs as save_prepare_complex_outputs
 from rush.prepare_protein import fetch_outputs as fetch_prepare_protein_outputs
@@ -31,7 +32,7 @@ def test_prepare_protein_fetch_outputs(monkeypatch):
     )
 
     result = fetch_prepare_protein_outputs(
-        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
     )
 
     assert isinstance(result, TRC)
@@ -47,7 +48,7 @@ def test_prepare_protein_save_outputs(monkeypatch):
     )
 
     result = save_prepare_protein_outputs(
-        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
     )
 
     assert result == TRCSavedResult(
@@ -66,7 +67,7 @@ def test_prepare_complex_fetch_outputs(monkeypatch):
     )
 
     result = fetch_prepare_complex_outputs(
-        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
     )
 
     assert isinstance(result, TRC)
@@ -84,7 +85,7 @@ def test_prepare_complex_save_outputs(monkeypatch):
     )
 
     result = save_prepare_complex_outputs(
-        [{"path": "top"}, {"path": "res"}, {"path": "chains"}]
+        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
     )
 
     assert result == TRCSavedResult(
@@ -94,14 +95,17 @@ def test_prepare_complex_save_outputs(monkeypatch):
     )
 
 
-def test_prepare_output_helpers_passthrough_errors_and_run_ids():
-    err = RunError("Error: prepare failed")
+def test_prepare_output_helpers_reject_invalid_shapes():
+    bad_outputs = ({"path": "top"}, {"path": "res"})
 
-    assert fetch_prepare_protein_outputs("run-id") == "run-id"
-    assert save_prepare_protein_outputs("run-id") == "run-id"
-    assert fetch_prepare_complex_outputs("run-id") == "run-id"
-    assert save_prepare_complex_outputs("run-id") == "run-id"
-    assert fetch_prepare_protein_outputs(err) is err
-    assert save_prepare_protein_outputs(err) is err
-    assert fetch_prepare_complex_outputs(err) is err
-    assert save_prepare_complex_outputs(err) is err
+    with pytest.raises(ValueError, match="unexpected format"):
+        fetch_prepare_protein_outputs(bad_outputs)
+
+    with pytest.raises(ValueError, match="unexpected format"):
+        save_prepare_protein_outputs(bad_outputs)
+
+    with pytest.raises(ValueError, match="unexpected format"):
+        fetch_prepare_complex_outputs(bad_outputs)
+
+    with pytest.raises(ValueError, match="unexpected format"):
+        save_prepare_complex_outputs(bad_outputs)

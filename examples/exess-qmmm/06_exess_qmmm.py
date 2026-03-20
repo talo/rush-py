@@ -23,9 +23,9 @@ from itertools import batched
 from pathlib import Path
 
 from rush import Topology
-from rush.client import RunError, RunOpts
-from rush.mol import Element, Fragment, Residue, Residues
+from rush.client import RunOpts
 from rush.exess_qmmm import Trajectory, exess_qmmm, fetch_outputs, save_outputs
+from rush.mol import Element, Fragment, Residue, Residues
 
 DATA_DIR = Path(__file__).parent / "data"
 OUTPUT_DIR = Path(__file__).parent / "qmmm-outputs"
@@ -69,28 +69,25 @@ print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
 saved_path = save_outputs(out)
-assert isinstance(saved_path, Path)
 print(f"Saved file: {saved_path}")
 
 result = fetch_outputs(out)
-assert not isinstance(result, (str, RunError))
 out_traj = result.geometries
 
 # Load topology for atom info
 with open(topology_path, encoding="utf-8") as f:
-    topo_data = json.load(f)
+    topology = Topology.from_json(json.load(f))
+    assert topology.fragments, "Topology lost its fragments!"
 
-symbols = topo_data["symbols"]
-fragments = topo_data["fragments"]
-n_atoms = len(symbols)
+n_atoms = len(topology.symbols)
 
 # Identify QM atom indices
 qm_atom_indices = set()
 for frag_idx in QM_FRAGMENTS:
-    qm_atom_indices.update(fragments[frag_idx])
+    qm_atom_indices.update(topology.fragments[frag_idx])
 
 # MM fragment count = total fragments minus QM fragments
-n_mm_fragments = len(fragments) - len(QM_FRAGMENTS)
+n_mm_fragments = len(topology.fragments) - len(QM_FRAGMENTS)
 n_qm_atoms = len(qm_atom_indices)
 n_mm_atoms = n_atoms - n_qm_atoms
 
@@ -99,8 +96,8 @@ print(f"QM atoms: {n_qm_atoms}, MM atoms: {n_mm_atoms}")
 print(f"Trajectory frames: {len(out_traj)}")
 
 # Print first/last frame info
-initial_geom = out_traj[0] if out_traj else topo_data["geometry"]
-final_geom = out_traj[-1] if out_traj else topo_data["geometry"]
+initial_geom = out_traj[0]
+final_geom = out_traj[-1]
 
 print("First atom position:")
 print(
@@ -129,13 +126,13 @@ def geometry_to_xyz(syms, geom, frame_label=""):
 # Build all frames as XYZ strings
 all_frames_xyz = []
 for i, geom in enumerate(out_traj):
-    all_frames_xyz.append(geometry_to_xyz(symbols, geom, f"Frame {i}"))
+    all_frames_xyz.append(geometry_to_xyz(topology.symbols, geom, f"Frame {i}"))
 
 n_frames = len(all_frames_xyz)
 
 # JSON-encode data for embedding in HTML
 frames_js = json.dumps(all_frames_xyz)
-qm_indices_js = json.dumps(sorted(qm_atom_indices))
+qm_indices_js = json.dumps(sorted([int(idx) for idx in qm_atom_indices]))
 
 html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -400,7 +397,6 @@ print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
 result = fetch_outputs(out)
-assert not isinstance(result, (str, RunError))
 out_traj = result.geometries
 
 topology = Topology.from_json(molecule_t_path)

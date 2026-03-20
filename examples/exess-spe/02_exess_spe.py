@@ -12,11 +12,10 @@ Prerequisites:
     - Input file: water_topology.json (provided in data/)
 """
 
-import json
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, RunError
+from rush.client import RunOpts
 from rush.exess import exess_energy
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -45,18 +44,11 @@ res = exess_energy(
     collect=True,
 )
 
-if isinstance(res, RunError):
-    print(f"Run failed: {res.message}")
-    exit(1)
-
 # Save energy outputs to disk and load from file
-files = exess.save_outputs(res)
-json_file = next((f for f in files if str(f).endswith(".json")), None)
-with open(json_file, encoding="utf-8") as f:
-    energy_data = json.load(f)
+exess_results = exess.fetch_outputs(res)
 
 # Access total energy from qmmbe object
-total_energy = energy_data.get("qmmbe", {}).get("expanded_hf_energy")
+total_energy = exess_results.calc.qmmbe.expanded_hf_energy
 
 # ===== Print results =====
 print()

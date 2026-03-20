@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-from rush.client import RunOpts, RunError, set_opts
-from rush.nnxtb import NnxtbResult, fetch_outputs, nnxtb
+from rush.client import RunOpts, set_opts
+from rush.nnxtb import NnxtbResult, fetch_outputs, nnxtb, save_outputs
 
 
 def test_nnxtb():
@@ -20,10 +20,10 @@ def test_nnxtb():
         collect=True,
     )
     print(res, file=sys.stderr)
-    output = fetch_outputs(res)
-    assert not isinstance(output, RunError)
-    assert isinstance(output, NnxtbResult)
-    print(output, file=sys.stderr)
+    fetched = fetch_outputs(res)
+    assert isinstance(fetched, NnxtbResult)
+    print(fetched, file=sys.stderr)
+    print(save_outputs(res), file=sys.stderr)
 
 
 if __name__ == "__main__":

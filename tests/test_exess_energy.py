@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunError, RunOpts, collect_run, set_opts
+from rush.client import RunOpts, collect_run, set_opts
 from rush.exess import exess_energy
 
 
@@ -12,14 +12,13 @@ def test_exess_energy_tutorial():
         method="RestrictedHF",
         basis="PCSeg-0",
         ksdft_keywords=None,
-        collect=True,
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 00: Tutorial",
             tags=["rush-py", "test", "6a5j"],
         ),
+        collect=True,
     )
     output = exess.fetch_outputs(res)
-    assert not isinstance(output, RunError)
     assert output.calc.qmmbe is not None
     assert output.calc.qmmbe.reference_fragment is None
     assert output.calc.qmmbe.expanded_hf_energy is not None

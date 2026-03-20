@@ -1,8 +1,10 @@
 import base64
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import numpy as np
+import pytest
+
 from rush import TRCSavedResult
 from rush.boltz import (
     BoltzResult,
@@ -10,7 +12,6 @@ from rush.boltz import (
     fetch_outputs,
     save_outputs,
 )
-from rush.client import RunError
 
 
 def _sample_boltz_output():
@@ -124,18 +125,28 @@ def test_save_outputs_saves_boltz_result(monkeypatch):
     assert saved_json_names[1].startswith("boltz_affinities_")
 
 
-def test_boltz_output_helpers_passthrough_run_id_and_errors():
-    err = RunError("Error: boltz failed")
+def test_boltz_output_helpers_reject_malformed_model_output():
+    bad_input: list[tuple[Any, ...]] = [
+        (
+            [{"path": "top"}, {"path": "res"}, {"path": "chains"}],
+            {
+                "confidence_score": 0.91,
+                "ptm": 0.92,
+                "iptm": 0.93,
+                "ligand_iptm": 0.94,
+                "protein_iptm": 0.95,
+                "complex_plddt": 0.96,
+                "complex_iplddt": 0.97,
+                "complex_pde": 0.98,
+                "complex_ipde": 0.99,
+            },
+            {"path": "plddt"},
+            {"path": "pae"},
+        ),
+    ]
 
-    assert fetch_outputs("run-id") == "run-id"
-    assert save_outputs("run-id") == "run-id"
-    assert fetch_outputs(err) is err
-    assert save_outputs(err) is err
+    with pytest.raises(ValueError, match="not enough values to unpack"):
+        fetch_outputs(bad_input)
 
-
-def test_boltz_output_helpers_reject_unexpected_shape():
-    bad_input = cast(Any, {"path": "bad"})
-    output = fetch_outputs(bad_input)
-
-    assert isinstance(output, RunError)
-    assert "unexpected format" in output.message
+    with pytest.raises(ValueError, match="not enough values to unpack"):
+        save_outputs(bad_input)

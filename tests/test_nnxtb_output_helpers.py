@@ -1,9 +1,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
-from rush.client import RunError
 from rush.nnxtb import NnxtbResult, fetch_outputs, save_outputs
 
 
@@ -34,15 +31,3 @@ def test_save_outputs_saves_nnxtb_result(monkeypatch):
     result = save_outputs({"path": "nnxtb.json"})
 
     assert result == saved_path
-
-
-def test_nnxtb_output_helpers_passthrough_run_error():
-    err = RunError("Error: nnxtb failed")
-
-    assert fetch_outputs(err) is err
-    assert save_outputs(err) is err
-
-
-def test_nnxtb_output_helpers_reject_multiple_outputs():
-    with pytest.raises(ValueError, match="exactly 1 output"):
-        fetch_outputs([{"path": "a.json"}, {"path": "b.json"}])
