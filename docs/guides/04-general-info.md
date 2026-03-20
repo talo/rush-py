@@ -32,17 +32,9 @@ Also provided is a `save_json` function that allows saving a dict as JSON, by de
 
 ## Output Saving Helpers
 
-Some module functions have a `save_outputs` helper that automatically downloads
-objects to the local filesystem and returns local paths instead of object store
-paths. This is useful when you want to inspect or post-process results on disk.
+Each module function has a `save_outputs` helper that automatically downloads objects to the local filesystem and returns local paths instead of object store paths. This is useful when you want to preserve results for inspection or post-processing.
 
-Downloading outputs is not required when chaining module runs: the object store
-paths returned by a module can be passed directly into another module as inputs.
-
-The `save_outputs` helpers are designed to retain the same output signature as
-the main function, but with object store paths transformed into local filesystem
-paths. Note that not every module has a `save_outputs` helper yet; if you rely
-on this pattern and find a gap, please open an issue so it can be prioritized.
+Downloading outputs is not required when chaining module runs: the object store paths returned by a module can be passed directly into another module as inputs.
 
 ## Workspaces
 Workspaces are used to organize output files from Rush runs. When using the `save_outputs` functions, a folder is created for the project currently in use named via the project ID, and the files are saved based on their object store paths. In this way, the output files will never be overwritten, as object store paths are guaranteed to be unique.

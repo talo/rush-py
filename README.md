@@ -50,18 +50,23 @@ from rush.client import collect_run
 topology_path = Path.cwd() / "thrombin_1c_t.json"
 
 # For energy, the only mandatory argument is the Topology
-result = exess_energy(topology_path, collect=True)
-exess.save_outputs(result)
+outputs = exess_energy(topology_path, collect=True)
+
+# Fetch the results for direct access
+res = exess.fetch_outputs(outputs)
+
+# Save the results
+paths = exess.save_outputs(outputs)
 ```
 
 Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current working directory). To customize the workspace location, call `rush.client.set_opts(workspace_dir=Path("..."))`.
 
 ```python
 # For interaction_energy, second argument is reference fragment
-result = exess_interaction_energy(topology_path, 1, collect=True)
+outputs = exess_interaction_energy(topology_path, 1, collect=True)
 
 # Use export keywords to obtain additional information
-result = exess_energy(
+outputs = exess_energy(
     topology_path,
     frag_keywords=None,  # MBE is not supported for CHELPG charges
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
@@ -80,7 +85,7 @@ id = exess_qmmm(
     free_atoms=[0],
 )
 # The output for qmmm is a geometries json; can swap into a Topology's geometry field
-result = collect_run(id)
+outputs = collect_run(id)
 
 # Get the full list of parameters and default arguments for a function
 help(exess_energy)

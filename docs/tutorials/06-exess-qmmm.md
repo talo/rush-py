@@ -24,11 +24,11 @@ Static structures tell you *where* atoms are. Dynamics tells you *how they move*
 from rush.exess_qmmm import exess_qmmm
 from rush.client import RunOpts, save_object
 
-out = exess_qmmm(
-    "6a5j_t.json",    # Topology (atoms, coordinates, fragments)
-    500,               # Number of MD timesteps
-    "6a5j_r.json",    # Residues (residue names and assignments)
-    qm_fragments=[6], # Treat fragment 6 with quantum mechanics — everything else is MM
+outputs = exess_qmmm(
+    topology_path="6a5j_t.json",  # Topology (atoms, coordinates, fragments)
+    residues_path="6a5j_r.json",  # Residues (residue names and assignments)
+    n_timesteps=500,              # Number of MD timesteps
+    qm_fragments=[6],  # Treat fragment 6 with quantum mechanics — everything else is MM
     run_opts=RunOpts(name="Tutorial: QM/MM"),
     collect=True,
 )
@@ -82,7 +82,7 @@ with open("molecule_r.json", "w") as f:
     json.dump(residues.to_json(), f)
 
 # Run all-QM dynamics
-out = exess_qmmm(
+outputs = exess_qmmm(
     topology_path="molecule_t.json",
     residues_path="molecule_r.json",
     n_timesteps=100,
@@ -110,12 +110,9 @@ from pathlib import Path
 from rush import Topology
 from rush.exess_qmmm import fetch_outputs, save_outputs
 
-# Save the raw JSON if you want it on disk
-saved_path = save_outputs(out)
-
 # Fetch parsed results into memory
-result = fetch_outputs(out)
-geometries = result.geometries
+res = fetch_outputs(outputs)
+geometries = res.geometries
 
 print(f"Trajectory has {len(geometries)} frames")
 
@@ -130,6 +127,13 @@ topology.geometry = geometries[-1]
 print("\nAtoms at Final Step:")
 for x, y, z in batched(topology.geometry, 3):
     print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
+```
+
+If you want the raw JSON trajectory file on disk, use:
+
+```python
+paths = save_outputs(outputs)
+print(paths)
 ```
 
 This example uses **6a5j**, a solution NMR structure of a small peptide. During the gas-phase NVE simulation, the peptide backbone flexes and side chains reorient. The surrounding MM environment would normally provide confining forces; in this gas-phase simulation, the structure is free to explore conformational space.

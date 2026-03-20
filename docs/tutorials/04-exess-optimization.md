@@ -28,9 +28,9 @@ This example uses **ethene (C₂H₄)** with an intentionally twisted starting g
 
 ```python
 from rush.exess_geo_opt import exess_geo_opt
-from rush.client import RunOpts, save_object
+from rush.client import RunOpts
 
-out = exess_geo_opt(
+outputs = exess_geo_opt(
     "ethene_twisted_t.json",
     100,  # Maximum optimization steps
     standard_orientation="None",  # Keep original frame of reference
@@ -64,13 +64,10 @@ The optimization returns two objects:
 ```python
 from rush.exess_geo_opt import fetch_outputs, save_outputs
 
-# Save the raw files if you want them on disk
-saved_paths = save_outputs(out)
-
 # Fetch parsed results into memory
-result = fetch_outputs(out)
-out_traj = result.trajectory
-out_info = result.steps
+res = fetch_outputs(outputs)
+out_traj = res.trajectory
+out_info = res.steps
 
 # How quickly did it converge?
 print(f"Converged in {len(out_traj)} steps")
@@ -86,6 +83,10 @@ print(f"Final max gradient: {out_info[-1].max_gradient_component:.2e} Å")
 # Compare atom positions
 print(f"First atom — start: {out_traj[0].geometry[:3]}")
 print(f"First atom — end:   {out_traj[-1].geometry[:3]}")
+
+paths = save_outputs(outputs)
+print(paths.trajectory)
+print(paths.steps)
 ```
 
 **What to look for:**

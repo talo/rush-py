@@ -31,8 +31,8 @@ from rush import exess
 from rush.exess import exess_energy
 from rush.client import save_object
 
-res = exess_energy("benzene_t.json", collect=True)
-output_file = save_object(res[0]["path"])
+outputs = exess_energy("benzene_t.json", collect=True)
+output_file = save_object(outputs[0]["path"])
 
 with open(output_file) as f:
     output_data = json.load(f)
@@ -48,7 +48,7 @@ Rush modules can take a long time, so by default run asynchronously: the functio
 from rush.client import collect_run
 from rush.exess import exess_energy
 id = exess_energy("input_topology.json")
-result = collect_run(id)
+outputs = collect_run(id)
 ```
 
 As shown, module calls return a "run ID" that can be used as above to collect any run that you've submitted.

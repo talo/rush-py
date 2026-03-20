@@ -33,7 +33,7 @@ print("Single Point Energy Calculation: Water (H₂O)")
 print(f"Method: {METHOD}/{BASIS}")
 print("=" * 60)
 
-res = exess_energy(
+outputs = exess_energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -44,11 +44,11 @@ res = exess_energy(
     collect=True,
 )
 
-# Save energy outputs to disk and load from file
-exess_results = exess.fetch_outputs(res)
+# Parse fetched outputs in memory
+res = exess.fetch_outputs(outputs)
 
 # Access total energy from qmmbe object
-total_energy = exess_results.calc.qmmbe.expanded_hf_energy
+total_energy = res.calc.qmmbe.expanded_hf_energy
 
 # ===== Print results =====
 print()

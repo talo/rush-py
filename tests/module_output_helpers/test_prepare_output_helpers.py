@@ -11,7 +11,7 @@ from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
 
 
 def _sample_trc_dict() -> dict:
-    data_path = Path(__file__).parent / "data" / "1hsg_MK1_trc.json"
+    data_path = Path(__file__).parent.parent / "data" / "1hsg_MK1_trc.json"
     with data_path.open() as f:
         data = json.load(f)
     return data[0] if isinstance(data, list) else data

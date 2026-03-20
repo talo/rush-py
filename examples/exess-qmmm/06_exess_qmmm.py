@@ -50,7 +50,7 @@ TEMPERATURE = 300  # Default temperature in Kelvin
 topology_path = DATA_DIR / "6a5j_t.json"
 residues_path = DATA_DIR / "6a5j_r.json"
 
-out = exess_qmmm(
+outputs = exess_qmmm(
     topology_path,
     N_TIMESTEPS,
     residues_path,
@@ -68,11 +68,11 @@ print("=" * 60)
 print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
-saved_path = save_outputs(out)
-print(f"Saved file: {saved_path}")
+paths = save_outputs(outputs)
+print(f"Saved file: {paths}")
 
-result = fetch_outputs(out)
-out_traj = result.geometries
+res = fetch_outputs(outputs)
+out_traj = res.geometries
 
 # Load topology for atom info
 with open(topology_path, encoding="utf-8") as f:
@@ -379,7 +379,7 @@ with open(molecule_t_path, "w", encoding="utf-8") as f_t:
 with open(molecule_r_path, "w", encoding="utf-8") as f_r:
     json.dump(residues.to_json(), f_r)
 
-out = exess_qmmm(
+outputs = exess_qmmm(
     topology_path=molecule_t_path,
     residues_path=molecule_r_path,
     n_timesteps=100,
@@ -396,8 +396,8 @@ print("=" * 60)
 print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
-result = fetch_outputs(out)
-out_traj = result.geometries
+res = fetch_outputs(outputs)
+out_traj = res.geometries
 
 topology = Topology.from_json(molecule_t_path)
 print("Atoms at First Step")

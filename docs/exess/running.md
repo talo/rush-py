@@ -161,8 +161,8 @@ By default, runs are asynchronous and return a run ID. Pass `collect=True` to wa
 from rush.client import collect_run
 from rush.exess import exess_energy
 
-run_id = exess_energy("input_topology.json")
-result = collect_run(run_id)
+id = exess_energy("input_topology.json")
+outputs = collect_run(id)
 ```
 
 `collect_run` waits up to one hour by default before timing out.
@@ -176,7 +176,7 @@ from rush import exess
 from rush.exess import exess_energy
 from rush.client import RunOpts, RunSpec
 
-res = exess_energy(
+outputs = exess_energy(
     "input_topology.json",
     run_opts=RunOpts(name="example", tags=["exess"], email=True),
     run_spec=RunSpec(storage=1000, gpus=1),
@@ -196,9 +196,7 @@ Rush uses object store paths for inputs and outputs. You can upload, download, a
 from rush.client import fetch_object, save_json, save_object, upload_object
 ```
 
-The `save_outputs` helpers download outputs to the local workspace and preserve the original output signature, replacing object store paths with local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
-
-Not every module has a `save_outputs` helper yet; if you rely on this pattern and find a gap, file an issue so it can be prioritized.
+The `save_outputs` helpers download outputs to the local workspace and return module-specific saved result objects or local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
 
 ### Workspaces
 
@@ -224,7 +222,7 @@ Replace `{PROJECT_ID}` with your actual project ID.
 Rush returns outputs as object store references (UUID paths plus format info). Use the EXESS output helpers to download the results:
 
 ```python
-files = exess.save_outputs(res)
+paths = exess.save_outputs(outputs)
 ```
 
 Details on output files and the JSON and HDF5 structures are in the [outputs page](outputs).

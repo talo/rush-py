@@ -20,7 +20,6 @@ Output files (saved to chelpg-outputs/):
 import base64
 import json
 import math
-import sys
 from collections import Counter
 from pathlib import Path
 
@@ -300,16 +299,13 @@ print(f"  Molecule: {mol_name} ({mol_formula_sub})")
 
 # Convert to topology JSON format
 topology_path = output_dir / f"{pdb_path.stem}_topology.json"
-topology_json = trc.topology.to_json()
-if "schema_version" not in topology_json:
-    topology_json["schema_version"] = "0.2.0"
-topology_path.write_text(json.dumps(topology_json, indent=2), encoding="utf-8")
+topology_path.write_text(json.dumps(trc.topology.to_json(), indent=2), encoding="utf-8")
 print(f"✓ Topology saved to {topology_path}")
 
 
 # ===== 2. Run CHELPG calculation =====
 print("\nRunning CHELPG calculation...")
-result = exess_energy(
+outputs = exess_energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
@@ -317,16 +313,9 @@ result = exess_energy(
     collect=True,
 )
 
-saved_result = exess.save_outputs(result)
-
-# Extract charges from JSON output
-charges = []
-if saved_result.exports:
-    with open(saved_result.exports) as f:
-        charges = json.load(f)["chelpg_charges"]
-else:
-    print("Error: No charge data available", file=sys.stderr)
-    exit(1)
+exports = exess.fetch_outputs(outputs).exports
+assert isinstance(exports, dict)
+charges = exports["chelpg_charges"]
 
 print("✓ CHELPG calculation complete!")
 print(f"✓ Extracted {len(charges)} atomic charges")

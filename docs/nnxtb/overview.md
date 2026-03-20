@@ -56,11 +56,11 @@ Use `fetch_outputs()` to parse this output into a `NnxtbResult` dataclass:
 from rush.nnxtb import NnxtbResult, fetch_outputs
 
 # After collecting a run result
-results: NnxtbResult = fetch_outputs(res)
+res: NnxtbResult = fetch_outputs(outputs)
 
-print(f"Energy: {results.energy_mev} meV")
-print(f"Forces: {results.forces_mev_per_angstrom}")
-print(f"Frequencies: {results.frequencies_inv_cm}")
+print(f"Energy: {res.energy_mev} meV")
+print(f"Forces: {res.forces_mev_per_angstrom}")
+print(f"Frequencies: {res.frequencies_inv_cm}")
 ```
 
 `NnxtbResult` has three fields:

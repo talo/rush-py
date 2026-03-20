@@ -26,7 +26,7 @@ print("=" * 60)
 print("NN-xTB Energy and Forces Calculation")
 print("=" * 60)
 
-res = nnxtb(
+outputs = nnxtb(
     TOPOLOGY_FILE,
     compute_forces=True,
     run_opts=RunOpts(
@@ -37,24 +37,24 @@ res = nnxtb(
 )
 
 # ===== Parse results =====
-result = fetch_outputs(res)
+res = fetch_outputs(outputs)
 
 # ===== Print energy =====
 print()
 print("Results:")
 print("-" * 40)
-print(f"  Energy:  {result.energy_mev:.2f} meV")
-print(f"           {result.energy_mev / 1000:.6f} eV")
-print(f"           {result.energy_mev / 1000 * 23.06:.4f} kcal/mol")
+print(f"  Energy:  {res.energy_mev:.2f} meV")
+print(f"           {res.energy_mev / 1000:.6f} eV")
+print(f"           {res.energy_mev / 1000 * 23.06:.4f} kcal/mol")
 print()
-assert result.forces_mev_per_angstrom, "Requested forces but didn't get them"
-print(f"  Forces ({len(result.forces_mev_per_angstrom)} atoms):")
+assert res.forces_mev_per_angstrom, "Requested forces but didn't get them"
+print(f"  Forces ({len(res.forces_mev_per_angstrom)} atoms):")
 print(f"  {'Atom':<6} {'Fx':>10} {'Fy':>10} {'Fz':>10} {'|F|':>10}  (meV/A)")
-for i, (fx, fy, fz) in enumerate(result.forces_mev_per_angstrom):
+for i, (fx, fy, fz) in enumerate(res.forces_mev_per_angstrom):
     magnitude = (fx**2 + fy**2 + fz**2) ** 0.5
     print(f"  {i:<6} {fx:>10.2f} {fy:>10.2f} {fz:>10.2f} {magnitude:>10.2f}")
     if i >= 9:
-        remaining = len(result.forces_mev_per_angstrom) - 10
+        remaining = len(res.forces_mev_per_angstrom) - 10
         if remaining > 0:
             print(f"  ... ({remaining} more atoms)")
         break

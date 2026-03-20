@@ -41,7 +41,7 @@ print("=" * 60)
 METHOD = "RestrictedHF"
 BASIS = "STO-3G"
 
-out = exess_geo_opt(
+outputs = exess_geo_opt(
     INPUT_FILE,
     100,  # Number of optimization iterations
     method=METHOD,
@@ -58,13 +58,13 @@ print("=" * 60)
 print("Working with the optimization output")
 print("=" * 60)
 
-saved_paths = save_outputs(out)
-print(f"Saved files: {saved_paths}")
+paths = save_outputs(outputs)
+print(f"Saved files: {paths}")
 
-result = fetch_outputs(out)
+res = fetch_outputs(outputs)
 
-out_traj = result.trajectory
-out_info = result.steps
+out_traj = res.trajectory
+out_info = res.steps
 
 print("Num steps to convergence:", len(out_traj))
 print("First Atom's Coords")

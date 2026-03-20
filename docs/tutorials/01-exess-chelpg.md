@@ -28,10 +28,11 @@ CHELPG (CHarges from ELectrostatic Potentials using a Grid-based method) fits pa
 
 ```python
 from pathlib import Path
+import json
+
 from rush import exess
 from rush.exess import exess_energy
-from rush.convert.pdb import from_pdb
-import json
+from rush import from_pdb
 
 # 1. Load PDB file
 pdb_content = Path("aspirin.pdb").read_text()
@@ -44,7 +45,7 @@ topology_path = Path("aspirin_topology.json")
 topology_path.write_text(json.dumps(topology_json, indent=2))
 
 # 3. Run energy calculation with CHELPG export (returns charges in ~30 seconds)
-result = exess_energy(
+outputs = exess_energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
@@ -52,12 +53,14 @@ result = exess_energy(
     collect=True,
 )
 
-# 4. Extract charges from the exports JSON
-json_path, exports_path = exess.save_outputs(result)
-charges = json.load(open(exports_path))["chelpg_charges"]
+# 4. Extract the charges
+res = exess.fetch_outputs(outputs)
+charges = res.exports["chelpg_charges"]
 ```
 
 That's it! `charges` is a list of CHELPG partial charges, one per atom.
+
+Setting `convert_hdf5_to_json=True` and using `fetch_outputs` gives us the quickest access to inspecting the exported data in our python code.
 
 ### Get the PDB file
 

@@ -30,7 +30,7 @@ In this tutorial, you will compute the NN-xTB energy and per-atom forces for a s
 from rush.nnxtb import nnxtb
 from rush.client import RunOpts
 
-res = nnxtb(
+outputs = nnxtb(
     "topology.json",
     compute_forces=True,
     run_opts=RunOpts(
@@ -41,7 +41,7 @@ res = nnxtb(
 )
 ```
 
-That's it — `res` contains a reference to the JSON output with the energy and forces.
+That's it — `outputs` contains a reference to the JSON output with the energy and forces. Use `fetch_outputs(outputs)` when you want a parsed `NnxtbResult` in memory, or `save_outputs(outputs)` if you want the raw JSON output file in the workspace.
 
 ### Input File
 
@@ -66,9 +66,9 @@ Fetch the parsed output directly with `fetch_outputs`. It returns a
 from rush.nnxtb import NnxtbResult, fetch_outputs
 
 # Parse into a structured result
-results: NnxtbResult = fetch_outputs(res)
+res: NnxtbResult = fetch_outputs(outputs)
 
-print(f"Energy: {results.energy_mev:.2f} meV")
+print(f"Energy: {res.energy_mev:.2f} meV")
 ```
 
 `NnxtbResult` has three fields:
@@ -92,8 +92,8 @@ The energy is returned in **millielectronvolts (meV)**, not Hartrees as in EXESS
 When `compute_forces=True` (the default), you get a list of (x, y, z) force vectors in meV/A, one per atom:
 
 ```python
-if results.forces_mev_per_angstrom:
-    for i, (fx, fy, fz) in enumerate(results.forces_mev_per_angstrom):
+if res.forces_mev_per_angstrom:
+    for i, (fx, fy, fz) in enumerate(res.forces_mev_per_angstrom):
         magnitude = (fx**2 + fy**2 + fz**2) ** 0.5
         print(f"Atom {i}: ({fx:.2f}, {fy:.2f}, {fz:.2f}) meV/A  |F| = {magnitude:.2f}")
 ```
@@ -107,7 +107,7 @@ Large force magnitudes indicate atoms that are far from equilibrium — useful f
 NN-xTB can also compute vibrational frequencies, which are useful for thermochemistry corrections and IR spectra prediction. This takes more compute than energy/forces:
 
 ```python
-res = nnxtb(
+outputs = nnxtb(
     "topology.json",
     compute_forces=True,
     compute_frequencies=True,
@@ -115,15 +115,15 @@ res = nnxtb(
     collect=True,
 )
 
-results = fetch_outputs(res)
+res = fetch_outputs(outputs)
 
-if results.frequencies_inv_cm:
-    print(f"Number of vibrational modes: {len(results.frequencies_inv_cm)}")
-    print(f"Lowest frequency: {min(results.frequencies_inv_cm):.1f} cm^-1")
-    print(f"Highest frequency: {max(results.frequencies_inv_cm):.1f} cm^-1")
+if res.frequencies_inv_cm:
+    print(f"Number of vibrational modes: {len(res.frequencies_inv_cm)}")
+    print(f"Lowest frequency: {min(res.frequencies_inv_cm):.1f} cm^-1")
+    print(f"Highest frequency: {max(res.frequencies_inv_cm):.1f} cm^-1")
 
     # Imaginary frequencies (negative values) indicate a saddle point
-    imaginary = [f for f in results.frequencies_inv_cm if f < 0]
+    imaginary = [f for f in res.frequencies_inv_cm if f < 0]
     if imaginary:
         print(f"Warning: {len(imaginary)} imaginary frequencies detected")
 ```
@@ -136,7 +136,7 @@ For charged or open-shell systems, specify the spin multiplicity:
 
 ```python
 # Doublet radical (multiplicity = 2)
-res = nnxtb(
+outputs = nnxtb(
     "radical_topology.json",
     multiplicity=2,
     run_opts=RunOpts(name="Tutorial: NN-xTB Doublet"),
@@ -158,22 +158,22 @@ from rush.client import RunOpts, collect_run
 
 # Submit a batch of structures
 topologies = ["conf_001.json", "conf_002.json", "conf_003.json"]
-run_ids = []
+ids = []
 
 for topo in topologies:
-    run_id = nnxtb(
+    id = nnxtb(
         topo,
         compute_forces=False,   # Forces not needed for ranking
         run_opts=RunOpts(tags=["screening"]),
         collect=False,          # Don't wait
     )
-    run_ids.append(run_id)
+    ids.append(id)
 
 # Collect all results
-for topo, run_id in zip(topologies, run_ids):
-    result = collect_run(run_id)
-    parsed = fetch_outputs(result)
-    print(f"{topo}: {parsed.energy_mev:.2f} meV")
+for topo, id in zip(topologies, ids):
+    outputs = collect_run(id)
+    res = fetch_outputs(outputs)
+    print(f"{topo}: {res.energy_mev:.2f} meV")
 ```
 
 ---

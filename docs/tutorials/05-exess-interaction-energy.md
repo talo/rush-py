@@ -22,12 +22,11 @@ This interaction energy is **not** a binding free energy — it doesn't include 
 ## Quick Start: Get an Interaction Energy
 
 ```python
-import json
 from rush import exess
 from rush.exess import exess_interaction_energy
-from rush.client import RunOpts, fetch_object
+from rush.client import RunOpts
 
-out = exess_interaction_energy(
+outputs = exess_interaction_energy(
     "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
     93,                          # Fragment index of the ligand
     method="RestrictedHF",       # Explicit: minimal method for testing
@@ -44,9 +43,8 @@ out = exess_interaction_energy(
 )
 
 # Extract the result
-json_bytes = fetch_object(out[0]["path"])
-result = json.loads(json_bytes.decode())
-print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
+res = exess.fetch_outputs(outputs)
+print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy} Eh")
 ```
 
 **Example output:**
@@ -76,7 +74,7 @@ The `tyk2_ejm_31_t.json` topology file is in the rush-py repo's [`tests/data/`](
 | `93` (fragment index) | Which fragment is your ligand | Check your topology to find the right index |
 | `level="Trimer"` | Include 3-body corrections | More accurate but slower; `"Dimer"` is faster |
 | `dimer_cutoff=10.0` | How far out to include fragment pairs (Å) | 10 Å captures most important interactions; increase for charged systems |
-| `trimer_cutoff=5.0` | How far out for 3-body terms (Å) | Keep smaller than dimer_cutoff; 3-body terms decay faster |
+| `trimer_cutoff=5.0` | How far out for 3-body terms (Å) | Keep smaller than `dimer_cutoff`; 3-body terms decay faster |
 | `included_fragments` | Restrict which fragments participate | Use to limit to the binding pocket (faster, often sufficient) |
 
 ---
@@ -93,14 +91,13 @@ from pathlib import Path
 from rush.client import RunOpts
 from rush.prepare_complex import fetch_outputs, prepare_complex
 
-trc = fetch_outputs(
-    prepare_complex(
-        Path("1hsg.pdb"),
-        ligand_names=["MK1", "HOH"],  # Residue names for ligands/waters
-        run_opts=RunOpts(name="Tutorial: Prepare Complex"),
-        collect=True,
-    )
+outputs = prepare_complex(
+    Path("1hsg.pdb"),
+    ligand_names=["MK1", "HOH"],  # Residue names for ligands/waters
+    run_opts=RunOpts(name="Tutorial: Prepare Complex"),
+    collect=True,
 )
+trc = fetch_outputs(outputs)
 
 # Inspect what Prepare Complex determined about charges
 print("Charged residues:")
@@ -137,7 +134,7 @@ from rush.exess import exess_interaction_energy
 with open("1hsg_t.json", "w") as f:
     json.dump(trc.topology.to_json(), f, indent=2)
 
-out = exess_interaction_energy(
+outputs = exess_interaction_energy(
     "1hsg_t.json",
     lig_idx,
     frag_keywords=exess.FragKeywords(
@@ -148,21 +145,20 @@ out = exess_interaction_energy(
     collect=True,
 )
 
-json_bytes = fetch_object(out[0]["path"])
-result = json.loads(json_bytes.decode())
-print(f"Interaction energy: {result['qmmbe']['expanded_hf_energy']} Eh")
+res = exess.fetch_outputs(outputs)
+print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy} Eh")
 ```
 
-:::{admonition} The second output
+:::{admonition} The optional second output
 :class: note
-`exess_interaction_energy` returns two outputs. The first is the JSON with energies. The second contains additional exported data (density matrices, etc.) — only populated if you request exports. See the {doc}`Exports tutorial<03-exess-exports>` for details.
+`exess_interaction_energy` always returns the main calculation output, and may also return an exports object if you request exports. `exess.fetch_outputs` turns those into an `ExessResult` with a `calc` field and an optional `exports` field. See the {doc}`Exports tutorial<03-exess-exports>` for details.
 :::
 
 ---
 
 ## Interpreting the Results
 
-The key value is `result['qmmbe']['expanded_hf_energy']`:
+The key value is `res.calc.qmmbe.expanded_hf_energy`:
 
 - **Negative** → ligand is stabilized by the protein (favorable interaction)
 - **More negative** → stronger interaction
