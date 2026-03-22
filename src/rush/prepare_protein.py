@@ -6,32 +6,38 @@ This module supports system preparation workflows such as converting PDB inputs
 to TRC, protonating and optimizing hydrogen positions, and augmenting
 structures with connectivity and formal charge information before downstream
 calculations.
+
+Usage::
+
+    from rush import prepare_protein
+
+    result = prepare_protein.prepare("protein.pdb").fetch()
+    print(result.topology.symbols)
 """
 
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
-from typing import Any, Literal, overload
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
-from ._output_types import TRCSavedResult
+from ._trc import TRCPaths, TRCRef
+from ._utils import optional_str
 from .client import (
-    RunID,
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
-    collect_run,
-    fetch_object,
-    save_object,
     upload_object,
 )
 from .convert import _single_trc, from_json, from_pdb
 from .mol import TRC
-from .utils import optional_str
+from .run import RushRun
 
 
 def _upload_trc(
@@ -58,61 +64,99 @@ def _upload_trc(
     )
 
 
-@overload
-def prepare_protein(
-    input_path: Path | str,
-    ph: float | None = None,
-    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
-    capping_style: Literal["never", "truncated", "always"] | None = None,
-    truncation_threshold: int | None = None,
-    opt: bool | None = None,
-    debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def prepare_protein(
-    input_path: Path | str,
-    ph: float | None = None,
-    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
-    capping_style: Literal["never", "truncated", "always"] | None = None,
-    truncation_threshold: int | None = None,
-    opt: bool | None = None,
-    debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> tuple[dict[str, Any], ...] | list[tuple[dict[str, Any], ...]]: ...
-@overload
-def prepare_protein(
-    input_path: Path | str,
-    ph: float | None = None,
-    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
-    capping_style: Literal["never", "truncated", "always"] | None = None,
-    truncation_threshold: int | None = None,
-    opt: bool | None = None,
-    debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | list[tuple[dict[str, Any], ...]] | RunID: ...
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
 
 
-def prepare_protein(
-    input_path: Path | str,
-    ph: float | None = None,
-    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
-    capping_style: Literal["never", "truncated", "always"] | None = None,
-    truncation_threshold: int | None = None,
-    opt: bool | None = None,
-    debump: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | list[tuple[dict[str, Any], ...]] | RunID:
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to prepare-protein output in the Rush object store.
+
+    May contain multiple TRC triplets if the input PDB has multiple models.
     """
-    Run prepare-protein on a PDB or TRC file and return the separate T, R, and C files.
+
+    models: list[TRCRef]
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``.
+
+        The raw output is a list of groups, where each group is a list of
+        3 dicts (topology, residues, chains objects).  Multi-model PDBs
+        produce multiple groups.
+        """
+        if not isinstance(res, list) or len(res) == 0:
+            raise ValueError(
+                f"prepare_protein should return a non-empty list, "
+                f"got {type(res).__name__}"
+                f"{f' with {len(res)} items' if hasattr(res, '__len__') else ''}."
+            )
+
+        models: list[TRCRef] = []
+        for i, group in enumerate(res):
+            if not isinstance(group, list) or len(group) != 3:
+                raise ValueError(
+                    f"prepare_protein output group {i} expected a list of 3 elements, "
+                    f"got {type(group).__name__}"
+                    f"{f' with {len(group)} items' if isinstance(group, list) else ''}."
+                )
+            topo, resid, chain = group[0], group[1], group[2]
+            if (
+                not isinstance(topo, dict)
+                or not isinstance(resid, dict)
+                or not isinstance(chain, dict)
+            ):
+                raise ValueError(
+                    f"prepare_protein output group {i} elements must be dicts."
+                )
+            models.append(
+                TRCRef(
+                    topology=RushObject.from_dict(topo),
+                    residues=RushObject.from_dict(resid),
+                    chains=RushObject.from_dict(chain),
+                )
+            )
+
+        return cls(models=models)
+
+    def fetch(self) -> list[TRC]:
+        """Download prepare-protein output and parse into TRCs.
+
+        Returns one TRC per model in the input PDB.  Most PDBs contain a
+        single model, so ``result[0]`` is the common pattern.
+        """
+        return [model.fetch() for model in self.models]
+
+    def save(self) -> list[TRCPaths]:
+        """Download prepare-protein output and save to the workspace.
+
+        Returns one TRCPaths per model in the input PDB.
+        """
+        return [model.save() for model in self.models]
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def prepare(
+    input_path: Path | str,
+    ph: float | None = None,
+    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
+    capping_style: Literal["never", "truncated", "always"] | None = None,
+    truncation_threshold: int | None = None,
+    opt: bool | None = None,
+    debump: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+) -> RushRun[ResultRef]:
+    """
+    Submit a prepare-protein job for a PDB or TRC file.
+
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed TRC, or ``.save()`` to write the output files to disk.
     """
 
     # Upload inputs
@@ -163,112 +207,13 @@ in
         chains_vobj_path=chains_vobj["path"],
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        out = [tuple(out_i) for out_i in out]
-        assert isinstance(out, list)
-        if len(out) == 1:
-            out = out[0]
-        return out
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-        raise e
-
-
-@overload
-def _unwrap_outputs(
-    res: tuple[dict[str, Any], ...],
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]: ...
-@overload
-def _unwrap_outputs(
-    res: list[tuple[dict[str, Any], ...]],
-) -> list[tuple[dict[str, Any], dict[str, Any], dict[str, Any]]]: ...
-
-
-def _unwrap_outputs(res):
-    if isinstance(res, tuple) and len(res) == 3:
-        return (res[0], res[1], res[2])
-    else:
-        out = []
-        for res_i in res:
-            if isinstance(res_i, tuple) and len(res) == 3:
-                out.append((res[0], res[1], res[2]))
-            else:
-                raise ValueError(
-                    f"Error: prepare_protein output helper received unexpected format: {type(res)}"
-                )
-        return out
-
-    raise ValueError(
-        f"Error: prepare_protein output helper received unexpected format: {type(res)}"
-    )
-
-
-def fetch_outputs(
-    res: tuple[dict[str, Any], ...] | list[tuple[dict[str, Any], ...]],
-) -> TRC | list[TRC]:
-    """
-    Fetch prepare-protein outputs into an in-memory TRC.
-
-    Args:
-        res: Collected output from prepare_protein(), containing topology,
-            residues, and chains objects.
-
-    Returns:
-        Parsed TRC data.
-    """
-
-    def fetch_output(res: tuple[dict[str, Any], ...]) -> TRC:
-        outputs = _unwrap_outputs(res)
-        topology_obj, residues_obj, chains_obj = outputs
-        return from_json(
-            {
-                "topology": json.loads(fetch_object(topology_obj["path"])),
-                "residues": json.loads(fetch_object(residues_obj["path"])),
-                "chains": json.loads(fetch_object(chains_obj["path"])),
-            }
-        )
-
-    if isinstance(res, tuple):
-        return fetch_output(res)
-    else:
-        return [fetch_output(res_i) for res_i in res]
-
-
-def save_outputs(
-    res: tuple[dict[str, Any], ...] | list[tuple[dict[str, Any], ...]],
-) -> TRCSavedResult | list[TRCSavedResult]:
-    """
-    Download output files from a prepare-protein run.
-
-    The prepare-protein computation returns three VirtualObject dicts for the
-    topology, residues, and chains files. This function downloads each file
-    and returns paths that can be passed to `from_json()`.
-
-    Args:
-        res: Collected output from prepare_protein(), containing topology,
-            residues, and chains objects.
-
-    Returns:
-        Local paths to the saved topology, residues, and chains files.
-    """
-
-    def save_output(res: tuple[dict[str, Any], ...]):
-        outputs = _unwrap_outputs(res)
-        topology_obj, residues_obj, chains_obj = outputs
-        return TRCSavedResult(
-            topology=save_object(topology_obj["path"]),
-            residues=save_object(residues_obj["path"]),
-            chains=save_object(chains_obj["path"]),
-        )
-
-    if isinstance(res, tuple):
-        return save_output(res)
-    else:
-        return [save_output(res_i) for res_i in res]
+        raise

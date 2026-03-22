@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 """
-EXESS geometry optimization helpers for the Rush Python client.
-
-Run geometry optimization with EXESS.
+EXESS geometry optimization for the Rush Python client.
 
 Quick Links
 -----------
 
-- :func:`rush.exess_geo_opt.exess_geo_opt`
-- :func:`rush.exess_geo_opt.fetch_outputs`
-- :func:`rush.exess_geo_opt.save_outputs`
-- :mod:`rush.exess`
-- :mod:`rush.exess_qmmm`
+- :func:`rush.exess.optimization`
+- :func:`rush.exess.energy`
 """
 
 import json
@@ -19,22 +14,23 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal, overload
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
-from .client import (
-    RunID,
+from .._utils import optional_str
+from ..client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
-    collect_run,
     fetch_object,
-    save_object,
     upload_object,
 )
-from .exess import (
+from ..mol import Topology
+from ..run import RushRun
+from ._energy import (
     AuxBasisT,
     BasisT,
     KSDFTKeywords,
@@ -44,8 +40,11 @@ from .exess import (
     System,
     _KSDFTDefault,
 )
-from .mol import Topology
-from .utils import optional_str
+
+
+# ---------------------------------------------------------------------------
+# Input types
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -233,87 +232,75 @@ class OptimizationKeywords:
         )
 
 
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
+
+
 @dataclass
-class ExessGeoOptStep:
+class OptimizationStep:
     total_energy: float
     max_gradient_component: float
 
 
 @dataclass
-class ExessGeoOptResult:
+class OptimizationResult:
     trajectory: list[Topology]
-    steps: list[ExessGeoOptStep]
+    steps: list[OptimizationStep]
 
 
 @dataclass(frozen=True)
-class ExessGeoOptSavedResult:
+class OptimizationResultPaths:
     trajectory: Path
     steps: Path
 
 
-@overload
-def exess_geo_opt(
-    topology_path: Path | str,
-    max_iters: int,
-    residues_path: Path | str | None = None,
-    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def exess_geo_opt(
-    topology_path: Path | str,
-    max_iters: int,
-    residues_path: Path | str | None = None,
-    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> tuple[dict[str, Any], ...]: ...
-@overload
-def exess_geo_opt(
-    topology_path: Path | str,
-    max_iters: int,
-    residues_path: Path | str | None = None,
-    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID: ...
+@dataclass(frozen=True)
+class OptimizationResultRef:
+    """Lightweight reference to optimization outputs in the Rush object store."""
+
+    trajectory: RushObject
+    steps: RushObject
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "OptimizationResultRef":
+        """Parse raw ``collect_run`` output into an ``OptimizationResultRef``."""
+        if not isinstance(res, list) or len(res) != 2:
+            raise ValueError(
+                "optimization should return exactly 2 outputs (trajectory + steps), "
+                f"got {type(res).__name__} with {len(res) if hasattr(res, '__len__') else '?'} items."
+            )
+        return cls(
+            trajectory=RushObject.from_dict(res[0]),
+            steps=RushObject.from_dict(res[1]),
+        )
+
+    def fetch(self) -> OptimizationResult:
+        """Download optimization outputs and parse into Python objects."""
+        trajectory = [
+            Topology.from_json(t)
+            for t in json.loads(fetch_object(self.trajectory.path))
+        ]
+        steps = [
+            OptimizationStep(**step)
+            for step in json.loads(fetch_object(self.steps.path))
+        ]
+        return OptimizationResult(trajectory=trajectory, steps=steps)
+
+    def save(self) -> OptimizationResultPaths:
+        """Download optimization outputs and save to the workspace."""
+        return OptimizationResultPaths(
+            trajectory=self.trajectory.save(),
+            steps=self.steps.save(),
+        )
 
 
-def exess_geo_opt(
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def optimization(
     topology_path: Path | str,
     max_iters: int,
     residues_path: Path | str | None = None,
@@ -330,15 +317,12 @@ def exess_geo_opt(
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID:
+) -> RushRun[OptimizationResultRef]:
     """
-    Run optimization on the system in the QDX topology and residues files at `topology_path`.
+    Submit a geometry optimization for the topology at *topology_path*.
 
-    Specifying the maximum iterations is mandatory.
-    Fragment-based QM calculation is not supported, but fragments can be used for specifying regions as QM or MM.
-    If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
-    If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed trajectory and optimization steps, or ``.save()`` to write them to disk.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
@@ -447,69 +431,13 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        assert isinstance(out, list)
-        return tuple(out)
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            OptimizationResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-        raise e
-
-
-def _unwrap_outputs(
-    res: tuple[dict[str, Any], ...],
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    if isinstance(res, tuple) and len(res) == 2:
-        return (res[0], res[1])
-
-    raise ValueError(
-        f"Error: exess_geo_opt output helper received unexpected format: {type(res)}"
-    )
-
-
-def fetch_outputs(res: tuple[dict[str, Any], ...]) -> ExessGeoOptResult:
-    """
-    Fetch EXESS geometry optimization outputs into memory.
-
-    Args:
-        res: Collected output from exess_geo_opt(), containing trajectory and
-            optimization-step objects.
-
-    Returns:
-        Parsed trajectory frames and optimization metadata.
-    """
-    outputs = _unwrap_outputs(res)
-    trajectory_obj, steps_obj = outputs
-    trajectory = [
-        Topology.from_json(topology)
-        for topology in json.loads(fetch_object(trajectory_obj["path"]))
-    ]
-    steps = [
-        ExessGeoOptStep(**step) for step in json.loads(fetch_object(steps_obj["path"]))
-    ]
-    return ExessGeoOptResult(trajectory=trajectory, steps=steps)
-
-
-def save_outputs(res: tuple[dict[str, Any], ...]) -> ExessGeoOptSavedResult:
-    """
-    Save EXESS geometry optimization outputs into the workspace.
-
-    Args:
-        res: Collected output from exess_geo_opt(), containing trajectory and
-            optimization-step objects.
-
-    Returns:
-        Local paths to the saved trajectory and optimization-step files.
-    """
-    outputs = _unwrap_outputs(res)
-    trajectory_obj, steps_obj = outputs
-    return ExessGeoOptSavedResult(
-        trajectory=save_object(trajectory_obj["path"]),
-        steps=save_object(steps_obj["path"]),
-    )
+        raise

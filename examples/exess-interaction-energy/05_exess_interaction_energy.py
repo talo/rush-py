@@ -17,8 +17,8 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
-from rush.exess import exess_interaction_energy
-from rush.prepare_complex import fetch_outputs, prepare_complex
+from rush.exess import interaction_energy
+from rush import prepare_complex
 
 # ===== Example 1: Fragment-based interaction energy =====
 print("=" * 60)
@@ -33,7 +33,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-outputs = exess_interaction_energy(
+run = interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
     93,  # This is the index of the fragment that contains the ligand
     method="RestrictedHF",
@@ -48,11 +48,10 @@ outputs = exess_interaction_energy(
     run_opts=RunOpts(
         name="Tutorial: Interaction Energy Basic",
     ),
-    collect=True,
 )
 
 # Extract and display results
-res = exess.fetch_outputs(outputs)
+res = run.fetch()
 print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")
 
 
@@ -64,14 +63,12 @@ print("=" * 60)
 
 
 # Step 1: Prepare the system
-outputs = prepare_complex(
+trc = prepare_complex.prepare(
     DATA_DIR / "1hsg.pdb",
     ligand_names=["MK1", "HOH"],
     debump=None,
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
-    collect=True,
-)
-trc = fetch_outputs(outputs)
+).fetch()[0]
 
 # Print the charged amino acids
 print("Charged amino acids:")
@@ -97,7 +94,7 @@ with open(topology_path, "w", encoding="utf-8") as f:
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-outputs = exess_interaction_energy(
+run = interaction_energy(
     topology_path,
     lig_idx,
     method="RestrictedHF",
@@ -107,9 +104,8 @@ outputs = exess_interaction_energy(
         included_fragments=frag_idcs,
     ),
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - EXESS"),
-    collect=True,
 )
 
 # Extract and display results
-res = exess.fetch_outputs(outputs)
+res = run.fetch()
 print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")

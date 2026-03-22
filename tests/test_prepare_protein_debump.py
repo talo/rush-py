@@ -4,7 +4,7 @@ from pathlib import Path
 from rush.client import RunOpts, set_opts
 from rush.convert import from_pdb
 from rush.mol import Element
-from rush.prepare_protein import fetch_outputs, prepare_protein
+from rush.prepare_protein import prepare
 
 
 def _as_trc(trc):
@@ -91,7 +91,7 @@ def _per_residue_rmsd(trc_ref, trc_cmp):
 def test_prepare_protein():
     set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
     data_dir = Path.cwd() / "tests" / "data"
-    res_debumped = prepare_protein(
+    run_debumped = prepare(
         data_dir / "3fln_raw.pdb",
         ph=7.4,
         naming_scheme="AMBER",
@@ -102,9 +102,8 @@ def test_prepare_protein():
             name="Test prepare-protein 02: Debump",
             tags=["rush-py", "test", "MAPK14"],
         ),
-        collect=True,
     )
-    res_nodebump = prepare_protein(
+    run_nodebump = prepare(
         data_dir / "3fln_raw.pdb",
         ph=7.4,
         naming_scheme="AMBER",
@@ -115,15 +114,14 @@ def test_prepare_protein():
             name="Test prepare-protein 02: No Debump",
             tags=["rush-py", "test", "MAPK14"],
         ),
-        collect=True,
     )
 
     # Load the original PDB into a TRC
     trc_unprepped = _as_trc(from_pdb((data_dir / "3fln_raw.pdb").read_text()))
 
-    # Parse into TRC object
-    trc_debumped = fetch_outputs(res_debumped)
-    trc_nodebump = fetch_outputs(res_nodebump)
+    # Parse into TRC object (single model)
+    trc_debumped = run_debumped.fetch()[0]
+    trc_nodebump = run_nodebump.fetch()[0]
 
     rmsd_nodebump = _rmsd_for_matching_atoms(trc_unprepped, trc_nodebump)
     rmsd_debumped = _rmsd_for_matching_atoms(trc_unprepped, trc_debumped)

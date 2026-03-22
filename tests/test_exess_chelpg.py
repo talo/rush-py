@@ -5,8 +5,8 @@ from pathlib import Path
 from pprint import pp
 
 from rush import exess, from_json
-from rush.client import RunOpts, fetch_object, set_opts
-from rush.exess import exess_energy
+from rush.client import RunOpts, set_opts
+from rush.exess import energy
 
 
 def test_exess_energy_chelpg_1hsg_MK1():
@@ -19,7 +19,7 @@ def test_exess_energy_chelpg_1hsg_MK1():
         json.dump(trc.topology.to_json(), tf)
         topology_path = tf.name
 
-    res = exess_energy(
+    result = energy(
         topology_path,
         basis="PCSeg-0",
         frag_keywords=None,  # Important, to disable fragmentation
@@ -29,18 +29,19 @@ def test_exess_energy_chelpg_1hsg_MK1():
             name="Rush-Py Test EXESS Energy 03.1: ChelpG via Energy",
             tags=["rush-py", "test", "tyk2+ejm-31"],
         ),
-        collect=True,
-    )
-    print(res, file=sys.stderr)
-    assert isinstance(res, tuple)
-    charges = json.loads(fetch_object(res[1]["Json"]["path"]))["chelpg_charges"]
+    ).collect()
+    print(result, file=sys.stderr)
+    assert result.exports is not None
+    fetched = result.fetch()
+    assert isinstance(fetched.exports, dict)
+    charges = fetched.exports["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
 
 
 def test_exess_energy_chelpg_benzene():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
-    res = exess_energy(
+    result = energy(
         data_dir / "benzene_t.json",
         method="RestrictedRIMP2",
         basis="def2-TZVP",
@@ -53,11 +54,12 @@ def test_exess_energy_chelpg_benzene():
             name="Rush-Py Test EXESS Energy 03.2: ChelpG via Energy",
             tags=["rush-py", "test", "benzene"],
         ),
-        collect=True,
-    )
-    print(res, file=sys.stderr)
-    assert isinstance(res, tuple)
-    charges = json.loads(fetch_object(res[1]["Json"]["path"]))["chelpg_charges"]
+    ).collect()
+    print(result, file=sys.stderr)
+    assert result.exports is not None
+    fetched = result.fetch()
+    assert isinstance(fetched.exports, dict)
+    charges = fetched.exports["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
 
 

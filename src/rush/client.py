@@ -20,7 +20,7 @@ import zstandard as zstd
 from gql import Client, FileVar, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-from .utils import clean_dict, optional_str
+from ._utils import clean_dict, optional_str
 
 INITIAL_POLL_INTERVAL = 0.5
 
@@ -29,6 +29,9 @@ MAX_POLL_INTERVAL = 30
 BACKOFF_FACTOR = 1.5
 
 RunID = NewType("RunID", str)
+
+#: UUID identifying an object in the Rush object store.
+ObjectID = NewType("ObjectID", str)
 
 _dotenv_cache: dict[str, str] | None = None
 
@@ -472,6 +475,75 @@ def save_json(
     return filepath
 
 
+@dataclass(frozen=True)
+class RushObject:
+    """Reference to an object in the Rush object store."""
+
+    #: UUID path in the object store.
+    path: ObjectID
+    #: Size in bytes.
+    size: int
+    #: Storage format.
+    format: Literal["Json", "Bin"]
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "RushObject":
+        """Construct from a raw GraphQL output dict.
+
+        Requires ``path``, ``size``, and ``format`` keys.
+        """
+        try:
+            return cls(
+                path=ObjectID(d["path"]),
+                size=d["size"],
+                format=d["format"],
+            )
+        except KeyError as e:
+            raise ValueError(
+                f"RushObject dict missing required key {e}; got keys: {list(d.keys())}"
+            ) from e
+
+    def save(
+        self,
+        filepath: Path | str | None = None,
+        name: str | None = None,
+        ext: str | None = None,
+        extract: bool = False,
+    ) -> Path:
+        """Download this object and save to the workspace.
+
+        The file type is derived from :attr:`format` automatically.
+        Pass *ext* to override the file extension (e.g. ``"hdf5"``,
+        ``"a3m"``).
+        """
+        if ext is None:
+            ext = self.format.lower()
+
+        if filepath is not None and name is None:
+            if isinstance(filepath, str):
+                filepath = Path(filepath)
+        elif filepath is None and name is not None:
+            project_id = _get_project_id()
+            filepath = _get_opts().workspace_dir / project_id / (f"{name}." + ext)
+        elif filepath is None and name is None:
+            project_id = _get_project_id()
+            filepath = _get_opts().workspace_dir / project_id / (f"{self.path}." + ext)
+        else:
+            raise Exception("Cannot specify both filepath and name")
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        if self.format == "Json":
+            d = json.loads(fetch_object(self.path).decode())
+            with open(filepath, "w") as f:
+                json.dump(clean_dict(d), f, indent=2)
+        else:
+            data = fetch_object(self.path, extract=extract)
+            with open(filepath, "wb") as f:
+                f.write(data)
+
+        return filepath
+
+
 def save_object(
     path: str,
     filepath: Path | str | None = None,
@@ -480,50 +552,16 @@ def save_object(
     ext: str | None = None,
     extract: bool = False,
 ) -> Path:
-    """
-    Saves the contents of the given Rush object store path into the workspace folder.
-    Provides a variety of naming schemes, and supports automatically extracting tar.zst
-    archives (which are sometimes used for module outputs).
+    """Save a Rush object store path to the workspace.
 
-    Note:
-        The `filepath` and `name` parameters are mutually exculsive.
-
-    Args:
-        path: The Rush object store path to save.
-        filepath: Overrides the path to save to.
-        name: Sets the name of the file to save to.
-        type: Manually specify the type of object (usually not necessary).
-        ext: Manually the filetype extension to use (otherwise, based on `type`).
-        extract: Automatically extract tar.zst files before saving.
+    Prefer :meth:`RushObject.save` when you have a ``RushObject``.
+    This function infers the format from the *type* parameter.
     """
-    if type is None and (ext is None or ext == "json"):
+    if type is None:
         type = "json"
-    else:
-        type = "bin"
-    ext = type if ext is None else ext
-
-    if filepath is not None and name is None:
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
-    elif filepath is None and name is not None:
-        project_id = _get_project_id()
-        filepath = _get_opts().workspace_dir / project_id / (f"{name}." + ext)
-    elif filepath is None and name is None:
-        project_id = _get_project_id()
-        filepath = _get_opts().workspace_dir / project_id / (f"{path}." + ext)
-    else:
-        raise Exception("Cannot specify both filepath or name")
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    if type == "json":
-        d = json.loads(fetch_object(path).decode())
-        with open(filepath, "w") as f:
-            json.dump(clean_dict(d), f, indent=2)
-    else:
-        data = fetch_object(path, extract=extract)
-        with open(filepath, "wb") as f:
-            f.write(data)
-
-    return filepath
+    format: Literal["Json", "Bin"] = "Json" if type == "json" else "Bin"
+    obj = RushObject(path=ObjectID(path), size=0, format=format)
+    return obj.save(filepath=filepath, name=name, ext=ext, extract=extract)
 
 
 def _fetch_results(run_id: str):

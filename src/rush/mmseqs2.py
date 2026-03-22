@@ -1,35 +1,101 @@
 #!/usr/bin/env python3
 """
-MMseqs2 module helpers for the Rush Python client.
+MMseqs2 module for the Rush Python client.
 
 MMseqs2 generates multiple-sequence alignments (MSAs) from amino acid
-sequences. The fetched output is the in-memory A3M text for each input
-sequence, while the saved output is the corresponding set of `.a3m` files in
-the workspace.
+sequences.
+
+Usage::
+
+    from rush import mmseqs2
+
+    result = mmseqs2.search(["MKFLILLFNILCL..."]).fetch()
+    print(result.a3m_texts[0])
 """
 
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal, overload
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
+from ._utils import optional_str
 from .client import (
-    RunID,
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
-    collect_run,
     fetch_object,
-    save_object,
 )
-from .utils import optional_str
+from .run import RushRun
 
 
-@overload
-def mmseqs2(
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Result:
+    """Parsed MMseqs2 results: A3M text per input sequence."""
+
+    a3m_texts: list[str]
+
+
+@dataclass
+class ResultPaths:
+    """Workspace paths for saved MMseqs2 A3M files."""
+
+    a3m_files: list[Path]
+
+
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to MMseqs2 outputs in the Rush object store."""
+
+    outputs: list[RushObject]
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``."""
+        if not isinstance(res, list) or len(res) == 0:
+            raise ValueError(
+                f"mmseqs2 output received unexpected format: {type(res).__name__}"
+            )
+        # collect_run returns [[dict, ...], ...] (nested per sequence)
+        # or [dict, ...] (flattened for single sequence)
+        items = res
+        if len(items) > 0 and isinstance(items[0], list):
+            # Nested: flatten all sublists into one list
+            items = [obj for sublist in items for obj in sublist]
+        return cls(
+            outputs=[RushObject.from_dict(obj) for obj in items],
+        )
+
+    def fetch(self) -> Result:
+        """Download MMseqs2 outputs and parse into A3M strings."""
+        a3ms: list[str] = []
+        for obj in self.outputs:
+            a3m = fetch_object(obj.path)
+            a3ms.append(a3m.decode() if isinstance(a3m, bytes) else a3m)
+        return Result(a3m_texts=a3ms)
+
+    def save(self) -> ResultPaths:
+        """Download MMseqs2 outputs and save as A3M files to the workspace."""
+        return ResultPaths(
+            a3m_files=[obj.save(ext="a3m") for obj in self.outputs],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def search(
     sequences: list[str],
     prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
     sensitivity: float | None = None,
@@ -40,56 +106,12 @@ def mmseqs2(
     max_accept: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def mmseqs2(
-    sequences: list[str],
-    prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
-    sensitivity: float | None = None,
-    expand_eval: float | None = None,
-    align_eval: int | None = None,
-    diff: int | None = None,
-    qsc: float | None = None,
-    max_accept: int | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> list[dict[str, Any]]: ...
-@overload
-def mmseqs2(
-    sequences: list[str],
-    prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
-    sensitivity: float | None = None,
-    expand_eval: float | None = None,
-    align_eval: int | None = None,
-    diff: int | None = None,
-    qsc: float | None = None,
-    max_accept: int | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> list[dict[str, Any]] | RunID: ...
-
-
-def mmseqs2(
-    sequences: list[str],
-    prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
-    sensitivity: float | None = None,
-    expand_eval: float | None = None,
-    align_eval: int | None = None,
-    diff: int | None = None,
-    qsc: float | None = None,
-    max_accept: int | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> list[dict[str, Any]] | RunID:
+) -> RushRun[ResultRef]:
     """
-    Run MMseqs2 on one or more amino acid sequences.
+    Submit an MMseqs2 sequence search for the given amino acid *sequences*.
 
-    The collected result is a list of Rush object-store paths to A3M files, one
-    per input sequence.
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed A3M results, or ``.save()`` to write them to disk.
     """
 
     # TODO: set use_upstream_server to `None` for prod, when it works again
@@ -119,55 +141,13 @@ mmseqs2_rex_s
         sequences=f"[\n        {',\n        '.join([f'"{seq}"' for seq in sequences])}]",
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        assert isinstance(out, list)
-        assert len(out) == len(sequences)
-        for out_i in out:
-            assert isinstance(out_i, list)
-        if len(out) == 1:
-            out = out[0]
-        return out
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-        raise e
-
-
-def fetch_outputs(res: list[dict[str, Any]]) -> list[str]:
-    """
-    Fetch MMseqs2 outputs into memory as A3M strings.
-
-    Args:
-        res: Collected output from mmseqs2(), one object per input sequence.
-
-    Returns:
-        A3M text outputs in the same order as the collected outputs.
-    """
-    outputs = res
-    a3ms: list[str] = []
-    for output_obj in outputs:
-        a3m = fetch_object(output_obj["path"])
-        a3ms.append(a3m.decode() if isinstance(a3m, bytes) else a3m)
-    return a3ms
-
-
-def save_outputs(res: list[dict[str, Any]]) -> list[Path]:
-    """
-    Save MMseqs2 outputs into the workspace as `.a3m` files.
-
-    Args:
-        res: Collected output from mmseqs2(), one object per input sequence.
-
-    Returns:
-        Local `.a3m` paths in the same order as the collected outputs.
-    """
-    outputs = res
-    return [
-        save_object(output_obj["path"], type="bin", ext="a3m") for output_obj in outputs
-    ]
+        raise

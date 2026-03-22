@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
 
-from rush.nnxtb import NnxtbResult, fetch_outputs, save_outputs
+from rush.nnxtb import Result, ResultPaths, ResultRef
 
 
-def test_fetch_outputs_parses_nnxtb_result(monkeypatch):
+def test_result_ref_fetch_parses_nnxtb_result(monkeypatch):
     monkeypatch.setattr(
         "rush.nnxtb.fetch_object",
         lambda path: json.dumps(
@@ -16,18 +16,24 @@ def test_fetch_outputs_parses_nnxtb_result(monkeypatch):
         ).encode(),
     )
 
-    result = fetch_outputs({"path": "nnxtb.json"})
+    ref = ResultRef.from_raw_output(
+        [{"path": "nnxtb.json", "size": 0, "format": "Json"}]
+    )
+    result = ref.fetch()
 
-    assert isinstance(result, NnxtbResult)
+    assert isinstance(result, Result)
     assert result.energy_mev == -123.4
     assert result.forces_mev_per_angstrom == [[1.0, 2.0, 3.0]]
     assert result.frequencies_inv_cm == [100.0, 200.0]
 
 
-def test_save_outputs_saves_nnxtb_result(monkeypatch):
+def test_result_ref_save_saves_nnxtb_result(monkeypatch):
     saved_path = Path("/tmp/nnxtb.json")
-    monkeypatch.setattr("rush.nnxtb.save_object", lambda path: saved_path)
+    monkeypatch.setattr("rush.client.RushObject.save", lambda self, **kw: saved_path)
 
-    result = save_outputs({"path": "nnxtb.json"})
+    ref = ResultRef.from_raw_output(
+        [{"path": "nnxtb.json", "size": 0, "format": "Json"}]
+    )
+    result = ref.save()
 
-    assert result == saved_path
+    assert result == ResultPaths(output=saved_path)

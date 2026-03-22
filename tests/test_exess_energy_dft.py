@@ -2,14 +2,14 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, collect_run, set_opts
-from rush.exess import exess_energy
+from rush.client import RunOpts, set_opts
+from rush.exess import energy
 
 
 def test_exess_energy_dft_hyb():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
-    id = exess_energy(
+    run = energy(
         data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         ksdft_keywords=exess.KSDFTKeywords(
@@ -30,18 +30,15 @@ def test_exess_energy_dft_hyb():
             tags=["rush-py", "test", "dft", "HYB_GGA_XC_B3LYP", "benzene"],
         ),
     )
-    res = collect_run(id)
-    print(res, file=sys.stderr)
-
-    # Each module has a `save_outputs` function that automatically writes the
-    # outputs as files to the workspace dir
-    exess.save_outputs(res)
+    result = run.collect()
+    print(result, file=sys.stderr)
+    result.save()
 
 
 def test_exess_energy_dft_dhyb():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
-    id = exess_energy(
+    run = energy(
         data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         basis="cc-pVTZ",
@@ -57,12 +54,9 @@ def test_exess_energy_dft_dhyb():
             tags=["rush-py", "test", "dft", "revDSD-PBEP86-D4", "benzene"],
         ),
     )
-    res = collect_run(id)
-    print(res, file=sys.stderr)
-
-    # Each module has a `save_outputs` function that automatically writes the
-    # outputs as files to the workspace dir
-    exess.save_outputs(res)
+    result = run.collect()
+    print(result, file=sys.stderr)
+    result.save()
 
 
 if __name__ == "__main__":

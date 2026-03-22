@@ -19,8 +19,8 @@ from typing import Any, Iterable, Sequence
 from rush.mol import FragmentRef
 
 from .. import RushRunError, exess
-from ..client import RunOpts, save_object
-from ..exess import exess_interaction_energy
+from ..client import RunOpts
+from ..exess import interaction_energy
 
 __all__ = [
     "fragmented_exess",
@@ -255,33 +255,25 @@ def fragmented_exess(
 
         print(f"Process {output_filename}", file=sys.stderr)
         try:
-            run_output = exess_interaction_energy(
-                topology_path,
-                job.reference_fragment,
-                "RestrictedRIMP2",
-                "cc-pVDZ",
-                "cc-pVDZ-RIFIT",
-                scf_keywords=exess.SCFKeywords(
-                    max_iters=50,
-                    max_diis_history_length=12,
-                    convergence_metric="DIIS",
-                    convergence_threshold=1e-8,
-                    density_threshold=1e-10,
-                    density_basis_set_projection_fallback_enabled=True,
-                ),
-                frag_keywords=frag_keywords,
-                run_opts=run_opts,
-                collect=collect,
-            )
             if collect:
-                assert isinstance(run_output, tuple)
-                run_path = save_object(
-                    (
-                        run_output["path"]
-                        if isinstance(run_output, dict)
-                        else run_output[0]["path"]
-                    )
-                )
+                run_output = interaction_energy(
+                    topology_path,
+                    job.reference_fragment,
+                    "RestrictedRIMP2",
+                    "cc-pVDZ",
+                    "cc-pVDZ-RIFIT",
+                    scf_keywords=exess.SCFKeywords(
+                        max_iters=50,
+                        max_diis_history_length=12,
+                        convergence_metric="DIIS",
+                        convergence_threshold=1e-8,
+                        density_threshold=1e-10,
+                        density_basis_set_projection_fallback_enabled=True,
+                    ),
+                    frag_keywords=frag_keywords,
+                    run_opts=run_opts,
+                ).collect()
+                run_path = run_output.calc.save()
                 if run_path.exists():
                     # Save the successful run
                     shutil.move(str(run_path), str(target_path))

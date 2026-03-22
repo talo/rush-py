@@ -1,15 +1,14 @@
 import sys
 from pathlib import Path
 
+from rush import exess
 from rush.client import RunOpts, set_opts
-from rush.exess_qmmm import ExessQMMMResult, fetch_outputs, save_outputs
-from rush.exess_qmmm import exess_qmmm as run_exess_qmmm
 
 
 def test_exess_qmmm():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    res = run_exess_qmmm(
+    run = exess.qmmm(
         n_timesteps=500,
         temperature_kelvin=300.0,
         topology_path=data_dir / "6a5j_t.json",
@@ -23,13 +22,12 @@ def test_exess_qmmm():
             name="Rush-Py Test EXESS QMMM 01: QM+MM",
             tags=["rush-py", "test", "6a5j"],
         ),
-        collect=True,
     )
-    print(res, file=sys.stderr)
-    fetched = fetch_outputs(res)
-    assert isinstance(fetched, ExessQMMMResult)
+    print(run, file=sys.stderr)
+    fetched = run.fetch()
+    assert isinstance(fetched, exess.QMMMResult)
     assert fetched.geometries
-    print(save_outputs(res), file=sys.stderr)
+    print(run.save(), file=sys.stderr)
 
 
 if __name__ == "__main__":

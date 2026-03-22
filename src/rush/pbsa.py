@@ -1,120 +1,130 @@
 #!/usr/bin/env python3
+"""
+PBSA module for the Rush Python client.
+
+Computes solvation energies using the Poisson-Boltzmann Surface Area method.
+
+Usage::
+
+    from rush import pbsa
+
+    result = pbsa.solvation_energy("mol.json", ...).fetch()
+    print(result.solvation_energy)
+"""
+
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from string import Template
-from typing import Literal, overload
+from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
+from ._utils import float_to_str
 from .client import (
-    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
     _json_content_name,
     _submit_rex,
-    collect_run,
     save_json,
     upload_object,
 )
-from .utils import float_to_str
+from .run import RushRun
+
+
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
 
 
 @dataclass
-class PBSAResult:
-    """
-    Parsed PBSA result.
-
-    Use `fetch_outputs(pbsa(..., collect=True))` to return this dataclass in
-    memory, or `save_outputs(pbsa(..., collect=True))` to save the same values
-    as JSON in the workspace.
-    """
+class Result:
+    """Parsed PBSA solvation energy results (all values in Hartrees)."""
 
     solvation_energy: float
     polar_solvation_energy: float
     nonpolar_solvation_energy: float
 
 
-@overload
-def pbsa(
-    topology_path: Path | str,
-    solute_dielectric: float,
-    solvent_dielectric: float,
-    solvent_radius: float,
-    ion_concentration: float,
-    temperature: float,
-    spacing: float,
-    sasa_gamma: float,
-    sasa_beta: float,
-    sasa_n_samples: int,
-    convergence: float,
-    box_size_factor: float,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def pbsa(
-    topology_path: Path | str,
-    solute_dielectric: float,
-    solvent_dielectric: float,
-    solvent_radius: float,
-    ion_concentration: float,
-    temperature: float,
-    spacing: float,
-    sasa_gamma: float,
-    sasa_beta: float,
-    sasa_n_samples: int,
-    convergence: float,
-    box_size_factor: float,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> tuple[float, float, float]: ...
-@overload
-def pbsa(
-    topology_path: Path | str,
-    solute_dielectric: float,
-    solvent_dielectric: float,
-    solvent_radius: float,
-    ion_concentration: float,
-    temperature: float,
-    spacing: float,
-    sasa_gamma: float,
-    sasa_beta: float,
-    sasa_n_samples: int,
-    convergence: float,
-    box_size_factor: float,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[float, float, float] | RunID: ...
+@dataclass(frozen=True)
+class ResultPaths:
+    """Workspace path for saved PBSA output."""
+
+    output: Path
 
 
-def pbsa(
-    topology_path: Path | str,
-    solute_dielectric: float,
-    solvent_dielectric: float,
-    solvent_radius: float,
-    ion_concentration: float,
-    temperature: float,
-    spacing: float,
-    sasa_gamma: float,
-    sasa_beta: float,
-    sasa_n_samples: int,
-    convergence: float,
-    box_size_factor: float,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[float, float, float] | RunID:
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to PBSA output.
+
+    PBSA results are small enough to be returned inline (three floats),
+    so no object store download is needed.
     """
-    Run PBSA on the system in the QDX topology file at `topology_path`.
 
-    Returns the
-    total solvation energy, polar solvation energy, and nonpolar solvation energy
-    of the system, in Hartrees.
+    solvation_energy: float
+    polar_solvation_energy: float
+    nonpolar_solvation_energy: float
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``."""
+        if isinstance(res, list) and len(res) == 3:
+            return cls(
+                solvation_energy=float(res[0]),
+                polar_solvation_energy=float(res[1]),
+                nonpolar_solvation_energy=float(res[2]),
+            )
+        raise ValueError(
+            f"pbsa should return exactly 3 float outputs, "
+            f"got {type(res).__name__} with {len(res) if hasattr(res, '__len__') else '?'} items."
+        )
+
+    def fetch(self) -> Result:
+        """Return parsed PBSA results (no download needed — data is inline)."""
+        return Result(
+            solvation_energy=self.solvation_energy,
+            polar_solvation_energy=self.polar_solvation_energy,
+            nonpolar_solvation_energy=self.nonpolar_solvation_energy,
+        )
+
+    def save(self) -> ResultPaths:
+        """Save PBSA results as JSON to the workspace."""
+        output_json = asdict(self.fetch())
+        return ResultPaths(
+            output=save_json(
+                output_json,
+                name=_json_content_name("pbsa_output", output_json),
+            ),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def solvation_energy(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+) -> RushRun[ResultRef]:
+    """
+    Submit a PBSA solvation energy calculation for the topology at *topology_path*.
+
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed result, or ``.save()`` to write it to disk as JSON.
     """
 
     # Upload inputs
@@ -159,50 +169,13 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        assert isinstance(out, list)
-        assert len(out) == 3
-        assert isinstance(out[0], float)
-        assert isinstance(out[1], float)
-        assert isinstance(out[2], float)
-        return tuple(out)
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-        raise e
-
-
-def fetch_outputs(res: tuple[float, float, float]) -> PBSAResult:
-    """
-    Fetch PBSA outputs into memory.
-
-    Args:
-        res: Collected output from pbsa().
-
-    Returns:
-        Parsed PBSA result values.
-    """
-    return PBSAResult(*res)
-
-
-def save_outputs(res: tuple[float, float, float]) -> Path:
-    """
-    Save PBSA outputs into the workspace as JSON.
-
-    Args:
-        res: Collected output from pbsa().
-
-    Returns:
-        Local path to the saved PBSA JSON file.
-    """
-    output_json = asdict(PBSAResult(*res))
-    return save_json(
-        output_json,
-        name=_json_content_name("pbsa_output", output_json),
-    )
+        raise

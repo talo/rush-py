@@ -11,13 +11,11 @@ selection, and configurable n-mer fragmentation levels.
 Quick Links
 -----------
 
-- :func:`rush.exess.exess`
-- :func:`rush.exess.exess_energy`
-- :func:`rush.exess.exess_interaction_energy`
-- :func:`rush.exess.fetch_outputs`
-- :func:`rush.exess.save_outputs`
-- :mod:`rush.exess_geo_opt`
-- :mod:`rush.exess_qmmm`
+- :func:`rush.exess.calculate`
+- :func:`rush.exess.energy`
+- :func:`rush.exess.interaction_energy`
+- :func:`rush.exess.optimization`
+- :func:`rush.exess.qmmm`
 """
 
 import enum
@@ -27,23 +25,22 @@ import warnings
 from dataclasses import dataclass, replace
 from pathlib import Path
 from string import Template
-from typing import Any, Literal, overload
+from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
-from .client import (
-    RunID,
+from .._utils import bool_to_str, float_to_str, optional_str
+from ..client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
-    collect_run,
     fetch_object,
-    save_object,
     upload_object,
 )
-from .mol import AtomRef, FragmentRef
-from .utils import bool_to_str, float_to_str, optional_str
+from ..mol import AtomRef, FragmentRef
+from ..run import RushRun
 
 type MethodT = Literal[
     "RestrictedHF",
@@ -107,11 +104,16 @@ type StandardOrientationT = Literal[
 ]
 
 
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
+
+
 type TensorLike = list[Any]
 
 
 @dataclass
-class ExessNmer:
+class Nmer:
     fragments: list[FragmentRef]
     density: TensorLike | None = None
     fock: TensorLike | None = None
@@ -139,7 +141,7 @@ class ExessNmer:
     num_basis_fns: int | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ExessNmer":
+    def from_dict(cls, data: dict[str, Any]) -> "Nmer":
         return cls(
             fragments=[FragmentRef(fragment) for fragment in data["fragments"]],
             density=data.get("density"),
@@ -174,9 +176,9 @@ class ExessNmer:
 
 
 @dataclass
-class ExessManyBodyExpansion:
+class ManyBodyExpansion:
     method: str
-    nmers: list[list[ExessNmer]]
+    nmers: list[list[Nmer]]
     distance_metric: str | None = None
     distance_method: str | None = None
     reference_fragment: FragmentRef | None = None
@@ -191,11 +193,11 @@ class ExessManyBodyExpansion:
     num_iters: int | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ExessManyBodyExpansion":
+    def from_dict(cls, data: dict[str, Any]) -> "ManyBodyExpansion":
         return cls(
             method=data["method"],
             nmers=[
-                [ExessNmer.from_dict(nmer) for nmer in nmer_level]
+                [Nmer.from_dict(nmer) for nmer in nmer_level]
                 for nmer_level in data["nmers"]
             ],
             distance_metric=data.get("distance_metric"),
@@ -218,28 +220,178 @@ class ExessManyBodyExpansion:
 
 
 @dataclass
-class ExessCalculation:
+class Calculation:
     calculation_time: float
-    qmmbe: ExessManyBodyExpansion
+    qmmbe: ManyBodyExpansion
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ExessCalculation":
+    def from_dict(cls, data: dict[str, Any]) -> "Calculation":
         return cls(
             calculation_time=data["calculation_time"],
-            qmmbe=ExessManyBodyExpansion.from_dict(data["qmmbe"]),
+            qmmbe=ManyBodyExpansion.from_dict(data["qmmbe"]),
         )
 
 
 @dataclass
-class ExessResult:
-    calc: ExessCalculation
+class Result:
+    calc: Calculation
     exports: dict[str, Any] | bytes | None = None
 
 
 @dataclass(frozen=True)
-class ExessSavedResult:
+class ResultPaths:
     calc: Path
     exports: Path | None = None
+
+
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to EXESS outputs in the Rush object store.
+
+    Call :meth:`fetch` to download and parse into Python dataclasses, or
+    :meth:`save` to download to local files.
+    """
+
+    calc: RushObject
+    exports: RushObject | dict[str, RushObject] | None = None
+
+    @classmethod
+    def from_raw_output(
+        cls,
+        res: Any,
+    ) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``."""
+        if not isinstance(res, list) or not (1 <= len(res) <= 2):
+            raise ValueError(
+                f"exess should return a list of 1 or 2 outputs, "
+                f"got {type(res).__name__}"
+                f"{f' with {len(res)} items' if hasattr(res, '__len__') else ''}."
+            )
+
+        calc = RushObject.from_dict(res[0])
+
+        exports: RushObject | dict[str, RushObject] | None = None
+        if len(res) == 2:
+            raw_export = res[1]
+            if "Hdf5" in raw_export:
+                inner = raw_export["Hdf5"]
+                exports = {"Hdf5": RushObject.from_dict(inner)}
+            elif "Json" in raw_export:
+                inner = raw_export["Json"]
+                exports = {"Json": RushObject.from_dict(inner)}
+            elif "path" in raw_export:
+                exports = RushObject.from_dict(raw_export)
+            else:
+                raise ValueError(
+                    f"Unknown output format in exports output. "
+                    f"Expected 'Json', 'Hdf5', or 'path' key, "
+                    f"but got keys: {list(raw_export.keys())}"
+                )
+
+        return cls(calc=calc, exports=exports)
+
+    @staticmethod
+    def _resolve_exports_object(
+        exports_obj: RushObject | dict[str, RushObject] | None,
+    ) -> tuple[Literal["Json", "Hdf5"], RushObject] | None:
+        if exports_obj is None:
+            return None
+        if isinstance(exports_obj, RushObject):
+            if exports_obj.format.lower() == "json":
+                return ("Json", exports_obj)
+            return ("Hdf5", exports_obj)
+        if "Json" in exports_obj:
+            return ("Json", exports_obj["Json"])
+        if "Hdf5" in exports_obj:
+            return ("Hdf5", exports_obj["Hdf5"])
+        raise ValueError(
+            "Unknown output format in exports output. Expected 'Json' or 'Hdf5' key, "
+            f"but got keys: {list(exports_obj.keys())}"
+        )
+
+    def fetch(self, extract: bool = True) -> Result:
+        """
+        Download EXESS outputs and parse into Python dataclasses.
+
+        Exported outputs are left lightly processed for now:
+        - JSON exports are returned as a raw dict
+        - HDF5 exports are returned as extracted file bytes by default
+        - HDF5 exports are returned as raw tar.zst bytes when extract=False
+
+        Args:
+            extract: Whether to extract HDF5 tarball exports before returning them.
+
+        Returns:
+            Parsed EXESS calculation data plus an optional export payload.
+        """
+        calc = Calculation.from_dict(json.loads(fetch_object(self.calc.path).decode()))
+
+        exports: dict[str, Any] | bytes | None = None
+        exports_ref = self._resolve_exports_object(self.exports)
+        if exports_ref is not None:
+            export_kind, exports_obj = exports_ref
+            if export_kind == "Json":
+                exports = json.loads(fetch_object(exports_obj.path).decode())
+            elif export_kind == "Hdf5":
+                try:
+                    exports = fetch_object(exports_obj.path, extract=extract)
+                except ValueError as e:
+                    if extract and "only directories" in str(e):
+                        exports = None
+                    else:
+                        raise
+            else:
+                raise ValueError(
+                    f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'."
+                )
+
+        return Result(calc=calc, exports=exports)
+
+    def save(self, extract=True) -> ResultPaths:
+        """
+        Download and save EXESS outputs to the workspace.
+
+        Args:
+            extract: Whether to extract HDF5 tarball exports before saving them.
+
+        Returns:
+            Local paths for the saved calculation output and optional export output.
+        """
+        calc_path = self.calc.save()
+        exports_ref = self._resolve_exports_object(self.exports)
+
+        if exports_ref is None:
+            return ResultPaths(calc=calc_path)
+
+        exports_kind, exports_obj = exports_ref
+        if exports_kind == "Json":
+            return ResultPaths(
+                calc=calc_path,
+                exports=exports_obj.save(),
+            )
+        elif exports_kind == "Hdf5":
+            exports_path = None
+            try:
+                exports_path = exports_obj.save(
+                    ext="hdf5" if extract else "tar.zst",
+                    extract=extract,
+                )
+            except ValueError as e:
+                if "only directories" in str(e):
+                    # No actual files in HDF5 tar, return None for exports_path
+                    exports_path = None
+                else:
+                    raise  # Re-raise other extraction errors
+            return ResultPaths(calc=calc_path, exports=exports_path)
+
+        raise ValueError(
+            f"Unknown export kind {exports_kind!r}. Expected 'Json' or 'Hdf5'."
+        )
+
+
+# ---------------------------------------------------------------------------
+# Input types
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -1010,66 +1162,12 @@ class KSDFTKeywords:
         )
 
 
-@overload
-def exess(
-    topology_path: Path | str,
-    driver: str,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    export_keywords: ExportKeywords | None = None,
-    system: System | None = None,
-    convert_hdf5_to_json: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def exess(
-    topology_path: Path | str,
-    driver: str,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    export_keywords: ExportKeywords | None = None,
-    system: System | None = None,
-    convert_hdf5_to_json: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> tuple[dict[str, Any], ...]: ...
-@overload
-def exess(
-    topology_path: Path | str,
-    driver: str,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    export_keywords: ExportKeywords | None = None,
-    system: System | None = None,
-    convert_hdf5_to_json: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID: ...
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
 
 
-def exess(
+def calculate(
     topology_path: Path | str,
     driver: str,
     method: MethodT = "RestrictedKSDFT",
@@ -1085,62 +1183,62 @@ def exess(
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID:
+) -> RushRun[ResultRef]:
     """
-    Compute the energy of the system in the QDX topology file at `topology_path`.
+    Submit a generic EXESS calculation for the topology at *topology_path*.
+
+    Returns a :class:`~rush.run.RushRun` handle.  Call ``.collect()`` to wait
+    for the result ref, or use the ``.fetch()`` / ``.save()`` shortcuts.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
-    # Upload inputs
     topology_vobj = upload_object(topology_path)
 
-    # Run rex
     rex = Template("""let
-  obj_j = λ j →
-    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology →
-    exess_rex_s
-      ($run_spec)
-      (exess_rex::ExessParams {
-        schema_version = "0.2.0",
-        external_charges = None,
-        convert_hdf5_to_json = $maybe_convert_hdf5_to_json,
-        model = Some (exess_rex::Model {
-          method = exess_rex::Method::$method,
-          basis = "$basis",
-          aux_basis = $maybe_aux_basis,
-          standard_orientation = $maybe_standard_orientation,
-          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
-        }),
-        system = $maybe_system,
-        keywords = exess_rex::Keywords {
-          scf = $maybe_scf_keywords,
-          ks_dft = $maybe_ks_keywords,
-          rtat = None,
-          frag = $maybe_frag_keywords,
-          boundary = None,
-          log = None,
-          dynamics = None,
-          integrals = None,
-          debug = None,
-          export = $maybe_export_keywords,
-          guess = None,
-          force_field = None,
-          optimization = None,
-          hessian = None,
-          gradient = None,
-          qmmm = None,
-          machine_learning = None,
-          regions = None,
-        },
-        driver = exess_rex::Driver::$driver,
-      })
-      [ (obj_j topology) ]
-      None
-in
-  exess "$topology_vobj_path"
-""").substitute(
+      obj_j = λ j →
+        VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
+      exess = λ topology →
+        exess_rex_s
+          ($run_spec)
+          (exess_rex::ExessParams {
+            schema_version = "0.2.0",
+            external_charges = None,
+            convert_hdf5_to_json = $maybe_convert_hdf5_to_json,
+            model = Some (exess_rex::Model {
+              method = exess_rex::Method::$method,
+              basis = "$basis",
+              aux_basis = $maybe_aux_basis,
+              standard_orientation = $maybe_standard_orientation,
+              force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
+            }),
+            system = $maybe_system,
+            keywords = exess_rex::Keywords {
+              scf = $maybe_scf_keywords,
+              ks_dft = $maybe_ks_keywords,
+              rtat = None,
+              frag = $maybe_frag_keywords,
+              boundary = None,
+              log = None,
+              dynamics = None,
+              integrals = None,
+              debug = None,
+              export = $maybe_export_keywords,
+              guess = None,
+              force_field = None,
+              optimization = None,
+              hessian = None,
+              gradient = None,
+              qmmm = None,
+              machine_learning = None,
+              regions = None,
+            },
+            driver = exess_rex::Driver::$driver,
+          })
+          [ (obj_j topology) ]
+          None
+    in
+      exess "$topology_vobj_path"
+    """).substitute(
         run_spec=run_spec._to_rex(),
         maybe_convert_hdf5_to_json=optional_str(convert_hdf5_to_json),
         method=method,
@@ -1167,13 +1265,10 @@ in
         driver=driver,
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        assert isinstance(out, list)
-        return tuple(out)
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
@@ -1182,8 +1277,7 @@ in
         raise
 
 
-@overload
-def exess_energy(
+def energy(
     topology_path: Path | str,
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
@@ -1198,212 +1292,28 @@ def exess_energy(
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def exess_energy(
-    topology_path: Path | str,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    export_keywords: ExportKeywords | None = None,
-    system: System | None = None,
-    convert_hdf5_to_json: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> tuple[dict[str, Any], ...]: ...
-@overload
-def exess_energy(
-    topology_path: Path | str,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    export_keywords: ExportKeywords | None = None,
-    system: System | None = None,
-    convert_hdf5_to_json: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID: ...
-
-
-def exess_energy(
-    topology_path: Path | str,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords | None = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    export_keywords: ExportKeywords | None = None,
-    system: System | None = None,
-    convert_hdf5_to_json: bool | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID:
-    return exess(
+) -> RushRun[ResultRef]:
+    """Submit an EXESS single-point energy calculation."""
+    return calculate(
         topology_path,
         "Energy",
-        method,
-        basis,
-        aux_basis,
-        standard_orientation,
-        force_cartesian_basis_sets,
-        scf_keywords,
-        frag_keywords,
-        ksdft_keywords,
-        export_keywords,
-        system,
-        convert_hdf5_to_json,
-        run_spec,
-        run_opts,
-        collect,
+        method=method,
+        basis=basis,
+        aux_basis=aux_basis,
+        standard_orientation=standard_orientation,
+        force_cartesian_basis_sets=force_cartesian_basis_sets,
+        scf_keywords=scf_keywords,
+        frag_keywords=frag_keywords,
+        ksdft_keywords=ksdft_keywords,
+        export_keywords=export_keywords,
+        system=system,
+        convert_hdf5_to_json=convert_hdf5_to_json,
+        run_spec=run_spec,
+        run_opts=run_opts,
     )
 
 
-def _unwrap_outputs(
-    res: tuple[dict[str, Any], ...],
-) -> tuple[dict[str, Any], dict[str, Any] | None]:
-    if isinstance(res, dict):
-        return (res, None)
-
-    if len(res) == 0 or len(res) > 2:
-        raise ValueError("exess_energy should return 1 or 2 outputs.")
-
-    return (res[0], res[1] if len(res) == 2 else None)
-
-
-def _resolve_exports_object(
-    exports_obj: dict[str, Any] | None,
-) -> tuple[Literal["Json", "Hdf5"], dict[str, Any]] | None:
-    if exports_obj is None:
-        return None
-    if "Json" in exports_obj:
-        return ("Json", exports_obj["Json"])
-    if "Hdf5" in exports_obj:
-        return ("Hdf5", exports_obj.get("Hdf5") or exports_obj)
-    if "path" in exports_obj:
-        if str(exports_obj.get("format", "")).lower() == "json":
-            return ("Json", exports_obj)
-        return ("Hdf5", exports_obj)
-    raise ValueError(
-        "Unknown output format in exports output. Expected 'Json' or 'Hdf5' key, "
-        f"but got keys: {list(exports_obj.keys())}"
-    )
-
-
-def fetch_outputs(res: tuple[dict[str, Any], ...], extract: bool = True) -> ExessResult:
-    """
-    Download EXESS outputs and convert the main JSON payload into Python dataclasses.
-
-    Exported outputs are left lightly processed for now:
-    - JSON exports are returned as a raw dict
-    - HDF5 exports are returned as extracted file bytes by default
-    - HDF5 exports are returned as raw tar.zst bytes when extract=False
-
-    Args:
-        res: Collected output from an EXESS single-point style run. This may
-            be a single output object or a sequence containing the main
-            calculation output plus an optional export output.
-        extract: Whether to extract HDF5 tarball exports before returning them.
-
-    Returns:
-        Parsed EXESS calculation data plus an optional fetched export payload.
-    """
-    calc_obj, exports_obj = _unwrap_outputs(res)
-
-    calc = ExessCalculation.from_dict(
-        json.loads(fetch_object(calc_obj["path"]).decode())
-    )
-
-    exports: dict[str, Any] | bytes | None = None
-    exports_ref = _resolve_exports_object(exports_obj)
-    if exports_ref is not None:
-        export_kind, exports_obj = exports_ref
-        if export_kind == "Json":
-            exports = json.loads(fetch_object(exports_obj["path"]).decode())
-        elif export_kind == "Hdf5":
-            try:
-                exports = fetch_object(exports_obj["path"], extract=extract)
-            except ValueError as e:
-                if extract and "only directories" in str(e):
-                    exports = None
-                else:
-                    raise
-        else:
-            raise ValueError(
-                f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'."
-            )
-
-    return ExessResult(calc=calc, exports=exports)
-
-
-def save_outputs(res: tuple[dict[str, Any], ...], extract=True) -> ExessSavedResult:
-    """
-    Download and save energy calculation outputs from Rush.
-
-    Takes the collected result from EXESS functions (`exess_energy()`,
-    `exess_interaction_energy()`, etc.) and downloads the output files to disk.
-
-    Args:
-        res: Collected output from an EXESS single-point style run. This may
-            be a single output object or a sequence containing the main
-            calculation output plus an optional export output.
-        extract: Whether to extract HDF5 tarball exports before saving them.
-
-    Returns:
-        Local paths for the saved calculation output and optional export output.
-    """
-    calc_obj, exports_obj = _unwrap_outputs(res)
-    calc_path = save_object(calc_obj["path"])
-    exports_ref = _resolve_exports_object(exports_obj)
-
-    if exports_ref is None:
-        return ExessSavedResult(calc=calc_path)
-
-    exports_kind, exports_obj = exports_ref
-    if exports_kind == "Json":
-        return ExessSavedResult(
-            calc=calc_path,
-            exports=save_object(exports_obj["path"]),
-        )
-    elif exports_kind == "Hdf5":
-        exports_path = None
-        try:
-            exports_path = save_object(
-                exports_obj["path"],
-                ext="hdf5" if extract else "tar.zst",
-                extract=extract,
-            )
-        except ValueError as e:
-            if "only directories" in str(e):
-                # No actual files in HDF5 tar, return None for exports_path
-                exports_path = None
-            else:
-                raise  # Re-raise other extraction errors
-        return ExessSavedResult(calc=calc_path, exports=exports_path)
-
-    raise ValueError(
-        f"Unknown export kind {exports_kind!r}. Expected 'Json' or 'Hdf5'."
-    )
-
-
-@overload
-def exess_interaction_energy(
+def interaction_energy(
     topology_path: Path | str,
     reference_fragment: int,
     method: MethodT = "RestrictedKSDFT",
@@ -1417,65 +1327,14 @@ def exess_interaction_energy(
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def exess_interaction_energy(
-    topology_path: Path | str,
-    reference_fragment: int,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> tuple[dict[str, Any], ...]: ...
-@overload
-def exess_interaction_energy(
-    topology_path: Path | str,
-    reference_fragment: int,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID: ...
-
-
-def exess_interaction_energy(
-    topology_path: Path | str,
-    reference_fragment: int,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> tuple[dict[str, Any], ...] | RunID:
+) -> RushRun[ResultRef]:
     """
-    Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
-    in the toplogy file at `topology_path`.
+    Submit an EXESS interaction-energy calculation.
+
+    Computes the interaction energy between the fragment at index
+    *reference_fragment* and the rest of the system.
     """
-    return exess_energy(
+    return energy(
         topology_path=topology_path,
         method=method,
         basis=basis,
@@ -1491,5 +1350,4 @@ def exess_interaction_energy(
         system=system,
         run_spec=run_spec,
         run_opts=run_opts,
-        collect=collect,
     )

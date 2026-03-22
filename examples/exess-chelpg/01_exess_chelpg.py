@@ -30,7 +30,7 @@ from rdkit import Chem
 from rdkit.Chem import rdDepictor
 
 from rush import TRC, exess, from_pdb
-from rush.exess import exess_energy
+from rush.exess import energy
 
 matplotlib.use("Agg")  # Use non-GUI backend
 
@@ -305,15 +305,14 @@ print(f"✓ Topology saved to {topology_path}")
 
 # ===== 2. Run CHELPG calculation =====
 print("\nRunning CHELPG calculation...")
-outputs = exess_energy(
+result = energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
     convert_hdf5_to_json=True,
-    collect=True,
-)
+).collect()
 
-exports = exess.fetch_outputs(outputs).exports
+exports = result.fetch().exports
 assert isinstance(exports, dict)
 charges = exports["chelpg_charges"]
 

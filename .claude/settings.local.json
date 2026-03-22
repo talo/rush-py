@@ -7,7 +7,14 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(python -c \"import shibuya; print\\(shibuya.__file__\\)\" 2>/dev/null || uv run python -c \"import shibuya; import os; print\\(os.path.dirname\\(shibuya.__file__\\)\\)\")",
-      "Bash(find /c/Users/kayle/rush-code/rush-py -type f -name \"*.py\" -path \"*/examples/*\" 2>/dev/null | head -10)"
+      "Bash(find /c/Users/kayle/rush-code/rush-py -type f -name \"*.py\" -path \"*/examples/*\" 2>/dev/null | head -10)",
+      "Bash(python -c \"from rush.exess import exess_energy\")",
+      "Bash(python -m pytest tests/module_output_helpers/test_exess_output_helpers.py tests/test_exess_namespaces.py -x -v)",
+      "Bash(python -m pytest tests/ -m \"not slow\" -x -v)",
+      "Bash(python -m pytest tests/test_exess_namespaces.py tests/module_output_helpers/test_exess_output_helpers.py tests/test_client_collect_run.py -x -v)",
+      "Bash(ruff check:*)",
+      "Bash(ty check:*)",
+      "Bash(python -m pytest tests/ -m \"not slow\" -v --ignore=tests/test_fetch_runs.py)"
     ]
   }
 }

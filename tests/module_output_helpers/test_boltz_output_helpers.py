@@ -5,41 +5,47 @@ from typing import Any
 import numpy as np
 import pytest
 
-from rush import TRCSavedResult
+from rush import TRCPaths
 from rush.boltz import (
-    BoltzResult,
-    BoltzSavedResult,
-    fetch_outputs,
-    save_outputs,
+    Result,
+    ResultPaths,
+    ResultRef,
 )
 
 
-def _sample_boltz_output():
+def _sample_boltz_raw_output():
+    """Simulate raw collect_run output: [[sample0_tuple, ...]]."""
     return [
-        (
-            [{"path": "top"}, {"path": "res"}, {"path": "chains"}],
-            {
-                "confidence_score": 0.91,
-                "ptm": 0.92,
-                "iptm": 0.93,
-                "ligand_iptm": 0.94,
-                "protein_iptm": 0.95,
-                "complex_plddt": 0.96,
-                "complex_iplddt": 0.97,
-                "complex_pde": 0.98,
-                "complex_ipde": 0.99,
-            },
-            {"path": "plddt"},
-            {"path": "pae"},
-            {
-                "affinity_pred_value": 1.0,
-                "affinity_probability_binary": 0.1,
-                "affinity_pred_value1": 1.1,
-                "affinity_probability_binary1": 0.2,
-                "affinity_pred_value2": 1.2,
-                "affinity_probability_binary2": 0.3,
-            },
-        )
+        [
+            [
+                [
+                    {"path": "top", "size": 0, "format": "Json"},
+                    {"path": "res", "size": 0, "format": "Json"},
+                    {"path": "chains", "size": 0, "format": "Json"},
+                ],
+                {
+                    "confidence_score": 0.91,
+                    "ptm": 0.92,
+                    "iptm": 0.93,
+                    "ligand_iptm": 0.94,
+                    "protein_iptm": 0.95,
+                    "complex_plddt": 0.96,
+                    "complex_iplddt": 0.97,
+                    "complex_pde": 0.98,
+                    "complex_ipde": 0.99,
+                },
+                {"path": "plddt", "size": 0, "format": "Bin"},
+                {"path": "pae", "size": 0, "format": "Bin"},
+                {
+                    "affinity_pred_value": 1.0,
+                    "affinity_probability_binary": 0.1,
+                    "affinity_pred_value1": 1.1,
+                    "affinity_probability_binary1": 0.2,
+                    "affinity_pred_value2": 1.2,
+                    "affinity_probability_binary2": 0.3,
+                },
+            ]
+        ]
     ]
 
 
@@ -48,7 +54,7 @@ def _encode_float_array(values: list[float]) -> str:
     return base64.b64encode(raw).decode()
 
 
-def test_fetch_outputs_parses_boltz_result(monkeypatch):
+def test_result_ref_fetch_parses_boltz_result(monkeypatch):
     fake_trc = object()
 
     def fake_fetch_object(path):
@@ -69,10 +75,11 @@ def test_fetch_outputs_parses_boltz_result(monkeypatch):
     monkeypatch.setattr("rush.boltz.fetch_object", fake_fetch_object)
     monkeypatch.setattr("rush.boltz.from_json", lambda data: fake_trc)
 
-    output = fetch_outputs(_sample_boltz_output())
+    ref = ResultRef.from_raw_output(_sample_boltz_raw_output())
+    output = list(ref.fetch())
 
-    assert isinstance(output, list)
-    assert isinstance(output[0], BoltzResult)
+    assert len(output) == 1
+    assert isinstance(output[0], Result)
     assert output[0].model is fake_trc
     assert output[0].metrics.confidence_score == 0.91
     assert isinstance(output[0].plddt, np.ndarray)
@@ -94,7 +101,7 @@ def test_fetch_outputs_parses_boltz_result(monkeypatch):
     assert output[0].affinities.affinity_pred_value2 == 1.2
 
 
-def test_save_outputs_saves_boltz_result(monkeypatch):
+def test_result_ref_save_saves_boltz_result(monkeypatch):
     saved_json_names = []
 
     monkeypatch.setattr(
@@ -108,11 +115,12 @@ def test_save_outputs_saves_boltz_result(monkeypatch):
 
     monkeypatch.setattr("rush.boltz.save_json", fake_save_json)
 
-    output = save_outputs(_sample_boltz_output())
+    ref = ResultRef.from_raw_output(_sample_boltz_raw_output())
+    output = list(ref.save())
 
-    assert isinstance(output, list)
-    assert isinstance(output[0], BoltzSavedResult)
-    assert output[0].model == TRCSavedResult(
+    assert len(output) == 1
+    assert isinstance(output[0], ResultPaths)
+    assert output[0].model == TRCPaths(
         topology=Path("/tmp/top.json"),
         residues=Path("/tmp/res.json"),
         chains=Path("/tmp/chains.json"),
@@ -125,28 +133,37 @@ def test_save_outputs_saves_boltz_result(monkeypatch):
     assert saved_json_names[1].startswith("boltz_affinities_")
 
 
-def test_boltz_output_helpers_reject_malformed_model_output():
-    bad_input: list[tuple[Any, ...]] = [
-        (
-            [{"path": "top"}, {"path": "res"}, {"path": "chains"}],
-            {
-                "confidence_score": 0.91,
-                "ptm": 0.92,
-                "iptm": 0.93,
-                "ligand_iptm": 0.94,
-                "protein_iptm": 0.95,
-                "complex_plddt": 0.96,
-                "complex_iplddt": 0.97,
-                "complex_pde": 0.98,
-                "complex_ipde": 0.99,
-            },
-            {"path": "plddt"},
-            {"path": "pae"},
-        ),
+def test_boltz_result_ref_rejects_malformed_output():
+    # Raw output missing the affinities element in the tuple
+    bad_raw: list[Any] = [
+        [
+            [
+                [
+                    {"path": "top", "size": 0, "format": "Json"},
+                    {"path": "res", "size": 0, "format": "Json"},
+                    {"path": "chains", "size": 0, "format": "Json"},
+                ],
+                {
+                    "confidence_score": 0.91,
+                    "ptm": 0.92,
+                    "iptm": 0.93,
+                    "ligand_iptm": 0.94,
+                    "protein_iptm": 0.95,
+                    "complex_plddt": 0.96,
+                    "complex_iplddt": 0.97,
+                    "complex_pde": 0.98,
+                    "complex_ipde": 0.99,
+                },
+                {"path": "plddt", "size": 0, "format": "Bin"},
+                {"path": "pae", "size": 0, "format": "Bin"},
+            ],
+        ]
     ]
 
-    with pytest.raises(ValueError, match="not enough values to unpack"):
-        fetch_outputs(bad_input)
+    ref = ResultRef.from_raw_output(bad_raw)
 
     with pytest.raises(ValueError, match="not enough values to unpack"):
-        save_outputs(bad_input)
+        list(ref.fetch())
+
+    with pytest.raises(ValueError, match="not enough values to unpack"):
+        list(ref.save())
