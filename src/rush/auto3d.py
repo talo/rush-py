@@ -9,9 +9,8 @@ Usage::
 
     from rush import auto3d
 
-    run = auto3d.generate(["CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"], k=5)
-    ref = run.collect()
-    results = ref.fetch()
+    result = auto3d.generate(["CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"], k=5).fetch()
+    print(next(results).stats.e_tot_hartrees)
 """
 
 import sys

@@ -23,10 +23,9 @@ This interaction energy is **not** a binding free energy — it doesn't include 
 
 ```python
 from rush import exess
-from rush.exess import exess_interaction_energy
 from rush.client import RunOpts
 
-outputs = exess_interaction_energy(
+result = exess.interaction_energy(
     "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
     93,                          # Fragment index of the ligand
     method="RestrictedHF",       # Explicit: minimal method for testing
@@ -39,12 +38,9 @@ outputs = exess_interaction_energy(
         distance_metric="Min",
     ),
     run_opts=RunOpts(name="Tutorial: Interaction Energy"),
-    collect=True,
-)
+).fetch()
 
-# Extract the result
-res = exess.fetch_outputs(outputs)
-print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy} Eh")
+print(f"Interaction energy: {result.calc.qmmbe.expanded_hf_energy} Eh")
 ```
 
 **Example output:**
@@ -88,16 +84,14 @@ Don't have a TRC file? Start from a PDB. Rush's **Prepare Complex** module handl
 ```python
 import json
 from pathlib import Path
+from rush import prepare
 from rush.client import RunOpts
-from rush.prepare_complex import fetch_outputs, prepare_complex
 
-outputs = prepare_complex(
+trc = prepare.protein_ligand(
     Path("1hsg.pdb"),
     ligand_names=["MK1", "HOH"],  # Residue names for ligands/waters
     run_opts=RunOpts(name="Tutorial: Prepare Complex"),
-    collect=True,
-)
-trc = fetch_outputs(outputs)
+).fetch()[0]
 
 # Inspect what Prepare Complex determined about charges
 print("Charged residues:")
@@ -128,13 +122,12 @@ print(f"Pocket contains {len(pocket_frags)} fragments (out of {len(trc.residues.
 
 ```python
 from rush import exess
-from rush.exess import exess_interaction_energy
 
 # EXESS needs the Topology (not the full TRC)
 with open("1hsg_t.json", "w") as f:
     json.dump(trc.topology.to_json(), f, indent=2)
 
-outputs = exess_interaction_energy(
+result = exess.interaction_energy(
     "1hsg_t.json",
     lig_idx,
     frag_keywords=exess.FragKeywords(
@@ -142,23 +135,21 @@ outputs = exess_interaction_energy(
         included_fragments=pocket_frags,
     ),
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E"),
-    collect=True,
-)
+).fetch()
 
-res = exess.fetch_outputs(outputs)
-print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy} Eh")
+print(f"Interaction energy: {result.calc.qmmbe.expanded_hf_energy} Eh")
 ```
 
 :::{admonition} The optional second output
 :class: note
-`exess_interaction_energy` always returns the main calculation output, and may also return an exports object if you request exports. `exess.fetch_outputs` turns those into an `ExessResult` with a `calc` field and an optional `exports` field. See the {doc}`Exports tutorial<03-exess-exports>` for details.
+`exess.interaction_energy(...).fetch()` always returns the main calculation output, and may also include an `exports` payload if you request exports. The result object has a `calc` field and an optional `exports` field. See the {doc}`Exports tutorial<03-exess-exports>` for details.
 :::
 
 ---
 
 ## Interpreting the Results
 
-The key value is `res.calc.qmmbe.expanded_hf_energy`:
+The key value is `result.calc.qmmbe.expanded_hf_energy`:
 
 - **Negative** → ligand is stabilized by the protein (favorable interaction)
 - **More negative** → stronger interaction

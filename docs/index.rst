@@ -88,5 +88,22 @@ For information on how to actually run EXESS programmatically, see the
 
 ----
 
+NN-xTB
+------
+
+NN-xTB is QDX's neural-network-augmented tight-binding method for fast,
+approximate quantum calculations. It is useful when you need energies,
+forces, or frequencies at much higher throughput than EXESS.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: NN-xTB
+
+   nnxtb/overview
+   nnxtb/running
+   nnxtb/citations
+
+----
+
 * :ref:`search`
 * :ref:`genindex`

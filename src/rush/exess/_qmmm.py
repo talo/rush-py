@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 EXESS QM/MM simulations for the Rush Python client.
 
@@ -6,8 +5,7 @@ Quick Links
 -----------
 
 - :func:`rush.exess.qmmm`
-- :class:`rush.exess.Trajectory`
-- :class:`rush.exess.Restraints`
+- :class:`rush.exess.QMMMResult`
 """
 
 import json

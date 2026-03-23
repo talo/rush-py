@@ -4,11 +4,10 @@ Rush Modules
    :maxdepth: 1
 
    rush.exess
-   rush.exess_geo_opt
+   rush.exess_optimization
    rush.exess_qmmm
    rush.nnxtb
-   rush.prepare_protein
-   rush.prepare_complex
+   rush.prepare
    rush.auto3d
    rush.mmseqs2
    rush.boltz

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Boltz module for the Rush Python client.
 
@@ -10,9 +9,8 @@ Usage::
 
     from rush import boltz
 
-    ref = boltz.fold([ProteinSequence(...)]).collect()
-    results = ref.fetch()
-    print(results[0].metrics.confidence_score)
+    result = boltz.fold([ProteinSequence(...)]).fetch()
+    print(next(result).metrics.confidence_score)
 """
 
 import base64

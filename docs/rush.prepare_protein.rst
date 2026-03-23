@@ -1,7 +1,8 @@
+:orphan:
+
 Prepare Protein
 ===============
 
-.. automodule:: rush.prepare_protein
-   :members:
-   :show-inheritance:
-   :undoc-members:
+Protein preparation helpers now live in ``rush.prepare``.
+
+See :doc:`rush.prepare <rush.prepare>`, especially ``rush.prepare.protein``.

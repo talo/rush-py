@@ -27,15 +27,14 @@ EXESS gives you two engines for this:
 This example uses **ethene (C₂H₄)** with an intentionally twisted starting geometry — the two CH₂ groups are rotated 90° so the hydrogen atoms are perpendicular. During optimization, the molecule relaxes to a **planar** structure because the C=C π bond requires parallel p-orbitals for maximum overlap. It's a dramatic visual change (perpendicular → flat) that illustrates a fundamental concept in chemistry.
 
 ```python
-from rush.exess_geo_opt import exess_geo_opt
+from rush import exess
 from rush.client import RunOpts
 
-outputs = exess_geo_opt(
+run = exess.optimization(
     "ethene_twisted_t.json",
     100,  # Maximum optimization steps
     standard_orientation="None",  # Keep original frame of reference
     run_opts=RunOpts(name="Tutorial: QM Optimization"),
-    collect=True,
 )
 ```
 
@@ -62,12 +61,9 @@ The optimization returns two objects:
 2. **Step info** — a list of parsed step records with `total_energy` (Hartrees) and `max_gradient_component` (Å)
 
 ```python
-from rush.exess_geo_opt import fetch_outputs, save_outputs
-
-# Fetch parsed results into memory
-res = fetch_outputs(outputs)
-out_traj = res.trajectory
-out_info = res.steps
+result = run.fetch()
+out_traj = result.trajectory
+out_info = result.steps
 
 # How quickly did it converge?
 print(f"Converged in {len(out_traj)} steps")
@@ -84,7 +80,7 @@ print(f"Final max gradient: {out_info[-1].max_gradient_component:.2e} Å")
 print(f"First atom — start: {out_traj[0].geometry[:3]}")
 print(f"First atom — end:   {out_traj[-1].geometry[:3]}")
 
-paths = save_outputs(outputs)
+paths = run.save()
 print(paths.trajectory)
 print(paths.steps)
 ```

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 EXESS geometry optimization for the Rush Python client.
 
@@ -6,7 +5,7 @@ Quick Links
 -----------
 
 - :func:`rush.exess.optimization`
-- :func:`rush.exess.energy`
+- :class:`rush.exess.OptimizationResult`
 """
 
 import json

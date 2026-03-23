@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 MMseqs2 module for the Rush Python client.
 
@@ -9,8 +8,7 @@ Usage::
 
     from rush import mmseqs2
 
-    result = mmseqs2.search(["MKFLILLFNILCL..."]).fetch()
-    print(result[0])
+    paths = mmseqs2.search(["MKFLILLFNILCL..."]).save()
 """
 
 import sys

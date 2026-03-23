@@ -1,7 +1,9 @@
+:orphan:
+
 Prepare Complex
 ===============
 
-.. automodule:: rush.prepare_complex
-   :members:
-   :show-inheritance:
-   :undoc-members:
+Protein-ligand preparation helpers now live in ``rush.prepare``.
+
+See :doc:`rush.prepare <rush.prepare>`, especially
+``rush.prepare.protein_ligand``.

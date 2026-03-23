@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 EXESS module helpers for the Rush Python client.
 
@@ -14,8 +13,7 @@ Quick Links
 - :func:`rush.exess.calculate`
 - :func:`rush.exess.energy`
 - :func:`rush.exess.interaction_energy`
-- :func:`rush.exess.optimization`
-- :func:`rush.exess.qmmm`
+- :class:`rush.exess.Result`
 """
 
 import enum
