@@ -9,3 +9,4 @@ Guides
    guides/03-objects-and-trc-files
    guides/04-general-info
    guides/05-hardware
+   guides/06-performance
