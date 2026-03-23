@@ -17,6 +17,9 @@ from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
+from rush import TRC, Residues, TRCRef
+from rush._trc import to_residues_vobj, to_topology_vobj
+
 from .._utils import optional_str
 from ..client import (
     RunOpts,
@@ -25,7 +28,6 @@ from ..client import (
     _get_project_id,
     _submit_rex,
     fetch_object,
-    upload_object,
 )
 from ..mol import Topology
 from ..run import RushRun
@@ -39,7 +41,6 @@ from ._energy import (
     System,
     _KSDFTDefault,
 )
-
 
 # ---------------------------------------------------------------------------
 # Input types
@@ -300,9 +301,14 @@ class OptimizationResultRef:
 
 
 def optimization(
-    topology_path: Path | str,
+    mol: TRC
+    | TRCRef
+    | tuple[Path | str | RushObject | Topology, Path | str | RushObject | Residues]
+    | Path
+    | str
+    | RushObject
+    | Topology,
     max_iters: int,
-    residues_path: Path | str | None = None,
     optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
@@ -326,10 +332,16 @@ def optimization(
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
-    topology_vobj = upload_object(topology_path)
     residues_vobj = None
-    if residues_path is not None:
-        residues_vobj = upload_object(residues_path)
+    match mol:
+        case TRC() | TRCRef():
+            topology_vobj = to_topology_vobj(mol.topology)
+            residues_vobj = to_residues_vobj(mol.residues)
+        case (t, r):
+            topology_vobj = to_topology_vobj(t)
+            residues_vobj = to_residues_vobj(r)
+        case _:
+            topology_vobj = to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let
@@ -424,7 +436,7 @@ in
             else "None"
         ),
         residues_expr=(
-            "(Some [ (obj_j residues) ])" if residues_path is not None else "None"
+            "(Some [ (obj_j residues) ])" if residues_vobj is not None else "None"
         ),
         topology_vobj_path=topology_vobj["path"],
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",

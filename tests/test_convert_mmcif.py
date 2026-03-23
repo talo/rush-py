@@ -2,7 +2,7 @@ import json
 import sys
 from pathlib import Path
 
-from rush.convert.json import to_json
+from rush.convert.json import to_dict
 from rush.convert.mmcif import from_mmcif
 
 
@@ -51,7 +51,7 @@ def test_cif_conversion():
             trcs = from_mmcif(cif_contents)
 
             # Convert TRC structures to JSON
-            converted_json = to_json(trcs)
+            converted_json = to_dict(trcs)
 
             # Read expected JSON
             with open(json_file, "r") as f:

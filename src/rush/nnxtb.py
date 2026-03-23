@@ -23,18 +23,19 @@ from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
-from .client import RushObject
+from rush import TRC, Topology, TRCRef
+from rush._trc import to_topology_vobj
+
 from ._utils import optional_str
 from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
     fetch_object,
-    upload_object,
 )
 from .run import RushRun
-
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -89,7 +90,7 @@ class ResultRef:
 
 
 def energy(
-    topology_path: Path | str,
+    mol: TRC | TRCRef | Path | str | RushObject | Topology,
     compute_forces: bool | None = None,
     compute_frequencies: bool | None = None,
     multiplicity: int | None = None,
@@ -104,7 +105,7 @@ def energy(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(topology_path)
+    topology_vobj = to_topology_vobj(mol)
     charge = 0
 
     # Run rex

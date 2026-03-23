@@ -19,18 +19,20 @@ from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
+from rush import TRC, Topology, TRCRef
+from rush._trc import to_topology_vobj
+
 from ._utils import float_to_str
 from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _json_content_name,
     _submit_rex,
     save_json,
-    upload_object,
 )
 from .run import RushRun
-
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -104,7 +106,7 @@ class ResultRef:
 
 
 def solvation_energy(
-    topology_path: Path | str,
+    mol: TRC | TRCRef | Path | str | RushObject | Topology,
     solute_dielectric: float,
     solvent_dielectric: float,
     solvent_radius: float,
@@ -127,7 +129,7 @@ def solvation_energy(
     """
 
     # Upload inputs
-    topology_vobj = upload_object(topology_path)
+    topology_vobj = to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let

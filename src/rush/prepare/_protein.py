@@ -16,16 +16,17 @@ Usage::
 
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from tempfile import NamedTemporaryFile
-from collections.abc import Iterator
 from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
-from .._trc import TRCPaths, TRCRef
+from rush import Chains, Residues, Topology
+
+from .._trc import TRCPaths, TRCRef, to_chains_vobj, to_residues_vobj, to_topology_vobj
 from .._utils import optional_str
 from ..client import (
     RunOpts,
@@ -33,36 +34,10 @@ from ..client import (
     RushObject,
     _get_project_id,
     _submit_rex,
-    upload_object,
 )
 from ..convert import _single_trc, from_json, from_pdb
 from ..mol import TRC
 from ..run import RushRun
-
-
-def _upload_trc(
-    trc: TRC,
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    r_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    c_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-
-    json.dump(trc.topology.to_json(), t_f)
-    json.dump(trc.residues.to_json(), r_f)
-    json.dump(trc.chains.to_json(), c_f)
-
-    # Important: Close temp files before uploading. Windows locks open files,
-    # causing PermissionError if upload_object() tries to access them while open.
-    t_f.close()
-    r_f.close()
-    c_f.close()
-
-    return (
-        upload_object(t_f.name),
-        upload_object(r_f.name),
-        upload_object(c_f.name),
-    )
-
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -151,7 +126,15 @@ class ResultRef:
 
 
 def protein(
-    input_path: Path | str,
+    mol: TRC
+    | TRCRef
+    | tuple[
+        Path | str | RushObject | Topology,
+        Path | str | RushObject | Residues,
+        Path | str | RushObject | Chains,
+    ]
+    | Path
+    | str,
     ph: float | None = None,
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
     capping_style: Literal["never", "truncated", "always"] | None = None,
@@ -169,15 +152,29 @@ def protein(
     """
 
     # Upload inputs
-    if isinstance(input_path, str):
-        input_path = Path(input_path)
-    with open(input_path) as f:
-        if input_path.suffix == ".pdb":
-            trc = from_pdb(f.read())
-        else:
-            trc = from_json(json.load(f))
-    trc = _single_trc(trc, input_path)
-    topology_vobj, residues_vobj, chains_vobj = _upload_trc(trc)
+    match mol:
+        case TRC():
+            trc_ref = TRCRef.upload(mol)
+        case TRCRef():
+            trc_ref = mol
+        case (t, r, c):
+            trc_ref = TRCRef(
+                RushObject.from_dict(to_topology_vobj(t)),
+                RushObject.from_dict(to_residues_vobj(r)),
+                RushObject.from_dict(to_chains_vobj(c)),
+            )
+        case Path() | str():
+            input_path = mol
+            if isinstance(input_path, str):
+                input_path = Path(input_path)
+
+            with open(input_path) as f:
+                if input_path.suffix == ".pdb":
+                    trc = from_pdb(f.read())
+                else:
+                    trc = from_json(json.load(f))
+            trc = _single_trc(trc, input_path)
+            trc_ref = TRCRef.upload(trc)
 
     # Run rex
     rex = Template("""let
@@ -211,9 +208,9 @@ in
         truncation_threshold=optional_str(truncation_threshold),
         opt=optional_str(opt),
         debump=optional_str(debump),
-        topology_vobj_path=topology_vobj["path"],
-        residues_vobj_path=residues_vobj["path"],
-        chains_vobj_path=chains_vobj["path"],
+        topology_vobj_path=trc_ref.topology.path,
+        residues_vobj_path=trc_ref.residues.path,
+        chains_vobj_path=trc_ref.chains.path,
     )
     try:
         return RushRun(

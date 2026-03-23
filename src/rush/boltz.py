@@ -20,7 +20,6 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from tempfile import NamedTemporaryFile
 from typing import Any
 
 import numpy as np
@@ -60,13 +59,16 @@ class Modification:
 class ProteinSequence:
     id: list[str]
     sequence: str
-    msa: dict[str, str] | Path | str
+    msa: Path | str | RushObject
     modifications: list[Modification] | None = None
     cyclic: bool | None = None
 
     def _to_rex(self):
-        if isinstance(self.msa, Path) or isinstance(self.msa, str):
-            self.msa = upload_object(self.msa)
+        match self.msa:
+            case Path() | str():
+                msa_vobj = upload_object(self.msa)
+            case RushObject():
+                msa_vobj = self.msa.to_dict()
 
         return Template(
             """(boltz2_rex::Sequence::Protein {
@@ -79,7 +81,7 @@ class ProteinSequence:
         ).substitute(
             id=f"[{', '.join([f'"{v}"' for v in self.id])}]",
             sequence=self.sequence,
-            msa=self.msa["path"],
+            msa=msa_vobj["path"],
             cyclic=optional_str(self.cyclic),
         )
 
@@ -320,20 +322,7 @@ def fold(
             else:
                 trc = from_json(json.load(f))
         trc = _single_trc(trc, template_path)
-        with (
-            NamedTemporaryFile(mode="w") as t_f,
-            NamedTemporaryFile(mode="w") as r_f,
-            NamedTemporaryFile(mode="w") as c_f,
-        ):
-            json.dump(trc.topology.to_json(), t_f)
-            json.dump(trc.residues.to_json(), r_f)
-            json.dump(trc.chains.to_json(), c_f)
-            t_f.seek(0)
-            r_f.seek(0)
-            c_f.seek(0)
-            topology_vobj = upload_object(t_f.name)
-            residues_vobj = upload_object(r_f.name)
-            chains_vobj = upload_object(c_f.name)
+        trc_ref = TRCRef.upload(trc)
 
     # Run rex
     rex = Template("""let
@@ -390,9 +379,9 @@ in
             if has_template
             else "None"
         ),
-        topology_vobj_path=topology_vobj["path"] if has_template else "",
-        residues_vobj_path=residues_vobj["path"] if has_template else "",
-        chains_vobj_path=chains_vobj["path"] if has_template else "",
+        topology_vobj_path=trc_ref.topology.path if has_template else "",
+        residues_vobj_path=trc_ref.residues.path if has_template else "",
+        chains_vobj_path=trc_ref.chains.path if has_template else "",
     )
     try:
         return RushRun(

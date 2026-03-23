@@ -27,6 +27,9 @@ from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
+from rush import TRC, Topology, TRCRef
+from rush._trc import to_topology_vobj
+
 from .._utils import bool_to_str, float_to_str, optional_str
 from ..client import (
     RunOpts,
@@ -35,7 +38,6 @@ from ..client import (
     _get_project_id,
     _submit_rex,
     fetch_object,
-    upload_object,
 )
 from ..mol import AtomRef, FragmentRef
 from ..run import RushRun
@@ -1166,7 +1168,7 @@ class KSDFTKeywords:
 
 
 def calculate(
-    topology_path: Path | str,
+    mol: TRC | TRCRef | Path | str | RushObject | Topology,
     driver: str,
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
@@ -1190,7 +1192,7 @@ def calculate(
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
-    topology_vobj = upload_object(topology_path)
+    topology_vobj = to_topology_vobj(mol)
 
     rex = Template("""let
       obj_j = λ j →
@@ -1276,7 +1278,7 @@ def calculate(
 
 
 def energy(
-    topology_path: Path | str,
+    mol: TRC | TRCRef | Path | str | RushObject | Topology,
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
@@ -1293,7 +1295,7 @@ def energy(
 ) -> RushRun[ResultRef]:
     """Submit an EXESS single-point energy calculation."""
     return calculate(
-        topology_path,
+        mol,
         "Energy",
         method=method,
         basis=basis,
@@ -1312,7 +1314,7 @@ def energy(
 
 
 def interaction_energy(
-    topology_path: Path | str,
+    mol: TRC | TRCRef | Path | str | RushObject | Topology,
     reference_fragment: int,
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
@@ -1333,7 +1335,7 @@ def interaction_energy(
     *reference_fragment* and the rest of the system.
     """
     return energy(
-        topology_path=topology_path,
+        mol=mol,
         method=method,
         basis=basis,
         aux_basis=aux_basis,

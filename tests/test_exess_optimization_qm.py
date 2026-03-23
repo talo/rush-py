@@ -9,8 +9,8 @@ def test_exess_optimization_qm():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
     run = exess.optimization(
+        data_dir / "benzene_t.json",
         max_iters=100,
-        topology_path=data_dir / "benzene_t.json",
         optimization_keywords=exess.OptimizationKeywords(),
         method="RestrictedRIMP2",
         basis="cc-pVDZ",

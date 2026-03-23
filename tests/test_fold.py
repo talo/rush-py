@@ -22,10 +22,9 @@ def test_fold():
     saved_msas = mmseqs2_ref.save()
     assert saved_msas[0].suffix == ".a3m"
     # Pass raw object store ref to boltz ProteinSequence
-    msa_obj = {"path": str(mmseqs2_ref[0].path)}
     ref = boltz.fold(
         [
-            ProteinSequence(["A"], protein_seq, msa_obj),
+            ProteinSequence(["A"], protein_seq, mmseqs2_ref[0]),
             LigandSequence(["E"], "N[C@@H](Cc1ccc(O)cc1)C(=O)O"),
         ],
         affinity_binder_chain_id="E",

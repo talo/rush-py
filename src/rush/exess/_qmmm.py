@@ -17,6 +17,9 @@ from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
+from rush import TRC, Residues, Topology, TRCRef
+from rush._trc import to_residues_vobj, to_topology_vobj
+
 from .._utils import optional_str
 from ..client import (
     RunOpts,
@@ -25,7 +28,6 @@ from ..client import (
     _get_project_id,
     _submit_rex,
     fetch_object,
-    upload_object,
 )
 from ..run import RushRun
 from ._energy import (
@@ -39,7 +41,6 @@ from ._energy import (
     System,
     _KSDFTDefault,
 )
-
 
 # ---------------------------------------------------------------------------
 # Input types
@@ -165,9 +166,14 @@ class QMMMResultRef:
 
 
 def qmmm(
-    topology_path: Path | str,
+    mol: TRC
+    | TRCRef
+    | tuple[Path | str | RushObject | Topology, Path | str | RushObject | Residues]
+    | Path
+    | str
+    | RushObject
+    | Topology,
     n_timesteps: int,
-    residues_path: Path | str | None = None,
     dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
@@ -197,10 +203,16 @@ def qmmm(
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
-    topology_vobj = upload_object(topology_path)
     residues_vobj = None
-    if residues_path is not None:
-        residues_vobj = upload_object(residues_path)
+    match mol:
+        case TRC() | TRCRef():
+            topology_vobj = to_topology_vobj(mol.topology)
+            residues_vobj = to_residues_vobj(mol.residues)
+        case (t, r):
+            topology_vobj = to_topology_vobj(t)
+            residues_vobj = to_residues_vobj(r)
+        case _:
+            topology_vobj = to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let

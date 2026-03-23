@@ -40,7 +40,7 @@ def _is_str_path(value: object) -> TypeGuard[StrPath]:
     return isinstance(value, PathLike)
 
 
-def _normalize_trc_json(data: object) -> list[dict]:
+def _normalize_trc_dict(data: object) -> list[dict]:
     if isinstance(data, dict) and "topology" in data:
         return [data]
     if _is_dict_list(data):
@@ -92,7 +92,7 @@ def from_json(
         path = Path(json_content)
         with path.open() as f:
             data = json.load(f)
-        trc_dicts = _normalize_trc_json(data)
+        trc_dicts = _normalize_trc_dict(data)
         return _trcs_from_dicts(trc_dicts)
 
     raise TypeError(
@@ -100,7 +100,7 @@ def from_json(
     )
 
 
-def to_json(
+def to_dict(
     trcs: TRC | list[TRC],
 ) -> dict[str, dict[str, object]] | list[dict[str, dict[str, object]]]:
     """
@@ -117,9 +117,9 @@ def to_json(
         trcs = [trcs]
     data = [
         {
-            "topology": trc.topology.to_json(),
-            "residues": trc.residues.to_json(),
-            "chains": trc.chains.to_json(),
+            "topology": trc.topology.to_dict(),
+            "residues": trc.residues.to_dict(),
+            "chains": trc.chains.to_dict(),
         }
         for trc in trcs
     ]

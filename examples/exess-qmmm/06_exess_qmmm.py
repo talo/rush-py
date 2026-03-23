@@ -51,9 +51,8 @@ topology_path = DATA_DIR / "6a5j_t.json"
 residues_path = DATA_DIR / "6a5j_r.json"
 
 run = exess.qmmm(
-    topology_path,
+    (topology_path, residues_path),
     N_TIMESTEPS,
-    residues_path,
     method=METHOD,
     basis=BASIS,
     qm_fragments=QM_FRAGMENTS,
@@ -74,9 +73,8 @@ res = run.fetch()
 out_traj = res.geometries
 
 # Load topology for atom info
-with open(topology_path, encoding="utf-8") as f:
-    topology = Topology.from_json(json.load(f))
-    assert topology.fragments, "Topology lost its fragments!"
+topology = Topology.from_json(topology_path)
+assert topology.fragments, "Topology lost its fragments!"
 
 n_atoms = len(topology.symbols)
 
@@ -370,17 +368,8 @@ residues = Residues(
     seqs=["HOH", "HOH"],
 )
 
-molecule_t_path = OUTPUT_DIR / "molecule_t.json"
-molecule_r_path = OUTPUT_DIR / "molecule_r.json"
-
-with open(molecule_t_path, "w", encoding="utf-8") as f_t:
-    json.dump(topology.to_json(), f_t)
-with open(molecule_r_path, "w", encoding="utf-8") as f_r:
-    json.dump(residues.to_json(), f_r)
-
 run2 = exess.qmmm(
-    topology_path=molecule_t_path,
-    residues_path=molecule_r_path,
+    (topology, residues),
     n_timesteps=100,
     trajectory=Trajectory(include_waters=True),
     mm_fragments=[],
@@ -397,7 +386,6 @@ print("=" * 60)
 res2 = run2.fetch()
 out_traj = res2.geometries
 
-topology = Topology.from_json(molecule_t_path)
 print("Atoms at First Step")
 for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
     print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")

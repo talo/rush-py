@@ -1,6 +1,4 @@
-import json
 import sys
-import tempfile
 from pathlib import Path
 from pprint import pp
 
@@ -12,15 +10,10 @@ from rush.exess import energy
 def test_exess_energy_chelpg_1hsg_MK1():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
-    with (data_dir / "1hsg_MK1_trc.json").open() as f:
-        trc = from_json(json.load(f)[0])
-
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tf:
-        json.dump(trc.topology.to_json(), tf)
-        topology_path = tf.name
+    trc = from_json(data_dir / "1hsg_MK1_trc.json")[0]
 
     result = energy(
-        topology_path,
+        trc,
         basis="PCSeg-0",
         frag_keywords=None,  # Important, to disable fragmentation
         export_keywords=exess.ExportKeywords(export_chelpg_charges=True),

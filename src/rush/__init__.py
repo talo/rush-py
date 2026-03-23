@@ -20,7 +20,7 @@ from .convert import (
     load_structure,
     merge_trcs,
     save_structure,
-    to_json,
+    to_dict,
     to_pdb,
 )
 from .mol import (
@@ -49,7 +49,7 @@ from .run import RushRun
 __all__ = [
     # I/O
     "from_json",
-    "to_json",
+    "to_dict",
     "from_pdb",
     "to_pdb",
     "from_mmcif",

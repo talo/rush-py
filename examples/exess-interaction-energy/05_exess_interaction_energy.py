@@ -12,7 +12,6 @@ Prerequisites:
     - Input file: tyk2_ejm_31_t.json (provided in data/)
 """
 
-import json
 from pathlib import Path
 
 from rush import exess, prepare
@@ -49,8 +48,8 @@ run = exess.interaction_energy(
 )
 
 # Extract and display results
-res = run.fetch()
-print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")
+result = run.fetch()
+print(f"Interaction energy: {result.calc.qmmbe.expanded_hf_energy}")
 
 
 # ===== Example 2: End-to-end from PDB =====
@@ -61,12 +60,13 @@ print("=" * 60)
 
 
 # Step 1: Prepare the system
-trc = prepare.protein_ligand(
+trc_ref = prepare.protein_ligand(
     DATA_DIR / "1hsg.pdb",
     ligand_names=["MK1", "HOH"],
     debump=None,
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
-).fetch()[0]
+).collect()[0]
+trc = trc_ref.fetch()
 
 # Print the charged amino acids
 print("Charged amino acids:")
@@ -83,17 +83,14 @@ for i, (res_name, formal_charge) in enumerate(
 lig_idx = trc.residues.seqs.index("MK1")
 frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
 
-# Step 3: Write topology and run interaction energy
-topology_path = OUTPUT_DIR / "1hsg_t.json"
-with open(topology_path, "w", encoding="utf-8") as f:
-    f.write(json.dumps(trc.topology.to_json(), indent=2))
+# Step 3: Run interaction energy
 
 # ⚠️ TUTORIAL ONLY: STO-3G is a minimal basis set used here for speed/demonstration.
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
 run = exess.interaction_energy(
-    topology_path,
+    trc_ref,
     lig_idx,
     method="RestrictedHF",
     basis="STO-3G",

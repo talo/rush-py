@@ -13,6 +13,7 @@ from io import BytesIO
 from os import getenv
 from pathlib import Path
 from string import Template
+from tempfile import NamedTemporaryFile
 from typing import Any, Literal, NewType, TypeAlias, TypeGuard
 
 import requests
@@ -114,9 +115,9 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
-        "exess_rex": "github:talo/tengu-exess/7ce77488ebc1ebb54597a91e68b576b270599959#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/7ce77488ebc1ebb54597a91e68b576b270599959#exess_geo_opt_rex",
-        "exess_qmmm_rex": "github:talo/tengu-exess/b667752cc767a223126184a3e78485a465a32aea#exess_qmmm_rex",
+        "exess_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex",
+        "exess_qmmm_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex",
         "mmseqs2_rex": "github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -315,7 +316,7 @@ class RunOpts:
     email: bool | None = None
 
 
-def upload_object(filepath: Path | str):
+def upload_object(input: Path | str | dict[str, Any]):
     """
     Upload an object at the filepath to the current project. Usually not necessary; the
     module functions should handle this automatically.
@@ -334,8 +335,16 @@ def upload_object(filepath: Path | str):
             }
         }
      """)
-    if isinstance(filepath, str):
-        filepath = Path(filepath)
+    if isinstance(input, dict):
+        t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        json.dump(input, t_f)
+        t_f.close()
+        return upload_object(t_f.name)
+
+    if isinstance(input, str):
+        filepath = Path(input)
+    else:
+        filepath = input
     with filepath.open(mode="rb") as f:
         project_id = _get_project_id()
         if filepath.suffix == ".json":
@@ -502,6 +511,9 @@ class RushObject:
             raise ValueError(
                 f"RushObject dict missing required key {e}; got keys: {list(d.keys())}"
             ) from e
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"path": str(self.path), "size": self.size, "format": self.format}
 
     def save(
         self,

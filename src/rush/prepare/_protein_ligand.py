@@ -28,7 +28,7 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush import TRC, from_json, from_pdb, merge_trcs, to_pdb
+from rush import TRC, TRCRef, from_json, from_pdb, merge_trcs, to_pdb
 from rush.client import (
     RunOpts,
     RunSpec,
@@ -36,7 +36,7 @@ from rush.client import (
 from rush.convert import _single_trc
 from rush.run import RushRun
 
-from ._protein import ResultRef, _upload_trc
+from ._protein import ResultRef
 from ._protein import protein as _run_prepare_protein
 
 
@@ -143,7 +143,7 @@ def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
 
 
 def protein_ligand(
-    input_path: Path | str,
+    mol: TRC | Path | str,
     ligand_names: list[str],
     ph: float | None = None,
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
@@ -165,12 +165,19 @@ def protein_ligand(
     Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
     parsed TRC, or ``.save()`` to write the output files to disk.
     """
-    if isinstance(input_path, str):
-        input_path = Path(input_path)
+    # TODO: Support all the input types that rush.prepare.protein() supports
+    if isinstance(mol, str):
+        mol = Path(mol)
+        input_path = mol
+    elif isinstance(mol, Path):
+        input_path = mol
 
-    if input_path.suffix == ".json":
+    if isinstance(mol, TRC) or (isinstance(mol, Path) and mol.suffix == ".json"):
         with NamedTemporaryFile(mode="w") as pdb_file:
-            trc = from_json(input_path)
+            if isinstance(mol, TRC):
+                trc = mol
+            else:
+                trc = from_json(mol)
             trc = _single_trc(trc, input_path)
             pdb_file.write(to_pdb(trc))
             pdb_l_str = _extract_ligand_with_hydrogens(pdb_file.name, ligand_names)
@@ -182,7 +189,7 @@ def protein_ligand(
 
     # Submit prepare-protein
     pp_run = _run_prepare_protein(
-        input_path,
+        mol,
         ph,
         naming_scheme,
         capping_style,
@@ -217,11 +224,7 @@ class _ComplexRun(RushRun[ResultRef]):
         if self._collected is None:
             protein_trcs = self._pp_run.collect(max_wait_time=max_wait_time).fetch()
             uploaded = [
-                _upload_trc(merge_trcs(trc_p, self._trc_l)) for trc_p in protein_trcs
+                TRCRef.upload(merge_trcs(trc_p, self._trc_l)) for trc_p in protein_trcs
             ]
-            # Each _upload_trc returns a tuple of 3 dicts; wrap as list of lists
-            # to match the shape from_raw_output expects: [[t,r,c], [t,r,c], ...]
-            self._collected = ResultRef.from_raw_output(
-                [list(triplet) for triplet in uploaded]
-            )
+            self._collected = ResultRef(models=uploaded)
         return self._collected

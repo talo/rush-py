@@ -16,8 +16,8 @@ def test_exess_optimization():
     # These optimization_keywords values are the only supported ones for non-QM runs.
     # Setting the `basis="STO-2G"` reduces memory requirements for non-QM runs.
     run = exess.optimization(
+        data_dir / "benzene_t.json",
         max_iters=100,
-        topology_path=data_dir / "benzene_t.json",
         optimization_keywords=exess.OptimizationKeywords(
             coordinate_system="Cartesian",
             algorithm="LBFGS",
