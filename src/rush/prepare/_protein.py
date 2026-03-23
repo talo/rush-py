@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Protein preparation module for the Rush Python client.
 
@@ -9,9 +8,9 @@ calculations.
 
 Usage::
 
-    from rush import prepare_protein
+    from rush import prepare
 
-    result = prepare_protein.prepare("protein.pdb").fetch()
+    result = prepare.protein("protein.pdb").fetch()
     print(result.topology.symbols)
 """
 
@@ -25,9 +24,9 @@ from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
 
-from ._trc import TRCPaths, TRCRef
-from ._utils import optional_str
-from .client import (
+from .._trc import TRCPaths, TRCRef
+from .._utils import optional_str
+from ..client import (
     RunOpts,
     RunSpec,
     RushObject,
@@ -35,9 +34,9 @@ from .client import (
     _submit_rex,
     upload_object,
 )
-from .convert import _single_trc, from_json, from_pdb
-from .mol import TRC
-from .run import RushRun
+from ..convert import _single_trc, from_json, from_pdb
+from ..mol import TRC
+from ..run import RushRun
 
 
 def _upload_trc(
@@ -141,7 +140,7 @@ class ResultRef:
 # ---------------------------------------------------------------------------
 
 
-def prepare(
+def protein(
     input_path: Path | str,
     ph: float | None = None,
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,

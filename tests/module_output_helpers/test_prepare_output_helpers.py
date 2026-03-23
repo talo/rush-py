@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from rush import TRC, TRCPaths
-from rush.prepare_protein import ResultRef
+from rush.prepare import ResultRef
 
 
 def _sample_trc_dict() -> dict:

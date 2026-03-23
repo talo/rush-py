@@ -203,7 +203,7 @@ def fragmented_exess(
     trimer_cutoff_cap: float = 15.0,
     collect: bool = True,
     output_dir: Path | None = None,
-) -> list[RushRun[exess.InteractionEnergyResultRef]] | None:
+) -> list[RushRun[exess.ResultRef]] | None:
     """
     Submit EXESS calculations for a fragmented ligand complex.
     """
@@ -237,7 +237,7 @@ def fragmented_exess(
     if not topology_path.exists():
         raise RuntimeError(f"Topology file no longer exists: {topology_path}")
 
-    submitted: list[RushRun[exess.InteractionEnergyResultRef]] = []
+    submitted: list[RushRun[exess.ResultRef]] = []
 
     for job in fragment_jobs:
         job_name = f"{input_path.stem}_ref{job.reference_fragment}"

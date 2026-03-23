@@ -4,7 +4,7 @@ from pathlib import Path
 from rush.client import RunOpts, set_opts
 from rush.convert import from_pdb
 from rush.mol import Element
-from rush.prepare_protein import prepare
+from rush.prepare import protein as prepare
 
 
 def _as_trc(trc):

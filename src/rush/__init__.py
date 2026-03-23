@@ -4,7 +4,14 @@ the Rush platform.
 """
 
 from ._trc import TRCPaths, TRCRef
-from .client import ObjectID, RunID, RushObject, RushRunError, RushRunInfo, fetch_run_info
+from .client import (
+    ObjectID,
+    RunID,
+    RushObject,
+    RushRunError,
+    RushRunInfo,
+    fetch_run_info,
+)
 from .convert import (
     from_json,
     from_mmcif,

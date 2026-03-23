@@ -102,7 +102,6 @@ def _map_outputs(
     ]
 
 
-
 @dataclass(frozen=True)
 class ResultRef:
     """Lightweight reference to Auto3D outputs in the Rush object store.

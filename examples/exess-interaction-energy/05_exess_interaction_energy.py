@@ -15,10 +15,8 @@ Prerequisites:
 import json
 from pathlib import Path
 
-from rush import exess
+from rush import exess, prepare
 from rush.client import RunOpts
-from rush.exess import interaction_energy
-from rush import prepare_complex
 
 # ===== Example 1: Fragment-based interaction energy =====
 print("=" * 60)
@@ -33,7 +31,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-run = interaction_energy(
+run = exess.interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
     93,  # This is the index of the fragment that contains the ligand
     method="RestrictedHF",
@@ -63,7 +61,7 @@ print("=" * 60)
 
 
 # Step 1: Prepare the system
-trc = prepare_complex.prepare(
+trc = prepare.protein_ligand(
     DATA_DIR / "1hsg.pdb",
     ligand_names=["MK1", "HOH"],
     debump=None,
@@ -94,7 +92,7 @@ with open(topology_path, "w", encoding="utf-8") as f:
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-run = interaction_energy(
+run = exess.interaction_energy(
     topology_path,
     lig_idx,
     method="RestrictedHF",

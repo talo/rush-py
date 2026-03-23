@@ -2,7 +2,7 @@ from rush import TRC
 from pathlib import Path
 
 from rush.client import RunOpts, set_opts
-from rush.prepare_protein import prepare
+from rush.prepare import protein as prepare
 
 
 def test_prepare_protein():

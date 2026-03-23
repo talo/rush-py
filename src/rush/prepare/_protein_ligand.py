@@ -7,14 +7,14 @@ with prepared protein TRC data for downstream computations.
 
 Usage::
 
-    from rush import prepare_complex
+    from rush import prepare
 
-    result = prepare_complex.prepare("complex.pdb", ligand_names=["LIG"]).fetch()
+    result = prepare.protein_ligand("complex.pdb", ligand_names=["LIG"]).fetch()
     print(result.topology.symbols)
 
 .. note::
 
-    Unlike most modules, ``prepare_complex.prepare()`` runs a full pipeline
+    Unlike most modules, ``prepare.protein_ligand()`` runs a full pipeline
     internally (prepare protein, extract ligand, merge).  The returned
     :class:`~rush.run.RushRun` wraps the prepare-protein job; calling
     ``.fetch()`` or ``.save()`` blocks until that job completes, then
@@ -34,9 +34,10 @@ from rush.client import (
     RunSpec,
 )
 from rush.convert import _single_trc
-from rush.prepare_protein import ResultRef, _upload_trc
-from rush.prepare_protein import prepare as run_prepare_protein
 from rush.run import RushRun
+
+from ._protein import ResultRef, _upload_trc
+from ._protein import protein as _run_prepare_protein
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
@@ -141,7 +142,7 @@ def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
 # ---------------------------------------------------------------------------
 
 
-def prepare(
+def protein_ligand(
     input_path: Path | str,
     ligand_names: list[str],
     ph: float | None = None,
@@ -180,7 +181,7 @@ def prepare(
     trc_l = _single_trc(trc_l, "ligand")
 
     # Submit prepare-protein
-    pp_run = run_prepare_protein(
+    pp_run = _run_prepare_protein(
         input_path,
         ph,
         naming_scheme,

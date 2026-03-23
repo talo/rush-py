@@ -13,7 +13,7 @@ python 06_exess_qmmm.py
 
 ## What This Example Covers
 
-1. Basic QM/MM simulation with `exess_qmmm`
+1. Basic QM/MM simulation with `exess.qmmm()`
 2. Manually constructing `Topology` and `Residues` for a two-water system
 3. Configuring QM/MM fragment regions
 4. Extracting and inspecting the simulation trajectory

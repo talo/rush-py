@@ -14,7 +14,9 @@
       "Bash(python -m pytest tests/test_exess_namespaces.py tests/module_output_helpers/test_exess_output_helpers.py tests/test_client_collect_run.py -x -v)",
       "Bash(ruff check:*)",
       "Bash(ty check:*)",
-      "Bash(python -m pytest tests/ -m \"not slow\" -v --ignore=tests/test_fetch_runs.py)"
+      "Bash(python -m pytest tests/ -m \"not slow\" -v --ignore=tests/test_fetch_runs.py)",
+      "Bash(find /home/machineer/repos/qdx/rush-py/docs -type f -name *.rst -o -name *.md)",
+      "Bash(ls -la /home/machineer/repos/qdx/rush-py/src/rush/*.py)"
     ]
   }
 }
