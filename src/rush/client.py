@@ -842,7 +842,7 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()) -> Run
 
 
 @dataclass
-class RushRun:
+class RushRunInfo:
     """
     Print it out to see a nicely-formatted summary of a run!
     """
@@ -861,7 +861,7 @@ class RushRun:
 
     def __str__(self) -> str:
         lines = [
-            f"RushRun: {self.name or '(unnamed)'}",
+            f"RushRunInfo: {self.name or '(unnamed)'}",
             f"  id:          {self.id}",
             f"  status:      {self.status}",
             f"  created_at:  {self.created_at}",
@@ -876,7 +876,7 @@ class RushRun:
         return "\n".join(lines)
 
 
-def fetch_run_info(run_id: str | RunID) -> RushRun | None:
+def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
     """
     Fetch all info for a run by ID.
 
@@ -904,7 +904,7 @@ def fetch_run_info(run_id: str | RunID) -> RushRun | None:
     if result["run"] is None:
         return None
 
-    return RushRun(**result["run"] | {"id": RunID(str(run_id))})
+    return RushRunInfo(**result["run"] | {"id": RunID(str(run_id))})
 
 
 def _poll_run(run_id: str | RunID, max_wait_time) -> tuple[str, bool]:

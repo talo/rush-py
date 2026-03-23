@@ -201,9 +201,9 @@ class _ComplexRun(RushRun[ResultRef]):
     """RushRun subclass that performs the merge step on collect."""
 
     def __init__(self, pp_run: RushRun[ResultRef], trc_l: TRC) -> None:
+        super().__init__(pp_run.id, ResultRef)
         self._pp_run = pp_run
         self._trc_l = trc_l
-        self._collected: ResultRef | None = None
 
     @property
     def id(self):

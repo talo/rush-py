@@ -4,7 +4,7 @@ the Rush platform.
 """
 
 from ._trc import TRCPaths, TRCRef
-from .client import ObjectID, RunID, RushObject, RushRunError
+from .client import ObjectID, RunID, RushObject, RushRunError, RushRunInfo, fetch_run_info
 from .convert import (
     from_json,
     from_mmcif,
@@ -28,6 +28,7 @@ from .mol import (
     Element,
     FormalCharge,
     Fragment,
+    FragmentRef,
     PartialCharge,
     Residue,
     ResidueId,
@@ -55,6 +56,8 @@ __all__ = [
     "RushObject",
     "RunID",
     "RushRunError",
+    "RushRunInfo",
+    "fetch_run_info",
     "RushRun",
     # Core structures
     "TRC",
@@ -68,6 +71,7 @@ __all__ = [
     "FormalCharge",
     "PartialCharge",
     "Fragment",
+    "FragmentRef",
     "AminoAcidSeq",
     "SchemaVersion",
     # Indices and records

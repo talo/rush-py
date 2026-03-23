@@ -21,6 +21,7 @@ from rush.mol import FragmentRef
 from .. import RushRunError, exess
 from ..client import RunOpts
 from ..exess import interaction_energy
+from ..run import RushRun
 
 __all__ = [
     "fragmented_exess",
@@ -202,7 +203,7 @@ def fragmented_exess(
     trimer_cutoff_cap: float = 15.0,
     collect: bool = True,
     output_dir: Path | None = None,
-) -> None:
+) -> list[RushRun[exess.InteractionEnergyResultRef]] | None:
     """
     Submit EXESS calculations for a fragmented ligand complex.
     """
@@ -236,6 +237,8 @@ def fragmented_exess(
     if not topology_path.exists():
         raise RuntimeError(f"Topology file no longer exists: {topology_path}")
 
+    submitted: list[RushRun[exess.InteractionEnergyResultRef]] = []
+
     for job in fragment_jobs:
         job_name = f"{input_path.stem}_ref{job.reference_fragment}"
         tags = [input_path.parent.name, f"ref_frag_{job.reference_fragment}"]
@@ -255,37 +258,40 @@ def fragmented_exess(
 
         print(f"Process {output_filename}", file=sys.stderr)
         try:
+            run = interaction_energy(
+                topology_path,
+                job.reference_fragment,
+                "RestrictedRIMP2",
+                "cc-pVDZ",
+                "cc-pVDZ-RIFIT",
+                scf_keywords=exess.SCFKeywords(
+                    max_iters=50,
+                    max_diis_history_length=12,
+                    convergence_metric="DIIS",
+                    convergence_threshold=1e-8,
+                    density_threshold=1e-10,
+                    density_basis_set_projection_fallback_enabled=True,
+                ),
+                frag_keywords=frag_keywords,
+                run_opts=run_opts,
+            )
+            submitted.append(run)
+
             if collect:
-                run_output = interaction_energy(
-                    topology_path,
-                    job.reference_fragment,
-                    "RestrictedRIMP2",
-                    "cc-pVDZ",
-                    "cc-pVDZ-RIFIT",
-                    scf_keywords=exess.SCFKeywords(
-                        max_iters=50,
-                        max_diis_history_length=12,
-                        convergence_metric="DIIS",
-                        convergence_threshold=1e-8,
-                        density_threshold=1e-10,
-                        density_basis_set_projection_fallback_enabled=True,
-                    ),
-                    frag_keywords=frag_keywords,
-                    run_opts=run_opts,
-                ).collect()
+                run_output = run.collect()
                 run_path = run_output.calc.save()
                 if run_path.exists():
-                    # Save the successful run
                     shutil.move(str(run_path), str(target_path))
                     print(f"  SAVED: {target_path}", file=sys.stderr)
                 else:
-                    # This case really should never get hit
                     print(
                         f"  Warning: exess output file not found: {run_path}",
                         file=sys.stderr,
                     )
         except RushRunError as e:
             print(f"  Warning: exess run failed! {e}", file=sys.stderr)
+
+    return submitted if not collect else None
 
 
 def discover_inputs(
