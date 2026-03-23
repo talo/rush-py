@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from rush.mmseqs2 import Result, ResultPaths, ResultRef
+from rush.mmseqs2 import ResultRef
 
 
 def test_result_ref_fetch_decodes_a3m_objects(monkeypatch):
@@ -17,8 +17,7 @@ def test_result_ref_fetch_decodes_a3m_objects(monkeypatch):
     )
     result = ref.fetch()
 
-    assert isinstance(result, Result)
-    assert result.a3m_texts == [">0.a3m\nSEQUENCE\n", ">1.a3m\nSEQUENCE\n"]
+    assert list(result) == [">0.a3m\nSEQUENCE\n", ">1.a3m\nSEQUENCE\n"]
 
 
 def test_result_ref_save_saves_a3m_objects(monkeypatch):
@@ -35,5 +34,4 @@ def test_result_ref_save_saves_a3m_objects(monkeypatch):
     )
     result = ref.save()
 
-    assert isinstance(result, ResultPaths)
-    assert result.a3m_files == [Path("/tmp/0.a3m"), Path("/tmp/1.a3m")]
+    assert list(result) == [Path("/tmp/0.a3m"), Path("/tmp/1.a3m")]

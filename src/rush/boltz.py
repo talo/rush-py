@@ -18,11 +18,11 @@ Usage::
 import base64
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
-from collections.abc import Iterator
 from typing import Any
 
 import numpy as np
@@ -32,21 +32,20 @@ from gql.transport.exceptions import TransportQueryError
 from rush.convert import _single_trc, from_json, from_pdb
 from rush.mol import TRC
 
-from ._trc import TRCPaths
+from ._trc import TRCPaths, TRCRef
 from ._utils import dict_to_vec_of_tuples_str, optional_str
 from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _json_content_name,
     _submit_rex,
     fetch_object,
     save_json,
-    save_object,
     upload_object,
 )
 from .run import RushRun
-
 
 # ---------------------------------------------------------------------------
 # Input types
@@ -168,35 +167,35 @@ def _decode_float_array(output: dict[str, Any]) -> npt.NDArray[np.float32]:
     return np.frombuffer(raw, dtype=np.dtype("<f4")).reshape(shape)
 
 
-def _fetch_trc_output(
-    model_obj: tuple[dict[str, Any], dict[str, Any], dict[str, Any]],
-) -> TRC:
-    topology_obj, residues_obj, chains_obj = model_obj
+@dataclass(frozen=True)
+class DiffusionSampleRef:
+    """Parsed reference to a single Boltz diffusion sample."""
 
-    def load_component(output_obj: dict[str, Any]) -> Any:
-        output = fetch_object(output_obj["path"])
-        if isinstance(output, bytes):
-            output = output.decode()
-        return json.loads(output)
-
-    return from_json(
-        {
-            "topology": load_component(topology_obj),
-            "residues": load_component(residues_obj),
-            "chains": load_component(chains_obj),
-        }
-    )
+    model: TRCRef
+    metrics: dict[str, Any]
+    plddt: RushObject
+    pae: RushObject
+    affinities: dict[str, Any] | None
 
 
 @dataclass(frozen=True)
 class ResultRef:
     """Lightweight reference to Boltz outputs in the Rush object store.
 
-    Each element of *samples* is a tuple representing one diffusion sample:
-    ``(model_obj, metrics_dict, plddt_obj, pae_obj, affinities_or_none)``.
+    Each element of *samples* is a parsed :class:`DiffusionSampleRef` for one
+    diffusion sample.
     """
 
-    samples: list[tuple[Any, ...]]
+    diffusion_samples: list[DiffusionSampleRef]
+
+    def __getitem__(self, index: int) -> DiffusionSampleRef:
+        return self.diffusion_samples[index]
+
+    def __len__(self) -> int:
+        return len(self.diffusion_samples)
+
+    def __iter__(self) -> Iterator[DiffusionSampleRef]:
+        return iter(self.diffusion_samples)
 
     @classmethod
     def from_raw_output(cls, res: Any) -> "ResultRef":
@@ -208,8 +207,24 @@ class ResultRef:
         # collect_run returns [[sample0, sample1, ...]] — outer list wraps
         # the single run, inner list contains one tuple per diffusion sample.
         out = res[0]
-        samples = [tuple(item) for item in out]
-        return cls(samples=samples)
+        diffusion_samples: list[DiffusionSampleRef] = []
+        for item in out:
+            model_obj, metrics, plddt_obj, pae_obj, affinities = item
+            topo, resid, chain = model_obj
+            diffusion_samples.append(
+                DiffusionSampleRef(
+                    model=TRCRef(
+                        topology=RushObject.from_dict(topo),
+                        residues=RushObject.from_dict(resid),
+                        chains=RushObject.from_dict(chain),
+                    ),
+                    metrics=metrics,
+                    plddt=RushObject.from_dict(plddt_obj),
+                    pae=RushObject.from_dict(pae_obj),
+                    affinities=affinities,
+                )
+            )
+        return cls(diffusion_samples=diffusion_samples)
 
     def fetch(self) -> Iterator[Result]:
         """Download Boltz outputs and parse into Python objects.
@@ -217,21 +232,24 @@ class ResultRef:
         Yields one :class:`Result` per diffusion sample.  Each sample is
         downloaded lazily on iteration — stop early to skip downloads.
         """
-        for sample in self.samples:
-            model_obj, metrics, plddt_obj, pae_obj, affinities = sample
-            plddt = fetch_object(plddt_obj["path"])
-            if isinstance(plddt, bytes):
-                plddt = plddt.decode()
-            pae = fetch_object(pae_obj["path"])
-            if isinstance(pae, bytes):
-                pae = pae.decode()
+        for sample in self.diffusion_samples:
+            plddt_raw = fetch_object(sample.plddt.path)
+            if isinstance(plddt_raw, bytes):
+                plddt_raw = plddt_raw.decode()
+            pae_raw = fetch_object(sample.pae.path)
+            if isinstance(pae_raw, bytes):
+                pae_raw = pae_raw.decode()
 
             yield Result(
-                model=_fetch_trc_output(model_obj),
-                metrics=Metrics(**metrics),
-                plddt=_decode_float_array(json.loads(plddt)),
-                pae=_decode_float_array(json.loads(pae)),
-                affinities=Affinities(**affinities) if affinities is not None else None,
+                model=sample.model.fetch(),
+                metrics=Metrics(**sample.metrics),
+                plddt=_decode_float_array(json.loads(plddt_raw)),
+                pae=_decode_float_array(json.loads(pae_raw)),
+                affinities=(
+                    Affinities(**sample.affinities)
+                    if sample.affinities is not None
+                    else None
+                ),
             )
 
     def save(self) -> Iterator[ResultPaths]:
@@ -240,28 +258,21 @@ class ResultRef:
         Yields one :class:`ResultPaths` per diffusion sample.  Each sample is
         downloaded lazily on iteration — stop early to skip downloads.
         """
-        for sample in self.samples:
-            model_obj, metrics, plddt_obj, pae_obj, affinities = sample
-            topology_obj, residues_obj, chains_obj = model_obj
-
+        for sample in self.diffusion_samples:
             yield ResultPaths(
-                model=TRCPaths(
-                    topology=save_object(topology_obj["path"]),
-                    residues=save_object(residues_obj["path"]),
-                    chains=save_object(chains_obj["path"]),
-                ),
+                model=sample.model.save(),
                 metrics=save_json(
-                    metrics,
-                    name=_json_content_name("boltz_metrics", metrics),
+                    sample.metrics,
+                    name=_json_content_name("boltz_metrics", sample.metrics),
                 ),
-                plddt=save_object(plddt_obj["path"]),
-                pae=save_object(pae_obj["path"]),
+                plddt=sample.plddt.save(),
+                pae=sample.pae.save(),
                 affinities=(
                     save_json(
-                        affinities,
-                        name=_json_content_name("boltz_affinities", affinities),
+                        sample.affinities,
+                        name=_json_content_name("boltz_affinities", sample.affinities),
                     )
-                    if affinities is not None
+                    if sample.affinities is not None
                     else None
                 ),
             )

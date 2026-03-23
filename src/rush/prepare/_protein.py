@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from string import Template
 from tempfile import NamedTemporaryFile
+from collections.abc import Iterator
 from typing import Any, Literal
 
 from gql.transport.exceptions import TransportQueryError
@@ -76,6 +77,15 @@ class ResultRef:
     """
 
     models: list[TRCRef]
+
+    def __getitem__(self, index: int) -> TRCRef:
+        return self.models[index]
+
+    def __len__(self) -> int:
+        return len(self.models)
+
+    def __iter__(self) -> Iterator[TRCRef]:
+        return iter(self.models)
 
     @classmethod
     def from_raw_output(cls, res: Any) -> "ResultRef":

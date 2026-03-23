@@ -59,9 +59,6 @@ def test_result_ref_fetch_parses_boltz_result(monkeypatch):
 
     def fake_fetch_object(path):
         payloads = {
-            "top": '{"atoms":[]}',
-            "res": '{"ids":[]}',
-            "chains": '{"ids":[]}',
             "plddt": (
                 '{"shape":[3],"data":"%s"}' % _encode_float_array([1.0, 2.0, 3.0])
             ).encode(),
@@ -73,7 +70,8 @@ def test_result_ref_fetch_parses_boltz_result(monkeypatch):
         return payloads[path]
 
     monkeypatch.setattr("rush.boltz.fetch_object", fake_fetch_object)
-    monkeypatch.setattr("rush.boltz.from_json", lambda data: fake_trc)
+    monkeypatch.setattr("rush._trc.fetch_object", lambda path: b"{}")
+    monkeypatch.setattr("rush._trc.from_json", lambda data: fake_trc)
 
     ref = ResultRef.from_raw_output(_sample_boltz_raw_output())
     output = list(ref.fetch())
@@ -105,8 +103,8 @@ def test_result_ref_save_saves_boltz_result(monkeypatch):
     saved_json_names = []
 
     monkeypatch.setattr(
-        "rush.boltz.save_object",
-        lambda path: Path(f"/tmp/{path}.json"),
+        "rush.client.RushObject.save",
+        lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
 
     def fake_save_json(data, filepath=None, name=None):
@@ -134,7 +132,7 @@ def test_result_ref_save_saves_boltz_result(monkeypatch):
 
 
 def test_boltz_result_ref_rejects_malformed_output():
-    # Raw output missing the affinities element in the tuple
+    # Raw output missing the affinities element in the tuple — now caught at parse time
     bad_raw: list[Any] = [
         [
             [
@@ -160,10 +158,5 @@ def test_boltz_result_ref_rejects_malformed_output():
         ]
     ]
 
-    ref = ResultRef.from_raw_output(bad_raw)
-
     with pytest.raises(ValueError, match="not enough values to unpack"):
-        list(ref.fetch())
-
-    with pytest.raises(ValueError, match="not enough values to unpack"):
-        list(ref.save())
+        ResultRef.from_raw_output(bad_raw)

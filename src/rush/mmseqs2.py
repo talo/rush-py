@@ -10,14 +10,15 @@ Usage::
     from rush import mmseqs2
 
     result = mmseqs2.search(["MKFLILLFNILCL..."]).fetch()
-    print(result.a3m_texts[0])
+    print(result[0])
 """
 
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, NewType
 
 from gql.transport.exceptions import TransportQueryError
 
@@ -32,31 +33,32 @@ from .client import (
 )
 from .run import RushRun
 
-
 # ---------------------------------------------------------------------------
 # Result types
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class Result:
-    """Parsed MMseqs2 results: A3M text per input sequence."""
+Result = NewType("Result", list[str])
+"""Parsed MMseqs2 results: one A3M text per input sequence."""
 
-    a3m_texts: list[str]
-
-
-@dataclass
-class ResultPaths:
-    """Workspace paths for saved MMseqs2 A3M files."""
-
-    a3m_files: list[Path]
+ResultPaths = NewType("ResultPaths", list[Path])
+"""Workspace paths for saved MMseqs2 A3M files."""
 
 
 @dataclass(frozen=True)
 class ResultRef:
     """Lightweight reference to MMseqs2 outputs in the Rush object store."""
 
-    outputs: list[RushObject]
+    msas: list[RushObject]
+
+    def __getitem__(self, index: int) -> RushObject:
+        return self.msas[index]
+
+    def __len__(self) -> int:
+        return len(self.msas)
+
+    def __iter__(self) -> Iterator[RushObject]:
+        return iter(self.msas)
 
     @classmethod
     def from_raw_output(cls, res: Any) -> "ResultRef":
@@ -72,22 +74,20 @@ class ResultRef:
             # Nested: flatten all sublists into one list
             items = [obj for sublist in items for obj in sublist]
         return cls(
-            outputs=[RushObject.from_dict(obj) for obj in items],
+            msas=[RushObject.from_dict(obj) for obj in items],
         )
 
     def fetch(self) -> Result:
         """Download MMseqs2 outputs and parse into A3M strings."""
         a3ms: list[str] = []
-        for obj in self.outputs:
+        for obj in self.msas:
             a3m = fetch_object(obj.path)
             a3ms.append(a3m.decode() if isinstance(a3m, bytes) else a3m)
-        return Result(a3m_texts=a3ms)
+        return Result(a3ms)
 
     def save(self) -> ResultPaths:
         """Download MMseqs2 outputs and save as A3M files to the workspace."""
-        return ResultPaths(
-            a3m_files=[obj.save(ext="a3m") for obj in self.outputs],
-        )
+        return ResultPaths([obj.save(ext="a3m") for obj in self.msas])
 
 
 # ---------------------------------------------------------------------------

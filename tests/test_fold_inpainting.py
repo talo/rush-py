@@ -17,8 +17,8 @@ def test_fold_inpainting():
         ),
     ).collect()
     saved_msas = mmseqs2_ref.save()
-    assert saved_msas.a3m_files[0].suffix == ".a3m"
-    msa_obj = {"path": str(mmseqs2_ref.outputs[0].path)}
+    assert saved_msas[0].suffix == ".a3m"
+    msa_obj = {"path": str(mmseqs2_ref[0].path)}
     ref = boltz.fold(
         [
             ProteinSequence(["A"], protein_seq, msa_obj),

@@ -16,7 +16,8 @@
       "Bash(ty check:*)",
       "Bash(python -m pytest tests/ -m \"not slow\" -v --ignore=tests/test_fetch_runs.py)",
       "Bash(find /home/machineer/repos/qdx/rush-py/docs -type f -name *.rst -o -name *.md)",
-      "Bash(ls -la /home/machineer/repos/qdx/rush-py/src/rush/*.py)"
+      "Bash(ls -la /home/machineer/repos/qdx/rush-py/src/rush/*.py)",
+      "Bash(pytest:*)"
     ]
   }
 }

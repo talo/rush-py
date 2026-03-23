@@ -14,7 +14,6 @@ Usage::
     results = ref.fetch()
 """
 
-import json
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -24,22 +23,20 @@ from typing import Any, Callable, NewType, TypeGuard, TypeVar
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, from_json
+from rush import TRC
 
-from ._trc import TRCPaths
+from ._trc import TRCPaths, TRCRef
 from ._utils import bool_to_str, float_to_str
 from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _json_content_name,
     _submit_rex,
-    fetch_object,
     save_json,
-    save_object,
 )
 from .run import RushRun
-
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -80,16 +77,6 @@ def _is_result_type(result: Any) -> TypeGuard[dict[str, Any]]:
     )
 
 
-def _unwrap_raw(raw: list[Any]) -> list[Any]:
-    """Unwrap the Ok/Err layer that Auto3D wraps per-input results in."""
-    out = [
-        next(iter(out_i.values())) if _is_result_type(out_i) else out_i for out_i in raw
-    ]
-    if len(out) == 1:
-        out = out[0]
-    return out
-
-
 def _map_outputs(
     res: list[Any],
     *,
@@ -103,28 +90,75 @@ def _map_outputs(
 
 
 @dataclass(frozen=True)
+class _ConformerRef:
+    """Parsed reference to a single Auto3D conformer."""
+
+    trc: TRCRef
+    stats: Stats
+
+
+@dataclass(frozen=True)
 class ResultRef:
     """Lightweight reference to Auto3D outputs in the Rush object store.
+
+    Supports indexing and iteration over per-input results::
+
+        ref = run.collect()
+        ref[0]  # first input's conformers (list[_ConformerRef]) or Error
+        len(ref)  # number of inputs
 
     Call :meth:`fetch` to download and parse into Python dataclasses, or
     :meth:`save` to download to local files.
     """
 
-    raw: list[Any]
+    _inputs: list[list[_ConformerRef] | Error]
 
     @classmethod
     def from_raw_output(cls, raw: Any) -> "ResultRef":
         """Parse raw ``collect_run`` output into a ``ResultRef``.
 
         The raw output from ``collect_run`` is a ``list[Any]`` where each
-        element is EITHER a dict containing a ``smiles`` field (error) OR a
-        list of ``(trc_objs, stats)`` tuples (conformers).  We unwrap the
-        ``Ok``/``Err`` layer and store the result.
+        element is EITHER a string (error) OR a list of
+        ``(trc_objs, stats)`` tuples (conformers), possibly wrapped in
+        ``Ok``/``Err``.  We unwrap and parse into typed refs.
         """
         if not isinstance(raw, list):
             raise ValueError(f"auto3d should return a list, got {type(raw).__name__}.")
-        unwrapped = _unwrap_raw(raw)
-        return cls(raw=unwrapped)
+
+        # Unwrap Ok/Err per element without collapsing single-element lists
+        unwrapped = [
+            next(iter(item.values())) if _is_result_type(item) else item for item in raw
+        ]
+
+        def parse_conformers(res_i: Any) -> list[_ConformerRef]:
+            return [
+                _ConformerRef(
+                    trc=TRCRef(
+                        topology=RushObject.from_dict(trc_obj[0]),
+                        residues=RushObject.from_dict(trc_obj[1]),
+                        chains=RushObject.from_dict(trc_obj[2]),
+                    ),
+                    stats=Stats(
+                        stats["f_max"],
+                        stats["converged"],
+                        stats["e_rel_kcal_mol"],
+                        stats["e_tot_hartrees"],
+                    ),
+                )
+                for trc_obj, stats in res_i
+            ]
+
+        parsed = _map_outputs(unwrapped, on_success=parse_conformers)
+        return cls(_inputs=parsed)
+
+    def __getitem__(self, index: int) -> list[_ConformerRef] | Error:
+        return self._inputs[index]
+
+    def __len__(self) -> int:
+        return len(self._inputs)
+
+    def __iter__(self) -> Iterator[list[_ConformerRef] | Error]:
+        return iter(self._inputs)
 
     def fetch(self) -> list[Iterator[Result] | Error]:
         """Download output files and parse into :class:`Result` objects.
@@ -137,24 +171,11 @@ class ResultRef:
             an Error for that input.
         """
 
-        def fetch_output(res_i: Any) -> Iterator[Result]:
-            for trc_obj, stats in res_i:
-                trc_dict = {
-                    "topology": json.loads(fetch_object(trc_obj[0]["path"])),
-                    "residues": json.loads(fetch_object(trc_obj[1]["path"])),
-                    "chains": json.loads(fetch_object(trc_obj[2]["path"])),
-                }
-                yield Result(
-                    from_json(trc_dict),
-                    Stats(
-                        stats["f_max"],
-                        stats["converged"],
-                        stats["e_rel_kcal_mol"],
-                        stats["e_tot_hartrees"],
-                    ),
-                )
+        def fetch_output(conformers: list[_ConformerRef]) -> Iterator[Result]:
+            for conf in conformers:
+                yield Result(conformer=conf.trc.fetch(), stats=conf.stats)
 
-        return _map_outputs(self.raw, on_success=fetch_output)
+        return _map_outputs(self._inputs, on_success=fetch_output)
 
     def save(self) -> list[Iterator[ResultPaths] | Error]:
         """Save Auto3D outputs into the workspace.
@@ -168,21 +189,17 @@ class ResultRef:
             an Error for that input.
         """
 
-        def save_output(res_i: Any) -> Iterator[ResultPaths]:
-            for trc_obj, stats in res_i:
+        def save_output(conformers: list[_ConformerRef]) -> Iterator[ResultPaths]:
+            for conf in conformers:
                 yield ResultPaths(
-                    conformer=TRCPaths(
-                        topology=save_object(trc_obj[0]["path"]),
-                        residues=save_object(trc_obj[1]["path"]),
-                        chains=save_object(trc_obj[2]["path"]),
-                    ),
+                    conformer=conf.trc.save(),
                     stats=save_json(
-                        stats,
-                        name=_json_content_name("auto3d_stats", stats),
+                        conf.stats.__dict__,
+                        name=_json_content_name("auto3d_stats", conf.stats.__dict__),
                     ),
                 )
 
-        return _map_outputs(self.raw, on_success=save_output)
+        return _map_outputs(self._inputs, on_success=save_output)
 
 
 # ---------------------------------------------------------------------------

@@ -1,12 +1,12 @@
 from pathlib import Path
 
+from rush import boltz, mmseqs2
 from rush.boltz import (
     LigandSequence,
     ProteinSequence,
     Result,
 )
 from rush.client import RunOpts, RunSpec, set_opts
-from rush import boltz, mmseqs2
 
 
 def test_fold():
@@ -20,9 +20,9 @@ def test_fold():
         ),
     ).collect()
     saved_msas = mmseqs2_ref.save()
-    assert saved_msas.a3m_files[0].suffix == ".a3m"
+    assert saved_msas[0].suffix == ".a3m"
     # Pass raw object store ref to boltz ProteinSequence
-    msa_obj = {"path": str(mmseqs2_ref.outputs[0].path)}
+    msa_obj = {"path": str(mmseqs2_ref[0].path)}
     ref = boltz.fold(
         [
             ProteinSequence(["A"], protein_seq, msa_obj),
