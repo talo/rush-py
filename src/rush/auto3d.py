@@ -1,40 +1,49 @@
-import json
+"""
+Auto3D module for the Rush Python client.
+
+Auto3D generates 3D conformers from SMILES strings using the AIMNET
+optimizing engine.  It supports configurable conformer counts, convergence
+thresholds, and isomer/tautomer enumeration.
+
+Usage::
+
+    from rush import auto3d
+
+    result = auto3d.generate(["CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O"], k=5).fetch()
+    print(next(results).stats.e_tot_hartrees)
+"""
+
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import (
-    Any,
-    Callable,
-    Iterator,
-    Literal,
-    NewType,
-    TypeGuard,
-    TypeVar,
-    overload,
-)
+from typing import Any, Callable, NewType, TypeGuard, TypeVar
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, from_json
-from rush._output_types import TRCSavedResult
-from rush.client import (
-    RunID,
+from rush import TRC
+
+from ._trc import TRCPaths, TRCRef
+from ._utils import bool_to_str, float_to_str
+from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _json_content_name,
     _submit_rex,
-    collect_run,
-    fetch_object,
     save_json,
-    save_object,
 )
-from rush.utils import bool_to_str, float_to_str
+from .run import RushRun
+
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
 
 
 @dataclass
-class Auto3DStats:
+class Stats:
     f_max: float
     converged: bool
     e_rel_kcal_mol: float
@@ -42,95 +51,181 @@ class Auto3DStats:
 
 
 @dataclass
-class Auto3DResult:
+class Result:
     conformer: TRC
-    stats: Auto3DStats
+    stats: Stats
 
 
 @dataclass(frozen=True)
-class Auto3DSavedResult:
-    conformer: TRCSavedResult
+class ResultPaths:
+    conformer: TRCPaths
     stats: Path
 
 
-Auto3DError = NewType("Auto3DError", str)
+Error = NewType("Error", str)
 
 
 T = TypeVar("T")
 
 
-@overload
-def auto3d(
-    smis: list[str],
-    k: int = 1,
-    batchsize_atoms: int = 1024,
-    capacity: int = 40,
-    convergence_threshold: float = 0.003,
-    enumerate_isomer: bool = True,
-    enumerate_tautomer: bool = False,
-    max_confs: int | None = None,
-    opt_steps: int = 5000,
-    patience: int = 1000,
-    threshold: float = 0.3,
-    run_spec: RunSpec = RunSpec(),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def auto3d(
-    smis: list[str],
-    k: int = 1,
-    batchsize_atoms: int = 1024,
-    capacity: int = 40,
-    convergence_threshold: float = 0.003,
-    enumerate_isomer: bool = True,
-    enumerate_tautomer: bool = False,
-    max_confs: int | None = None,
-    opt_steps: int = 5000,
-    patience: int = 1000,
-    threshold: float = 0.3,
-    run_spec: RunSpec = RunSpec(),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> list[Any]: ...
-@overload
-def auto3d(
-    smis: list[str],
-    k: int = 1,
-    batchsize_atoms: int = 1024,
-    capacity: int = 40,
-    convergence_threshold: float = 0.003,
-    enumerate_isomer: bool = True,
-    enumerate_tautomer: bool = False,
-    max_confs: int | None = None,
-    opt_steps: int = 5000,
-    patience: int = 1000,
-    threshold: float = 0.3,
-    run_spec: RunSpec = RunSpec(),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> list[Any] | RunID: ...
+def _is_result_type(result: Any) -> TypeGuard[dict[str, Any]]:
+    return (
+        isinstance(result, dict)
+        and len(result) == 1
+        and ("Ok" in result or "Err" in result)
+    )
 
 
-def auto3d(
-    smis: list[str],
-    k: int = 1,
-    batchsize_atoms: int = 1024,
-    capacity: int = 40,
-    convergence_threshold: float = 0.003,
-    enumerate_isomer: bool = True,
-    enumerate_tautomer: bool = False,
-    max_confs: int | None = None,
-    opt_steps: int = 5000,
-    patience: int = 1000,
-    threshold: float = 0.3,
-    run_spec: RunSpec = RunSpec(),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> list[Any] | RunID:
+def _map_outputs(
+    res: list[Any],
+    *,
+    on_success: Callable[[Any], T],
+) -> list[T | Error]:
+    return [
+        # Handle per-conformer error strings
+        Error(res_i) if isinstance(res_i, str) else on_success(res_i)
+        for res_i in res
+    ]
+
+
+@dataclass(frozen=True)
+class _ConformerRef:
+    """Parsed reference to a single Auto3D conformer."""
+
+    trc: TRCRef
+    stats: Stats
+
+
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to Auto3D outputs in the Rush object store.
+
+    Supports indexing and iteration over per-input results::
+
+        ref = run.collect()
+        ref[0]  # first input's conformers (list[_ConformerRef]) or Error
+        len(ref)  # number of inputs
+
+    Call :meth:`fetch` to download and parse into Python dataclasses, or
+    :meth:`save` to download to local files.
     """
-    Runs Auto3D on a list of SMILES strings, returning either the TRC structure
-    or an error string.
+
+    _inputs: list[list[_ConformerRef] | Error]
+
+    @classmethod
+    def from_raw_output(cls, raw: Any) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``.
+
+        The raw output from ``collect_run`` is a ``list[Any]`` where each
+        element is EITHER a string (error) OR a list of
+        ``(trc_objs, stats)`` tuples (conformers), possibly wrapped in
+        ``Ok``/``Err``.  We unwrap and parse into typed refs.
+        """
+        if not isinstance(raw, list):
+            raise ValueError(f"auto3d should return a list, got {type(raw).__name__}.")
+
+        # Unwrap Ok/Err per element without collapsing single-element lists
+        unwrapped = [
+            next(iter(item.values())) if _is_result_type(item) else item for item in raw
+        ]
+
+        def parse_conformers(res_i: Any) -> list[_ConformerRef]:
+            return [
+                _ConformerRef(
+                    trc=TRCRef(
+                        topology=RushObject.from_dict(trc_obj[0]),
+                        residues=RushObject.from_dict(trc_obj[1]),
+                        chains=RushObject.from_dict(trc_obj[2]),
+                    ),
+                    stats=Stats(
+                        stats["f_max"],
+                        stats["converged"],
+                        stats["e_rel_kcal_mol"],
+                        stats["e_tot_hartrees"],
+                    ),
+                )
+                for trc_obj, stats in res_i
+            ]
+
+        parsed = _map_outputs(unwrapped, on_success=parse_conformers)
+        return cls(_inputs=parsed)
+
+    def __getitem__(self, index: int) -> list[_ConformerRef] | Error:
+        return self._inputs[index]
+
+    def __len__(self) -> int:
+        return len(self._inputs)
+
+    def __iter__(self) -> Iterator[list[_ConformerRef] | Error]:
+        return iter(self._inputs)
+
+    def fetch(self) -> list[Iterator[Result] | Error]:
+        """Download output files and parse into :class:`Result` objects.
+
+        Each input SMILES either succeeds (returning an iterator of conformer
+        :class:`Result` objects) or fails (returning an :class:`Error`).
+
+        Returns:
+            One item per input: either an iterator over fetched conformers or
+            an Error for that input.
+        """
+
+        def fetch_output(conformers: list[_ConformerRef]) -> Iterator[Result]:
+            for conf in conformers:
+                yield Result(conformer=conf.trc.fetch(), stats=conf.stats)
+
+        return _map_outputs(self._inputs, on_success=fetch_output)
+
+    def save(self) -> list[Iterator[ResultPaths] | Error]:
+        """Save Auto3D outputs into the workspace.
+
+        Each successful input yields an iterator of conformers.  Every
+        conformer is saved as three TRC component files ``(topology,
+        residues, chains)`` plus a JSON file containing the associated stats.
+
+        Returns:
+            One item per input: either an iterator over saved conformers or
+            an Error for that input.
+        """
+
+        def save_output(conformers: list[_ConformerRef]) -> Iterator[ResultPaths]:
+            for conf in conformers:
+                yield ResultPaths(
+                    conformer=conf.trc.save(),
+                    stats=save_json(
+                        conf.stats.__dict__,
+                        name=_json_content_name("auto3d_stats", conf.stats.__dict__),
+                    ),
+                )
+
+        return _map_outputs(self._inputs, on_success=save_output)
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def generate(
+    smis: list[str],
+    k: int = 1,
+    batchsize_atoms: int = 1024,
+    capacity: int = 40,
+    convergence_threshold: float = 0.003,
+    enumerate_isomer: bool = True,
+    enumerate_tautomer: bool = False,
+    max_confs: int | None = None,
+    opt_steps: int = 5000,
+    patience: int = 1000,
+    threshold: float = 0.3,
+    run_spec: RunSpec = RunSpec(),
+    run_opts: RunOpts = RunOpts(),
+) -> RushRun[ResultRef]:
+    """
+    Submit an Auto3D conformer generation job for a list of SMILES strings.
+
+    Returns a :class:`~rush.run.RushRun` handle.  Call ``.collect()`` to wait
+    for the result ref, then ``.fetch()`` or ``.save()`` to retrieve outputs.
     """
     rex = Template("""let
   auto3d = λ smis →
@@ -172,117 +267,14 @@ in
         run_spec=run_spec._to_rex(),
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        assert isinstance(out, list)
-
-        def is_result_type(result: Any) -> TypeGuard[dict[str, Any]]:
-            return (
-                isinstance(result, dict)
-                and len(result) == 1
-                and ("Ok" in result or "Err" in result)
-            )
-
-        # Auto3D has an extra layer of per-conformer errors to unwrap
-        out = [
-            next(iter(out_i.values())) if is_result_type(out_i) else out_i
-            for out_i in out
-        ]
-        if len(out) == 1:
-            out = out[0]
-        return out
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             print("Error:", file=sys.stderr)
             for error in e.errors:
                 print(f"  {error['message']}", file=sys.stderr)
-        raise e
-
-
-def _map_outputs(
-    res: list[Any],
-    *,
-    on_success: Callable[[Any], T],
-) -> list[T | Auto3DError]:
-    return [
-        # Handle per-conformer error strings
-        Auto3DError(res_i) if isinstance(res_i, str) else on_success(res_i)
-        for res_i in res
-    ]
-
-
-def fetch_outputs(res: list[Any]) -> list[Iterator[Auto3DResult] | Auto3DError]:
-    """
-    Download output files from an auto3d run.
-
-    The auto3d rex computation returns Rush object-store pointers for TRCs
-    and stats for each conformer generated. There are up to k conformers
-    per input. Each input can either succeed, in which case a Iterator[Auto3DResult]
-    is returned that downloads and packages each conformer on the fly, or fail,
-    in which case an Auto3DError is returned for that input.
-
-    Args:
-        res: Collected output from auto3d(). Each successful item contains
-            conformer TRC object references and stats for one input.
-
-    Returns:
-        One item per input: either an iterator over fetched conformers or an
-        Auto3DError for that input.
-    """
-
-    def fetch_output(res_i) -> Iterator[Auto3DResult]:
-        for trc_obj, stats in res_i:
-            trc_dict = {
-                "topology": json.loads(fetch_object(trc_obj[0]["path"])),
-                "residues": json.loads(fetch_object(trc_obj[1]["path"])),
-                "chains": json.loads(fetch_object(trc_obj[2]["path"])),
-            }
-            yield Auto3DResult(
-                from_json(trc_dict),
-                Auto3DStats(
-                    stats["f_max"],
-                    stats["converged"],
-                    stats["e_rel_kcal_mol"],
-                    stats["e_tot_hartrees"],
-                ),
-            )
-
-    return _map_outputs(res, on_success=fetch_output)
-
-
-def save_outputs(res: list[Any]) -> list[Iterator[Auto3DSavedResult] | Auto3DError]:
-    """
-    Save Auto3D outputs into the workspace.
-
-    Each successful input yields an iterator of conformers. Every conformer is
-    saved as three TRC component files `(topology, residues, chains)` plus a
-    JSON file containing the associated Auto3DStats.
-
-    Args:
-        res: Collected output from auto3d(). Each successful item contains
-            conformer TRC object references and stats for one input.
-
-    Returns:
-        One item per input: either an iterator over saved conformers or an
-        Auto3DError for that input.
-    """
-
-    def save_output(res_i) -> Iterator[Auto3DSavedResult]:
-        for trc_obj, stats in res_i:
-            yield Auto3DSavedResult(
-                conformer=TRCSavedResult(
-                    topology=save_object(trc_obj[0]["path"]),
-                    residues=save_object(trc_obj[1]["path"]),
-                    chains=save_object(trc_obj[2]["path"]),
-                ),
-                stats=save_json(
-                    stats,
-                    name=_json_content_name("auto3d_stats", stats),
-                ),
-            )
-
-    return _map_outputs(res, on_success=save_output)
+        raise

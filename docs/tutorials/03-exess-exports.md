@@ -24,10 +24,9 @@ The simplest export: compute an energy and also write out the electron density a
 
 ```python
 from rush import exess
-from rush.exess import exess_energy
 from rush.client import RunOpts
 
-outputs = exess_energy(
+paths = exess.energy(
     "input_topology.json",
     export_keywords=exess.ExportKeywords(
         export_density=True,
@@ -36,10 +35,7 @@ outputs = exess_energy(
         name="Tutorial: EXESS Exports — Density",
         tags=["rush-py", "tutorial", "exess"],
     ),
-    collect=True,
-)
-
-paths = exess.save_outputs(outputs)
+).save()
 print(paths.calc)
 print(paths.exports)
 ```
@@ -50,11 +46,11 @@ print(paths.exports)
 
 ### What comes back
 
-EXESS returns the collected object-store outputs, and `save_outputs` turns them into an `ExessSavedResult` with named filesystem paths:
+EXESS returns a `RushRun` handle, and `run.save()` turns the outputs into an `exess.ResultPaths` object with named filesystem paths:
 
 ```python
 # paths looks like:
-ExessSavedResult(
+exess.ResultPaths(
     calc=Path("...json"),
     exports=Path("...hdf5"),
 )
@@ -73,10 +69,9 @@ Often you want property values at *specific locations* — for example, to map t
 
 ```python
 from rush import exess
-from rush.exess import exess_energy
 from rush.client import RunOpts, RunSpec
 
-outputs = exess_energy(
+paths = exess.energy(
     "input_topology.json",
     frag_keywords=None,  # No fragmentation — whole-system calculation
     export_keywords=exess.ExportKeywords(
@@ -94,10 +89,7 @@ outputs = exess_energy(
         name="Tutorial: EXESS Exports — Descriptor Grid",
         tags=["rush-py", "tutorial", "exess", "density", "ESP"],
     ),
-    collect=True,
-)
-
-paths = exess.save_outputs(outputs)
+).save()
 ```
 
 This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`). The resulting JSON looks like:
@@ -156,7 +148,7 @@ The `expanded_esp_descriptors` export currently causes an upstream out-of-memory
 Once you have the saved files, you can load and inspect them in Python:
 
 :::{tip}
-To work with the output directly without needing to save it first, use `fetch_outputs` instead of `save_outputs`, which loads the data directly into dataclasses for your convenience! Here we show how to load the exports data from the saved files. For EXESS's exports this might be the preferred way of doing things, since the data may be very large and naturally take the form of a JSON or HDF5 file.
+To work with the output directly without needing to save it first, use `run.fetch()` instead of `run.save()`. Here we show how to load the exports data from the saved files. For EXESS exports that can be very large, saving first is often the better workflow.
 :::
 
 ```python

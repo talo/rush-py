@@ -18,7 +18,6 @@ Output files (saved to chelpg-outputs/):
 """
 
 import base64
-import json
 import math
 from collections import Counter
 from pathlib import Path
@@ -30,7 +29,6 @@ from rdkit import Chem
 from rdkit.Chem import rdDepictor
 
 from rush import TRC, exess, from_pdb
-from rush.exess import exess_energy
 
 matplotlib.use("Agg")  # Use non-GUI backend
 
@@ -266,7 +264,7 @@ print(f"Output directory: {output_dir}")
 pdb_path = data_dir / "aspirin.pdb"
 mol_name = pdb_path.stem.replace("_", " ").replace("-", " ").title()
 print(f"Loading {pdb_path.name}...")
-pdb_content = pdb_path.read_text(encoding="utf-8")
+pdb_content = pdb_path.read_text()
 trc = from_pdb(pdb_content)
 assert isinstance(trc, TRC)  # Confirm we got just one structure
 
@@ -297,23 +295,16 @@ for ch in mol_formula:
 
 print(f"  Molecule: {mol_name} ({mol_formula_sub})")
 
-# Convert to topology JSON format
-topology_path = output_dir / f"{pdb_path.stem}_topology.json"
-topology_path.write_text(json.dumps(trc.topology.to_json(), indent=2), encoding="utf-8")
-print(f"✓ Topology saved to {topology_path}")
-
-
 # ===== 2. Run CHELPG calculation =====
 print("\nRunning CHELPG calculation...")
-outputs = exess_energy(
-    topology_path=topology_path,
+result = exess.energy(
+    trc,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
     convert_hdf5_to_json=True,
-    collect=True,
-)
+).fetch()
 
-exports = exess.fetch_outputs(outputs).exports
+exports = result.exports
 assert isinstance(exports, dict)
 charges = exports["chelpg_charges"]
 

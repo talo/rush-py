@@ -16,9 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
+from rush.mol import FragmentRef
+
 from .. import RushRunError, exess
-from ..client import RunOpts, save_object
-from ..exess import exess_interaction_energy
+from ..client import RunOpts
+from ..exess import interaction_energy
+from ..run import RushRun
 
 __all__ = [
     "fragmented_exess",
@@ -132,11 +135,13 @@ def determine_ligand_atoms(conf: dict[str, Any]) -> tuple[set[int], list[int]]:
     return ligand_atoms, ligand_res_indices
 
 
-def collect_ligand_fragments(conf: dict[str, Any], ligand_atoms: set[int]) -> list[int]:
-    ligand_fragments: list[int] = []
+def collect_ligand_fragments(
+    conf: dict[str, Any], ligand_atoms: set[int]
+) -> list[FragmentRef]:
+    ligand_fragments: list[FragmentRef] = []
     for frag_idx, fragment in enumerate(conf["topology"]["fragments"]):
         if set(fragment) & ligand_atoms:
-            ligand_fragments.append(frag_idx)
+            ligand_fragments.append(FragmentRef(frag_idx))
     if not ligand_fragments:
         raise ValueError("Failed to match ligand atoms to fragment indices.")
     return ligand_fragments
@@ -145,7 +150,7 @@ def collect_ligand_fragments(conf: dict[str, Any], ligand_atoms: set[int]) -> li
 def compute_fragment_cutoffs(
     conf: dict[str, Any],
     ligand_atoms: set[int],
-    ligand_fragments: set[int],
+    ligand_fragments: set[FragmentRef],
     threshold: float,
 ) -> list[FragmentJob]:
     geometry = conf["topology"]["geometry"]
@@ -177,7 +182,7 @@ def compute_fragment_cutoffs(
 def build_frag_keywords(
     cutoff: int,
     reference_fragment: int,
-    included_fragments: list[int],
+    included_fragments: list[FragmentRef],
     trimer_cap: float,
 ) -> exess.FragKeywords:
     trimer_cutoff = float(min(cutoff, trimer_cap))
@@ -198,7 +203,7 @@ def fragmented_exess(
     trimer_cutoff_cap: float = 15.0,
     collect: bool = True,
     output_dir: Path | None = None,
-) -> None:
+) -> list[RushRun[exess.ResultRef]] | None:
     """
     Submit EXESS calculations for a fragmented ligand complex.
     """
@@ -232,6 +237,8 @@ def fragmented_exess(
     if not topology_path.exists():
         raise RuntimeError(f"Topology file no longer exists: {topology_path}")
 
+    submitted: list[RushRun[exess.ResultRef]] = []
+
     for job in fragment_jobs:
         job_name = f"{input_path.stem}_ref{job.reference_fragment}"
         tags = [input_path.parent.name, f"ref_frag_{job.reference_fragment}"]
@@ -251,7 +258,7 @@ def fragmented_exess(
 
         print(f"Process {output_filename}", file=sys.stderr)
         try:
-            run_output = exess_interaction_energy(
+            run = interaction_energy(
                 topology_path,
                 job.reference_fragment,
                 "RestrictedRIMP2",
@@ -267,29 +274,24 @@ def fragmented_exess(
                 ),
                 frag_keywords=frag_keywords,
                 run_opts=run_opts,
-                collect=collect,
             )
+            submitted.append(run)
+
             if collect:
-                assert isinstance(run_output, tuple)
-                run_path = save_object(
-                    (
-                        run_output["path"]
-                        if isinstance(run_output, dict)
-                        else run_output[0]["path"]
-                    )
-                )
+                run_output = run.collect()
+                run_path = run_output.calc.save()
                 if run_path.exists():
-                    # Save the successful run
                     shutil.move(str(run_path), str(target_path))
                     print(f"  SAVED: {target_path}", file=sys.stderr)
                 else:
-                    # This case really should never get hit
                     print(
                         f"  Warning: exess output file not found: {run_path}",
                         file=sys.stderr,
                     )
         except RushRunError as e:
             print(f"  Warning: exess run failed! {e}", file=sys.stderr)
+
+    return submitted if not collect else None
 
 
 def discover_inputs(

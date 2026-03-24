@@ -8,9 +8,8 @@ The rush-py client functions have a structured form for their arguments:
 To see the documentation, signature, or parameters for any class or function, use Python's built-in help function:
 ```python
 from rush import exess
-from rush.exess import exess_energy
 
-help(exess_energy)
+help(exess.energy)
 help(exess.FragKeywords)
 ```
 
@@ -21,23 +20,17 @@ When a Rush module expects a tuple of paths to Topology, Residues, and Chains ob
 One can pass a set of run options to each module function via `run_opts=rush.client.RunOpts(...)`. Current options include setting the run's name, description, tags, and an email flag which, if set to true, will trigger messages for job notifications sent to the email address associated with the user's Rush account.
 
 ## Submit + Collect Pattern
-Rush module functions will return a run ID that can be used to collect the run at a later point in time using `rush.client.collect_run`, which takes the run ID and a maximum time to wait for the run to finish (1 hour by default). If it does finish, the `collect_run` call will then return the module outputs.
-
-If synchronous behavior is desired, `collect=True` can be passed to the module function and collection with a 1 hour wait time will happen automatically, without the need to call `collect_run`, and the module outputs will be returned directly from the module function call as well.
+Rush module functions return a `RushRun` handle. Call `RushRun.collect()` to wait for completion and get the module's result reference, or use the convenience shortcuts `RushRun.fetch()` and `RushRun.save()`. All functions take a `max_wait_time` parameter that sets the number of seconds to wait for the run to finish before timing out.
 
 ## Uploading, Downloading & Saving Data
-The rush-py client provides `upload_object`, `fetch_object`, and `save_object` functions in the `rush.client` Python submodule. These functions upload an object from a local filesystem path, fetch an object via its object store path and return its data directly in memory, and save an object into the workspace directory with arguments that allow for configuring how it gets named (run `help(rush.client.save_object)` for usage).
+The Rush client module provides `client.upload_object` and `client.save_object`, which allow for uploading and saving `RushObject` instances to the Rush object store to and from local filesystem paths. Also, each module's `ResultRef` class provides `ResultRef.fetch()` and `ResultRef.save() functions. These fetch a module's results and return its data directly in memory, and save an object into the workspace directory with arguments that allow for configuring how it gets named.
 
-Also provided is a `save_json` function that allows saving a dict as JSON, by default into the workspace directory, for convenient parallel usage with `save_object`.
-
-## Output Saving Helpers
-
-Each module function has a `save_outputs` helper that automatically downloads objects to the local filesystem and returns local paths instead of object store paths. This is useful when you want to preserve results for inspection or post-processing.
+Also provided is `client.save_json`, which allows saving a dict as JSON, by default into the workspace directory, for convenient parallel usage with `save_object`.
 
 Downloading outputs is not required when chaining module runs: the object store paths returned by a module can be passed directly into another module as inputs.
 
 ## Workspaces
-Workspaces are used to organize output files from Rush runs. When using the `save_outputs` functions, a folder is created for the project currently in use named via the project ID, and the files are saved based on their object store paths. In this way, the output files will never be overwritten, as object store paths are guaranteed to be unique.
+Workspaces are used to organize output files from Rush runs. When using `RushRun.save()` or `ResultRef.save()`, a folder is created for the project currently in use named via the project ID, and the files are saved based on their object store paths. In this way, the output files will never be overwritten, as object store paths are guaranteed to be unique.
 
 A `history.json` file is also written into the root of the workspace, where it maintains a list of all module instances (i.e. runs of a module) that have been created for this workspace. Each module instance has its run ID, time created, and module path (which contains the exact revision of the module used for the run) tracked here.
 

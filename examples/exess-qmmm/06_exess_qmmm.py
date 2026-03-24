@@ -22,9 +22,9 @@ import json
 from itertools import batched
 from pathlib import Path
 
-from rush import Topology
+from rush import Topology, exess
 from rush.client import RunOpts
-from rush.exess_qmmm import Trajectory, exess_qmmm, fetch_outputs, save_outputs
+from rush.exess import Trajectory
 from rush.mol import Element, Fragment, Residue, Residues
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -50,15 +50,13 @@ TEMPERATURE = 300  # Default temperature in Kelvin
 topology_path = DATA_DIR / "6a5j_t.json"
 residues_path = DATA_DIR / "6a5j_r.json"
 
-outputs = exess_qmmm(
-    topology_path,
+run = exess.qmmm(
+    (topology_path, residues_path),
     N_TIMESTEPS,
-    residues_path,
     method=METHOD,
     basis=BASIS,
     qm_fragments=QM_FRAGMENTS,
     run_opts=RunOpts(name="Tutorial: QM/MM"),
-    collect=True,
 )
 
 
@@ -68,16 +66,15 @@ print("=" * 60)
 print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
-paths = save_outputs(outputs)
+paths = run.save()
 print(f"Saved file: {paths}")
 
-res = fetch_outputs(outputs)
+res = run.fetch()
 out_traj = res.geometries
 
 # Load topology for atom info
-with open(topology_path, encoding="utf-8") as f:
-    topology = Topology.from_json(json.load(f))
-    assert topology.fragments, "Topology lost its fragments!"
+topology = Topology.from_json(topology_path)
+assert topology.fragments, "Topology lost its fragments!"
 
 n_atoms = len(topology.symbols)
 
@@ -371,22 +368,12 @@ residues = Residues(
     seqs=["HOH", "HOH"],
 )
 
-molecule_t_path = OUTPUT_DIR / "molecule_t.json"
-molecule_r_path = OUTPUT_DIR / "molecule_r.json"
-
-with open(molecule_t_path, "w", encoding="utf-8") as f_t:
-    json.dump(topology.to_json(), f_t)
-with open(molecule_r_path, "w", encoding="utf-8") as f_r:
-    json.dump(residues.to_json(), f_r)
-
-outputs = exess_qmmm(
-    topology_path=molecule_t_path,
-    residues_path=molecule_r_path,
+run2 = exess.qmmm(
+    (topology, residues),
     n_timesteps=100,
     trajectory=Trajectory(include_waters=True),
     mm_fragments=[],
     run_opts=RunOpts(name="Tutorial: QM/MM with Manually-Constructed Water"),
-    collect=True,
 )
 
 
@@ -396,10 +383,9 @@ print("=" * 60)
 print("Working with the QM/MM trajectory output")
 print("=" * 60)
 
-res = fetch_outputs(outputs)
-out_traj = res.geometries
+res2 = run2.fetch()
+out_traj = res2.geometries
 
-topology = Topology.from_json(molecule_t_path)
 print("Atoms at First Step")
 for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
     print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")

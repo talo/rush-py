@@ -11,10 +11,9 @@ Each Rush module has a Python submodule that provides support for it. For exampl
 from rush import exess
 ```
 
-For example, single-point energy calculations can be performred using `exess_energy`:
+For example, single-point energy calculations can be performed using `exess.energy`:
 ```python
-from rush.exess import exess_energy
-exess_energy("input_topology.json", collect=True)
+result = exess.energy("input_topology.json").fetch()
 ```
 
 And you're done! The EXESS module has a rich set of capabilities and configuration, but by default will perform an energy calculation on the input topology molecule. To learn more about EXESS capabilities, see the [EXESS documentation](../exess/index.md). To learn about TRC files, check the [topologies section](../exess/topologies.md).
@@ -28,43 +27,35 @@ Here's a complete example that runs an energy calculation and prints the result:
 ```python
 import json
 from rush import exess
-from rush.exess import exess_energy
-from rush.client import save_object
 
-outputs = exess_energy("benzene_t.json", collect=True)
-output_file = save_object(outputs[0]["path"])
-
-with open(output_file) as f:
-    output_data = json.load(f)
-
+result = exess.energy("benzene_t.json").fetch()
 print("EXPANDED HF ENERGY:")
-print(output_data["qmmbe"]["expanded_hf_energy"])
+print(result.calc.qmmbe.expanded_hf_energy)
 ```
 
-### Asynchronous Runs and Collecting Runs
+### Asynchronous Runs
 
-Rush modules can take a long time, so by default run asynchronously: the function that triggers the run will return once the run is submitted. In order to obtain the output synchronously for this same call, pass `collect=True` as we've done above. You can also collect the run later:
+Rush modules can take a long time, so by default they return a `RushRun` handle as soon as the run is submitted. To wait for completion and get the result, call `.fetch()`:
 ```python
-from rush.client import collect_run
-from rush.exess import exess_energy
-id = exess_energy("input_topology.json")
-outputs = collect_run(id)
+from rush import exess
+
+run = exess.energy("input_topology.json")  # run started
+result = run.fetch()  # waits for completion
 ```
 
-As shown, module calls return a "run ID" that can be used as above to collect any run that you've submitted.
+As shown, module calls return a `RushRun` object that can be used as above to fetch any run that you've submitted.
 
 
 ### Supplementary Entrypoints
 
 Or, call one of the other supplementary EXESS entry points, built to facilitate using EXESS's various capabilities:
 ```python
-from rush.exess import exess_energy, exess_interaction_energy
-from rush.exess_geo_opt import exess_geo_opt
-from rush.exess_qmmm import exess_qmmm
-exess_energy(...)
-exess_interaction_energy(...)
-exess_geo_opt(...)
-exess_qmmm(...)
+from rush import exess
+
+exess.energy(...)
+exess.interaction_energy(...)
+exess.optimization(...)
+exess.qmmm(...)
 ```
 
 ## View your run in the Rush Web Interface

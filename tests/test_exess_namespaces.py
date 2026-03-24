@@ -1,31 +1,31 @@
 import types
 
-from rush import (
-    exess,
-    exess_geo_opt as exess_geo_opt_module,
-    exess_qmmm as exess_qmmm_module,
+from rush import exess
+from rush.exess import (
+    energy,
+    interaction_energy,
+    optimization,
+    qmmm,
+    FragKeywords,
+    Trajectory,
+    OptimizationKeywords,
 )
-from rush.exess import exess_energy, exess_interaction_energy
-from rush.exess_geo_opt import exess_geo_opt
-from rush.exess_qmmm import exess_qmmm
 
 
-def test_exess_modules_expose_module_functions():
+def test_exess_is_a_module():
     assert isinstance(exess, types.ModuleType)
-    assert isinstance(exess_geo_opt_module, types.ModuleType)
-    assert isinstance(exess_qmmm_module, types.ModuleType)
-
-    assert getattr(exess, "exess_energy") is exess_energy
-    assert getattr(exess, "exess_interaction_energy") is exess_interaction_energy
-    assert exess_geo_opt_module.exess_geo_opt is exess_geo_opt
-    assert exess_qmmm_module.exess_qmmm is exess_qmmm
 
 
-def test_exess_modules_expose_module_specific_types():
-    frag_keywords = exess.FragKeywords()
+def test_exess_exposes_computation_functions():
+    assert getattr(exess, "energy") is energy
+    assert getattr(exess, "interaction_energy") is interaction_energy
+    assert getattr(exess, "optimization") is optimization
+    assert getattr(exess, "qmmm") is qmmm
+
+
+def test_exess_exposes_module_specific_types():
+    frag_keywords = FragKeywords()
     assert frag_keywords.level == "Dimer"
-    assert exess_qmmm_module.Trajectory is exess_qmmm_module.Trajectory
-    assert (
-        exess_geo_opt_module.OptimizationKeywords
-        is exess_geo_opt_module.OptimizationKeywords
-    )
+    assert exess.FragKeywords is FragKeywords
+    assert exess.Trajectory is Trajectory
+    assert exess.OptimizationKeywords is OptimizationKeywords

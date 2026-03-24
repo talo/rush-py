@@ -5,7 +5,7 @@ import pytest
 
 from rush import Topology, exess
 from rush.client import RunOpts, RunSpec, set_opts
-from rush.exess import exess_interaction_energy
+from rush.exess import interaction_energy
 
 
 @pytest.mark.timeout(1800)
@@ -15,7 +15,7 @@ def test_exess_interaction_energy_setonix():
     topology = Topology.from_json(data_dir / "tyk2_ejm_31_t.json")
     lig_idx = 93
     frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
-    res = exess_interaction_energy(
+    run = interaction_energy(
         data_dir / "tyk2_ejm_31_t.json",
         lig_idx,
         basis="PCSeg-0",
@@ -32,10 +32,10 @@ def test_exess_interaction_energy_setonix():
             tags=["rush-py", "test", "tyk2+ejm-31", "setonix"],
         ),
         run_spec=RunSpec(target="Setonix"),
-        collect=True,
     )
-    print(res, file=sys.stderr)
-    exess.save_outputs(res)
+    result = run.collect()
+    print(result, file=sys.stderr)
+    result.save()
 
 
 if __name__ == "__main__":

@@ -2,22 +2,24 @@ from rush import TRC
 from pathlib import Path
 
 from rush.client import RunOpts, set_opts
-from rush.prepare_protein import fetch_outputs, prepare_protein
+from rush.prepare import protein as prepare
 
 
 def test_prepare_protein():
     set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
     data_dir = Path.cwd() / "tests" / "data"
-    res = prepare_protein(
+    run = prepare(
         data_dir / "3fln_raw.pdb",
         capping_style="always",
         run_opts=RunOpts(
             name="Test prepare-protein 01", tags=["rush-py", "test", "cdk2"]
         ),
-        collect=True,
     )
 
-    trc = fetch_outputs(res)
+    trcs = run.fetch()
+    assert isinstance(trcs, list)
+    assert len(trcs) >= 1
+    trc = trcs[0]
     assert isinstance(trc, TRC)
     residues = trc.residues
 

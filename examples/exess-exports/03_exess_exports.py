@@ -26,7 +26,7 @@ from scipy.interpolate import griddata
 
 from rush import exess
 from rush.client import RunOpts, RunSpec
-from rush.exess import exess_energy
+from rush.exess import energy
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
@@ -50,7 +50,7 @@ print("=" * 60)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-outputs = exess_energy(
+run = energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -61,33 +61,19 @@ outputs = exess_energy(
         name="Rush-Py Tutorial: EXESS Exports 1",
         tags=["rush-py", "tutorial", "exess"],
     ),
-    collect=True,
 )
+result = run.fetch()
 
-# Inspect the outputs
-print("Raw outputs:")
-for i, output in enumerate(outputs):
-    if "path" in output:
-        # First output: flat dict with path/format
-        print(
-            f"  [{i}] path={output['path']}, format={output.get('format', 'unknown')}"
-        )
-    elif "Json" in output:
-        # Type-discriminated JSON output
-        print(f"  [{i}] Json: path={output['Json']['path']}")
-    elif "Hdf5" in output:
-        # Type-discriminated HDF5 output
-        print(f"  [{i}] Hdf5: path={output['Hdf5']['path']}")
-    else:
-        print(f"  [{i}] Unknown output type with keys: {list(output.keys())}")
+# Inspect the result
+print(f"Calc object: {result.calc}")
+print(f"Exports object: {result.exports}")
 
 # Save outputs to disk (JSON + HDF5)
-paths = exess.save_outputs(outputs)
+paths = run.save()
 print(f"Saved files: {paths}")
 
 # Load total energy from fetched outputs
-res = exess.fetch_outputs(outputs)
-total_energy = res.calc.qmmbe.expanded_hf_energy
+total_energy = result.calc.qmmbe.expanded_hf_energy
 
 
 # ===== Example 2: Descriptor grids for density and ESP =====
@@ -103,7 +89,7 @@ GRID_MIN = [-5.5, -5.5, -3.5]
 GRID_MAX = [5.5, 5.5, 3.5]
 GRID_SPACING = [0.3, 0.3, 0.3]
 
-outputs = exess_energy(
+run = energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -122,10 +108,10 @@ outputs = exess_energy(
         name="Rush-Py Tutorial: EXESS Exports 2",
         tags=["rush-py", "tutorial", "exess", "electron density", "ESP"],
     ),
-    collect=True,
 )
+result = run.fetch()
 
-paths = exess.save_outputs(outputs)
+paths = run.save()
 print(f"Saved files: {paths}")
 print()
 print("The JSON file contains density_descriptors, esp_descriptors,")

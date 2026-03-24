@@ -3,7 +3,7 @@ Example: NN-xTB Energy and Forces
 
 This script demonstrates how to:
 1. Run an NN-xTB energy and forces calculation using Rush
-2. Fetch the parsed result with `fetch_outputs`
+2. Fetch the parsed result
 3. Inspect per-atom forces
 
 Tutorial: https://exess.qdx.co/docs/tutorials/07-nnxtb-energy.html
@@ -15,8 +15,8 @@ Prerequisites:
 
 from pathlib import Path
 
+from rush import nnxtb
 from rush.client import RunOpts
-from rush.nnxtb import fetch_outputs, nnxtb
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "1kuw_t.json"
@@ -26,18 +26,14 @@ print("=" * 60)
 print("NN-xTB Energy and Forces Calculation")
 print("=" * 60)
 
-outputs = nnxtb(
+res = nnxtb.energy(
     TOPOLOGY_FILE,
     compute_forces=True,
     run_opts=RunOpts(
         name="Tutorial: NN-xTB Energy",
         tags=["rush-py", "tutorial", "nnxtb"],
     ),
-    collect=True,
-)
-
-# ===== Parse results =====
-res = fetch_outputs(outputs)
+).fetch()
 
 # ===== Print energy =====
 print()

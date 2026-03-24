@@ -1,8 +1,37 @@
 EXESS QMMM
 ==========
 
-.. automodule:: rush.exess_qmmm
+.. automodule:: rush.exess._qmmm
+
+.. currentmodule:: rush.exess
+
+Submission
+----------
+
+.. autofunction:: qmmm
+
+Input Types
+-----------
+
+.. autoclass:: Trajectory
    :members:
-   :member-order: bysource
-   :show-inheritance:
+   :undoc-members:
+
+.. autoclass:: Restraints
+   :members:
+   :undoc-members:
+
+Result Types
+------------
+
+.. autoclass:: QMMMResult
+   :members:
+   :undoc-members:
+
+.. autoclass:: QMMMResultPaths
+   :members:
+   :undoc-members:
+
+.. autoclass:: QMMMResultRef
+   :members:
    :undoc-members:

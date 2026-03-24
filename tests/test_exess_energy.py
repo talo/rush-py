@@ -2,12 +2,12 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, collect_run, set_opts
-from rush.exess import exess_energy
+from rush.client import RunOpts, set_opts
+from rush.exess import energy
 
 
 def test_exess_energy_tutorial():
-    res = exess_energy(
+    run = energy(
         "tests/data/6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
@@ -16,9 +16,8 @@ def test_exess_energy_tutorial():
             name="Rush-Py Test EXESS Energy 00: Tutorial",
             tags=["rush-py", "test", "6a5j"],
         ),
-        collect=True,
     )
-    output = exess.fetch_outputs(res)
+    output = run.fetch()
     assert output.calc.qmmbe is not None
     assert output.calc.qmmbe.reference_fragment is None
     assert output.calc.qmmbe.expanded_hf_energy is not None
@@ -30,7 +29,7 @@ def test_exess_energy_exports():
     data_dir = Path.cwd() / "tests" / "data"
     # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
     # Using PCSeg-0 for faster test runtimes
-    id = exess_energy(
+    run = energy(
         data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
@@ -48,12 +47,11 @@ def test_exess_energy_exports():
             tags=["rush-py", "test", "6a5j"],
         ),
     )
-    res = collect_run(id)
-    print(res, file=sys.stderr)
+    result = run.collect()
+    print(result, file=sys.stderr)
 
-    # Each module has a `save_outputs` function that automatically writes the
-    # outputs as files to the workspace dir
-    exess.save_outputs(res)
+    # Each module result has .save() for downloading outputs to the workspace
+    result.save()
 
 
 if __name__ == "__main__":

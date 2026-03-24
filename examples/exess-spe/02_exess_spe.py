@@ -14,9 +14,8 @@ Prerequisites:
 
 from pathlib import Path
 
-from rush import exess
 from rush.client import RunOpts
-from rush.exess import exess_energy
+from rush.exess import Result, ResultPaths, energy
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "water_topology.json"
@@ -33,7 +32,7 @@ print("Single Point Energy Calculation: Water (H₂O)")
 print(f"Method: {METHOD}/{BASIS}")
 print("=" * 60)
 
-outputs = exess_energy(
+run = energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -41,14 +40,15 @@ outputs = exess_energy(
         name="Rush-Py Tutorial: Single Point Energy",
         tags=["rush-py", "tutorial", "exess", "spe"],
     ),
-    collect=True,
 )
 
 # Parse fetched outputs in memory
-res = exess.fetch_outputs(outputs)
+res: Result = run.fetch()
 
 # Access total energy from qmmbe object
 total_energy = res.calc.qmmbe.expanded_hf_energy
+
+paths: ResultPaths = run.save()
 
 # ===== Print results =====
 print()

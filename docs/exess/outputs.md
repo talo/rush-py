@@ -1,6 +1,6 @@
 # Outputs
 
-EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, outputs are returned as object store paths; use `exess.fetch_outputs` for in-memory objects or `exess.save_outputs` to download them locally.
+EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, module calls return a `RushRun` handle; use `run.fetch()` for in-memory objects or `run.save()` to download them locally.
 
 ## Rush output objects
 
@@ -18,7 +18,7 @@ For EXESS energy calculations, the first output is the JSON result. If any expor
 
 In the rush-py tutorial, the `size` field is currently informational only (often 0) but is intended to carry the output size in bytes in future revisions.
 
-In rush-py, `exess.fetch_outputs` converts the main EXESS JSON output into Python dataclasses in memory. `exess.save_outputs` downloads the raw output objects to the local workspace and returns an `ExessSavedResult` with `calc` and optional `exports` path fields. For export-heavy runs, the second output is stored as a compressed archive in the object store; `save_outputs` decompresses it and extracts the HDF5 file automatically.
+In rush-py, `run.fetch()` converts the main EXESS JSON output into Python dataclasses in memory. `run.save()` downloads the raw output objects to the local workspace and returns an `exess.ResultPaths` object with `calc` and optional `exports` path fields. For export-heavy runs, the second output is stored as a compressed archive in the object store; `save()` decompresses it and extracts the HDF5 file automatically.
 
 If no exports are present, `exports` is `None`. If `convert_hdf5_to_json=True` was set on the EXESS run, the exported saved path points to a JSON file instead of HDF5.
 
@@ -285,10 +285,9 @@ Example (regular grid with three points):
 
 ```python
 from rush import exess
-from rush.exess import exess_energy
 from rush.client import RunOpts, RunSpec
 
-outputs = exess_energy(
+run = exess.energy(
     "input_topology.json",
     frag_keywords=None,
     export_keywords=exess.ExportKeywords(
@@ -305,11 +304,10 @@ outputs = exess_energy(
         name="Rush-Py Tutorial: EXESS Exports 2",
         tags=["rush-py", "test", "1kuw", "electron density", "ESP"],
     ),
-    collect=True,
 )
 ```
 
-When `convert_hdf5_to_json=True` is set on the EXESS run, `save_outputs` saves the exported data as JSON instead of HDF5. Example JSON structure:
+When `convert_hdf5_to_json=True` is set on the EXESS run, `run.save()` saves the exported data as JSON instead of HDF5. Example JSON structure:
 
 ```json
 {

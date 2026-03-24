@@ -12,13 +12,10 @@ Prerequisites:
     - Input file: tyk2_ejm_31_t.json (provided in data/)
 """
 
-import json
 from pathlib import Path
 
-from rush import exess
+from rush import exess, prepare
 from rush.client import RunOpts
-from rush.exess import exess_interaction_energy
-from rush.prepare_complex import fetch_outputs, prepare_complex
 
 # ===== Example 1: Fragment-based interaction energy =====
 print("=" * 60)
@@ -33,7 +30,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-outputs = exess_interaction_energy(
+run = exess.interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
     93,  # This is the index of the fragment that contains the ligand
     method="RestrictedHF",
@@ -48,12 +45,11 @@ outputs = exess_interaction_energy(
     run_opts=RunOpts(
         name="Tutorial: Interaction Energy Basic",
     ),
-    collect=True,
 )
 
 # Extract and display results
-res = exess.fetch_outputs(outputs)
-print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")
+result = run.fetch()
+print(f"Interaction energy: {result.calc.qmmbe.expanded_hf_energy}")
 
 
 # ===== Example 2: End-to-end from PDB =====
@@ -64,14 +60,13 @@ print("=" * 60)
 
 
 # Step 1: Prepare the system
-outputs = prepare_complex(
+trc_ref = prepare.protein_ligand(
     DATA_DIR / "1hsg.pdb",
     ligand_names=["MK1", "HOH"],
     debump=None,
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
-    collect=True,
-)
-trc = fetch_outputs(outputs)
+).collect()[0]
+trc = trc_ref.fetch()
 
 # Print the charged amino acids
 print("Charged amino acids:")
@@ -88,17 +83,14 @@ for i, (res_name, formal_charge) in enumerate(
 lig_idx = trc.residues.seqs.index("MK1")
 frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
 
-# Step 3: Write topology and run interaction energy
-topology_path = OUTPUT_DIR / "1hsg_t.json"
-with open(topology_path, "w", encoding="utf-8") as f:
-    f.write(json.dumps(trc.topology.to_json(), indent=2))
+# Step 3: Run interaction energy
 
 # ⚠️ TUTORIAL ONLY: STO-3G is a minimal basis set used here for speed/demonstration.
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-outputs = exess_interaction_energy(
-    topology_path,
+run = exess.interaction_energy(
+    trc_ref,
     lig_idx,
     method="RestrictedHF",
     basis="STO-3G",
@@ -107,9 +99,8 @@ outputs = exess_interaction_energy(
         included_fragments=frag_idcs,
     ),
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - EXESS"),
-    collect=True,
 )
 
 # Extract and display results
-res = exess.fetch_outputs(outputs)
+res = run.fetch()
 print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")

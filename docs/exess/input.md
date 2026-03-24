@@ -117,9 +117,7 @@ Example with inline geometry and symbols:
       .. code-block:: python
          :caption: run.py
 
-         from pathlib import Path
-
-         from rush.exess import exess_energy
+         from rush import exess
          from rush.mol import Element, Topology
 
          topology = Topology(
@@ -131,9 +129,7 @@ Example with inline geometry and symbols:
              ],
          )
 
-         Path("molecule_t.json").write_text(topology.to_json())
-
-         exess_energy(topology_path="molecule_t.json")
+         exess.energy(topology)
 ```
 
 Example using an XYZ file:
@@ -162,7 +158,7 @@ Example using an XYZ file:
 
          from pathlib import Path
 
-         from rush.exess import exess_energy
+         from rush import exess
          from rush.mol import Element, Topology
 
          lines = Path("molecule.xyz").read_text().splitlines()
@@ -176,9 +172,8 @@ Example using an XYZ file:
              geometry.extend([float(x), float(y), float(z)])
 
          topology = Topology(symbols=symbols, geometry=geometry)
-         Path("molecule_t.json").write_text(topology.to_json())
 
-         exess_energy(topology_path="molecule_t.json")
+         exess.energy(topology)
 ```
 
 ### residues
@@ -232,9 +227,7 @@ Example:
       .. code-block:: python
          :caption: run.py
 
-         from pathlib import Path
-
-         from rush.exess_qmmm import exess_qmmm
+         from rush import exess
          from rush.mol import Element, Fragment, Residue, Residues, Topology
 
          topology = Topology(
@@ -257,12 +250,8 @@ Example:
              insertion_codes=["", ""],
          )
 
-         Path("molecule_t.json").write_text(topology.to_json())
-         Path("molecule_r.json").write_text(residues.to_json())
-
-         exess_qmmm(
-             topology_path="molecule_t.json",
-             residues_path="molecule_r.json",
+         exess.qmmm(
+             (topology, residues),
              n_timesteps=100,
              qm_fragments=[0],
              mm_fragments=[1],
@@ -367,10 +356,10 @@ The `driver` field selects the calculation type:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import exess_energy
+         from rush import exess
 
-         exess_energy(
-             topology_path="molecule_t.json",
+         exess.energy(
+             "molecule_t.json",
              method="RestrictedRIMP2",
              basis="cc-pVDZ",
              aux_basis="cc-pVDZ-RIFIT",
@@ -412,7 +401,7 @@ The `driver` field selects the calculation type:
       HF methods support multiple integral build types, while MP2 is only implemented
       via RI (resolution-of-identity).
 
-      When running through rush-py, ``method`` defaults to ``RestrictedHF`` if omitted.
+      When running through rush-py, ``method`` defaults to ``RestrictedKSDFT`` if omitted.
 
    .. exess-param:: basis
       :type: string
@@ -476,11 +465,11 @@ The `driver` field selects the calculation type:
       .. code-block:: python
          :caption: run.py
 
-         from rush.exess import System, exess_energy
+         from rush import exess
 
-         exess_energy(
-             topology_path="molecule_t.json",
-             system=System(
+         exess.energy(
+             "molecule_t.json",
+             system=exess.System(
                  max_gpu_memory_mb=24000,
                  teams_per_node=4,
                  gpus_per_team=1,
@@ -558,9 +547,9 @@ See the Rush guides for TRC objects and conversions: [Objects and TRC Files](../
 
 Default values set by the rush-py entry points:
 
-- `exess.exess` / `exess_energy` / `exess_interaction_energy`: `driver="Energy"` (for `exess.exess`), `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`).
-- `exess_qmmm`: `method="RestrictedHF"`, `basis="STO-3G"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`), `dt_ps=0.002`, `temperature_kelvin=290.0`, `pressure_atm=None`, gradient method `Analytical` with default step size.
-- `exess_geo_opt`: `method="RestrictedHF"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`), `max_iters` required.
+- `exess.calculate` / `exess.energy` / `exess.interaction_energy`: `driver="Energy"` (for `exess.calculate`), `method="RestrictedKSDFT"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`).
+- `exess.qmmm`: `method="RestrictedKSDFT"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`), `dt_ps=0.002`, `temperature_kelvin=290.0`, `pressure_atm=None`, gradient method `Analytical` with default step size.
+- `exess.optimization`: `method="RestrictedKSDFT"`, `basis="cc-pVDZ"`, `aux_basis=None`, `standard_orientation` unset (EXESS default `FullSystem`), `force_cartesian_basis_sets` unset (EXESS default `true`), `max_iters` required.
 
 Keyword defaults for rush-py are documented in the keyword reference page.
 

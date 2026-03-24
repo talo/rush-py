@@ -1,19 +1,11 @@
-#!/usr/bin/env python3
 """
-EXESS QM/MM module helpers for the Rush Python client.
-
-Run QM/MM simulations with EXESS.
+EXESS QM/MM simulations for the Rush Python client.
 
 Quick Links
 -----------
 
-- :func:`rush.exess_qmmm.exess_qmmm`
-- :func:`rush.exess_qmmm.fetch_outputs`
-- :func:`rush.exess_qmmm.save_outputs`
-- :class:`rush.exess_qmmm.Trajectory`
-- :class:`rush.exess_qmmm.Restraints`
-- :mod:`rush.exess`
-- :mod:`rush.exess_geo_opt`
+- :func:`rush.exess.qmmm`
+- :class:`rush.exess.QMMMResult`
 """
 
 import json
@@ -21,22 +13,24 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal, overload
+from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
-from .client import (
-    RunID,
+from rush import TRC, Residues, Topology, TRCRef
+from rush._trc import to_residues_vobj, to_topology_vobj
+
+from .._utils import optional_str
+from ..client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
-    collect_run,
     fetch_object,
-    save_object,
-    upload_object,
 )
-from .exess import (
+from ..run import RushRun
+from ._energy import (
     AuxBasisT,
     BasisT,
     FragKeywords,
@@ -47,7 +41,10 @@ from .exess import (
     System,
     _KSDFTDefault,
 )
-from .utils import optional_str
+
+# ---------------------------------------------------------------------------
+# Input types
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -124,95 +121,59 @@ class Restraints:
         )
 
 
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
+
+
 @dataclass
-class ExessQMMMResult:
+class QMMMResult:
     geometries: list[list[float]]
 
 
-@overload
-def exess_qmmm(
-    topology_path: Path | str,
-    n_timesteps: int,
-    residues_path: Path | str | None = None,
-    dt_ps: float = 2e-3,
-    temperature_kelvin: float = 290.0,
-    pressure_atm: float | None = None,
-    restraints: Restraints | None = None,
-    trajectory: Trajectory = Trajectory(),
-    gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[False] = False,
-) -> RunID: ...
-@overload
-def exess_qmmm(
-    topology_path: Path | str,
-    n_timesteps: int,
-    residues_path: Path | str | None = None,
-    dt_ps: float = 2e-3,
-    temperature_kelvin: float = 290.0,
-    pressure_atm: float | None = None,
-    restraints: Restraints | None = None,
-    trajectory: Trajectory = Trajectory(),
-    gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: Literal[True] = True,
-) -> dict[str, Any]: ...
-@overload
-def exess_qmmm(
-    topology_path: Path | str,
-    n_timesteps: int,
-    residues_path: Path | str | None = None,
-    dt_ps: float = 2e-3,
-    temperature_kelvin: float = 290.0,
-    pressure_atm: float | None = None,
-    restraints: Restraints | None = None,
-    trajectory: Trajectory = Trajectory(),
-    gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> dict[str, Any] | RunID: ...
+@dataclass(frozen=True)
+class QMMMResultPaths:
+    output: Path
 
 
-def exess_qmmm(
-    topology_path: Path | str,
+@dataclass(frozen=True)
+class QMMMResultRef:
+    """Lightweight reference to QM/MM outputs in the Rush object store."""
+
+    output: RushObject
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "QMMMResultRef":
+        """Parse raw ``collect_run`` output into a ``QMMMResultRef``."""
+        if not isinstance(res, dict) or not isinstance(res.get("path"), str):
+            raise ValueError(
+                f"qmmm output received unexpected format: {type(res).__name__}"
+            )
+        return cls(output=RushObject.from_dict(res))
+
+    def fetch(self) -> QMMMResult:
+        """Download QM/MM outputs and parse into Python objects."""
+        return QMMMResult(**json.loads(fetch_object(self.output.path)))
+
+    def save(self) -> QMMMResultPaths:
+        """Download QM/MM outputs and save to the workspace."""
+        return QMMMResultPaths(output=self.output.save())
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def qmmm(
+    mol: TRC
+    | TRCRef
+    | tuple[Path | str | RushObject | Topology, Path | str | RushObject | Residues]
+    | Path
+    | str
+    | RushObject
+    | Topology,
     n_timesteps: int,
-    residues_path: Path | str | None = None,
     dt_ps: float = 2e-3,
     temperature_kelvin: float = 290.0,
     pressure_atm: float | None = None,
@@ -232,24 +193,26 @@ def exess_qmmm(
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-) -> dict[str, Any] | RunID:
+) -> RushRun[QMMMResultRef]:
     """
-    Run a QMMM simulation of the system in the QDX topology and residues files at `topology_path` and `residues_path`.
+    Submit a QM/MM simulation for the topology at *topology_path*.
 
-    Specifying the number of timesteps is mandatory.
-    If pressure is None, an NVT ensemble is used; if pressure is specified, an NPT ensemble is used.
-    Fragments can be specified as QM or MM fragments via the respective parameters.
-    If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
-    If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed trajectory, or ``.save()`` to write it to disk.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
     # Upload inputs
-    topology_vobj = upload_object(topology_path)
     residues_vobj = None
-    if residues_path is not None:
-        residues_vobj = upload_object(residues_path)
+    match mol:
+        case TRC() | TRCRef():
+            topology_vobj = to_topology_vobj(mol.topology)
+            residues_vobj = to_residues_vobj(mol.residues)
+        case (t, r):
+            topology_vobj = to_topology_vobj(t)
+            residues_vobj = to_residues_vobj(r)
+        case _:
+            topology_vobj = to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let
@@ -351,63 +314,13 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if not collect:
-            return run_id
-
-        out = collect_run(run_id)
-        assert isinstance(out, dict)
-        return out
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            QMMMResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
-        raise e
-
-
-def fetch_outputs(res: dict[str, Any]) -> ExessQMMMResult:
-    """
-    Fetch EXESS QM/MM outputs into memory.
-
-    Args:
-        res: Collected output from exess_qmmm().
-
-    Returns:
-        Parsed QM/MM trajectory data.
-    """
-    if not isinstance(res, dict) or not isinstance(res.get("path"), str):
-        raise ValueError(
-            f"Error: exess_qmmm output helper received unexpected format: {type(res)}"
-        )
-
-    return ExessQMMMResult(**json.loads(fetch_object(res["path"])))
-
-
-def save_outputs(res: dict[str, Any]) -> Path:
-    """
-    Save EXESS QM/MM outputs into the workspace.
-
-    Args:
-        res: Collected output from exess_qmmm().
-
-    Returns:
-        Local path to the saved QM/MM output file.
-    """
-    if not isinstance(res, dict) or not isinstance(res.get("path"), str):
-        raise ValueError(
-            f"Error: exess_qmmm output helper received unexpected format: {type(res)}"
-        )
-
-    return save_object(res["path"])
-
-
-# TODO:
-#  - trace for failure
-#  - stdout, stderr
-#  - other module instance info?
-#  - qmmm minimisation config:
-#    minimisation = Some (exess_rex::ClassicalMinimisation {
-#      err_tol_kj_per_mol_nm = $err_tol_kj_per_mol_nm,
-#      max_iterations = $max_iterations,
-#    }),
+        raise

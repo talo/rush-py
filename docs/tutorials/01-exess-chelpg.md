@@ -31,7 +31,6 @@ from pathlib import Path
 import json
 
 from rush import exess
-from rush.exess import exess_energy
 from rush import from_pdb
 
 # 1. Load PDB file
@@ -40,27 +39,24 @@ trc = from_pdb(pdb_content)
 
 # 2. Convert to topology JSON
 topology_json = trc.topology.to_json()
-topology_json["schema_version"] = "0.2.0"
 topology_path = Path("aspirin_topology.json")
 topology_path.write_text(json.dumps(topology_json, indent=2))
 
 # 3. Run energy calculation with CHELPG export (returns charges in ~30 seconds)
-outputs = exess_energy(
+result = exess.energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
     convert_hdf5_to_json=True,
-    collect=True,
-)
+).fetch()
 
 # 4. Extract the charges
-res = exess.fetch_outputs(outputs)
-charges = res.exports["chelpg_charges"]
+charges = result.exports["chelpg_charges"]
 ```
 
 That's it! `charges` is a list of CHELPG partial charges, one per atom.
 
-Setting `convert_hdf5_to_json=True` and using `fetch_outputs` gives us the quickest access to inspecting the exported data in our python code.
+Setting `convert_hdf5_to_json=True` and using `run.fetch()` gives us the quickest access to inspecting the exported data in Python.
 
 ### Get the PDB file
 
@@ -99,7 +95,7 @@ For drug discovery, CHELPG charges tell you:
 
 ## Notes
 
-- **Default parameters** — Uses RestrictedHF method with cc-pVDZ basis set
+- **Default parameters** — Uses RestrictedKSDFT with a cc-pVDZ basis set unless you override them
 
 ---
 

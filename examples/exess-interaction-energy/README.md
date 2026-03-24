@@ -15,7 +15,7 @@ python 05_exess_interaction_energy.py
 
 1. Computing interaction energy between a ligand fragment and its environment
 2. Using `FragKeywords` to control fragmentation (Trimer level, cutoffs)
-3. Preparing a complex from PDB using `prepare_complex`
+3. Preparing a complex from PDB using `prepare.protein_ligand`
 4. Finding nearby fragments with `get_fragments_near_fragment`
 
 ## Input Data

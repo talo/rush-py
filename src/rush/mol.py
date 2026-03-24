@@ -394,7 +394,7 @@ class Topology:
 
         return topology
 
-    def to_json(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         topology_dict: dict[str, object] = {
             "schema_version": "0.2.0",
             "symbols": [str(symbol) for symbol in self.symbols],
@@ -875,7 +875,7 @@ class Residues:
 
         return residues
 
-    def to_json(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         residues_dict: dict[str, object] = {
             "residues": [residue.atoms for residue in self.residues],
             "seqs": self.seqs,
@@ -1073,7 +1073,7 @@ class Chains:
 
         return chains
 
-    def to_json(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         chains_dict: dict[str, object] = {
             "chains": [chain.residues for chain in self.chains],
         }

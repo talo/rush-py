@@ -99,7 +99,7 @@ def _format_signature_without_overloads(self, **kwargs):
     return _original_format_signature(self, **kwargs)
 
 
-FunctionDocumenter.format_signature = _format_signature_without_overloads
+FunctionDocumenter.format_signature = _format_signature_without_overloads  # ty:ignore[invalid-assignment]
 
 
 # Skip individual enum members to prevent documentation clutter

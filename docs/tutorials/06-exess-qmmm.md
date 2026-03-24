@@ -21,17 +21,16 @@ Static structures tell you *where* atoms are. Dynamics tells you *how they move*
 ## Quick Start: QM/MM on a Protein–Ligand System
 
 ```python
-from rush.exess_qmmm import exess_qmmm
-from rush.client import RunOpts, save_object
+from rush import exess
+from rush.client import RunOpts
 
-outputs = exess_qmmm(
+result = exess.qmmm(
     topology_path="6a5j_t.json",  # Topology (atoms, coordinates, fragments)
     residues_path="6a5j_r.json",  # Residues (residue names and assignments)
     n_timesteps=500,              # Number of MD timesteps
     qm_fragments=[6],  # Treat fragment 6 with quantum mechanics — everything else is MM
     run_opts=RunOpts(name="Tutorial: QM/MM"),
-    collect=True,
-)
+).fetch()
 ```
 
 This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand or key residue) is computed with Hartree-Fock QM, and the remaining protein + solvent fragments use classical MM (OpenMM).
@@ -51,9 +50,8 @@ To understand exactly what inputs QM/MM needs, let's build a system manually —
 
 ```python
 import json
-from rush.exess_qmmm import Trajectory, exess_qmmm
+from rush import exess, Topology
 from rush.client import RunOpts
-from rush import Topology
 from rush.mol import Element, Fragment, Residue, Residues
 
 # Define two water molecules
@@ -73,6 +71,8 @@ topology = Topology(
 residues = Residues(
     residues=[Residue([0, 1, 2]), Residue([3, 4, 5])],
     seqs=["HOH", "HOH"],
+    seq_ns=[1, 2],
+    insertion_codes=["", ""],
 )
 
 # Write input files
@@ -82,15 +82,15 @@ with open("molecule_r.json", "w") as f:
     json.dump(residues.to_json(), f)
 
 # Run all-QM dynamics
-outputs = exess_qmmm(
+run = exess.qmmm(
     topology_path="molecule_t.json",
     residues_path="molecule_r.json",
     n_timesteps=100,
-    trajectory=Trajectory(include_waters=True),
+    trajectory=exess.Trajectory(include_waters=True),
     mm_fragments=[],   # No MM → everything is QM
     run_opts=RunOpts(name="Tutorial: QM/MM Water Dimer"),
-    collect=True,
 )
+result = run.fetch()
 ```
 
 :::{admonition} Fragment assignment logic
@@ -108,11 +108,9 @@ The output is a JSON object containing `geometries` — a list of coordinate arr
 from itertools import batched
 from pathlib import Path
 from rush import Topology
-from rush.exess_qmmm import fetch_outputs, save_outputs
 
 # Fetch parsed results into memory
-res = fetch_outputs(outputs)
-geometries = res.geometries
+geometries = result.geometries
 
 print(f"Trajectory has {len(geometries)} frames")
 
@@ -132,7 +130,7 @@ for x, y, z in batched(topology.geometry, 3):
 If you want the raw JSON trajectory file on disk, use:
 
 ```python
-paths = save_outputs(outputs)
+paths = run.save()
 print(paths)
 ```
 

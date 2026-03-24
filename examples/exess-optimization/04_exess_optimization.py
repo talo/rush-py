@@ -20,8 +20,8 @@ Output files (saved to optimization-outputs/):
 import json
 from pathlib import Path
 
+from rush import exess
 from rush.client import RunOpts
-from rush.exess_geo_opt import exess_geo_opt, fetch_outputs, save_outputs
 
 DATA_DIR = Path(__file__).parent / "data"
 INPUT_FILE = DATA_DIR / "ethene_twisted_t.json"
@@ -41,14 +41,13 @@ print("=" * 60)
 METHOD = "RestrictedHF"
 BASIS = "STO-3G"
 
-outputs = exess_geo_opt(
+run = exess.optimization(
     INPUT_FILE,
     100,  # Number of optimization iterations
     method=METHOD,
     basis=BASIS,
     standard_orientation="None",
     run_opts=RunOpts(name="Tutorial: Optimization using QM"),
-    collect=True,
 )
 
 
@@ -58,10 +57,10 @@ print("=" * 60)
 print("Working with the optimization output")
 print("=" * 60)
 
-paths = save_outputs(outputs)
+paths = run.save()
 print(f"Saved files: {paths}")
 
-res = fetch_outputs(outputs)
+res = run.fetch()
 
 out_traj = res.trajectory
 out_info = res.steps

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TypeGuard
 
 from ..mol import TRC
-from .json import from_json, to_json
+from .json import from_json, to_dict
 from .mmcif import from_mmcif
 from .pdb import from_pdb, to_pdb
 from .sdf import from_sdf
@@ -73,7 +73,7 @@ def save_structure(
 
     if format.lower() == "json":
         with path.open("w") as f:
-            std_json.dump(to_json(trcs), f, indent=2)
+            std_json.dump(to_dict(trcs), f, indent=2)
         return
     elif format.lower() == "pdb":
         if isinstance(trcs, TRC):
@@ -197,14 +197,14 @@ def merge_trcs(
     if output_file is not None:
         output_path = Path(output_file)
         with output_path.open("w") as f:
-            std_json.dump(to_json([merged]), f, indent=2)
+            std_json.dump(to_dict([merged]), f, indent=2)
 
     return merged
 
 
 __all__ = [
     "from_json",
-    "to_json",
+    "to_dict",
     "from_mmcif",
     "from_pdb",
     "to_pdb",

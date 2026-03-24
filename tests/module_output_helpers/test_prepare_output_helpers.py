@@ -3,109 +3,110 @@ from pathlib import Path
 
 import pytest
 
-from rush import TRC, TRCSavedResult, from_json
-from rush.prepare_complex import fetch_outputs as fetch_prepare_complex_outputs
-from rush.prepare_complex import save_outputs as save_prepare_complex_outputs
-from rush.prepare_protein import fetch_outputs as fetch_prepare_protein_outputs
-from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
+from rush import TRC, TRCPaths
+from rush.prepare import ResultRef
 
 
 def _sample_trc_dict() -> dict:
     data_path = Path(__file__).parent.parent / "data" / "1hsg_MK1_trc.json"
     with data_path.open() as f:
-        data = json.load(f)
-    return data[0] if isinstance(data, list) else data
+        return json.load(f)[0]
 
 
-def test_prepare_protein_fetch_outputs(monkeypatch):
+def test_prepare_protein_result_ref_fetch(monkeypatch):
     trc_dict = _sample_trc_dict()
 
     monkeypatch.setattr(
-        "rush.prepare_protein.fetch_object",
-        lambda path: json.dumps(
-            {
-                "top": trc_dict["topology"],
-                "res": trc_dict["residues"],
-                "chains": trc_dict["chains"],
-            }[path]
-        ).encode(),
+        "rush._trc.fetch_object",
+        lambda path: json.dumps(trc_dict.get(path, {})).encode(),
     )
 
-    result = fetch_prepare_protein_outputs(
-        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
+    ref = ResultRef.from_raw_output(
+        [
+            [
+                {"path": "topology", "size": 0, "format": "Json"},
+                {"path": "residues", "size": 0, "format": "Json"},
+                {"path": "chains", "size": 0, "format": "Json"},
+            ]
+        ]
     )
+    result = ref.fetch()
 
-    assert isinstance(result, TRC)
-    assert result.topology.symbols
-    assert result.residues.residues
-    assert result.chains.chains
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert isinstance(result[0], TRC)
+    assert result[0].topology.symbols
 
 
-def test_prepare_protein_save_outputs(monkeypatch):
+def test_prepare_protein_result_ref_save(monkeypatch):
     monkeypatch.setattr(
-        "rush.prepare_protein.save_object",
-        lambda path: Path(f"/tmp/{path}.json"),
+        "rush.client.RushObject.save",
+        lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
 
-    result = save_prepare_protein_outputs(
-        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
+    ref = ResultRef.from_raw_output(
+        [
+            [
+                {"path": "top", "size": 0, "format": "Json"},
+                {"path": "res", "size": 0, "format": "Json"},
+                {"path": "chains", "size": 0, "format": "Json"},
+            ]
+        ]
     )
+    result = ref.save()
 
-    assert result == TRCSavedResult(
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0] == TRCPaths(
         topology=Path("/tmp/top.json"),
         residues=Path("/tmp/res.json"),
         chains=Path("/tmp/chains.json"),
     )
 
 
-def test_prepare_complex_fetch_outputs(monkeypatch):
+def test_prepare_protein_multi_model(monkeypatch):
+    """Multi-model PDB returns multiple TRCs."""
     trc_dict = _sample_trc_dict()
 
     monkeypatch.setattr(
-        "rush.prepare_complex.fetch_trc_output",
-        lambda res: from_json(trc_dict),
+        "rush._trc.fetch_object",
+        lambda path: json.dumps(trc_dict.get(path.split("_")[0], {})).encode(),
     )
 
-    result = fetch_prepare_complex_outputs(
-        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
+    ref = ResultRef.from_raw_output(
+        [
+            [
+                {"path": "topology_1", "size": 0, "format": "Json"},
+                {"path": "residues_1", "size": 0, "format": "Json"},
+                {"path": "chains_1", "size": 0, "format": "Json"},
+            ],
+            [
+                {"path": "topology_2", "size": 0, "format": "Json"},
+                {"path": "residues_2", "size": 0, "format": "Json"},
+                {"path": "chains_2", "size": 0, "format": "Json"},
+            ],
+        ]
     )
+    result = ref.fetch()
 
-    assert isinstance(result, TRC)
-    assert result.topology.symbols
-
-
-def test_prepare_complex_save_outputs(monkeypatch):
-    monkeypatch.setattr(
-        "rush.prepare_complex.save_trc_output",
-        lambda res: TRCSavedResult(
-            topology=Path("/tmp/top.json"),
-            residues=Path("/tmp/res.json"),
-            chains=Path("/tmp/chains.json"),
-        ),
-    )
-
-    result = save_prepare_complex_outputs(
-        ({"path": "top"}, {"path": "res"}, {"path": "chains"})
-    )
-
-    assert result == TRCSavedResult(
-        topology=Path("/tmp/top.json"),
-        residues=Path("/tmp/res.json"),
-        chains=Path("/tmp/chains.json"),
-    )
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert all(isinstance(trc, TRC) for trc in result)
 
 
-def test_prepare_output_helpers_reject_invalid_shapes():
-    bad_outputs = ({"path": "top"}, {"path": "res"})
+def test_prepare_result_ref_from_raw_output_rejects_invalid():
+    with pytest.raises(ValueError, match="should return a non-empty list"):
+        ResultRef.from_raw_output("bad")
 
-    with pytest.raises(ValueError, match="unexpected format"):
-        fetch_prepare_protein_outputs(bad_outputs)
+    with pytest.raises(ValueError, match="expected a list of 3 elements"):
+        ResultRef.from_raw_output(
+            [
+                [
+                    {"path": "a", "size": 0, "format": "Json"},
+                    {"path": "b", "size": 0, "format": "Json"},
+                ]
+            ]
+        )
 
-    with pytest.raises(ValueError, match="unexpected format"):
-        save_prepare_protein_outputs(bad_outputs)
-
-    with pytest.raises(ValueError, match="unexpected format"):
-        fetch_prepare_complex_outputs(bad_outputs)
-
-    with pytest.raises(ValueError, match="unexpected format"):
-        save_prepare_complex_outputs(bad_outputs)
+    with pytest.raises(ValueError, match="should return a non-empty list"):
+        ResultRef.from_raw_output([])
