@@ -17,7 +17,8 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
-
+from rush.exess import exess_interaction_energy
+from rush.prepare_complex import fetch_outputs, prepare_complex
 
 # ===== Example 1: Fragment-based interaction energy =====
 print("=" * 60)
@@ -32,7 +33,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-out = exess.interaction_energy(
+outputs = exess_interaction_energy(
     DATA_DIR / "tyk2_ejm_31_t.json",
     93,  # This is the index of the fragment that contains the ligand
     method="RestrictedHF",
@@ -51,14 +52,8 @@ out = exess.interaction_energy(
 )
 
 # Extract and display results
-files = exess.save_energy_outputs(out)
-json_file = next((f for f in files if str(f).endswith(".json")), None)
-if json_file:
-    with open(json_file) as f:
-        out_data = json.load(f)
-    print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
-else:
-    print("Error: No JSON output file found")
+res = exess.fetch_outputs(outputs)
+print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")
 
 
 # ===== Example 2: End-to-end from PDB =====
@@ -67,21 +62,24 @@ print("=" * 60)
 print("Example 2: End-to-end interaction energy from PDB")
 print("=" * 60)
 
-from rush.prepare_complex import prepare_complex
 
 # Step 1: Prepare the system
-trc = prepare_complex(
+outputs = prepare_complex(
     DATA_DIR / "1hsg.pdb",
     ligand_names=["MK1", "HOH"],
     debump=None,
     run_opts=RunOpts(name="Tutorial: Interaction Energy E2E - Prepare Complex"),
     collect=True,
 )
+trc = fetch_outputs(outputs)
 
 # Print the charged amino acids
 print("Charged amino acids:")
 for i, (res_name, formal_charge) in enumerate(
-    zip(trc.residues.seqs, trc.topology.fragment_formal_charges)
+    zip(
+        trc.residues.seqs,
+        trc.topology.fragment_formal_charges or [0 for _ in trc.residues.seqs],
+    )
 ):
     if int(formal_charge) != 0:
         print(f"{i:>4} {res_name}: {int(formal_charge):+}")
@@ -99,7 +97,7 @@ with open(topology_path, "w", encoding="utf-8") as f:
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-out = exess.interaction_energy(
+outputs = exess_interaction_energy(
     topology_path,
     lig_idx,
     method="RestrictedHF",
@@ -113,11 +111,5 @@ out = exess.interaction_energy(
 )
 
 # Extract and display results
-files = exess.save_energy_outputs(out)
-json_file = next((f for f in files if str(f).endswith(".json")), None)
-if json_file:
-    with open(json_file, encoding="utf-8") as f:
-        out_data = json.load(f)
-    print(f"Interaction energy: {out_data['qmmbe']['expanded_hf_energy']}")
-else:
-    print("Error: No JSON output file found")
+res = exess.fetch_outputs(outputs)
+print(f"Interaction energy: {res.calc.qmmbe.expanded_hf_energy}")

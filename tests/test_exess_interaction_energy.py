@@ -3,6 +3,8 @@ from pathlib import Path
 
 from rush import Topology, exess
 from rush.client import RunOpts, set_opts
+from rush.exess import exess_interaction_energy
+from rush.mol import FragmentRef
 
 
 def test_exess_interaction_energy():
@@ -11,7 +13,7 @@ def test_exess_interaction_energy():
     topology = Topology.from_json(data_dir / "tyk2_ejm_31_t.json")
     lig_idx = 93
     frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
-    res = exess.interaction_energy(
+    res = exess_interaction_energy(
         data_dir / "tyk2_ejm_31_t.json",
         lig_idx,
         basis="PCSeg-0",
@@ -30,7 +32,10 @@ def test_exess_interaction_energy():
         collect=True,
     )
     print(res, file=sys.stderr)
-    exess.save_energy_outputs(res)
+    fetched = exess.fetch_outputs(res)
+    assert fetched.calc.qmmbe is not None
+    assert fetched.calc.qmmbe.reference_fragment == FragmentRef(lig_idx)
+    assert fetched.calc.qmmbe.nmers[0][0].fragments == [FragmentRef(lig_idx)]
 
 
 if __name__ == "__main__":

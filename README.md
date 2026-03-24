@@ -43,23 +43,30 @@ RUSH_PROJECT=your-project-id-here
 from pathlib import Path
 
 from rush import exess
+from rush.exess import exess_energy, exess_interaction_energy
+from rush.exess_qmmm import exess_qmmm
 from rush.client import collect_run
 
 topology_path = Path.cwd() / "thrombin_1c_t.json"
 
 # For energy, the only mandatory argument is the Topology
-result = exess.energy(topology_path, collect=True)
-exess.save_energy_outputs(result)
+outputs = exess_energy(topology_path, collect=True)
+
+# Fetch the results for direct access
+res = exess.fetch_outputs(outputs)
+
+# Save the results
+paths = exess.save_outputs(outputs)
 ```
 
 Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current working directory). To customize the workspace location, call `rush.client.set_opts(workspace_dir=Path("..."))`.
 
 ```python
 # For interaction_energy, second argument is reference fragment
-result = exess.interaction_energy(topology_path, 1, collect=True)
+outputs = exess_interaction_energy(topology_path, 1, collect=True)
 
 # Use export keywords to obtain additional information
-result = exess.energy(
+outputs = exess_energy(
     topology_path,
     frag_keywords=None,  # MBE is not supported for CHELPG charges
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
@@ -70,7 +77,7 @@ result = exess.energy(
 md_topology_path = "./6a5j_t.json"
 md_residues_path = "./6a5j_r.json"
 # Without `collect=True`, the run takes place asynchronously, and a run ID is returned
-id = exess.qmmm(
+id = exess_qmmm(
     md_topology_path,
     md_residues_path,
     n_timesteps=500,
@@ -78,12 +85,12 @@ id = exess.qmmm(
     free_atoms=[0],
 )
 # The output for qmmm is a geometries json; can swap into a Topology's geometry field
-result = collect_run(id)
+outputs = collect_run(id)
 
 # Get the full list of parameters and default arguments for a function
-help(exess.energy)
-help(exess.interaction_energy)
-help(exess.qmmm)
+help(exess_energy)
+help(exess_interaction_energy)
+help(exess_qmmm)
 ```
 
 See the [docs](https://talo.github.io/rush-py) for more information!

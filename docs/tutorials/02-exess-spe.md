@@ -32,10 +32,11 @@ Because there's no geometry optimization loop, SPE is fast — you get your answ
 
 ```python
 from rush import exess
+from rush.exess import exess_energy
 from rush.client import RunOpts
 
 # Run a single-point energy calculation on water
-res = exess.energy(
+outputs = exess_energy(
     "water_topology.json",
     method="RestrictedHF",
     basis="STO-3G",  # Minimal basis set for tutorials only – use cc-pVDZ or larger for production
@@ -46,11 +47,13 @@ res = exess.energy(
     collect=True,
 )
 
-# Save outputs and extract energy
-files = exess.save_energy_outputs(res)
+# Parse the result in memory
+res = exess.fetch_outputs(outputs)
+total_energy = res.calc.qmmbe.expanded_hf_energy
 ```
 
-That's it — `res` contains the energy result, and `files` has the saved JSON output on disk.
+That's it — `res` contains the single-point result in memory, including the
+total energy and other calculated properties.
 
 > ⚠️ **Tutorial Basis Set Warning**
 >
@@ -62,6 +65,13 @@ That's it — `res` contains the energy result, and `files` has the saved JSON o
 ### Input File
 
 The input is a TRC (topology representation) JSON file with atomic coordinates and element symbols. See {doc}`../exess/topologies` for the full TRC format specification. You can also convert from PDB using `rush.convert.pdb.from_pdb()` (see {doc}`01-exess-chelpg` for an example).
+
+If you want to save the output as a JSON file on disk instead of working in memory, use:
+
+```python
+paths = exess.save_outputs(outputs)
+print(paths.calc)
+```
 
 ---
 
@@ -79,7 +89,7 @@ The JSON output contains the total energy in Hartrees (atomic units). Common con
 
 ## Notes
 
-- **Default parameters** — `exess.energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py#L190){target="_blank"} in `exess.py` for the complete list of defaults.
+- **Default parameters** — `exess_energy()` uses sensible SCF defaults (convergence threshold, DIIS history, etc.). See the [`SCFKeywords` class](https://github.com/talo/rush-py/blob/main/src/rush/exess.py){target="_blank"} in `exess.py` for the complete list of defaults.
 - **No fragmentation** — for a small molecule like water, the whole system is treated in one calculation. For larger systems, see fragmentation in {doc}`05-exess-interaction-energy`
 - **Geometry matters** — SPE gives you the energy at *exactly* the coordinates you provide. If the geometry is unrealistic, the energy will be too. Use {doc}`04-exess-optimization` first if you need a relaxed structure
 

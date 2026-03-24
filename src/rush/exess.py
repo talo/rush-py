@@ -3,42 +3,46 @@
 EXESS module helpers for the Rush Python client.
 
 EXESS supports whole-system energy calculations (fragmented or unfragmented),
-interaction energy between a fragment and the rest of the system, geometry
-optimization, simulations, and gradient/Hessian calculations. It supports
-multiple levels of theory (e.g., restricted/unrestricted HF, RI-MP2, DFT),
-flexible basis set selection, and configurable n-mer fragmentation levels.
+interaction energy between a fragment and the rest of the system, and
+gradient/Hessian calculations. It supports multiple levels of theory
+(e.g., restricted/unrestricted HF, RI-MP2, DFT), flexible basis set
+selection, and configurable n-mer fragmentation levels.
 
 Quick Links
 -----------
 
 - :func:`rush.exess.exess`
-- :func:`rush.exess.energy`
-- :func:`rush.exess.interaction_energy`
-- :func:`rush.exess.qmmm`
-- :func:`rush.exess.optimization`
+- :func:`rush.exess.exess_energy`
+- :func:`rush.exess.exess_interaction_energy`
+- :func:`rush.exess.fetch_outputs`
+- :func:`rush.exess.save_outputs`
+- :mod:`rush.exess_geo_opt`
+- :mod:`rush.exess_qmmm`
 """
 
 import enum
+import json
 import sys
 import warnings
 from dataclasses import dataclass, replace
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
     save_object,
     upload_object,
 )
-from .mol import FragmentRef
+from .mol import AtomRef, FragmentRef
 from .utils import bool_to_str, float_to_str, optional_str
 
 type MethodT = Literal[
@@ -101,6 +105,141 @@ type StandardOrientationT = Literal[
     "FullSystem",
     "PerFragment",
 ]
+
+
+type TensorLike = list[Any]
+
+
+@dataclass
+class ExessNmer:
+    fragments: list[FragmentRef]
+    density: TensorLike | None = None
+    fock: TensorLike | None = None
+    overlap: TensorLike | None = None
+    h_core: TensorLike | None = None
+    coeffs_initial: TensorLike | None = None
+    coeffs_final: TensorLike | None = None
+    molecular_orbital_energies: list[float] | None = None
+    hf_gradients: list[float] | None = None
+    mp2_gradients: list[float] | None = None
+    hf_energy: float | None = None
+    mp2_ss_correction: float | None = None
+    mp2_os_correction: float | None = None
+    ccsd_correction: float | None = None
+    s_squared_eigenvalue: float | None = None
+    delta_hf_energy: float | None = None
+    delta_mp2_ss_correction: float | None = None
+    delta_mp2_os_correction: float | None = None
+    mulliken_charges: list[float] | None = None
+    chelpg_charges: list[float] | None = None
+    fragment_distance: float | None = None
+    bond_orders: list[list[float]] | None = None
+    h_caps: list[AtomRef] | None = None
+    num_iters: int | None = None
+    num_basis_fns: int | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExessNmer":
+        return cls(
+            fragments=[FragmentRef(fragment) for fragment in data["fragments"]],
+            density=data.get("density"),
+            fock=data.get("fock"),
+            overlap=data.get("overlap"),
+            h_core=data.get("h_core"),
+            coeffs_initial=data.get("coeffs_initial"),
+            coeffs_final=data.get("coeffs_final"),
+            molecular_orbital_energies=data.get("molecular_orbital_energies"),
+            hf_gradients=data.get("hf_gradients"),
+            mp2_gradients=data.get("mp2_gradients"),
+            hf_energy=data.get("hf_energy"),
+            mp2_ss_correction=data.get("mp2_ss_correction"),
+            mp2_os_correction=data.get("mp2_os_correction"),
+            ccsd_correction=data.get("ccsd_correction"),
+            s_squared_eigenvalue=data.get("s_squared_eigenvalue"),
+            delta_hf_energy=data.get("delta_hf_energy"),
+            delta_mp2_ss_correction=data.get("delta_mp2_ss_correction"),
+            delta_mp2_os_correction=data.get("delta_mp2_os_correction"),
+            mulliken_charges=data.get("mulliken_charges"),
+            chelpg_charges=data.get("chelpg_charges"),
+            fragment_distance=data.get("fragment_distance"),
+            bond_orders=data.get("bond_orders"),
+            h_caps=(
+                [AtomRef(atom) for atom in data["h_caps"]]
+                if data.get("h_caps") is not None
+                else None
+            ),
+            num_iters=data.get("num_iters"),
+            num_basis_fns=data.get("num_basis_fns"),
+        )
+
+
+@dataclass
+class ExessManyBodyExpansion:
+    method: str
+    nmers: list[list[ExessNmer]]
+    distance_metric: str | None = None
+    distance_method: str | None = None
+    reference_fragment: FragmentRef | None = None
+    expanded_hf_energy: float | None = None
+    classical_water_energy: float | None = None
+    expanded_mp2_ss_correction: float | None = None
+    expanded_mp2_os_correction: float | None = None
+    expanded_ccsd_correction: float | None = None
+    expanded_density: TensorLike | None = None
+    expanded_hf_gradients: list[float] | None = None
+    expanded_mp2_gradients: list[float] | None = None
+    num_iters: int | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExessManyBodyExpansion":
+        return cls(
+            method=data["method"],
+            nmers=[
+                [ExessNmer.from_dict(nmer) for nmer in nmer_level]
+                for nmer_level in data["nmers"]
+            ],
+            distance_metric=data.get("distance_metric"),
+            distance_method=data.get("distance_method"),
+            reference_fragment=(
+                FragmentRef(data["reference_fragment"])
+                if data.get("reference_fragment") is not None
+                else None
+            ),
+            expanded_hf_energy=data.get("expanded_hf_energy"),
+            classical_water_energy=data.get("classical_water_energy"),
+            expanded_mp2_ss_correction=data.get("expanded_mp2_ss_correction"),
+            expanded_mp2_os_correction=data.get("expanded_mp2_os_correction"),
+            expanded_ccsd_correction=data.get("expanded_ccsd_correction"),
+            expanded_density=data.get("expanded_density"),
+            expanded_hf_gradients=data.get("expanded_hf_gradients"),
+            expanded_mp2_gradients=data.get("expanded_mp2_gradients"),
+            num_iters=data.get("num_iters"),
+        )
+
+
+@dataclass
+class ExessCalculation:
+    calculation_time: float
+    qmmbe: ExessManyBodyExpansion
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ExessCalculation":
+        return cls(
+            calculation_time=data["calculation_time"],
+            qmmbe=ExessManyBodyExpansion.from_dict(data["qmmbe"]),
+        )
+
+
+@dataclass
+class ExessResult:
+    calc: ExessCalculation
+    exports: dict[str, Any] | bytes | None = None
+
+
+@dataclass(frozen=True)
+class ExessSavedResult:
+    calc: Path
+    exports: Path | None = None
 
 
 @dataclass
@@ -871,83 +1010,48 @@ class KSDFTKeywords:
         )
 
 
-@dataclass
-class Trajectory:
-    """
-    Configure the output of QMMM runs. By default, will provide all atoms at every frame.
-    """
-
-    #: Save every n frames to the trajectory, where n is the interval specified.
-    interval: int | None = None
-    #: The frame at which to start the trajectory.
-    start: int | None = None
-    #: The frame at which to end the trajectory.
-    end: int | None = None
-    #: Whether to include waters in the trajectory. Convenient for reducing output size.
-    include_waters: int | None = None
-
-    def _to_rex(self):
-        return Template(
-            """Some (exess_qmmm_rex::MDTrajectory {
-              format = None,
-              interval = $maybe_interval,
-              start = $maybe_start,
-              end = $maybe_end,
-              include_waters = $maybe_include_waters,
-            })"""
-        ).substitute(
-            maybe_interval=optional_str(self.interval),
-            maybe_start=optional_str(self.start),
-            maybe_end=optional_str(self.end),
-            maybe_include_waters=optional_str(self.include_waters),
-        )
-
-
-@dataclass
-class Restraints:
-    """
-    Restrain atoms using an external force proportional to its distance from its original position,
-    scaled by `k` (larger values mean a stronger restraint).
-
-    All atoms can be fixed by specifying `free_atoms = []`.
-    """
-
-    #: Scaling factor for restraints (larger values mean a stronger restraint).
-    k: float | None = None
-    #: Which atoms to hold fixed. All fixed/free parameters are mutually exclusive.
-    fixed_atoms: list[int] | None = None
-    #: Which atoms to keep unfixed. All fixed/free parameters are mutually exclusive.
-    free_atoms: list[int] | None = None
-    #: Which fragments to hold fixed. All fixed/free parameters are mutually exclusive.
-    fixed_fragments: list[int] | None = None
-    #: Which fragments to keep unfixed. All fixed/free parameters are mutually exclusive.
-    free_fragments: list[int] | None = None
-    #: Flag to easily enable fixing all heavy atoms only. Mutually exclusive with fixed/free parameters.
-    fix_heavy: bool | None = None
-
-    def _to_rex(self):
-        return Template(
-            """Some (exess_rex::Restraints {
-              k = $maybe_k,
-              fixed_atoms = $maybe_fixed_atoms,
-              free_atoms = $maybe_free_atoms,
-              fixed_fragments = $maybe_fixed_fragments,
-              free_fragments = $maybe_free_fragments,
-              fix_heavy = $maybe_fix_heavy,
-            })"""
-        ).substitute(
-            maybe_k=optional_str(self.k),
-            maybe_fixed_atoms=optional_str(self.fixed_atoms),
-            maybe_free_atoms=optional_str(self.free_atoms),
-            maybe_fixed_fragments=optional_str(self.fixed_fragments),
-            maybe_free_fragments=optional_str(self.free_fragments),
-            maybe_fix_heavy=optional_str(self.fix_heavy),
-        )
-
-
+@overload
 def exess(
     topology_path: Path | str,
-    driver: str = "Energy",
+    driver: str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess(
+    topology_path: Path | str,
+    driver: str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
+def exess(
+    topology_path: Path | str,
+    driver: str,
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
     aux_basis: AuxBasisT | None = None,
@@ -962,7 +1066,27 @@ def exess(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID: ...
+
+
+def exess(
+    topology_path: Path | str,
+    driver: str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID:
     """
     Compute the energy of the system in the QDX topology file at `topology_path`.
     """
@@ -1044,18 +1168,58 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        return tuple(out)
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise
 
 
-def energy(
+@overload
+def exess_energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess_energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
+def exess_energy(
     topology_path: Path | str,
     method: MethodT = "RestrictedKSDFT",
     basis: BasisT = "cc-pVDZ",
@@ -1071,7 +1235,26 @@ def energy(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID: ...
+
+
+def exess_energy(
+    topology_path: Path | str,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords | None = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    export_keywords: ExportKeywords | None = None,
+    system: System | None = None,
+    convert_hdf5_to_json: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID:
     return exess(
         topology_path,
         "Energy",
@@ -1092,71 +1275,169 @@ def energy(
     )
 
 
-def save_energy_outputs(
-    res: dict[str, Any] | list[dict[str, Any]] | tuple[dict[str, Any], ...] | RunError,
-    extract=True,
-) -> tuple[Path, Path | None] | RunError:
+def _unwrap_outputs(
+    res: tuple[dict[str, Any], ...],
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    if isinstance(res, dict):
+        return (res, None)
+
+    if len(res) == 0 or len(res) > 2:
+        raise ValueError("exess_energy should return 1 or 2 outputs.")
+
+    return (res[0], res[1] if len(res) == 2 else None)
+
+
+def _resolve_exports_object(
+    exports_obj: dict[str, Any] | None,
+) -> tuple[Literal["Json", "Hdf5"], dict[str, Any]] | None:
+    if exports_obj is None:
+        return None
+    if "Json" in exports_obj:
+        return ("Json", exports_obj["Json"])
+    if "Hdf5" in exports_obj:
+        return ("Hdf5", exports_obj.get("Hdf5") or exports_obj)
+    if "path" in exports_obj:
+        if str(exports_obj.get("format", "")).lower() == "json":
+            return ("Json", exports_obj)
+        return ("Hdf5", exports_obj)
+    raise ValueError(
+        "Unknown output format in exports output. Expected 'Json' or 'Hdf5' key, "
+        f"but got keys: {list(exports_obj.keys())}"
+    )
+
+
+def fetch_outputs(res: tuple[dict[str, Any], ...], extract: bool = True) -> ExessResult:
+    """
+    Download EXESS outputs and convert the main JSON payload into Python dataclasses.
+
+    Exported outputs are left lightly processed for now:
+    - JSON exports are returned as a raw dict
+    - HDF5 exports are returned as extracted file bytes by default
+    - HDF5 exports are returned as raw tar.zst bytes when extract=False
+
+    Args:
+        res: Collected output from an EXESS single-point style run. This may
+            be a single output object or a sequence containing the main
+            calculation output plus an optional export output.
+        extract: Whether to extract HDF5 tarball exports before returning them.
+
+    Returns:
+        Parsed EXESS calculation data plus an optional fetched export payload.
+    """
+    calc_obj, exports_obj = _unwrap_outputs(res)
+
+    calc = ExessCalculation.from_dict(
+        json.loads(fetch_object(calc_obj["path"]).decode())
+    )
+
+    exports: dict[str, Any] | bytes | None = None
+    exports_ref = _resolve_exports_object(exports_obj)
+    if exports_ref is not None:
+        export_kind, exports_obj = exports_ref
+        if export_kind == "Json":
+            exports = json.loads(fetch_object(exports_obj["path"]).decode())
+        elif export_kind == "Hdf5":
+            try:
+                exports = fetch_object(exports_obj["path"], extract=extract)
+            except ValueError as e:
+                if extract and "only directories" in str(e):
+                    exports = None
+                else:
+                    raise
+        else:
+            raise ValueError(
+                f"Unknown export kind {export_kind!r}. Expected 'Json' or 'Hdf5'."
+            )
+
+    return ExessResult(calc=calc, exports=exports)
+
+
+def save_outputs(res: tuple[dict[str, Any], ...], extract=True) -> ExessSavedResult:
     """
     Download and save energy calculation outputs from Rush.
 
-    Takes the result from exess functions (energy(), interaction_energy(), etc.)
-    and downloads the output files to disk. The result can be either a tuple or list
-    because collect_run() returns a list when there are multiple outputs, which is
-    converted to a tuple for consistent processing.
+    Takes the collected result from EXESS functions (`exess_energy()`,
+    `exess_interaction_energy()`, etc.) and downloads the output files to disk.
 
     Args:
-        res: Result from exess calculation. Can be:
-            - tuple[dict]: Single output from exess function
-            - tuple[dict, dict]: Two outputs (JSON + HDF5)
-            - list[dict]: Same as tuple (collect_run returns list for multiple outputs)
-        extract: Whether to extract tar.zst files (default True)
+        res: Collected output from an EXESS single-point style run. This may
+            be a single output object or a sequence containing the main
+            calculation output plus an optional export output.
+        extract: Whether to extract HDF5 tarball exports before saving them.
 
     Returns:
-        - (json_path, exports_path): Tuple of local Paths to downloaded files
-        - (json_path, None): If HDF5 extraction fails or no HDF5 output
-        - RunError: If the input res is an error
+        Local paths for the saved calculation output and optional export output.
     """
-    if isinstance(res, RunError):
-        return res
-    if isinstance(res, dict):
-        return (save_object(res["path"]), None)
-    if len(res) == 1:
-        return (save_object(res[0]["path"]), None)
-    if len(res) < 2:
-        raise ValueError("exess.energy should return 1 or 2 outputs.")
-    # convert_hdf5_to_json set to false (or not set)
-    if "Hdf5" in res[1]:
-        hdf5_path = None
+    calc_obj, exports_obj = _unwrap_outputs(res)
+    calc_path = save_object(calc_obj["path"])
+    exports_ref = _resolve_exports_object(exports_obj)
+
+    if exports_ref is None:
+        return ExessSavedResult(calc=calc_path)
+
+    exports_kind, exports_obj = exports_ref
+    if exports_kind == "Json":
+        return ExessSavedResult(
+            calc=calc_path,
+            exports=save_object(exports_obj["path"]),
+        )
+    elif exports_kind == "Hdf5":
+        exports_path = None
         try:
-            # Support new-style with the type key, and old-style without
-            hdf5_obj = res[1].get("Hdf5") or res[1]
-            hdf5_path = save_object(
-                hdf5_obj["path"],
+            exports_path = save_object(
+                exports_obj["path"],
                 ext="hdf5" if extract else "tar.zst",
                 extract=extract,
             )
         except ValueError as e:
             if "only directories" in str(e):
-                # No actual files in HDF5 tar, return None for hdf5_path
-                hdf5_path = None
+                # No actual files in HDF5 tar, return None for exports_path
+                exports_path = None
             else:
                 raise  # Re-raise other extraction errors
-        return (save_object(res[0]["path"]), hdf5_path)
-    # convert_hdf5_to_json set to true
-    elif "Json" in res[1]:
-        return (
-            save_object(res[0]["path"]),
-            save_object(res[1]["Json"]["path"]),
-        )
-    # Unknown output format
-    else:
-        raise ValueError(
-            f"Unknown output format in res[1]. Expected 'Json' or 'Hdf5' key, "
-            f"but got keys: {list(res[1].keys())}"
-        )
+        return ExessSavedResult(calc=calc_path, exports=exports_path)
+
+    raise ValueError(
+        f"Unknown export kind {exports_kind!r}. Expected 'Json' or 'Hdf5'."
+    )
 
 
-def interaction_energy(
+@overload
+def exess_interaction_energy(
+    topology_path: Path | str,
+    reference_fragment: int,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def exess_interaction_energy(
+    topology_path: Path | str,
+    reference_fragment: int,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
+def exess_interaction_energy(
     topology_path: Path | str,
     reference_fragment: int,
     method: MethodT = "RestrictedKSDFT",
@@ -1171,12 +1452,30 @@ def interaction_energy(
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
     collect: bool = False,
-):
+) -> tuple[dict[str, Any], ...] | RunID: ...
+
+
+def exess_interaction_energy(
+    topology_path: Path | str,
+    reference_fragment: int,
+    method: MethodT = "RestrictedKSDFT",
+    basis: BasisT = "cc-pVDZ",
+    aux_basis: AuxBasisT | None = None,
+    standard_orientation: StandardOrientationT | None = None,
+    force_cartesian_basis_sets: bool | None = None,
+    scf_keywords: SCFKeywords | None = None,
+    frag_keywords: FragKeywords = FragKeywords(),
+    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
+    system: System | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID:
     """
     Compute the interaction energy between the fragment with index `reference_fragment` and the rest of the system
     in the toplogy file at `topology_path`.
     """
-    return energy(
+    return exess_energy(
         topology_path=topology_path,
         method=method,
         basis=basis,
@@ -1194,501 +1493,3 @@ def interaction_energy(
         run_opts=run_opts,
         collect=collect,
     )
-
-
-def qmmm(
-    topology_path: Path | str,
-    n_timesteps: int,
-    residues_path: Path | str | None = None,
-    dt_ps: float = 2e-3,
-    temperature_kelvin: float = 290.0,
-    pressure_atm: float | None = None,
-    restraints: Restraints | None = None,
-    trajectory: Trajectory = Trajectory(),
-    gradient_finite_difference_step_size: float | None = None,
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    frag_keywords: FragKeywords = FragKeywords(),
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-):
-    """
-    Run a QMMM simulation of the system in the QDX topology and residues files at `topology_path` and `residues_path`.
-
-    Specifying the number of timesteps is mandatory.
-    If pressure is None, an NVT ensemble is used; if pressure is specified, an NPT ensemble is used.
-    Fragments can be specified as QM or MM fragments via the respective parameters.
-    If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
-    If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
-    """
-    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
-
-    # Upload inputs
-    topology_vobj = upload_object(topology_path)
-    residues_vobj = None
-    if residues_path is not None:
-        residues_vobj = upload_object(residues_path)
-
-    # Run rex
-    rex = Template("""let
-  obj_j = λ j →
-    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology residues →
-    exess_qmmm_rex_s
-      ($run_spec)
-      (exess_qmmm_rex::QMMMParams {
-        schema_version = "0.2.0",
-        model = Some (exess_qmmm_rex::Model {
-          method = exess_qmmm_rex::Method::$method,
-          basis = "$basis",
-          aux_basis = $maybe_aux_basis,
-          standard_orientation = $maybe_standard_orientation,
-          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
-        }),
-        system = $system,
-        keywords = exess_qmmm_rex::Keywords {
-          scf = $maybe_scf_keywords,
-          ks_dft = $maybe_ks_keywords,
-          rtat = None,
-          frag = $maybe_frag_keywords,
-          boundary = None,
-          log = None,
-          dynamics = None,
-          integrals = None,
-          debug = None,
-          export = None,
-          guess = None,
-          force_field = None,
-          optimization = None,
-          hessian = None,
-          gradient = Some (exess_qmmm_rex::GradientKeywords {
-            finite_difference_step_size = $maybe_gradient_finite_difference_step_size,
-            method = Some exess_qmmm_rex::DerivativesMethod::Analytical,
-          }),
-          qmmm = Some (exess_qmmm_rex::QMMMKeywords {
-            n_timesteps = $n_timesteps,
-            dt_ps = $dt_ps,
-            temperature_kelvin = $temperature_kelvin,
-            pressure_atm = $maybe_pressure_atm,
-            minimisation = None,
-            trajectory = $trajectory,
-            restraints = $maybe_restraints,
-            energy_csv = None,
-          }),
-          machine_learning = None,
-          regions = $maybe_regions,
-        },
-      })
-      (obj_j topology)
-      (Some (obj_j residues))
-in
-  exess "$topology_vobj_path" "$residues_vobj_path"
-""").substitute(
-        run_spec=run_spec._to_rex(),
-        method=method,
-        basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
-        maybe_standard_orientation=optional_str(
-            standard_orientation, "exess_rex::StandardOrientation::"
-        ),
-        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        system=system._to_rex() if system is not None else "None",
-        maybe_scf_keywords=(
-            scf_keywords._to_rex() if scf_keywords is not None else "None"
-        ),
-        maybe_ks_keywords=(
-            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
-        ),
-        maybe_frag_keywords=(
-            frag_keywords._to_rex() if frag_keywords is not None else "None"
-        ),
-        maybe_gradient_finite_difference_step_size=optional_str(
-            gradient_finite_difference_step_size
-        ),
-        n_timesteps=n_timesteps,
-        dt_ps=dt_ps,
-        temperature_kelvin=temperature_kelvin,
-        maybe_pressure_atm=optional_str(pressure_atm),
-        trajectory=trajectory._to_rex(),
-        maybe_restraints=restraints._to_rex() if restraints is not None else "None",
-        maybe_regions=(
-            Template(
-                """Some (exess_qmmm_rex::RegionKeywords {
-            qm_fragments = $maybe_qm_fragments,
-            mm_fragments = $maybe_mm_fragments,
-            ml_fragments = Some [],
-          })"""
-            ).substitute(
-                maybe_qm_fragments=optional_str(qm_fragments),
-                maybe_mm_fragments=optional_str(mm_fragments),
-            )
-            if not (qm_fragments is None and mm_fragments is None)
-            else "None"
-        ),
-        topology_vobj_path=topology_vobj["path"],
-        residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
-    )
-    try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
-            return run_id
-
-    except TransportQueryError as e:
-        if e.errors:
-            for error in e.errors:
-                print(f"Error: {error['message']}", file=sys.stderr)
-
-
-@dataclass
-class OptimizationConvergenceCriteria:
-    metric: str | None = None
-    gradient_threshold: float | None = None
-    delta_energy_threshold: float | None = None
-    step_component_threshold: float | None = None
-
-    def _to_rex(self, reference_fragment: int | None = None):
-        return Template(
-            """Some (exess_geo_opt_rex::OptimizationConvergenceCriteria {
-            metric = $maybe_metric,
-            gradient_threshold = $maybe_gradient_threshold,
-            delta_energy_threshold = $maybe_delta_energy_threshold,
-            step_component_threshold = $maybe_step_component_threshold,
-          })"""
-        ).substitute(
-            maybe_metric=optional_str(self.metric),  # TODO: enum prefix
-            maybe_gradient_threshold=optional_str(self.gradient_threshold),
-            maybe_delta_energy_threshold=optional_str(self.delta_energy_threshold),
-            maybe_step_component_threshold=optional_str(self.step_component_threshold),
-        )
-
-
-type CoordinateSystemT = Literal["Cartesian", "NaturalInternal", "DelocalisedInternal"]
-
-type HessianGuessTypeT = Literal["Identity", "ScaledIdentity", "Schlegel", "Lindh"]
-
-type OptimizationAlgorithmTypeT = Literal[
-    "EigenvectorFollowing", "TrustRegionAugmentedHessian", "LBFGS"
-]
-
-
-@dataclass
-class TrustRegionKeywords:
-    initial_radius: float | None = None
-    max_radius: float | None = None
-    min_radius: float | None = None
-    increase_factor: float | None = None
-    decrease_factor: float | None = None
-    constrict_factor: float | None = None
-    increase_threshold: float | None = None
-    decrease_threshold: float | None = None
-    rejection_threshold: float | None = None
-
-    def _to_rex(self):
-        return Template(
-            """Some (exess_geo_opt_rex::TrustRegionKeywords {
-            initial_radius = $maybe_initial_radius,
-            max_radius = $maybe_max_radius,
-            min_radius = $maybe_min_radius,
-            increase_factor = $maybe_increase_factor,
-            decrease_factor = $maybe_decrease_factor,
-            constrict_factor = $maybe_constrict_factor,
-            increase_threshold = $maybe_increase_threshold,
-            decrease_threshold = $maybe_decrease_threshold,
-            rejection_threshold = $maybe_rejection_threshold,
-          })"""
-        ).substitute(
-            maybe_initial_radius=optional_str(self.initial_radius),
-            maybe_max_radius=optional_str(self.max_radius),
-            maybe_min_radius=optional_str(self.min_radius),
-            maybe_increase_factor=optional_str(self.increase_factor),
-            maybe_decrease_factor=optional_str(self.decrease_factor),
-            maybe_constrict_factor=optional_str(self.constrict_factor),
-            maybe_increase_threshold=optional_str(self.increase_threshold),
-            maybe_decrease_threshold=optional_str(self.decrease_threshold),
-            maybe_rejection_threshold=optional_str(self.rejection_threshold),
-        )
-
-
-type LBFGSLinesearchT = Literal[
-    "MoreThuente", "BacktrackingArmijo", "BacktrackingWolfe", "BacktrackingStrongWolfe"
-]
-
-
-@dataclass
-class LBFGSKeywords:
-    linesearch: LBFGSLinesearchT = "BacktrackingStrongWolfe"
-    n_corrections: int | None = None
-    epsilon: float | None = None
-    max_linesearch: int | None = None
-    gtol: float | None = None
-
-    def _to_rex(self):
-        return Template(
-            """Some (exess_geo_opt_rex::LBFGSKeywords {
-              linesearch = $maybe_linesearch,
-              n_corrections = $maybe_n_corrections,
-              epsilon = $maybe_epsilon,
-              max_linesearch = $maybe_max_linesearch,
-              gtol = $maybe_gtol,
-            })"""
-        ).substitute(
-            maybe_linesearch=optional_str(
-                self.linesearch, "exess_geo_opt_rex::LBFGSLinesearch::"
-            ),
-            maybe_n_corrections=optional_str(self.n_corrections),
-            maybe_epsilon=optional_str(self.epsilon),
-            maybe_max_linesearch=optional_str(self.max_linesearch),
-            maybe_gtol=optional_str(self.gtol),
-        )
-
-
-@dataclass
-class OptimizationKeywords:
-    convergence_criteria: OptimizationConvergenceCriteria | None = None
-    optimizer_reset_interval: int | None = None
-    coordinate_system: CoordinateSystemT | None = None
-    constraints: list[list[int]] | None = None
-    hessian_guess: HessianGuessTypeT | None = None
-    algorithm: OptimizationAlgorithmTypeT | None = None
-    lbfgs_keywords: LBFGSKeywords | None = None
-    frozen_distance_slippage_tolerance_angstroms: float | None = None
-    frozen_angle_slippage_tolerance_degrees: float | None = None
-    trust_region_keywords: TrustRegionKeywords | None = None
-    fixed_atoms: list[int] | None = None
-    free_atoms: list[int] | None = None
-    fixed_fragments: list[int] | None = None
-    free_fragments: list[int] | None = None
-    fix_heavy: bool | None = None
-
-    def _to_rex(self, max_iters):
-        return Template(
-            """Some (exess_geo_opt_rex::OptimizationKeywords {
-            max_iters = $max_iters,
-            convergence_criteria = $maybe_convergence_criteria,
-            optimizer_reset_interval = $maybe_optimizer_reset_interval,
-            coordinate_system = $maybe_coordinate_system,
-            constraints = $maybe_constraints,
-            hessian_guess = $maybe_hessian_guess,
-            algorithm = $maybe_algorithm,
-            lbfgs_keywords = $maybe_lbfgs_keywords,
-            frozen_distance_slippage_tolerance_angstroms = $maybe_frozen_distance_slippage_tolerance_angstroms,
-            frozen_angle_slippage_tolerance_degrees = $maybe_frozen_angle_slippage_tolerance_degrees,
-            trust_region_keywords = $maybe_trust_region_keywords,
-            fixed_atoms = $maybe_fixed_atoms,
-            free_atoms = $maybe_free_atoms,
-            fixed_fragments = $maybe_fixed_fragments,
-            free_fragments = $maybe_free_fragments,
-            fix_heavy = $maybe_fix_heavy,
-          })"""
-        ).substitute(
-            max_iters=max_iters,
-            maybe_convergence_criteria=(
-                self.convergence_criteria._to_rex()
-                if self.convergence_criteria is not None
-                else "None"
-            ),
-            maybe_optimizer_reset_interval=optional_str(self.optimizer_reset_interval),
-            maybe_coordinate_system=optional_str(
-                self.coordinate_system, "exess_geo_opt_rex::CoordinateSystem::"
-            ),
-            # maybe_constraints=optional_list(
-            #     self.constraints,
-            #     lambda constraint: f"vec![{', '.join(f'exess_geo_opt_rex::AtomRef ({atom})' for atom in constraint)}]",
-            # ),
-            maybe_constraints="None",  # TODO
-            maybe_hessian_guess=optional_str(
-                self.hessian_guess, "exess_geo_opt_rex::HessianGuessType::"
-            ),
-            maybe_algorithm=optional_str(
-                self.algorithm, "exess_geo_opt_rex::OptimizationAlgorithmType::"
-            ),
-            maybe_lbfgs_keywords=(
-                self.lbfgs_keywords._to_rex()
-                if self.lbfgs_keywords is not None
-                else "None"
-            ),
-            maybe_frozen_distance_slippage_tolerance_angstroms=optional_str(
-                self.frozen_distance_slippage_tolerance_angstroms
-            ),
-            maybe_frozen_angle_slippage_tolerance_degrees=optional_str(
-                self.frozen_angle_slippage_tolerance_degrees
-            ),
-            maybe_trust_region_keywords=(
-                self.trust_region_keywords._to_rex()
-                if self.trust_region_keywords is not None
-                else "None"
-            ),
-            maybe_fixed_atoms=optional_str(self.fixed_atoms),
-            maybe_free_atoms=optional_str(self.free_atoms),
-            maybe_fixed_fragments=optional_str(self.fixed_fragments),
-            maybe_free_fragments=optional_str(self.free_fragments),
-            maybe_fix_heavy=optional_str(self.fix_heavy),
-        )
-
-
-def optimization(
-    topology_path: Path | str,
-    max_iters: int,
-    residues_path: Path | str | None = None,
-    optimization_keywords: OptimizationKeywords = OptimizationKeywords(),
-    method: MethodT = "RestrictedKSDFT",
-    basis: BasisT = "cc-pVDZ",
-    aux_basis: AuxBasisT | None = None,
-    standard_orientation: StandardOrientationT | None = None,
-    force_cartesian_basis_sets: bool | None = None,
-    scf_keywords: SCFKeywords | None = None,
-    ksdft_keywords: KSDFTKeywords | _KSDFTDefault | None = _KSDFTDefault.DEFAULT,
-    qm_fragments: list[int] | None = None,
-    mm_fragments: list[int] | None = None,
-    system: System | None = None,
-    run_spec: RunSpec = RunSpec(gpus=1),
-    run_opts: RunOpts = RunOpts(),
-    collect: bool = False,
-):
-    """
-    Run optimization on the system in the QDX topology and residues files at `topology_path`.
-
-    Specifying the maximum iterations is mandatory.
-    Fragment-based QM calculation is not supported, but fragments can be used for specifying regions as QM or MM.
-    If one fragment list parameter is specified, the rest of the fragments are inferred to be of the other type.
-    If both fragment list parameters are specified, each fragment must be placed in exactly one of the lists.
-    """
-    ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
-
-    # Upload inputs
-    topology_vobj = upload_object(topology_path)
-    residues_vobj = None
-    if residues_path is not None:
-        residues_vobj = upload_object(residues_path)
-
-    # Run rex
-    rex = Template("""let
-  obj_j = λ j →
-    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-  exess = λ topology residues →
-    exess_geo_opt_rex_s
-      ($run_spec)
-      (exess_geo_opt_rex::OptimizationParams {
-        schema_version = "0.2.0",
-        external_charges = None,
-        model = Some (exess_geo_opt_rex::Model {
-          method = exess_geo_opt_rex::Method::$method,
-          basis = "$basis",
-          aux_basis = $maybe_aux_basis,
-          standard_orientation = $maybe_standard_orientation,
-          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
-        }),
-        system = $maybe_system,
-        keywords = exess_geo_opt_rex::Keywords {
-          scf = $maybe_scf_keywords,
-          ks_dft = $maybe_ks_keywords,
-          rtat = None,
-          frag = None,
-          boundary = None,
-          log = None,
-          dynamics = None,
-          integrals = None,
-          debug = None,
-          export = None,
-          guess = None,
-          force_field = None,
-          optimization = $maybe_optimization_keywords,
-          hessian = None,
-          gradient = None,
-          qmmm = $maybe_qmmm_keywords,
-          machine_learning = None,
-          regions = $maybe_regions,
-        },
-      })
-      [ (obj_j topology) ]
-      $residues_expr
-in
-  exess "$topology_vobj_path" "$residues_vobj_path"
-""").substitute(
-        run_spec=run_spec._to_rex(),
-        method=method,
-        basis=basis,
-        maybe_aux_basis=optional_str(aux_basis),
-        maybe_standard_orientation=optional_str(
-            standard_orientation, "exess_rex::StandardOrientation::"
-        ),
-        maybe_force_cartesian_basis_sets=optional_str(force_cartesian_basis_sets),
-        maybe_system=system._to_rex() if system is not None else "None",
-        maybe_scf_keywords=(
-            scf_keywords._to_rex() if scf_keywords is not None else "None"
-        ),
-        maybe_ks_keywords=(
-            ksdft_keywords._to_rex() if ksdft_keywords is not None else "None"
-        ),
-        maybe_optimization_keywords=(
-            optimization_keywords._to_rex(max_iters)
-            if optimization_keywords is not None
-            else "None"
-        ),
-        maybe_qmmm_keywords=(
-            """Some (exess_qmmm_rex::QMMMKeywords {
-            n_timesteps = 1,
-            dt_ps = 0.002,
-            temperature_kelvin = 290.0,
-            pressure_atm = None,
-            minimisation = None,
-            trajectory = None,
-            restraints = None,
-            energy_csv = None,
-          })"""
-            if mm_fragments or (qm_fragments is not None)
-            else "None"
-        ),
-        maybe_regions=(
-            Template(
-                """Some (exess_qmmm_rex::RegionKeywords {
-            qm_fragments = $maybe_qm_fragments,
-            mm_fragments = $maybe_mm_fragments,
-            ml_fragments = Some [],
-          })"""
-            ).substitute(
-                maybe_qm_fragments=optional_str(qm_fragments),
-                maybe_mm_fragments=optional_str(mm_fragments),
-            )
-            if not (qm_fragments is None and mm_fragments is None)
-            else "None"
-        ),
-        residues_expr=(
-            "(Some [ (obj_j residues) ])" if residues_path is not None else "None"
-        ),
-        topology_vobj_path=topology_vobj["path"],
-        residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
-    )
-    try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
-            return run_id
-
-    except TransportQueryError as e:
-        if e.errors:
-            for error in e.errors:
-                print(f"Error: {error['message']}", file=sys.stderr)
-
-
-# TODO:
-#  - trace for failure
-#  - stdout, stderr
-#  - other module instance info?
-#  - qmmm minimisation config:
-#    minimisation = Some (exess_rex::ClassicalMinimisation {
-#      err_tol_kj_per_mol_nm = $err_tol_kj_per_mol_nm,
-#      max_iterations = $max_iterations,
-#    }),

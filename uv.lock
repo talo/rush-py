@@ -1142,13 +1142,14 @@ wheels = [
 
 [[package]]
 name = "rush-py"
-version = "6.10.2"
+version = "7.0.0b1"
 source = { editable = "." }
 dependencies = [
     { name = "gql" },
     { name = "h5py" },
     { name = "matplotlib" },
     { name = "networkx" },
+    { name = "numpy" },
     { name = "rdkit" },
     { name = "requests" },
     { name = "requests-toolbelt" },
@@ -1176,6 +1177,7 @@ requires-dist = [
     { name = "h5py", specifier = "~=3.14" },
     { name = "matplotlib", specifier = "~=3.10" },
     { name = "networkx", specifier = "~=3.6" },
+    { name = "numpy", specifier = ">=1.26,<3" },
     { name = "rdkit", specifier = "~=2025.9.2" },
     { name = "requests", specifier = "~=2.32" },
     { name = "requests-toolbelt", specifier = "~=1.0" },

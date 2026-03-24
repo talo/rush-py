@@ -1,13 +1,25 @@
 # Changelog
 
-## 6.10.3
+## Unreleased
 
-### Fixed
-- Rewrite wordy intro sentence in docs landing page for clarity
+### Changed
+- EXESS now uses `fetch_outputs()` for in-memory results and `save_outputs()` for workspace persistence, with shared output handling between the two paths
+- EXESS parsed output types are now `ExessResult`, `ExessCalculation`, and `ExessManyBodyExpansion`, with the calculation available at `result.calc`
+- Added `fetch_object()` as the in-memory object-store helper and removed `download_object()`
+- `fetch_object()` and `save_object()` now share archive extraction logic
+- Updated EXESS docs, examples, and tests to use the new fetch/save naming
+- NN-xTB now uses `fetch_outputs()` for in-memory `NnxtbResult` objects and `save_outputs()` for saving raw JSON outputs
+- Updated NN-xTB docs, examples, and tests to use `NnxtbResult` and the new fetch/save helpers
+- Auto3D now provides both `fetch_outputs()` for in-memory results and `save_outputs()` for workspace files, with shared output dispatch logic
+- `prepare_protein` now provides `fetch_outputs()` for in-memory TRCs and `prepare_complex` now matches its object-store output shape, with matching fetch/save helpers
+- PBSA now provides `fetch_outputs()` for in-memory `PBSAResult` objects and `save_outputs()` for saving the direct JSON-style result into the workspace
+- mmseqs2 now provides `fetch_outputs()` for in-memory A3M text and `save_outputs()` for saving raw `.a3m` outputs
+- Boltz now provides typed `fetch_outputs()` / `save_outputs()` helpers for model, metrics, confidence arrays, and optional affinity outputs
 
 ## 6.10.2
 
 ### Fixed
+- Rewrite wordy intro sentence in docs landing page for clarity
 - Don't print message about run being restored if the run is canceled or failed: this usually means that the module instance couldn't be started at all because the account tier doesn't support running that module instance. The other potential cause is if a module isn't available for a particular target and the user tries to use that combination.
 - Print and store `trace` field from a run properly when it's either canceled or failed
 - Remove AI-generated mismatches page from docs

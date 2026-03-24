@@ -1,9 +1,8 @@
-import json
 import sys
 from pathlib import Path
 
-from rush.client import RunOpts, save_object, set_opts
-from rush.nnxtb import NnxtbResults, nnxtb
+from rush.client import RunOpts, set_opts
+from rush.nnxtb import NnxtbResult, fetch_outputs, nnxtb, save_outputs
 
 
 def test_nnxtb():
@@ -21,10 +20,10 @@ def test_nnxtb():
         collect=True,
     )
     print(res, file=sys.stderr)
-    print(
-        NnxtbResults(**json.loads(save_object(res["path"]).read_text())),
-        file=sys.stderr,
-    )
+    fetched = fetch_outputs(res)
+    assert isinstance(fetched, NnxtbResult)
+    print(fetched, file=sys.stderr)
+    print(save_outputs(res), file=sys.stderr)
 
 
 if __name__ == "__main__":

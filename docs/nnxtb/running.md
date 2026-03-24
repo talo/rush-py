@@ -14,7 +14,7 @@ NN-xTB is accessed through the `rush.nnxtb` module in the Rush Python SDK.
 from rush.nnxtb import nnxtb
 
 # Submit and wait for results
-res = nnxtb("topology.json", collect=True)
+outputs = nnxtb("topology.json", collect=True)
 ```
 
 The input is a TRC (topology representation) JSON file containing atomic coordinates and element information. See the {doc}`EXESS topologies documentation <../exess/topologies>` for the full TRC format specification. You can also convert from PDB or SDF using the `rush.convert` module.
@@ -47,7 +47,7 @@ def nnxtb(
 
 ### Return value
 
-- **`collect=False`** (default): Returns a run ID (string). Use `collect_run(run_id)` later to retrieve results.
+- **`collect=False`** (default): Returns a run ID. Use `collect_run(id)` later to retrieve results.
 - **`collect=True`**: Blocks until the run completes and returns the output object (a dict with a `path` key pointing to the JSON result in the object store).
 
 ## Synchronous vs asynchronous
@@ -59,18 +59,18 @@ from rush.nnxtb import nnxtb
 from rush.client import collect_run
 
 # Submit asynchronously
-run_id = nnxtb("topology.json")
+id = nnxtb("topology.json")
 
 # ... do other work ...
 
 # Collect when ready
-result = collect_run(run_id)
+outputs = collect_run(id)
 ```
 
 For interactive use, pass `collect=True` to block until the result is ready:
 
 ```python
-result = nnxtb("topology.json", collect=True)
+outputs = nnxtb("topology.json", collect=True)
 ```
 
 ## Run metadata
@@ -80,7 +80,7 @@ Use `RunOpts` to attach metadata to your runs. This makes them easier to find in
 ```python
 from rush.client import RunOpts
 
-res = nnxtb(
+outputs = nnxtb(
     "topology.json",
     run_opts=RunOpts(
         name="Ligand screening batch 1",
@@ -92,28 +92,37 @@ res = nnxtb(
 
 ## Parsing results
 
-After collecting a run, download and parse the output JSON:
+After collecting a run, either fetch the parsed `NnxtbResult` in memory or save
+the raw JSON output to the workspace:
 
 ```python
-import json
-from rush.client import save_object
-from rush.nnxtb import NnxtbResults
+from rush.nnxtb import NnxtbResult, fetch_outputs, nnxtb
 
-res = nnxtb("topology.json", collect=True)
-
-# Download the output file
-output_path = save_object(res["path"])
-data = json.loads(output_path.read_text())
+outputs = nnxtb("topology.json", collect=True)
 
 # Parse into a structured object
-results = NnxtbResults(**data)
-print(f"Energy: {results.energy_mev:.2f} meV")
+res: NnxtbResult = fetch_outputs(outputs)
+print(f"Energy: {res.energy_mev:.2f} meV")
 
-if results.forces_mev_per_angstrom:
-    print(f"Number of atoms: {len(results.forces_mev_per_angstrom)}")
+if res.forces_mev_per_angstrom:
+    print(f"Number of atoms: {len(res.forces_mev_per_angstrom)}")
 
-if results.frequencies_inv_cm:
-    print(f"Number of frequencies: {len(results.frequencies_inv_cm)}")
+if res.frequencies_inv_cm:
+    print(f"Number of frequencies: {len(res.frequencies_inv_cm)}")
+```
+
+`NnxtbResult` has three fields:
+- `energy_mev`
+- `forces_mev_per_angstrom`
+- `frequencies_inv_cm`
+
+To save the raw JSON output instead:
+
+```python
+from rush.nnxtb import nnxtb, save_outputs
+
+outputs = nnxtb("topology.json", collect=True)
+paths = save_outputs(outputs)
 ```
 
 ## Error handling

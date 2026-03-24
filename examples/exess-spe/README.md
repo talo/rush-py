@@ -13,7 +13,7 @@ python 02_exess_spe.py
 
 ## What This Example Covers
 
-1. Running an EXESS energy calculation with `exess.energy`
+1. Running an EXESS energy calculation with `exess_energy`
 2. Extracting and printing total energy from the output
 
 ## Input Data

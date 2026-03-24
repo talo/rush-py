@@ -1,27 +1,95 @@
 #!/usr/bin/env python3
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from string import Template
+from typing import Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
+    _json_content_name,
     _submit_rex,
     collect_run,
+    save_json,
     upload_object,
 )
 from .utils import float_to_str
 
 
 @dataclass
-class PBSAResults:
+class PBSAResult:
+    """
+    Parsed PBSA result.
+
+    Use `fetch_outputs(pbsa(..., collect=True))` to return this dataclass in
+    memory, or `save_outputs(pbsa(..., collect=True))` to save the same values
+    as JSON in the workspace.
+    """
+
     solvation_energy: float
     polar_solvation_energy: float
     nonpolar_solvation_energy: float
+
+
+@overload
+def pbsa(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def pbsa(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[float, float, float]: ...
+@overload
+def pbsa(
+    topology_path: Path | str,
+    solute_dielectric: float,
+    solvent_dielectric: float,
+    solvent_radius: float,
+    ion_concentration: float,
+    temperature: float,
+    spacing: float,
+    sasa_gamma: float,
+    sasa_beta: float,
+    sasa_n_samples: int,
+    convergence: float,
+    box_size_factor: float,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[float, float, float] | RunID: ...
 
 
 def pbsa(
@@ -39,8 +107,8 @@ def pbsa(
     box_size_factor: float,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+    collect: bool = False,
+) -> tuple[float, float, float] | RunID:
     """
     Run PBSA on the system in the QDX topology file at `topology_path`.
 
@@ -92,12 +160,49 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        assert isinstance(out, list)
+        assert len(out) == 3
+        assert isinstance(out[0], float)
+        assert isinstance(out[1], float)
+        assert isinstance(out[2], float)
+        return tuple(out)
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
+
+
+def fetch_outputs(res: tuple[float, float, float]) -> PBSAResult:
+    """
+    Fetch PBSA outputs into memory.
+
+    Args:
+        res: Collected output from pbsa().
+
+    Returns:
+        Parsed PBSA result values.
+    """
+    return PBSAResult(*res)
+
+
+def save_outputs(res: tuple[float, float, float]) -> Path:
+    """
+    Save PBSA outputs into the workspace as JSON.
+
+    Args:
+        res: Collected output from pbsa().
+
+    Returns:
+        Local path to the saved PBSA JSON file.
+    """
+    output_json = asdict(PBSAResult(*res))
+    return save_json(
+        output_json,
+        name=_json_content_name("pbsa_output", output_json),
+    )

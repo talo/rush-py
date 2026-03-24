@@ -17,21 +17,22 @@ Output files (saved to chelpg-outputs/):
     - chelpg_aspirin.html: Single-page viz — 3D structure (left), 2D charge map (center), bar chart (right)
 """
 
-from pathlib import Path
-from collections import Counter
-from rush import exess
-from rush.client import RunError
-from rush.convert.pdb import from_pdb
+import base64
 import json
-import matplotlib
+import math
+from collections import Counter
+from pathlib import Path
 
-matplotlib.use("Agg")  # Use non-GUI backend
+import matplotlib
 import matplotlib.pyplot as plt
 import py3Dmol
-import base64
-import math
 from rdkit import Chem
 from rdkit.Chem import rdDepictor
+
+from rush import TRC, exess, from_pdb
+from rush.exess import exess_energy
+
+matplotlib.use("Agg")  # Use non-GUI backend
 
 # Shared charge-to-color mapping (RdBu: red=negative/electron-rich, blue=positive/electron-poor)
 Q_ABSMAX = 0.5  # fixed scale range
@@ -267,6 +268,7 @@ mol_name = pdb_path.stem.replace("_", " ").replace("-", " ").title()
 print(f"Loading {pdb_path.name}...")
 pdb_content = pdb_path.read_text(encoding="utf-8")
 trc = from_pdb(pdb_content)
+assert isinstance(trc, TRC)  # Confirm we got just one structure
 
 # Derive molecular formula from topology (Hill order: C first, H second, then alphabetical)
 elem_counts = Counter(
@@ -297,16 +299,13 @@ print(f"  Molecule: {mol_name} ({mol_formula_sub})")
 
 # Convert to topology JSON format
 topology_path = output_dir / f"{pdb_path.stem}_topology.json"
-topology_json = trc.topology.to_json()
-if "schema_version" not in topology_json:
-    topology_json["schema_version"] = "0.2.0"
-topology_path.write_text(json.dumps(topology_json, indent=2), encoding="utf-8")
+topology_path.write_text(json.dumps(trc.topology.to_json(), indent=2), encoding="utf-8")
 print(f"✓ Topology saved to {topology_path}")
 
 
 # ===== 2. Run CHELPG calculation =====
 print("\nRunning CHELPG calculation...")
-result = exess.energy(
+outputs = exess_energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
@@ -314,86 +313,73 @@ result = exess.energy(
     collect=True,
 )
 
-if isinstance(result, RunError):
-    print(f"Run failed: {result.message}")
-else:
-    save_result = exess.save_energy_outputs(result)
-    if isinstance(save_result, RunError):
-        print(f"Failed to save outputs: {save_result.message}")
-        exit(1)
-    json_path, exports_path = save_result
+exports = exess.fetch_outputs(outputs).exports
+assert isinstance(exports, dict)
+charges = exports["chelpg_charges"]
 
-    # Extract charges from JSON output
-    charges = []
-    if exports_path:
-        with open(exports_path) as f:
-            charges = json.load(f)["chelpg_charges"]
-    else:
-        print("Warning: No charge data available")
+print("✓ CHELPG calculation complete!")
+print(f"✓ Extracted {len(charges)} atomic charges")
+symbols = [trc.topology.symbols[i] for i in range(len(charges))]
 
-    print("✓ CHELPG calculation complete!")
-    print(f"✓ Extracted {len(charges)} atomic charges")
-    symbols = [trc.topology.symbols[i] for i in range(len(charges))]
+# ===== 3. Generate bar chart (tall, narrow — fits right column) =====
+print("\nGenerating bar chart...")
+labels = [f"{s}{i}" for i, s in enumerate(symbols)]
 
-    # ===== 3. Generate bar chart (tall, narrow — fits right column) =====
-    print("\nGenerating bar chart...")
-    labels = [f"{s}{i}" for i, s in enumerate(symbols)]
+bar_colors = [charge_to_rgb(q) for q in charges]
 
-    bar_colors = [charge_to_rgb(q) for q in charges]
+fig, ax = plt.subplots(figsize=(3.5, 6.5))
+fig.patch.set_facecolor("#000000")
+ax.set_facecolor("#000000")
+ax.barh(
+    range(len(charges)),
+    charges,
+    color=bar_colors,
+    edgecolor="#27272a",
+    linewidth=0.5,
+)
+ax.set_yticks(range(len(charges)))
+ax.set_yticklabels(labels, fontsize=8, color="#a1a1aa", fontfamily="monospace")
+ax.invert_yaxis()
+ax.axvline(0, color="#52525b", linewidth=0.8, linestyle="--", alpha=0.7)
+ax.set_xlabel("Partial Charge (e)", fontsize=10, fontweight="bold", color="#a1a1aa")
+ax.tick_params(axis="x", colors="#a1a1aa")
+ax.grid(axis="x", alpha=0.15, color="#52525b")
+for spine in ax.spines.values():
+    spine.set_color("#27272a")
+plt.tight_layout()
+chart_path = output_dir / "chelpg_charges.png"
+plt.savefig(chart_path, dpi=150, bbox_inches="tight", facecolor="#000000")
+print(f"✓ Bar chart saved: {chart_path}")
 
-    fig, ax = plt.subplots(figsize=(3.5, 6.5))
-    fig.patch.set_facecolor("#000000")
-    ax.set_facecolor("#000000")
-    ax.barh(
-        range(len(charges)),
-        charges,
-        color=bar_colors,
-        edgecolor="#27272a",
-        linewidth=0.5,
+# Convert to base64 for embedding
+with open(chart_path, "rb") as img_file:
+    chart_base64 = base64.b64encode(img_file.read()).decode()
+plt.close()
+
+# ===== 4. Generate 3D visualization =====
+print("Generating 3D visualization...")
+view = py3Dmol.view(width=700, height=600)
+view.addModel(pdb_content, "pdb")
+
+for i, q in enumerate(charges):
+    color = charge_to_hex(q)
+    # Note: 3Dmol uses 1-based serial numbering
+    view.setStyle(
+        {"serial": i + 1},
+        {"sphere": {"radius": 0.4, "color": color}, "stick": {"color": color}},
     )
-    ax.set_yticks(range(len(charges)))
-    ax.set_yticklabels(labels, fontsize=8, color="#a1a1aa", fontfamily="monospace")
-    ax.invert_yaxis()
-    ax.axvline(0, color="#52525b", linewidth=0.8, linestyle="--", alpha=0.7)
-    ax.set_xlabel("Partial Charge (e)", fontsize=10, fontweight="bold", color="#a1a1aa")
-    ax.tick_params(axis="x", colors="#a1a1aa")
-    ax.grid(axis="x", alpha=0.15, color="#52525b")
-    for spine in ax.spines.values():
-        spine.set_color("#27272a")
-    plt.tight_layout()
-    chart_path = output_dir / "chelpg_charges.png"
-    plt.savefig(chart_path, dpi=150, bbox_inches="tight", facecolor="#000000")
-    print(f"✓ Bar chart saved: {chart_path}")
 
-    # Convert to base64 for embedding
-    with open(chart_path, "rb") as img_file:
-        chart_base64 = base64.b64encode(img_file.read()).decode()
-    plt.close()
+view.setBackgroundColor("black")
+view.zoomTo()
+html_3d = view._make_html()
 
-    # ===== 4. Generate 3D visualization =====
-    print("Generating 3D visualization...")
-    view = py3Dmol.view(width=700, height=600)
-    view.addModel(pdb_content, "pdb")
+# ===== 5. Generate 2D structure diagram =====
+print("Generating 2D structure diagram...")
+structure_svg = generate_aspirin_2d_svg(pdb_content, charges, symbols)
+print("✓ 2D structure SVG generated")
 
-    for i, q in enumerate(charges):
-        color = charge_to_hex(q)
-        # Note: 3Dmol uses 1-based serial numbering
-        view.setStyle(
-            {"serial": i + 1},
-            {"sphere": {"radius": 0.4, "color": color}, "stick": {"color": color}},
-        )
-
-    view.setBackgroundColor("black")
-    view.zoomTo()
-    html_3d = view._make_html()
-
-    # ===== 5. Generate 2D structure diagram =====
-    print("Generating 2D structure diagram...")
-    structure_svg = generate_aspirin_2d_svg(pdb_content, charges, symbols)
-    print("✓ 2D structure SVG generated")
-
-    # ===== 6. Create combined HTML visualization =====
-    combined_html = f"""
+# ===== 6. Create combined HTML visualization =====
+combined_html = f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -452,18 +438,18 @@ else:
 </body>
 </html>
 """
-    html_path = output_dir / f"chelpg_{pdb_path.stem}.html"
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(combined_html)
-    print(f"✓ Combined visualization saved: {html_path}")
+html_path = output_dir / f"chelpg_{pdb_path.stem}.html"
+with open(html_path, "w", encoding="utf-8") as f:
+    f.write(combined_html)
+print(f"✓ Combined visualization saved: {html_path}")
 
-    # ===== 7. Print summary =====
-    print(f"\n✓ CHELPG Charges ({mol_name}):")
-    print("-" * 40)
-    for i, (sym, q) in enumerate(zip(symbols, charges)):
-        print(f"  Atom {i:2d} ({sym}): {q:8.5f} e")
-    print("-" * 40)
-    print(f"  Total charge: {sum(charges):8.5f} e")
-    print(f"  Min charge:   {min(charges):8.5f} e")
-    print(f"  Max charge:   {max(charges):8.5f} e")
-    print(f"\n✓ All done! Open '{html_path}' in a browser to view results.")
+# ===== 7. Print summary =====
+print(f"\n✓ CHELPG Charges ({mol_name}):")
+print("-" * 40)
+for i, (sym, q) in enumerate(zip(symbols, charges)):
+    print(f"  Atom {i:2d} ({sym}): {q:8.5f} e")
+print("-" * 40)
+print(f"  Total charge: {sum(charges):8.5f} e")
+print(f"  Min charge:   {min(charges):8.5f} e")
+print(f"  Max charge:   {max(charges):8.5f} e")
+print(f"\n✓ All done! Open '{html_path}' in a browser to view results.")

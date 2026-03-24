@@ -3,12 +3,13 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts, collect_run, set_opts
+from rush.exess import exess_energy
 
 
 def test_exess_energy_dft_hyb():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
-    id = exess.energy(
+    id = exess_energy(
         data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         ksdft_keywords=exess.KSDFTKeywords(
@@ -34,13 +35,13 @@ def test_exess_energy_dft_hyb():
 
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 def test_exess_energy_dft_dhyb():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path(__file__).parent / "data"
-    id = exess.energy(
+    id = exess_energy(
         data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         basis="cc-pVTZ",
@@ -61,7 +62,7 @@ def test_exess_energy_dft_dhyb():
 
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 if __name__ == "__main__":

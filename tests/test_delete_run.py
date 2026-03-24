@@ -1,19 +1,19 @@
 import time
 from pathlib import Path
 
-from rush import exess
 from rush.client import (
     RunOpts,
     delete_run,
     fetch_runs,
     set_opts,
 )
+from rush.exess import exess_energy
 
 
 def test_delete_run():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    id = exess.energy(
+    id = exess_energy(
         data_dir / "1kuw_t.json",
         basis="PCSeg-0",
         run_opts=RunOpts(

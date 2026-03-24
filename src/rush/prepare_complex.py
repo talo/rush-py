@@ -9,19 +9,22 @@ with prepared protein TRC data for downstream computations.
 from collections import defaultdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Literal
+from typing import Any, Literal, overload
 
 from rdkit import Chem
 
 from rush import TRC, from_json, from_pdb, merge_trcs, to_pdb
+from rush._output_types import TRCSavedResult
 from rush.client import (
-    RunError,
+    RunID,
     RunOpts,
     RunSpec,
 )
 from rush.convert import _single_trc
+from rush.prepare_protein import _upload_trc
+from rush.prepare_protein import fetch_outputs as fetch_trc_output
 from rush.prepare_protein import prepare_protein as run_prepare_protein
-from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
+from rush.prepare_protein import save_outputs as save_trc_output
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
@@ -121,6 +124,7 @@ def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
     return Chem.MolToPDBBlock(ligand_h)
 
 
+@overload
 def prepare_complex(
     input_path: Path | str,
     ligand_names: list[str],
@@ -132,8 +136,51 @@ def prepare_complex(
     debump: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-) -> TRC | str | RunError:
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def prepare_complex(
+    input_path: Path | str,
+    ligand_names: list[str],
+    ph: float | None = None,
+    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
+    capping_style: Literal["never", "truncated", "always"] | None = None,
+    truncation_threshold: int | None = None,
+    opt: bool | None = None,
+    debump: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> tuple[dict[str, Any], ...]: ...
+@overload
+def prepare_complex(
+    input_path: Path | str,
+    ligand_names: list[str],
+    ph: float | None = None,
+    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
+    capping_style: Literal["never", "truncated", "always"] | None = None,
+    truncation_threshold: int | None = None,
+    opt: bool | None = None,
+    debump: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID: ...
+
+
+def prepare_complex(
+    input_path: Path | str,
+    ligand_names: list[str],
+    ph: float | None = None,
+    naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
+    capping_style: Literal["never", "truncated", "always"] | None = None,
+    truncation_threshold: int | None = None,
+    opt: bool | None = None,
+    debump: bool | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> tuple[dict[str, Any], ...] | RunID:
     """
     Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.
 
@@ -147,12 +194,11 @@ def prepare_complex(
         debump: Whether to perform debumping
         run_spec: Run specification for the preparation job
         run_opts: Run options
-        collect: If True, collects results and returns merged TRC. If False, returns run ID.
+        collect: If True, collects results and returns merged TRC. If False, returns RunID.
 
     Returns:
-        - If collect=True: Merged TRC containing prepared protein and ligand
-        - If collect=False: Run ID string for the prepare-protein job
-        - RunError if preparation fails
+        - If collect=True: Uploaded T/R/C object-store triplet for the merged complex
+        - If collect=False: RunID for the prepare-protein job
     """
     if isinstance(input_path, str):
         input_path = Path(input_path)
@@ -182,17 +228,42 @@ def prepare_complex(
         run_opts,
         collect=collect,
     )
-    trc_p_output = save_prepare_protein_outputs(res)
-    if isinstance(trc_p_output, RunError):
-        return trc_p_output
+    if isinstance(res, str):
+        return RunID(res)
 
-    # If collect=False, we get a run ID (string) back - return it as-is
-    if isinstance(trc_p_output, str):
-        return trc_p_output
-
-    # Otherwise, collect=True gave us Paths to process
-    trc_p = from_json(trc_p_output)
-    trc_p = _single_trc(trc_p, "protein")
+    trc_p = fetch_trc_output(res)
 
     trc_c = merge_trcs(trc_p, trc_l)
-    return trc_c
+    return _upload_trc(trc_c)
+
+
+def fetch_outputs(res: tuple[dict[str, object], ...]) -> TRC:
+    """
+    Fetch prepare-complex outputs into an in-memory TRC.
+
+    Args:
+        res: Collected output from prepare_complex(), containing topology,
+            residues, and chains objects for the merged complex.
+
+    Returns:
+        Parsed TRC data for the merged complex.
+    """
+    out = fetch_trc_output(res)
+    assert isinstance(out, TRC)
+    return out
+
+
+def save_outputs(res: tuple[dict[str, object], ...]) -> TRCSavedResult:
+    """
+    Save prepare-complex outputs into the workspace.
+
+    Args:
+        res: Collected output from prepare_complex(), containing topology,
+            residues, and chains objects for the merged complex.
+
+    Returns:
+        Local paths to the saved topology, residues, and chains files.
+    """
+    out = save_trc_output(res)
+    assert isinstance(out, TRCSavedResult)
+    return out

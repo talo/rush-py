@@ -7,7 +7,10 @@ The rush-py client functions have a structured form for their arguments:
 
 To see the documentation, signature, or parameters for any class or function, use Python's built-in help function:
 ```python
-help(exess.energy)
+from rush import exess
+from rush.exess import exess_energy
+
+help(exess_energy)
 help(exess.FragKeywords)
 ```
 
@@ -23,23 +26,15 @@ Rush module functions will return a run ID that can be used to collect the run a
 If synchronous behavior is desired, `collect=True` can be passed to the module function and collection with a 1 hour wait time will happen automatically, without the need to call `collect_run`, and the module outputs will be returned directly from the module function call as well.
 
 ## Uploading, Downloading & Saving Data
-The rush-py client provides `upload_object`, `download_object`, and `save_object` functions in the `rush.client` Python submodule. These functions upload an object from a local filesystem path, download an object via its object store path and return its data directly (either as a dict for JSON data or as bytes otherwise), and save an object into the workspace directory with arguments that allow for configuring how it gets named (run `help(rush.client.save_object)` for usage).
+The rush-py client provides `upload_object`, `fetch_object`, and `save_object` functions in the `rush.client` Python submodule. These functions upload an object from a local filesystem path, fetch an object via its object store path and return its data directly in memory, and save an object into the workspace directory with arguments that allow for configuring how it gets named (run `help(rush.client.save_object)` for usage).
 
 Also provided is a `save_json` function that allows saving a dict as JSON, by default into the workspace directory, for convenient parallel usage with `save_object`.
 
 ## Output Saving Helpers
 
-Some module functions have a `save_outputs` helper that automatically downloads
-objects to the local filesystem and returns local paths instead of object store
-paths. This is useful when you want to inspect or post-process results on disk.
+Each module function has a `save_outputs` helper that automatically downloads objects to the local filesystem and returns local paths instead of object store paths. This is useful when you want to preserve results for inspection or post-processing.
 
-Downloading outputs is not required when chaining module runs: the object store
-paths returned by a module can be passed directly into another module as inputs.
-
-The `save_outputs` helpers are designed to retain the same output signature as
-the main function, but with object store paths transformed into local filesystem
-paths. Note that not every module has a `save_outputs` helper yet; if you rely
-on this pattern and find a gap, please open an issue so it can be prioritized.
+Downloading outputs is not required when chaining module runs: the object store paths returned by a module can be passed directly into another module as inputs.
 
 ## Workspaces
 Workspaces are used to organize output files from Rush runs. When using the `save_outputs` functions, a folder is created for the project currently in use named via the project ID, and the files are saved based on their object store paths. In this way, the output files will never be overwritten, as object store paths are guaranteed to be unique.

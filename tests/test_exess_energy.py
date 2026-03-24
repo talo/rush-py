@@ -1,28 +1,28 @@
-import json
 import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunError, RunOpts, collect_run, set_opts
+from rush.client import RunOpts, collect_run, set_opts
+from rush.exess import exess_energy
 
 
 def test_exess_energy_tutorial():
-    res = exess.energy(
+    res = exess_energy(
         "tests/data/6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
         ksdft_keywords=None,
-        collect=True,
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 00: Tutorial",
             tags=["rush-py", "test", "6a5j"],
         ),
+        collect=True,
     )
-    output = exess.save_energy_outputs(res)
-    assert not isinstance(output, RunError)
-    output_file = output[0] if isinstance(output, tuple) else output
-    with open(output_file) as f:
-        print(json.load(f)["qmmbe"]["expanded_hf_energy"])
+    output = exess.fetch_outputs(res)
+    assert output.calc.qmmbe is not None
+    assert output.calc.qmmbe.reference_fragment is None
+    assert output.calc.qmmbe.expanded_hf_energy is not None
+    print(output.calc.qmmbe.expanded_hf_energy)
 
 
 def test_exess_energy_exports():
@@ -30,7 +30,7 @@ def test_exess_energy_exports():
     data_dir = Path.cwd() / "tests" / "data"
     # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
     # Using PCSeg-0 for faster test runtimes
-    id = exess.energy(
+    id = exess_energy(
         data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
@@ -53,7 +53,7 @@ def test_exess_energy_exports():
 
     # Each module has a `save_outputs` function that automatically writes the
     # outputs as files to the workspace dir
-    exess.save_energy_outputs(res)
+    exess.save_outputs(res)
 
 
 if __name__ == "__main__":

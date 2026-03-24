@@ -2,9 +2,16 @@ import json
 import sys
 from pathlib import Path
 
-from rush.boltz import LigandSequence, ProteinSequence, boltz
+from rush.boltz import (
+    BoltzResult,
+    LigandSequence,
+    ProteinSequence,
+    boltz,
+    fetch_outputs,
+)
 from rush.client import RunOpts, RunSpec, set_opts
 from rush.mmseqs2 import mmseqs2
+from rush.mmseqs2 import save_outputs as save_mmseqs2_outputs
 
 
 def test_fold():
@@ -18,7 +25,9 @@ def test_fold():
         ),
         collect=True,
     )
-    print(res, file=sys.stderr)
+    print(json.dumps(res, indent=2), file=sys.stderr)
+    saved_msas = save_mmseqs2_outputs(res)
+    assert saved_msas[0].suffix == ".a3m"
     res = boltz(
         [
             ProteinSequence(["A"], protein_seq, res[0]),
@@ -33,6 +42,10 @@ def test_fold():
         collect=True,
     )
     print(json.dumps(res, indent=2), file=sys.stderr)
+    output = fetch_outputs(res)
+    # One diffusion sample by default
+    assert len(output) == 1
+    assert isinstance(output[0], BoltzResult)
 
 
 if __name__ == "__main__":

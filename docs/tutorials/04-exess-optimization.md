@@ -27,10 +27,10 @@ EXESS gives you two engines for this:
 This example uses **ethene (C₂H₄)** with an intentionally twisted starting geometry — the two CH₂ groups are rotated 90° so the hydrogen atoms are perpendicular. During optimization, the molecule relaxes to a **planar** structure because the C=C π bond requires parallel p-orbitals for maximum overlap. It's a dramatic visual change (perpendicular → flat) that illustrates a fundamental concept in chemistry.
 
 ```python
-from rush import exess
-from rush.client import RunOpts, save_object
+from rush.exess_geo_opt import exess_geo_opt
+from rush.client import RunOpts
 
-out = exess.optimization(
+outputs = exess_geo_opt(
     "ethene_twisted_t.json",
     100,  # Maximum optimization steps
     standard_orientation="None",  # Keep original frame of reference
@@ -39,7 +39,7 @@ out = exess.optimization(
 )
 ```
 
-That's it — EXESS will iteratively relax the twisted ethene geometry using the defaults: **Restricted Hartree-Fock / cc-pVDZ**. You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
+That's it — EXESS will iteratively relax the twisted ethene geometry using the default method and basis set. You get back two outputs: the **trajectory** (one topology per step) and **step info** (energy + gradient at each step).
 
 > ⚠️ **Tutorial Basis Set Warning**
 >
@@ -59,33 +59,34 @@ Ethene is the simplest molecule with a C=C double bond. Starting from a 90° twi
 
 The optimization returns two objects:
 1. **Trajectory** — a list of Topology objects, one per step (the geometry at each iteration)
-2. **Step info** — a list of dictionaries with `total_energy` (Hartrees) and `max_gradient_component` (Å)
+2. **Step info** — a list of parsed step records with `total_energy` (Hartrees) and `max_gradient_component` (Å)
 
 ```python
-import json
-from rush import Topology
+from rush.exess_geo_opt import fetch_outputs, save_outputs
 
-# Download both outputs
-out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
-with open(out_traj_path) as f1, open(out_info_path) as f2:
-    out_traj_raw, out_info = [json.load(f) for f in (f1, f2)]
-
-out_traj = [Topology.from_json(t) for t in out_traj_raw]
+# Fetch parsed results into memory
+res = fetch_outputs(outputs)
+out_traj = res.trajectory
+out_info = res.steps
 
 # How quickly did it converge?
 print(f"Converged in {len(out_traj)} steps")
 
 # Energy at start vs. end
-print(f"Initial energy: {out_info[0]['total_energy']:.8f} Eh")
-print(f"Final energy:   {out_info[-1]['total_energy']:.8f} Eh")
-print(f"Energy change:  {out_info[-1]['total_energy'] - out_info[0]['total_energy']:.8f} Eh")
+print(f"Initial energy: {out_info[0].total_energy:.8f} Eh")
+print(f"Final energy:   {out_info[-1].total_energy:.8f} Eh")
+print(f"Energy change:  {out_info[-1].total_energy - out_info[0].total_energy:.8f} Eh")
 
 # How "flat" is the potential at the end?
-print(f"Final max gradient: {out_info[-1]['max_gradient_component']:.2e} Å")
+print(f"Final max gradient: {out_info[-1].max_gradient_component:.2e} Å")
 
 # Compare atom positions
 print(f"First atom — start: {out_traj[0].geometry[:3]}")
 print(f"First atom — end:   {out_traj[-1].geometry[:3]}")
+
+paths = save_outputs(outputs)
+print(paths.trajectory)
+print(paths.steps)
 ```
 
 **What to look for:**

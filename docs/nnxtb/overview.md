@@ -50,19 +50,20 @@ NN-xTB returns a JSON object with three fields:
 | `forces_mev_per_angstrom` | `list[tuple[float, float, float]]` or `null` | Per-atom force vectors (x, y, z) |
 | `frequencies_inv_cm` | `list[float]` or `null` | Vibrational frequencies in cm^-1 |
 
-Use the `NnxtbResults` dataclass to parse this output conveniently:
+Use `fetch_outputs()` to parse this output into a `NnxtbResult` dataclass:
 
 ```python
-import json
-from rush.client import save_object
-from rush.nnxtb import NnxtbResults
+from rush.nnxtb import NnxtbResult, fetch_outputs
 
 # After collecting a run result
-output_path = save_object(res["path"])
-data = json.loads(output_path.read_text())
-results = NnxtbResults(**data)
+res: NnxtbResult = fetch_outputs(outputs)
 
-print(f"Energy: {results.energy_mev} meV")
-print(f"Forces: {results.forces_mev_per_angstrom}")
-print(f"Frequencies: {results.frequencies_inv_cm}")
+print(f"Energy: {res.energy_mev} meV")
+print(f"Forces: {res.forces_mev_per_angstrom}")
+print(f"Frequencies: {res.frequencies_inv_cm}")
 ```
+
+`NnxtbResult` has three fields:
+- `energy_mev`
+- `forces_mev_per_angstrom`
+- `frequencies_inv_cm`

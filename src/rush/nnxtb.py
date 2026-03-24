@@ -8,45 +8,74 @@ is well-suited for large-scale screening where fast, per-atom forces or
 vibrational frequencies are needed. Frequency calculations are more expensive.
 """
 
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
+from typing import Any, Literal, overload
 
 from gql.transport.exceptions import TransportQueryError
 
 from .client import (
+    RunID,
     RunOpts,
     RunSpec,
     _get_project_id,
     _submit_rex,
     collect_run,
+    fetch_object,
+    save_object,
     upload_object,
 )
 from .utils import optional_str
 
 
 @dataclass
-class NnxtbResults:
+class NnxtbResult:
     """
     Parsed nn-xTB results.
 
-    Use this to load JSON output from the Rush object store. When calling
-    `nnxtb(..., collect=True)`, the return value includes a `path` to the JSON
-    output. After reading the json into a dict, you can pass it to this class
-    like `NnxtbResults(**data)`.
+    Use `fetch_outputs(nnxtb(..., collect=True))` to return this dataclass in
+    memory, or `save_outputs(nnxtb(..., collect=True))` to save the raw JSON
+    output into the workspace.
     """
 
     energy_mev: float
-    forces_mev_per_angstrom: list[tuple[float, float, float]] | None
-    frequencies_inv_cm: list[float] | None
+    forces_mev_per_angstrom: list[tuple[float, float, float]] | None = None
+    frequencies_inv_cm: list[float] | None = None
 
-    def __init__(
-        self, energy_mev, forces_mev_per_angstrom=None, frequencies_inv_cm=None
-    ):
-        self.energy_mev = energy_mev
-        self.forces_mev_per_angstrom = forces_mev_per_angstrom
-        self.frequencies_inv_cm = frequencies_inv_cm
+
+@overload
+def nnxtb(
+    topology_path: Path | str,
+    compute_forces: bool | None = None,
+    compute_frequencies: bool | None = None,
+    multiplicity: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1, storage=100),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[False] = False,
+) -> RunID: ...
+@overload
+def nnxtb(
+    topology_path: Path | str,
+    compute_forces: bool | None = None,
+    compute_frequencies: bool | None = None,
+    multiplicity: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1, storage=100),
+    run_opts: RunOpts = RunOpts(),
+    collect: Literal[True] = True,
+) -> dict[str, Any]: ...
+@overload
+def nnxtb(
+    topology_path: Path | str,
+    compute_forces: bool | None = None,
+    compute_frequencies: bool | None = None,
+    multiplicity: int | None = None,
+    run_spec: RunSpec = RunSpec(gpus=1, storage=100),
+    run_opts: RunOpts = RunOpts(),
+    collect: bool = False,
+) -> dict[str, Any] | RunID: ...
 
 
 def nnxtb(
@@ -56,8 +85,8 @@ def nnxtb(
     multiplicity: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1, storage=100),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+    collect: bool = False,
+) -> dict[str, Any] | RunID:
     """
     Run NN-xTB on the system in the QDX topology file at `topology_path`.
 
@@ -103,12 +132,44 @@ in
     )
     try:
         run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
+        if not collect:
             return run_id
+
+        out = collect_run(run_id)
+        out = out[0]
+        assert isinstance(out, dict)
+        return out
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise e
+
+
+def fetch_outputs(res: dict[str, Any]) -> NnxtbResult:
+    """
+    Fetch NN-xTB outputs into memory.
+
+    Args:
+        res: Collected output from nnxtb().
+
+    Returns:
+        Parsed NN-xTB result data.
+    """
+    output_obj = res
+    return NnxtbResult(**json.loads(fetch_object(output_obj["path"]).decode()))
+
+
+def save_outputs(res: dict[str, Any]) -> Path:
+    """
+    Save NN-xTB outputs into the workspace.
+
+    Args:
+        res: Collected output from nnxtb().
+
+    Returns:
+        Local path to the saved NN-xTB output file.
+    """
+    output_obj = res
+    return save_object(output_obj["path"])
