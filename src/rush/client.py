@@ -893,9 +893,10 @@ class RushRunInfo:
         totals_suffix = "" if self._resource_totals_complete() else " (incomplete)"
         if self.walltime is not None:
             lines.append(f"  walltime:    {self.walltime}{totals_suffix}")
-        if self.sus:
+        if self.sus is not None:
             for target, sus in self.sus.items():
-                lines.append(f"  {target} SUs:  {sus}{totals_suffix}")
+                prefix = f"{target.capitalize()} SUs:"
+                lines.append(f"  {prefix:<12} {sus}{totals_suffix}")
         return "\n".join(lines)
 
 
@@ -919,13 +920,13 @@ def _run_sus(
     sus_by_target: dict[str, int | float] = {}
     for module_instance in module_instances["nodes"] if module_instances else []:
         target = module_instance.get("target")
-        if target in {"Gadi", "Setonix"}:
+        if target in {"gadi", "setonix"}:
             sus_by_target.setdefault(target, 0)
 
     for utilization in resource_utilizations["nodes"] if resource_utilizations else []:
         target = utilization.get("target")
         sus = utilization.get("sus")
-        if target not in {"Gadi", "Setonix"}:
+        if target not in {"gadi", "setonix"}:
             continue
         sus_by_target.setdefault(target, 0)
         if sus is not None:
