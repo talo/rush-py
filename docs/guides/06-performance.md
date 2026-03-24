@@ -1,4 +1,4 @@
-# Performance & Benchmarking
+# Estimating Cost & Runtime
 
 Computational chemistry workloads vary enormously depending on your inputs and settings. Two single-point energy calculations can differ in cost by several orders of magnitude. This page explains what drives runtime and how to estimate cost for your own use case with a few short test runs.
 
