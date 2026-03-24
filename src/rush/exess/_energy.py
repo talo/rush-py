@@ -1195,50 +1195,50 @@ def calculate(
     topology_vobj = to_topology_vobj(mol)
 
     rex = Template("""let
-      obj_j = λ j →
-        VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
-      exess = λ topology →
-        exess_rex_s
-          ($run_spec)
-          (exess_rex::ExessParams {
-            schema_version = "0.2.0",
-            external_charges = None,
-            convert_hdf5_to_json = $maybe_convert_hdf5_to_json,
-            model = Some (exess_rex::Model {
-              method = exess_rex::Method::$method,
-              basis = "$basis",
-              aux_basis = $maybe_aux_basis,
-              standard_orientation = $maybe_standard_orientation,
-              force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
-            }),
-            system = $maybe_system,
-            keywords = exess_rex::Keywords {
-              scf = $maybe_scf_keywords,
-              ks_dft = $maybe_ks_keywords,
-              rtat = None,
-              frag = $maybe_frag_keywords,
-              boundary = None,
-              log = None,
-              dynamics = None,
-              integrals = None,
-              debug = None,
-              export = $maybe_export_keywords,
-              guess = None,
-              force_field = None,
-              optimization = None,
-              hessian = None,
-              gradient = None,
-              qmmm = None,
-              machine_learning = None,
-              regions = None,
-            },
-            driver = exess_rex::Driver::$driver,
-          })
-          [ (obj_j topology) ]
-          None
-    in
-      exess "$topology_vobj_path"
-    """).substitute(
+  obj_j = λ j →
+    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
+  exess = λ topology →
+    exess_rex_s
+      ($run_spec)
+      (exess_rex::ExessParams {
+        schema_version = "0.2.0",
+        external_charges = None,
+        convert_hdf5_to_json = $maybe_convert_hdf5_to_json,
+        model = Some (exess_rex::Model {
+          method = exess_rex::Method::$method,
+          basis = "$basis",
+          aux_basis = $maybe_aux_basis,
+          standard_orientation = $maybe_standard_orientation,
+          force_cartesian_basis_sets = $maybe_force_cartesian_basis_sets,
+        }),
+        system = $maybe_system,
+        keywords = exess_rex::Keywords {
+          scf = $maybe_scf_keywords,
+          ks_dft = $maybe_ks_keywords,
+          rtat = None,
+          frag = $maybe_frag_keywords,
+          boundary = None,
+          log = None,
+          dynamics = None,
+          integrals = None,
+          debug = None,
+          export = $maybe_export_keywords,
+          guess = None,
+          force_field = None,
+          optimization = None,
+          hessian = None,
+          gradient = None,
+          qmmm = None,
+          machine_learning = None,
+          regions = None,
+        },
+        driver = exess_rex::Driver::$driver,
+      })
+      [ (obj_j topology) ]
+      None
+in
+  exess "$topology_vobj_path"
+""").substitute(
         run_spec=run_spec._to_rex(),
         maybe_convert_hdf5_to_json=optional_str(convert_hdf5_to_json),
         method=method,
