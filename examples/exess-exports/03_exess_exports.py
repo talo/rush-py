@@ -50,7 +50,7 @@ print("=" * 60)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-result = energy(
+run = energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -61,19 +61,19 @@ result = energy(
         name="Rush-Py Tutorial: EXESS Exports 1",
         tags=["rush-py", "tutorial", "exess"],
     ),
-).collect()
+)
+result = run.fetch()
 
 # Inspect the result
 print(f"Calc object: {result.calc}")
 print(f"Exports object: {result.exports}")
 
 # Save outputs to disk (JSON + HDF5)
-paths = result.save()
+paths = run.save()
 print(f"Saved files: {paths}")
 
 # Load total energy from fetched outputs
-res = result.fetch()
-total_energy = res.calc.qmmbe.expanded_hf_energy
+total_energy = result.calc.qmmbe.expanded_hf_energy
 
 
 # ===== Example 2: Descriptor grids for density and ESP =====
@@ -89,7 +89,7 @@ GRID_MIN = [-5.5, -5.5, -3.5]
 GRID_MAX = [5.5, 5.5, 3.5]
 GRID_SPACING = [0.3, 0.3, 0.3]
 
-result = energy(
+run = energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -108,9 +108,10 @@ result = energy(
         name="Rush-Py Tutorial: EXESS Exports 2",
         tags=["rush-py", "tutorial", "exess", "electron density", "ESP"],
     ),
-).collect()
+)
+result = run.fetch()
 
-paths = result.save()
+paths = run.save()
 print(f"Saved files: {paths}")
 print()
 print("The JSON file contains density_descriptors, esp_descriptors,")

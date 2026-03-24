@@ -33,18 +33,17 @@ print("EXPANDED HF ENERGY:")
 print(result.calc.qmmbe.expanded_hf_energy)
 ```
 
-### Asynchronous Runs and Collecting Runs
+### Asynchronous Runs
 
-Rush modules can take a long time, so by default they return a `RushRun` handle as soon as the run is submitted. To wait for completion and get the result reference, call `.collect()`:
+Rush modules can take a long time, so by default they return a `RushRun` handle as soon as the run is submitted. To wait for completion and get the result, call `.fetch()`:
 ```python
 from rush import exess
 
 run = exess.energy("input_topology.json")  # run started
-result_ref = run.collect()  # waits for completion
-result = result_ref.fetch()
+result = run.fetch()  # waits for completion
 ```
 
-As shown, module calls return a `RushRun` object that can be used as above to collect any run that you've submitted.
+As shown, module calls return a `RushRun` object that can be used as above to fetch any run that you've submitted.
 
 
 ### Supplementary Entrypoints

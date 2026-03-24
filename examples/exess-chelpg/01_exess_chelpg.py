@@ -302,9 +302,9 @@ result = exess.energy(
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
     convert_hdf5_to_json=True,
-).collect()
+).fetch()
 
-exports = result.fetch().exports
+exports = result.exports
 assert isinstance(exports, dict)
 charges = exports["chelpg_charges"]
 

@@ -20,7 +20,7 @@ When a Rush module expects a tuple of paths to Topology, Residues, and Chains ob
 One can pass a set of run options to each module function via `run_opts=rush.client.RunOpts(...)`. Current options include setting the run's name, description, tags, and an email flag which, if set to true, will trigger messages for job notifications sent to the email address associated with the user's Rush account.
 
 ## Submit + Collect Pattern
-Rush module functions return a `RushRun` handle. Call `RushRun.collect()` to wait for completion and get the module's result reference, or use the convenience shortcuts `RushRun.fetch()` and `RushRun.save()`.
+Rush module functions return a `RushRun` handle. Call `RushRun.collect()` to wait for completion and get the module's result reference, or use the convenience shortcuts `RushRun.fetch()` and `RushRun.save()`. All functions take a `max_wait_time` parameter that sets the number of seconds to wait for the run to finish before timing out.
 
 ## Uploading, Downloading & Saving Data
 The Rush client module provides `client.upload_object` and `client.save_object`, which allow for uploading and saving `RushObject` instances to the Rush object store to and from local filesystem paths. Also, each module's `ResultRef` class provides `ResultRef.fetch()` and `ResultRef.save() functions. These fetch a module's results and return its data directly in memory, and save an object into the workspace directory with arguments that allow for configuring how it gets named.

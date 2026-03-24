@@ -152,7 +152,7 @@ help(exess.energy)
 help(exess.FragKeywords)
 ```
 
-By default, module calls return a `RushRun` handle immediately. Call `.collect()` to wait for completion, or use `.fetch()` / `.save()` as shortcuts:
+By default, module calls return a `RushRun` handle. Call `.collect()` to wait for completion, or use `.fetch()` / `.save()` as shortcuts:
 
 ```python
 from rush import exess
