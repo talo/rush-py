@@ -3,13 +3,23 @@
 ## Unreleased
 
 ### Changed
-- Modules now uses `RushRun.fetch()` for in-memory results and `RushRun.save()` for workspace persistence, with shared output handling between the two paths
-- Implemented `module.Result` types for module output
+- Modules that take molecules as input are now overloaded to behave as expected for multiple types, including TRCs, tuples of the required TRC components, individual Topologies where possible, and object-store references in multiple forms
+- renamed mol types' `to_json` to `to_dict`, since it returns a dict
+
+### Added
+- Provided `RushRun` type that modules functions return to manage the run
+- Modules now use `RushRun.collect() for blocking until run completion and getting access to results as remote object-store references
+- Modules now use `RushRun.fetch()` for in-memory results, and `RushRun.save()` for workspace persistence, with shared output handling between the two latter paths.
+- Provide `module.ResultRef` types for references to remote module output
+- Provide `module.Result` types for fetched module output
     - E.g., EXESS parsed output types are now `exess.Result`, `exess.Calculation`, and `exess.ManyBodyExpansion`, with the calculation available at `result.calc`
-- Added `fetch_object()` as the in-memory object-store helper and removed `download_object()`
+- Provide `module.ResultPaths` types for saved module output
+    - Mirrors the structure of `ResultRef` and `Result` per module, but each field is a path to the local saved file for each field
+- Provide similar `TRCRef` and `TRCPaths` classes with the same design pattern, and `TRCRef.upload()` for uploading TRCs to the Rush object store
+- Provide `RushObject` class wrapping raw virtual object JSON data
+- Provide `fetch_object()` as the in-memory object-store helper and removed `download_object()`
 - `fetch_object()` and `save_object()` now share archive extraction logic
 - Updated docs, examples, and tests to use the new fetch/save naming
-- Modules that take molecules as input are now overloaded to behave as expected for multiple types, including TRCs, tuples of the required TRC components, individual Topologies where possible, and object-store references in multiple forms
 
 ## 6.10.2
 
