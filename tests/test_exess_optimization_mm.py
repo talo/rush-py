@@ -2,17 +2,16 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, save_object, set_opts
+from rush.client import RunOpts, set_opts
 
 
 def test_exess_optimization_mm():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    res = exess.optimization(
-        max_iters=10000,
-        topology_path=data_dir / "6a5j_t.json",
+    run = exess.optimization(
         # Residues are required for MM fragments
-        residues_path=data_dir / "6a5j_r.json",
+        (data_dir / "6a5j_t.json", data_dir / "6a5j_r.json"),
+        max_iters=10000,
         optimization_keywords=exess.OptimizationKeywords(
             coordinate_system="Cartesian",
             algorithm="LBFGS",
@@ -26,11 +25,14 @@ def test_exess_optimization_mm():
             name="Rush-Py Test EXESS Optimization 02: MM",
             tags=["rush-py", "test", "6a5j", "MM"],
         ),
-        collect=True,
     )
-    print(res, file=sys.stderr)
-    for res_i in res:
-        save_object(res_i["path"])
+    print(run, file=sys.stderr)
+    fetched = run.fetch()
+    assert isinstance(fetched, exess.OptimizationResult)
+    # TODO: check why convergence fails here
+
+    saved = run.save()
+    assert isinstance(saved, exess.OptimizationResultPaths)
 
 
 if __name__ == "__main__":

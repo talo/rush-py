@@ -1,31 +1,112 @@
-#!/usr/bin/env python3
+"""
+PBSA module for the Rush Python client.
+
+Computes solvation energies using the Poisson-Boltzmann Surface Area method.
+
+Usage::
+
+    from rush import pbsa
+
+    result = pbsa.solvation_energy("mol.json", ...).fetch()
+    print(result.solvation_energy)
+"""
+
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from string import Template
+from typing import Any
 
 from gql.transport.exceptions import TransportQueryError
 
+from rush import TRC, Topology, TRCRef
+from rush._trc import to_topology_vobj
+
+from ._utils import float_to_str
 from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
+    _json_content_name,
     _submit_rex,
-    collect_run,
-    upload_object,
+    save_json,
 )
-from .utils import float_to_str
+from .run import RushRun
+
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
 
 
 @dataclass
-class PBSAResults:
+class Result:
+    """Parsed PBSA solvation energy results (all values in Hartrees)."""
+
     solvation_energy: float
     polar_solvation_energy: float
     nonpolar_solvation_energy: float
 
 
-def pbsa(
-    topology_path: Path | str,
+@dataclass(frozen=True)
+class ResultPaths:
+    """Workspace path for saved PBSA output."""
+
+    output: Path
+
+
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to PBSA output.
+
+    PBSA results are small enough to be returned inline (three floats),
+    so no object store download is needed.
+    """
+
+    solvation_energy: float
+    polar_solvation_energy: float
+    nonpolar_solvation_energy: float
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``."""
+        if isinstance(res, list) and len(res) == 3:
+            return cls(
+                solvation_energy=float(res[0]),
+                polar_solvation_energy=float(res[1]),
+                nonpolar_solvation_energy=float(res[2]),
+            )
+        raise ValueError(
+            f"pbsa should return exactly 3 float outputs, "
+            f"got {type(res).__name__} with {len(res) if hasattr(res, '__len__') else '?'} items."
+        )
+
+    def fetch(self) -> Result:
+        """Return parsed PBSA results (no download needed — data is inline)."""
+        return Result(
+            solvation_energy=self.solvation_energy,
+            polar_solvation_energy=self.polar_solvation_energy,
+            nonpolar_solvation_energy=self.nonpolar_solvation_energy,
+        )
+
+    def save(self) -> ResultPaths:
+        """Save PBSA results as JSON to the workspace."""
+        output_json = asdict(self.fetch())
+        return ResultPaths(
+            output=save_json(
+                output_json,
+                name=_json_content_name("pbsa_output", output_json),
+            ),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def solvation_energy(
+    mol: TRC | TRCRef | Path | str | RushObject | Topology,
     solute_dielectric: float,
     solvent_dielectric: float,
     solvent_radius: float,
@@ -39,18 +120,16 @@ def pbsa(
     box_size_factor: float,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+) -> RushRun[ResultRef]:
     """
-    Run PBSA on the system in the QDX topology file at `topology_path`.
+    Submit a PBSA solvation energy calculation for the topology at *topology_path*.
 
-    Returns the
-    total solvation energy, polar solvation energy, and nonpolar solvation energy
-    of the system, in Hartrees.
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed result, or ``.save()`` to write it to disk as JSON.
     """
 
     # Upload inputs
-    topology_vobj = upload_object(topology_path)
+    topology_vobj = to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let
@@ -91,13 +170,13 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
-            return run_id
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise

@@ -20,8 +20,8 @@ Output files (saved to optimization-outputs/):
 import json
 from pathlib import Path
 
-from rush import Topology, exess
-from rush.client import RunOpts, save_object
+from rush import exess
+from rush.client import RunOpts
 
 DATA_DIR = Path(__file__).parent / "data"
 INPUT_FILE = DATA_DIR / "ethene_twisted_t.json"
@@ -41,14 +41,13 @@ print("=" * 60)
 METHOD = "RestrictedHF"
 BASIS = "STO-3G"
 
-out = exess.optimization(
+run = exess.optimization(
     INPUT_FILE,
     100,  # Number of optimization iterations
     method=METHOD,
     basis=BASIS,
     standard_orientation="None",
     run_opts=RunOpts(name="Tutorial: Optimization using QM"),
-    collect=True,
 )
 
 
@@ -58,30 +57,27 @@ print("=" * 60)
 print("Working with the optimization output")
 print("=" * 60)
 
-out_traj_path, out_info_path = [save_object(obj["path"]) for obj in out]
-with (
-    open(out_traj_path, encoding="utf-8") as f1,
-    open(out_info_path, encoding="utf-8") as f2,
-):
-    out_traj_raw, out_info = [json.load(f) for f in (f1, f2)]
+paths = run.save()
+print(f"Saved files: {paths}")
 
-print("Num steps to convergence:", len(out_traj_raw))
+res = run.fetch()
 
-out_traj = [Topology.from_json(t) for t in out_traj_raw]
+out_traj = res.trajectory
+out_info = res.steps
+
+print("Num steps to convergence:", len(out_traj))
 print("First Atom's Coords")
 print(f"  First step: {out_traj[0].geometry[:3]}")
 print(f"  Final step: {out_traj[-1].geometry[:3]}")
 
 # The below are only provided for QM regions
 print("Final Step Info")
-print(f"  Available keys: {list(out_info[-1].keys())}")
-energy_key = "total_energy" if "total_energy" in out_info[-1] else "energy"
-if energy_key in out_info[-1]:
-    print(f"  Total energy: {out_info[-1][energy_key]:.5f} Eh")
+if out_info[-1].total_energy is not None:
+    print(f"  Total energy: {out_info[-1].total_energy:.5f} Eh")
 else:
     print("  Energy: (not available in output)")
-if "max_gradient_component" in out_info[-1]:
-    print(f"  Max gradient component: {out_info[-1]['max_gradient_component']:.2} Å")
+if out_info[-1].max_gradient_component is not None:
+    print(f"  Max gradient component: {out_info[-1].max_gradient_component:.2} Å")
 else:
     print("  Max gradient component: (not available in output)")
 
@@ -108,18 +104,17 @@ def topology_to_xyz(topo):
 initial_xyz = topology_to_xyz(out_traj[0])
 final_xyz = topology_to_xyz(out_traj[-1])
 
-energy_key = "total_energy" if "total_energy" in out_info[0] else "energy"
-if energy_key not in out_info[0]:
+if out_info[0].total_energy is None:
     raise KeyError(
-        f"Cannot find energy key in optimization output. "
-        f"Available keys: {list(out_info[0].keys())}"
+        "Cannot find total_energy in optimization output. "
+        f"Available values: {out_info[0]!r}"
     )
-energies = [step[energy_key] for step in out_info]
+energies = [step.total_energy for step in out_info]
 steps = list(range(len(energies)))
 initial_energy = energies[0]
 final_energy = energies[-1]
 energy_change = final_energy - initial_energy
-final_max_grad = out_info[-1].get("max_gradient_component", "N/A")
+final_max_grad = out_info[-1].max_gradient_component or "N/A"
 n_steps = len(out_traj)
 
 # Escape XYZ strings for JavaScript embedding

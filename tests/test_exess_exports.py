@@ -3,12 +3,13 @@ from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts, RunSpec, set_opts
+from rush.exess import energy
 
 
 def test_exess_exports():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    res = exess.energy(
+    run = energy(
         data_dir / "benzene_t.json",
         basis="PCSeg-0",
         frag_keywords=None,  # No fragmentation; whole system calc
@@ -27,10 +28,10 @@ def test_exess_exports():
             name="Rush-Py Test EXESS Energy 04: Electron Density and ESP",
             tags=["rush-py", "test", "1kuw", "electron density", "ESP"],
         ),
-        collect=True,
     )
-    print(res, file=sys.stderr)
-    files = exess.save_energy_outputs(res)
+    result = run.collect()
+    print(result, file=sys.stderr)
+    files = result.save()
     print(files, file=sys.stderr)
 
 

@@ -19,7 +19,7 @@ This page covers both the EXESS executable and the rush-py interface. The input 
 
          from rush import exess
 
-         exess.energy("input.json", collect=True)
+         exess.energy("input.json").fetch()
 ```
 
 ## CLI (EXESS executable)
@@ -126,13 +126,13 @@ Set the Rush environment variables before running the client:
 
 ### Basic usage
 
-The rush-py EXESS wrapper accepts the same topology input format (JSON), and exposes both a direct EXESS entry point and convenience wrappers:
+The rush-py EXESS wrapper accepts the same topology input format (JSON). Most users should prefer the module-specific wrappers and only use `exess.calculate(...)` when they need to set the EXESS driver explicitly:
 
 ```python
 from rush import exess
 
 # Direct wrapper
-exess.exess("input_topology.json", collect=True)
+exess.calculate("input_topology.json", driver="Energy").fetch()
 
 # Convenience wrappers
 exess.energy(...)
@@ -143,7 +143,7 @@ exess.qmmm(...)
 
 Sample topology inputs are available in `tests/data/`, including `tests/data/1kuw_t.json` (small protein topology), `tests/data/benzene_t.json`, and `tests/data/ethane_t.json`.
 
-`exess.optimization` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM regions when needed.
+`exess.optimization()` requires `max_iters` and does not support fragment-based QM calculations; fragments can still be used to define QM/MM regions when needed.
 
 To inspect function signatures and parameter docs locally, use Python's `help`:
 
@@ -152,17 +152,18 @@ help(exess.energy)
 help(exess.FragKeywords)
 ```
 
-By default, runs are asynchronous and return a run ID. Pass `collect=True` to wait for completion, or collect later:
+By default, module calls return a `RushRun` handle. Call `.collect()` to wait for completion, or use `.fetch()` / `.save()` as shortcuts:
 
 ```python
-from rush.client import collect_run
-from rush.exess import exess as run_exess
+from rush import exess
 
-run_id = run_exess("input_topology.json")
-result = collect_run(run_id)
+run = exess.energy("input_topology.json")
+result_ref = run.collect()
+result = result_ref.fetch()  # could have also done run.fetch()
+paths = result_ref.save()  # could have also done run.save()
 ```
 
-`collect_run` waits up to one hour by default before timing out.
+`RushRun.collect()` waits up to one hour by default before timing out.
 
 ### Run metadata and resources
 
@@ -172,11 +173,10 @@ Run metadata (name, tags, description, email notifications) is configured via `r
 from rush import exess
 from rush.client import RunOpts, RunSpec
 
-res = exess.energy(
+run = exess.energy(
     "input_topology.json",
     run_opts=RunOpts(name="example", tags=["exess"], email=True),
     run_spec=RunSpec(storage=1000, gpus=1),
-    collect=True,
 )
 ```
 
@@ -189,16 +189,14 @@ When a Rush module expects paths to Topology/Residues/Chains objects, rush-py ca
 Rush uses object store paths for inputs and outputs. You can upload, download, and save objects explicitly:
 
 ```python
-from rush.client import download_object, save_json, save_object, upload_object
+from rush.client import fetch_object, save_json, save_object, upload_object
 ```
 
-The `save_outputs` helpers download outputs to the local workspace and preserve the original output signature, replacing object store paths with local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
-
-Not every module has a `save_outputs` helper yet; if you rely on this pattern and find a gap, file an issue so it can be prioritized.
+`RushRun.save()` and `ResultRef.save()` download outputs to the local workspace and return module-specific saved result objects or local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
 
 ### Workspaces
 
-`save_outputs` writes files into a per-project workspace directory, keeping a `history.json` ledger of module runs (run ID, time created, module revision). To customize the workspace location:
+`RushRun.save()` writes files into a per-project workspace directory, keeping a `history.json` ledger of module runs (run ID, time created, module revision). To customize the workspace location:
 
 ```python
 from pathlib import Path
@@ -217,10 +215,10 @@ Replace `{PROJECT_ID}` with your actual project ID.
 
 ### Outputs and object store paths
 
-Rush returns outputs as object store references (UUID paths plus format info). Use the EXESS output helpers to download the results:
+Rush returns outputs as object store references (UUID paths plus format info). Use the run or result-reference helpers to download the results:
 
 ```python
-files = exess.save_energy_outputs(res)
+paths = exess.energy("input_topology.json").save()
 ```
 
 Details on output files and the JSON and HDF5 structures are in the [outputs page](outputs).

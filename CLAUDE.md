@@ -31,11 +31,11 @@ uv run pytest tests/test_exess_energy.py
 uv run pytest tests/test_exess_energy.py::test_name
 
 # Linting / formatting
-uv run ruff check .
-uv run ruff format .
+uv run ruff check
+uv run ruff format
 
 # Type checking
-uv run ty ./src ./tests/
+uv run ty check
 
 # Build docs
 cd docs && uv run sphinx-build -b html . _build/html
@@ -50,12 +50,12 @@ Tests hit the live Rush staging API — they require valid credentials in `.env`
 **Client layer (`client.py`):** GraphQL client that handles authentication, REX DSL code generation, run submission/polling with exponential backoff, and file upload/download via object storage. Reads credentials from `.env` files (project dir or `~/.rush/.env`).
 
 **Computation modules** each follow the same pattern — accept a `TRC` or file input, build REX DSL code via the client, submit to the Rush API, poll for results, and return parsed output:
-- `exess.py` — Quantum chemistry (energy, optimization, QMMM, CHELPG, interaction energy)
+- `exess` subpackage — Quantum chemistry (energy, optimization, QMMM, CHELPG, interaction energy)
 - `nnxtb.py` — Tight-binding quantum chemistry
 - `boltz.py` — Protein folding
 - `auto3d.py` — Conformation generation
 - `pbsa.py` — Solvation energy (Poisson-Boltzmann)
-- `prepare_protein.py` / `prepare_complex.py` — Structure preparation
+- `prepare` subpackage — Structure preparation
 - `mmseqs2.py` — Sequence search
 
 **File format converters (`convert/`):** Read/write PDB, mmCIF, SDF, JSON with auto-detection via `load_structure()`/`save_structure()`.
@@ -65,7 +65,7 @@ Tests hit the live Rush staging API — they require valid credentials in `.env`
 ## Key Conventions
 
 - Python >= 3.12, managed with `uv`
-- Type checking: `basedpyright` in standard mode (see `[tool.pyright]` in pyproject.toml)
-- Linting: `ruff`
 - Build backend: `uv_build`
+- Formatting and linting: `ruff`
+- Type checking: `ty`
 - Source layout: `src/rush/` (installed as `rush` package)

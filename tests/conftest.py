@@ -14,6 +14,14 @@ FAST_TEST_PREFIXES = (
     "test_merge",
     "test_fetch_runs",
     "test_client_collect_run",
+    "test_exess_namespaces",
+    "test_exess_output_helpers",
+    "test_nnxtb_output_helpers",
+    "test_auto3d_output_helpers",
+    "test_prepare_output_helpers",
+    "test_pbsa_output_helpers",
+    "test_mmseqs2_output_helpers",
+    "test_boltz_output_helpers",
 )
 
 # Threshold: if any target has more than this many queued+admitted jobs, skip slow tests.

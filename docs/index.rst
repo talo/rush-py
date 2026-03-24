@@ -1,12 +1,11 @@
 QDX Documentation
 ==================
 
-Welcome to QDX's documentation hub. These docs cover the **Rush Python
-SDK** for programmatic access to the `Rush platform <https://qdx.co/rush>`__,
-which is how we make our quantum chemistry technology available along with
-vertical applications to drug discovery developed by our R&D team, the
-**EXESS** quantum chemistry engine that powers many of its calculations,
-and the **NN-xTB** neural network tight-binding method for fast
+Welcome to QDX's documentation hub. The `Rush platform <https://qdx.co/rush>`__
+is how we make our quantum chemistry technology and drug-discovery applications
+available. These docs cover three key components: the **Rush Python SDK** for
+programmatic access to Rush, **EXESS** — our GPU-accelerated quantum chemistry
+engine, and **NN-xTB** — a neural network tight-binding method for fast
 semi-empirical calculations.
 
 If you prefer a visual interface over scripting, you can use EXESS directly
@@ -86,6 +85,23 @@ For information on how to actually run EXESS programmatically, see the
    exess/outputs
    exess/reference
    exess/citations
+
+----
+
+NN-xTB
+------
+
+NN-xTB is QDX's neural-network-augmented tight-binding method for fast,
+approximate quantum calculations. It is useful when you need energies,
+forces, or frequencies at much higher throughput than EXESS.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: NN-xTB
+
+   nnxtb/overview
+   nnxtb/running
+   nnxtb/citations
 
 ----
 

@@ -13,20 +13,26 @@ from io import BytesIO
 from os import getenv
 from pathlib import Path
 from string import Template
-from typing import Literal, TypeAlias
+from tempfile import NamedTemporaryFile
+from typing import Any, Literal, NewType, TypeAlias, TypeGuard
 
 import requests
 import zstandard as zstd
 from gql import Client, FileVar, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-from .utils import clean_dict, optional_str
+from ._utils import clean_dict, optional_str
 
 INITIAL_POLL_INTERVAL = 0.5
 
 MAX_POLL_INTERVAL = 30
 
 BACKOFF_FACTOR = 1.5
+
+RunID = NewType("RunID", str)
+
+#: UUID identifying an object in the Rush object store.
+ObjectID = NewType("ObjectID", str)
 
 _dotenv_cache: dict[str, str] | None = None
 
@@ -109,9 +115,9 @@ MODULE_LOCK = (
         # staging
         "auto3d_rex": "github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
-        "exess_rex": "github:talo/tengu-exess/7ce77488ebc1ebb54597a91e68b576b270599959#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/7ce77488ebc1ebb54597a91e68b576b270599959#exess_geo_opt_rex",
-        "exess_qmmm_rex": "github:talo/tengu-exess/b667752cc767a223126184a3e78485a465a32aea#exess_qmmm_rex",
+        "exess_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex",
+        "exess_qmmm_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex",
         "mmseqs2_rex": "github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -310,7 +316,7 @@ class RunOpts:
     email: bool | None = None
 
 
-def upload_object(filepath: Path | str):
+def upload_object(input: Path | str | dict[str, Any]):
     """
     Upload an object at the filepath to the current project. Usually not necessary; the
     module functions should handle this automatically.
@@ -329,8 +335,16 @@ def upload_object(filepath: Path | str):
             }
         }
      """)
-    if isinstance(filepath, str):
-        filepath = Path(filepath)
+    if isinstance(input, dict):
+        t_f = NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        json.dump(input, t_f)
+        t_f.close()
+        return upload_object(t_f.name)
+
+    if isinstance(input, str):
+        filepath = Path(input)
+    else:
+        filepath = input
     with filepath.open(mode="rb") as f:
         project_id = _get_project_id()
         if filepath.suffix == ".json":
@@ -366,10 +380,52 @@ def upload_object(filepath: Path | str):
     return obj
 
 
-def download_object(path: str):
+def _extract_object_archive(data: bytes) -> bytes:
+    decompressed = zstd.ZstdDecompressor().decompress(data, max_output_size=int(1e9))
+    with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
+        tar_filenames = tar.getnames()
+
+        # Handle empty tar archives
+        if not tar_filenames:
+            raise ValueError("Tar archive is empty - no files to extract")
+
+        # Extract the appropriate file:
+        # - If 1 file: extract that file
+        # - If 2+ files: extract index 1 (skip index 0, which is often metadata)
+        file_index = 1 if len(tar_filenames) >= 2 else 0
+        member = tar.getmember(tar_filenames[file_index])
+
+        # If we selected a directory, find the first actual file instead
+        if member.isdir():
+            file_index = None
+            for i, name in enumerate(tar_filenames):
+                m = tar.getmember(name)
+                if not m.isdir():
+                    file_index = i
+                    break
+            if file_index is None:
+                raise ValueError(
+                    "Tar archive contains only directories, no files to extract"
+                )
+
+        extracted_file = tar.extractfile(tar_filenames[file_index])
+        if extracted_file is None:
+            raise ValueError(
+                f"Failed to extract file '{tar_filenames[file_index]}' from tar archive"
+            )
+
+        return extracted_file.read()
+
+
+def fetch_object(path: str, extract: bool = False):
     """
-    Downloads the contents of the given Rush object store path directly into a variable.
-    Be careful, if the contents are too large it might not fit into memory!
+    Fetch the contents of the given Rush object store path directly into memory.
+
+    Be careful: if the contents are too large, they might not fit into memory.
+
+    Args:
+        path: The Rush object store path to fetch.
+        extract: Automatically extract tar.zst archives in memory before returning.
     """
     # TODO: enforce UUID type
     query = gql("""
@@ -395,12 +451,20 @@ def download_object(path: str):
     elif "url" in obj_descriptor:
         response = requests.get(obj_descriptor["url"])
         response.raise_for_status()
-        return response.content
+        data = response.content
+        return _extract_object_archive(data) if extract else data
 
     raise Exception(f"Object at path {path} has neither contents nor URL")
 
 
-def save_json(d: dict, filepath: Path | str | None = None, name: str | None = None):
+def _json_content_name(prefix: str, d: dict) -> str:
+    payload = json.dumps(clean_dict(d), sort_keys=True, separators=(",", ":"))
+    return f"{prefix}_{uuid.uuid5(uuid.NAMESPACE_OID, payload)}"
+
+
+def save_json(
+    d: dict[str, Any], filepath: Path | str | None = None, name: str | None = None
+):
     """
     Save a JSON file into the workspace folder.
     Convenient for saving non-object JSON output from a module run alongside
@@ -420,6 +484,78 @@ def save_json(d: dict, filepath: Path | str | None = None, name: str | None = No
     return filepath
 
 
+@dataclass(frozen=True)
+class RushObject:
+    """Reference to an object in the Rush object store."""
+
+    #: UUID path in the object store.
+    path: ObjectID
+    #: Size in bytes.
+    size: int
+    #: Storage format.
+    format: Literal["Json", "Bin"]
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "RushObject":
+        """Construct from a raw GraphQL output dict.
+
+        Requires ``path``, ``size``, and ``format`` keys.
+        """
+        try:
+            return cls(
+                path=ObjectID(d["path"]),
+                size=d["size"],
+                format=d["format"],
+            )
+        except KeyError as e:
+            raise ValueError(
+                f"RushObject dict missing required key {e}; got keys: {list(d.keys())}"
+            ) from e
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"path": str(self.path), "size": self.size, "format": self.format}
+
+    def save(
+        self,
+        filepath: Path | str | None = None,
+        name: str | None = None,
+        ext: str | None = None,
+        extract: bool = False,
+    ) -> Path:
+        """Download this object and save to the workspace.
+
+        The file type is derived from :attr:`format` automatically.
+        Pass *ext* to override the file extension (e.g. ``"hdf5"``,
+        ``"a3m"``).
+        """
+        if ext is None:
+            ext = self.format.lower()
+
+        if filepath is not None and name is None:
+            if isinstance(filepath, str):
+                filepath = Path(filepath)
+        elif filepath is None and name is not None:
+            project_id = _get_project_id()
+            filepath = _get_opts().workspace_dir / project_id / (f"{name}." + ext)
+        elif filepath is None and name is None:
+            project_id = _get_project_id()
+            filepath = _get_opts().workspace_dir / project_id / (f"{self.path}." + ext)
+        else:
+            raise Exception("Cannot specify both filepath and name")
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        if self.format == "Json":
+            d = json.loads(fetch_object(self.path).decode())
+            with open(filepath, "w") as f:
+                json.dump(clean_dict(d), f, indent=2)
+        else:
+            data = fetch_object(self.path, extract=extract)
+            with open(filepath, "wb") as f:
+                f.write(data)
+
+        return filepath
+
+
 def save_object(
     path: str,
     filepath: Path | str | None = None,
@@ -428,93 +564,16 @@ def save_object(
     ext: str | None = None,
     extract: bool = False,
 ) -> Path:
-    """
-    Saves the contents of the given Rush object store path into the workspace folder.
-    Provides a variety of naming schemes, and supports automatically extracting tar.zst
-    archives (which are sometimes used for module outputs).
+    """Save a Rush object store path to the workspace.
 
-    Note:
-        The `filepath` and `name` parameters are mutually exculsive.
-
-    Args:
-        path: The Rush object store path to save.
-        filepath: Overrides the path to save to.
-        name: Sets the name of the file to save to.
-        type: Manually specify the type of object (usually not necessary).
-        ext: Manually the filetype extension to use (otherwise, based on `type`).
-        extract: Automatically extract tar.zst files before saving.
+    Prefer :meth:`RushObject.save` when you have a ``RushObject``.
+    This function infers the format from the *type* parameter.
     """
-    if type is None and (ext is None or ext == "json"):
+    if type is None:
         type = "json"
-    else:
-        type = "bin"
-    ext = type if ext is None else ext
-
-    if filepath is not None and name is None:
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
-    elif filepath is None and name is not None:
-        project_id = _get_project_id()
-        filepath = _get_opts().workspace_dir / project_id / (f"{name}." + ext)
-    elif filepath is None and name is None:
-        project_id = _get_project_id()
-        filepath = _get_opts().workspace_dir / project_id / (f"{path}." + ext)
-    else:
-        raise Exception("Cannot specify both filepath or name")
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    if type == "json":
-        d = json.loads(download_object(path).decode())
-        with open(filepath, "w") as f:
-            json.dump(clean_dict(d), f, indent=2)
-    else:
-        data = download_object(path)
-        if extract:
-            decompressed = zstd.ZstdDecompressor().decompress(
-                data, max_output_size=int(1e9)
-            )
-            with tarfile.open(fileobj=BytesIO(decompressed)) as tar:
-                tar_filenames = tar.getnames()
-
-                # Handle empty tar archives
-                if not tar_filenames:
-                    raise ValueError("Tar archive is empty - no files to extract")
-
-                # Extract the appropriate file:
-                # - If 1 file: extract that file
-                # - If 2+ files: extract index 1 (skip index 0, which is often metadata)
-                file_index = 1 if len(tar_filenames) >= 2 else 0
-                member = tar.getmember(tar_filenames[file_index])
-
-                # If we selected a directory, find the first actual file instead
-                if member.isdir():
-                    file_index = None
-                    for i, name in enumerate(tar_filenames):
-                        m = tar.getmember(name)
-                        if not m.isdir():
-                            file_index = i
-                            break
-                    if file_index is None:
-                        raise ValueError(
-                            "Tar archive contains only directories, no files to extract"
-                        )
-
-                extracted_file = tar.extractfile(tar_filenames[file_index])
-
-                if extracted_file is None:
-                    raise ValueError(
-                        f"Failed to extract file '{tar_filenames[file_index]}' from tar archive"
-                    )
-
-                data = extracted_file.read()
-
-            # Always write the extracted data to disk
-            with open(filepath, "wb") as f:
-                f.write(data)
-        else:
-            with open(filepath, "wb") as f:
-                f.write(data)
-
-    return filepath
+    format: Literal["Json", "Bin"] = "Json" if type == "json" else "Bin"
+    obj = RushObject(path=ObjectID(path), size=0, format=format)
+    return obj.save(filepath=filepath, name=name, ext=ext, extract=extract)
 
 
 def _fetch_results(run_id: str):
@@ -583,8 +642,8 @@ type RunStatus = Literal["pending", "running", "done", "error", "cancelled", "dr
 
 
 @dataclass
-class RunError:
-    """Represents a run error message, returned from failed collected runs."""
+class RushRunError(Exception):
+    """Raised when a Rush run fails during collection."""
 
     message: str
     trace: str = ""
@@ -601,7 +660,7 @@ def _build_filters(
     tags: list[str] | None,
 ) -> dict | None:
     """Build the GraphQL filter input from Python arguments."""
-    filters = {
+    filters: dict[str, Any] = {
         # We don't want to show deleted runs
         "deleted_at": {"is_null": True},
     }
@@ -630,7 +689,7 @@ def fetch_runs(
     status: RunStatus | list[RunStatus] | None = None,
     tags: list[str] | None = None,
     limit: int | None = None,
-) -> list[str]:
+) -> list[RunID]:
     """
     Query runs and return their IDs.
 
@@ -665,7 +724,7 @@ def fetch_runs(
         tags=tags,
     )
 
-    run_ids = []
+    run_ids: list[RunID] = []
     cursor = None
     page_limit = min(limit, 100) if limit else 100
 
@@ -679,7 +738,7 @@ def fetch_runs(
         result = _get_client().execute(query)
 
         runs_data = result["runs"]
-        run_ids.extend(node["id"] for node in runs_data["nodes"])
+        run_ids.extend(RunID(node["id"]) for node in runs_data["nodes"])
 
         if limit and len(run_ids) >= limit:
             return run_ids[:limit]
@@ -692,7 +751,7 @@ def fetch_runs(
     return run_ids
 
 
-def delete_run(run_id: str) -> None:
+def delete_run(run_id: str | RunID) -> None:
     """
     Delete a run by ID.
     """
@@ -708,7 +767,7 @@ def delete_run(run_id: str) -> None:
     _get_client().execute(query)
 
 
-def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
+def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()) -> RunID:
     # Auto-generate SDK metadata tags
     auto_tags = _get_sdk_tags(rex)
 
@@ -748,7 +807,7 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
     }
 
     result = _get_client().execute(mutation)
-    run_id = result["eval"]["id"]
+    run_id = RunID(result["eval"]["id"])
     created_at = result["eval"]["created_at"].split(".")[0]
     print(f"Run submitted @ {created_at} with ID: {run_id}", file=sys.stderr)
 
@@ -795,12 +854,12 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()):
 
 
 @dataclass
-class RushRun:
+class RushRunInfo:
     """
     Print it out to see a nicely-formatted summary of a run!
     """
 
-    id: str
+    id: RunID
     created_at: str
     updated_at: str
     status: str
@@ -814,7 +873,7 @@ class RushRun:
 
     def __str__(self) -> str:
         lines = [
-            f"RushRun: {self.name or '(unnamed)'}",
+            f"RushRunInfo: {self.name or '(unnamed)'}",
             f"  id:          {self.id}",
             f"  status:      {self.status}",
             f"  created_at:  {self.created_at}",
@@ -829,7 +888,7 @@ class RushRun:
         return "\n".join(lines)
 
 
-def fetch_run_info(run_id: str) -> RushRun | None:
+def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
     """
     Fetch all info for a run by ID.
 
@@ -857,10 +916,10 @@ def fetch_run_info(run_id: str) -> RushRun | None:
     if result["run"] is None:
         return None
 
-    return RushRun(**result["run"] | {"id": run_id})
+    return RushRunInfo(**result["run"] | {"id": RunID(str(run_id))})
 
 
-def _poll_run(run_id: str, max_wait_time) -> tuple[str, bool]:
+def _poll_run(run_id: str | RunID, max_wait_time) -> tuple[str, bool]:
     query = gql("""
         query GetStatus($id: String!) {
             run(id: $id) {
@@ -933,35 +992,33 @@ def _poll_run(run_id: str, max_wait_time) -> tuple[str, bool]:
     return status, module_instance_created
 
 
-def collect_run(
-    run_id: str, max_wait_time: int = 3600
-) -> dict | tuple[dict, ...] | RunError:
+def collect_run(run_id: str | RunID, max_wait_time: int = 3600):
     """
-    Waits until the run finishes, or `max_wait_time` elapses, and returns either the
-    actual result of the run, an error string if the run failed, or a string indicating
-    that the run timed out.
+    Wait until the run finishes and return its outputs.
+
+    Raises:
+        RushRunError: If the run times out, is cancelled, or finishes with an error.
     """
     status, module_instance_created = _poll_run(run_id, max_wait_time)
     if status not in ["cancelled", "error", "done"]:
         err = f"Run timed out: did not complete within {max_wait_time} seconds"
-        run_error = RunError(err)
-        return run_error
+        raise RushRunError(err)
 
     run = _fetch_results(run_id)
     if run["status"] == "cancelled":
-        run_error = RunError(f"Cancelled: {run['result']}", run["trace"] or "")
+        run_error = RushRunError(f"Cancelled: {run['result']}", run["trace"] or "")
         print(run_error, file=sys.stderr)
-        return run_error
+        raise run_error
     elif run["status"] == "error":
-        run_error = RunError(f"Error: {run['result']}", run["trace"] or "")
+        run_error = RushRunError(f"Error: {run['result']}", run["trace"] or "")
         print(run_error, file=sys.stderr)
-        return run_error
+        raise run_error
     elif run["status"] == "done" and not module_instance_created:
         print("Restored already-completed run", file=sys.stderr)
 
     result = run["result"]
 
-    def is_result_type(result):
+    def is_result_type(result: Any) -> TypeGuard[dict[str, Any]]:
         return (
             isinstance(result, dict)
             and len(result) == 1
@@ -973,23 +1030,20 @@ def collect_run(
         if "Ok" in result:
             result = result["Ok"]
         elif "Err" in result:
-            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
+            run_error = RushRunError(f"Error: {result['Err']}", run["trace"] or "")
             print(run_error, file=sys.stderr)
-            return run_error
+            raise run_error
 
     # inner error: for logic-level failures (may not exist, but should)
     if is_result_type(result):
         if "Ok" in result:
             result = result["Ok"]
         elif "Err" in result:
-            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
+            run_error = RushRunError(f"Error: {result['Err']}", run["trace"] or "")
             print(run_error, file=sys.stderr)
-            return run_error
+            raise run_error
 
-    if len(result) == 1:
-        return result[0]
-    else:
-        return result
+    return result
 
 
 #: All self-explanatory: pending runs are queued for submission to a target.

@@ -1,6 +1,8 @@
 import os
 import sys
 
+from sphinx.ext.autodoc import FunctionDocumenter
+
 # Add your project root to path for autodoc
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("_ext"))
@@ -72,6 +74,32 @@ autodoc_typehints_format = "short"
 
 # Control member ordering - group by type (functions, classes, then data)
 autodoc_member_order = "groupwise"
+
+
+_original_format_signature = FunctionDocumenter.format_signature
+
+
+def _format_signature_without_overloads(self, **kwargs):
+    """
+    Render the implementation signature instead of enumerating overloads.
+
+    This keeps autodoc output aligned with the runtime function signature shown
+    in the docs while still allowing overloads to exist for type checkers.
+    """
+
+    analyzer = self.analyzer
+    if analyzer and ".".join(self.objpath) in analyzer.overloads:
+        saved_overloads = analyzer.overloads
+        try:
+            analyzer.overloads = {}
+            return _original_format_signature(self, **kwargs)
+        finally:
+            analyzer.overloads = saved_overloads
+
+    return _original_format_signature(self, **kwargs)
+
+
+FunctionDocumenter.format_signature = _format_signature_without_overloads  # ty:ignore[invalid-assignment]
 
 
 # Skip individual enum members to prevent documentation clutter

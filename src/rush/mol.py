@@ -19,6 +19,7 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
+from functools import total_ordering
 from pathlib import Path
 from typing import Self
 
@@ -93,6 +94,7 @@ class Element(IntEnum):
         return self.name
 
 
+@total_ordering
 class AtomRef:
     """Reference to an atom by index."""
 
@@ -104,6 +106,9 @@ class AtomRef:
     def __eq__(self, other):
         return isinstance(other, AtomRef) and self.value == other.value
 
+    def __lt__(self, other):
+        return isinstance(other, AtomRef) and self.value < other.value
+
     def __hash__(self):
         return hash(self.value)
 
@@ -114,6 +119,7 @@ class AtomRef:
         return self.value
 
 
+@total_ordering
 class FragmentRef:
     """Reference to a fragment by index."""
 
@@ -125,6 +131,9 @@ class FragmentRef:
     def __eq__(self, other):
         return isinstance(other, FragmentRef) and self.value == other.value
 
+    def __lt__(self, other):
+        return isinstance(other, FragmentRef) and self.value < other.value
+
     def __hash__(self):
         return hash(self.value)
 
@@ -135,6 +144,7 @@ class FragmentRef:
         return self.value
 
 
+@total_ordering
 class ResidueRef:
     """Reference to a residue by index."""
 
@@ -146,6 +156,9 @@ class ResidueRef:
     def __eq__(self, other):
         return isinstance(other, ResidueRef) and self.value == other.value
 
+    def __lt__(self, other):
+        return isinstance(other, ResidueRef) and self.value < other.value
+
     def __hash__(self):
         return hash(self.value)
 
@@ -156,6 +169,7 @@ class ResidueRef:
         return self.value
 
 
+@total_ordering
 class ChainRef:
     """Reference to a chain by index."""
 
@@ -166,6 +180,9 @@ class ChainRef:
 
     def __eq__(self, other):
         return isinstance(other, ChainRef) and self.value == other.value
+
+    def __lt__(self, other):
+        return isinstance(other, ChainRef) and self.value < other.value
 
     def __hash__(self):
         return hash(self.value)
@@ -377,7 +394,7 @@ class Topology:
 
         return topology
 
-    def to_json(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         topology_dict: dict[str, object] = {
             "schema_version": "0.2.0",
             "symbols": [str(symbol) for symbol in self.symbols],
@@ -858,7 +875,7 @@ class Residues:
 
         return residues
 
-    def to_json(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         residues_dict: dict[str, object] = {
             "residues": [residue.atoms for residue in self.residues],
             "seqs": self.seqs,
@@ -1056,7 +1073,7 @@ class Chains:
 
         return chains
 
-    def to_json(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         chains_dict: dict[str, object] = {
             "chains": [chain.residues for chain in self.chains],
         }

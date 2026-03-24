@@ -12,7 +12,10 @@
     inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ inputs.uv2nix-parts.flakeModule ];
-      systems = [ "x86_64-linux" "aarch64-darwin"];
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
       perSystem =
         {
           self',
@@ -26,32 +29,11 @@
         in
         {
           packages = {
-            rush-py = config.uv2nix-parts.mkApplication {
-              inherit name workspaceRoot;
-              pyprojectOverrides = final: prev: {
-                pydoc-markdown = prev.pydoc-markdown.overrideAttrs (old: {
-                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
-                });
-                docstring_parser = prev.docstring_parser.overrideAttrs (old: {
-                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
-                });
-              };
-            };
+            rush-py = config.uv2nix-parts.mkApplication { inherit name workspaceRoot; };
             default = self'.packages.rush-py;
           };
           devShells = {
-            rush-py = config.uv2nix-parts.mkShell {
-              inherit name workspaceRoot;
-              args.packages = [pkgs.git];
-              pyprojectOverrides = final: prev: {
-                pydoc-markdown = prev.pydoc-markdown.overrideAttrs (old: {
-                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
-                });
-                docstring_parser = prev.docstring_parser.overrideAttrs (old: {
-                  nativeBuildInputs = old.nativeBuildInputs ++ (final.resolveBuildSystem { setuptools = [ ]; });
-                });
-              };
-            };
+            rush-py = config.uv2nix-parts.mkShell { inherit name workspaceRoot; };
             default = self'.devShells.rush-py;
             uv = pkgs.mkShell { packages = [ pkgs.uv ]; };
           };

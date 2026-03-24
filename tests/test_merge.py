@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from rush import TRC, to_json
+from rush import TRC, to_dict
 from rush.convert import from_json, from_sdf
 from rush import merge_trcs
 
@@ -76,8 +76,8 @@ def test_merge_3fly():
     merged_trc = merge_trcs(protein_trc, ligand_trc)
 
     # Convert merged TRC to JSON
-    merged_json = to_json([merged_trc])
-    # to_json returns an array, but expected might be a single object
+    merged_json = to_dict([merged_trc])
+    # to_dict returns an array, but expected might be a single object
     if isinstance(merged_json, list) and len(merged_json) == 1:
         merged_json = merged_json[0]
 

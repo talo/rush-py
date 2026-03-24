@@ -26,7 +26,7 @@ The simplest export: compute an energy and also write out the electron density a
 from rush import exess
 from rush.client import RunOpts
 
-res = exess.energy(
+paths = exess.energy(
     "input_topology.json",
     export_keywords=exess.ExportKeywords(
         export_density=True,
@@ -35,40 +35,31 @@ res = exess.energy(
         name="Tutorial: EXESS Exports — Density",
         tags=["rush-py", "tutorial", "exess"],
     ),
-    collect=True,
-)
+).save()
+print(paths.calc)
+print(paths.exports)
 ```
 
 > ⚠️ **Tutorial Basis Set Warning**
 >
-> This tutorial [example code](https://github.com/talo/rush-py/tree/main/examples/exess-exports){target="_blank"} uses **STO-3G**, a minimal basis set chosen purely for speed so examples
-> run quickly. **STO-3G is not suitable for research or production calculations.** For
-> meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure
-> methods reference for available basis sets.
+> This tutorial [example code](https://github.com/talo/rush-py/tree/main/examples/exess-exports){target="_blank"} uses **STO-3G**, a minimal basis set chosen purely for speed so examples run quickly. **STO-3G is not suitable for research or production calculations.** For meaningful results, use at least `cc-pVDZ` or larger. See the electronic structure methods reference for available basis sets.
 
 ### What comes back
 
-EXESS returns two outputs:
+EXESS returns a `RushRun` handle, and `run.save()` turns the outputs into an `exess.ResultPaths` object with named filesystem paths:
 
 ```python
-# res looks like:
-[
-    {"path": "17e16a82-...", "size": 0, "format": "json"},   # Energy results (JSON)
-    {"path": "3f80961e-...", "size": 0, "format": "bin"},    # Exported data (HDF5)
-]
+# paths looks like:
+exess.ResultPaths(
+    calc=Path("...json"),
+    exports=Path("...hdf5"),
+)
 ```
 
-- **Output 0** — The standard JSON energy output (same as a normal `exess.energy` call)
-- **Output 1** — An HDF5 file containing the exported properties (electron density in this case)
+- **`paths.calc`** — The standard JSON energy output from the EXESS run
+- **`paths.exports`** — The exported data file, usually HDF5 for export-heavy runs
 
-Save both to disk with the helper function:
-
-```python
-files = exess.save_energy_outputs(res)
-# files = ("17e16a82-....json", "3f80961e-....hdf5")
-```
-
-The HDF5 file can be explored with **h5py**, **h5ls**, **h5dump**, **h5glance**, or any HDF5-compatible tool. Exported data can be large (especially density on fine grids), which is why EXESS uses HDF5 rather than JSON.
+The HDF5 file can be explored with **h5py**, **h5ls**, **h5dump**, **h5glance**, or any HDF5-compatible tool. Exported data can be large, especially density data on fine grids, so it makes sense to request the exports as a HDF5 file and save it to disk before loading and reading the data in it.
 
 ---
 
@@ -80,7 +71,7 @@ Often you want property values at *specific locations* — for example, to map t
 from rush import exess
 from rush.client import RunOpts, RunSpec
 
-res = exess.energy(
+paths = exess.energy(
     "input_topology.json",
     frag_keywords=None,  # No fragmentation — whole-system calculation
     export_keywords=exess.ExportKeywords(
@@ -98,10 +89,7 @@ res = exess.energy(
         name="Tutorial: EXESS Exports — Descriptor Grid",
         tags=["rush-py", "tutorial", "exess", "density", "ESP"],
     ),
-    collect=True,
-)
-
-files = exess.save_energy_outputs(res)
+).save()
 ```
 
 This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecule like benzene, you'd use a larger grid that envelopes the molecule (e.g., `min=[-5.5, -5.5, -3.5]`, `max=[5.5, 5.5, 3.5]`, `spacing=[0.3, 0.3, 0.3]`). The resulting JSON looks like:
@@ -148,9 +136,9 @@ EXESS supports several grid definitions:
 
 **Standard grid options:** `"FINE"`, `"ULTRAFINE"`, `"SUPERFINE"`, `"TREUTLER_GM3"`, `"TREUTLER_GM5"` — these are DFT-style radial quadrature grids centered on atoms.
 
-:::{admonition} Avoid expanded_esp_descriptors
+:::{admonition} Avoid expanded\_esp\_descriptors
 :class: danger
-The `expanded_esp_descriptors` export currently causes an out-of-memory error. Do not enable it.
+The `expanded_esp_descriptors` export currently causes an upstream out-of-memory error bug. Do not enable it.
 :::
 
 ---
@@ -159,26 +147,26 @@ The `expanded_esp_descriptors` export currently causes an out-of-memory error. D
 
 Once you have the saved files, you can load and inspect them in Python:
 
+:::{tip}
+To work with the output directly without needing to save it first, use `run.fetch()` instead of `run.save()`. Here we show how to load the exports data from the saved files. For EXESS exports that can be very large, saving first is often the better workflow.
+:::
+
 ```python
 import json
 import h5py
 
-# Load the JSON energy output
-with open(files[0]) as f:
-    energy_data = json.load(f)
-print(f"Total energy: {energy_data['total_energy']} Hartree")
-
-# Load the HDF5 export (if not using convert_hdf5_to_json)
-with h5py.File(files[1], "r") as f:
+# Load the HDF5 export
+with h5py.File(paths.exports, "r") as f:
     print("HDF5 datasets:", list(f.keys()))
-    density = f["density"][:]
-    print(f"Density shape: {density.shape}")
+    if "density_descriptors" in f:
+        density = f["density_descriptors"][:]
+        print(f"Density descriptor shape: {density.shape}")
 ```
 
 If you used `convert_hdf5_to_json=True` (as in Example 2), the second file is JSON instead:
 
 ```python
-with open(files[1]) as f:
+with open(paths.exports) as f:
     export_data = json.load(f)
 
 density = export_data["density_descriptors"]

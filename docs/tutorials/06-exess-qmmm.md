@@ -22,16 +22,15 @@ Static structures tell you *where* atoms are. Dynamics tells you *how they move*
 
 ```python
 from rush import exess
-from rush.client import RunOpts, save_object
+from rush.client import RunOpts
 
-out = exess.qmmm(
-    "6a5j_t.json",    # Topology (atoms, coordinates, fragments)
-    500,               # Number of MD timesteps
-    "6a5j_r.json",    # Residues (residue names and assignments)
-    qm_fragments=[6], # Treat fragment 6 with quantum mechanics — everything else is MM
+result = exess.qmmm(
+    topology_path="6a5j_t.json",  # Topology (atoms, coordinates, fragments)
+    residues_path="6a5j_r.json",  # Residues (residue names and assignments)
+    n_timesteps=500,              # Number of MD timesteps
+    qm_fragments=[6],  # Treat fragment 6 with quantum mechanics — everything else is MM
     run_opts=RunOpts(name="Tutorial: QM/MM"),
-    collect=True,
-)
+).fetch()
 ```
 
 This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand or key residue) is computed with Hartree-Fock QM, and the remaining protein + solvent fragments use classical MM (OpenMM).
@@ -51,9 +50,8 @@ To understand exactly what inputs QM/MM needs, let's build a system manually —
 
 ```python
 import json
-from rush import exess
+from rush import exess, Topology
 from rush.client import RunOpts
-from rush import Topology, exess
 from rush.mol import Element, Fragment, Residue, Residues
 
 # Define two water molecules
@@ -73,6 +71,8 @@ topology = Topology(
 residues = Residues(
     residues=[Residue([0, 1, 2]), Residue([3, 4, 5])],
     seqs=["HOH", "HOH"],
+    seq_ns=[1, 2],
+    insertion_codes=["", ""],
 )
 
 # Write input files
@@ -82,15 +82,15 @@ with open("molecule_r.json", "w") as f:
     json.dump(residues.to_json(), f)
 
 # Run all-QM dynamics
-out = exess.qmmm(
+run = exess.qmmm(
     topology_path="molecule_t.json",
     residues_path="molecule_r.json",
     n_timesteps=100,
     trajectory=exess.Trajectory(include_waters=True),
     mm_fragments=[],   # No MM → everything is QM
     run_opts=RunOpts(name="Tutorial: QM/MM Water Dimer"),
-    collect=True,
 )
+result = run.fetch()
 ```
 
 :::{admonition} Fragment assignment logic
@@ -105,14 +105,12 @@ EXESS requires that every fragment is assigned to either QM or MM. Setting `mm_f
 The output is a JSON object containing `geometries` — a list of coordinate arrays, one per timestep. Each geometry is a flat list of floats (`[x1, y1, z1, x2, y2, z2, ...]`), matching the order of atoms in your Topology.
 
 ```python
-import json
 from itertools import batched
 from pathlib import Path
 from rush import Topology
 
-out_file = save_object(out["path"])
-with open(out_file) as f:
-    geometries = json.load(f)["geometries"]
+# Fetch parsed results into memory
+geometries = result.geometries
 
 print(f"Trajectory has {len(geometries)} frames")
 
@@ -127,6 +125,13 @@ topology.geometry = geometries[-1]
 print("\nAtoms at Final Step:")
 for x, y, z in batched(topology.geometry, 3):
     print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
+```
+
+If you want the raw JSON trajectory file on disk, use:
+
+```python
+paths = run.save()
+print(paths)
 ```
 
 This example uses **6a5j**, a solution NMR structure of a small peptide. During the gas-phase NVE simulation, the peptide backbone flexes and side chains reorient. The surrounding MM environment would normally provide confining forces; in this gas-phase simulation, the structure is free to explore conformational space.

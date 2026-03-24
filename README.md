@@ -43,46 +43,51 @@ RUSH_PROJECT=your-project-id-here
 from pathlib import Path
 
 from rush import exess
-from rush.client import collect_run
 
 topology_path = Path.cwd() / "thrombin_1c_t.json"
 
 # For energy, the only mandatory argument is the Topology
-result = exess.energy(topology_path, collect=True)
-exess.save_energy_outputs(result)
+run = exess.energy(topology_path)
+
+# Fetch the results for direct access
+result = run.fetch()
+
+# Save the results
+paths = run.save()
 ```
 
 Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current working directory). To customize the workspace location, call `rush.client.set_opts(workspace_dir=Path("..."))`.
 
 ```python
 # For interaction_energy, second argument is reference fragment
-result = exess.interaction_energy(topology_path, 1, collect=True)
+result = exess.interaction_energy(topology_path, 1).fetch()
 
 # Use export keywords to obtain additional information
 result = exess.energy(
     topology_path,
     frag_keywords=None,  # MBE is not supported for CHELPG charges
-    export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
-    collect=True,
-)
+    export_keywords=exess.ExportKeywords(export_chelpg_charges=True)
+).fetch()
 
 # QMMM requires Residues too
-md_topology_path = "./6a5j_t.json"
-md_residues_path = "./6a5j_r.json"
-# Without `collect=True`, the run takes place asynchronously, and a run ID is returned
-id = exess.qmmm(
-    md_topology_path,
-    md_residues_path,
+topology_path = "./6a5j_t.json"
+residues_path = "./6a5j_r.json"
+# Without calling `.fetch()` or `.save()` the run takes place asynchronously
+# and a run object is returned
+run = exess.qmmm(
+    topology_path=topology_path,
+    residues_path=residues_path,
     n_timesteps=500,
     qm_fragments=[0],
-    free_atoms=[0],
 )
-# The output for qmmm is a geometries json; can swap into a Topology's geometry field
-result = collect_run(id)
+# The output is a QMMMResult object that contains the geometries for each timestep,
+# which can be swapped into a Topology's geometry field
+result = run.fetch()
 
 # Get the full list of parameters and default arguments for a function
 help(exess.energy)
 help(exess.interaction_energy)
+help(exess.optimization)
 help(exess.qmmm)
 ```
 

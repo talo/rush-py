@@ -4,6 +4,21 @@ Protein-ligand complex preparation module for the Rush Python client.
 This module builds on the protein preparation workflow to prepare complexes by
 extracting ligands from PDB inputs, adding hydrogens, and merging ligand data
 with prepared protein TRC data for downstream computations.
+
+Usage::
+
+    from rush import prepare
+
+    result = prepare.protein_ligand("complex.pdb", ligand_names=["LIG"]).fetch()
+    print(result.topology.symbols)
+
+.. note::
+
+    Unlike most modules, ``prepare.protein_ligand()`` runs a full pipeline
+    internally (prepare protein, extract ligand, merge).  The returned
+    :class:`~rush.run.RushRun` wraps the prepare-protein job; calling
+    ``.fetch()`` or ``.save()`` blocks until that job completes, then
+    performs the merge and returns the combined complex.
 """
 
 from collections import defaultdict
@@ -13,15 +28,16 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush import TRC, from_json, from_pdb, merge_trcs, to_pdb
+from rush import TRC, TRCRef, from_json, from_pdb, merge_trcs, to_pdb
 from rush.client import (
-    RunError,
     RunOpts,
     RunSpec,
 )
 from rush.convert import _single_trc
-from rush.prepare_protein import prepare_protein as run_prepare_protein
-from rush.prepare_protein import save_outputs as save_prepare_protein_outputs
+from rush.run import RushRun
+
+from ._protein import ResultRef
+from ._protein import protein as _run_prepare_protein
 
 
 def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
@@ -121,8 +137,13 @@ def _extract_ligand_with_hydrogens(pdb_path, ligand_resnames):
     return Chem.MolToPDBBlock(ligand_h)
 
 
-def prepare_complex(
-    input_path: Path | str,
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def protein_ligand(
+    mol: TRC | Path | str,
     ligand_names: list[str],
     ph: float | None = None,
     naming_scheme: Literal["AMBER", "CHARMM"] | None = None,
@@ -132,34 +153,31 @@ def prepare_complex(
     debump: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-) -> TRC | str | RunError:
+) -> RushRun[ResultRef]:
     """
-    Prepare a protein-ligand complex by running prepare-protein and merging with ligand data.
+    Submit a complex preparation job for a PDB or TRC file.
 
-    Args:
-        input_path: Path to input PDB or TRC file
-        ligand_names: List of ligand residue names to extract
-        ph: pH for protonation (optional)
-        naming_scheme: Atom naming scheme ('AMBER' or 'CHARMM')
-        capping_style: Style for capping terminal residues
-        truncation_threshold: Distance threshold for truncating chains
-        debump: Whether to perform debumping
-        run_spec: Run specification for the preparation job
-        run_opts: Run options
-        collect: If True, collects results and returns merged TRC. If False, returns run ID.
+    Internally runs prepare-protein, extracts ligands, merges, and uploads
+    the combined TRC.  The returned :class:`~rush.run.RushRun` wraps the
+    prepare-protein job.  Calling ``.fetch()`` or ``.save()`` blocks until
+    the protein preparation completes, then performs the merge locally.
 
-    Returns:
-        - If collect=True: Merged TRC containing prepared protein and ligand
-        - If collect=False: Run ID string for the prepare-protein job
-        - RunError if preparation fails
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed TRC, or ``.save()`` to write the output files to disk.
     """
-    if isinstance(input_path, str):
-        input_path = Path(input_path)
+    # TODO: Support all the input types that rush.prepare.protein() supports
+    if isinstance(mol, str):
+        mol = Path(mol)
+        input_path = mol
+    elif isinstance(mol, Path):
+        input_path = mol
 
-    if input_path.suffix == ".json":
+    if isinstance(mol, TRC) or (isinstance(mol, Path) and mol.suffix == ".json"):
         with NamedTemporaryFile(mode="w") as pdb_file:
-            trc = from_json(input_path)
+            if isinstance(mol, TRC):
+                trc = mol
+            else:
+                trc = from_json(mol)
             trc = _single_trc(trc, input_path)
             pdb_file.write(to_pdb(trc))
             pdb_l_str = _extract_ligand_with_hydrogens(pdb_file.name, ligand_names)
@@ -169,9 +187,9 @@ def prepare_complex(
     trc_l = from_pdb(pdb_l_str)
     trc_l = _single_trc(trc_l, "ligand")
 
-    # Respect the collect parameter: pass it through to run_prepare_protein
-    res = run_prepare_protein(
-        input_path,
+    # Submit prepare-protein
+    pp_run = _run_prepare_protein(
+        mol,
         ph,
         naming_scheme,
         capping_style,
@@ -180,19 +198,33 @@ def prepare_complex(
         debump,
         run_spec,
         run_opts,
-        collect=collect,
     )
-    trc_p_output = save_prepare_protein_outputs(res)
-    if isinstance(trc_p_output, RunError):
-        return trc_p_output
 
-    # If collect=False, we get a run ID (string) back - return it as-is
-    if isinstance(trc_p_output, str):
-        return trc_p_output
+    # Return a wrapper RushRun that, when collected, waits for prepare-protein,
+    # merges with ligand, uploads, and returns a ResultRef for the complex.
+    return _ComplexRun(pp_run, trc_l)
 
-    # Otherwise, collect=True gave us Paths to process
-    trc_p = from_json(trc_p_output)
-    trc_p = _single_trc(trc_p, "protein")
 
-    trc_c = merge_trcs(trc_p, trc_l)
-    return trc_c
+class _ComplexRun(RushRun[ResultRef]):
+    """RushRun subclass that performs the merge step on collect."""
+
+    def __init__(self, pp_run: RushRun[ResultRef], trc_l: TRC) -> None:
+        super().__init__(pp_run.id, ResultRef)
+        self._pp_run = pp_run
+        self._trc_l = trc_l
+
+    @property
+    def id(self):
+        return self._pp_run.id
+
+    def __repr__(self) -> str:
+        return f"RushRun(id={self._pp_run.id!r})"
+
+    def collect(self, max_wait_time: int = 3600) -> ResultRef:
+        if self._collected is None:
+            protein_trcs = self._pp_run.collect(max_wait_time=max_wait_time).fetch()
+            uploaded = [
+                TRCRef.upload(merge_trcs(trc_p, self._trc_l)) for trc_p in protein_trcs
+            ]
+            self._collected = ResultRef(models=uploaded)
+        return self._collected

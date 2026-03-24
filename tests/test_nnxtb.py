@@ -1,15 +1,14 @@
-import json
 import sys
 from pathlib import Path
 
-from rush.client import RunOpts, save_object, set_opts
-from rush.nnxtb import NnxtbResults, nnxtb
+from rush import nnxtb
+from rush.client import RunOpts, set_opts
 
 
 def test_nnxtb():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    res = nnxtb(
+    run = nnxtb.energy(
         data_dir / "1kuw_t.json",
         compute_forces=True,
         compute_frequencies=False,  # defaults to False; more expensive to compute
@@ -18,13 +17,11 @@ def test_nnxtb():
             name="Rush-Py Test NN-xTB 01",
             tags=["rush-py", "test", "1kuw"],
         ),
-        collect=True,
     )
-    print(res, file=sys.stderr)
-    print(
-        NnxtbResults(**json.loads(save_object(res["path"]).read_text())),
-        file=sys.stderr,
-    )
+    result = run.fetch()
+    assert isinstance(result, nnxtb.Result)
+    print(result, file=sys.stderr)
+    print(run.save(), file=sys.stderr)
 
 
 if __name__ == "__main__":

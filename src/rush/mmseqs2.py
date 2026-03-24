@@ -1,21 +1,99 @@
-#!/usr/bin/env python3
+"""
+MMseqs2 module for the Rush Python client.
+
+MMseqs2 generates multiple-sequence alignments (MSAs) from amino acid
+sequences.
+
+Usage::
+
+    from rush import mmseqs2
+
+    paths = mmseqs2.search(["MKFLILLFNILCL..."]).save()
+"""
+
 import sys
+from collections.abc import Iterator
+from dataclasses import dataclass
+from pathlib import Path
 from string import Template
-from typing import Literal
+from typing import Any, Literal, NewType
 
 from gql.transport.exceptions import TransportQueryError
 
+from ._utils import optional_str
 from .client import (
     RunOpts,
     RunSpec,
+    RushObject,
     _get_project_id,
     _submit_rex,
-    collect_run,
+    fetch_object,
 )
-from .utils import optional_str
+from .run import RushRun
+
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
 
 
-def mmseqs2(
+Result = NewType("Result", list[str])
+"""Parsed MMseqs2 results: one A3M text per input sequence."""
+
+ResultPaths = NewType("ResultPaths", list[Path])
+"""Workspace paths for saved MMseqs2 A3M files."""
+
+
+@dataclass(frozen=True)
+class ResultRef:
+    """Lightweight reference to MMseqs2 outputs in the Rush object store."""
+
+    msas: list[RushObject]
+
+    def __getitem__(self, index: int) -> RushObject:
+        return self.msas[index]
+
+    def __len__(self) -> int:
+        return len(self.msas)
+
+    def __iter__(self) -> Iterator[RushObject]:
+        return iter(self.msas)
+
+    @classmethod
+    def from_raw_output(cls, res: Any) -> "ResultRef":
+        """Parse raw ``collect_run`` output into a ``ResultRef``."""
+        if not isinstance(res, list) or len(res) == 0:
+            raise ValueError(
+                f"mmseqs2 output received unexpected format: {type(res).__name__}"
+            )
+        # collect_run returns [[dict, ...], ...] (nested per sequence)
+        # or [dict, ...] (flattened for single sequence)
+        items = res
+        if len(items) > 0 and isinstance(items[0], list):
+            # Nested: flatten all sublists into one list
+            items = [obj for sublist in items for obj in sublist]
+        return cls(
+            msas=[RushObject.from_dict(obj) for obj in items],
+        )
+
+    def fetch(self) -> Result:
+        """Download MMseqs2 outputs and parse into A3M strings."""
+        a3ms: list[str] = []
+        for obj in self.msas:
+            a3m = fetch_object(obj.path)
+            a3ms.append(a3m.decode() if isinstance(a3m, bytes) else a3m)
+        return Result(a3ms)
+
+    def save(self) -> ResultPaths:
+        """Download MMseqs2 outputs and save as A3M files to the workspace."""
+        return ResultPaths([obj.save(ext="a3m") for obj in self.msas])
+
+
+# ---------------------------------------------------------------------------
+# Submission
+# ---------------------------------------------------------------------------
+
+
+def search(
     sequences: list[str],
     prefilter_mode: Literal["KMer", "Ungapped", "Exhaustive"] | None = None,
     sensitivity: float | None = None,
@@ -26,8 +104,14 @@ def mmseqs2(
     max_accept: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-    collect=False,
-):
+) -> RushRun[ResultRef]:
+    """
+    Submit an MMseqs2 sequence search for the given amino acid *sequences*.
+
+    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    parsed A3M results, or ``.save()`` to write them to disk.
+    """
+
     # TODO: set use_upstream_server to `None` for prod, when it works again
     rex = Template("""
 mmseqs2_rex_s
@@ -55,13 +139,13 @@ mmseqs2_rex_s
         sequences=f"[\n        {',\n        '.join([f'"{seq}"' for seq in sequences])}]",
     )
     try:
-        run_id = _submit_rex(_get_project_id(), rex, run_opts)
-        if collect:
-            return collect_run(run_id)
-        else:
-            return run_id
+        return RushRun(
+            _submit_rex(_get_project_id(), rex, run_opts),
+            ResultRef,
+        )
 
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
                 print(f"Error: {error['message']}", file=sys.stderr)
+        raise

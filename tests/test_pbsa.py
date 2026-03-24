@@ -1,14 +1,14 @@
 import sys
 from pathlib import Path
 
-from rush.client import RunOpts, save_json, set_opts
-from rush.pbsa import PBSAResults, pbsa
+from rush import pbsa
+from rush.client import RunOpts, set_opts
 
 
 def test_pbsa():
     set_opts(workspace_dir=Path.cwd() / "test-runs")
     data_dir = Path.cwd() / "tests" / "data"
-    res = pbsa(
+    run = pbsa.solvation_energy(
         data_dir / "ethane_t.json",
         solute_dielectric=1.0,
         solvent_dielectric=78.54,
@@ -25,10 +25,11 @@ def test_pbsa():
             name="Rush-Py Test PBSA 01",
             tags=["rush-py", "test", "ethane"],
         ),
-        collect=True,
     )
-    print(PBSAResults(*res), file=sys.stderr)
-    save_json(res, name="test_pbsa.json")
+    result = run.fetch()
+    assert isinstance(result, pbsa.Result)
+    print(result, file=sys.stderr)
+    print(run.save(), file=sys.stderr)
 
 
 if __name__ == "__main__":
