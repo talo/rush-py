@@ -1,13 +1,11 @@
 import itertools
 import sys
-from pathlib import Path
 
 from rush.auto3d import generate
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 
 
 def test_auto3d():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
     run = generate(
         ["CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O", "COOH"],
         k=5,
@@ -36,7 +34,3 @@ def test_auto3d():
     # res[1] expected to fail
     assert isinstance(res[1], str)
     print(res[1])
-
-
-if __name__ == "__main__":
-    test_auto3d()

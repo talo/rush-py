@@ -4,19 +4,17 @@ from pathlib import Path
 import pytest
 
 from rush import Topology, exess
-from rush.client import RunOpts, RunSpec, set_opts
+from rush.client import RunOpts, RunSpec
 from rush.exess import interaction_energy
 
 
 @pytest.mark.timeout(1800)
-def test_exess_interaction_energy_gadi():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
-    topology = Topology.from_json(data_dir / "tyk2_ejm_31_t.json")
+def test_exess_interaction_energy_gadi(test_data_dir: Path):
+    topology = Topology.from_json(test_data_dir / "tyk2_ejm_31_t.json")
     lig_idx = 93
     frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
     run = interaction_energy(
-        data_dir / "tyk2_ejm_31_t.json",
+        test_data_dir / "tyk2_ejm_31_t.json",
         lig_idx,
         basis="PCSeg-0",
         frag_keywords=exess.FragKeywords(
@@ -36,7 +34,3 @@ def test_exess_interaction_energy_gadi():
     result = run.collect()
     print(result, file=sys.stderr)
     result.save()
-
-
-if __name__ == "__main__":
-    test_exess_interaction_energy_gadi()

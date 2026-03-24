@@ -2,14 +2,12 @@ import sys
 from pathlib import Path
 
 from rush import nnxtb
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 
 
-def test_nnxtb():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_nnxtb(test_data_dir: Path):
     run = nnxtb.energy(
-        data_dir / "1kuw_t.json",
+        test_data_dir / "1kuw_t.json",
         compute_forces=True,
         compute_frequencies=False,  # defaults to False; more expensive to compute
         multiplicity=1,  # also the default (singlet)
@@ -22,7 +20,3 @@ def test_nnxtb():
     assert isinstance(result, nnxtb.Result)
     print(result, file=sys.stderr)
     print(run.save(), file=sys.stderr)
-
-
-if __name__ == "__main__":
-    test_nnxtb()

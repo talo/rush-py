@@ -3,20 +3,16 @@ from pathlib import Path
 
 import pytest
 
-from rush.client import set_opts
 from rush.convert import from_pdb, from_sdf, to_dict
 from rush.fried import fragment_ligand, fragmented_exess, plot_fried_stacked
 from rush import merge_trcs
 
 
 @pytest.mark.timeout(2700)
-def test_fried_3fln(tmp_path: Path):
-    set_opts(workspace_dir=tmp_path / ".test-workspace")
-    data_dir = Path(__file__).parent / "data"
-
+def test_fried_3fln(tmp_path: Path, test_data_dir: Path):
     system_name = "3fln"
-    protein_trc = from_pdb((data_dir / f"{system_name}_protein.pdb").read_text())
-    ligand_trc = from_sdf((data_dir / f"{system_name}_ligand.sdf").read_text())
+    protein_trc = from_pdb((test_data_dir / f"{system_name}_protein.pdb").read_text())
+    ligand_trc = from_sdf((test_data_dir / f"{system_name}_ligand.sdf").read_text())
 
     complex_trc = merge_trcs(protein_trc, ligand_trc)
     complex_json_path = tmp_path / f"{system_name}_complex.json"
@@ -27,7 +23,3 @@ def test_fried_3fln(tmp_path: Path):
     fragmented_exess(fragmented_lig_file, distance_threshold=3)
 
     plot_fried_stacked(tmp_path, system_prefix=f"{system_name}_complex")
-
-
-if __name__ == "__main__":
-    test_fried_3fln(Path.cwd())

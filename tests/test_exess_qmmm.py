@@ -2,14 +2,12 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 
 
-def test_exess_qmmm():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_exess_qmmm(test_data_dir: Path):
     run = exess.qmmm(
-        (data_dir / "6a5j_t.json", data_dir / "6a5j_r.json"),
+        (test_data_dir / "6a5j_t.json", test_data_dir / "6a5j_r.json"),
         n_timesteps=500,
         temperature_kelvin=300.0,
         method="RestrictedHF",
@@ -27,7 +25,3 @@ def test_exess_qmmm():
     assert isinstance(fetched, exess.QMMMResult)
     assert fetched.geometries
     print(run.save(), file=sys.stderr)
-
-
-if __name__ == "__main__":
-    test_exess_qmmm()

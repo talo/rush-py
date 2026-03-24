@@ -1,15 +1,13 @@
 from rush import TRC
 from pathlib import Path
 
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 from rush.prepare import protein as prepare
 
 
-def test_prepare_protein():
-    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_prepare_protein(test_data_dir: Path):
     run = prepare(
-        data_dir / "3fln_raw.pdb",
+        test_data_dir / "3fln_raw.pdb",
         capping_style="always",
         run_opts=RunOpts(
             name="Test prepare-protein 01", tags=["rush-py", "test", "cdk2"]
@@ -26,7 +24,3 @@ def test_prepare_protein():
     # Ensure the output is capped as requested
     assert "ACE" == residues.seqs[0]
     assert "NME" == residues.seqs[-1]
-
-
-if __name__ == "__main__":
-    test_prepare_protein()

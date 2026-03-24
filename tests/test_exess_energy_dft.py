@@ -2,15 +2,13 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 from rush.exess import energy
 
 
-def test_exess_energy_dft_hyb():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
+def test_exess_energy_dft_hyb(test_data_dir: Path):
     run = energy(
-        data_dir / "benzene_t.json",
+        test_data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         ksdft_keywords=exess.KSDFTKeywords(
             functional="HYB_GGA_XC_B3LYP",
@@ -35,11 +33,9 @@ def test_exess_energy_dft_hyb():
     result.save()
 
 
-def test_exess_energy_dft_dhyb():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
+def test_exess_energy_dft_dhyb(test_data_dir: Path):
     run = energy(
-        data_dir / "benzene_t.json",
+        test_data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         basis="cc-pVTZ",
         aux_basis="cc-pVTZ-RIFIT",
@@ -57,8 +53,3 @@ def test_exess_energy_dft_dhyb():
     result = run.collect()
     print(result, file=sys.stderr)
     result.save()
-
-
-if __name__ == "__main__":
-    test_exess_energy_dft_hyb()
-    test_exess_energy_dft_dhyb()

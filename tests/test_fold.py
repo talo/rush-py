@@ -1,16 +1,13 @@
-from pathlib import Path
-
 from rush import boltz, mmseqs2
 from rush.boltz import (
     LigandSequence,
     ProteinSequence,
     Result,
 )
-from rush.client import RunOpts, RunSpec, set_opts
+from rush.client import RunOpts, RunSpec
 
 
 def test_fold():
-    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
     protein_seq = "MVTPEGNVSLVDESLLVGVTDEDRAVRSAHQFYERLIGLWAPAVMEAAHELGVFAALAEAPADSGELARRLDCDARAMRVLLDALYAYDVIDRIHDTNGFRYLLSAEARECLLPGTLFSLVGKFMHDINVAWPAWRNLAEVVRHGARDTSGAESPNGIAQEDYESLVGGINFWAPPIVTTLSRKLRASGRSGDATASVLDVGCGTGLYSQLLLREFPRWTATGLDVERIATLANAQALRLGVEERFATRAGDFWRGGWGTGYDLVLFANIFHLQTPASAVRLMRHAAACLAPDGLVAVVDQIVDADREPKTPQDRFALLFAASMTNTGGGDAYTFQEYEEWFTAAGLQRIETLDTPMHRILLARRATEPSAVPEGQASENLYFQ"
     mmseqs2_ref = mmseqs2.search(
         [protein_seq],
@@ -38,7 +35,3 @@ def test_fold():
     # One diffusion sample by default
     assert len(output) == 1
     assert isinstance(output[0], Result)
-
-
-if __name__ == "__main__":
-    test_fold()

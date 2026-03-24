@@ -2,14 +2,12 @@ import sys
 from pathlib import Path
 
 from rush import pbsa
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 
 
-def test_pbsa():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_pbsa(test_data_dir: Path):
     run = pbsa.solvation_energy(
-        data_dir / "ethane_t.json",
+        test_data_dir / "ethane_t.json",
         solute_dielectric=1.0,
         solvent_dielectric=78.54,
         solvent_radius=0.14,
@@ -30,7 +28,3 @@ def test_pbsa():
     assert isinstance(result, pbsa.Result)
     print(result, file=sys.stderr)
     print(run.save(), file=sys.stderr)
-
-
-if __name__ == "__main__":
-    test_pbsa()

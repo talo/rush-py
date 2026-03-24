@@ -2,14 +2,12 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 
 
-def test_exess_optimization_qm():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_exess_optimization_qm(test_data_dir: Path):
     run = exess.optimization(
-        data_dir / "benzene_t.json",
+        test_data_dir / "benzene_t.json",
         max_iters=100,
         optimization_keywords=exess.OptimizationKeywords(),
         method="RestrictedRIMP2",
@@ -29,7 +27,3 @@ def test_exess_optimization_qm():
 
     saved = run.save()
     assert isinstance(saved, exess.OptimizationResultPaths)
-
-
-if __name__ == "__main__":
-    test_exess_optimization_qm()

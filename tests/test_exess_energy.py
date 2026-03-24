@@ -2,13 +2,13 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 from rush.exess import energy
 
 
-def test_exess_energy_tutorial():
+def test_exess_energy_tutorial(test_data_dir: Path):
     run = energy(
-        "tests/data/6a5j_t.json",
+        test_data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
         ksdft_keywords=None,
@@ -24,13 +24,11 @@ def test_exess_energy_tutorial():
     print(output.calc.qmmbe.expanded_hf_energy)
 
 
-def test_exess_energy_exports():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_exess_energy_exports(test_data_dir: Path):
     # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
     # Using PCSeg-0 for faster test runtimes
     run = energy(
-        data_dir / "6a5j_t.json",
+        test_data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
         ksdft_keywords=None,
@@ -52,8 +50,3 @@ def test_exess_energy_exports():
 
     # Each module result has .save() for downloading outputs to the workspace
     result.save()
-
-
-if __name__ == "__main__":
-    test_exess_energy_tutorial()
-    test_exess_energy_exports()

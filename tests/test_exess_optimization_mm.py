@@ -2,15 +2,13 @@ import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 
 
-def test_exess_optimization_mm():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_exess_optimization_mm(test_data_dir: Path):
     run = exess.optimization(
         # Residues are required for MM fragments
-        (data_dir / "6a5j_t.json", data_dir / "6a5j_r.json"),
+        (test_data_dir / "6a5j_t.json", test_data_dir / "6a5j_r.json"),
         max_iters=10000,
         optimization_keywords=exess.OptimizationKeywords(
             coordinate_system="Cartesian",
@@ -33,7 +31,3 @@ def test_exess_optimization_mm():
 
     saved = run.save()
     assert isinstance(saved, exess.OptimizationResultPaths)
-
-
-if __name__ == "__main__":
-    test_exess_optimization_mm()

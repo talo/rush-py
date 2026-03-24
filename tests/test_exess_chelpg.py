@@ -3,14 +3,12 @@ from pathlib import Path
 from pprint import pp
 
 from rush import exess, from_json
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
 from rush.exess import energy
 
 
-def test_exess_energy_chelpg_1hsg_MK1():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
-    trc = from_json(data_dir / "1hsg_MK1_trc.json")[0]
+def test_exess_energy_chelpg_1hsg_MK1(test_data_dir: Path):
+    trc = from_json(test_data_dir / "1hsg_MK1_trc.json")[0]
 
     result = energy(
         trc,
@@ -31,11 +29,9 @@ def test_exess_energy_chelpg_1hsg_MK1():
     pp(charges, width=130, compact=True, stream=sys.stderr)
 
 
-def test_exess_energy_chelpg_benzene():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
+def test_exess_energy_chelpg_benzene(test_data_dir: Path):
     result = energy(
-        data_dir / "benzene_t.json",
+        test_data_dir / "benzene_t.json",
         method="RestrictedRIMP2",
         basis="def2-TZVP",
         aux_basis="def2-TZVP-RIFIT",
@@ -54,8 +50,3 @@ def test_exess_energy_chelpg_benzene():
     assert isinstance(fetched.exports, dict)
     charges = fetched.exports["chelpg_charges"]
     pp(charges, width=130, compact=True, stream=sys.stderr)
-
-
-if __name__ == "__main__":
-    test_exess_energy_chelpg_1hsg_MK1()
-    test_exess_energy_chelpg_benzene()

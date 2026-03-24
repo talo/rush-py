@@ -5,16 +5,13 @@ from rush.client import (
     RunOpts,
     delete_run,
     fetch_runs,
-    set_opts,
 )
 from rush.exess import energy
 
 
-def test_delete_run():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_delete_run(test_data_dir: Path):
     run = energy(
-        data_dir / "1kuw_t.json",
+        test_data_dir / "1kuw_t.json",
         basis="PCSeg-0",
         run_opts=RunOpts(
             name="Rush-Py Test Delete Run 01",
@@ -27,7 +24,3 @@ def test_delete_run():
     time.sleep(1)
     runs_1 = fetch_runs(tags=["delete-me"])
     assert run.id not in runs_1
-
-
-if __name__ == "__main__":
-    test_delete_run()

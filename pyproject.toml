@@ -62,9 +62,14 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = "--strict-config --strict-markers"
 timeout = 300
+tmp_path_retention_policy = "failed"
+tmp_path_retention_count = 3
 markers = [
-  "slow: marks tests that submit jobs to the Rush API (auto-applied, skipped when queues busy)",
+  "submits_rush_jobs: marks tests that submit jobs to Rush (auto-applied, skipped when queues are busy)",
 ]
 
 [tool.uv.build-backend]

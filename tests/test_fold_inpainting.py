@@ -1,13 +1,11 @@
 from pathlib import Path
 
 from rush.boltz import ProteinSequence, ResultPaths
-from rush.client import RunOpts, RunSpec, set_opts
+from rush.client import RunOpts, RunSpec
 from rush import boltz, mmseqs2
 
 
-def test_fold_inpainting():
-    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_fold_inpainting(test_data_dir: Path):
     protein_seq = "LSALNPELVQAVQHVVIGPSSLIVHFNEVIGRGHFGCVYHGTLLDNDGKKIHCAVKSLNRITDIGEVSQFLTEGIIMKDFSHPNVLSLLGICLRSEGSPLVVLPYMKHGDLRNFIRNETHNPTVKDLIGFGLQVAKGMKYLASKKFVHRDLAARNCMLDEKFTVKVADFGLARDMYDKEYYSVHNKTGAKLPVKWMALESLQTQKFTTKSDVWSFGVLLWELMTRGAPPYPDVNTFDITVYLLQGRRLLQPEYCPDPLYEVMLKCWHPKAEMRPSFSELVSRISAIFSTFIG"
     mmseqs2_ref = mmseqs2.search(
         [protein_seq],
@@ -23,7 +21,7 @@ def test_fold_inpainting():
             ProteinSequence(["A"], protein_seq, mmseqs2_ref[0]),
         ],
         use_potentials=True,
-        template_path=data_dir / "4r1y_protein.pdb",
+        template_path=test_data_dir / "4r1y_protein.pdb",
         template_threshold_angstroms=0.1,
         run_opts=RunOpts(
             name="Rush-Py Test: Residue Inpainting Step 2 (Boltz)",
@@ -35,7 +33,3 @@ def test_fold_inpainting():
     # One diffusion sample by default
     assert len(output) == 1
     assert isinstance(output[0], ResultPaths)
-
-
-if __name__ == "__main__":
-    test_fold_inpainting()
