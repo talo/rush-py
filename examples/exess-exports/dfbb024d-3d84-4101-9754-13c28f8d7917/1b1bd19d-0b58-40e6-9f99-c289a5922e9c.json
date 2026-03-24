@@ -1,1 +1,0 @@
-{"schema_version":"0.2.0","calculation_time":0.614360632,"qmmbe":{"schema_version":"0.2.0","method":"RestrictedHF","nmers":[[{"schema_version":"0.2.0","fragments":[0],"hf_energy":-227.8901225505692,"num_iters":4,"num_basis_fns":36}]],"expanded_hf_energy":-227.8901225505692,"num_iters":4}}
