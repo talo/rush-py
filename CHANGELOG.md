@@ -34,6 +34,9 @@
 - Print and store `trace` field from a run properly when it's either canceled or failed
 - Remove AI-generated mismatches page from docs
 
+### Added
+- Info on predicting runtime
+
 ## 6.10.1
 
 ### Fixed
