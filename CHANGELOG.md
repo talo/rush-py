@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 7.0.0b2
 
 ### Changed
 - Modules that take molecules as input are now overloaded to behave as expected for multiple types, including TRCs, tuples of the required TRC components, individual Topologies where possible, and object-store references in multiple forms
-- renamed mol types' `to_json` to `to_dict`, since it returns a dict
+- Renamed mol types' `to_json` to `to_dict`, since it returns a dict
 
 ### Added
 - Provided `RushRun` type that modules functions return to manage the run
@@ -17,9 +17,14 @@
     - Mirrors the structure of `ResultRef` and `Result` per module, but each field is a path to the local saved file for each field
 - Provide similar `TRCRef` and `TRCPaths` classes with the same design pattern, and `TRCRef.upload()` for uploading TRCs to the Rush object store
 - Provide `RushObject` class wrapping raw virtual object JSON data
+- Updated docs, examples, and tests to use the new fetch/save naming
+
+## 7.0.0b1
+
+### Added
+- Provide per- Rush module `fetch_outputs()` and `save_outputs()` functions
 - Provide `fetch_object()` as the in-memory object-store helper and removed `download_object()`
 - `fetch_object()` and `save_object()` now share archive extraction logic
-- Updated docs, examples, and tests to use the new fetch/save naming
 
 ## 6.10.2
 
