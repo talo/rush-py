@@ -15,7 +15,7 @@ The most reliable way to estimate cost at scale is to **run a small, representat
 | **System size** | Number of atoms (or basis functions) is the dominant cost driver. |
 | **Level of theory** | Semi-empirical methods like NN-xTB are orders of magnitude cheaper than DFT, which is itself cheaper than correlated wavefunction methods. Method choice matters more than any other single variable. |
 | **Basis set** | For DFT and ab initio methods, a larger basis set increases the number of basis functions and cost substantially — independently of system size. |
-| **Convergence** | SCF and geometry optimisation iterations vary per system. A difficult electronic structure or a poor starting geometry can multiply runtime unpredictably. |
+| **Convergence** | SCF and geometry optimisation iterations vary per system. A difficult electronic structure or a poor starting geometry can multiply runtime unpredictably. How tightly you set the convergence thresholds also matters — stricter tolerances require more iterations. The right threshold is application-dependent: some applications need tight convergence while others are well served by looser defaults. |
 | **Calculation type** | Single-point energies, geometry optimisations, frequency calculations, and dynamics all have different cost profiles. Geometry optimisations and dynamics are inherently iterative, so their total cost depends on how many steps are needed. |
 | **Hardware target** | Absolute walltime varies with the GPU generation and cluster your job runs on. Scaling behaviour is consistent, but prefactors differ between targets. See {doc}`05-hardware` for the available targets. |
 
