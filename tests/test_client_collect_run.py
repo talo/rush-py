@@ -21,9 +21,7 @@ def test_collect_run_restored(monkeypatch, capsys):
     assert "Restored already-completed run" in capsys.readouterr().err
 
 
-def test_collect_run_no_mi_error(
-    monkeypatch, capsys
-):
+def test_collect_run_no_mi_error(monkeypatch, capsys):
     monkeypatch.setattr(
         "rush.client._poll_run",
         lambda run_id, max_wait_time: ("error", False),

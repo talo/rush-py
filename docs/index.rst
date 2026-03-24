@@ -1,11 +1,12 @@
 QDX Documentation
 ==================
 
-Welcome to QDX's documentation hub. Here you'll find docs for three key
-components: the **Rush Python SDK** for programmatic access to the
-`Rush platform <https://qdx.co/rush>`__, **EXESS** — our GPU-accelerated
-quantum chemistry engine, and **NN-xTB** — a neural network tight-binding
-method for fast semi-empirical calculations.
+Welcome to QDX's documentation hub. The `Rush platform <https://qdx.co/rush>`__
+is how we make our quantum chemistry technology and drug-discovery applications
+available. These docs cover three key components: the **Rush Python SDK** for
+programmatic access to Rush, **EXESS** — our GPU-accelerated quantum chemistry
+engine, and **NN-xTB** — a neural network tight-binding method for fast
+semi-empirical calculations.
 
 If you prefer a visual interface over scripting, you can use EXESS directly
 `here <https://exess.qdx.co/exess-flow>`__ and the rest of Rush
