@@ -10,29 +10,14 @@ The most reliable way to estimate cost at scale is to **run a small, representat
 
 ## What drives runtime
 
-### System size
-
-Number of atoms (or basis functions) is the dominant cost driver. Scaling is non-linear — doubling the system size more than doubles runtime, depending on the method.
-
-### Level of theory
-
-Semi-empirical methods like NN-xTB are orders of magnitude cheaper than DFT, which is itself cheaper than correlated wavefunction methods. Method choice matters more than any other single variable.
-
-### Basis set
-
-For DFT and ab initio methods, a larger basis set increases the number of basis functions and cost substantially — independently of system size.
-
-### Convergence
-
-SCF and geometry optimisation iterations vary per system. A difficult electronic structure or a poor starting geometry can multiply runtime unpredictably.
-
-### Calculation type
-
-Single-point energies, geometry optimisations, frequency calculations, and dynamics all have different cost profiles. Geometry optimisations and dynamics are inherently iterative, so their total cost depends on how many steps are needed.
-
-### Hardware target
-
-Absolute walltime varies with the GPU generation and cluster your job runs on. Scaling behaviour is consistent, but prefactors differ between targets. See {doc}`05-hardware` for the available targets.
+| Factor | Impact |
+|---|---|
+| **System size** | Number of atoms (or basis functions) is the dominant cost driver. |
+| **Level of theory** | Semi-empirical methods like NN-xTB are orders of magnitude cheaper than DFT, which is itself cheaper than correlated wavefunction methods. Method choice matters more than any other single variable. |
+| **Basis set** | For DFT and ab initio methods, a larger basis set increases the number of basis functions and cost substantially — independently of system size. |
+| **Convergence** | SCF and geometry optimisation iterations vary per system. A difficult electronic structure or a poor starting geometry can multiply runtime unpredictably. |
+| **Calculation type** | Single-point energies, geometry optimisations, frequency calculations, and dynamics all have different cost profiles. Geometry optimisations and dynamics are inherently iterative, so their total cost depends on how many steps are needed. |
+| **Hardware target** | Absolute walltime varies with the GPU generation and cluster your job runs on. Scaling behaviour is consistent, but prefactors differ between targets. See {doc}`05-hardware` for the available targets. |
 
 ## How to benchmark your own workload
 
@@ -40,7 +25,7 @@ This approach requires only a small amount of compute — typically enough to gi
 
 ### 1. Pick representative inputs
 
-Select 3–5 systems that span the range of what you intend to run — ideally including your smallest, largest, and a typical case. Avoid cherry-picking easy inputs; the goal is a realistic sample.
+Select 3–5 systems that span the range of what you intend to run. Avoid cherry-picking easy inputs; the goal is a realistic sample. If you don't have a sense of how long your largest systems might take, start with a few at the smaller end to get an idea of the scaling before committing compute to the expensive cases. Ideally, by the end you'll have timing data covering your smallest, largest, and typical systems.
 
 ### 2. Run with your actual settings
 
@@ -60,13 +45,14 @@ Use the curve to estimate total walltime for your intended scale. Build in a buf
 
 ## What to measure
 
-Depending on your calculation type, different metrics are most informative:
+Depending on which EXESS function you're using, different metrics are most informative:
 
-| Calculation type | Useful metric | Notes |
+| Function | Useful metric | Notes |
 |---|---|---|
-| Single-point energy | Walltime vs number of atoms (or basis functions) | For semi-empirical methods, atom count is sufficient. For DFT, basis set size matters independently. |
-| Geometry optimisation | Walltime per optimisation cycle; total cycles to convergence | Cycle count is system-dependent and harder to predict — sample variance will be higher. |
-| Conformer generation | Walltime per conformer vs number of atoms | Cost is also sensitive to the number of conformers requested and pruning settings. |
+| `energy` | Walltime vs number of atoms (or basis functions) | For semi-empirical methods, atom count is sufficient. For DFT, basis set size matters independently. |
+| `optimization` | Walltime per optimisation cycle; total cycles to convergence | Cycle count is system-dependent and harder to predict — sample variance will be higher. |
+| `interaction_energy` | Walltime vs fragment and system size | Cost depends on both the fragment size and the total system, since the calculation involves the fragment, the environment, and the full system. |
+| `qmmm` | Walltime per timestep; total timesteps | Cost scales with the size of the QM region and the number of timesteps requested. |
 
 ## Capping resource usage with RunSpec
 
