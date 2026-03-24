@@ -8,6 +8,9 @@
 - Tests more thoroughly check for valid behavior and output
 - Removed `run_tests.sh` favor of calling pytest manually (it's not too hard)
 
+### Added
+- Report walltime and SUs in `RushRunInfo`
+
 ## 7.0.0b2
 
 ### Changed
