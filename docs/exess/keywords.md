@@ -61,7 +61,7 @@ Icon key:
          from rush import exess
 
          exess.energy(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              scf_keywords=exess.SCFKeywords(
                  max_iters=40,
                  max_diis_history_length=12,
@@ -254,7 +254,7 @@ Icon key:
          from rush import exess
 
          exess.energy(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              frag_keywords=exess.FragKeywords(
                  cutoff_type="Centroid",
                  distance_metric="Average",
@@ -383,7 +383,7 @@ Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation 
          from rush import exess
 
          exess.energy(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              method="RestrictedKSDFT",
              ksdft_keywords=exess.KSDFTKeywords(
                  functional="GGA_XC_PBE",
@@ -600,7 +600,7 @@ Export controls what is written to HDF5 output files:
          from rush import exess
 
          exess.energy(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              export_keywords=exess.ExportKeywords(
                  export_density=True,
                  export_fock=True,
@@ -827,8 +827,7 @@ Export controls what is written to HDF5 output files:
          from rush import exess
 
          exess.qmmm(
-             topology_path="molecule_t.json",
-             residues_path="system.residues",
+             ("molecule_t.json", "molecule_r.json"),
              n_timesteps=10,
              dt_ps=0.002,
              temperature_kelvin=290.0,
@@ -902,7 +901,7 @@ Rules and defaults:
          from rush import exess
 
          exess.optimization(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              max_iters=200,
              optimization_keywords=exess.OptimizationKeywords(
                  algorithm="LBFGS",
@@ -1128,8 +1127,7 @@ Fragmentation (``frag``) can be used when a QM region exists; EXESS fragments on
          from rush import exess
 
          exess.qmmm(
-             topology_path="molecule_t.json",
-             residues_path="molecule_r.json",
+             ("molecule_t.json", "molecule_r.json"),
              n_timesteps=1000,
              dt_ps=0.002,
              temperature_kelvin=290.0,

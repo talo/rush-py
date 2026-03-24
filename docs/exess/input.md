@@ -117,9 +117,6 @@ Example with inline geometry and symbols:
       .. code-block:: python
          :caption: run.py
 
-         import json
-         from pathlib import Path
-
          from rush import exess
          from rush.mol import Element, Topology
 
@@ -132,9 +129,7 @@ Example with inline geometry and symbols:
              ],
          )
 
-         Path("molecule_t.json").write_text(json.dumps(topology.to_json(), indent=2))
-
-         exess.energy(topology_path="molecule_t.json")
+         exess.energy(topology)
 ```
 
 Example using an XYZ file:
@@ -161,7 +156,6 @@ Example using an XYZ file:
       .. code-block:: python
          :caption: run.py
 
-         import json
          from pathlib import Path
 
          from rush import exess
@@ -178,9 +172,8 @@ Example using an XYZ file:
              geometry.extend([float(x), float(y), float(z)])
 
          topology = Topology(symbols=symbols, geometry=geometry)
-         Path("molecule_t.json").write_text(json.dumps(topology.to_json(), indent=2))
 
-         exess.energy(topology_path="molecule_t.json")
+         exess.energy(topology)
 ```
 
 ### residues
@@ -234,9 +227,6 @@ Example:
       .. code-block:: python
          :caption: run.py
 
-         import json
-         from pathlib import Path
-
          from rush import exess
          from rush.mol import Element, Fragment, Residue, Residues, Topology
 
@@ -260,12 +250,8 @@ Example:
              insertion_codes=["", ""],
          )
 
-         Path("molecule_t.json").write_text(json.dumps(topology.to_json(), indent=2))
-         Path("molecule_r.json").write_text(json.dumps(residues.to_json(), indent=2))
-
          exess.qmmm(
-             topology_path="molecule_t.json",
-             residues_path="molecule_r.json",
+             (topology, residues),
              n_timesteps=100,
              qm_fragments=[0],
              mm_fragments=[1],
@@ -373,7 +359,7 @@ The `driver` field selects the calculation type:
          from rush import exess
 
          exess.energy(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              method="RestrictedRIMP2",
              basis="cc-pVDZ",
              aux_basis="cc-pVDZ-RIFIT",
@@ -482,7 +468,7 @@ The `driver` field selects the calculation type:
          from rush import exess
 
          exess.energy(
-             topology_path="molecule_t.json",
+             "molecule_t.json",
              system=exess.System(
                  max_gpu_memory_mb=24000,
                  teams_per_node=4,
