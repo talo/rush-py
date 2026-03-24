@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.10.3
+
+### Fixed
+- Rewrite wordy intro sentence in docs landing page for clarity
+
 ## 6.10.2
 
 ### Fixed
