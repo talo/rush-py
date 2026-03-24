@@ -868,12 +868,17 @@ class RushRunInfo:
     description: str | None = None
     tags: list[str] | None = None
     result: dict | None = None
-    trace: dict | None = None
     stdout: str | None = None
+    trace: dict | None = None
+    walltime: int | float | None = None
+    sus: dict[str, int | float] | None = None
+
+    def _resource_totals_complete(self) -> bool:
+        return self.status in {"done", "error", "cancelled"}
 
     def __str__(self) -> str:
         lines = [
-            f"RushRunInfo: {self.name or '(unnamed)'}",
+            f"Run info for {self.name or '(unnamed)'}",
             f"  id:          {self.id}",
             f"  status:      {self.status}",
             f"  created_at:  {self.created_at}",
@@ -885,7 +890,48 @@ class RushRunInfo:
             lines.append(f"  description: {self.description}")
         if self.tags:
             lines.append(f"  tags:        {', '.join(self.tags)}")
+        totals_suffix = "" if self._resource_totals_complete() else " (incomplete)"
+        if self.walltime is not None:
+            lines.append(f"  walltime:    {self.walltime}{totals_suffix}")
+        if self.sus:
+            for target, sus in self.sus.items():
+                lines.append(f"  {target} SUs:  {sus}{totals_suffix}")
         return "\n".join(lines)
+
+
+def _total_run_walltime(
+    resource_utilizations: dict[str, Any] | None,
+) -> int | float | None:
+    if resource_utilizations is None:
+        return None
+
+    return sum(
+        utilization["walltime"]
+        for utilization in resource_utilizations["nodes"]
+        if utilization.get("walltime") is not None
+    )
+
+
+def _run_sus(
+    resource_utilizations: dict[str, Any] | None,
+    module_instances: dict[str, Any] | None = None,
+) -> dict[str, int | float] | None:
+    sus_by_target: dict[str, int | float] = {}
+    for module_instance in module_instances["nodes"] if module_instances else []:
+        target = module_instance.get("target")
+        if target in {"Gadi", "Setonix"}:
+            sus_by_target.setdefault(target, 0)
+
+    for utilization in resource_utilizations["nodes"] if resource_utilizations else []:
+        target = utilization.get("target")
+        sus = utilization.get("sus")
+        if target not in {"Gadi", "Setonix"}:
+            continue
+        sus_by_target.setdefault(target, 0)
+        if sus is not None:
+            sus_by_target[target] += sus
+
+    return sus_by_target or None
 
 
 def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
@@ -907,6 +953,18 @@ def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
                 status
                 trace
                 stdout
+                module_instances {
+                    nodes {
+                        target
+                    }
+                }
+                resource_utilizations {
+                    nodes {
+                        target
+                        walltime
+                        sus
+                    }
+                }
             }
         }
     """)
@@ -916,7 +974,24 @@ def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
     if result["run"] is None:
         return None
 
-    return RushRunInfo(**result["run"] | {"id": RunID(str(run_id))})
+    run = result["run"]
+    walltime = _total_run_walltime(run.get("resource_utilizations"))
+    sus = _run_sus(run.get("resource_utilizations"), run.get("module_instances"))
+    return RushRunInfo(
+        id=RunID(str(run_id)),
+        created_at=run["created_at"],
+        updated_at=run["updated_at"],
+        status=run["status"],
+        deleted_at=run["deleted_at"],
+        name=run["name"],
+        description=run["description"],
+        tags=run["tags"],
+        result=run["result"],
+        trace=run["trace"],
+        stdout=run["stdout"],
+        walltime=walltime,
+        sus=sus,
+    )
 
 
 def _poll_run(run_id: str | RunID, max_wait_time) -> tuple[str, bool]:
