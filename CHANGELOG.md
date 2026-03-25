@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+#### Changed
+- Tests now write to a temporary workspace that doesn't clutter the git tree
+- Can configure tests' workspace directory via `--rush-workspace-dir` flag to pytest
+- Tests more thoroughly check for valid behavior and output
+- Removed `run_tests.sh` favor of calling pytest manually (it's not too hard)
+
 ## 7.0.0b2
 
 ### Changed
@@ -8,7 +16,7 @@
 
 ### Added
 - Provided `RushRun` type that modules functions return to manage the run
-- Modules now use `RushRun.collect() for blocking until run completion and getting access to results as remote object-store references
+- Modules now use `RushRun.collect()` for blocking until run completion and getting access to results as remote object-store references
 - Modules now use `RushRun.fetch()` for in-memory results, and `RushRun.save()` for workspace persistence, with shared output handling between the two latter paths.
 - Provide `module.ResultRef` types for references to remote module output
 - Provide `module.Result` types for fetched module output
