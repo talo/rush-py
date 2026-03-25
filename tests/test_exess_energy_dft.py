@@ -1,16 +1,13 @@
-import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
-from rush.exess import energy
+from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
-def test_exess_energy_dft_hyb():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
-    run = energy(
-        data_dir / "benzene_t.json",
+def test_exess_energy_dft_hyb(test_data_dir: Path):
+    run = exess.energy(
+        test_data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         ksdft_keywords=exess.KSDFTKeywords(
             functional="HYB_GGA_XC_B3LYP",
@@ -30,16 +27,22 @@ def test_exess_energy_dft_hyb():
             tags=["rush-py", "test", "dft", "HYB_GGA_XC_B3LYP", "benzene"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    result.save()
+    assert_run_collects_and_caches(run, exess.ResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.calc.calculation_time > 0.0
+    assert result.exports is None
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is None
+    assert saved.calc.exists()
 
 
-def test_exess_energy_dft_dhyb():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
-    run = energy(
-        data_dir / "benzene_t.json",
+def test_exess_energy_dft_dhyb(test_data_dir: Path):
+    run = exess.energy(
+        test_data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         basis="cc-pVTZ",
         aux_basis="cc-pVTZ-RIFIT",
@@ -54,11 +57,14 @@ def test_exess_energy_dft_dhyb():
             tags=["rush-py", "test", "dft", "revDSD-PBEP86-D4", "benzene"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    result.save()
+    assert_run_collects_and_caches(run, exess.ResultRef)
 
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.calc.calculation_time > 0.0
+    assert result.exports is None
 
-if __name__ == "__main__":
-    test_exess_energy_dft_hyb()
-    test_exess_energy_dft_dhyb()
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is None
+    assert saved.calc.exists()

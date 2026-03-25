@@ -1,15 +1,13 @@
-import sys
 from pathlib import Path
 
 from rush import exess
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
-def test_exess_qmmm():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_exess_qmmm(test_data_dir: Path):
     run = exess.qmmm(
-        (data_dir / "6a5j_t.json", data_dir / "6a5j_r.json"),
+        (test_data_dir / "6a5j_t.json", test_data_dir / "6a5j_r.json"),
         n_timesteps=500,
         temperature_kelvin=300.0,
         method="RestrictedHF",
@@ -22,12 +20,14 @@ def test_exess_qmmm():
             tags=["rush-py", "test", "6a5j"],
         ),
     )
-    print(run, file=sys.stderr)
-    fetched = run.fetch()
-    assert isinstance(fetched, exess.QMMMResult)
-    assert fetched.geometries
-    print(run.save(), file=sys.stderr)
+    assert_run_collects_and_caches(run, exess.QMMMResultRef)
 
+    result = run.fetch()
+    assert isinstance(result, exess.QMMMResult)
+    assert result.geometries
+    assert all(geometry for geometry in result.geometries)
 
-if __name__ == "__main__":
-    test_exess_qmmm()
+    saved = run.save()
+    assert isinstance(saved, exess.QMMMResultPaths)
+    assert saved.output.suffix == ".json"
+    assert saved.output.exists()

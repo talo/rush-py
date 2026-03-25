@@ -2,13 +2,13 @@ import types
 
 from rush import exess
 from rush.exess import (
+    FragKeywords,
+    OptimizationKeywords,
+    Trajectory,
     energy,
     interaction_energy,
     optimization,
     qmmm,
-    FragKeywords,
-    Trajectory,
-    OptimizationKeywords,
 )
 
 

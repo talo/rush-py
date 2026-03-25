@@ -1,20 +1,20 @@
 from rush import TRC
 from pathlib import Path
 
-from rush.client import RunOpts, set_opts
-from rush.prepare import protein as prepare
+from rush import prepare
+from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
-def test_prepare_protein():
-    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
-    data_dir = Path.cwd() / "tests" / "data"
-    run = prepare(
-        data_dir / "3fln_raw.pdb",
+def test_prepare_protein(test_data_dir: Path):
+    run = prepare.protein(
+        test_data_dir / "3fln_raw.pdb",
         capping_style="always",
         run_opts=RunOpts(
             name="Test prepare-protein 01", tags=["rush-py", "test", "cdk2"]
         ),
     )
+    assert_run_collects_and_caches(run, prepare.ResultRef)
 
     trcs = run.fetch()
     assert isinstance(trcs, list)
@@ -27,6 +27,9 @@ def test_prepare_protein():
     assert "ACE" == residues.seqs[0]
     assert "NME" == residues.seqs[-1]
 
-
-if __name__ == "__main__":
-    test_prepare_protein()
+    saved = run.save()
+    assert len(saved) == len(trcs)
+    for saved_model in saved:
+        assert saved_model.topology.exists()
+        assert saved_model.residues.exists()
+        assert saved_model.chains.exists()

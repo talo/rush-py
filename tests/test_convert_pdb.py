@@ -2,8 +2,7 @@ import json
 import sys
 from pathlib import Path
 
-from rush.convert.json import to_dict
-from rush.convert.pdb import from_pdb
+from rush import from_pdb, to_dict
 
 
 def normalize_json(obj):

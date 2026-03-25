@@ -1,22 +1,19 @@
-import sys
 from pathlib import Path
 
 import pytest
 
-from rush import Topology, exess
-from rush.client import RunOpts, RunSpec, set_opts
-from rush.exess import interaction_energy
+from rush import FragmentRef, Topology, exess
+from rush.client import RunOpts, RunSpec
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 @pytest.mark.timeout(1800)
-def test_exess_interaction_energy_setonix():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
-    topology = Topology.from_json(data_dir / "tyk2_ejm_31_t.json")
+def test_exess_interaction_energy_setonix(test_data_dir: Path):
+    topology = Topology.from_json(test_data_dir / "tyk2_ejm_31_t.json")
     lig_idx = 93
     frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
-    run = interaction_energy(
-        data_dir / "tyk2_ejm_31_t.json",
+    run = exess.interaction_energy(
+        test_data_dir / "tyk2_ejm_31_t.json",
         lig_idx,
         basis="PCSeg-0",
         frag_keywords=exess.FragKeywords(
@@ -33,10 +30,12 @@ def test_exess_interaction_energy_setonix():
         ),
         run_spec=RunSpec(target="Setonix"),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    result.save()
+    assert_run_collects_and_caches(run, exess.ResultRef)
 
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.calc.qmmbe.reference_fragment == FragmentRef(lig_idx)
 
-if __name__ == "__main__":
-    test_exess_interaction_energy_setonix()
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.calc.exists()

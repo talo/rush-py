@@ -17,8 +17,8 @@ uv sync --dev
 # Run all tests (requires .env with RUSH_TOKEN, RUSH_ENDPOINT, RUSH_PROJECT)
 uv run pytest                          # auto-skips slow tests if queues busy
 uv run pytest -m "not slow"            # fast tests only (converters, merge, fetch)
-uv run pytest -m slow --run-slow-force # slow tests only, ignore queue status
-uv run pytest --run-slow-force         # all tests, ignore queue status
+uv run pytest -m slow --force-run-slow # slow tests only, ignore queue status
+uv run pytest --force-run-slow         # all tests, ignore queue status
 
 # Via run_tests.sh (sources .env automatically)
 ./run_tests.sh              # auto-skip slow if queues busy

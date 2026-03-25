@@ -1,10 +1,8 @@
 import math
-from pathlib import Path
 
-from rush.client import RunOpts, set_opts
-from rush.convert import from_pdb
-from rush.mol import Element
-from rush.prepare import protein as prepare
+from rush import Element, from_pdb, prepare
+from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def _as_trc(trc):
@@ -88,11 +86,9 @@ def _per_residue_rmsd(trc_ref, trc_cmp):
     return all
 
 
-def test_prepare_protein():
-    set_opts(workspace_dir=Path.cwd() / ".scratch" / "workspace")
-    data_dir = Path.cwd() / "tests" / "data"
-    run_debumped = prepare(
-        data_dir / "3fln_raw.pdb",
+def test_prepare_protein(test_data_dir):
+    run_debumped = prepare.protein(
+        test_data_dir / "3fln_raw.pdb",
         ph=7.4,
         naming_scheme="AMBER",
         capping_style="truncated",
@@ -103,8 +99,8 @@ def test_prepare_protein():
             tags=["rush-py", "test", "MAPK14"],
         ),
     )
-    run_nodebump = prepare(
-        data_dir / "3fln_raw.pdb",
+    run_nodebump = prepare.protein(
+        test_data_dir / "3fln_raw.pdb",
         ph=7.4,
         naming_scheme="AMBER",
         capping_style="truncated",
@@ -115,9 +111,11 @@ def test_prepare_protein():
             tags=["rush-py", "test", "MAPK14"],
         ),
     )
+    assert_run_collects_and_caches(run_debumped, prepare.ResultRef)
+    assert_run_collects_and_caches(run_nodebump, prepare.ResultRef)
 
     # Load the original PDB into a TRC
-    trc_unprepped = _as_trc(from_pdb((data_dir / "3fln_raw.pdb").read_text()))
+    trc_unprepped = _as_trc(from_pdb((test_data_dir / "3fln_raw.pdb").read_text()))
 
     # Parse into TRC object (single model)
     trc_debumped = run_debumped.fetch()[0]
@@ -148,7 +146,3 @@ def test_prepare_protein():
             f"unprepped residues (nodebump={residue_rmsd_nodebump:.4f}, "
             f"debumped={residue_rmsd_debumped:.4f})."
         )
-
-
-if __name__ == "__main__":
-    test_prepare_protein()

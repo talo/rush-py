@@ -1,15 +1,15 @@
-import sys
 from pathlib import Path
 
+import pytest
+
 from rush import pbsa
-from rush.client import RunOpts, set_opts
+from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
-def test_pbsa():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path.cwd() / "tests" / "data"
+def test_pbsa(test_data_dir: Path):
     run = pbsa.solvation_energy(
-        data_dir / "ethane_t.json",
+        test_data_dir / "ethane_t.json",
         solute_dielectric=1.0,
         solvent_dielectric=78.54,
         solvent_radius=0.14,
@@ -26,11 +26,15 @@ def test_pbsa():
             tags=["rush-py", "test", "ethane"],
         ),
     )
+    assert_run_collects_and_caches(run, pbsa.ResultRef)
+
     result = run.fetch()
     assert isinstance(result, pbsa.Result)
-    print(result, file=sys.stderr)
-    print(run.save(), file=sys.stderr)
+    assert result.solvation_energy == pytest.approx(
+        result.polar_solvation_energy + result.nonpolar_solvation_energy
+    )
 
-
-if __name__ == "__main__":
-    test_pbsa()
+    saved = run.save()
+    assert isinstance(saved, pbsa.ResultPaths)
+    assert saved.output.suffix == ".json"
+    assert saved.output.exists()

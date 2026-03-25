@@ -1,30 +1,25 @@
 import json
 import sys
-from pathlib import Path
 from typing import Any
 
-from rush import TRC, to_dict
-from rush.convert import from_json, from_sdf
-from rush import merge_trcs
+from rush import TRC, from_json, from_sdf, merge_trcs, to_dict
 
 
-def test_merge_with_paths():
+def test_merge_with_paths(test_data_dir):
     """Test merging TRCs using file paths."""
-    data_dir = Path.cwd() / "tests" / "data"
     seqs = merge_trcs(
-        data_dir / "1hsg_MK1_trc.json", data_dir / "1hsg_HOH_trc.json"
+        test_data_dir / "1hsg_MK1_trc.json", test_data_dir / "1hsg_HOH_trc.json"
     ).residues.seqs
     assert "MK1" in seqs and "HOH" in seqs
 
 
-def test_merge_with_trcs():
+def test_merge_with_trcs(test_data_dir):
     """Test merging TRCs using TRC objects."""
-    data_dir = Path.cwd() / "tests" / "data"
-    mk1_trcs = from_json(data_dir / "1hsg_MK1_trc.json")
+    mk1_trcs = from_json(test_data_dir / "1hsg_MK1_trc.json")
     assert isinstance(mk1_trcs, list)
     assert len(mk1_trcs) == 1
     mk1_trc = mk1_trcs[0]
-    hoh_trcs = from_json(data_dir / "1hsg_HOH_trc.json")
+    hoh_trcs = from_json(test_data_dir / "1hsg_HOH_trc.json")
     assert isinstance(hoh_trcs, list)
     assert len(hoh_trcs) == 1
     hoh_trc = hoh_trcs[0]
@@ -42,13 +37,11 @@ def normalize_json(obj):
         return obj
 
 
-def test_merge_3fly():
+def test_merge_3fly(test_data_dir):
     """Test merging 3fly ligand SDF with 3fly protein JSON to get 3fly complex JSON."""
-    test_inputs_dir = Path(__file__).parent / "data"
-
-    protein_json_file = test_inputs_dir / "3fly_protein_trc.json"
-    ligand_sdf_file = test_inputs_dir / "3fly_ligand.sdf"
-    expected_complex_json_file = test_inputs_dir / "3fly_complex_trc.json"
+    protein_json_file = test_data_dir / "3fly_protein_trc.json"
+    ligand_sdf_file = test_data_dir / "3fly_ligand.sdf"
+    expected_complex_json_file = test_data_dir / "3fly_complex_trc.json"
 
     # Check that all files exist
     assert ligand_sdf_file.exists(), f"Ligand SDF file not found: {ligand_sdf_file}"
@@ -131,9 +124,3 @@ def test_merge_3fly():
     assert merged_summary == expected_summary, (
         "Fields differ between merged TRC and expected complex JSON"
     )
-
-
-if __name__ == "__main__":
-    test_merge_with_paths()
-    test_merge_with_trcs()
-    test_merge_3fly()

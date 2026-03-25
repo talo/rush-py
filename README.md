@@ -114,4 +114,18 @@ uv sync
 source .venv/bin/activate
 ```
 
+### Running Tests
+Run the full suite with:
+```bash
+uv run pytest
+```
+
+Common focused invocations:
+```bash
+uv run pytest -m "not submits_rush_jobs"
+uv run pytest -m submits_rush_jobs --force-run-slow
+uv run pytest tests/test_exess_energy.py
+uv run pytest tests/test_exess_energy.py --rush-workspace-dir /tmp/rush-py-workspaces
+```
+
 See the Terms of Service for use of the underlying Rush software at https://qdx.co/terms.

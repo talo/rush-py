@@ -6,11 +6,7 @@ import numpy as np
 import pytest
 
 from rush import TRCPaths
-from rush.boltz import (
-    Result,
-    ResultPaths,
-    ResultRef,
-)
+from rush.boltz import Result, ResultPaths, ResultRef
 
 
 def _sample_boltz_raw_output():

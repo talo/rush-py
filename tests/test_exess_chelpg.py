@@ -1,18 +1,14 @@
-import sys
 from pathlib import Path
-from pprint import pp
 
 from rush import exess, from_json
-from rush.client import RunOpts, set_opts
-from rush.exess import energy
+from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
-def test_exess_energy_chelpg_1hsg_MK1():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
-    trc = from_json(data_dir / "1hsg_MK1_trc.json")[0]
+def test_exess_energy_chelpg_1hsg_MK1(test_data_dir: Path):
+    trc = from_json(test_data_dir / "1hsg_MK1_trc.json")[0]
 
-    result = energy(
+    run = exess.energy(
         trc,
         basis="PCSeg-0",
         frag_keywords=None,  # Important, to disable fragmentation
@@ -22,20 +18,26 @@ def test_exess_energy_chelpg_1hsg_MK1():
             name="Rush-Py Test EXESS Energy 03.1: ChelpG via Energy",
             tags=["rush-py", "test", "tyk2+ejm-31"],
         ),
-    ).collect()
-    print(result, file=sys.stderr)
-    assert result.exports is not None
-    fetched = result.fetch()
-    assert isinstance(fetched.exports, dict)
-    charges = fetched.exports["chelpg_charges"]
-    pp(charges, width=130, compact=True, stream=sys.stderr)
+    )
+    ref = assert_run_collects_and_caches(run, exess.ResultRef)
+    assert ref.exports is not None
+
+    result = run.fetch()
+    assert isinstance(result.exports, dict)
+    charges = result.exports["chelpg_charges"]
+    assert charges
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is not None
+    assert saved.exports.suffix == ".json"
+    assert saved.calc.exists()
+    assert saved.exports.exists()
 
 
-def test_exess_energy_chelpg_benzene():
-    set_opts(workspace_dir=Path.cwd() / "test-runs")
-    data_dir = Path(__file__).parent / "data"
-    result = energy(
-        data_dir / "benzene_t.json",
+def test_exess_energy_chelpg_benzene(test_data_dir: Path):
+    run = exess.energy(
+        test_data_dir / "benzene_t.json",
         method="RestrictedRIMP2",
         basis="def2-TZVP",
         aux_basis="def2-TZVP-RIFIT",
@@ -47,15 +49,18 @@ def test_exess_energy_chelpg_benzene():
             name="Rush-Py Test EXESS Energy 03.2: ChelpG via Energy",
             tags=["rush-py", "test", "benzene"],
         ),
-    ).collect()
-    print(result, file=sys.stderr)
-    assert result.exports is not None
-    fetched = result.fetch()
-    assert isinstance(fetched.exports, dict)
-    charges = fetched.exports["chelpg_charges"]
-    pp(charges, width=130, compact=True, stream=sys.stderr)
+    )
+    ref = assert_run_collects_and_caches(run, exess.ResultRef)
+    assert ref.exports is not None
 
+    result = run.fetch()
+    assert isinstance(result.exports, dict)
+    charges = result.exports["chelpg_charges"]
+    assert charges
 
-if __name__ == "__main__":
-    test_exess_energy_chelpg_1hsg_MK1()
-    test_exess_energy_chelpg_benzene()
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is not None
+    assert saved.exports.suffix == ".json"
+    assert saved.calc.exists()
+    assert saved.exports.exists()
