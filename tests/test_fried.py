@@ -3,9 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from rush.convert import from_pdb, from_sdf, to_dict
+from rush import from_pdb, from_sdf, merge_trcs, to_dict
 from rush.fried import fragment_ligand, fragmented_exess, plot_fried_stacked
-from rush import merge_trcs
 
 
 @pytest.mark.timeout(2700)

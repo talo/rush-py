@@ -1,13 +1,12 @@
-import sys
 from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
-from rush.exess import energy
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_exess_energy_tutorial(test_data_dir: Path):
-    run = energy(
+    run = exess.energy(
         test_data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
@@ -17,17 +16,24 @@ def test_exess_energy_tutorial(test_data_dir: Path):
             tags=["rush-py", "test", "6a5j"],
         ),
     )
-    output = run.fetch()
-    assert output.calc.qmmbe is not None
-    assert output.calc.qmmbe.reference_fragment is None
-    assert output.calc.qmmbe.expanded_hf_energy is not None
-    print(output.calc.qmmbe.expanded_hf_energy)
+    assert_run_collects_and_caches(run, exess.ResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.exports is None
+    assert result.calc.qmmbe.reference_fragment is None
+    assert result.calc.qmmbe.expanded_hf_energy is not None
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.calc.suffix == ".json"
+    assert saved.calc.exists()
 
 
 def test_exess_energy_exports(test_data_dir: Path):
     # Default method is RestrictedKSDFT, and default basis is cc-pVDZ
     # Using PCSeg-0 for faster test runtimes
-    run = energy(
+    run = exess.energy(
         test_data_dir / "6a5j_t.json",
         method="RestrictedHF",
         basis="PCSeg-0",
@@ -45,8 +51,17 @@ def test_exess_energy_exports(test_data_dir: Path):
             tags=["rush-py", "test", "6a5j"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
+    ref = assert_run_collects_and_caches(run, exess.ResultRef)
+    assert ref.exports is not None
 
-    # Each module result has .save() for downloading outputs to the workspace
-    result.save()
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert isinstance(result.exports, bytes)
+    assert result.exports
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is not None
+    assert saved.exports.suffix == ".hdf5"
+    assert saved.calc.exists()
+    assert saved.exports.exists()

@@ -2,9 +2,7 @@ import json
 import sys
 from typing import Any
 
-from rush import TRC, to_dict
-from rush.convert import from_json, from_sdf
-from rush import merge_trcs
+from rush import TRC, from_json, from_sdf, merge_trcs, to_dict
 
 
 def test_merge_with_paths(test_data_dir):

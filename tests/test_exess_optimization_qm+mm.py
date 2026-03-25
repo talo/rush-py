@@ -1,8 +1,8 @@
-import sys
 from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_exess_optimization_qm_mm(test_data_dir: Path):
@@ -30,11 +30,14 @@ def test_exess_optimization_qm_mm(test_data_dir: Path):
             tags=["rush-py", "test", "6a5j", "QM+MM"],
         ),
     )
-    print(run, file=sys.stderr)
-    fetched = run.fetch()
-    assert isinstance(fetched, exess.OptimizationResult)
-    assert fetched.trajectory
-    assert fetched.steps
+    assert_run_collects_and_caches(run, exess.OptimizationResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.OptimizationResult)
+    assert result.trajectory
+    assert result.steps
 
     saved = run.save()
     assert isinstance(saved, exess.OptimizationResultPaths)
+    assert saved.trajectory.exists()
+    assert saved.steps.exists()

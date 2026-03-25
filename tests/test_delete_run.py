@@ -1,16 +1,16 @@
 import time
 from pathlib import Path
 
+from rush import exess
 from rush.client import (
     RunOpts,
     delete_run,
     fetch_runs,
 )
-from rush.exess import energy
 
 
 def test_delete_run(test_data_dir: Path):
-    run = energy(
+    run = exess.energy(
         test_data_dir / "1kuw_t.json",
         basis="PCSeg-0",
         run_opts=RunOpts(

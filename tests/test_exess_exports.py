@@ -1,13 +1,12 @@
-import sys
 from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts, RunSpec
-from rush.exess import energy
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_exess_exports(test_data_dir: Path):
-    run = energy(
+    run = exess.energy(
         test_data_dir / "benzene_t.json",
         basis="PCSeg-0",
         frag_keywords=None,  # No fragmentation; whole system calc
@@ -27,7 +26,18 @@ def test_exess_exports(test_data_dir: Path):
             tags=["rush-py", "test", "1kuw", "electron density", "ESP"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    files = result.save()
-    print(files, file=sys.stderr)
+    ref = assert_run_collects_and_caches(run, exess.ResultRef)
+    assert ref.exports is not None
+
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert isinstance(result.exports, dict)
+    assert "density_descriptors" in result.exports
+    assert "esp_descriptors" in result.exports
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is not None
+    assert saved.exports.suffix == ".json"
+    assert saved.calc.exists()
+    assert saved.exports.exists()

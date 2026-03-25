@@ -1,8 +1,8 @@
-import sys
 from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_exess_qmmm(test_data_dir: Path):
@@ -20,8 +20,14 @@ def test_exess_qmmm(test_data_dir: Path):
             tags=["rush-py", "test", "6a5j"],
         ),
     )
-    print(run, file=sys.stderr)
-    fetched = run.fetch()
-    assert isinstance(fetched, exess.QMMMResult)
-    assert fetched.geometries
-    print(run.save(), file=sys.stderr)
+    assert_run_collects_and_caches(run, exess.QMMMResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.QMMMResult)
+    assert result.geometries
+    assert all(geometry for geometry in result.geometries)
+
+    saved = run.save()
+    assert isinstance(saved, exess.QMMMResultPaths)
+    assert saved.output.suffix == ".json"
+    assert saved.output.exists()

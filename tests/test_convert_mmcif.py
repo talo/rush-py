@@ -2,8 +2,7 @@ import json
 import sys
 from pathlib import Path
 
-from rush.convert.json import to_dict
-from rush.convert.mmcif import from_mmcif
+from rush import from_mmcif, to_dict
 
 
 def normalize_json(obj):

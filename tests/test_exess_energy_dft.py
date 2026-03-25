@@ -1,13 +1,12 @@
-import sys
 from pathlib import Path
 
 from rush import exess
 from rush.client import RunOpts
-from rush.exess import energy
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_exess_energy_dft_hyb(test_data_dir: Path):
-    run = energy(
+    run = exess.energy(
         test_data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         ksdft_keywords=exess.KSDFTKeywords(
@@ -28,13 +27,21 @@ def test_exess_energy_dft_hyb(test_data_dir: Path):
             tags=["rush-py", "test", "dft", "HYB_GGA_XC_B3LYP", "benzene"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    result.save()
+    assert_run_collects_and_caches(run, exess.ResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.calc.calculation_time > 0.0
+    assert result.exports is None
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is None
+    assert saved.calc.exists()
 
 
 def test_exess_energy_dft_dhyb(test_data_dir: Path):
-    run = energy(
+    run = exess.energy(
         test_data_dir / "benzene_t.json",
         method="RestrictedKSDFT",
         basis="cc-pVTZ",
@@ -50,6 +57,14 @@ def test_exess_energy_dft_dhyb(test_data_dir: Path):
             tags=["rush-py", "test", "dft", "revDSD-PBEP86-D4", "benzene"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    result.save()
+    assert_run_collects_and_caches(run, exess.ResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.calc.calculation_time > 0.0
+    assert result.exports is None
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.exports is None
+    assert saved.calc.exists()

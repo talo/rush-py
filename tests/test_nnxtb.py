@@ -1,8 +1,8 @@
-import sys
 from pathlib import Path
 
 from rush import nnxtb
 from rush.client import RunOpts
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_nnxtb(test_data_dir: Path):
@@ -16,7 +16,14 @@ def test_nnxtb(test_data_dir: Path):
             tags=["rush-py", "test", "1kuw"],
         ),
     )
+    assert_run_collects_and_caches(run, nnxtb.ResultRef)
+
     result = run.fetch()
     assert isinstance(result, nnxtb.Result)
-    print(result, file=sys.stderr)
-    print(run.save(), file=sys.stderr)
+    assert result.energy_mev != 0.0
+    assert result.forces_mev_per_angstrom is not None
+
+    saved = run.save()
+    assert isinstance(saved, nnxtb.ResultPaths)
+    assert saved.output.suffix == ".json"
+    assert saved.output.exists()

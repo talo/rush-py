@@ -103,18 +103,14 @@ def test_data_dir() -> Path:
     return TEST_DATA_DIR
 
 
-@pytest.fixture
-def rush_workspace(
-    tmp_path: Path, request: pytest.FixtureRequest
-) -> Path:
+@pytest.fixture(autouse=True)
+def rush_workspace(tmp_path: Path, request: pytest.FixtureRequest) -> Path:
     """Provide a per-test Rush workspace under temp storage or a user-supplied root."""
-    workspace_root = request.config.getoption("--rush-workspace-dir")
-    if workspace_root:
-        safe_nodeid = re.sub(
-            r"[^A-Za-z0-9._-]+", "-", request.node.nodeid
-        ).strip("-")
+    configured_root = request.config.getoption("--rush-workspace-dir")
+    if configured_root:
+        safe_nodeid = re.sub(r"[^A-Za-z0-9._-]+", "-", request.node.nodeid).strip("-")
         workspace = (
-            Path(workspace_root).expanduser().resolve()
+            Path(configured_root).expanduser().resolve()
             / safe_nodeid
             / "rush-workspace"
         )
@@ -128,6 +124,7 @@ def rush_workspace(
 @pytest.fixture(autouse=True)
 def _configure_rush_workspace(rush_workspace: Path):
     """Isolate each test's workspace so saved outputs never leak into the repo."""
+
     previous_workspace = rush_client._get_opts().workspace_dir
     rush_client.set_opts(workspace_dir=rush_workspace)
     try:

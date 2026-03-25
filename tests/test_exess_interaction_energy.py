@@ -1,17 +1,15 @@
-import sys
 from pathlib import Path
 
-from rush import Topology, exess
+from rush import FragmentRef, Topology, exess
 from rush.client import RunOpts
-from rush.exess import interaction_energy
-from rush.mol import FragmentRef
+from tests._module_test_utils import assert_run_collects_and_caches
 
 
 def test_exess_interaction_energy(test_data_dir: Path):
     topology = Topology.from_json(test_data_dir / "tyk2_ejm_31_t.json")
     lig_idx = 93
     frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
-    run = interaction_energy(
+    run = exess.interaction_energy(
         test_data_dir / "tyk2_ejm_31_t.json",
         lig_idx,
         basis="PCSeg-0",
@@ -28,9 +26,13 @@ def test_exess_interaction_energy(test_data_dir: Path):
             tags=["rush-py", "test", "tyk2+ejm-31", "deploy"],
         ),
     )
-    result = run.collect()
-    print(result, file=sys.stderr)
-    fetched = result.fetch()
-    assert fetched.calc.qmmbe is not None
-    assert fetched.calc.qmmbe.reference_fragment == FragmentRef(lig_idx)
-    assert fetched.calc.qmmbe.nmers[0][0].fragments == [FragmentRef(lig_idx)]
+    assert_run_collects_and_caches(run, exess.ResultRef)
+
+    result = run.fetch()
+    assert isinstance(result, exess.Result)
+    assert result.calc.qmmbe.reference_fragment == FragmentRef(lig_idx)
+    assert result.calc.qmmbe.nmers[0][0].fragments == [FragmentRef(lig_idx)]
+
+    saved = run.save()
+    assert isinstance(saved, exess.ResultPaths)
+    assert saved.calc.exists()
