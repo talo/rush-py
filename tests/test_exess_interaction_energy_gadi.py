@@ -1,8 +1,9 @@
+import sys
 from pathlib import Path
 
 import pytest
 
-from rush import FragmentRef, Topology, exess
+from rush import FragmentRef, Topology, exess, fetch_run_info
 from rush.client import RunOpts, RunSpec
 from tests._module_test_utils import assert_run_collects_and_caches
 
@@ -18,7 +19,7 @@ def test_exess_interaction_energy_gadi(test_data_dir: Path):
         basis="PCSeg-0",
         frag_keywords=exess.FragKeywords(
             level="Trimer",
-            dimer_cutoff=5.0,
+            dimer_cutoff=5.01,
             trimer_cutoff=1.0,
             cutoff_type="Centroid",
             distance_metric="Min",
@@ -30,7 +31,9 @@ def test_exess_interaction_energy_gadi(test_data_dir: Path):
         ),
         run_spec=RunSpec(target="Gadi"),
     )
+    print(fetch_run_info(run.id), file=sys.stderr)
     assert_run_collects_and_caches(run, exess.ResultRef)
+    print(fetch_run_info(run.id), file=sys.stderr)
 
     result = run.fetch()
     assert isinstance(result, exess.Result)

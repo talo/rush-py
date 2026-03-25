@@ -128,9 +128,9 @@ MODULE_LOCK = (
         # prod
         "auto3d_rex": "github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex",
         "boltz2_rex": "github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex",
-        "exess_rex": "github:talo/tengu-exess/b667752cc767a223126184a3e78485a465a32aea#exess_rex",
-        "exess_geo_opt_rex": "github:talo/tengu-exess/b667752cc767a223126184a3e78485a465a32aea#exess_geo_opt_rex",
-        "exess_qmmm_rex": "github:talo/tengu-exess/b667752cc767a223126184a3e78485a465a32aea#exess_qmmm_rex",
+        "exess_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex",
+        "exess_geo_opt_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex",
+        "exess_qmmm_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex",
         "mmseqs2_rex": "github:talo/tengu-colabfold/0b6ca8b9dc97fc6380d334169a6faae51d85fac7#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -868,12 +868,17 @@ class RushRunInfo:
     description: str | None = None
     tags: list[str] | None = None
     result: dict | None = None
-    trace: dict | None = None
     stdout: str | None = None
+    trace: dict | None = None
+    walltime: int | float | None = None
+    sus: dict[str, int | float] | None = None
+
+    def _resource_totals_complete(self) -> bool:
+        return self.status in {"done", "error", "cancelled"}
 
     def __str__(self) -> str:
         lines = [
-            f"RushRunInfo: {self.name or '(unnamed)'}",
+            f"Run info for {self.name or '(unnamed)'}",
             f"  id:          {self.id}",
             f"  status:      {self.status}",
             f"  created_at:  {self.created_at}",
@@ -885,7 +890,49 @@ class RushRunInfo:
             lines.append(f"  description: {self.description}")
         if self.tags:
             lines.append(f"  tags:        {', '.join(self.tags)}")
+        totals_suffix = "" if self._resource_totals_complete() else " (incomplete)"
+        if self.walltime is not None:
+            lines.append(f"  walltime:    {self.walltime}{totals_suffix}")
+        if self.sus is not None:
+            for target, sus in self.sus.items():
+                prefix = f"{target.capitalize()} SUs:"
+                lines.append(f"  {prefix:<12} {sus}{totals_suffix}")
         return "\n".join(lines)
+
+
+def _total_run_walltime(
+    resource_utilizations: dict[str, Any] | None,
+) -> int | float | None:
+    if resource_utilizations is None:
+        return None
+
+    return sum(
+        utilization["walltime"]
+        for utilization in resource_utilizations["nodes"]
+        if utilization.get("walltime") is not None
+    )
+
+
+def _run_sus(
+    resource_utilizations: dict[str, Any] | None,
+    module_instances: dict[str, Any] | None = None,
+) -> dict[str, int | float] | None:
+    sus_by_target: dict[str, int | float] = {}
+    for module_instance in module_instances["nodes"] if module_instances else []:
+        target = module_instance.get("target")
+        if target in {"gadi", "setonix"}:
+            sus_by_target.setdefault(target, 0)
+
+    for utilization in resource_utilizations["nodes"] if resource_utilizations else []:
+        target = utilization.get("target")
+        sus = utilization.get("sus")
+        if target not in {"gadi", "setonix"}:
+            continue
+        sus_by_target.setdefault(target, 0)
+        if sus is not None:
+            sus_by_target[target] += sus
+
+    return sus_by_target or None
 
 
 def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
@@ -907,6 +954,18 @@ def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
                 status
                 trace
                 stdout
+                module_instances {
+                    nodes {
+                        target
+                    }
+                }
+                resource_utilizations {
+                    nodes {
+                        target
+                        walltime
+                        sus
+                    }
+                }
             }
         }
     """)
@@ -916,7 +975,24 @@ def fetch_run_info(run_id: str | RunID) -> RushRunInfo | None:
     if result["run"] is None:
         return None
 
-    return RushRunInfo(**result["run"] | {"id": RunID(str(run_id))})
+    run = result["run"]
+    walltime = _total_run_walltime(run.get("resource_utilizations"))
+    sus = _run_sus(run.get("resource_utilizations"), run.get("module_instances"))
+    return RushRunInfo(
+        id=RunID(str(run_id)),
+        created_at=run["created_at"],
+        updated_at=run["updated_at"],
+        status=run["status"],
+        deleted_at=run["deleted_at"],
+        name=run["name"],
+        description=run["description"],
+        tags=run["tags"],
+        result=run["result"],
+        trace=run["trace"],
+        stdout=run["stdout"],
+        walltime=walltime,
+        sus=sus,
+    )
 
 
 def _poll_run(run_id: str | RunID, max_wait_time) -> tuple[str, bool]:
