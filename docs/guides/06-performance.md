@@ -33,11 +33,11 @@ Use the same method, basis set, convergence criteria, and job configuration you 
 
 ### 3. Record walltime
 
-For each test run, note the walltime. You can track this by comparing timestamps before and after collection, or by inspecting the `history.json` file written to your workspace (see {doc}`04-general-info`).
+For each test run, note the walltime. For energy calculations, you can read it directly from the result object via `result.calc.calculation_time` (reported in seconds). For other calculation types, you can compare timestamps before and after collection.
 
 ### 4. Plot cost versus system size
 
-Even with 3–5 data points you can fit a scaling curve and extrapolate to larger systems. The shape of the curve is predictable for a given method — your test runs supply the real-world prefactors.
+Even with 3–5 data points you can fit a scaling curve and extrapolate to larger systems. The general shape of the curve is predictable for a given method — your test runs fill in the actual numbers so the curve matches your real workload.
 
 ### 5. Extrapolate to your full dataset
 

@@ -299,6 +299,8 @@ print(f"  Molecule: {mol_name} ({mol_formula_sub})")
 print("\nRunning CHELPG calculation...")
 result = exess.energy(
     trc,
+    method="RestrictedHF",
+    basis="STO-3G",  # Minimal basis set for tutorials only – use cc-pVDZ or larger for production
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
     convert_hdf5_to_json=True,

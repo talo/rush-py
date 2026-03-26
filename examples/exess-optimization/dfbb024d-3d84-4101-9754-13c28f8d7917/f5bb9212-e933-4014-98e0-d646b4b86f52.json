@@ -1,0 +1,34 @@
+[
+  {
+    "total_energy": -76.88327568687835,
+    "max_gradient_component": 0.13360690568402578
+  },
+  {
+    "total_energy": -76.95552192502615,
+    "max_gradient_component": -0.10080076144801589
+  },
+  {
+    "total_energy": -77.02439315042528,
+    "max_gradient_component": -0.06696818143071873
+  },
+  {
+    "total_energy": -77.06173412291565,
+    "max_gradient_component": 0.05589940586334701
+  },
+  {
+    "total_energy": -77.07311766647442,
+    "max_gradient_component": 0.008099733804419341
+  },
+  {
+    "total_energy": -77.07394828387302,
+    "max_gradient_component": -0.0021012237176426763
+  },
+  {
+    "total_energy": -77.0739542018995,
+    "max_gradient_component": -0.0006772442921273856
+  },
+  {
+    "total_energy": -77.07395445013555,
+    "max_gradient_component": 9.575090871551662e-05
+  }
+]
