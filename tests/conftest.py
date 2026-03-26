@@ -30,6 +30,7 @@ NON_SUBMITTING_TEST_FILES = frozenset(
         "tests/test_exess_namespaces.py",
         "tests/test_fetch_runs.py",
         "tests/test_merge.py",
+        "tests/test_fetch_run_info.py",
     }
 )
 

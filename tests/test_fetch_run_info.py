@@ -150,4 +150,4 @@ def test_run_info_marks_zero_resource_totals_incomplete_for_non_final_runs():
     formatted = str(info)
 
     assert "walltime:    0 (incomplete)" in formatted
-    assert "Gadi SUs:  0 (incomplete)" in formatted
+    assert "Gadi SUs:    0 (incomplete)" in formatted
