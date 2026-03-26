@@ -76,5 +76,5 @@ markers = [
 module-name = "rush"
 
 [build-system]
-requires = ["uv_build~=0.9"]
+requires = ["uv_build~=0.11"]
 build-backend = "uv_build"
