@@ -30,21 +30,21 @@ def test_run_sus_only_includes_gadi_and_setonix():
     assert _run_sus(
         {
             "nodes": [
-                {"target": "Bullet", "sus": 5},
-                {"target": "Gadi", "sus": 12},
-                {"target": "Setonix", "sus": 8},
-                {"target": "Gadi", "sus": 3},
-                {"target": "Setonix", "sus": None},
+                {"target": "bullet", "sus": 5},
+                {"target": "gadi", "sus": 12},
+                {"target": "setonix", "sus": 8},
+                {"target": "gadi", "sus": 3},
+                {"target": "setonix", "sus": None},
             ]
         },
         {
             "nodes": [
-                {"target": "Bullet"},
-                {"target": "Gadi"},
-                {"target": "Setonix"},
+                {"target": "bullet"},
+                {"target": "gadi"},
+                {"target": "setonix"},
             ]
         },
-    ) == {"Gadi": 15, "Setonix": 8}
+    ) == {"gadi": 15, "setonix": 8}
 
 
 def test_run_sus_returns_zero_for_supported_targets_with_no_usage():
@@ -52,12 +52,12 @@ def test_run_sus_returns_zero_for_supported_targets_with_no_usage():
         None,
         {
             "nodes": [
-                {"target": "Gadi"},
-                {"target": "Setonix"},
-                {"target": "Bullet"},
+                {"target": "gadi"},
+                {"target": "setonix"},
+                {"target": "bullet"},
             ]
         },
-    ) == {"Gadi": 0, "Setonix": 0}
+    ) == {"gadi": 0, "setonix": 0}
 
 
 def test_fetch_run_info_includes_total_walltime(monkeypatch):
@@ -77,14 +77,14 @@ def test_fetch_run_info_includes_total_walltime(monkeypatch):
                     "stdout": "done",
                     "module_instances": {
                         "nodes": [
-                            {"target": "Gadi"},
+                            {"target": "gadi"},
                         ]
                     },
                     "resource_utilizations": {
                         "nodes": [
-                            {"target": "Gadi", "walltime": 7, "sus": 2.5},
-                            {"target": "Gadi", "walltime": 13, "sus": 1.5},
-                            {"target": "Bullet", "walltime": 5, "sus": 99},
+                            {"target": "gadi", "walltime": 7, "sus": 2.5},
+                            {"target": "gadi", "walltime": 13, "sus": 1.5},
+                            {"target": "bullet", "walltime": 5, "sus": 99},
                         ]
                     },
                 }
@@ -97,9 +97,9 @@ def test_fetch_run_info_includes_total_walltime(monkeypatch):
     assert info is not None
     assert info.id == RunID("run-id")
     assert info.walltime == 25
-    assert info.sus == {"Gadi": 4.0}
+    assert info.sus == {"gadi": 4.0}
     assert "walltime:    25" in str(info)
-    assert "Gadi SUs:  4.0" in str(info)
+    assert "Gadi SUs:    4.0" in str(info)
 
 
 def test_fetch_run_info_seeds_supported_targets_before_sus_exist(monkeypatch):
@@ -119,7 +119,7 @@ def test_fetch_run_info_seeds_supported_targets_before_sus_exist(monkeypatch):
                     "stdout": None,
                     "module_instances": {
                         "nodes": [
-                            {"target": "Gadi"},
+                            {"target": "gadi"},
                         ]
                     },
                     "resource_utilizations": {"nodes": []},
@@ -132,9 +132,9 @@ def test_fetch_run_info_seeds_supported_targets_before_sus_exist(monkeypatch):
 
     assert info is not None
     assert info.walltime == 0
-    assert info.sus == {"Gadi": 0}
+    assert info.sus == {"gadi": 0}
     assert "walltime:    0 (incomplete)" in str(info)
-    assert "Gadi SUs:  0 (incomplete)" in str(info)
+    assert "Gadi SUs:    0 (incomplete)" in str(info)
 
 
 def test_run_info_marks_zero_resource_totals_incomplete_for_non_final_runs():
@@ -144,7 +144,7 @@ def test_run_info_marks_zero_resource_totals_incomplete_for_non_final_runs():
         updated_at="2026-03-24T10:20:00.000000",
         status="running",
         walltime=0,
-        sus={"Gadi": 0},
+        sus={"gadi": 0},
     )
 
     formatted = str(info)
