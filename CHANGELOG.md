@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 7.0.0b3
 
 #### Changed
 - Tests now write to a temporary workspace that doesn't clutter the git tree
