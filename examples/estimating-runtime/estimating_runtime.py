@@ -47,6 +47,8 @@ else:
     print()
     print(f"Created at: {info.created_at}")
     print(f"Updated at: {info.updated_at}")
+    print(f"Walltime:   {info.walltime}")
+    print(f"SUs:        {info.sus}")
 
     if info.stdout:
         print()

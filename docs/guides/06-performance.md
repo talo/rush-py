@@ -65,7 +65,8 @@ from rush.client import RunSpec
 spec = RunSpec(walltime=60)
 
 # Pass it to any computation module
-result = exess.energy(trc, run_spec=spec, collect=True)
+run = exess.energy(trc, run_spec=spec)
+result = run.fetch()
 ```
 
 `RunSpec` accepts the following parameters:
