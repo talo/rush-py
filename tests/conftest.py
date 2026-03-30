@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import requests
 
-from rush import session as rush_session
+import rush.session
 
 # Test files that do not submit Rush jobs. New test files default to
 # `submits_rush_jobs`, which is safer than accidentally bypassing queue-aware
@@ -124,12 +124,12 @@ def rush_workspace(tmp_path: Path, request: pytest.FixtureRequest) -> Path:
 def _configure_rush_workspace(rush_workspace: Path):
     """Isolate each test's workspace so saved outputs never leak into the repo."""
 
-    previous_workspace = rush_session._get_config().workspace_dir
-    rush_session.configure(workspace_dir=rush_workspace)
+    previous_workspace = rush.session._get_config().workspace_dir
+    rush.session.configure(workspace_dir=rush_workspace)
     try:
         yield
     finally:
-        rush_session.configure(workspace_dir=previous_workspace)
+        rush.session.configure(workspace_dir=previous_workspace)
 
 
 def pytest_collection_modifyitems(
