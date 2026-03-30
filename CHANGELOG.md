@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0rc2
+
+### Fixed
+- Distinguish backend and module run failures
+- Tweak pytest config based on scientific python recs and make some other small cleanups
+
 ## 7.0.0rc1
 
 ### Changed
@@ -8,7 +14,7 @@
 
 ## 7.0.0b3
 
-#### Changed
+### Changed
 - Tests now write to a temporary workspace that doesn't clutter the git tree
 - Can configure tests' workspace directory via `--rush-workspace-dir` flag to pytest
 - Tests more thoroughly check for valid behavior and output
