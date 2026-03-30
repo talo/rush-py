@@ -47,7 +47,6 @@ result = exess.energy(
     topology_path=topology_path,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
-    convert_hdf5_to_json=True,
 ).fetch()
 
 # 4. Extract the charges
@@ -56,7 +55,7 @@ charges = result.exports["chelpg_charges"]
 
 That's it! `charges` is a list of CHELPG partial charges, one per atom.
 
-Setting `convert_hdf5_to_json=True` and using `run.fetch()` gives us the quickest access to inspecting the exported data in Python.
+Using `run.fetch()` gives us the quickest access to inspecting the exported data in Python.
 
 ### Get the PDB file
 

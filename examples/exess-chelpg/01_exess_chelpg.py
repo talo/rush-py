@@ -301,7 +301,6 @@ result = exess.energy(
     trc,
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
-    convert_hdf5_to_json=True,
 ).fetch()
 
 exports = result.exports

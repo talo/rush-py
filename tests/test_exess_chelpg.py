@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from rush import exess, from_json
-from rush import RunOpts
+from rush import RunOpts, exess, from_json
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
@@ -13,7 +12,6 @@ def test_exess_energy_chelpg_1hsg_MK1(test_data_dir: Path):
         basis="PCSeg-0",
         frag_keywords=None,  # Important, to disable fragmentation
         export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
-        convert_hdf5_to_json=True,
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 03.1: ChelpG via Energy",
             tags=["rush-py", "test", "tyk2+ejm-31"],
@@ -44,7 +42,6 @@ def test_exess_energy_chelpg_benzene(test_data_dir: Path):
         scf_keywords=exess.SCFKeywords(fock_build_type="RI"),
         frag_keywords=None,  # Important, to disable fragmentation
         export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
-        convert_hdf5_to_json=True,
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 03.2: ChelpG via Energy",
             tags=["rush-py", "test", "benzene"],

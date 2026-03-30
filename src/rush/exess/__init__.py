@@ -14,7 +14,7 @@ Usage::
 """
 
 # --- Energy (single-point, interaction energy) ---
-from ._energy import (
+from ._energy import (  # noqa: I001
     # Functions (accessed as exess.energy(), not directly imported)
     calculate,  # noqa: F401
     energy,  # noqa: F401

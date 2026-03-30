@@ -1,6 +1,6 @@
 # Outputs
 
-EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, module calls return a `Run` handle; use `run.fetch()` for in-memory objects or `run.save()` to download them locally.
+EXESS produces JSON outputs for all calculations, and optional export outputs when requested. In the Rush Python client, module calls return a `Run` handle; use `run.fetch()` for in-memory objects or `run.save()` to download them locally.
 
 ## Rush output objects
 
@@ -14,13 +14,13 @@ Rush returns outputs as objects with a path, size, and format:
 }
 ```
 
-For EXESS energy calculations, the first output is the JSON result. If any exports are requested, a second output is an HDF5 file containing the exported data.
+:::{admonition} Why is the size 0?
+:class: note
+In the rush-py tutorial, the `size` field is currently unused (often set to 0) but is intended to carry the object's size in bytes in future revisions.
 
-In the rush-py tutorial, the `size` field is currently informational only (often 0) but is intended to carry the output size in bytes in future revisions.
+For EXESS energy calculations, the first output is the JSON result. If no exports are present, `exports` is `None`. If any exports are requested, a second output contains the exported data. By default it is an HDF5 file, but in rush-py it is automatically converted to JSON. To keep it in its original format, pass `convert_hdf5_to_json=False` to `exess.calculate` or `exess.energy`.
 
-In rush-py, `run.fetch()` converts the main EXESS JSON output into Python dataclasses in memory. `run.save()` downloads the raw output objects to the local workspace and returns an `exess.ResultPaths` object with `calc` and optional `exports` path fields. For export-heavy runs, the second output is stored as a compressed archive in the object store; `save()` decompresses it and extracts the HDF5 file automatically.
-
-If no exports are present, `exports` is `None`. If `convert_hdf5_to_json=True` was set on the EXESS run, the exported saved path points to a JSON file instead of HDF5.
+In rush-py, `run.fetch()` converts the main EXESS JSON output into Python dataclasses in memory. `run.save()` downloads the raw output objects to the local workspace and returns an `exess.ResultPaths` object with `calc` and optional `exports` path fields.
 
 The helper uses the object store path as the filename and applies a `.hdf5` or `.json` extension as appropriate.
 
@@ -306,7 +306,7 @@ run = exess.energy(
 )
 ```
 
-When `convert_hdf5_to_json=True` is set on the EXESS run, `run.save()` saves the exported data as JSON instead of HDF5. Example JSON structure:
+As rush-py converts EXESS exports to JSON by default, `run.save()` saves the exported data as JSON. Example JSON structure:
 
 ```json
 {

@@ -31,8 +31,7 @@ from rdkit import Chem
 from ..convert import _single_trc, from_json, from_pdb, merge_trcs, to_pdb
 from ..mol import TRC
 from ..objects import TRCRef
-from ..runs import RunOpts, RunSpec, Run
-
+from ..runs import Run, RunOpts, RunSpec
 from ._protein import ResultRef
 from ._protein import protein as _run_prepare_protein
 

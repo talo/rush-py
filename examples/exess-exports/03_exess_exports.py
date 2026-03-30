@@ -55,6 +55,7 @@ run = exess.energy(
     export_keywords=exess.ExportKeywords(
         export_density=True,
     ),
+    convert_hdf5_to_json=False,
     run_opts=RunOpts(
         name="Rush-Py Tutorial: EXESS Exports 1",
         tags=["rush-py", "tutorial", "exess"],
@@ -101,6 +102,7 @@ run = exess.energy(
             spacing=GRID_SPACING,
         ),
     ),
+    convert_hdf5_to_json=False,
     run_spec=RunSpec(storage=1000, gpus=1),
     run_opts=RunOpts(
         name="Rush-Py Tutorial: EXESS Exports 2",

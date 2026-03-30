@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from rush import exess
-from rush import RunOpts
+from rush import RunOpts, exess
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
@@ -20,7 +19,7 @@ def test_exess_energy_tutorial(test_data_dir: Path):
 
     result = run.fetch()
     assert isinstance(result, exess.Result)
-    assert result.exports is None
+    assert result.exports == {}
     assert result.calc.qmmbe.reference_fragment is None
     assert result.calc.qmmbe.expanded_hf_energy is not None
 
@@ -46,6 +45,7 @@ def test_exess_energy_exports(test_data_dir: Path):
             export_chelpg_charges=True,
             export_basis_labels=True,
         ),
+        convert_hdf5_to_json=False,
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 01: w/ Export Keywords",
             tags=["rush-py", "test", "6a5j"],
