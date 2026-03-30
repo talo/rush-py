@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from rush import FragmentRef, Topology, exess
-from rush import RunOpts
+from rush import FragmentRef, RunOpts, Topology, exess
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

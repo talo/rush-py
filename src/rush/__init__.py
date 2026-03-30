@@ -3,7 +3,7 @@ Python library for accessing and writing computational chemistry workflows with
 the Rush platform.
 """
 
-from . import session
+from . import session  # noqa: I001
 from .convert import (
     from_json,
     from_mmcif,

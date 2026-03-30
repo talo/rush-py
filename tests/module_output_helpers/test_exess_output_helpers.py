@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 import zstandard as zstd
 
-from rush.objects import _extract_object_archive
 from rush.exess import (
     OptimizationResult,
     OptimizationResultPaths,
@@ -17,6 +16,7 @@ from rush.exess import (
     QMMMResultRef,
     ResultRef,
 )
+from rush.objects import _extract_object_archive
 
 
 def _make_tar_zst(payload: bytes, filename: str = "output.hdf5") -> bytes:

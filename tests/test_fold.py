@@ -1,5 +1,4 @@
-from rush import boltz, mmseqs2
-from rush import RunOpts, RunSpec
+from rush import RunOpts, RunSpec, boltz, mmseqs2
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

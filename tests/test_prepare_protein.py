@@ -1,8 +1,6 @@
-from rush import TRC
 from pathlib import Path
 
-from rush import prepare
-from rush import RunOpts
+from rush import TRC, RunOpts, prepare
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
