@@ -1,4 +1,4 @@
-name: Build and Deploy Docs
+name: Build and Sync Docs
 
 on:
   push:
@@ -9,7 +9,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   docs:
@@ -31,12 +35,6 @@ jobs:
 
       - name: Build docs
         run: uv run sphinx-build -b html docs/ docs/_build/html
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/_build/html
 
       - name: Push docs to qdx-main-landing
         env:
