@@ -1,10 +1,5 @@
-from rush.runs import (
-    RunID,
-    RunInfo,
-    _run_sus,
-    _total_run_walltime,
-    fetch_run_info,
-)
+from rush import RunID, RunInfo, fetch_run_info
+from rush.runs import _run_sus, _total_run_walltime
 
 
 def test_total_run_walltime_sums_resource_utilizations():

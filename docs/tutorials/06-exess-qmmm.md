@@ -22,7 +22,7 @@ Static structures tell you *where* atoms are. Dynamics tells you *how they move*
 
 ```python
 from rush import exess
-from rush.runs import RunOpts
+from rush import RunOpts
 
 result = exess.qmmm(
     topology_path="6a5j_t.json",  # Topology (atoms, coordinates, fragments)
@@ -51,8 +51,7 @@ To understand exactly what inputs QM/MM needs, let's build a system manually —
 ```python
 import json
 from rush import exess, Topology
-from rush.runs import RunOpts
-from rush.mol import Element, Fragment, Residue, Residues
+from rush import Element, Fragment, Residue, Residues, RunOpts
 
 # Define two water molecules
 topology = Topology(

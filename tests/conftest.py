@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import requests
 
-import rush.session as rush_session
+from rush import session as rush_session
 
 # Test files that do not submit Rush jobs. New test files default to
 # `submits_rush_jobs`, which is safer than accidentally bypassing queue-aware

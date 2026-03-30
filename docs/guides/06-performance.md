@@ -59,7 +59,7 @@ Depending on which EXESS function you're using, different metrics are most infor
 If you want to guard against unexpectedly long or expensive runs — especially useful when benchmarking unfamiliar systems — you can set an explicit walltime limit using `RunSpec`. A job that reaches the limit will be stopped rather than running indefinitely.
 
 ```python
-from rush.runs import RunSpec
+from rush import RunSpec
 
 # Cap the run at 60 minutes of walltime
 spec = RunSpec(walltime=60)

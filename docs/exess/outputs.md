@@ -284,8 +284,7 @@ Descriptor exports (`export_density_descriptors`, `export_esp_descriptors`) requ
 Example (regular grid with three points):
 
 ```python
-from rush import exess
-from rush.runs import RunOpts, RunSpec
+from rush import RunOpts, RunSpec, exess
 
 run = exess.energy(
     "input_topology.json",

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from rush import exess
-from rush.runs import RunOpts, RunSpec
+from rush import RunOpts, RunSpec
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

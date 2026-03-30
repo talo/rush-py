@@ -2,7 +2,7 @@
 
 from typing import TypeVar
 
-from rush.runs import Run
+from rush import Run
 
 R = TypeVar("R")
 

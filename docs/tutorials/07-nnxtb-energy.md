@@ -28,7 +28,7 @@ In this tutorial, you will compute the NN-xTB energy and per-atom forces for a s
 
 ```python
 from rush import nnxtb
-from rush.runs import RunOpts
+from rush import RunOpts
 
 run = nnxtb.energy(
     "topology.json",
@@ -149,7 +149,7 @@ For screening workflows, submit many jobs asynchronously and collect results lat
 
 ```python
 from rush import nnxtb
-from rush.runs import RunOpts
+from rush import RunOpts
 
 # Submit a batch of structures
 topologies = ["conf_001.json", "conf_002.json", "conf_003.json"]

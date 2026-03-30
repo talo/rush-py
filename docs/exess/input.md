@@ -118,7 +118,7 @@ Example with inline geometry and symbols:
          :caption: run.py
 
          from rush import exess
-         from rush.mol import Element, Topology
+         from rush import Element, Topology
 
          topology = Topology(
              symbols=[Element.O, Element.H, Element.H],
@@ -159,7 +159,7 @@ Example using an XYZ file:
          from pathlib import Path
 
          from rush import exess
-         from rush.mol import Element, Topology
+         from rush import Element, Topology
 
          lines = Path("molecule.xyz").read_text().splitlines()
          symbols = []
@@ -228,7 +228,7 @@ Example:
          :caption: run.py
 
          from rush import exess
-         from rush.mol import Element, Fragment, Residue, Residues, Topology
+         from rush import Element, Fragment, Residue, Residues, Topology
 
          topology = Topology(
              symbols=[Element.O, Element.H, Element.H, Element.O, Element.H, Element.H],

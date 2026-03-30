@@ -73,7 +73,7 @@ result = nnxtb.energy("topology.json").fetch()
 Use `RunOpts` to attach metadata to your runs. This makes them easier to find in the Rush web interface:
 
 ```python
-from rush.runs import RunOpts
+from rush import RunOpts
 
 run = nnxtb.energy(
     "topology.json",

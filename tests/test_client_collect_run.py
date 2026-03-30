@@ -1,6 +1,6 @@
 import pytest
 
-from rush.runs import RunError, collect_run
+from rush import RunError, collect_run
 
 
 def test_collect_run_restored(monkeypatch, capsys):

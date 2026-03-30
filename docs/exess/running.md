@@ -170,8 +170,7 @@ paths = result_ref.save()  # could have also done run.save()
 Run metadata (name, tags, description, email notifications) is configured via `run_opts`. Resource hints can be provided via `run_spec`:
 
 ```python
-from rush import exess
-from rush.runs import RunOpts, RunSpec
+from rush import RunOpts, RunSpec, exess
 
 run = exess.energy(
     "input_topology.json",

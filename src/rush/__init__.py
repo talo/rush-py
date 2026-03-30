@@ -42,7 +42,18 @@ from .objects import (
     TRCPaths,
     TRCRef,
 )
-from .runs import Run, RunError, RunID, RunInfo, RunOpts, RunSpec, fetch_run_info
+from .runs import (
+    Run,
+    RunError,
+    RunID,
+    RunInfo,
+    RunOpts,
+    RunSpec,
+    fetch_runs,
+    fetch_run_info,
+    delete_run,
+    collect_run,
+)
 
 __all__ = [
     "session",
@@ -63,7 +74,10 @@ __all__ = [
     "RunID",
     "RunError",
     "RunInfo",
+    "fetch_runs",
     "fetch_run_info",
+    "delete_run",
+    "collect_run",
     # Object store
     "RushObject",
     "ObjectID",
