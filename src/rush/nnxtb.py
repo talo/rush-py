@@ -109,7 +109,7 @@ def energy(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   nnxtb = λ topology →
-    nnxtb_rex_s
+    try_nnxtb_rex
       ($run_spec)
       (nnxtb_rex::NnxtbConfig {
         compute_forces = $maybe_compute_forces,

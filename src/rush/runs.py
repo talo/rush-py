@@ -395,7 +395,12 @@ def delete_run(run_id: str | RunID) -> None:
     _get_client().execute(query)
 
 
-def _format_failed_run(message: str, trace: str = "") -> str:
+def _format_failed_run(
+    title: str,
+    message: str,
+    trace: str = "",
+    guidance: str | None = None,
+) -> str:
     trace = re.sub(
         r"\\u\{([0-9a-fA-F]+)\}",
         lambda m: chr(int(m.group(1), 16)),
@@ -420,7 +425,9 @@ def _format_failed_run(message: str, trace: str = "") -> str:
     )
     trace_lines = [line.rstrip() for line in trace_without_streams.splitlines()]
     trace_lines = [line for line in trace_lines if line.strip()]
-    lines = [message]
+    lines = [f"{title}: {message}"]
+    if guidance:
+        lines.append(guidance)
     if trace_lines:
         lines.append("Trace:")
         for line in trace_lines:
@@ -443,13 +450,75 @@ def _format_failed_run(message: str, trace: str = "") -> str:
 
 @dataclass
 class RunError(Exception):
-    """Raised when a Rush run fails during collection."""
+    """Base class for errors raised while collecting a Rush run."""
 
     message: str
     trace: str = ""
 
+    def _title(self) -> str:
+        return "Run error"
+
+    def _guidance(self) -> str | None:
+        return None
+
     def __str__(self) -> str:
-        return _format_failed_run(self.message, self.trace)
+        return _format_failed_run(
+            self._title(),
+            self.message,
+            self.trace,
+            self._guidance(),
+        )
+
+
+@dataclass
+class RunBackendError(RunError):
+    """Run failed due to Rush backend, infrastructure, or orchestration issues."""
+
+    def _title(self) -> str:
+        return "Rush backend error"
+
+    def _guidance(self) -> str | None:
+        return (
+            "This indicates a Rush backend or infrastructure failure. "
+            "Contact QDX or submit a bug report for assistance and resolution."
+        )
+
+
+@dataclass
+class RunModuleError(RunError):
+    """Run failed inside the module/application layer."""
+
+    def _title(self) -> str:
+        return "Run module error"
+
+    def _guidance(self) -> str | None:
+        return None
+
+
+def _raise_run_error(error: RunError) -> None:
+    print(error, file=sys.stderr)
+    raise error
+
+
+def _unwrap_result(
+    result: Any,
+    trace: str,
+    error_type: type[RunError],
+) -> Any:
+    def is_result_type(value: Any) -> TypeGuard[dict[str, Any]]:
+        return (
+            isinstance(value, dict)
+            and len(value) == 1
+            and ("Ok" in value or "Err" in value)
+        )
+
+    if not is_result_type(result):
+        return result
+
+    if "Ok" in result:
+        return result["Ok"]
+
+    _raise_run_error(error_type(str(result["Err"]), trace))
 
 
 def _poll_run(run_id: str | RunID, max_wait_time: int) -> tuple[str, bool]:
@@ -536,50 +605,31 @@ def collect_run(run_id: str | RunID, max_wait_time: int = 3600):
     Wait until the run finishes and return its outputs.
 
     Raises:
-        RunError: If the run times out, is cancelled, or finishes with an error.
+        RunBackendError: If the run times out, is cancelled, or the Rush backend
+            fails to execute it successfully.
+        RunModuleError: If the module fails inside the module/application layer.
     """
     status, module_instance_created = _poll_run(run_id, max_wait_time)
     if status not in ["cancelled", "error", "done"]:
         err = f"Run timed out: did not complete within {max_wait_time} seconds"
-        raise RunError(err)
+        raise RunBackendError(err)
 
     run = _fetch_results(run_id)
     if run["status"] == "cancelled":
-        run_error = RunError(f"Cancelled: {run['result']}", run["trace"] or "")
-        print(run_error, file=sys.stderr)
-        raise run_error
+        _raise_run_error(
+            RunBackendError(f"Cancelled: {run['result']}", run["trace"] or "")
+        )
     elif run["status"] == "error":
-        run_error = RunError(f"Error: {run['result']}", run["trace"] or "")
-        print(run_error, file=sys.stderr)
-        raise run_error
+        _raise_run_error(RunBackendError(str(run["result"]), run["trace"] or ""))
     elif run["status"] == "done" and not module_instance_created:
         print("Restored already-completed run", file=sys.stderr)
 
     result = run["result"]
 
-    def is_result_type(result: Any) -> TypeGuard[dict[str, Any]]:
-        return (
-            isinstance(result, dict)
-            and len(result) == 1
-            and ("Ok" in result or "Err" in result)
-        )
-
     # outer error: for tengu-level failures (should exist for try-prefixed rex fns)
-    if is_result_type(result):
-        if "Ok" in result:
-            result = result["Ok"]
-        elif "Err" in result:
-            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
-            print(run_error, file=sys.stderr)
-            raise run_error
+    result = _unwrap_result(result, run["trace"] or "", RunBackendError)
 
     # inner error: for logic-level failures (may not exist, but should)
-    if is_result_type(result):
-        if "Ok" in result:
-            result = result["Ok"]
-        elif "Err" in result:
-            run_error = RunError(f"Error: {result['Err']}", run["trace"] or "")
-            print(run_error, file=sys.stderr)
-            raise run_error
+    result = _unwrap_result(result, run["trace"] or "", RunModuleError)
 
     return result

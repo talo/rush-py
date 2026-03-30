@@ -107,7 +107,7 @@ def search(
 
     # TODO: set use_upstream_server to `None` for prod, when it works again
     rex = Template("""
-mmseqs2_rex_s
+try_mmseqs2_rex
   ($run_spec)
   (mmseqs2_rex::Mmseqs2Config {
     prefilter_mode = $maybe_prefilter_mode,

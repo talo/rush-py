@@ -44,9 +44,11 @@ from .objects import (
 )
 from .runs import (
     Run,
+    RunBackendError,
     RunError,
     RunID,
     RunInfo,
+    RunModuleError,
     RunOpts,
     RunSpec,
     fetch_runs,
@@ -73,6 +75,8 @@ __all__ = [
     "RunSpec",
     "RunID",
     "RunError",
+    "RunBackendError",
+    "RunModuleError",
     "RunInfo",
     "fetch_runs",
     "fetch_run_info",

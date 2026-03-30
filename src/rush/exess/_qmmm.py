@@ -216,7 +216,7 @@ def qmmm(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology residues →
-    exess_qmmm_rex_s
+    try_exess_qmmm_rex
       ($run_spec)
       (exess_qmmm_rex::QMMMParams {
         schema_version = "0.2.0",

@@ -1192,7 +1192,7 @@ def calculate(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology →
-    exess_rex_s
+    try_exess_rex
       ($run_spec)
       (exess_rex::ExessParams {
         schema_version = "0.2.0",

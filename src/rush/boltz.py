@@ -318,7 +318,7 @@ def fold(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   boltz = λ topology residues chains →
-    boltz2_rex_s
+    try_boltz2_rex
       ($run_spec)
       (boltz2_rex::Boltz2Config {
         recycling_steps = $maybe_recycling_steps,

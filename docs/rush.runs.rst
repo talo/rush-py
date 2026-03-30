@@ -46,6 +46,14 @@ Run Handles and Metadata
    :members:
    :undoc-members:
 
+.. autoclass:: RunBackendError
+   :members:
+   :undoc-members:
+
+.. autoclass:: RunModuleError
+   :members:
+   :undoc-members:
+
 Run Queries and Collection
 --------------------------
 
