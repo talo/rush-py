@@ -340,7 +340,7 @@ def optimization(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology residues →
-    exess_geo_opt_rex_s
+    try_exess_geo_opt_rex
       ($run_spec)
       (exess_geo_opt_rex::OptimizationParams {
         schema_version = "0.2.0",

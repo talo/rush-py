@@ -180,7 +180,7 @@ def protein(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   prepare_protein = λ topology residues chains →
-    prepare_protein_rex_s
+    try_prepare_protein_rex
       ($run_spec)
       (prepare_protein_rex::PrepareProteinOptions {
         ph = $ph,

@@ -1,6 +1,6 @@
 import pytest
 
-from rush import RunError, collect_run
+from rush import RunBackendError, RunModuleError, collect_run
 
 
 def test_collect_run_restored(monkeypatch, capsys):
@@ -43,7 +43,7 @@ def test_collect_run_no_mi_error(monkeypatch, capsys):
         },
     )
 
-    with pytest.raises(RunError) as exc_info:
+    with pytest.raises(RunBackendError) as exc_info:
         collect_run("run-id")
 
     stderr = capsys.readouterr().err
@@ -71,7 +71,7 @@ def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
         },
     )
 
-    with pytest.raises(RunError):
+    with pytest.raises(RunBackendError):
         collect_run("run-id")
 
     stderr = capsys.readouterr().err
@@ -83,9 +83,9 @@ def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
     assert stderr.index("stdout:") < stderr.index("stderr:")
 
 
-def test_run_error_str_includes_trace_and_stdio_sections():
-    err = RunError(
-        "Error: rex evaluation failed",
+def test_run_backend_error_str_includes_trace_and_stdio_sections():
+    err = RunBackendError(
+        "rex evaluation failed",
         (
             'module_state: Some("rex_start_failed")\\n'
             'stdout: Some("starting rex evaluation")\\n'
@@ -95,8 +95,33 @@ def test_run_error_str_includes_trace_and_stdio_sections():
 
     formatted = str(err)
 
-    assert "Error: rex evaluation failed" in formatted
+    assert "Rush backend error: rex evaluation failed" in formatted
+    assert "Contact QDX or submit a bug report" in formatted
     assert 'module_state: Some("rex_start_failed")' in formatted
     assert "stdout:" in formatted
     assert "stderr:" in formatted
     assert formatted.index("Trace:") < formatted.index("stdout:")
+
+
+def test_collect_run_raises_run_module_error_for_inner_module_error(
+    monkeypatch, capsys
+):
+    monkeypatch.setattr(
+        "rush.runs._poll_run",
+        lambda run_id, max_wait_time: ("done", True),
+    )
+    monkeypatch.setattr(
+        "rush.runs._fetch_results",
+        lambda run_id: {
+            "status": "done",
+            "result": {"Ok": {"Err": "Unsupported model configuration"}},
+            "trace": "",
+        },
+    )
+
+    with pytest.raises(RunModuleError) as exc_info:
+        collect_run("run-id")
+
+    stderr = capsys.readouterr().err
+    assert exc_info.value.message == "Unsupported model configuration"
+    assert "Run module error: Unsupported model configuration" in stderr

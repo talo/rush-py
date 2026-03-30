@@ -1,6 +1,6 @@
 [project]
 name = "rush-py"
-version = "7.0.0rc1"
+version = "7.0.0rc2"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -64,7 +64,10 @@ dev = [
 [tool.pytest.ini_options]
 minversion = "9.0"
 testpaths = ["tests"]
-addopts = "--strict-config --strict-markers"
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+strict = true
+log_level = "INFO"
+filterwarnings = ["error"]
 timeout = 300
 tmp_path_retention_policy = "failed"
 tmp_path_retention_count = 3

@@ -133,7 +133,7 @@ def solvation_energy(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   pbsa = λ topology →
-    pbsa_rex_s
+    try_pbsa_rex
       ($run_spec)
       (pbsa_rex::PBSAParameters {
         solute_dielectric = $solute_dielectric,
