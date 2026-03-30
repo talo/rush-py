@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0rc1
+
+### Changed
+- Split the non-module Rush implementation into session, runs, and objects modules, and clean up type annotations
+- Improve docs' API reference structure, including exposing all the type declarations properly
+
 ## 7.0.0b3
 
 #### Changed
