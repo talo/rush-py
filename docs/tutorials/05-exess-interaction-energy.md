@@ -23,7 +23,7 @@ This interaction energy is **not** a binding free energy — it doesn't include 
 
 ```python
 from rush import exess
-from rush.client import RunOpts
+from rush import RunOpts
 
 result = exess.interaction_energy(
     "tyk2_ejm_31_t.json",       # TRC file for TYK2 + ligand EJM-31
@@ -85,7 +85,7 @@ Don't have a TRC file? Start from a PDB. Rush's **Prepare Complex** module handl
 import json
 from pathlib import Path
 from rush import prepare
-from rush.client import RunOpts
+from rush import RunOpts
 
 trc = prepare.protein_ligand(
     Path("1hsg.pdb"),

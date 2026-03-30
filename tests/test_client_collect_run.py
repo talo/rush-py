@@ -1,15 +1,15 @@
 import pytest
 
-from rush.client import RushRunError, collect_run
+from rush import RunError, collect_run
 
 
 def test_collect_run_restored(monkeypatch, capsys):
     monkeypatch.setattr(
-        "rush.client._poll_run",
+        "rush.runs._poll_run",
         lambda run_id, max_wait_time: ("done", False),
     )
     monkeypatch.setattr(
-        "rush.client._fetch_results",
+        "rush.runs._fetch_results",
         lambda run_id: {
             "status": "done",
             "result": [{"path": "output.json"}],
@@ -25,11 +25,11 @@ def test_collect_run_restored(monkeypatch, capsys):
 
 def test_collect_run_no_mi_error(monkeypatch, capsys):
     monkeypatch.setattr(
-        "rush.client._poll_run",
+        "rush.runs._poll_run",
         lambda run_id, max_wait_time: ("error", False),
     )
     monkeypatch.setattr(
-        "rush.client._fetch_results",
+        "rush.runs._fetch_results",
         lambda run_id: {
             "status": "error",
             "result": (
@@ -43,7 +43,7 @@ def test_collect_run_no_mi_error(monkeypatch, capsys):
         },
     )
 
-    with pytest.raises(RushRunError) as exc_info:
+    with pytest.raises(RunError) as exc_info:
         collect_run("run-id")
 
     stderr = capsys.readouterr().err
@@ -54,11 +54,11 @@ def test_collect_run_no_mi_error(monkeypatch, capsys):
 
 def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
     monkeypatch.setattr(
-        "rush.client._poll_run",
+        "rush.runs._poll_run",
         lambda run_id, max_wait_time: ("error", False),
     )
     monkeypatch.setattr(
-        "rush.client._fetch_results",
+        "rush.runs._fetch_results",
         lambda run_id: {
             "status": "error",
             "result": "rex evaluation failed",
@@ -71,7 +71,7 @@ def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
         },
     )
 
-    with pytest.raises(RushRunError):
+    with pytest.raises(RunError):
         collect_run("run-id")
 
     stderr = capsys.readouterr().err
@@ -84,7 +84,7 @@ def test_collect_run_prints_non_stream_trace_before_stdio(monkeypatch, capsys):
 
 
 def test_run_error_str_includes_trace_and_stdio_sections():
-    err = RushRunError(
+    err = RunError(
         "Error: rex evaluation failed",
         (
             'module_state: Some("rex_start_failed")\\n'

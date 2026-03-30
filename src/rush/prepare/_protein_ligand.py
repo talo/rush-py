@@ -16,7 +16,7 @@ Usage::
 
     Unlike most modules, ``prepare.protein_ligand()`` runs a full pipeline
     internally (prepare protein, extract ligand, merge).  The returned
-    :class:`~rush.run.RushRun` wraps the prepare-protein job; calling
+    :class:`~rush.runs.Run` wraps the prepare-protein job; calling
     ``.fetch()`` or ``.save()`` blocks until that job completes, then
     performs the merge and returns the combined complex.
 """
@@ -28,13 +28,10 @@ from typing import Literal
 
 from rdkit import Chem
 
-from rush import TRC, TRCRef, from_json, from_pdb, merge_trcs, to_pdb
-from rush.client import (
-    RunOpts,
-    RunSpec,
-)
-from rush.convert import _single_trc
-from rush.run import RushRun
+from ..convert import _single_trc, from_json, from_pdb, merge_trcs, to_pdb
+from ..mol import TRC
+from ..objects import TRCRef
+from ..runs import RunOpts, RunSpec, Run
 
 from ._protein import ResultRef
 from ._protein import protein as _run_prepare_protein
@@ -153,16 +150,16 @@ def protein_ligand(
     debump: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit a complex preparation job for a PDB or TRC file.
 
     Internally runs prepare-protein, extracts ligands, merges, and uploads
-    the combined TRC.  The returned :class:`~rush.run.RushRun` wraps the
+    the combined TRC.  The returned :class:`~rush.runs.Run` wraps the
     prepare-protein job.  Calling ``.fetch()`` or ``.save()`` blocks until
     the protein preparation completes, then performs the merge locally.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed TRC, or ``.save()`` to write the output files to disk.
     """
     # TODO: Support all the input types that rush.prepare.protein() supports
@@ -200,15 +197,15 @@ def protein_ligand(
         run_opts,
     )
 
-    # Return a wrapper RushRun that, when collected, waits for prepare-protein,
+    # Return a rush.Run object that, when collected, waits for prepare-protein,
     # merges with ligand, uploads, and returns a ResultRef for the complex.
     return _ComplexRun(pp_run, trc_l)
 
 
-class _ComplexRun(RushRun[ResultRef]):
-    """RushRun subclass that performs the merge step on collect."""
+class _ComplexRun(Run[ResultRef]):
+    """Run subclass that performs the merge step on collect."""
 
-    def __init__(self, pp_run: RushRun[ResultRef], trc_l: TRC) -> None:
+    def __init__(self, pp_run: Run[ResultRef], trc_l: TRC) -> None:
         super().__init__(pp_run.id, ResultRef)
         self._pp_run = pp_run
         self._trc_l = trc_l
@@ -218,7 +215,7 @@ class _ComplexRun(RushRun[ResultRef]):
         return self._pp_run.id
 
     def __repr__(self) -> str:
-        return f"RushRun(id={self._pp_run.id!r})"
+        return f"Run(id={self._pp_run.id!r})"
 
     def collect(self, max_wait_time: int = 3600) -> ResultRef:
         if self._collected is None:

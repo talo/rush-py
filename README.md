@@ -56,7 +56,7 @@ result = run.fetch()
 paths = run.save()
 ```
 
-Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current working directory). To customize the workspace location, call `rush.client.set_opts(workspace_dir=Path("..."))`.
+Outputs are saved under `<workspace_dir>/<PROJECT_ID>/` (default: current working directory). To customize the workspace location, call `rush.session.configure(workspace_dir=Path("..."))`.
 
 ```python
 # For interaction_energy, second argument is reference fragment

@@ -24,7 +24,7 @@ The simplest export: compute an energy and also write out the electron density a
 
 ```python
 from rush import exess
-from rush.client import RunOpts
+from rush import RunOpts
 
 paths = exess.energy(
     "input_topology.json",
@@ -46,7 +46,7 @@ print(paths.exports)
 
 ### What comes back
 
-EXESS returns a `RushRun` handle, and `run.save()` turns the outputs into an `exess.ResultPaths` object with named filesystem paths:
+EXESS returns a `Run` handle, and `run.save()` turns the outputs into an `exess.ResultPaths` object with named filesystem paths:
 
 ```python
 # paths looks like:
@@ -69,7 +69,7 @@ Often you want property values at *specific locations* — for example, to map t
 
 ```python
 from rush import exess
-from rush.client import RunOpts, RunSpec
+from rush import RunOpts, RunSpec
 
 paths = exess.energy(
     "input_topology.json",

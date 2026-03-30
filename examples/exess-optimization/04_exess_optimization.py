@@ -20,8 +20,7 @@ Output files (saved to optimization-outputs/):
 import json
 from pathlib import Path
 
-from rush import exess
-from rush.client import RunOpts
+from rush import RunOpts, exess
 
 DATA_DIR = Path(__file__).parent / "data"
 INPUT_FILE = DATA_DIR / "ethene_twisted_t.json"

@@ -3,6 +3,8 @@ Core API
 .. toctree::
    :maxdepth: 1
 
-   rush.client
+   rush.session
+   rush.runs
+   rush.objects
    rush.mol
    rush.convert

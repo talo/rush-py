@@ -17,30 +17,24 @@ Quick Links
 """
 
 import enum
-import json
 import sys
 import warnings
 from dataclasses import dataclass, replace
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, Topology, TRCRef
-from rush._trc import to_topology_vobj
-
-from .._utils import bool_to_str, float_to_str, optional_str
-from ..client import (
-    RunOpts,
-    RunSpec,
+from .._rex import bool_to_str, float_to_str, optional_str
+from ..mol import TRC, AtomRef, FragmentRef, Topology
+from ..objects import (
     RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
+    TRCRef,
+    _to_topology_vobj,
 )
-from ..mol import AtomRef, FragmentRef
-from ..run import RushRun
+from ..runs import Run, RunOpts, RunSpec
+from ..session import _submit_rex
 
 type MethodT = Literal[
     "RestrictedHF",
@@ -141,7 +135,7 @@ class Nmer:
     num_basis_fns: int | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Nmer":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             fragments=[FragmentRef(fragment) for fragment in data["fragments"]],
             density=data.get("density"),
@@ -193,7 +187,7 @@ class ManyBodyExpansion:
     num_iters: int | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ManyBodyExpansion":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             method=data["method"],
             nmers=[
@@ -225,7 +219,7 @@ class Calculation:
     qmmbe: ManyBodyExpansion
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Calculation":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             calculation_time=data["calculation_time"],
             qmmbe=ManyBodyExpansion.from_dict(data["qmmbe"]),
@@ -259,7 +253,7 @@ class ResultRef:
     def from_raw_output(
         cls,
         res: Any,
-    ) -> "ResultRef":
+    ) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``."""
         if not isinstance(res, list) or not (1 <= len(res) <= 2):
             raise ValueError(
@@ -324,17 +318,17 @@ class ResultRef:
         Returns:
             Parsed EXESS calculation data plus an optional export payload.
         """
-        calc = Calculation.from_dict(json.loads(fetch_object(self.calc.path).decode()))
+        calc = Calculation.from_dict(self.calc.fetch_dict())
 
         exports: dict[str, Any] | bytes | None = None
         exports_ref = self._resolve_exports_object(self.exports)
         if exports_ref is not None:
             export_kind, exports_obj = exports_ref
             if export_kind == "Json":
-                exports = json.loads(fetch_object(exports_obj.path).decode())
+                exports = exports_obj.fetch_dict()
             elif export_kind == "Hdf5":
                 try:
-                    exports = fetch_object(exports_obj.path, extract=extract)
+                    exports = exports_obj.fetch_bytes(extract=extract)
                 except ValueError as e:
                     if extract and "only directories" in str(e):
                         exports = None
@@ -1183,16 +1177,16 @@ def calculate(
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit a generic EXESS calculation for the topology at *topology_path*.
 
-    Returns a :class:`~rush.run.RushRun` handle.  Call ``.collect()`` to wait
+    Returns a :class:`~rush.runs.Run` handle.  Call ``.collect()`` to wait
     for the result ref, or use the ``.fetch()`` / ``.save()`` shortcuts.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
-    topology_vobj = to_topology_vobj(mol)
+    topology_vobj = _to_topology_vobj(mol)
 
     rex = Template("""let
   obj_j = λ j →
@@ -1265,10 +1259,7 @@ in
         driver=driver,
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:
@@ -1292,7 +1283,7 @@ def energy(
     convert_hdf5_to_json: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """Submit an EXESS single-point energy calculation."""
     return calculate(
         mol,
@@ -1327,7 +1318,7 @@ def interaction_energy(
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit an EXESS interaction-energy calculation.
 

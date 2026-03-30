@@ -20,24 +20,23 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import Chains, Residues, Topology
-
-from .._trc import TRCPaths, TRCRef, to_chains_vobj, to_residues_vobj, to_topology_vobj
-from .._utils import optional_str
-from ..client import (
-    RunOpts,
-    RunSpec,
-    RushObject,
-    _get_project_id,
-    _submit_rex,
-)
+from .._rex import optional_str
 from ..convert import _single_trc, from_json, from_pdb
-from ..mol import TRC
-from ..run import RushRun
+from ..mol import TRC, Chains, Residues, Topology
+from ..objects import (
+    RushObject,
+    TRCPaths,
+    TRCRef,
+    _to_chains_vobj,
+    _to_residues_vobj,
+    _to_topology_vobj,
+)
+from ..runs import Run, RunOpts, RunSpec
+from ..session import _submit_rex
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -63,7 +62,7 @@ class ResultRef:
         return iter(self.models)
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "ResultRef":
+    def from_raw_output(cls, res: list[Any]) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``.
 
         The raw output is a list of groups, where each group is a list of
@@ -143,11 +142,11 @@ def protein(
     debump: bool | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit a prepare-protein job for a PDB or TRC file.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed TRC, or ``.save()`` to write the output files to disk.
     """
 
@@ -159,9 +158,9 @@ def protein(
             trc_ref = mol
         case (t, r, c):
             trc_ref = TRCRef(
-                RushObject.from_dict(to_topology_vobj(t)),
-                RushObject.from_dict(to_residues_vobj(r)),
-                RushObject.from_dict(to_chains_vobj(c)),
+                RushObject.from_dict(_to_topology_vobj(t)),
+                RushObject.from_dict(_to_residues_vobj(r)),
+                RushObject.from_dict(_to_chains_vobj(c)),
             )
         case Path() | str():
             input_path = mol
@@ -213,10 +212,7 @@ in
         chains_vobj_path=trc_ref.chains.path,
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:

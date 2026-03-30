@@ -14,7 +14,7 @@ Prerequisites:
 
 from pathlib import Path
 
-from rush.client import RunOpts
+from rush import RunOpts
 from rush.exess import Result, ResultPaths, energy
 
 DATA_DIR = Path(__file__).parent / "data"

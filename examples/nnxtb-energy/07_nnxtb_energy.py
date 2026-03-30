@@ -15,8 +15,7 @@ Prerequisites:
 
 from pathlib import Path
 
-from rush import nnxtb
-from rush.client import RunOpts
+from rush import RunOpts, nnxtb
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "1kuw_t.json"

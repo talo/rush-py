@@ -18,24 +18,15 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Callable, NewType, TypeGuard, TypeVar
+from typing import Any, Callable, NewType, Self, TypeGuard, TypeVar
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC
-
-from ._trc import TRCPaths, TRCRef
-from ._utils import bool_to_str, float_to_str
-from .client import (
-    RunOpts,
-    RunSpec,
-    RushObject,
-    _get_project_id,
-    _json_content_name,
-    _submit_rex,
-    save_json,
-)
-from .run import RushRun
+from ._rex import bool_to_str, float_to_str
+from .mol import TRC
+from .objects import RushObject, TRCPaths, TRCRef, _json_content_name, save_json
+from .runs import Run, RunOpts, RunSpec
+from .session import _submit_rex
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -113,7 +104,7 @@ class ResultRef:
     _inputs: list[list[_ConformerRef] | Error]
 
     @classmethod
-    def from_raw_output(cls, raw: Any) -> "ResultRef":
+    def from_raw_output(cls, raw: Any) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``.
 
         The raw output from ``collect_run`` is a ``list[Any]`` where each
@@ -220,11 +211,11 @@ def generate(
     threshold: float = 0.3,
     run_spec: RunSpec = RunSpec(),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit an Auto3D conformer generation job for a list of SMILES strings.
 
-    Returns a :class:`~rush.run.RushRun` handle.  Call ``.collect()`` to wait
+    Returns a :class:`~rush.runs.Run` handle.  Call ``.collect()`` to wait
     for the result ref, then ``.fetch()`` or ``.save()`` to retrieve outputs.
     """
     rex = Template("""let
@@ -267,10 +258,7 @@ in
         run_spec=run_spec._to_rex(),
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:
