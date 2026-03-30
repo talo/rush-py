@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.0
+
+No new changes since 7.0.0rc3.
+
 ## 7.0.0rc3
 
 ### Changed
