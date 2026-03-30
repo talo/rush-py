@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from rush.client import _json_content_name
+from rush.objects import _json_content_name
 from rush.pbsa import Result, ResultPaths, ResultRef
 
 

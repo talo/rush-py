@@ -1,12 +1,7 @@
 import time
 from pathlib import Path
 
-from rush import exess
-from rush.client import (
-    RunOpts,
-    delete_run,
-    fetch_runs,
-)
+from rush import RunOpts, delete_run, exess, fetch_runs
 
 
 def test_delete_run(test_data_dir: Path):

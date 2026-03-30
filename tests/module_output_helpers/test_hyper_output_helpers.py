@@ -19,7 +19,7 @@ def _install_fake_save(monkeypatch, tmp_path: Path) -> None:
         out.write_bytes(b"saved")
         return out
 
-    monkeypatch.setattr("rush.client.RushObject.save", fake_save)
+    monkeypatch.setattr("rush.objects.RushObject.save", fake_save)
 
 
 def test_solvate_result_ref_fetch_and_save(monkeypatch, test_data_dir: Path, tmp_path: Path):

@@ -24,9 +24,7 @@ import h5py
 import numpy as np
 from scipy.interpolate import griddata
 
-from rush import exess
-from rush.client import RunOpts, RunSpec
-from rush.exess import energy
+from rush import RunOpts, RunSpec, exess
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
@@ -50,7 +48,7 @@ print("=" * 60)
 # It is NOT suitable for research or production use. For real work, use at least
 # cc-pVDZ or larger (e.g., cc-pVTZ, aug-cc-pVDZ) with an appropriate method.
 
-run = energy(
+run = exess.energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,
@@ -89,7 +87,7 @@ GRID_MIN = [-5.5, -5.5, -3.5]
 GRID_MAX = [5.5, 5.5, 3.5]
 GRID_SPACING = [0.3, 0.3, 0.3]
 
-run = energy(
+run = exess.energy(
     TOPOLOGY_FILE,
     method=METHOD,
     basis=BASIS,

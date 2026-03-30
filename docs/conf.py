@@ -88,8 +88,9 @@ def _format_signature_without_overloads(self, **kwargs):
     """
 
     analyzer = self.analyzer
-    if analyzer and ".".join(self.objpath) in analyzer.overloads:
-        saved_overloads = analyzer.overloads
+    overloads = getattr(analyzer, "overloads", None) if analyzer else None
+    if overloads and ".".join(self.objpath) in overloads:
+        saved_overloads = overloads
         try:
             analyzer.overloads = {}
             return _original_format_signature(self, **kwargs)

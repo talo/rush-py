@@ -1,6 +1,6 @@
 # Outputs
 
-EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, module calls return a `RushRun` handle; use `run.fetch()` for in-memory objects or `run.save()` to download them locally.
+EXESS produces JSON outputs for all calculations, and optional HDF5 outputs when exports are requested. In the Rush Python client, module calls return a `Run` handle; use `run.fetch()` for in-memory objects or `run.save()` to download them locally.
 
 ## Rush output objects
 
@@ -284,8 +284,7 @@ Descriptor exports (`export_density_descriptors`, `export_esp_descriptors`) requ
 Example (regular grid with three points):
 
 ```python
-from rush import exess
-from rush.client import RunOpts, RunSpec
+from rush import RunOpts, RunSpec, exess
 
 run = exess.energy(
     "input_topology.json",

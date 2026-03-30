@@ -12,17 +12,11 @@ from gql.transport.exceptions import TransportQueryError
 
 from ..mol import TRC
 
-from .._utils import optional_str
-from ..client import (
-    RunOpts,
-    RunSpec,
-    RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
-)
+from .._rex import optional_str
 from ..convert import from_json
-from ..run import RushRun
+from ..objects import RushObject, fetch_object
+from ..runs import Run, RunOpts, RunSpec
+from ..session import _submit_rex
 from ._common import ItemError, parse_fallible_items, trc_object_input_to_vobj
 
 
@@ -89,7 +83,7 @@ def hyper_solvate_sumo(
     timeout_seconds: int | None = None,
     run_spec: RunSpec = RunSpec(target="Bullet"),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """Run Hyper solvation and return one output per input item."""
 
     input_exprs: list[str] = []
@@ -133,8 +127,8 @@ in
     )
 
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
+        return Run(
+            _submit_rex(rex, run_opts),
             ResultRef,
         )
     except TransportQueryError as e:

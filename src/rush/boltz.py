@@ -20,29 +20,25 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any
+from typing import Any, Self
 
 import numpy as np
 import numpy.typing as npt
 from gql.transport.exceptions import TransportQueryError
 
-from rush.convert import _single_trc, from_json, from_pdb
-from rush.mol import TRC
-
-from ._trc import TRCPaths, TRCRef
-from ._utils import dict_to_vec_of_tuples_str, optional_str
-from .client import (
-    RunOpts,
-    RunSpec,
+from ._rex import dict_to_vec_of_tuples_str, optional_str
+from .convert import _single_trc, from_json, from_pdb
+from .mol import TRC
+from .objects import (
     RushObject,
-    _get_project_id,
+    TRCPaths,
+    TRCRef,
     _json_content_name,
-    _submit_rex,
-    fetch_object,
     save_json,
     upload_object,
 )
-from .run import RushRun
+from .runs import Run, RunOpts, RunSpec
+from .session import _submit_rex
 
 # ---------------------------------------------------------------------------
 # Input types
@@ -198,7 +194,7 @@ class ResultRef:
         return iter(self.diffusion_samples)
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "ResultRef":
+    def from_raw_output(cls, res: Any) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``."""
         if not isinstance(res, list) or len(res) == 0:
             raise ValueError(
@@ -233,18 +229,11 @@ class ResultRef:
         downloaded lazily on iteration — stop early to skip downloads.
         """
         for sample in self.diffusion_samples:
-            plddt_raw = fetch_object(sample.plddt.path)
-            if isinstance(plddt_raw, bytes):
-                plddt_raw = plddt_raw.decode()
-            pae_raw = fetch_object(sample.pae.path)
-            if isinstance(pae_raw, bytes):
-                pae_raw = pae_raw.decode()
-
             yield Result(
                 model=sample.model.fetch(),
                 metrics=Metrics(**sample.metrics),
-                plddt=_decode_float_array(json.loads(plddt_raw)),
-                pae=_decode_float_array(json.loads(pae_raw)),
+                plddt=_decode_float_array(sample.plddt.fetch_dict()),
+                pae=_decode_float_array(sample.pae.fetch_dict()),
                 affinities=(
                     Affinities(**sample.affinities)
                     if sample.affinities is not None
@@ -303,11 +292,11 @@ def fold(
     template_chain_mapping: dict[str, str] | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit a Boltz fold job for the given protein/ligand *sequences*.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.collect()`` to get a
+    Returns a :class:`~rush.runs.Run` handle. Call ``.collect()`` to get a
     :class:`ResultRef`, then ``.fetch()`` or ``.save()`` on that ref.
     """
 
@@ -384,10 +373,7 @@ in
         chains_vobj_path=trc_ref.chains.path if has_template else "",
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:

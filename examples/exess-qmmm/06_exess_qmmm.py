@@ -22,8 +22,7 @@ import json
 from itertools import batched
 from pathlib import Path
 
-from rush import Topology, exess
-from rush.client import RunOpts
+from rush import RunOpts, Topology, exess
 from rush.exess import Trajectory
 from rush.mol import Element, Fragment, Residue, Residues
 

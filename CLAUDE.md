@@ -47,7 +47,7 @@ Tests hit the live Rush staging API — they require valid credentials in `.env`
 
 **Core data model (`mol.py`):** `Topology` (atoms, bonds, geometry, charges) + `Residues` + `Chains` = `TRC` — the central structure passed through all workflows.
 
-**Client layer (`client.py`):** GraphQL client that handles authentication, REX DSL code generation, run submission/polling with exponential backoff, and file upload/download via object storage. Reads credentials from `.env` files (project dir or `~/.rush/.env`).
+**Rush platform layer (`session.py`, `runs.py`, `objects.py`):** GraphQL client/session configuration, REX submission/polling with exponential backoff, and object-store upload/download helpers. Reads credentials from `.env` files (project dir or `~/.rush/.env`).
 
 **Computation modules** each follow the same pattern — accept a `TRC` or file input, build REX DSL code via the client, submit to the Rush API, poll for results, and return parsed output:
 - `exess` subpackage — Quantum chemistry (energy, optimization, QMMM, CHELPG, interaction energy)

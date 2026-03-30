@@ -44,11 +44,11 @@ def energy(
 | `run_opts` | `RunOpts` | empty | Run metadata (name, tags, description, email) |
 ### Return value
 
-Returns a `RushRun[nnxtb.ResultRef]` handle. Call `.collect()` to wait for the lightweight result reference, or use `.fetch()` / `.save()` as shortcuts.
+Returns a `Run[nnxtb.ResultRef]` handle. Call `.collect()` to wait for the lightweight result reference, or use `.fetch()` / `.save()` as shortcuts.
 
 ## Synchronous vs asynchronous
 
-By default, `nnxtb.energy()` submits the job and returns immediately with a `RushRun` handle. This is useful for batch workflows where you want to submit many jobs and collect results later:
+By default, `nnxtb.energy()` submits the job and returns immediately with a `Run` handle. This is useful for batch workflows where you want to submit many jobs and collect results later:
 
 ```python
 from rush import nnxtb
@@ -73,7 +73,7 @@ result = nnxtb.energy("topology.json").fetch()
 Use `RunOpts` to attach metadata to your runs. This makes them easier to find in the Rush web interface:
 
 ```python
-from rush.client import RunOpts
+from rush import RunOpts
 
 run = nnxtb.energy(
     "topology.json",
@@ -124,4 +124,4 @@ If the submission fails (e.g., invalid input, authentication error), the functio
 
 - **Missing credentials**: Ensure `RUSH_TOKEN` and `RUSH_PROJECT` are set
 - **Invalid topology**: The input file must be a valid TRC JSON file
-- **Timeout**: `RushRun.collect()` waits up to one hour by default before timing out
+- **Timeout**: `Run.collect()` waits up to one hour by default before timing out

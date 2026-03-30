@@ -16,20 +16,14 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal, NewType
+from typing import Any, Literal, NewType, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from ._utils import optional_str
-from .client import (
-    RunOpts,
-    RunSpec,
-    RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
-)
-from .run import RushRun
+from ._rex import optional_str
+from .objects import RushObject
+from .runs import Run, RunOpts, RunSpec
+from .session import _submit_rex
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -59,7 +53,7 @@ class ResultRef:
         return iter(self.msas)
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "ResultRef":
+    def from_raw_output(cls, res: Any) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``."""
         if not isinstance(res, list) or len(res) == 0:
             raise ValueError(
@@ -79,8 +73,7 @@ class ResultRef:
         """Download MMseqs2 outputs and parse into A3M strings."""
         a3ms: list[str] = []
         for obj in self.msas:
-            a3m = fetch_object(obj.path)
-            a3ms.append(a3m.decode() if isinstance(a3m, bytes) else a3m)
+            a3ms.append(obj.fetch_bytes().decode())
         return Result(a3ms)
 
     def save(self) -> ResultPaths:
@@ -104,11 +97,11 @@ def search(
     max_accept: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit an MMseqs2 sequence search for the given amino acid *sequences*.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed A3M results, or ``.save()`` to write them to disk.
     """
 
@@ -139,10 +132,7 @@ mmseqs2_rex_s
         sequences=f"[\n        {',\n        '.join([f'"{seq}"' for seq in sequences])}]",
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:

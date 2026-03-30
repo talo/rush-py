@@ -7,8 +7,7 @@ from typing import Any, Callable, TypeGuard, TypeVar
 
 from ..mol import TRC
 
-from .._trc import TRCRef
-from ..client import RushObject, upload_object
+from ..objects import RushObject, TRCRef, upload_object
 from ..convert import to_dict as trc_to_dict
 
 
