@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from rush.client import fetch_run_info, fetch_runs
+from rush.runs import fetch_run_info, fetch_runs
 
 
 def test_fetch_runs():

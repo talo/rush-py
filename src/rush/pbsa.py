@@ -15,24 +15,21 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from string import Template
-from typing import Any
+from typing import Any, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, Topology, TRCRef
-from rush._trc import to_topology_vobj
-
-from ._utils import float_to_str
-from .client import (
-    RunOpts,
-    RunSpec,
+from ._rex import float_to_str
+from .mol import TRC, Topology
+from .objects import (
     RushObject,
-    _get_project_id,
+    TRCRef,
     _json_content_name,
-    _submit_rex,
+    _to_topology_vobj,
     save_json,
 )
-from .run import RushRun
+from .runs import Run, RunOpts, RunSpec
+from .session import _submit_rex
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -68,7 +65,7 @@ class ResultRef:
     nonpolar_solvation_energy: float
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "ResultRef":
+    def from_raw_output(cls, res: Any) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``."""
         if isinstance(res, list) and len(res) == 3:
             return cls(
@@ -120,16 +117,16 @@ def solvation_energy(
     box_size_factor: float,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit a PBSA solvation energy calculation for the topology at *topology_path*.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed result, or ``.save()`` to write it to disk as JSON.
     """
 
     # Upload inputs
-    topology_vobj = to_topology_vobj(mol)
+    topology_vobj = _to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let
@@ -170,10 +167,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:

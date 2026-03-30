@@ -152,7 +152,7 @@ help(exess.energy)
 help(exess.FragKeywords)
 ```
 
-By default, module calls return a `RushRun` handle. Call `.collect()` to wait for completion, or use `.fetch()` / `.save()` as shortcuts:
+By default, module calls return a `Run` handle. Call `.collect()` to wait for completion, or use `.fetch()` / `.save()` as shortcuts:
 
 ```python
 from rush import exess
@@ -163,7 +163,7 @@ result = result_ref.fetch()  # could have also done run.fetch()
 paths = result_ref.save()  # could have also done run.save()
 ```
 
-`RushRun.collect()` waits up to one hour by default before timing out.
+`Run.collect()` waits up to one hour by default before timing out.
 
 ### Run metadata and resources
 
@@ -171,7 +171,7 @@ Run metadata (name, tags, description, email notifications) is configured via `r
 
 ```python
 from rush import exess
-from rush.client import RunOpts, RunSpec
+from rush.runs import RunOpts, RunSpec
 
 run = exess.energy(
     "input_topology.json",
@@ -189,20 +189,20 @@ When a Rush module expects paths to Topology/Residues/Chains objects, rush-py ca
 Rush uses object store paths for inputs and outputs. You can upload, download, and save objects explicitly:
 
 ```python
-from rush.client import fetch_object, save_json, save_object, upload_object
+from rush.objects import fetch_object, save_json, save_object, upload_object
 ```
 
-`RushRun.save()` and `ResultRef.save()` download outputs to the local workspace and return module-specific saved result objects or local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
+`Run.save()` and `ResultRef.save()` download outputs to the local workspace and return module-specific saved result objects or local paths. You do not need to download outputs when chaining module runs: object store paths can be passed directly as inputs.
 
 ### Workspaces
 
-`RushRun.save()` writes files into a per-project workspace directory, keeping a `history.json` ledger of module runs (run ID, time created, module revision). To customize the workspace location:
+`Run.save()` writes files into a per-project workspace directory, keeping a `history.json` ledger of module runs (run ID, time created, module revision). To customize the workspace location:
 
 ```python
 from pathlib import Path
-from rush import client
+from rush import session
 
-client.set_opts(workspace_dir=Path("/path/to/workspace"))
+session.configure(workspace_dir=Path("/path/to/workspace"))
 ```
 
 ### View runs in the Rush web interface

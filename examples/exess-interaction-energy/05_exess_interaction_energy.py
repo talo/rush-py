@@ -14,8 +14,7 @@ Prerequisites:
 
 from pathlib import Path
 
-from rush import exess, prepare
-from rush.client import RunOpts
+from rush import RunOpts, exess, prepare
 
 # ===== Example 1: Fragment-based interaction energy =====
 print("=" * 60)

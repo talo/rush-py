@@ -1,6 +1,6 @@
-from rush.client import (
+from rush.runs import (
     RunID,
-    RushRunInfo,
+    RunInfo,
     _run_sus,
     _total_run_walltime,
     fetch_run_info,
@@ -90,7 +90,7 @@ def test_fetch_run_info_includes_total_walltime(monkeypatch):
                 }
             }
 
-    monkeypatch.setattr("rush.client._get_client", lambda: FakeClient())
+    monkeypatch.setattr("rush.runs._get_client", lambda: FakeClient())
 
     info = fetch_run_info("run-id")
 
@@ -126,7 +126,7 @@ def test_fetch_run_info_seeds_supported_targets_before_sus_exist(monkeypatch):
                 }
             }
 
-    monkeypatch.setattr("rush.client._get_client", lambda: FakeClient())
+    monkeypatch.setattr("rush.runs._get_client", lambda: FakeClient())
 
     info = fetch_run_info("run-id")
 
@@ -138,7 +138,7 @@ def test_fetch_run_info_seeds_supported_targets_before_sus_exist(monkeypatch):
 
 
 def test_run_info_marks_zero_resource_totals_incomplete_for_non_final_runs():
-    info = RushRunInfo(
+    info = RunInfo(
         id=RunID("run-id"),
         created_at="2026-03-24T10:00:00.000000",
         updated_at="2026-03-24T10:20:00.000000",

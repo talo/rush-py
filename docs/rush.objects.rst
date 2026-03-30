@@ -1,7 +1,7 @@
-rush.client
-===========
+rush.objects
+============
 
-.. automodule:: rush.client
+.. automodule:: rush.objects
    :members:
    :show-inheritance:
    :undoc-members:

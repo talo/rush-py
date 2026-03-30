@@ -2,7 +2,7 @@ import time
 from pathlib import Path
 
 from rush import exess
-from rush.client import (
+from rush.runs import (
     RunOpts,
     delete_run,
     fetch_runs,

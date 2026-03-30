@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from rush import exess
-from rush.client import RunOpts
+from rush.runs import RunOpts
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

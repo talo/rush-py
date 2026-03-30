@@ -32,7 +32,7 @@ Because there's no geometry optimization loop, SPE is fast — you get your answ
 
 ```python
 from rush import exess
-from rush.client import RunOpts
+from rush.runs import RunOpts
 
 # Run a single-point energy calculation on water
 result = exess.energy(

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from rush import FragmentRef, Topology, exess, fetch_run_info
-from rush.client import RunOpts, RunSpec
+from rush.runs import RunOpts, RunSpec
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
