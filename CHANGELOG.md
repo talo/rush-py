@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Other
+- Add GitHub Action for making releases
+- Clean up the rest of the GitHub Actions
+
 ## 7.0.0rc2
 
 ### Fixed
