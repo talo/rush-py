@@ -20,7 +20,7 @@ def test_exess_energy_tutorial(test_data_dir: Path):
 
     result = run.fetch()
     assert isinstance(result, exess.Result)
-    assert result.exports is None
+    assert result.exports == {}
     assert result.calc.qmmbe.reference_fragment is None
     assert result.calc.qmmbe.expanded_hf_energy is not None
 
