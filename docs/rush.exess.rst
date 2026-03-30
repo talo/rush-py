@@ -1,3 +1,5 @@
+:tocdepth: 3
+
 EXESS
 =====
 
@@ -7,8 +9,8 @@ For detailed documentation on EXESS capabilities, keywords, and examples, see th
 
 .. currentmodule:: rush.exess
 
-Submission
-----------
+Run Submission
+--------------
 
 .. autofunction:: calculate
 
@@ -42,6 +44,26 @@ Input Types
 .. autoclass:: ExportKeywords
    :members:
    :undoc-members:
+
+.. autotype:: MethodT
+
+.. autotype:: BasisT
+
+.. autotype:: AuxBasisT
+
+.. autotype:: StandardOrientationT
+
+.. autotype:: TensorLike
+
+.. autotype:: ConvergenceMetricT
+
+.. autotype:: FockBuildTypeT
+
+.. autotype:: FragmentLevelT
+
+.. autotype:: CutoffTypeT
+
+.. autotype:: DistanceMetricT
 
 Descriptor Grids
 ----------------
@@ -94,6 +116,16 @@ Descriptor Grids
    :members:
    :undoc-members:
 
+.. autotype:: RadialQuadT
+
+.. autotype:: PruningSchemeT
+
+.. autotype:: XCGridResolutionT
+
+.. autotype:: XCBatchingSchemeT
+
+.. autotype:: KSDFTMethodT
+
 Result Types
 ------------
 
@@ -120,4 +152,3 @@ Result Types
 .. autoclass:: Nmer
    :members:
    :undoc-members:
-

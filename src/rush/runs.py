@@ -11,7 +11,6 @@ from typing import (
     Generic,
     Literal,
     NewType,
-    TypeAlias,
     TypeGuard,
     TypeVar,
 )
@@ -25,20 +24,17 @@ INITIAL_POLL_INTERVAL = 0.5
 MAX_POLL_INTERVAL = 30
 BACKOFF_FACTOR = 1.5
 
+#: String identifier for a Rush run.
 RunID = NewType("RunID", str)
-
-RunStatus: TypeAlias = Literal[
-    "pending", "running", "done", "error", "cancelled", "draft"
-]
 
 #: All self-explanatory: pending runs are queued for submission to a target.
 type RunStatus = Literal["pending", "running", "done", "error", "cancelled", "draft"]
 
 #: Valid values for the `target` field of `RunSpec`.
-Target: TypeAlias = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
+type Target = Literal["Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"]
 
 #: Valid values for the `storage_units` field of `RunSpec`.
-StorageUnit: TypeAlias = Literal["KB", "MB", "GB"]
+type StorageUnit = Literal["KB", "MB", "GB"]
 
 R = TypeVar("R")
 
@@ -140,193 +136,6 @@ class Run(Generic[R]):
 
     def __repr__(self) -> str:
         return f"Run(id={self._id!r})"
-
-
-def _fetch_results(run_id: str) -> dict[str, Any]:
-    query = gql("""
-        query GetResults($id: String!) {
-            run(id: $id) {
-                status
-                result
-                trace
-            }
-        }
-    """)
-    query.variable_values = {"id": run_id}
-
-    result = _get_client().execute(query)
-    return result["run"]
-
-
-def _format_failed_run(message: str, trace: str = "") -> str:
-    trace = re.sub(
-        r"\\u\{([0-9a-fA-F]+)\}",
-        lambda m: chr(int(m.group(1), 16)),
-        trace,
-    )
-    trace = trace.replace("\\n", "\n")
-    trace = trace.replace('\\"', '"')
-    try:
-        trace = trace.encode("latin-1").decode("utf-8")
-    except (UnicodeDecodeError, UnicodeEncodeError):
-        pass
-
-    # This shouldn't be necessary, but we'll leave it in case we have
-    # a module that still manually places stdout and stderr in the trace.
-    stdout_match = re.search(r'stdout: Some\("(.*?)"\)', trace, re.DOTALL)
-    stderr_match = re.search(r'stderr: Some\("(.*?)"\)', trace, re.DOTALL)
-    trace_without_streams = re.sub(
-        r'stdout: Some\(".*?"\)|stderr: Some\(".*?"\)',
-        "",
-        trace,
-        flags=re.DOTALL,
-    )
-    trace_lines = [line.rstrip() for line in trace_without_streams.splitlines()]
-    trace_lines = [line for line in trace_lines if line.strip()]
-    lines = [message]
-    if trace_lines:
-        lines.append("Trace:")
-        for line in trace_lines:
-            lines.append(f"  {line}")
-
-    if stdout_match:
-        lines.append("stdout:")
-        for line in stdout_match.group(1).split("\n"):
-            lines.append(f"  {line}")
-    if stderr_match:
-        lines.append("stderr:")
-        for line in stderr_match.group(1).split("\n"):
-            lines.append(f"  {line}")
-
-    if trace_lines or stdout_match or stderr_match:
-        lines.append("")
-
-    return "\n".join(lines)
-
-
-@dataclass
-class RunError(Exception):
-    """Raised when a Rush run fails during collection."""
-
-    message: str
-    trace: str = ""
-
-    def __str__(self) -> str:
-        return _format_failed_run(self.message, self.trace)
-
-
-def _build_filters(
-    *,
-    name: str | None,
-    name_contains: str | None,
-    status: RunStatus | list[RunStatus] | None,
-    tags: list[str] | None,
-) -> dict[str, Any]:
-    """Build the GraphQL filter input from Python arguments."""
-    filters: dict[str, Any] = {
-        # We don't want to show deleted runs
-        "deleted_at": {"is_null": True},
-    }
-
-    if name is not None:
-        filters["name"] = {"ci_eq": name}
-    elif name_contains is not None:
-        filters["name"] = {"ilike": f"%{name_contains}%"}
-
-    if status is not None:
-        filters["status"] = (
-            {"is_in": status} if isinstance(status, list) else {"eq": status}
-        )
-
-    if tags is not None:
-        filters["tags"] = {"array_contains": tags}
-
-    return filters
-
-
-def fetch_runs(
-    *,
-    name: str | None = None,
-    name_contains: str | None = None,
-    status: RunStatus | list[RunStatus] | None = None,
-    tags: list[str] | None = None,
-    limit: int | None = None,
-) -> list[RunID]:
-    """
-    Query runs and return their IDs.
-
-    Args:
-        name: Filter by exact run name (case-insensitive).
-        name_contains: Filter by runs whose name contains this substring.
-        status: Filter by status. Can be a single status or a list of statuses.
-        tags: Filter by tags. Returns runs that have ALL specified tags.
-        limit: Maximum number of runs to return. If None, returns all matching runs.
-
-    Returns:
-        A list of run IDs matching the filters.
-    """
-    query = gql("""
-        query GetRuns($filters: RunFilterInput, $pagination: PaginationInput) {
-            runs(filters: $filters, pagination: $pagination) {
-                page_info {
-                    has_next_page
-                    end_cursor
-                }
-                nodes {
-                    id
-                }
-            }
-        }
-    """)
-
-    filters = _build_filters(
-        name=name,
-        name_contains=name_contains,
-        status=status,
-        tags=tags,
-    )
-
-    run_ids: list[RunID] = []
-    cursor = None
-    page_limit = min(limit, 100) if limit else 100
-
-    while True:
-        pagination = (
-            {"cursor": {"cursor": cursor, "limit": page_limit}}
-            if cursor
-            else {"offset": {"offset": 0, "limit": page_limit}}
-        )
-        query.variable_values = {"filters": filters, "pagination": pagination}
-        result = _get_client().execute(query)
-
-        runs_data = result["runs"]
-        run_ids.extend(RunID(node["id"]) for node in runs_data["nodes"])
-
-        if limit and len(run_ids) >= limit:
-            return run_ids[:limit]
-
-        if not runs_data["page_info"]["has_next_page"]:
-            break
-
-        cursor = runs_data["page_info"]["end_cursor"]
-
-    return run_ids
-
-
-def delete_run(run_id: str | RunID) -> None:
-    """
-    Delete a run by ID.
-    """
-    query = gql("""
-        mutation DeleteRun($run_id: String!) {
-            delete_run(run_id: $run_id) {
-                id
-            }
-        }
-    """)
-    query.variable_values = {"run_id": run_id}
-
-    _get_client().execute(query)
 
 
 @dataclass
@@ -472,6 +281,177 @@ def fetch_run_info(run_id: str | RunID) -> RunInfo | None:
     )
 
 
+def _build_filters(
+    *,
+    name: str | None,
+    name_contains: str | None,
+    status: RunStatus | list[RunStatus] | None,
+    tags: list[str] | None,
+) -> dict[str, Any]:
+    """Build the GraphQL filter input from Python arguments."""
+    filters: dict[str, Any] = {
+        # We don't want to show deleted runs
+        "deleted_at": {"is_null": True},
+    }
+
+    if name is not None:
+        filters["name"] = {"ci_eq": name}
+    elif name_contains is not None:
+        filters["name"] = {"ilike": f"%{name_contains}%"}
+
+    if status is not None:
+        filters["status"] = (
+            {"is_in": status} if isinstance(status, list) else {"eq": status}
+        )
+
+    if tags is not None:
+        filters["tags"] = {"array_contains": tags}
+
+    return filters
+
+
+def fetch_runs(
+    *,
+    name: str | None = None,
+    name_contains: str | None = None,
+    status: RunStatus | list[RunStatus] | None = None,
+    tags: list[str] | None = None,
+    limit: int | None = None,
+) -> list[RunID]:
+    """
+    Query runs and return their IDs.
+
+    Args:
+        name: Filter by exact run name (case-insensitive).
+        name_contains: Filter by runs whose name contains this substring.
+        status: Filter by status. Can be a single status or a list of statuses.
+        tags: Filter by tags. Returns runs that have ALL specified tags.
+        limit: Maximum number of runs to return. If None, returns all matching runs.
+
+    Returns:
+        A list of run IDs matching the filters.
+    """
+    query = gql("""
+        query GetRuns($filters: RunFilterInput, $pagination: PaginationInput) {
+            runs(filters: $filters, pagination: $pagination) {
+                page_info {
+                    has_next_page
+                    end_cursor
+                }
+                nodes {
+                    id
+                }
+            }
+        }
+    """)
+
+    filters = _build_filters(
+        name=name,
+        name_contains=name_contains,
+        status=status,
+        tags=tags,
+    )
+
+    run_ids: list[RunID] = []
+    cursor = None
+    page_limit = min(limit, 100) if limit else 100
+
+    while True:
+        pagination = (
+            {"cursor": {"cursor": cursor, "limit": page_limit}}
+            if cursor
+            else {"offset": {"offset": 0, "limit": page_limit}}
+        )
+        query.variable_values = {"filters": filters, "pagination": pagination}
+        result = _get_client().execute(query)
+
+        runs_data = result["runs"]
+        run_ids.extend(RunID(node["id"]) for node in runs_data["nodes"])
+
+        if limit and len(run_ids) >= limit:
+            return run_ids[:limit]
+
+        if not runs_data["page_info"]["has_next_page"]:
+            break
+
+        cursor = runs_data["page_info"]["end_cursor"]
+
+    return run_ids
+
+
+def delete_run(run_id: str | RunID) -> None:
+    """
+    Delete a run by ID.
+    """
+    query = gql("""
+        mutation DeleteRun($run_id: String!) {
+            delete_run(run_id: $run_id) {
+                id
+            }
+        }
+    """)
+    query.variable_values = {"run_id": run_id}
+
+    _get_client().execute(query)
+
+
+def _format_failed_run(message: str, trace: str = "") -> str:
+    trace = re.sub(
+        r"\\u\{([0-9a-fA-F]+)\}",
+        lambda m: chr(int(m.group(1), 16)),
+        trace,
+    )
+    trace = trace.replace("\\n", "\n")
+    trace = trace.replace('\\"', '"')
+    try:
+        trace = trace.encode("latin-1").decode("utf-8")
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        pass
+
+    # This shouldn't be necessary, but we'll leave it in case we have
+    # a module that still manually places stdout and stderr in the trace.
+    stdout_match = re.search(r'stdout: Some\("(.*?)"\)', trace, re.DOTALL)
+    stderr_match = re.search(r'stderr: Some\("(.*?)"\)', trace, re.DOTALL)
+    trace_without_streams = re.sub(
+        r'stdout: Some\(".*?"\)|stderr: Some\(".*?"\)',
+        "",
+        trace,
+        flags=re.DOTALL,
+    )
+    trace_lines = [line.rstrip() for line in trace_without_streams.splitlines()]
+    trace_lines = [line for line in trace_lines if line.strip()]
+    lines = [message]
+    if trace_lines:
+        lines.append("Trace:")
+        for line in trace_lines:
+            lines.append(f"  {line}")
+
+    if stdout_match:
+        lines.append("stdout:")
+        for line in stdout_match.group(1).split("\n"):
+            lines.append(f"  {line}")
+    if stderr_match:
+        lines.append("stderr:")
+        for line in stderr_match.group(1).split("\n"):
+            lines.append(f"  {line}")
+
+    if trace_lines or stdout_match or stderr_match:
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+@dataclass
+class RunError(Exception):
+    """Raised when a Rush run fails during collection."""
+
+    message: str
+    trace: str = ""
+
+    def __str__(self) -> str:
+        return _format_failed_run(self.message, self.trace)
+
+
 def _poll_run(run_id: str | RunID, max_wait_time: int) -> tuple[str, bool]:
     query = gql("""
         query GetStatus($id: String!) {
@@ -532,9 +512,23 @@ def _poll_run(run_id: str | RunID, max_wait_time: int) -> tuple[str, bool]:
         if status in ["done", "error", "cancelled"]:
             return status, module_instance_created
 
-        poll_interval = min(poll_interval * BACKOFF_FACTOR, MAX_POLL_INTERVAL)
-
     return status, module_instance_created
+
+
+def _fetch_results(run_id: str) -> dict[str, Any]:
+    query = gql("""
+        query GetResults($id: String!) {
+            run(id: $id) {
+                status
+                result
+                trace
+            }
+        }
+    """)
+    query.variable_values = {"id": run_id}
+
+    result = _get_client().execute(query)
+    return result["run"]
 
 
 def collect_run(run_id: str | RunID, max_wait_time: int = 3600):

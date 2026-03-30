@@ -1,5 +1,5 @@
-rush.convert
-============
+Molecule I/O & Converters
+=========================
 
 .. automodule:: rush.convert
    :members:

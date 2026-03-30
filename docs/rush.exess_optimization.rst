@@ -1,3 +1,5 @@
+:tocdepth: 3
+
 EXESS Optimization
 ==================
 
@@ -5,8 +7,8 @@ EXESS Optimization
 
 .. currentmodule:: rush.exess
 
-Submission
-----------
+Run Submission
+--------------
 
 .. autofunction:: optimization
 
@@ -28,6 +30,14 @@ Input Types
 .. autoclass:: LBFGSKeywords
    :members:
    :undoc-members:
+
+.. autotype:: CoordinateSystemT
+
+.. autotype:: HessianGuessTypeT
+
+.. autotype:: OptimizationAlgorithmTypeT
+
+.. autotype:: LBFGSLinesearchT
 
 Result Types
 ------------

@@ -1,5 +1,5 @@
-rush.session
-============
+Session
+=======
 
 .. automodule:: rush.session
    :members:
