@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 7.0.0rc3
+
+### Changed
+- Make EXESS `calculation`, `energy`, and `interaction_energy` functions output exports as JSON by default
 
 ### Other
 - Add GitHub Action for making releases
