@@ -1,23 +1,11 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "Stop": [
       {
-        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "FILE_PATH=$(jq -r '.tool_input.file_path' < /dev/stdin) && if [[ \"$FILE_PATH\" == *.env* ]]; then echo 'BLOCKED: Do not edit .env files' >&2 && exit 2; fi"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ruff format $CLAUDE_FILE_PATHS 2>/dev/null; uv run ruff check --fix $CLAUDE_FILE_PATHS 2>/dev/null; true"
+            "command": "FAILURE_MARKER=\"/home/ubuntu/module-forge-output/rush-py-rush-py-onboard-hyper-20260329/.rush-py-onboard-validation-failed\"; COUNTER_FILE=\"/home/ubuntu/module-forge-output/rush-py-rush-py-onboard-hyper-20260329/.rush-py-onboard-iteration-count\"; CURRENT=$(cat \"$COUNTER_FILE\" 2>/dev/null || echo 0); NEXT=$((CURRENT + 1)); echo \"$NEXT\" > \"$COUNTER_FILE\"; RESULT=$(uv run --project /nix/store/7rnlqdcbzka3ni2jz5c33505g8rfp4js-module-forge-0.1.9/lib/python3.12/site-packages/module_forge/_data python3 -m module_forge.rush_py_validate /home/ubuntu/module-forge-output/rush-py-rush-py-onboard-hyper-20260329 --module hyper --entrypoint /nix/store/7znlhics81w01zc8shvks85g0jd3apnj-hyper_minimize_sumo-0.1.0/bin/hyper_minimize_sumo --entrypoint /nix/store/whnyvfgrr3svi0qg9wsdk6xlr2nmvjv0-hyper_run_sumo-0.1.0/bin/hyper_run_sumo --entrypoint /nix/store/zjpnf344s79r6pi5vj90855ng8hpqswh-hyper_solvate_sumo-0.1.0/bin/hyper_solvate_sumo --module-lock-entry 'hyper_minimize_sumo=github:talo/tengu-hyper/5763204b032ed8357028f6757fe6cab744ca3053#hyper_minimize_sumo' --module-lock-entry 'hyper_run_sumo=github:talo/tengu-hyper/5763204b032ed8357028f6757fe6cab744ca3053#hyper_run_sumo' --module-lock-entry 'hyper_solvate_sumo=github:talo/tengu-hyper/5763204b032ed8357028f6757fe6cab744ca3053#hyper_solvate_sumo' 2>&1); VALEXIT=$?; if [ \"$VALEXIT\" -eq 0 ]; then   rm -f \"$FAILURE_MARKER\";   rm -f \"$COUNTER_FILE\";   exit 0; fi; if [ \"$NEXT\" -ge 5 ]; then   printf \"%s\n\" \"$RESULT\" > \"$FAILURE_MARKER\";   echo \"MAX ITERATIONS (5) REACHED. Stopping despite validation failures.\" >&2;   rm -f \"$COUNTER_FILE\";   exit 0; fi; echo \"$RESULT\" >&2; echo \"VALIDATION FAILED (attempt $NEXT/5). Fix the issues above and try again.\" >&2; exit 2"
           }
         ]
       }
