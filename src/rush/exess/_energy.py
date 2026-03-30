@@ -769,7 +769,7 @@ class ExportKeywords:
     """
     Configure the exported outputs of the system.
     Outputs are in both JSON and HDF5 format (some just one or the other).
-    Most outputs are in the HDF5 file only.
+    Most of the outputs obtained by requesting them here are in the HDF5 file only.
     """
 
     #: Electron density
@@ -1183,6 +1183,8 @@ def calculate(
 
     Returns a :class:`~rush.runs.Run` handle.  Call ``.collect()`` to wait
     for the result ref, or use the ``.fetch()`` / ``.save()`` shortcuts.
+    Export outputs are converted from HDF5 to JSON by default; pass
+    ``convert_hdf5_to_json=False`` to keep them in their original format.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
 
@@ -1234,7 +1236,7 @@ in
   exess "$topology_vobj_path"
 """).substitute(
         run_spec=run_spec._to_rex(),
-        maybe_convert_hdf5_to_json=optional_str(convert_hdf5_to_json),
+        maybe_convert_hdf5_to_json=optional_str(convert_hdf5_to_json is not False),
         method=method,
         basis=basis,
         maybe_aux_basis=optional_str(aux_basis),

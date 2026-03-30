@@ -20,7 +20,7 @@ EXESS lets you export these properties on a grid of your choosing — fine-grain
 
 ## Example 1: Exporting Electron Density
 
-The simplest export: compute an energy and also write out the electron density as an HDF5 file.
+The simplest export: compute an energy and also write out the electron density export file. By default, rush-py converts EXESS exports to JSON. For large export-heavy runs, pass `convert_hdf5_to_json=False` to keep them in their original format.
 
 ```python
 from rush import exess
@@ -28,9 +28,8 @@ from rush import RunOpts
 
 paths = exess.energy(
     "input_topology.json",
-    export_keywords=exess.ExportKeywords(
-        export_density=True,
-    ),
+    export_keywords=exess.ExportKeywords(export_density=True),
+    convert_hdf5_to_json=False,
     run_opts=RunOpts(
         name="Tutorial: EXESS Exports — Density",
         tags=["rush-py", "tutorial", "exess"],
@@ -57,9 +56,9 @@ exess.ResultPaths(
 ```
 
 - **`paths.calc`** — The standard JSON energy output from the EXESS run
-- **`paths.exports`** — The exported data file, usually HDF5 for export-heavy runs
+- **`paths.exports`** — The exported data file, JSON by default
 
-The HDF5 file can be explored with **h5py**, **h5ls**, **h5dump**, **h5glance**, or any HDF5-compatible tool. Exported data can be large, especially density data on fine grids, so it makes sense to request the exports as a HDF5 file and save it to disk before loading and reading the data in it.
+The HDF5 file can be explored with **h5py**, **h5ls**, **h5dump**, **h5glance**, or any HDF5-compatible tool. Exported data can be large, especially density data on fine grids, so when that's the case it makes sense to obtain the exports in the HDF5 format and save it to disk before loading and reading the data in it.
 
 ---
 
@@ -83,7 +82,6 @@ paths = exess.energy(
             spacing=[1.0, 1.0, 1.0],
         ),
     ),
-    convert_hdf5_to_json=True,  # Get JSON instead of HDF5 (convenient for small grids)
     run_spec=RunSpec(storage=1000, gpus=1),
     run_opts=RunOpts(
         name="Tutorial: EXESS Exports — Descriptor Grid",
@@ -113,7 +111,7 @@ This computes density and ESP at the 8 corners of a 1 Å cube. For a real molecu
 - Negative ESP = a positive test charge would be attracted there (nucleophilic region)
 
 :::{tip}
-Pass `convert_hdf5_to_json=True` for small grids where JSON is more convenient. For large grids (thousands of points), stick with HDF5 — the files can be hundreds of MB.
+For small descriptor grids, obtaining the exports data as JSON is more convenient. For large grids (thousands of points), pass `convert_hdf5_to_json=False` to use HDF5 — the files can be hundreds of MB.
 :::
 
 :::{admonition} Fragmentation and descriptor grids
@@ -163,7 +161,7 @@ with h5py.File(paths.exports, "r") as f:
         print(f"Density descriptor shape: {density.shape}")
 ```
 
-If you used `convert_hdf5_to_json=True` (as in Example 2), the second file is JSON instead:
+Because Example 2 uses the default export behavior, the second file is JSON:
 
 ```python
 with open(paths.exports) as f:

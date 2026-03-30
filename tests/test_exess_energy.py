@@ -46,6 +46,7 @@ def test_exess_energy_exports(test_data_dir: Path):
             export_chelpg_charges=True,
             export_basis_labels=True,
         ),
+        convert_hdf5_to_json=False,
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 01: w/ Export Keywords",
             tags=["rush-py", "test", "6a5j"],
