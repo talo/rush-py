@@ -5,7 +5,6 @@ on:
     paths:
       - "src/rush/**"
       - "docs/**"
-      - "CHANGELOG.md"
 
 permissions:
   contents: write
