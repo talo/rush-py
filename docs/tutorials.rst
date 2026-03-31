@@ -11,4 +11,6 @@ Tutorials
    tutorials/05-exess-interaction-energy
    tutorials/06-exess-qmmm
    tutorials/07-nnxtb-energy
-   tutorials/08-hyper-solvate
+   tutorials/08-hyper-solvate_sumo
+   tutorials/09-hyper-minimize_sumo
+   tutorials/10-hyper-run_sumo
