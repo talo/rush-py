@@ -10,7 +10,7 @@ from typing import Any, Literal
 from gql.transport.exceptions import TransportQueryError
 
 from ..client import RunOpts, RunSpec, RushObject, _get_project_id, _submit_rex
-from ..runs import Run as RushRun
+from ..runs import Run as RushRun, RunID
 from ._common import (
     HyperRunOutput,
     HyperRunOutputPaths,
@@ -162,7 +162,7 @@ in
     )
 
     try:
-        return RushRun(_submit_rex(_get_project_id(), rex, run_opts), ResultRef)
+        return RushRun(RunID(_submit_rex(_get_project_id(), rex, run_opts)), ResultRef)
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
