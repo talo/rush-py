@@ -21,7 +21,7 @@ from gql.transport.exceptions import TransportQueryError
 from .._rex import optional_str
 from ..convert import from_json, to_dict
 from ..mol import TRC
-from ..objects import RushObject, fetch_object, upload_object
+from ..objects import RushObject, upload_object
 from ..runs import Run, RunOpts, RunSpec
 from ..session import _submit_rex
 
@@ -195,14 +195,14 @@ class RunResultRef:
             if isinstance(item, ItemError):
                 out.append(item)
                 continue
-            trajectory = fetch_object(item.trajectory.path)
+            trajectory = item.trajectory.fetch_bytes()
             checkpoint = (
-                fetch_object(item.checkpoint.path) if item.checkpoint is not None else None
+                item.checkpoint.fetch_bytes() if item.checkpoint is not None else None
             )
             out.append(
                 RunOutput(
-                    trajectory=_ensure_bytes(trajectory),
-                    checkpoint=_ensure_bytes(checkpoint) if checkpoint is not None else None,
+                    trajectory=trajectory,
+                    checkpoint=checkpoint,
                 )
             )
         return out
@@ -325,24 +325,18 @@ def _upload_trc_object(input_object: TRCInput) -> RushObject:
 
 
 def _fetch_trc(obj: RushObject) -> TRC:
-    raw = fetch_object(obj.path)
-    if isinstance(raw, bytes):
-        decoded = json.loads(raw.decode())
-    elif isinstance(raw, str):
-        decoded = json.loads(raw)
-    else:
-        decoded = raw
-
-    parsed = from_json(decoded)
+    parsed = from_json(obj.fetch_json())
     if isinstance(parsed, list):
         if len(parsed) != 1:
             raise ValueError(f"Expected one TRC object, got {len(parsed)}")
-        return parsed[0]
+        item = parsed[0]
+        if not isinstance(item, TRC):
+            raise TypeError("Expected TRC item in parsed list")
+        return item
+    if not isinstance(parsed, TRC):
+        raise TypeError(f"Expected TRC output, got {type(parsed).__name__}")
     return parsed
 
-
-def _ensure_bytes(value: bytes | str) -> bytes:
-    return value.encode() if isinstance(value, str) else value
 
 
 def _to_rex_json_obj(obj: RushObject) -> str:

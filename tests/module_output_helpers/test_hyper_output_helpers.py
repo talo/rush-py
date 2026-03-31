@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from rush import TRC
@@ -8,7 +9,7 @@ def test_trc_batch_result_ref_fetch_and_save(monkeypatch):
     fixture_path = Path(__file__).parent.parent / "data" / "hyper" / "valid_trc.json"
     trc_payload = fixture_path.read_text()
 
-    monkeypatch.setattr("rush.hyper.fetch_object", lambda _path: trc_payload.encode())
+    monkeypatch.setattr("rush.objects.RushObject.fetch_json", lambda _self: json.loads(trc_payload))
     monkeypatch.setattr(
         "rush.objects.RushObject.save",
         lambda self, ext="json", **_kw: Path("workspace") / f"{self.path}.{ext}",
@@ -43,7 +44,7 @@ def test_trc_batch_result_ref_fetch_and_save(monkeypatch):
 
 
 def test_run_result_ref_fetch_and_save(monkeypatch):
-    monkeypatch.setattr("rush.hyper.fetch_object", lambda _path: b"binary-data")
+    monkeypatch.setattr("rush.objects.RushObject.fetch_bytes", lambda _self: b"binary-data")
     monkeypatch.setattr(
         "rush.objects.RushObject.save",
         lambda self, ext="bin", **_kw: Path("workspace") / f"{self.path}.{ext}",
