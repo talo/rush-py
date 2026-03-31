@@ -152,15 +152,15 @@ def as_hyper_solvate_config(
         and seed is None
         and timeout_seconds is None
     ):
-        return "None"
+        return "(None)"
 
     return (
-        "Some (hyper_solvate_sumo::HyperConfig {"
+        "(Some (hyper_solvate_sumo::HyperConfig {"
         f" max_inputs = {optional_str(max_inputs)},"
         f" padding_nm = {optional_str(padding_nm)},"
         f" seed = {optional_str(seed)},"
         f" timeout_seconds = {optional_str(timeout_seconds)}"
-        " })"
+        " }))"
     )
 
 
@@ -172,15 +172,15 @@ def as_hyper_minimize_config(
     timeout_seconds: int | None,
 ) -> str:
     if max_inputs is None and steps is None and gtol is None and timeout_seconds is None:
-        return "None"
+        return "(None)"
 
     return (
-        "Some (hyper_minimize_sumo::HyperMinimizeConfig {"
+        "(Some (hyper_minimize_sumo::HyperMinimizeConfig {"
         f" max_inputs = {optional_str(max_inputs)},"
         f" steps = {optional_str(steps)},"
         f" gtol = {optional_str(gtol)},"
         f" timeout_seconds = {optional_str(timeout_seconds)}"
-        " })"
+        " }))"
     )
 
 
@@ -209,7 +209,7 @@ def as_hyper_run_config(
         and nthreads is None
         and timeout_seconds is None
     ):
-        return "None"
+        return "(None)"
 
     ensemble_value = (
         f"Some hyper_run_sumo::RunEnsemble::{ensemble}"
@@ -223,7 +223,7 @@ def as_hyper_run_config(
     )
 
     return (
-        "Some (hyper_run_sumo::HyperRunConfig {"
+        "(Some (hyper_run_sumo::HyperRunConfig {"
         f" max_inputs = {optional_str(max_inputs)},"
         f" nsteps = {optional_str(nsteps)},"
         f" dt_ps = {dt_ps_value},"
@@ -234,5 +234,5 @@ def as_hyper_run_config(
         f" use_gpu = {optional_str(use_gpu)},"
         f" nthreads = {optional_str(nthreads)},"
         f" timeout_seconds = {optional_str(timeout_seconds)}"
-        " })"
+        " }))"
     )

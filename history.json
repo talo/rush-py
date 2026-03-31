@@ -1,0 +1,9 @@
+{
+  "instances": [
+    {
+      "run_id": "116b11c0-fa11-498c-b368-a2f6139e23b1",
+      "run_created_at": "2026-03-31T03:59:19",
+      "module_path": "github:talo/tengu-hyper/f2906f085c7a3a07104a98a263dc9876f08ee4e7#hyper_solvate_sumo"
+    }
+  ]
+}

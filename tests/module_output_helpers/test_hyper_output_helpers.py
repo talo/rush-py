@@ -38,7 +38,7 @@ _SAMPLE_TRC = {
 }
 
 
-def test_solvate_result_ref_fetches_and_saves_trc(monkeypatch):
+def test_solvate_result_ref_fetches_and_saves_trc(monkeypatch, tmp_path: Path):
     raw = [{"Ok": {"path": "solvated-1", "size": 0, "format": "Json"}}]
 
     monkeypatch.setattr(
@@ -47,7 +47,7 @@ def test_solvate_result_ref_fetches_and_saves_trc(monkeypatch):
     )
     monkeypatch.setattr(
         "rush.client.RushObject.save",
-        lambda self, ext="json", **kw: Path(f"/tmp/{self.path}.{ext}"),
+        lambda self, ext="json", **kw: tmp_path / f"{self.path}.{ext}",
     )
 
     ref = hyper.SolvateResultRef.from_raw_output(raw)
@@ -57,7 +57,7 @@ def test_solvate_result_ref_fetches_and_saves_trc(monkeypatch):
     assert isinstance(fetched[0], TRC)
 
     saved = ref.save()
-    assert saved == [Path("/tmp/solvated-1.json")]
+    assert saved == [tmp_path / "solvated-1.json"]
 
 
 def test_minimize_result_ref_parses_item_error():
@@ -80,7 +80,7 @@ def test_minimize_result_ref_parses_item_error():
     assert outputs[0].message == "broken"
 
 
-def test_run_result_ref_fetches_artifacts_and_preserves_errors(monkeypatch):
+def test_run_result_ref_fetches_artifacts_and_preserves_errors(monkeypatch, tmp_path: Path):
     raw = [
         {
             "Ok": {
@@ -104,7 +104,7 @@ def test_run_result_ref_fetches_artifacts_and_preserves_errors(monkeypatch):
     )
     monkeypatch.setattr(
         "rush.client.RushObject.save",
-        lambda self, ext="bin", **kw: Path(f"/tmp/{self.path}.{ext}"),
+        lambda self, ext="bin", **kw: tmp_path / f"{self.path}.{ext}",
     )
 
     ref = hyper.RunResultRef.from_raw_output(raw)
@@ -117,6 +117,6 @@ def test_run_result_ref_fetches_artifacts_and_preserves_errors(monkeypatch):
 
     saved = ref.save()
     assert isinstance(saved[0], hyper.HyperRunOutputPaths)
-    assert saved[0].trajectory == Path("/tmp/traj-1.xtc")
-    assert saved[0].checkpoint == Path("/tmp/chk-1.bin")
+    assert saved[0].trajectory == tmp_path / "traj-1.xtc"
+    assert saved[0].checkpoint == tmp_path / "chk-1.bin"
     assert isinstance(saved[1], hyper.ItemError)
