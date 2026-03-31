@@ -118,6 +118,9 @@ MODULE_LOCK = (
         "exess_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex",
+        "hyper_minimize_sumo": "github:talo/tengu-hyper/d4f3d29c06aa8eba74ff63101a3fe828aeabcf52#hyper_minimize_sumo",
+        "hyper_run_sumo": "github:talo/tengu-hyper/d4f3d29c06aa8eba74ff63101a3fe828aeabcf52#hyper_run_sumo",
+        "hyper_solvate_sumo": "github:talo/tengu-hyper/d4f3d29c06aa8eba74ff63101a3fe828aeabcf52#hyper_solvate_sumo",
         "mmseqs2_rex": "github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -131,6 +134,9 @@ MODULE_LOCK = (
         "exess_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex",
         "exess_geo_opt_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex",
         "exess_qmmm_rex": "github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex",
+        "hyper_minimize_sumo": "github:talo/tengu-hyper/d4f3d29c06aa8eba74ff63101a3fe828aeabcf52#hyper_minimize_sumo",
+        "hyper_run_sumo": "github:talo/tengu-hyper/d4f3d29c06aa8eba74ff63101a3fe828aeabcf52#hyper_run_sumo",
+        "hyper_solvate_sumo": "github:talo/tengu-hyper/d4f3d29c06aa8eba74ff63101a3fe828aeabcf52#hyper_solvate_sumo",
         "mmseqs2_rex": "github:talo/tengu-colabfold/0b6ca8b9dc97fc6380d334169a6faae51d85fac7#mmseqs2_rex",
         "nnxtb_rex": "github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex",
         "pbsa_rex": "github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex",
@@ -785,6 +791,17 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()) -> Run
         email=run_opts.email,
     )
 
+    matching_modules = [
+        module
+        for module in MODULE_LOCK
+        if f"{module}_s" in rex or f"try_{module}" in rex
+    ]
+    module_lock_payload = (
+        {module: MODULE_LOCK[module] for module in matching_modules}
+        if matching_modules
+        else MODULE_LOCK
+    )
+
     mutation = gql("""
         mutation EvalRex($input: CreateRun!) {
             eval(input: $input) {
@@ -797,7 +814,7 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()) -> Run
     mutation.variable_values = {
         "input": {
             "rex": rex,
-            "module_lock": MODULE_LOCK,
+            "module_lock": module_lock_payload,
             "draft": False,
             "project_id": project_id,
         },
@@ -814,11 +831,6 @@ def _submit_rex(project_id: str, rex: str, run_opts: RunOpts = RunOpts()) -> Run
     history_filepath = _get_opts().workspace_dir / "history.json"
     history_filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    matching_modules = [
-        module
-        for module in MODULE_LOCK
-        if f"{module}_s" in rex or f"try_{module}" in rex
-    ]
     if not matching_modules:
         print(
             "Error: no matching module for submission, not adding to history",

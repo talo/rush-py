@@ -20,6 +20,7 @@ NON_SUBMITTING_TEST_FILES = frozenset(
         "tests/module_output_helpers/test_auto3d_output_helpers.py",
         "tests/module_output_helpers/test_boltz_output_helpers.py",
         "tests/module_output_helpers/test_exess_output_helpers.py",
+        "tests/module_output_helpers/test_hyper_output_helpers.py",
         "tests/module_output_helpers/test_mmseqs2_output_helpers.py",
         "tests/module_output_helpers/test_nnxtb_output_helpers.py",
         "tests/module_output_helpers/test_pbsa_output_helpers.py",
