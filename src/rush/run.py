@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, cast
 
 from .client import RunID, collect_run
 
@@ -34,16 +34,16 @@ class RushRun(Generic[R]):
         """
         if self._collected is None:
             raw = collect_run(self._id, max_wait_time=max_wait_time)
-            self._collected = self._result_type.from_raw_output(raw)  # type: ignore[attr-defined]
+            self._collected = cast(Any, self._result_type).from_raw_output(raw)
         return self._collected
 
     def fetch(self, **kwargs: Any) -> Any:
         """Shorthand for ``collect().fetch(**kwargs)``."""
-        return self.collect().fetch(**kwargs)  # type: ignore[union-attr]
+        return cast(Any, self.collect()).fetch(**kwargs)
 
     def save(self, **kwargs: Any) -> Any:
         """Shorthand for ``collect().save(**kwargs)``."""
-        return self.collect().save(**kwargs)  # type: ignore[union-attr]
+        return cast(Any, self.collect()).save(**kwargs)
 
     def __repr__(self) -> str:
         return f"RushRun(id={self._id!r})"
