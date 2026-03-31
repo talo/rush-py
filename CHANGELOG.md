@@ -4,6 +4,9 @@
 
 No new changes since 7.0.0rc3.
 
+### Other
+- Add GitHub Actions to build and deploy Sphinx docs previews for PRs via GitHub Pages
+
 ## 7.0.0rc3
 
 ### Changed
