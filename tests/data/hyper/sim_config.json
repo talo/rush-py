@@ -1,0 +1,1 @@
+{"force_field":"AMBERFF19SB","ensemble":"NVT","n_steps":40,"dt":0.001,"temperature":300.0,"initial_temp":300.0,"tau_t":0.1,"electrostatics":"CUTOFF","cutoff":0.0,"dispersion_correction":false,"constraints":"NONE","box_x":5.0,"box_y":5.0,"box_z":5.0,"output":{"trajectory_freq":1,"energy_freq":1,"checkpoint_freq":20,"log_freq":10}}
