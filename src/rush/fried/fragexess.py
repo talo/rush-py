@@ -5,8 +5,6 @@ Primary entrypoint:
 - fragmented_exess(input_file, distance_threshold=4.0, trimer_cutoff_cap=15.0, collect=True, output_dir=None) -> None
 """
 
-from __future__ import annotations
-
 import json
 import math
 import shutil
@@ -18,10 +16,9 @@ from typing import Any, Iterable, Sequence
 
 from rush.mol import FragmentRef
 
-from .. import RushRunError, exess
-from ..client import RunOpts
+from .. import RunError, exess
 from ..exess import interaction_energy
-from ..run import RushRun
+from ..runs import Run, RunOpts
 
 __all__ = [
     "fragmented_exess",
@@ -203,7 +200,7 @@ def fragmented_exess(
     trimer_cutoff_cap: float = 15.0,
     collect: bool = True,
     output_dir: Path | None = None,
-) -> list[RushRun[exess.ResultRef]] | None:
+) -> list[Run[exess.ResultRef]] | None:
     """
     Submit EXESS calculations for a fragmented ligand complex.
     """
@@ -237,7 +234,7 @@ def fragmented_exess(
     if not topology_path.exists():
         raise RuntimeError(f"Topology file no longer exists: {topology_path}")
 
-    submitted: list[RushRun[exess.ResultRef]] = []
+    submitted: list[Run[exess.ResultRef]] = []
 
     for job in fragment_jobs:
         job_name = f"{input_path.stem}_ref{job.reference_fragment}"
@@ -288,7 +285,7 @@ def fragmented_exess(
                         f"  Warning: exess output file not found: {run_path}",
                         file=sys.stderr,
                     )
-        except RushRunError as e:
+        except RunError as e:
             print(f"  Warning: exess run failed! {e}", file=sys.stderr)
 
     return submitted if not collect else None

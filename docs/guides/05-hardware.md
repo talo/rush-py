@@ -4,7 +4,7 @@ Rush provides both cloud computing and supercomputing infrastructure for you to 
 
 ## Run Specification: Target and Resources
 
-You can pass a set of run specifications to each module function via `run_spec=rush.client.RunSpec(...)`. The target ("Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"), walltime (in minutes), storage (in MB, though storage units are configurable as well), cpus, gpus, and nodes are all configurable via this parameter and class.
+You can pass a set of run specifications to each module function via `run_spec=rush.runs.RunSpec(...)`. The target ("Bullet", "Bullet2", "Bullet3", "Gadi", "Setonix"), walltime (in minutes), storage (in MB, though storage units are configurable as well), cpus, gpus, and nodes are all configurable via this parameter and class.
 
 If the target is left unspecified, one of the three Bullet clusters will be chosen. 
 

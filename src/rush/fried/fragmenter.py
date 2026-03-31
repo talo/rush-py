@@ -5,8 +5,6 @@ Primary entrypoint:
 - fragment_ligand(input_path, fragment_assignments_lookup=None) -> Path
 """
 
-from __future__ import annotations
-
 import json
 from pathlib import Path
 from typing import Any

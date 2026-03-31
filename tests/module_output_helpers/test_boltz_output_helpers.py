@@ -53,21 +53,23 @@ def _encode_float_array(values: list[float]) -> str:
 def test_result_ref_fetch_parses_boltz_result(monkeypatch):
     fake_trc = object()
 
-    def fake_fetch_object(path):
+    def fake_fetch_dict(self):
         payloads = {
             "plddt": (
                 '{"shape":[3],"data":"%s"}' % _encode_float_array([1.0, 2.0, 3.0])
-            ).encode(),
+            ),
             "pae": (
                 '{"shape":[3,3],"data":"%s"}'
                 % _encode_float_array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-            ).encode(),
+            ),
         }
-        return payloads[path]
+        if self.path in payloads:
+            return __import__("json").loads(payloads[self.path])
+        return {}
 
-    monkeypatch.setattr("rush.boltz.fetch_object", fake_fetch_object)
-    monkeypatch.setattr("rush._trc.fetch_object", lambda path: b"{}")
-    monkeypatch.setattr("rush._trc.from_json", lambda data: fake_trc)
+    monkeypatch.setattr("rush.objects.RushObject.fetch_dict", fake_fetch_dict)
+    monkeypatch.setattr("rush.objects.fetch_object", lambda path, extract=False: b"{}")
+    monkeypatch.setattr("rush.objects.from_json", lambda data: fake_trc)
 
     ref = ResultRef.from_raw_output(_sample_boltz_raw_output())
     output = list(ref.fetch())
@@ -99,7 +101,7 @@ def test_result_ref_save_saves_boltz_result(monkeypatch):
     saved_json_names = []
 
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
 

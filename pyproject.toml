@@ -1,6 +1,6 @@
 [project]
 name = "rush-py"
-version = "7.0.0b3"
+version = "7.0.0"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -52,10 +52,10 @@ dev = [
   "ty",
   "pytest~=9.0",
   "pytest-timeout~=2.3",
-  "sphinx~=8.2",
+  "sphinx~=9.1",
   "sphinx-autodoc-typehints~=3.5",
   "sphinx-design~=0.6",
-  "myst-parser~=4.0",
+  "myst-parser~=5.0",
   "shibuya>=2025.12.19",
   "py3Dmol~=2.5",
   "scipy~=1.17",
@@ -64,7 +64,10 @@ dev = [
 [tool.pytest.ini_options]
 minversion = "9.0"
 testpaths = ["tests"]
-addopts = "--strict-config --strict-markers"
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+strict = true
+log_level = "INFO"
+filterwarnings = ["error"]
 timeout = 300
 tmp_path_retention_policy = "failed"
 tmp_path_retention_count = 3

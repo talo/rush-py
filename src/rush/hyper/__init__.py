@@ -18,20 +18,12 @@ from typing import Any, Callable, Literal, TypeVar
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC
-from rush.convert import from_json, to_dict
-
-from .._utils import optional_str
-from ..client import (
-    RunOpts,
-    RunSpec,
-    RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
-    upload_object,
-)
-from ..run import RushRun
+from .._rex import optional_str
+from ..convert import from_json, to_dict
+from ..mol import TRC
+from ..objects import RushObject, fetch_object, upload_object
+from ..runs import Run, RunOpts, RunSpec
+from ..session import _submit_rex
 
 JsonObjectInput = Path | str | RushObject | dict[str, Any]
 TRCInput = TRC | Path | str | RushObject | dict[str, Any]
@@ -449,7 +441,7 @@ def hyper_solvate_sumo(
     config: HyperConfig | None = None,
     run_spec: RunSpec = RunSpec(target="Bullet"),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[TRCBatchResultRef]:
+) -> Run[TRCBatchResultRef]:
     """Submit Hyper solvation for one or more TRC inputs."""
     input_exprs = [_to_rex_json_obj(_upload_trc_object(item)) for item in input_trcs]
 
@@ -465,7 +457,7 @@ def hyper_solvate_sumo(
     )
 
     try:
-        return RushRun(_submit_rex(_get_project_id(), rex, run_opts), TRCBatchResultRef)
+        return Run(_submit_rex(rex, run_opts), TRCBatchResultRef)
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
@@ -478,7 +470,7 @@ def hyper_minimize_sumo(
     config: HyperMinimizeConfig | None = None,
     run_spec: RunSpec = RunSpec(target="Bullet"),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[TRCBatchResultRef]:
+) -> Run[TRCBatchResultRef]:
     """Submit Hyper minimization for one or more structures."""
     job_exprs = []
     for job in jobs:
@@ -504,7 +496,7 @@ def hyper_minimize_sumo(
     )
 
     try:
-        return RushRun(_submit_rex(_get_project_id(), rex, run_opts), TRCBatchResultRef)
+        return Run(_submit_rex(rex, run_opts), TRCBatchResultRef)
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:
@@ -517,7 +509,7 @@ def hyper_run_sumo(
     config: HyperRunConfig | None = None,
     run_spec: RunSpec = RunSpec(target="Bullet"),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[RunResultRef]:
+) -> Run[RunResultRef]:
     """Submit Hyper molecular dynamics runs for one or more jobs."""
     job_exprs = []
     for job in jobs:
@@ -544,7 +536,7 @@ def hyper_run_sumo(
     )
 
     try:
-        return RushRun(_submit_rex(_get_project_id(), rex, run_opts), RunResultRef)
+        return Run(_submit_rex(rex, run_opts), RunResultRef)
     except TransportQueryError as e:
         if e.errors:
             for error in e.errors:

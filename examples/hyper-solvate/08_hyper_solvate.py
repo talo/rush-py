@@ -16,7 +16,7 @@ Prerequisites:
 from pathlib import Path
 
 from rush import TRC, hyper
-from rush.client import RunOpts
+from rush import RunOpts
 
 DATA_DIR = Path(__file__).parent / "data"
 INPUT_TRC = DATA_DIR / "valid_trc.json"

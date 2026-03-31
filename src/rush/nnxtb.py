@@ -14,28 +14,23 @@ Usage::
     print(result.energy_mev)
 """
 
-import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any
+from typing import Any, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, Topology, TRCRef
-from rush._trc import to_topology_vobj
-
-from ._utils import optional_str
-from .client import (
-    RunOpts,
-    RunSpec,
+from ._rex import optional_str
+from .mol import TRC, Topology
+from .objects import (
     RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
+    TRCRef,
+    _to_topology_vobj,
 )
-from .run import RushRun
+from .runs import Run, RunOpts, RunSpec
+from .session import _submit_rex
 
 # ---------------------------------------------------------------------------
 # Result types
@@ -65,7 +60,7 @@ class ResultRef:
     output: RushObject
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "ResultRef":
+    def from_raw_output(cls, res: Any) -> Self:
         """Parse raw ``collect_run`` output into a ``ResultRef``."""
         if not isinstance(res, list) or len(res) != 1:
             raise ValueError(
@@ -77,7 +72,8 @@ class ResultRef:
 
     def fetch(self) -> Result:
         """Download nn-xTB output and parse into Python objects."""
-        return Result(**json.loads(fetch_object(self.output.path).decode()))
+        output = self.output.fetch_dict()
+        return Result(**output)
 
     def save(self) -> ResultPaths:
         """Download nn-xTB output and save to the workspace."""
@@ -96,16 +92,16 @@ def energy(
     multiplicity: int | None = None,
     run_spec: RunSpec = RunSpec(gpus=1, storage=100),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[ResultRef]:
+) -> Run[ResultRef]:
     """
     Submit an nn-xTB energy calculation for the topology at *topology_path*.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed result, or ``.save()`` to write it to disk.
     """
 
     # Upload inputs
-    topology_vobj = to_topology_vobj(mol)
+    topology_vobj = _to_topology_vobj(mol)
     charge = 0
 
     # Run rex
@@ -113,7 +109,7 @@ def energy(
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   nnxtb = λ topology →
-    nnxtb_rex_s
+    try_nnxtb_rex
       ($run_spec)
       (nnxtb_rex::NnxtbConfig {
         compute_forces = $maybe_compute_forces,
@@ -133,10 +129,7 @@ in
         topology_vobj_path=topology_vobj["path"],
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            ResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), ResultRef)
 
     except TransportQueryError as e:
         if e.errors:

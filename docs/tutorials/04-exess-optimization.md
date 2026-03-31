@@ -28,7 +28,7 @@ This example uses **ethene (C₂H₄)** with an intentionally twisted starting g
 
 ```python
 from rush import exess
-from rush.client import RunOpts
+from rush import RunOpts
 
 run = exess.optimization(
     "ethene_twisted_t.json",

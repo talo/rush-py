@@ -10,7 +10,7 @@ def test_trc_batch_result_ref_fetch_and_save(monkeypatch):
 
     monkeypatch.setattr("rush.hyper.fetch_object", lambda _path: trc_payload.encode())
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, ext="json", **_kw: Path("workspace") / f"{self.path}.{ext}",
     )
 
@@ -45,7 +45,7 @@ def test_trc_batch_result_ref_fetch_and_save(monkeypatch):
 def test_run_result_ref_fetch_and_save(monkeypatch):
     monkeypatch.setattr("rush.hyper.fetch_object", lambda _path: b"binary-data")
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, ext="bin", **_kw: Path("workspace") / f"{self.path}.{ext}",
     )
 

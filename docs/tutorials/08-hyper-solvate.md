@@ -20,7 +20,7 @@ Most molecular workflows need explicit solvent before minimization or MD. Solvat
 
 ```python
 from rush import TRC, hyper
-from rush.client import RunOpts
+from rush import RunOpts
 
 run = hyper.hyper_solvate_sumo(
     ["valid_trc.json"],
@@ -52,7 +52,7 @@ This submits one structure, waits for completion with `fetch()`, and returns a p
 
 ## Reading the Output
 
-`hyper_solvate_sumo()` returns `RushRun[hyper.TRCBatchResultRef]`.
+`hyper_solvate_sumo()` returns `Run[hyper.TRCBatchResultRef]`.
 
 - `run.collect()` gives a `TRCBatchResultRef`
 - `result_ref.fetch()` returns `list[TRC | ItemError]`

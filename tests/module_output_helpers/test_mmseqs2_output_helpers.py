@@ -5,8 +5,8 @@ from rush.mmseqs2 import ResultRef
 
 def test_result_ref_fetch_decodes_a3m_objects(monkeypatch):
     monkeypatch.setattr(
-        "rush.mmseqs2.fetch_object",
-        lambda path: f">{path}\nSEQUENCE\n".encode(),
+        "rush.objects.RushObject.fetch_bytes",
+        lambda self, extract=False: f">{self.path}\nSEQUENCE\n".encode(),
     )
 
     ref = ResultRef.from_raw_output(
@@ -22,7 +22,7 @@ def test_result_ref_fetch_decodes_a3m_objects(monkeypatch):
 
 def test_result_ref_save_saves_a3m_objects(monkeypatch):
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, ext="a3m", **kw: Path(f"/tmp/{self.path}.{ext}"),
     )
 

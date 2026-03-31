@@ -8,28 +8,24 @@ Quick Links
 - :class:`rush.exess.QMMMResult`
 """
 
-import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any
+from typing import Any, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, Residues, Topology, TRCRef
-from rush._trc import to_residues_vobj, to_topology_vobj
-
-from .._utils import optional_str
-from ..client import (
-    RunOpts,
-    RunSpec,
+from .._rex import optional_str
+from ..mol import TRC, Residues, Topology
+from ..objects import (
     RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
+    TRCRef,
+    _to_residues_vobj,
+    _to_topology_vobj,
 )
-from ..run import RushRun
+from ..runs import Run, RunOpts, RunSpec
+from ..session import _submit_rex
 from ._energy import (
     AuxBasisT,
     BasisT,
@@ -143,7 +139,7 @@ class QMMMResultRef:
     output: RushObject
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "QMMMResultRef":
+    def from_raw_output(cls, res: Any) -> Self:
         """Parse raw ``collect_run`` output into a ``QMMMResultRef``."""
         if not isinstance(res, dict) or not isinstance(res.get("path"), str):
             raise ValueError(
@@ -153,7 +149,8 @@ class QMMMResultRef:
 
     def fetch(self) -> QMMMResult:
         """Download QM/MM outputs and parse into Python objects."""
-        return QMMMResult(**json.loads(fetch_object(self.output.path)))
+        output = self.output.fetch_dict()
+        return QMMMResult(**output)
 
     def save(self) -> QMMMResultPaths:
         """Download QM/MM outputs and save to the workspace."""
@@ -193,11 +190,11 @@ def qmmm(
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[QMMMResultRef]:
+) -> Run[QMMMResultRef]:
     """
     Submit a QM/MM simulation for the topology at *topology_path*.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed trajectory, or ``.save()`` to write it to disk.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
@@ -206,20 +203,20 @@ def qmmm(
     residues_vobj = None
     match mol:
         case TRC() | TRCRef():
-            topology_vobj = to_topology_vobj(mol.topology)
-            residues_vobj = to_residues_vobj(mol.residues)
+            topology_vobj = _to_topology_vobj(mol.topology)
+            residues_vobj = _to_residues_vobj(mol.residues)
         case (t, r):
-            topology_vobj = to_topology_vobj(t)
-            residues_vobj = to_residues_vobj(r)
+            topology_vobj = _to_topology_vobj(t)
+            residues_vobj = _to_residues_vobj(r)
         case _:
-            topology_vobj = to_topology_vobj(mol)
+            topology_vobj = _to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology residues →
-    exess_qmmm_rex_s
+    try_exess_qmmm_rex
       ($run_spec)
       (exess_qmmm_rex::QMMMParams {
         schema_version = "0.2.0",
@@ -314,10 +311,7 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            QMMMResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), QMMMResultRef)
 
     except TransportQueryError as e:
         if e.errors:

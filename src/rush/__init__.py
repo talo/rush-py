@@ -3,15 +3,7 @@ Python library for accessing and writing computational chemistry workflows with
 the Rush platform.
 """
 
-from ._trc import TRCPaths, TRCRef
-from .client import (
-    ObjectID,
-    RunID,
-    RushObject,
-    RushRunError,
-    RushRunInfo,
-    fetch_run_info,
-)
+from . import session  # noqa: I001
 from .convert import (
     from_json,
     from_mmcif,
@@ -44,9 +36,29 @@ from .mol import (
     SchemaVersion,
     Topology,
 )
-from .run import RushRun
+from .objects import (
+    ObjectID,
+    RushObject,
+    TRCPaths,
+    TRCRef,
+)
+from .runs import (
+    Run,
+    RunBackendError,
+    RunError,
+    RunID,
+    RunInfo,
+    RunModuleError,
+    RunOpts,
+    RunSpec,
+    fetch_runs,
+    fetch_run_info,
+    delete_run,
+    collect_run,
+)
 
 __all__ = [
+    "session",
     # I/O
     "from_json",
     "to_dict",
@@ -57,15 +69,24 @@ __all__ = [
     "load_structure",
     "save_structure",
     "merge_trcs",
+    # Runs
+    "Run",
+    "RunOpts",
+    "RunSpec",
+    "RunID",
+    "RunError",
+    "RunBackendError",
+    "RunModuleError",
+    "RunInfo",
+    "fetch_runs",
+    "fetch_run_info",
+    "delete_run",
+    "collect_run",
+    # Object store
+    "RushObject",
+    "ObjectID",
     "TRCPaths",
     "TRCRef",
-    "ObjectID",
-    "RushObject",
-    "RunID",
-    "RushRunError",
-    "RushRunInfo",
-    "fetch_run_info",
-    "RushRun",
     # Core structures
     "TRC",
     "Topology",

@@ -14,18 +14,11 @@ Usage::
 """
 
 # --- Energy (single-point, interaction energy) ---
-from ._energy import (
+from ._energy import (  # noqa: I001
     # Functions (accessed as exess.energy(), not directly imported)
     calculate,  # noqa: F401
     energy,  # noqa: F401
     interaction_energy,  # noqa: F401
-    # Result types
-    Calculation,
-    ManyBodyExpansion,
-    Nmer,
-    Result,
-    ResultPaths,
-    ResultRef,
     # Config types
     Model,
     System,
@@ -45,21 +38,44 @@ from ._energy import (
     SpaceFillingBatching,
     GauXCBatching,
     Octree,
-    # Type aliases
     MethodT,
     BasisT,
     AuxBasisT,
     StandardOrientationT,
     TensorLike,
+    ConvergenceMetricT,
+    FockBuildTypeT,
+    FragmentLevelT,
+    CutoffTypeT,
+    DistanceMetricT,
+    RadialQuadT,
+    PruningSchemeT,
+    XCGridResolutionT,
+    XCBatchingSchemeT,
+    KSDFTMethodT,
+    # Result types
+    Calculation,
+    ManyBodyExpansion,
+    Nmer,
+    Result,
+    ResultPaths,
+    ResultRef,
 )
 
 # --- Geometry optimization ---
 from ._optimization import (
+    # Functions
     optimization,  # noqa: F401
+    # Config types
     OptimizationKeywords,
     OptimizationConvergenceCriteria,
     TrustRegionKeywords,
     LBFGSKeywords,
+    CoordinateSystemT,
+    HessianGuessTypeT,
+    OptimizationAlgorithmTypeT,
+    LBFGSLinesearchT,
+    # Result types
     OptimizationResult,
     OptimizationResultPaths,
     OptimizationResultRef,
@@ -68,7 +84,9 @@ from ._optimization import (
 
 # --- QM/MM ---
 from ._qmmm import (
+    # Functions
     qmmm,  # noqa: F401
+    # Result Types
     Trajectory,
     Restraints,
     QMMMResult,
@@ -77,7 +95,7 @@ from ._qmmm import (
 )
 
 __all__ = [
-    # Config types
+    # Generic & Energy Types
     "Model",
     "System",
     "SCFKeywords",
@@ -96,7 +114,6 @@ __all__ = [
     "SpaceFillingBatching",
     "GauXCBatching",
     "Octree",
-    # Result types
     "Calculation",
     "ManyBodyExpansion",
     "Nmer",
@@ -108,6 +125,10 @@ __all__ = [
     "OptimizationConvergenceCriteria",
     "TrustRegionKeywords",
     "LBFGSKeywords",
+    "CoordinateSystemT",
+    "HessianGuessTypeT",
+    "OptimizationAlgorithmTypeT",
+    "LBFGSLinesearchT",
     "OptimizationResult",
     "OptimizationResultPaths",
     "OptimizationResultRef",
@@ -124,4 +145,14 @@ __all__ = [
     "AuxBasisT",
     "StandardOrientationT",
     "TensorLike",
+    "ConvergenceMetricT",
+    "FockBuildTypeT",
+    "FragmentLevelT",
+    "CutoffTypeT",
+    "DistanceMetricT",
+    "RadialQuadT",
+    "PruningSchemeT",
+    "XCGridResolutionT",
+    "XCBatchingSchemeT",
+    "KSDFTMethodT",
 ]
