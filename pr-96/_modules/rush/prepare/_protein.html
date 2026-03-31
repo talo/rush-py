@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rush.prepare._protein - QDX Documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="rush.prepare._protein"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../../../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="../../../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../../../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/08-hyper-solvate_sumo.html">Tutorial 8: Hyper Solvate Sumo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/09-hyper-minimize_sumo.html">Tutorial 9: Hyper Minimize Sumo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/10-hyper-run_sumo.html">Tutorial 10: Hyper Run Sumo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.hyper.html">Hyper Solvation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.hyper_minimize_sumo.html">Hyper Minimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.hyper_run_sumo.html">Hyper Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">Module code</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">rush.prepare._protein</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <h1>Source code for rush.prepare._protein</h1><div class="highlight"><pre>
+<span></span><span data-line="1"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="2"><span class="sd">Protein preparation module for the Rush Python client.</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="sd">This module supports system preparation workflows such as converting PDB inputs</span>
+</span><span data-line="5"><span class="sd">to TRC, protonating and optimizing hydrogen positions, and augmenting</span>
+</span><span data-line="6"><span class="sd">structures with connectivity and formal charge information before downstream</span>
+</span><span data-line="7"><span class="sd">calculations.</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="sd">Usage::</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="sd">    from rush import prepare</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="sd">    result = prepare.protein(&quot;protein.pdb&quot;).fetch()</span>
+</span><span data-line="14"><span class="sd">    print(result.topology.symbols)</span>
+</span><span data-line="15"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="18"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="19"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+</span><span data-line="20"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span data-line="21"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="22"><span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
+</span><span data-line="23"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
+</span><span data-line="24">
+</span><span data-line="25"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportQueryError</span>
+</span><span data-line="26">
+</span><span data-line="27"><span class="kn">from</span><span class="w"> </span><span class="nn">.._rex</span><span class="w"> </span><span class="kn">import</span> <span class="n">optional_str</span>
+</span><span data-line="28"><span class="kn">from</span><span class="w"> </span><span class="nn">..convert</span><span class="w"> </span><span class="kn">import</span> <span class="n">_single_trc</span><span class="p">,</span> <span class="n">from_json</span><span class="p">,</span> <span class="n">from_pdb</span>
+</span><span data-line="29"><span class="kn">from</span><span class="w"> </span><span class="nn">..mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRC</span><span class="p">,</span> <span class="n">Chains</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="30"><span class="kn">from</span><span class="w"> </span><span class="nn">..objects</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="31">    <span class="n">RushObject</span><span class="p">,</span>
+</span><span data-line="32">    <span class="n">TRCPaths</span><span class="p">,</span>
+</span><span data-line="33">    <span class="n">TRCRef</span><span class="p">,</span>
+</span><span data-line="34">    <span class="n">_to_chains_vobj</span><span class="p">,</span>
+</span><span data-line="35">    <span class="n">_to_residues_vobj</span><span class="p">,</span>
+</span><span data-line="36">    <span class="n">_to_topology_vobj</span><span class="p">,</span>
+</span><span data-line="37"><span class="p">)</span>
+</span><span data-line="38"><span class="kn">from</span><span class="w"> </span><span class="nn">..runs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Run</span><span class="p">,</span> <span class="n">RunOpts</span><span class="p">,</span> <span class="n">RunSpec</span>
+</span><span data-line="39"><span class="kn">from</span><span class="w"> </span><span class="nn">..session</span><span class="w"> </span><span class="kn">import</span> <span class="n">_submit_rex</span>
+</span><span data-line="40">
+</span><span data-line="41"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="42"><span class="c1"># Result types</span>
+</span><span data-line="43"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="44">
+</span><span data-line="45">
+<div class="viewcode-block" id="ResultRef">
+<a class="viewcode-back" href="../../../rush.prepare.html#rush.prepare.ResultRef">[docs]</a>
+</span><span data-line="46"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="47"><span class="k">class</span><span class="w"> </span><span class="nc">ResultRef</span><span class="p">:</span>
+</span><span data-line="48"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Lightweight reference to prepare-protein output in the Rush object store.</span>
+</span><span data-line="49">
+</span><span data-line="50"><span class="sd">    May contain multiple TRC triplets if the input PDB has multiple models.</span>
+</span><span data-line="51"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="52">
+</span><span data-line="53">    <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRCRef</span><span class="p">]</span>
+</span><span data-line="54">
+</span><span data-line="55">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRCRef</span><span class="p">:</span>
+</span><span data-line="56">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</span><span data-line="57">
+</span><span data-line="58">    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span data-line="59">        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+</span><span data-line="60">
+</span><span data-line="61">    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">TRCRef</span><span class="p">]:</span>
+</span><span data-line="62">        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+</span><span data-line="63">
+<div class="viewcode-block" id="ResultRef.from_raw_output">
+<a class="viewcode-back" href="../../../rush.prepare.html#rush.prepare.ResultRef.from_raw_output">[docs]</a>
+</span><span data-line="64">    <span class="nd">@classmethod</span>
+</span><span data-line="65">    <span class="k">def</span><span class="w"> </span><span class="nf">from_raw_output</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span data-line="66"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse raw ``collect_run`` output into a ``ResultRef``.</span>
+</span><span data-line="67">
+</span><span data-line="68"><span class="sd">        The raw output is a list of groups, where each group is a list of</span>
+</span><span data-line="69"><span class="sd">        3 dicts (topology, residues, chains objects).  Multi-model PDBs</span>
+</span><span data-line="70"><span class="sd">        produce multiple groups.</span>
+</span><span data-line="71"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span data-line="72">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="73">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="74">                <span class="sa">f</span><span class="s2">&quot;prepare_protein should return a non-empty list, &quot;</span>
+</span><span data-line="75">                <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="76">                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="sa">f</span><span class="s1">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="si">}</span><span class="s1"> items&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">hasattr</span><span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;__len__&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">.&quot;</span>
+</span><span data-line="77">            <span class="p">)</span>
+</span><span data-line="78">
+</span><span data-line="79">        <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRCRef</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="80">        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+</span><span data-line="81">            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+</span><span data-line="82">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="83">                    <span class="sa">f</span><span class="s2">&quot;prepare_protein output group </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> expected a list of 3 elements, &quot;</span>
+</span><span data-line="84">                    <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="85">                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="sa">f</span><span class="s1">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="si">}</span><span class="s1"> items&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">,</span><span class="w"> </span><span class="nb">list</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">.&quot;</span>
+</span><span data-line="86">                <span class="p">)</span>
+</span><span data-line="87">            <span class="n">topo</span><span class="p">,</span> <span class="n">resid</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">group</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</span><span data-line="88">            <span class="k">if</span> <span class="p">(</span>
+</span><span data-line="89">                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topo</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="90">                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resid</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="91">                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="92">            <span class="p">):</span>
+</span><span data-line="93">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="94">                    <span class="sa">f</span><span class="s2">&quot;prepare_protein output group </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> elements must be dicts.&quot;</span>
+</span><span data-line="95">                <span class="p">)</span>
+</span><span data-line="96">            <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="97">                <span class="n">TRCRef</span><span class="p">(</span>
+</span><span data-line="98">                    <span class="n">topology</span><span class="o">=</span><span class="n">RushObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">topo</span><span class="p">),</span>
+</span><span data-line="99">                    <span class="n">residues</span><span class="o">=</span><span class="n">RushObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">resid</span><span class="p">),</span>
+</span><span data-line="100">                    <span class="n">chains</span><span class="o">=</span><span class="n">RushObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">chain</span><span class="p">),</span>
+</span><span data-line="101">                <span class="p">)</span>
+</span><span data-line="102">            <span class="p">)</span>
+</span><span data-line="103">
+</span><span data-line="104">        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">)</span></div>
+
+</span><span data-line="105">
+<div class="viewcode-block" id="ResultRef.fetch">
+<a class="viewcode-back" href="../../../rush.prepare.html#rush.prepare.ResultRef.fetch">[docs]</a>
+</span><span data-line="106">    <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
+</span><span data-line="107"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Download prepare-protein output and parse into TRCs.</span>
+</span><span data-line="108">
+</span><span data-line="109"><span class="sd">        Returns one TRC per model in the input PDB.  Most PDBs contain a</span>
+</span><span data-line="110"><span class="sd">        single model, so ``result[0]`` is the common pattern.</span>
+</span><span data-line="111"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span data-line="112">        <span class="k">return</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span></div>
+
+</span><span data-line="113">
+<div class="viewcode-block" id="ResultRef.save">
+<a class="viewcode-back" href="../../../rush.prepare.html#rush.prepare.ResultRef.save">[docs]</a>
+</span><span data-line="114">    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRCPaths</span><span class="p">]:</span>
+</span><span data-line="115"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Download prepare-protein output and save to the workspace.</span>
+</span><span data-line="116">
+</span><span data-line="117"><span class="sd">        Returns one TRCPaths per model in the input PDB.</span>
+</span><span data-line="118"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span data-line="119">        <span class="k">return</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span></div>
+</div>
+
+</span><span data-line="120">
+</span><span data-line="121">
+</span><span data-line="122"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="123"><span class="c1"># Submission</span>
+</span><span data-line="124"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="125">
+</span><span data-line="126">
+<div class="viewcode-block" id="protein">
+<a class="viewcode-back" href="../../../rush.prepare.html#rush.prepare.protein">[docs]</a>
+</span><span data-line="127"><span class="k">def</span><span class="w"> </span><span class="nf">protein</span><span class="p">(</span>
+</span><span data-line="128">    <span class="n">mol</span><span class="p">:</span> <span class="n">TRC</span>
+</span><span data-line="129">    <span class="o">|</span> <span class="n">TRCRef</span>
+</span><span data-line="130">    <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span>
+</span><span data-line="131">        <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">RushObject</span> <span class="o">|</span> <span class="n">Topology</span><span class="p">,</span>
+</span><span data-line="132">        <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">RushObject</span> <span class="o">|</span> <span class="n">Residues</span><span class="p">,</span>
+</span><span data-line="133">        <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">RushObject</span> <span class="o">|</span> <span class="n">Chains</span><span class="p">,</span>
+</span><span data-line="134">    <span class="p">]</span>
+</span><span data-line="135">    <span class="o">|</span> <span class="n">Path</span>
+</span><span data-line="136">    <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="137">    <span class="n">ph</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="138">    <span class="n">naming_scheme</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;AMBER&quot;</span><span class="p">,</span> <span class="s2">&quot;CHARMM&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="139">    <span class="n">capping_style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;never&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">,</span> <span class="s2">&quot;always&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="140">    <span class="n">truncation_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="141">    <span class="n">opt</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="142">    <span class="n">debump</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="143">    <span class="n">run_spec</span><span class="p">:</span> <span class="n">RunSpec</span> <span class="o">=</span> <span class="n">RunSpec</span><span class="p">(</span><span class="n">gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+</span><span data-line="144">    <span class="n">run_opts</span><span class="p">:</span> <span class="n">RunOpts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(),</span>
+</span><span data-line="145"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Run</span><span class="p">[</span><span class="n">ResultRef</span><span class="p">]:</span>
+</span><span data-line="146"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="147"><span class="sd">    Submit a prepare-protein job for a PDB or TRC file.</span>
+</span><span data-line="148">
+</span><span data-line="149"><span class="sd">    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the</span>
+</span><span data-line="150"><span class="sd">    parsed TRC, or ``.save()`` to write the output files to disk.</span>
+</span><span data-line="151"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="152">
+</span><span data-line="153">    <span class="c1"># Upload inputs</span>
+</span><span data-line="154">    <span class="k">match</span> <span class="n">mol</span><span class="p">:</span>
+</span><span data-line="155">        <span class="k">case</span> <span class="n">TRC</span><span class="p">():</span>
+</span><span data-line="156">            <span class="n">trc_ref</span> <span class="o">=</span> <span class="n">TRCRef</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</span><span data-line="157">        <span class="k">case</span> <span class="n">TRCRef</span><span class="p">():</span>
+</span><span data-line="158">            <span class="n">trc_ref</span> <span class="o">=</span> <span class="n">mol</span>
+</span><span data-line="159">        <span class="k">case</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+</span><span data-line="160">            <span class="n">trc_ref</span> <span class="o">=</span> <span class="n">TRCRef</span><span class="p">(</span>
+</span><span data-line="161">                <span class="n">RushObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">_to_topology_vobj</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span>
+</span><span data-line="162">                <span class="n">RushObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">_to_residues_vobj</span><span class="p">(</span><span class="n">r</span><span class="p">)),</span>
+</span><span data-line="163">                <span class="n">RushObject</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">_to_chains_vobj</span><span class="p">(</span><span class="n">c</span><span class="p">)),</span>
+</span><span data-line="164">            <span class="p">)</span>
+</span><span data-line="165">        <span class="k">case</span> <span class="n">Path</span><span class="p">()</span> <span class="o">|</span> <span class="nb">str</span><span class="p">():</span>
+</span><span data-line="166">            <span class="n">input_path</span> <span class="o">=</span> <span class="n">mol</span>
+</span><span data-line="167">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="168">                <span class="n">input_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+</span><span data-line="169">
+</span><span data-line="170">            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="171">                <span class="k">if</span> <span class="n">input_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.pdb&quot;</span><span class="p">:</span>
+</span><span data-line="172">                    <span class="n">trc</span> <span class="o">=</span> <span class="n">from_pdb</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</span><span data-line="173">                <span class="k">else</span><span class="p">:</span>
+</span><span data-line="174">                    <span class="n">trc</span> <span class="o">=</span> <span class="n">from_json</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+</span><span data-line="175">            <span class="n">trc</span> <span class="o">=</span> <span class="n">_single_trc</span><span class="p">(</span><span class="n">trc</span><span class="p">,</span> <span class="n">input_path</span><span class="p">)</span>
+</span><span data-line="176">            <span class="n">trc_ref</span> <span class="o">=</span> <span class="n">TRCRef</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">trc</span><span class="p">)</span>
+</span><span data-line="177">
+</span><span data-line="178">    <span class="c1"># Run rex</span>
+</span><span data-line="179">    <span class="n">rex</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;let</span>
+</span><span data-line="180"><span class="s2">  obj_j = λ j →</span>
+</span><span data-line="181"><span class="s2">    VirtualObject { path = j, format = ObjectFormat::json, size = 0 },</span>
+</span><span data-line="182"><span class="s2">  prepare_protein = λ topology residues chains →</span>
+</span><span data-line="183"><span class="s2">    try_prepare_protein_rex</span>
+</span><span data-line="184"><span class="s2">      ($run_spec)</span>
+</span><span data-line="185"><span class="s2">      (prepare_protein_rex::PrepareProteinOptions {</span>
+</span><span data-line="186"><span class="s2">        ph = $ph,</span>
+</span><span data-line="187"><span class="s2">        naming_scheme = $naming_scheme,</span>
+</span><span data-line="188"><span class="s2">        capping_style = $capping_style,</span>
+</span><span data-line="189"><span class="s2">        truncation_threshold = $truncation_threshold,</span>
+</span><span data-line="190"><span class="s2">        opt = $opt,</span>
+</span><span data-line="191"><span class="s2">        debump = $debump,</span>
+</span><span data-line="192"><span class="s2">      })</span>
+</span><span data-line="193"><span class="s2">      [( (obj_j topology), (obj_j residues), (obj_j chains) )]</span>
+</span><span data-line="194"><span class="s2">in</span>
+</span><span data-line="195"><span class="s2">  prepare_protein &quot;$topology_vobj_path&quot; &quot;$residues_vobj_path&quot; &quot;$chains_vobj_path&quot;</span>
+</span><span data-line="196"><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+</span><span data-line="197">        <span class="n">run_spec</span><span class="o">=</span><span class="n">run_spec</span><span class="o">.</span><span class="n">_to_rex</span><span class="p">(),</span>
+</span><span data-line="198">        <span class="n">ph</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">ph</span><span class="p">),</span>
+</span><span data-line="199">        <span class="n">naming_scheme</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span>
+</span><span data-line="200">            <span class="n">naming_scheme</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">naming_scheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="201">            <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;prepare_protein_rex::NamingScheme::&quot;</span><span class="p">,</span>
+</span><span data-line="202">        <span class="p">),</span>
+</span><span data-line="203">        <span class="n">capping_style</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span>
+</span><span data-line="204">            <span class="n">capping_style</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">capping_style</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="205">            <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;prepare_protein_rex::CappingStyle::&quot;</span><span class="p">,</span>
+</span><span data-line="206">        <span class="p">),</span>
+</span><span data-line="207">        <span class="n">truncation_threshold</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">truncation_threshold</span><span class="p">),</span>
+</span><span data-line="208">        <span class="n">opt</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">opt</span><span class="p">),</span>
+</span><span data-line="209">        <span class="n">debump</span><span class="o">=</span><span class="n">optional_str</span><span class="p">(</span><span class="n">debump</span><span class="p">),</span>
+</span><span data-line="210">        <span class="n">topology_vobj_path</span><span class="o">=</span><span class="n">trc_ref</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+</span><span data-line="211">        <span class="n">residues_vobj_path</span><span class="o">=</span><span class="n">trc_ref</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+</span><span data-line="212">        <span class="n">chains_vobj_path</span><span class="o">=</span><span class="n">trc_ref</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+</span><span data-line="213">    <span class="p">)</span>
+</span><span data-line="214">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="215">        <span class="k">return</span> <span class="n">Run</span><span class="p">(</span><span class="n">_submit_rex</span><span class="p">(</span><span class="n">rex</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">),</span> <span class="n">ResultRef</span><span class="p">)</span>
+</span><span data-line="216">
+</span><span data-line="217">    <span class="k">except</span> <span class="n">TransportQueryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="218">        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="219">            <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+</span><span data-line="220">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="221">        <span class="k">raise</span></div>
+
+</span></pre></div>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

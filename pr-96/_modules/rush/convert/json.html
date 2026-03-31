@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rush.convert.json - QDX Documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="rush.convert.json"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../../../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="../../../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../../../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/08-hyper-solvate_sumo.html">Tutorial 8: Hyper Solvate Sumo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/09-hyper-minimize_sumo.html">Tutorial 9: Hyper Minimize Sumo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/10-hyper-run_sumo.html">Tutorial 10: Hyper Run Sumo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.hyper.html">Hyper Solvation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.hyper_minimize_sumo.html">Hyper Minimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.hyper_run_sumo.html">Hyper Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exess/citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">Module code</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../convert.html"><span itemprop="name">rush.convert</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">rush.convert.json</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <h1>Source code for rush.convert.json</h1><div class="highlight"><pre>
+<span></span><span data-line="1"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="2"><span class="sd">JSON conversion functionality for TRC structures.</span>
+</span><span data-line="3"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathLike</span>
+</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeGuard</span><span class="p">,</span> <span class="n">overload</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">..mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRC</span><span class="p">,</span> <span class="n">Chains</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="n">StrPath</span> <span class="o">=</span> <span class="n">PathLike</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span data-line="14">
+</span><span data-line="15">
+</span><span data-line="16"><span class="k">def</span><span class="w"> </span><span class="nf">_trcs_from_dicts</span><span class="p">(</span><span class="n">trc_dicts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
+</span><span data-line="17">    <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="18">        <span class="n">TRC</span><span class="p">(</span>
+</span><span data-line="19">            <span class="n">topology</span><span class="o">=</span><span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]),</span>
+</span><span data-line="20">            <span class="n">residues</span><span class="o">=</span><span class="n">Residues</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]),</span>
+</span><span data-line="21">            <span class="n">chains</span><span class="o">=</span><span class="n">Chains</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">trc_dict</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]),</span>
+</span><span data-line="22">        <span class="p">)</span>
+</span><span data-line="23">        <span class="k">for</span> <span class="n">trc_dict</span> <span class="ow">in</span> <span class="n">trc_dicts</span>
+</span><span data-line="24">    <span class="p">]</span>
+</span><span data-line="25">
+</span><span data-line="26">
+</span><span data-line="27"><span class="k">def</span><span class="w"> </span><span class="nf">_is_dict_list</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+</span><span data-line="28">    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+</span><span data-line="29">
+</span><span data-line="30">
+</span><span data-line="31"><span class="k">def</span><span class="w"> </span><span class="nf">_is_path_triplet</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]]:</span>
+</span><span data-line="32">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+</span><span data-line="33">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="34">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+</span><span data-line="35">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="36">    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+</span><span data-line="37">
+</span><span data-line="38">
+</span><span data-line="39"><span class="k">def</span><span class="w"> </span><span class="nf">_is_str_path</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]:</span>
+</span><span data-line="40">    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">)</span>
+</span><span data-line="41">
+</span><span data-line="42">
+</span><span data-line="43"><span class="k">def</span><span class="w"> </span><span class="nf">_normalize_trc_dict</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span data-line="44">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;topology&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+</span><span data-line="45">        <span class="k">return</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+</span><span data-line="46">    <span class="k">if</span> <span class="n">_is_dict_list</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+</span><span data-line="47">        <span class="k">return</span> <span class="n">data</span>
+</span><span data-line="48">    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected TRC JSON dict or list of dicts&quot;</span><span class="p">)</span>
+</span><span data-line="49">
+</span><span data-line="50">
+</span><span data-line="51"><span class="nd">@overload</span>
+</span><span data-line="52"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span><span class="p">:</span> <span class="o">...</span>
+</span><span data-line="53">
+</span><span data-line="54">
+</span><span data-line="55"><span class="nd">@overload</span>
+</span><span data-line="56"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">:</span> <span class="n">StrPath</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span> <span class="o">...</span>
+</span><span data-line="57">
+</span><span data-line="58">
+<div class="viewcode-block" id="from_json">
+<a class="viewcode-back" href="../../../rush.convert.html#rush.convert.from_json">[docs]</a>
+</span><span data-line="59"><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span>
+</span><span data-line="60">    <span class="n">json_content</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">StrPath</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+</span><span data-line="61"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">]:</span>
+</span><span data-line="62"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="63"><span class="sd">    Load TRC structures from JSON.</span>
+</span><span data-line="64">
+</span><span data-line="65"><span class="sd">    Args:</span>
+</span><span data-line="66"><span class="sd">        json_content: JSON file path, dict, list of dicts, or (topology, residues, chains) paths</span>
+</span><span data-line="67">
+</span><span data-line="68"><span class="sd">    Returns:</span>
+</span><span data-line="69"><span class="sd">        TRC structure or list of TRC structures</span>
+</span><span data-line="70"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="71">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span data-line="72">        <span class="n">trcs</span> <span class="o">=</span> <span class="n">_trcs_from_dicts</span><span class="p">([</span><span class="n">json_content</span><span class="p">])</span>
+</span><span data-line="73">        <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="74">
+</span><span data-line="75">    <span class="k">if</span> <span class="n">_is_dict_list</span><span class="p">(</span><span class="n">json_content</span><span class="p">):</span>
+</span><span data-line="76">        <span class="k">return</span> <span class="n">_trcs_from_dicts</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
+</span><span data-line="77">
+</span><span data-line="78">    <span class="k">if</span> <span class="n">_is_path_triplet</span><span class="p">(</span><span class="n">json_content</span><span class="p">):</span>
+</span><span data-line="79">        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="80">        <span class="k">with</span> <span class="p">(</span>
+</span><span data-line="81">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">t_f</span><span class="p">,</span>
+</span><span data-line="82">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">r_f</span><span class="p">,</span>
+</span><span data-line="83">            <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">c_f</span><span class="p">,</span>
+</span><span data-line="84">        <span class="p">):</span>
+</span><span data-line="85">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;topology&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">t_f</span><span class="p">)</span>
+</span><span data-line="86">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;residues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r_f</span><span class="p">)</span>
+</span><span data-line="87">            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;chains&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c_f</span><span class="p">)</span>
+</span><span data-line="88">        <span class="n">trcs</span> <span class="o">=</span> <span class="n">_trcs_from_dicts</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+</span><span data-line="89">        <span class="k">return</span> <span class="n">trcs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="90">
+</span><span data-line="91">    <span class="k">if</span> <span class="n">_is_str_path</span><span class="p">(</span><span class="n">json_content</span><span class="p">):</span>
+</span><span data-line="92">        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">json_content</span><span class="p">)</span>
+</span><span data-line="93">        <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="94">            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="95">        <span class="n">trc_dicts</span> <span class="o">=</span> <span class="n">_normalize_trc_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span data-line="96">        <span class="k">return</span> <span class="n">_trcs_from_dicts</span><span class="p">(</span><span class="n">trc_dicts</span><span class="p">)</span>
+</span><span data-line="97">
+</span><span data-line="98">    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+</span><span data-line="99">        <span class="s2">&quot;Expected a path, dict, list of dicts, or (topology, residues, chains) paths&quot;</span>
+</span><span data-line="100">    <span class="p">)</span></div>
+
+</span><span data-line="101">
+</span><span data-line="102">
+<div class="viewcode-block" id="to_dict">
+<a class="viewcode-back" href="../../../rush.convert.html#rush.convert.to_dict">[docs]</a>
+</span><span data-line="103"><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span>
+</span><span data-line="104">    <span class="n">trcs</span><span class="p">:</span> <span class="n">TRC</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">TRC</span><span class="p">],</span>
+</span><span data-line="105"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]]:</span>
+</span><span data-line="106"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="107"><span class="sd">    Convert TRC structures to JSON.</span>
+</span><span data-line="108">
+</span><span data-line="109"><span class="sd">    Args:</span>
+</span><span data-line="110"><span class="sd">        trcs: TRC structure or list of TRC structures</span>
+</span><span data-line="111">
+</span><span data-line="112"><span class="sd">    Returns:</span>
+</span><span data-line="113"><span class="sd">        JSON-compatible dict or list of dicts</span>
+</span><span data-line="114"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="115">
+</span><span data-line="116">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trcs</span><span class="p">,</span> <span class="n">TRC</span><span class="p">):</span>
+</span><span data-line="117">        <span class="n">trcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">trcs</span><span class="p">]</span>
+</span><span data-line="118">    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="119">        <span class="p">{</span>
+</span><span data-line="120">            <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+</span><span data-line="121">            <span class="s2">&quot;residues&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+</span><span data-line="122">            <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+</span><span data-line="123">        <span class="p">}</span>
+</span><span data-line="124">        <span class="k">for</span> <span class="n">trc</span> <span class="ow">in</span> <span class="n">trcs</span>
+</span><span data-line="125">    <span class="p">]</span>
+</span><span data-line="126">    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">data</span></div>
+
+</span></pre></div>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/shibuya.js?v=cac61aee"></script></body>
+</html>
