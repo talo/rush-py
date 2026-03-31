@@ -1,5 +1,7 @@
-rush.mol
-========
+:tocdepth: 2
+
+Molecular Systems & TRCs
+========================
 
 .. automodule:: rush.mol
    :members:

@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 import zstandard as zstd
 
-from rush.client import _extract_object_archive
 from rush.exess import (
     OptimizationResult,
     OptimizationResultPaths,
@@ -17,6 +16,7 @@ from rush.exess import (
     QMMMResultRef,
     ResultRef,
 )
+from rush.objects import _extract_object_archive
 
 
 def _make_tar_zst(payload: bytes, filename: str = "output.hdf5") -> bytes:
@@ -35,13 +35,13 @@ def test_result_ref_fetch_extracts_hdf5(monkeypatch):
     export_bytes = _make_tar_zst(b"fake-hdf5")
 
     monkeypatch.setattr(
-        "rush.exess._energy.fetch_object",
-        lambda path, extract=False: (
-            output_bytes
-            if path == "main"
-            else _extract_object_archive(export_bytes)
-            if extract
-            else export_bytes
+        "rush.objects.RushObject.fetch_dict",
+        lambda self: json.loads(output_bytes),
+    )
+    monkeypatch.setattr(
+        "rush.objects.RushObject.fetch_bytes",
+        lambda self, extract=False: (
+            _extract_object_archive(export_bytes) if extract else export_bytes
         ),
     )
 
@@ -64,8 +64,12 @@ def test_result_ref_fetch_can_skip_extract(monkeypatch):
     export_bytes = _make_tar_zst(b"fake-hdf5")
 
     monkeypatch.setattr(
-        "rush.exess._energy.fetch_object",
-        lambda path, extract=False: output_bytes if path == "main" else export_bytes,
+        "rush.objects.RushObject.fetch_dict",
+        lambda self: json.loads(output_bytes),
+    )
+    monkeypatch.setattr(
+        "rush.objects.RushObject.fetch_bytes",
+        lambda self, extract=False: export_bytes,
     )
 
     ref = ResultRef.from_raw_output(
@@ -84,7 +88,8 @@ def test_result_ref_rejects_unknown_export_wrapper(monkeypatch):
         {"calculation_time": 1.0, "qmmbe": {"method": "RestrictedHF", "nmers": []}}
     ).encode()
     monkeypatch.setattr(
-        "rush.exess._energy.fetch_object", lambda path, extract=False: output_bytes
+        "rush.objects.RushObject.fetch_dict",
+        lambda self: json.loads(output_bytes),
     )
 
     with pytest.raises(ValueError, match="Unknown output format"):
@@ -116,8 +121,8 @@ def test_optimization_ref_fetch(monkeypatch):
     ).encode()
 
     monkeypatch.setattr(
-        "rush.exess._optimization.fetch_object",
-        lambda path: trajectory_json if path == "traj" else steps_json,
+        "rush.objects.RushObject.fetch_list",
+        lambda self: json.loads(trajectory_json if self.path == "traj" else steps_json),
     )
 
     ref = OptimizationResultRef.from_raw_output(
@@ -148,7 +153,7 @@ def test_optimization_ref_fetch(monkeypatch):
 
 def test_optimization_ref_save(monkeypatch):
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
 
@@ -170,8 +175,8 @@ def test_qmmm_ref_fetch(monkeypatch):
     qmmm_json = json.dumps({"geometries": [[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]}).encode()
 
     monkeypatch.setattr(
-        "rush.exess._qmmm.fetch_object",
-        lambda path: qmmm_json,
+        "rush.objects.RushObject.fetch_dict",
+        lambda self: json.loads(qmmm_json),
     )
 
     ref = QMMMResultRef.from_raw_output({"path": "traj", "size": 0, "format": "Json"})
@@ -183,7 +188,7 @@ def test_qmmm_ref_fetch(monkeypatch):
 
 def test_qmmm_ref_save(monkeypatch):
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
 

@@ -10,7 +10,7 @@ from typing import Any, Literal
 from gql.transport.exceptions import TransportQueryError
 
 from ..client import RunOpts, RunSpec, RushObject, _get_project_id, _submit_rex
-from ..run import RushRun
+from ..runs import Run as RushRun
 from ._common import (
     HyperRunOutput,
     HyperRunOutputPaths,

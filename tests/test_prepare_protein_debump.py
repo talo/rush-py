@@ -1,7 +1,6 @@
 import math
 
-from rush import Element, from_pdb, prepare
-from rush.client import RunOpts
+from rush import Element, RunOpts, from_pdb, prepare
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

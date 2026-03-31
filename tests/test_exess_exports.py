@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from rush import exess
-from rush.client import RunOpts, RunSpec
+from rush import RunOpts, RunSpec, exess
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
@@ -19,7 +18,6 @@ def test_exess_exports(test_data_dir: Path):
                 spacing=[1.0, 1.0, 1.0],
             ),
         ),
-        convert_hdf5_to_json=True,
         run_spec=RunSpec(storage=1000, gpus=1),
         run_opts=RunOpts(
             name="Rush-Py Test EXESS Energy 04: Electron Density and ESP",

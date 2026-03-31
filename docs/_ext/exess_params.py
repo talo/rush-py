@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import html
 import re
 
@@ -151,7 +149,7 @@ def visit_exess_param_html(self, node: ExessParam) -> None:
     notes = node.get("notes", [])
     has_details = node.get("has_details", False)
     if brief_node in node.children:
-        node.children.remove(brief_node)
+        node.children.remove(brief_node)  # type: ignore[ty:unresolved-attribute]
 
     if not has_details:
         self.body.append('<div class="param-row">')

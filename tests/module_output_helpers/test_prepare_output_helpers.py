@@ -17,8 +17,8 @@ def test_prepare_protein_result_ref_fetch(monkeypatch):
     trc_dict = _sample_trc_dict()
 
     monkeypatch.setattr(
-        "rush._trc.fetch_object",
-        lambda path: json.dumps(trc_dict.get(path, {})).encode(),
+        "rush.objects.fetch_object",
+        lambda path, extract=False: json.dumps(trc_dict.get(path, {})).encode(),
     )
 
     ref = ResultRef.from_raw_output(
@@ -40,7 +40,7 @@ def test_prepare_protein_result_ref_fetch(monkeypatch):
 
 def test_prepare_protein_result_ref_save(monkeypatch):
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
 
@@ -69,8 +69,10 @@ def test_prepare_protein_multi_model(monkeypatch):
     trc_dict = _sample_trc_dict()
 
     monkeypatch.setattr(
-        "rush._trc.fetch_object",
-        lambda path: json.dumps(trc_dict.get(path.split("_")[0], {})).encode(),
+        "rush.objects.fetch_object",
+        lambda path, extract=False: json.dumps(
+            trc_dict.get(path.split("_")[0], {})
+        ).encode(),
     )
 
     ref = ResultRef.from_raw_output(
@@ -95,8 +97,8 @@ def test_prepare_protein_multi_model(monkeypatch):
 
 
 def test_prepare_result_ref_from_raw_output_rejects_invalid():
-    with pytest.raises(ValueError, match="should return a non-empty list"):
-        ResultRef.from_raw_output("bad")
+    with pytest.raises(ValueError, match="expected a list of 3 elements"):
+        ResultRef.from_raw_output(["bad"])
 
     with pytest.raises(ValueError, match="expected a list of 3 elements"):
         ResultRef.from_raw_output(

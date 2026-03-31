@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from rush import exess
-from rush.client import RunOpts
+from rush import RunOpts, exess
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
@@ -32,12 +31,12 @@ def test_exess_energy_dft_hyb(test_data_dir: Path):
     result = run.fetch()
     assert isinstance(result, exess.Result)
     assert result.calc.calculation_time > 0.0
-    assert result.exports is None
+    assert result.exports == {}
 
     saved = run.save()
     assert isinstance(saved, exess.ResultPaths)
-    assert saved.exports is None
     assert saved.calc.exists()
+    assert saved.exports.exists()  # empty, but still exists
 
 
 def test_exess_energy_dft_dhyb(test_data_dir: Path):
@@ -62,9 +61,9 @@ def test_exess_energy_dft_dhyb(test_data_dir: Path):
     result = run.fetch()
     assert isinstance(result, exess.Result)
     assert result.calc.calculation_time > 0.0
-    assert result.exports is None
+    assert result.exports == {}
 
     saved = run.save()
     assert isinstance(saved, exess.ResultPaths)
-    assert saved.exports is None
     assert saved.calc.exists()
+    assert saved.exports.exists()  # empty, but still exists

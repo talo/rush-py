@@ -21,7 +21,7 @@ import zstandard as zstd
 from gql import Client, FileVar, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-from ._utils import clean_dict, optional_str
+from ._rex import clean_dict, optional_str
 
 INITIAL_POLL_INTERVAL = 0.5
 

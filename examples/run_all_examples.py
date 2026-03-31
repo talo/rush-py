@@ -15,11 +15,11 @@ Options:
     --quiet, -q: Suppress output from examples (only show summary)
 """
 
+import argparse
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
-import argparse
 
 # Set UTF-8 encoding for Windows compatibility
 if sys.platform == "win32":

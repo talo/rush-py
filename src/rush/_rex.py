@@ -9,8 +9,8 @@ def float_to_str(v: float) -> str:
     return f"{Decimal(str(v)):f}"
 
 
-def bool_to_str(v: float) -> str:
-    return f"{str(v).lower()}"
+def bool_to_str(v: bool) -> str:
+    return str(v).lower()
 
 
 def dict_to_vec_of_tuples_str(d: dict[str, str]) -> str:
@@ -32,10 +32,9 @@ def optional_str(
     return f"Some {prefix}{v}" if v is not None else "None"
 
 
-def clean_dict(d):
+def clean_dict(d: object) -> object:
     if isinstance(d, dict):
         return {k: clean_dict(v) for k, v in d.items() if v is not None}
-    elif isinstance(d, list):
+    if isinstance(d, list):
         return [clean_dict(v) for v in d]
-    else:
-        return d
+    return d

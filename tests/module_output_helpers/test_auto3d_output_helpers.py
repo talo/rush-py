@@ -5,7 +5,7 @@ import pytest
 
 from rush import TRCPaths
 from rush.auto3d import Result, ResultPaths, ResultRef
-from rush.client import _json_content_name
+from rush.objects import _json_content_name
 
 
 def _sample_raw():
@@ -32,10 +32,10 @@ def _sample_raw():
 def test_fetch_parses_auto3d_result(monkeypatch):
     fake_trc = object()
     monkeypatch.setattr(
-        "rush._trc.fetch_object",
-        lambda path: b'{"schema_version":"0.1.0"}',
+        "rush.objects.fetch_object",
+        lambda path, extract=False: b'{"schema_version":"0.1.0"}',
     )
-    monkeypatch.setattr("rush._trc.from_json", lambda data: fake_trc)
+    monkeypatch.setattr("rush.objects.from_json", lambda data: fake_trc)
 
     ref = ResultRef.from_raw_output(_sample_raw())
     output = ref.fetch()
@@ -52,7 +52,7 @@ def test_fetch_parses_auto3d_result(monkeypatch):
 
 def test_save_saves_auto3d_result(monkeypatch):
     monkeypatch.setattr(
-        "rush.client.RushObject.save",
+        "rush.objects.RushObject.save",
         lambda self, **kw: Path(f"/tmp/{self.path}.json"),
     )
     monkeypatch.setattr(

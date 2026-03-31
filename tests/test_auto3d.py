@@ -1,8 +1,7 @@
 import itertools
 import sys
 
-from rush import auto3d
-from rush.client import RunOpts
+from rush import RunOpts, auto3d
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

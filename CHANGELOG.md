@@ -1,8 +1,33 @@
 # Changelog
 
+## 7.0.0
+
+No new changes since 7.0.0rc3.
+
+## 7.0.0rc3
+
+### Changed
+- Make EXESS `calculation`, `energy`, and `interaction_energy` functions output exports as JSON by default
+
+### Other
+- Add GitHub Action for making releases
+- Clean up the rest of the GitHub Actions
+
+## 7.0.0rc2
+
+### Fixed
+- Distinguish backend and module run failures
+- Tweak pytest config based on scientific python recs and make some other small cleanups
+
+## 7.0.0rc1
+
+### Changed
+- Split the non-module Rush implementation into session, runs, and objects modules, and clean up type annotations
+- Improve docs' API reference structure, including exposing all the type declarations properly
+
 ## 7.0.0b3
 
-#### Changed
+### Changed
 - Tests now write to a temporary workspace that doesn't clutter the git tree
 - Can configure tests' workspace directory via `--rush-workspace-dir` flag to pytest
 - Tests more thoroughly check for valid behavior and output

@@ -7,7 +7,7 @@ from typing import Any, Callable, TypeGuard, TypeVar
 
 from rush import TRC, from_json, to_dict
 
-from .._utils import float_to_str, optional_str
+from .._rex import float_to_str, optional_str
 from ..client import RushObject, fetch_object, upload_object
 
 T = TypeVar("T")

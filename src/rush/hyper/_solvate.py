@@ -13,7 +13,7 @@ from gql.transport.exceptions import TransportQueryError
 from rush import TRC
 
 from ..client import RunOpts, RunSpec, RushObject, _get_project_id, _submit_rex
-from ..run import RushRun
+from ..runs import Run as RushRun
 from ._common import (
     ItemError,
     TRCInput,

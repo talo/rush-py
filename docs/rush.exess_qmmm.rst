@@ -1,3 +1,5 @@
+:tocdepth: 3
+
 EXESS QMMM
 ==========
 
@@ -5,8 +7,8 @@ EXESS QMMM
 
 .. currentmodule:: rush.exess
 
-Submission
-----------
+Run Submission
+--------------
 
 .. autofunction:: qmmm
 

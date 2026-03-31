@@ -2,8 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from rush import pbsa
-from rush.client import RunOpts
+from rush import RunOpts, pbsa
 from tests._module_test_utils import assert_run_collects_and_caches
 
 

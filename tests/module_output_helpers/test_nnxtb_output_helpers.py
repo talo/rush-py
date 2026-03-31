@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 from rush.nnxtb import Result, ResultPaths, ResultRef
@@ -6,14 +5,12 @@ from rush.nnxtb import Result, ResultPaths, ResultRef
 
 def test_result_ref_fetch_parses_nnxtb_result(monkeypatch):
     monkeypatch.setattr(
-        "rush.nnxtb.fetch_object",
-        lambda path: json.dumps(
-            {
-                "energy_mev": -123.4,
-                "forces_mev_per_angstrom": [[1.0, 2.0, 3.0]],
-                "frequencies_inv_cm": [100.0, 200.0],
-            }
-        ).encode(),
+        "rush.objects.RushObject.fetch_dict",
+        lambda self: {
+            "energy_mev": -123.4,
+            "forces_mev_per_angstrom": [[1.0, 2.0, 3.0]],
+            "frequencies_inv_cm": [100.0, 200.0],
+        },
     )
 
     ref = ResultRef.from_raw_output(
@@ -29,7 +26,7 @@ def test_result_ref_fetch_parses_nnxtb_result(monkeypatch):
 
 def test_result_ref_save_saves_nnxtb_result(monkeypatch):
     saved_path = Path("/tmp/nnxtb.json")
-    monkeypatch.setattr("rush.client.RushObject.save", lambda self, **kw: saved_path)
+    monkeypatch.setattr("rush.objects.RushObject.save", lambda self, **kw: saved_path)
 
     ref = ResultRef.from_raw_output(
         [{"path": "nnxtb.json", "size": 0, "format": "Json"}]

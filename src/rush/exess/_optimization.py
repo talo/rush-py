@@ -8,29 +8,24 @@ Quick Links
 - :class:`rush.exess.OptimizationResult`
 """
 
-import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from gql.transport.exceptions import TransportQueryError
 
-from rush import TRC, Residues, TRCRef
-from rush._trc import to_residues_vobj, to_topology_vobj
-
-from .._utils import optional_str
-from ..client import (
-    RunOpts,
-    RunSpec,
+from .._rex import optional_str
+from ..mol import TRC, Residues, Topology
+from ..objects import (
     RushObject,
-    _get_project_id,
-    _submit_rex,
-    fetch_object,
+    TRCRef,
+    _to_residues_vobj,
+    _to_topology_vobj,
 )
-from ..mol import Topology
-from ..run import RushRun
+from ..runs import Run, RunOpts, RunSpec
+from ..session import _submit_rex
 from ._energy import (
     AuxBasisT,
     BasisT,
@@ -263,7 +258,7 @@ class OptimizationResultRef:
     steps: RushObject
 
     @classmethod
-    def from_raw_output(cls, res: Any) -> "OptimizationResultRef":
+    def from_raw_output(cls, res: Any) -> Self:
         """Parse raw ``collect_run`` output into an ``OptimizationResultRef``."""
         if not isinstance(res, list) or len(res) != 2:
             raise ValueError(
@@ -277,14 +272,11 @@ class OptimizationResultRef:
 
     def fetch(self) -> OptimizationResult:
         """Download optimization outputs and parse into Python objects."""
-        trajectory = [
-            Topology.from_json(t)
-            for t in json.loads(fetch_object(self.trajectory.path))
-        ]
-        steps = [
-            OptimizationStep(**step)
-            for step in json.loads(fetch_object(self.steps.path))
-        ]
+        trajectory_raw = self.trajectory.fetch_list()
+        steps_raw = self.steps.fetch_list()
+
+        trajectory = [Topology.from_json(t) for t in trajectory_raw]
+        steps = [OptimizationStep(**step) for step in steps_raw]
         return OptimizationResult(trajectory=trajectory, steps=steps)
 
     def save(self) -> OptimizationResultPaths:
@@ -322,11 +314,11 @@ def optimization(
     system: System | None = None,
     run_spec: RunSpec = RunSpec(gpus=1),
     run_opts: RunOpts = RunOpts(),
-) -> RushRun[OptimizationResultRef]:
+) -> Run[OptimizationResultRef]:
     """
     Submit a geometry optimization for the topology at *topology_path*.
 
-    Returns a :class:`~rush.run.RushRun` handle. Call ``.fetch()`` to get the
+    Returns a :class:`~rush.runs.Run` handle. Call ``.fetch()`` to get the
     parsed trajectory and optimization steps, or ``.save()`` to write them to disk.
     """
     ksdft_keywords = KSDFTKeywords.resolve(ksdft_keywords, method)
@@ -335,20 +327,20 @@ def optimization(
     residues_vobj = None
     match mol:
         case TRC() | TRCRef():
-            topology_vobj = to_topology_vobj(mol.topology)
-            residues_vobj = to_residues_vobj(mol.residues)
+            topology_vobj = _to_topology_vobj(mol.topology)
+            residues_vobj = _to_residues_vobj(mol.residues)
         case (t, r):
-            topology_vobj = to_topology_vobj(t)
-            residues_vobj = to_residues_vobj(r)
+            topology_vobj = _to_topology_vobj(t)
+            residues_vobj = _to_residues_vobj(r)
         case _:
-            topology_vobj = to_topology_vobj(mol)
+            topology_vobj = _to_topology_vobj(mol)
 
     # Run rex
     rex = Template("""let
   obj_j = λ j →
     VirtualObject { path = j, format = ObjectFormat::json, size = 0 },
   exess = λ topology residues →
-    exess_geo_opt_rex_s
+    try_exess_geo_opt_rex
       ($run_spec)
       (exess_geo_opt_rex::OptimizationParams {
         schema_version = "0.2.0",
@@ -442,10 +434,7 @@ in
         residues_vobj_path=residues_vobj["path"] if residues_vobj is not None else "",
     )
     try:
-        return RushRun(
-            _submit_rex(_get_project_id(), rex, run_opts),
-            OptimizationResultRef,
-        )
+        return Run(_submit_rex(rex, run_opts), OptimizationResultRef)
 
     except TransportQueryError as e:
         if e.errors:
