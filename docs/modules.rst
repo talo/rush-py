@@ -7,6 +7,7 @@ Rush Modules
    rush.exess_optimization
    rush.exess_qmmm
    rush.nnxtb
+   rush.hyper
    rush.prepare
    rush.auto3d
    rush.mmseqs2
