@@ -12,3 +12,4 @@ Rush Modules
    rush.mmseqs2
    rush.boltz
    rush.pbsa
+   rush.smol-similarity

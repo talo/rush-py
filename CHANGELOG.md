@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Add smol-similarity module
+
 ## 7.0.0
 
 No new changes since 7.0.0rc3.
