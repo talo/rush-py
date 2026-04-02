@@ -22,6 +22,7 @@ NON_SUBMITTING_TEST_FILES = frozenset(
         "tests/module_output_helpers/test_nnxtb_output_helpers.py",
         "tests/module_output_helpers/test_pbsa_output_helpers.py",
         "tests/module_output_helpers/test_prepare_output_helpers.py",
+        "tests/module_output_helpers/test_smol_similarity_output_helpers.py",
         "tests/test_client_collect_run.py",
         "tests/test_convert_mmcif.py",
         "tests/test_convert_pdb.py",
