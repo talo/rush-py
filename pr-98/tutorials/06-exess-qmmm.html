@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tutorial 6: EXESS QM/MM Dynamics - QDX Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Tutorial 7: NN-xTB Energy and Forces" href="07-nnxtb-energy.html" /><link rel="prev" title="Tutorial 5: EXESS Interaction Energy" href="05-exess-interaction-energy.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Tutorial 6: EXESS QM/MM Dynamics"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08-smol-similarity-smol_similarity_sumo.html">Tutorial 8: smol-similarity nearest-neighbor search</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.pbsa.html">PBSA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.smol-similarity.html">smol-similarity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exess/citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#why-this-matters">Why This Matters</a></li>
+<li><a class="reference internal" href="#quick-start-qm-mm-on-a-proteinligand-system">Quick Start: QM/MM on a Protein&#8211;Ligand System</a></li>
+<li><a class="reference internal" href="#minimal-example-two-water-molecules-from-scratch">Minimal Example: Two Water Molecules from Scratch</a></li>
+<li><a class="reference internal" href="#working-with-the-trajectory">Working with the Trajectory</a></li>
+<li><a class="reference internal" href="#example-output">Example Output</a></li>
+<li><a class="reference internal" href="#try-it-yourself">Try It Yourself</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../tutorials.html"><span itemprop="name">Tutorials</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Tutorial 6: EXESS QM/MM Dynamics</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="tutorial-6-exess-qm-mm-dynamics">
+<h1>Tutorial 6: EXESS QM/MM Dynamics<a class="headerlink" href="#tutorial-6-exess-qm-mm-dynamics" title="Link to this heading">¶</a></h1>
+<p><strong>What you get:</strong> A trajectory of atomic positions over time — a molecular movie where the critical region (your ligand, active site, or reaction center) is treated with quantum mechanics while the rest uses fast classical force fields.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Time</strong></p></td>
+<td><p>~5–30 minutes depending on system size and timesteps</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Skill level</strong></p></td>
+<td><p>Intermediate</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Prerequisites</strong></p></td>
+<td><p>Python 3.10+, <code class="docutils literal notranslate"><span class="pre">rush-py</span></code> installed, <code class="docutils literal notranslate"><span class="pre">RUSH_TOKEN</span></code> and <code class="docutils literal notranslate"><span class="pre">RUSH_PROJECT</span></code> set</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<section id="why-this-matters">
+<h2>Why This Matters<a class="headerlink" href="#why-this-matters" title="Link to this heading">¶</a></h2>
+<p>Static structures tell you <em>where</em> atoms are. Dynamics tells you <em>how they move</em> — which bonds vibrate, which water molecules exchange, how flexible a binding pocket is. Classical molecular dynamics (MD) handles this well for proteins, but it can’t describe bond breaking, charge redistribution, or electronic effects in your region of interest.</p>
+<p><strong>QM/MM</strong> gives you the best of both worlds: quantum mechanics for the part that matters (a ligand, a catalytic site, a metal center) and molecular mechanics for everything else.</p>
+</section>
+<hr class="docutils" />
+<section id="quick-start-qm-mm-on-a-proteinligand-system">
+<h2>Quick Start: QM/MM on a Protein–Ligand System<a class="headerlink" href="#quick-start-qm-mm-on-a-proteinligand-system" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunOpts</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">result</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">qmmm</span><span class="p">(</span>
+</span><span data-line="5">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;6a5j_t.json&quot;</span><span class="p">,</span>  <span class="c1"># Topology (atoms, coordinates, fragments)</span>
+</span><span data-line="6">    <span class="n">residues_path</span><span class="o">=</span><span class="s2">&quot;6a5j_r.json&quot;</span><span class="p">,</span>  <span class="c1"># Residues (residue names and assignments)</span>
+</span><span data-line="7">    <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>              <span class="c1"># Number of MD timesteps</span>
+</span><span data-line="8">    <span class="n">qm_fragments</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>  <span class="c1"># Treat fragment 6 with quantum mechanics — everything else is MM</span>
+</span><span data-line="9">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: QM/MM&quot;</span><span class="p">),</span>
+</span><span data-line="10"><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<p>This runs 500 timesteps of molecular dynamics where fragment 6 (e.g., a ligand or key residue) is computed with Hartree-Fock QM, and the remaining protein + solvent fragments use classical MM (OpenMM).</p>
+<blockquote>
+<div><p>⚠️ <strong>Tutorial Basis Set Warning</strong></p>
+<p>This tutorial <a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-qmmm" target="_blank">example code</a> uses <strong>STO-3G</strong>, a minimal basis set chosen purely for speed so examples
+run quickly. <strong>STO-3G is not suitable for research or production calculations.</strong> For
+meaningful results, use at least <code class="docutils literal notranslate"><span class="pre">cc-pVDZ</span></code> or larger. See the electronic structure
+methods reference for available basis sets.</p>
+</div></blockquote>
+</section>
+<hr class="docutils" />
+<section id="minimal-example-two-water-molecules-from-scratch">
+<h2>Minimal Example: Two Water Molecules from Scratch<a class="headerlink" href="#minimal-example-two-water-molecules-from-scratch" title="Link to this heading">¶</a></h2>
+<p>To understand exactly what inputs QM/MM needs, let’s build a system manually — two water molecules, all treated with QM:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">exess</span><span class="p">,</span> <span class="n">Topology</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">Residue</span><span class="p">,</span> <span class="n">Residues</span><span class="p">,</span> <span class="n">RunOpts</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="c1"># Define two water molecules</span>
+</span><span data-line="6"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span>
+</span><span data-line="7">    <span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">Element</span><span class="o">.</span><span class="n">H</span><span class="p">],</span>
+</span><span data-line="8">    <span class="n">geometry</span><span class="o">=</span><span class="p">[</span>
+</span><span data-line="9">         <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>   <span class="c1"># Water 1: O</span>
+</span><span data-line="10">         <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>   <span class="c1">#          H</span>
+</span><span data-line="11">        <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>   <span class="c1">#          H</span>
+</span><span data-line="12">         <span class="mf">2.8000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>   <span class="c1"># Water 2: O</span>
+</span><span data-line="13">         <span class="mf">3.5570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>   <span class="c1">#          H</span>
+</span><span data-line="14">         <span class="mf">2.0430</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span>   <span class="c1">#          H</span>
+</span><span data-line="15">    <span class="p">],</span>
+</span><span data-line="16">    <span class="n">fragments</span><span class="o">=</span><span class="p">[</span><span class="n">Fragment</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Fragment</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
+</span><span data-line="17"><span class="p">)</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="n">residues</span> <span class="o">=</span> <span class="n">Residues</span><span class="p">(</span>
+</span><span data-line="20">    <span class="n">residues</span><span class="o">=</span><span class="p">[</span><span class="n">Residue</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">Residue</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])],</span>
+</span><span data-line="21">    <span class="n">seqs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;HOH&quot;</span><span class="p">,</span> <span class="s2">&quot;HOH&quot;</span><span class="p">],</span>
+</span><span data-line="22">    <span class="n">seq_ns</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+</span><span data-line="23">    <span class="n">insertion_codes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">],</span>
+</span><span data-line="24"><span class="p">)</span>
+</span><span data-line="25">
+</span><span data-line="26"><span class="c1"># Write input files</span>
+</span><span data-line="27"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="28">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">f</span><span class="p">)</span>
+</span><span data-line="29"><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="30">    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">residues</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">f</span><span class="p">)</span>
+</span><span data-line="31">
+</span><span data-line="32"><span class="c1"># Run all-QM dynamics</span>
+</span><span data-line="33"><span class="n">run</span> <span class="o">=</span> <span class="n">exess</span><span class="o">.</span><span class="n">qmmm</span><span class="p">(</span>
+</span><span data-line="34">    <span class="n">topology_path</span><span class="o">=</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">,</span>
+</span><span data-line="35">    <span class="n">residues_path</span><span class="o">=</span><span class="s2">&quot;molecule_r.json&quot;</span><span class="p">,</span>
+</span><span data-line="36">    <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="37">    <span class="n">trajectory</span><span class="o">=</span><span class="n">exess</span><span class="o">.</span><span class="n">Trajectory</span><span class="p">(</span><span class="n">include_waters</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span data-line="38">    <span class="n">mm_fragments</span><span class="o">=</span><span class="p">[],</span>   <span class="c1"># No MM → everything is QM</span>
+</span><span data-line="39">    <span class="n">run_opts</span><span class="o">=</span><span class="n">RunOpts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorial: QM/MM Water Dimer&quot;</span><span class="p">),</span>
+</span><span data-line="40"><span class="p">)</span>
+</span><span data-line="41"><span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<div class="tip admonition">
+<p class="admonition-title">Fragment assignment logic</p>
+<p>EXESS requires that every fragment is assigned to either QM or MM. Setting <code class="docutils literal notranslate"><span class="pre">mm_fragments=[]</span></code> forces all fragments into the QM region. You can also explicitly set <code class="docutils literal notranslate"><span class="pre">qm_fragments=[0,</span> <span class="pre">1]</span></code> for clarity.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="working-with-the-trajectory">
+<h2>Working with the Trajectory<a class="headerlink" href="#working-with-the-trajectory" title="Link to this heading">¶</a></h2>
+<p>The output is a JSON object containing <code class="docutils literal notranslate"><span class="pre">geometries</span></code> — a list of coordinate arrays, one per timestep. Each geometry is a flat list of floats (<code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">z1,</span> <span class="pre">x2,</span> <span class="pre">y2,</span> <span class="pre">z2,</span> <span class="pre">...]</span></code>), matching the order of atoms in your Topology.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">batched</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">Topology</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="c1"># Fetch parsed results into memory</span>
+</span><span data-line="6"><span class="n">geometries</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">geometries</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trajectory has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">geometries</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames&quot;</span><span class="p">)</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="c1"># Load the original topology and compare first/last frames</span>
+</span><span data-line="11"><span class="n">topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;molecule_t.json&quot;</span><span class="p">))</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Atoms at First Step:&quot;</span><span class="p">)</span>
+</span><span data-line="14"><span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">batched</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+</span><span data-line="15">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  (</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="18"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Atoms at Final Step:&quot;</span><span class="p">)</span>
+</span><span data-line="19"><span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">batched</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+</span><span data-line="20">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  (</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>If you want the raw JSON trajectory file on disk, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">paths</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span data-line="2"><span class="nb">print</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>This example uses <strong>6a5j</strong>, a solution NMR structure of a small peptide. During the gas-phase NVE simulation, the peptide backbone flexes and side chains reorient. The surrounding MM environment would normally provide confining forces; in this gas-phase simulation, the structure is free to explore conformational space.</p>
+</section>
+<hr class="docutils" />
+<section id="example-output">
+<h2>Example Output<a class="headerlink" href="#example-output" title="Link to this heading">¶</a></h2>
+<p>Explore the QM/MM trajectory visualization. Or run the code above to generate this yourself!</p>
+<iframe src="../_static/outputs/qmmm_results.html" width="100%" height="600px" frameborder="0"></iframe>
+</section>
+<hr class="docutils" />
+<section id="try-it-yourself">
+<h2>Try It Yourself<a class="headerlink" href="#try-it-yourself" title="Link to this heading">¶</a></h2>
+<p>The complete example is available in the rush-py repository:</p>
+<p>👉 <strong><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-qmmm" target="_blank">examples/exess-qmmm/</a></strong></p>
+<p>You can download the files directly or clone the repository to run the full example.</p>
+</section>
+<hr class="docutils" />
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="04-exess-optimization.html"><span class="doc">Optimization tutorial</span></a> — relax structures before running dynamics</p></li>
+<li><p><a class="reference internal" href="05-exess-interaction-energy.html"><span class="doc">Interaction energy tutorial</span></a> — compute binding energies from trajectory snapshots</p></li>
+<li><p><a class="reference internal" href="03-exess-exports.html"><span class="doc">Exports tutorial</span></a> — extract electronic properties during simulations</p></li>
+<li><p><a class="reference external" href="https://github.com/talo/rush-py/tree/main/examples/exess-qmmm" target="_blank">Full example script</a></p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="05-exess-interaction-energy.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Tutorial 5: EXESS Interaction Energy</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="07-nnxtb-energy.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Tutorial 7: NN-xTB Energy and Forces</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

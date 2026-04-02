@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Citations - QDX Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Overview | Use NN-xTB" href="../nnxtb/overview.html" /><link rel="prev" title="Reference" href="reference.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Citations"/>
+    <meta name="twitter:card" content="summary"/>
+  <link rel="stylesheet" href="../_static/exess-params.css" /></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/08-smol-similarity-smol_similarity_sumo.html">Tutorial 8: smol-similarity nearest-neighbor search</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.pbsa.html">PBSA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.smol-similarity.html">smol-similarity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#main-exess-citation">Main EXESS citation</a></li>
+<li><a class="reference internal" href="#fragmentation-papers">Fragmentation papers</a></li>
+<li><a class="reference internal" href="#ri-methodologies-energies-and-gradients">RI methodologies (energies and gradients)</a></li>
+<li><a class="reference internal" href="#ksdft-methodologies">KSDFT methodologies</a></li>
+<li><a class="reference internal" href="#general-scf-routines">General SCF routines</a></li>
+<li><a class="reference internal" href="#commented-citation-block">Commented citation block</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Citations</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="citations">
+<h1>Citations<a class="headerlink" href="#citations" title="Link to this heading">¶</a></h1>
+<p>EXESS prints a citation summary at the end of each calculation. The complete set of citations is provided below, along with their BibTeX entries.</p>
+<section id="main-exess-citation">
+<h2>Main EXESS citation<a class="headerlink" href="#main-exess-citation" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Galvez Vallejo, J. L.; Snowdon, C.; Stocks, R.; Kazemian, F.; Yan Yu, F. C.; Seidl, C.; Seeger, Z.; Alkan, M.; Poole, D.; Westheimer, B. M.; Basha, M.; De La Pierre, M.; Rendell, A.; Izgorodina, E. I.; Gordon, M. S.; Barca, G. M. J. Toward an Extreme-Scale Electronic Structure System. The Journal of Chemical Physics 2023, 159 (4), 044112. https://doi.org/10.1063/5.0156399.</p></li>
+</ul>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nc">@article</span><span class="p">{</span><span class="nl">galvez_vallejo_exess_jcp</span><span class="p">,</span>
+</span><span data-line="2"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Toward an extreme-scale electronic structure system}</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{159}</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{0021-9606}</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1063/5.0156399}</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1063/5.0156399}</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{4}</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2023-11-28}</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{The Journal of Chemical Physics}</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Galvez Vallejo, Jorge L. and Snowdon, Calum and Stocks, Ryan and Kazemian, Fazeleh and Yan Yu, Fiona Chuo and Seidl, Christopher and Seeger, Zoe and Alkan, Melisa and Poole, David and Westheimer, Bryce M. and Basha, Mehaboob and De La Pierre, Marco and Rendell, Alistair and Izgorodina, Ekaterina I. and Gordon, Mark S. and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">jul</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2023}</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{044112}</span>
+</span><span data-line="14"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="fragmentation-papers">
+<h2>Fragmentation papers<a class="headerlink" href="#fragmentation-papers" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Stocks, R.; Vallejo, J. L. G.; Yu, F. C. Y.; Snowdon, C.; Palethorpe, E.; Kurzak, J.; Bykov, D.; Barca, G. M. J. Breaking the Million-Electron and 1 EFLOP/s Barriers: Biomolecular-Scale Ab Initio Molecular Dynamics Using MP2 Potentials. In SC24: International Conference for High Performance Computing, Networking, Storage and Analysis; 2024; pp 1-12. https://doi.org/10.1109/SC41406.2024.00015.</p></li>
+<li><p>Barca, G. M. J.; Snowdon, C.; Vallejo, J. L. G.; Kazemian, F.; Rendell, A. P.; Gordon, M. S. Scaling Correlated Fragment Molecular Orbital Calculations on Summit; IEEE Computer Society, 2022; pp 72-85.</p></li>
+<li><p>Barca, G. M. J.; Vallejo, J. L. G.; Poole, D. L.; Alkan, M.; Stocks, R.; Rendell, A. P.; Gordon, M. S. Enabling Large-Scale Correlated Electronic Structure Calculations: Scaling the RI-MP2 Method on Summit. In Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis; SC ‘21; Association for Computing Machinery: New York, NY, USA, 2021; pp 1-15. https://doi.org/10.1145/3458817.3476222.</p></li>
+<li><p>Barca, G. M. J.; Poole, D. L.; Vallejo, J. L. G.; Alkan, M.; Bertoni, C.; Rendell, A. P.; Gordon, M. S. Scaling the Hartree-Fock Matrix Build on Summit. In SC20: International Conference for High Performance Computing, Networking, Storage and Analysis; 2020; pp 1-14. https://doi.org/10.1109/SC41405.2020.00085.</p></li>
+</ul>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">stocks_breaking_2024</span><span class="p">,</span>
+</span><span data-line="2"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Breaking the {Million}-{Electron} and 1 {{EFLOP}}/s {Barriers}: {Biomolecular}-{Scale} {Ab Initio} {Molecular} {Dynamics} {Using} {{MP2}} {Potentials}}</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="na">shorttitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Breaking the {Million}-{Electron} and 1 {{EFLOP}}/s {Barriers}}</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="na">booktitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{{{SC24}}: {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}}}</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Stocks, Ryan and Vallejo, Jorge L. Galvez and Yu, Fiona C. Y. and Snowdon, Calum and Palethorpe, Elise and Kurzak, Jakub and Bykov, Dmytro and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">nov</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1--12}</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{IEEE}</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">  </span><span class="na">address</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Atlanta, GA, USA}</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1109/SC41406.2024.00015}</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025-06-16}</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="na">isbn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{979-8-3503-5291-7}</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">  </span><span class="na">langid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{english}</span>
+</span><span data-line="15"><span class="p">}</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">barca_fmo_sc22</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Scaling {Correlated} {Fragment} {Molecular} {Orbital} {Calculations} on {Summit}}</span><span class="p">,</span>
+</span><span data-line="19"><span class="w">  </span><span class="na">isbn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{978-1-66545-444-5}</span><span class="p">,</span>
+</span><span data-line="20"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://www.computer.org/csdl/proceedings-article/sc/2022/544400a072/1I0bSLKTsKA}</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">  </span><span class="na">language</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{English}</span><span class="p">,</span>
+</span><span data-line="22"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022-11-21}</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{IEEE Computer Society}</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Barca, Giuseppe M. J. and Snowdon, Calum and Vallejo, Jorge L. Galvez and Kazemian, Fazeleh and Rendell, Alistair P. and Gordon, Mark S.}</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">nov</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022}</span><span class="p">,</span>
+</span><span data-line="27"><span class="w">  </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{ISSN: 2167-4337}</span><span class="p">,</span>
+</span><span data-line="28"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{72--85}</span>
+</span><span data-line="29"><span class="p">}</span>
+</span><span data-line="30">
+</span><span data-line="31"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">barca_rimp2_summit_sc21</span><span class="p">,</span>
+</span><span data-line="32"><span class="w">  </span><span class="na">address</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{New York, NY, USA}</span><span class="p">,</span>
+</span><span data-line="33"><span class="w">  </span><span class="na">series</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{{SC} &#39;21}</span><span class="p">,</span>
+</span><span data-line="34"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Enabling large-scale correlated electronic structure calculations: scaling the {RI}-{MP2} method on summit}</span><span class="p">,</span>
+</span><span data-line="35"><span class="w">  </span><span class="na">isbn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{978-1-4503-8442-1}</span><span class="p">,</span>
+</span><span data-line="36"><span class="w">  </span><span class="na">shorttitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Enabling large-scale correlated electronic structure calculations}</span><span class="p">,</span>
+</span><span data-line="37"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1145/3458817.3476222}</span><span class="p">,</span>
+</span><span data-line="38"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1145/3458817.3476222}</span><span class="p">,</span>
+</span><span data-line="39"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2021-11-01}</span><span class="p">,</span>
+</span><span data-line="40"><span class="w">  </span><span class="na">booktitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Proceedings of the {International} {Conference} for {High} {Performance} {Computing}, {Networking}, {Storage} and {Analysis}}</span><span class="p">,</span>
+</span><span data-line="41"><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Association for Computing Machinery}</span><span class="p">,</span>
+</span><span data-line="42"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Barca, Giuseppe M. J. and Vallejo, Jorge L. Galvez and Poole, David L. and Alkan, Melisa and Stocks, Ryan and Rendell, Alistair P. and Gordon, Mark S.}</span><span class="p">,</span>
+</span><span data-line="43"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">nov</span><span class="p">,</span>
+</span><span data-line="44"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2021}</span><span class="p">,</span>
+</span><span data-line="45"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1--15}</span>
+</span><span data-line="46"><span class="p">}</span>
+</span><span data-line="47">
+</span><span data-line="48"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">barca_fock_build_summit_sc20</span><span class="p">,</span>
+</span><span data-line="49"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Scaling the {Hartree}-{Fock} {Matrix} {Build} on {Summit}}</span><span class="p">,</span>
+</span><span data-line="50"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1109/SC41405.2020.00085}</span><span class="p">,</span>
+</span><span data-line="51"><span class="w">  </span><span class="na">booktitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{{SC20}: {International} {Conference} for {High} {Performance} {Computing}, {Networking}, {Storage} and {Analysis}}</span><span class="p">,</span>
+</span><span data-line="52"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Barca, G. M. J. and Poole, D. L. and Vallejo, J. L. G. and Alkan, M. and Bertoni, C. and Rendell, A. P. and Gordon, Mark S.}</span><span class="p">,</span>
+</span><span data-line="53"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">nov</span><span class="p">,</span>
+</span><span data-line="54"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2020}</span><span class="p">,</span>
+</span><span data-line="55"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1--14}</span>
+</span><span data-line="56"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="ri-methodologies-energies-and-gradients">
+<h2>RI methodologies (energies and gradients)<a class="headerlink" href="#ri-methodologies-energies-and-gradients" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Stocks, R.; Palethorpe, E.; Barca, G. M. J. Multi-GPU RI-HF Energies and Analytic Gradients - toward High-Throughput Ab Initio Molecular Dynamics. J. Chem. Theory Comput. 2024, 20 (17), 7503-7515. https://doi.org/10.1021/acs.jctc.4c00877.</p></li>
+<li><p>Stocks, R.; Palethorpe, E.; Barca, G. M. J. High-Performance Multi-GPU Analytic RI-MP2 Energy Gradients. J. Chem. Theory Comput. 2024, 20 (6), 2505-2519. https://doi.org/10.1021/acs.jctc.3c01424.</p></li>
+</ul>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nc">@article</span><span class="p">{</span><span class="nl">stocks_rihf_2024</span><span class="p">,</span>
+</span><span data-line="2"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Multi-{{GPU RI-HF}} {Energies} and {Analytic} {Gradients} --- toward {High}-{Throughput} {Ab} {Initio} {Molecular} {Dynamics}}</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{20}</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.4c00877}</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.4c00877}</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025-06-16}</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Stocks, Ryan and Palethorpe, Elise and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">aug</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{17}</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{7503--7515}</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">  </span><span class="na">langid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{english}</span>
+</span><span data-line="15"><span class="p">}</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="nc">@article</span><span class="p">{</span><span class="nl">stocks_rimp2_grad_2024</span><span class="p">,</span>
+</span><span data-line="18"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{High-{Performance} {Multi}-{GPU} {Analytic} {RI}-{MP2} {Energy} {Gradients}}</span><span class="p">,</span>
+</span><span data-line="19"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{20}</span><span class="p">,</span>
+</span><span data-line="20"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618, 1549-9626}</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://pubs.acs.org/doi/10.1021/acs.jctc.3c01424}</span><span class="p">,</span>
+</span><span data-line="22"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.3c01424}</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">  </span><span class="na">language</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{en}</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{6}</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024-06-24}</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="27"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Stocks, Ryan and Palethorpe, Elise and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="28"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">mar</span><span class="p">,</span>
+</span><span data-line="29"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span><span class="p">,</span>
+</span><span data-line="30"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2505--2519}</span>
+</span><span data-line="31"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="ksdft-methodologies">
+<h2>KSDFT methodologies<a class="headerlink" href="#ksdft-methodologies" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Stocks, R.; Barca, G. M. J. Efficient Algorithms for GPU Accelerated Evaluation of the DFT Exchange-Correlation Functional. J. Chem. Theory Comput. 2025. https://doi.org/10.1021/acs.jctc.5c01229.</p></li>
+</ul>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nc">@article</span><span class="p">{</span><span class="nl">stocks_dft_2025</span><span class="p">,</span>
+</span><span data-line="2"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Efficient {Algorithms} for {{GPU}} {Accelerated} {Evaluation} of the {{DFT}} {Exchange}-{Correlation} {Functional}}</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.5c01229}</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.5c01229}</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025-10-16}</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{American Chemical Society}</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Stocks, Ryan and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">oct</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025}</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">  </span><span class="na">langid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{english}</span>
+</span><span data-line="13"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="general-scf-routines">
+<h2>General SCF routines<a class="headerlink" href="#general-scf-routines" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Palethorpe, E.; Barca, G. M. J. High-Performance, High-Angular-Momentum J Engine on Graphics Processing Units. J. Chem. Theory Comput. 2025, 21 (19), 9388-9403. https://doi.org/10.1021/acs.jctc.5c00775.</p></li>
+<li><p>Palethorpe, E.; Stocks, R.; Barca, G. M. J. Advanced Techniques for High-Performance Fock Matrix Construction on GPU Clusters. J. Chem. Theory Comput. 2024, 20 (23), 10424-10442. https://doi.org/10.1021/acs.jctc.4c00994.</p></li>
+<li><p>Galvez Vallejo, J. L.; Barca, G. M. J.; Gordon, M. S. High-Performance GPU-Accelerated Evaluation of Electron Repulsion Integrals. Molecular Physics 2022, 0 (0), e2112987. https://doi.org/10.1080/00268976.2022.2112987.</p></li>
+<li><p>Barca, G. M. J.; Alkan, M.; Galvez-Vallejo, J. L.; Poole, D. L.; Rendell, A. P.; Gordon, M. S. Faster Self-Consistent Field (SCF) Calculations on GPU Clusters. J. Chem. Theory Comput. 2021, 17 (12), 7486-7503. https://doi.org/10.1021/acs.jctc.1c00720.</p></li>
+<li><p>Barca, G. M. J.; Galvez-Vallejo, J. L.; Poole, D. L.; Rendell, A. P.; Gordon, M. S. High-Performance, Graphics Processing Unit-Accelerated Fock Build Algorithm. J. Chem. Theory Comput. 2020, 16 (12), 7232-7238. https://doi.org/10.1021/acs.jctc.0c00768.</p></li>
+</ul>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nc">@article</span><span class="p">{</span><span class="nl">palethorpe_j_engine_2025</span><span class="p">,</span>
+</span><span data-line="2"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{High-{Performance}, {High}-{Angular}-{Momentum} {{J}} {Engine} on {Graphics} {Processing} {Units}}</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{21}</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.5c00775}</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.5c00775}</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025-10-16}</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{American Chemical Society}</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Palethorpe, Elise and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">oct</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025}</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{19}</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{9388--9403}</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">  </span><span class="na">abstract</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Efficient evaluation of electron repulsion integrals (ERIs) involving high-angular-momentum Gaussian basis functions is computationally challenging on graphical processing units (GPUs), as traditional recurrence-based integral algorithms generate numerous intermediates, causing significant register pressure and memory bottlenecks. In this Article, we present a high-performance, high-angular-momentum Coulomb-matrix (J) engine specifically optimized for GPU execution. Our approach introduces a GPU-optimized McMurchie-Davidson recurrence algorithm combined with a tailored integral batching scheme, designed specifically to jointly minimize intermediate storage requirements and redundant computation. By strategically partitioning high-angular-momentum ERIs classes into several carefully selected sub-batches, our approach transitions the associated integral evaluation kernels from memory-bound to compute-bound regimes, significantly enhancing computational throughput and reducing time to solution. Implemented in the Extreme-scale Electronic Structure System (EXESS), our algorithm achieves individual kernel speedups of up to 9\texttimes{} and improves overall J-matrix formation performance by up to 64\% across a variety of increasing-size chemical systems, including polyglycine chains, water clusters, and boron nitride crystals, when using the cc-pVQZ quadruple-{$\zeta$} basis set on an NVIDIA A100 GPU.}</span><span class="p">,</span>
+</span><span data-line="16"><span class="w">  </span><span class="na">langid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{english}</span>
+</span><span data-line="17"><span class="p">}</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="nc">@article</span><span class="p">{</span><span class="nl">palethorpe_fock_build_2024</span><span class="p">,</span>
+</span><span data-line="20"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Advanced {Techniques} for {High}-{Performance} {{Fock}} {Matrix} {Construction} on {{GPU}} {Clusters}}</span><span class="p">,</span>
+</span><span data-line="21"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{20}</span><span class="p">,</span>
+</span><span data-line="22"><span class="w">  </span><span class="na">copyright</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.15223/policy-029}</span><span class="p">,</span>
+</span><span data-line="23"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="24"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.4c00994}</span><span class="p">,</span>
+</span><span data-line="25"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.4c00994}</span><span class="p">,</span>
+</span><span data-line="26"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025-06-16}</span><span class="p">,</span>
+</span><span data-line="27"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="28"><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{American Chemical Society}</span><span class="p">,</span>
+</span><span data-line="29"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Palethorpe, Elise and Stocks, Ryan and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="30"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">dec</span><span class="p">,</span>
+</span><span data-line="31"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span><span class="p">,</span>
+</span><span data-line="32"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{23}</span><span class="p">,</span>
+</span><span data-line="33"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10424--10442}</span><span class="p">,</span>
+</span><span data-line="34"><span class="w">  </span><span class="na">abstract</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{This Article presents two optimized multi-GPU algorithms for Fock matrix construction, building on the work of Ufimtsev and Martinez [ J. Chem. Theory Comput. 2009, 5, 1004--1015] and Barca et al. [ J. Chem. Theory Comput. 2021, 17, 7486--7503]. The novel algorithms, opt-UM and opt-Brc, introduce significant enhancements, including improved integral screening, exploitation of sparsity and symmetry, a linear scaling exchange matrix assembly algorithm, and extended capabilities for Hartree--Fock calculations up to f-type angular momentum functions. Opt-Brc excels for smaller systems and for highly contracted triple-{$\zeta$} basis sets, while opt-UM is advantageous for large molecular systems. Performance benchmarks on NVIDIA A100 GPUs show that our algorithms in the EXtreme-scale Electronic Structure System (EXESS), when combined, outperform all current GPU and CPU Fock build implementations in TeraChem, QUICK, GPU4PySCF, LibIntX, ORCA, and Q-Chem. The implementations were benchmarked on linear and globular systems and average speed ups across three double-{$\zeta$} basis sets of 1.4\texttimes, 8.4\texttimes, and 9.4\texttimes{} were observed compared to TeraChem, QUICK, and GPU4PySCF respectively. An increased average speedup of 2.1\texttimes{} over TeraChem is observed when using four A100 GPUs. Strong scaling analysis reveals over 91\% parallel efficiency on four GPUs for opt-Brc, making it typically faster for multi-GPU execution. Single-compute-node comparisons with CPU-based software like ORCA and Q-Chem show speedups of up to 42\texttimes{} and 31\texttimes, respectively, enhancing power efficiency by up to 18\texttimes.}</span><span class="p">,</span>
+</span><span data-line="35"><span class="w">  </span><span class="na">langid</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{english}</span>
+</span><span data-line="36"><span class="p">}</span>
+</span><span data-line="37">
+</span><span data-line="38"><span class="nc">@article</span><span class="p">{</span><span class="nl">galvez_vallejo_integrals_2022</span><span class="p">,</span>
+</span><span data-line="39"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{High-performance {GPU}-accelerated evaluation of electron repulsion integrals}</span><span class="p">,</span>
+</span><span data-line="40"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{0}</span><span class="p">,</span>
+</span><span data-line="41"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{0026-8976}</span><span class="p">,</span>
+</span><span data-line="42"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1080/00268976.2022.2112987}</span><span class="p">,</span>
+</span><span data-line="43"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1080/00268976.2022.2112987}</span><span class="p">,</span>
+</span><span data-line="44"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{0}</span><span class="p">,</span>
+</span><span data-line="45"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022-10-03}</span><span class="p">,</span>
+</span><span data-line="46"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Molecular Physics}</span><span class="p">,</span>
+</span><span data-line="47"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Galvez Vallejo, Jorge Luis and Barca, Giuseppe M.J. and Gordon, Mark S.}</span><span class="p">,</span>
+</span><span data-line="48"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">aug</span><span class="p">,</span>
+</span><span data-line="49"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022}</span><span class="p">,</span>
+</span><span data-line="50"><span class="w">  </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Publisher: Taylor \&amp; Francis}</span><span class="p">,</span>
+</span><span data-line="51"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{e2112987}</span>
+</span><span data-line="52"><span class="p">}</span>
+</span><span data-line="53">
+</span><span data-line="54"><span class="nc">@article</span><span class="p">{</span><span class="nl">barca_scf_2021</span><span class="p">,</span>
+</span><span data-line="55"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Faster {Self}-{Consistent} {Field} ({SCF}) {Calculations} on {GPU} {Clusters}}</span><span class="p">,</span>
+</span><span data-line="56"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{17}</span><span class="p">,</span>
+</span><span data-line="57"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="58"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.1c00720}</span><span class="p">,</span>
+</span><span data-line="59"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.1c00720}</span><span class="p">,</span>
+</span><span data-line="60"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{12}</span><span class="p">,</span>
+</span><span data-line="61"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024-06-24}</span><span class="p">,</span>
+</span><span data-line="62"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="63"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Barca, Giuseppe M. J. and Alkan, Melisa and Galvez-Vallejo, Jorge L. and Poole, David L. and Rendell, Alistair P. and Gordon, Mark S.}</span><span class="p">,</span>
+</span><span data-line="64"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">dec</span><span class="p">,</span>
+</span><span data-line="65"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2021}</span><span class="p">,</span>
+</span><span data-line="66"><span class="w">  </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Publisher: American Chemical Society}</span><span class="p">,</span>
+</span><span data-line="67"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{7486--7503}</span>
+</span><span data-line="68"><span class="p">}</span>
+</span><span data-line="69">
+</span><span data-line="70"><span class="nc">@article</span><span class="p">{</span><span class="nl">barca_fock_build_2021</span><span class="p">,</span>
+</span><span data-line="71"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{High-{Performance}, {Graphics} {Processing} {Unit}-{Accelerated} {Fock} {Build} {Algorithm}}</span><span class="p">,</span>
+</span><span data-line="72"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{16}</span><span class="p">,</span>
+</span><span data-line="73"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="74"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.0c00768}</span><span class="p">,</span>
+</span><span data-line="75"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.0c00768}</span><span class="p">,</span>
+</span><span data-line="76"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{12}</span><span class="p">,</span>
+</span><span data-line="77"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2021-03-15}</span><span class="p">,</span>
+</span><span data-line="78"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="79"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Barca, Giuseppe M. J. and Galvez-Vallejo, Jorge L. and Poole, David L. and Rendell, Alistair P. and Gordon, Mark S.}</span><span class="p">,</span>
+</span><span data-line="80"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">dec</span><span class="p">,</span>
+</span><span data-line="81"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2020}</span><span class="p">,</span>
+</span><span data-line="82"><span class="w">  </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Publisher: American Chemical Society}</span><span class="p">,</span>
+</span><span data-line="83"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{7232--7238}</span>
+</span><span data-line="84"><span class="p">}</span>
+</span></pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">
+</span></pre></div>
+</div>
+</section>
+<section id="commented-citation-block">
+<h2>Commented citation block<a class="headerlink" href="#commented-citation-block" title="Link to this heading">¶</a></h2>
+<p>The citation page includes a commented Q-Next citation block. It is reproduced here for completeness:</p>
+<ul class="simple">
+<li><p>Seidl, C.; Barca, G. M. J. Q-Next: A Fast, Parallel, and Diagonalization-Free Alternative to Direct Inversion of the Iterative Subspace. J. Chem. Theory Comput. 2022, 18 (7), 4164-4176. https://doi.org/10.1021/acs.jctc.2c00073.</p></li>
+</ul>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nc">@article</span><span class="p">{</span><span class="nl">q-next-2022</span><span class="p">,</span>
+</span><span data-line="2"><span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Q-{Next}: {A} {Fast}, {Parallel}, and {Diagonalization}-{Free} {Alternative} to {Direct} {Inversion} of the {Iterative} {Subspace}}</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{18}</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{1549-9618}</span><span class="p">,</span>
+</span><span data-line="5"><span class="w">  </span><span class="na">shorttitle</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Q-{Next}}</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.1021/acs.jctc.2c00073}</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1021/acs.jctc.2c00073}</span><span class="p">,</span>
+</span><span data-line="8"><span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{7}</span><span class="p">,</span>
+</span><span data-line="9"><span class="w">  </span><span class="na">urldate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022-10-03}</span><span class="p">,</span>
+</span><span data-line="10"><span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Journal of Chemical Theory and Computation}</span><span class="p">,</span>
+</span><span data-line="11"><span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Seidl, Christopher and Barca, Giuseppe M. J.}</span><span class="p">,</span>
+</span><span data-line="12"><span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">jul</span><span class="p">,</span>
+</span><span data-line="13"><span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2022}</span><span class="p">,</span>
+</span><span data-line="14"><span class="w">  </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Publisher: American Chemical Society}</span><span class="p">,</span>
+</span><span data-line="15"><span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{4164--4176}</span>
+</span><span data-line="16"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="reference.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Reference</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../nnxtb/overview.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Overview | Use NN-xTB</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

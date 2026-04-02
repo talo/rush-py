@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Object Store Utilities - QDX Documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Molecular Systems &amp; TRCs" href="rush.mol.html" /><link rel="prev" title="Runs" href="rush.runs.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Object Store Utilities"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/08-smol-similarity-smol_similarity_sumo.html">Tutorial 8: smol-similarity nearest-neighbor search</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.pbsa.html">PBSA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.smol-similarity.html">smol-similarity</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Core API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.runs.html">Runs</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#identifiers">Identifiers</a><ul>
+<li><a class="reference internal" href="#rush.objects.ObjectID"><code class="docutils literal notranslate"><span class="pre">ObjectID</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#object-references">Object References</a><ul>
+<li><a class="reference internal" href="#rush.objects.RushObject"><code class="docutils literal notranslate"><span class="pre">RushObject</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trc-object-support">TRC Object Support</a><ul>
+<li><a class="reference internal" href="#rush.objects.TRCRef"><code class="docutils literal notranslate"><span class="pre">TRCRef</span></code></a></li>
+<li><a class="reference internal" href="#rush.objects.TRCPaths"><code class="docutils literal notranslate"><span class="pre">TRCPaths</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#object-store-functions">Object Store Functions</a><ul>
+<li><a class="reference internal" href="#rush.objects.upload_object"><code class="docutils literal notranslate"><span class="pre">upload_object()</span></code></a></li>
+<li><a class="reference internal" href="#rush.objects.fetch_object"><code class="docutils literal notranslate"><span class="pre">fetch_object()</span></code></a></li>
+<li><a class="reference internal" href="#rush.objects.save_object"><code class="docutils literal notranslate"><span class="pre">save_object()</span></code></a></li>
+<li><a class="reference internal" href="#rush.objects.save_json"><code class="docutils literal notranslate"><span class="pre">save_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="api.html"><span itemprop="name">Core API</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Object Store Utilities</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="object-store-utilities">
+<h1>Object Store Utilities<a class="headerlink" href="#object-store-utilities" title="Link to this heading">¶</a></h1>
+<p>Rush stores some of the data used in runs in its own object store. This API
+exposes Rush object-store references and helper functions for uploading,
+fetching, and saving objects. It also includes TRC-specific helpers for working
+with TRC data in the object store, which are sometimes returned by Rush
+modules.</p>
+<section id="identifiers">
+<h2>Identifiers<a class="headerlink" href="#identifiers" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="rush.objects.ObjectID">
+<span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">ObjectID</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">rush.objects.ObjectID</span></span><a class="headerlink" href="#rush.objects.ObjectID" title="Link to this definition">¶</a></dt>
+<dd><p>UUID identifying an object in the Rush object store.</p>
+</dd></dl>
+
+</section>
+<section id="object-references">
+<h2>Object References<a class="headerlink" href="#object-references" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.objects.RushObject">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">RushObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject" title="Link to this definition">¶</a></dt>
+<dd><p>Reference to an object in the Rush object store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference internal" href="#rush.objects.ObjectID" title="rush.objects.ObjectID"><em>ObjectID</em></a>)</p></li>
+<li><p><strong>size</strong> (<em>int</em>)</p></li>
+<li><p><strong>format</strong> (<em>Literal</em><em>[</em><em>'Json'</em><em>, </em><em>'Bin'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.from_dict">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Construct from a raw GraphQL output dict.</p>
+<p>Requires <code class="docutils literal notranslate"><span class="pre">path</span></code>, <code class="docutils literal notranslate"><span class="pre">size</span></code>, and <code class="docutils literal notranslate"><span class="pre">format</span></code> keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Download this object into memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extract</strong> (<em>bool</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list</em>[<em>Any</em>] | <em>dict</em>[<em>str</em>, <em>Any</em>] | <em>bytes</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.fetch_bytes">
+<span class="sig-name descname"><span class="pre">fetch_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.fetch_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.fetch_bytes" title="Link to this definition">¶</a></dt>
+<dd><p>Download this binary object into memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extract</strong> (<em>bool</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>bytes</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.fetch_dict">
+<span class="sig-name descname"><span class="pre">fetch_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.fetch_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.fetch_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Download this JSON object and require a dictionary payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>dict</em>[<em>str</em>, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.fetch_json">
+<span class="sig-name descname"><span class="pre">fetch_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.fetch_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.fetch_json" title="Link to this definition">¶</a></dt>
+<dd><p>Download this JSON object into memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<em>Any</em>] | <em>dict</em>[<em>str</em>, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.fetch_list">
+<span class="sig-name descname"><span class="pre">fetch_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.fetch_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.fetch_list" title="Link to this definition">¶</a></dt>
+<dd><p>Download this JSON object and require a list payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.save" title="Link to this definition">¶</a></dt>
+<dd><p>Download this object and save to the workspace.</p>
+<p>The file type is derived from <a class="reference internal" href="#rush.objects.RushObject.format" title="rush.objects.RushObject.format"><code class="xref py py-attr docutils literal notranslate"><span class="pre">format</span></code></a> automatically.
+Pass <em>ext</em> to override the file extension (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;hdf5&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;a3m&quot;</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>ext</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extract</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.RushObject.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#RushObject.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.RushObject.to_dict" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>dict</em>[<em>str</em>, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.RushObject.format">
+<span class="sig-name descname"><span class="pre">format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Bin'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.objects.RushObject.format" title="Link to this definition">¶</a></dt>
+<dd><p>Storage format.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.RushObject.path">
+<span class="sig-name descname"><span class="pre">path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.objects.ObjectID" title="rush.objects.ObjectID"><span class="pre">ObjectID</span></a></span><a class="headerlink" href="#rush.objects.RushObject.path" title="Link to this definition">¶</a></dt>
+<dd><p>UUID path in the object store.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.RushObject.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#rush.objects.RushObject.size" title="Link to this definition">¶</a></dt>
+<dd><p>Size in bytes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="trc-object-support">
+<h2>TRC Object Support<a class="headerlink" href="#trc-object-support" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.objects.TRCRef">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">TRCRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chains</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#TRCRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.TRCRef" title="Link to this definition">¶</a></dt>
+<dd><p>Reference to a single TRC triplet in the Rush object store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<a class="reference internal" href="#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a>)</p></li>
+<li><p><strong>residues</strong> (<a class="reference internal" href="#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a>)</p></li>
+<li><p><strong>chains</strong> (<a class="reference internal" href="#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.TRCRef.upload">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#TRCRef.upload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.TRCRef.upload" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trc</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.TRCRef.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#TRCRef.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.TRCRef.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Download and parse into a TRC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.objects.TRCRef.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#TRCRef.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.TRCRef.save" title="Link to this definition">¶</a></dt>
+<dd><p>Download and save to the workspace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.objects.TRCPaths" title="rush.objects.TRCPaths"><em>TRCPaths</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.TRCRef.chains">
+<span class="sig-name descname"><span class="pre">chains</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.objects.RushObject" title="rush.objects.RushObject"><span class="pre">RushObject</span></a></span><a class="headerlink" href="#rush.objects.TRCRef.chains" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.TRCRef.residues">
+<span class="sig-name descname"><span class="pre">residues</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.objects.RushObject" title="rush.objects.RushObject"><span class="pre">RushObject</span></a></span><a class="headerlink" href="#rush.objects.TRCRef.residues" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.TRCRef.topology">
+<span class="sig-name descname"><span class="pre">topology</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.objects.RushObject" title="rush.objects.RushObject"><span class="pre">RushObject</span></a></span><a class="headerlink" href="#rush.objects.TRCRef.topology" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.objects.TRCPaths">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">TRCPaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chains</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#TRCPaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.TRCPaths" title="Link to this definition">¶</a></dt>
+<dd><p>Workspace paths for a saved TRC triplet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<em>Path</em>)</p></li>
+<li><p><strong>residues</strong> (<em>Path</em>)</p></li>
+<li><p><strong>chains</strong> (<em>Path</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.TRCPaths.chains">
+<span class="sig-name descname"><span class="pre">chains</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.objects.TRCPaths.chains" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.TRCPaths.residues">
+<span class="sig-name descname"><span class="pre">residues</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.objects.TRCPaths.residues" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.objects.TRCPaths.topology">
+<span class="sig-name descname"><span class="pre">topology</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.objects.TRCPaths.topology" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="object-store-functions">
+<h2>Object Store Functions<a class="headerlink" href="#object-store-functions" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.objects.upload_object">
+<span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">upload_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#upload_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.upload_object" title="Link to this definition">¶</a></dt>
+<dd><p>Upload an object at the filepath to the current project. Usually not necessary; the
+module functions should handle this automatically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em>[<em>str</em>, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.objects.fetch_object">
+<span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">fetch_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#fetch_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.fetch_object" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the contents of the given Rush object store path directly into memory.</p>
+<p>Be careful: if the contents are too large, they might not fit into memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The Rush object store path to fetch.</p></li>
+<li><p><strong>extract</strong> (<em>bool</em>) – Automatically extract tar.zst archives in memory before returning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the data from the object store path, as a dict (JSON objects) or bytes (bin objects)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<em>Any</em>] | <em>dict</em>[<em>str</em>, <em>Any</em>] | <em>bytes</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.objects.save_object">
+<span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">save_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#save_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.save_object" title="Link to this definition">¶</a></dt>
+<dd><p>Save a Rush object store path to the workspace.</p>
+<p>Prefer <a class="reference internal" href="#rush.objects.RushObject.save" title="rush.objects.RushObject.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RushObject.save()</span></code></a> when you have a <code class="docutils literal notranslate"><span class="pre">RushObject</span></code>.
+This function infers the format from the <em>type</em> parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>)</p></li>
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>type</strong> (<em>Literal</em><em>[</em><em>'json'</em><em>, </em><em>'bin'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>ext</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extract</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.objects.save_json">
+<span class="sig-prename descclassname"><span class="pre">rush.objects.</span></span><span class="sig-name descname"><span class="pre">save_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/objects.html#save_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.objects.save_json" title="Link to this definition">¶</a></dt>
+<dd><p>Save a JSON file into the workspace folder.
+Convenient for saving non-object JSON output from a module run alongside
+the object outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="rush.runs.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Runs</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="rush.mol.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Molecular Systems &amp; TRCs</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+</html>

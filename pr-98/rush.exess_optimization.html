@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>EXESS Optimization - QDX Documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="EXESS QMMM" href="rush.exess_qmmm.html" /><link rel="prev" title="EXESS" href="rush.exess.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="EXESS Optimization"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/08-smol-similarity-smol_similarity_sumo.html">Tutorial 8: smol-similarity nearest-neighbor search</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Rush Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="rush.exess.html">EXESS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.pbsa.html">PBSA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.smol-similarity.html">smol-similarity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exess/citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#quick-links">Quick Links</a></li>
+<li><a class="reference internal" href="#run-submission">Run Submission</a><ul>
+<li><a class="reference internal" href="#rush.exess.optimization"><code class="docutils literal notranslate"><span class="pre">optimization()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#input-types">Input Types</a><ul>
+<li><a class="reference internal" href="#rush.exess.OptimizationKeywords"><code class="docutils literal notranslate"><span class="pre">OptimizationKeywords</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.OptimizationConvergenceCriteria"><code class="docutils literal notranslate"><span class="pre">OptimizationConvergenceCriteria</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.TrustRegionKeywords"><code class="docutils literal notranslate"><span class="pre">TrustRegionKeywords</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.LBFGSKeywords"><code class="docutils literal notranslate"><span class="pre">LBFGSKeywords</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.CoordinateSystemT"><code class="docutils literal notranslate"><span class="pre">CoordinateSystemT</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.HessianGuessTypeT"><code class="docutils literal notranslate"><span class="pre">HessianGuessTypeT</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.OptimizationAlgorithmTypeT"><code class="docutils literal notranslate"><span class="pre">OptimizationAlgorithmTypeT</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.LBFGSLinesearchT"><code class="docutils literal notranslate"><span class="pre">LBFGSLinesearchT</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#result-types">Result Types</a><ul>
+<li><a class="reference internal" href="#rush.exess.OptimizationResult"><code class="docutils literal notranslate"><span class="pre">OptimizationResult</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.OptimizationResultPaths"><code class="docutils literal notranslate"><span class="pre">OptimizationResultPaths</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.OptimizationResultRef"><code class="docutils literal notranslate"><span class="pre">OptimizationResultRef</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.OptimizationStep"><code class="docutils literal notranslate"><span class="pre">OptimizationStep</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="modules.html"><span itemprop="name">Rush Modules</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">EXESS Optimization</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="module-rush.exess._optimization">
+<span id="exess-optimization"></span><h1>EXESS Optimization<a class="headerlink" href="#module-rush.exess._optimization" title="Link to this heading">¶</a></h1>
+<p>EXESS geometry optimization for the Rush Python client.</p>
+<section id="quick-links">
+<h2>Quick Links<a class="headerlink" href="#quick-links" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#rush.exess.optimization" title="rush.exess.optimization"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.optimization()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#rush.exess.OptimizationResult" title="rush.exess.OptimizationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">rush.exess.OptimizationResult</span></code></a></p></li>
+</ul>
+</section>
+<section id="run-submission">
+<h2>Run Submission<a class="headerlink" href="#run-submission" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.exess.optimization">
+<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">optimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">OptimizationKeywords()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RestrictedKSDFT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cc-pVDZ'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_cartesian_basis_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scf_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ksdft_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">_KSDFTDefault.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qm_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mm_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#optimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.optimization" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a geometry optimization for the topology at <em>topology_path</em>.</p>
+<p>Returns a <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> handle. Call <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> to get the
+parsed trajectory and optimization steps, or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> to write them to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference internal" href="rush.mol.html#rush.mol.TRC" title="rush.mol.TRC"><em>TRC</em></a><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.TRCRef" title="rush.objects.TRCRef"><em>TRCRef</em></a><em> | </em><em>tuple</em><em>[</em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><a class="reference internal" href="rush.mol.html#rush.mol.Topology" title="rush.mol.Topology"><em>Topology</em></a><em>, </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><a class="reference internal" href="rush.mol.html#rush.mol.Residues" title="rush.mol.Residues"><em>Residues</em></a><em>] </em><em>| </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><a class="reference internal" href="rush.mol.html#rush.mol.Topology" title="rush.mol.Topology"><em>Topology</em></a>)</p></li>
+<li><p><strong>max_iters</strong> (<em>int</em>)</p></li>
+<li><p><strong>optimization_keywords</strong> (<a class="reference internal" href="#rush.exess.OptimizationKeywords" title="rush.exess._optimization.OptimizationKeywords"><em>OptimizationKeywords</em></a>)</p></li>
+<li><p><strong>method</strong> (<em>MethodT</em>)</p></li>
+<li><p><strong>basis</strong> (<em>BasisT</em>)</p></li>
+<li><p><strong>aux_basis</strong> (<em>AuxBasisT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>standard_orientation</strong> (<em>StandardOrientationT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>force_cartesian_basis_sets</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>scf_keywords</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.SCFKeywords" title="rush.exess._energy.SCFKeywords"><em>SCFKeywords</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>ksdft_keywords</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.KSDFTKeywords" title="rush.exess._energy.KSDFTKeywords"><em>KSDFTKeywords</em></a><em> | </em><em>_KSDFTDefault</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>qm_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>mm_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>system</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.System" title="rush.exess._energy.System"><em>System</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunSpec" title="rush.runs.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunOpts" title="rush.runs.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><em>Run</em></a>[<a class="reference internal" href="#rush.exess.OptimizationResultRef" title="rush.exess._optimization.OptimizationResultRef"><em>OptimizationResultRef</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="input-types">
+<h2>Input Types<a class="headerlink" href="#input-types" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationKeywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">convergence_criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.OptimizationConvergenceCriteria" title="rush.exess._optimization.OptimizationConvergenceCriteria"><span class="pre">OptimizationConvergenceCriteria</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_reset_interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate_system</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.CoordinateSystemT" title="rush.exess.CoordinateSystemT"><span class="pre">CoordinateSystemT</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian_guess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.HessianGuessTypeT" title="rush.exess.HessianGuessTypeT"><span class="pre">HessianGuessTypeT</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.OptimizationAlgorithmTypeT" title="rush.exess.OptimizationAlgorithmTypeT"><span class="pre">OptimizationAlgorithmTypeT</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lbfgs_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.LBFGSKeywords" title="rush.exess._optimization.LBFGSKeywords"><span class="pre">LBFGSKeywords</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen_distance_slippage_tolerance_angstroms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen_angle_slippage_tolerance_degrees</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trust_region_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.TrustRegionKeywords" title="rush.exess._optimization.TrustRegionKeywords"><span class="pre">TrustRegionKeywords</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_fragments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_fragments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_heavy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationKeywords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationKeywords" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convergence_criteria</strong> (<a class="reference internal" href="#rush.exess.OptimizationConvergenceCriteria" title="rush.exess._optimization.OptimizationConvergenceCriteria"><em>OptimizationConvergenceCriteria</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>optimizer_reset_interval</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>coordinate_system</strong> (<em>CoordinateSystemT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>constraints</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><em>int</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>hessian_guess</strong> (<em>HessianGuessTypeT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>algorithm</strong> (<em>OptimizationAlgorithmTypeT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>lbfgs_keywords</strong> (<a class="reference internal" href="#rush.exess.LBFGSKeywords" title="rush.exess._optimization.LBFGSKeywords"><em>LBFGSKeywords</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>frozen_distance_slippage_tolerance_angstroms</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>frozen_angle_slippage_tolerance_degrees</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>trust_region_keywords</strong> (<a class="reference internal" href="#rush.exess.TrustRegionKeywords" title="rush.exess._optimization.TrustRegionKeywords"><em>TrustRegionKeywords</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>fixed_atoms</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>free_atoms</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>fixed_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>free_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>fix_heavy</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.algorithm">
+<span class="sig-name descname"><span class="pre">algorithm</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OptimizationAlgorithmTypeT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.algorithm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.constraints">
+<span class="sig-name descname"><span class="pre">constraints</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.constraints" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.convergence_criteria">
+<span class="sig-name descname"><span class="pre">convergence_criteria</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.exess.OptimizationConvergenceCriteria" title="rush.exess._optimization.OptimizationConvergenceCriteria"><span class="pre">OptimizationConvergenceCriteria</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.convergence_criteria" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.coordinate_system">
+<span class="sig-name descname"><span class="pre">coordinate_system</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CoordinateSystemT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.coordinate_system" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.fix_heavy">
+<span class="sig-name descname"><span class="pre">fix_heavy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.fix_heavy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.fixed_atoms">
+<span class="sig-name descname"><span class="pre">fixed_atoms</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.fixed_atoms" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.fixed_fragments">
+<span class="sig-name descname"><span class="pre">fixed_fragments</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.fixed_fragments" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.free_atoms">
+<span class="sig-name descname"><span class="pre">free_atoms</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.free_atoms" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.free_fragments">
+<span class="sig-name descname"><span class="pre">free_fragments</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.free_fragments" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.frozen_angle_slippage_tolerance_degrees">
+<span class="sig-name descname"><span class="pre">frozen_angle_slippage_tolerance_degrees</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.frozen_angle_slippage_tolerance_degrees" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.frozen_distance_slippage_tolerance_angstroms">
+<span class="sig-name descname"><span class="pre">frozen_distance_slippage_tolerance_angstroms</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.frozen_distance_slippage_tolerance_angstroms" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.hessian_guess">
+<span class="sig-name descname"><span class="pre">hessian_guess</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">HessianGuessTypeT</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.hessian_guess" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.lbfgs_keywords">
+<span class="sig-name descname"><span class="pre">lbfgs_keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.exess.LBFGSKeywords" title="rush.exess._optimization.LBFGSKeywords"><span class="pre">LBFGSKeywords</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.lbfgs_keywords" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.optimizer_reset_interval">
+<span class="sig-name descname"><span class="pre">optimizer_reset_interval</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.optimizer_reset_interval" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationKeywords.trust_region_keywords">
+<span class="sig-name descname"><span class="pre">trust_region_keywords</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.exess.TrustRegionKeywords" title="rush.exess._optimization.TrustRegionKeywords"><span class="pre">TrustRegionKeywords</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationKeywords.trust_region_keywords" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.OptimizationConvergenceCriteria">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationConvergenceCriteria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradient_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_energy_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_component_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationConvergenceCriteria"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationConvergenceCriteria" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>gradient_threshold</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>delta_energy_threshold</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>step_component_threshold</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationConvergenceCriteria.delta_energy_threshold">
+<span class="sig-name descname"><span class="pre">delta_energy_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationConvergenceCriteria.delta_energy_threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationConvergenceCriteria.gradient_threshold">
+<span class="sig-name descname"><span class="pre">gradient_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationConvergenceCriteria.gradient_threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationConvergenceCriteria.metric">
+<span class="sig-name descname"><span class="pre">metric</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationConvergenceCriteria.metric" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationConvergenceCriteria.step_component_threshold">
+<span class="sig-name descname"><span class="pre">step_component_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.OptimizationConvergenceCriteria.step_component_threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">TrustRegionKeywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">increase_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decrease_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constrict_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">increase_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decrease_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rejection_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#TrustRegionKeywords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.TrustRegionKeywords" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_radius</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>min_radius</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>increase_factor</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>decrease_factor</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>constrict_factor</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>increase_threshold</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>decrease_threshold</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>rejection_threshold</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.constrict_factor">
+<span class="sig-name descname"><span class="pre">constrict_factor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.constrict_factor" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.decrease_factor">
+<span class="sig-name descname"><span class="pre">decrease_factor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.decrease_factor" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.decrease_threshold">
+<span class="sig-name descname"><span class="pre">decrease_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.decrease_threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.increase_factor">
+<span class="sig-name descname"><span class="pre">increase_factor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.increase_factor" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.increase_threshold">
+<span class="sig-name descname"><span class="pre">increase_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.increase_threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.initial_radius">
+<span class="sig-name descname"><span class="pre">initial_radius</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.initial_radius" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.max_radius">
+<span class="sig-name descname"><span class="pre">max_radius</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.max_radius" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.min_radius">
+<span class="sig-name descname"><span class="pre">min_radius</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.min_radius" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.TrustRegionKeywords.rejection_threshold">
+<span class="sig-name descname"><span class="pre">rejection_threshold</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.TrustRegionKeywords.rejection_threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.LBFGSKeywords">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">LBFGSKeywords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linesearch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.exess.LBFGSLinesearchT" title="rush.exess.LBFGSLinesearchT"><span class="pre">LBFGSLinesearchT</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'BacktrackingStrongWolfe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_corrections</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_linesearch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#LBFGSKeywords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.LBFGSKeywords" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>linesearch</strong> (<em>LBFGSLinesearchT</em>)</p></li>
+<li><p><strong>n_corrections</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>max_linesearch</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>gtol</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.LBFGSKeywords.epsilon">
+<span class="sig-name descname"><span class="pre">epsilon</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.LBFGSKeywords.epsilon" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.LBFGSKeywords.gtol">
+<span class="sig-name descname"><span class="pre">gtol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.LBFGSKeywords.gtol" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.LBFGSKeywords.linesearch">
+<span class="sig-name descname"><span class="pre">linesearch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LBFGSLinesearchT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BacktrackingStrongWolfe'</span></span><a class="headerlink" href="#rush.exess.LBFGSKeywords.linesearch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.LBFGSKeywords.max_linesearch">
+<span class="sig-name descname"><span class="pre">max_linesearch</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.LBFGSKeywords.max_linesearch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.LBFGSKeywords.n_corrections">
+<span class="sig-name descname"><span class="pre">n_corrections</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.LBFGSKeywords.n_corrections" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="rush.exess.CoordinateSystemT">
+<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">CoordinateSystemT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Cartesian'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'NaturalInternal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'DelocalisedInternal'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.CoordinateSystemT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="rush.exess.HessianGuessTypeT">
+<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">HessianGuessTypeT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Identity'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'ScaledIdentity'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Schlegel'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Lindh'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.HessianGuessTypeT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="rush.exess.OptimizationAlgorithmTypeT">
+<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationAlgorithmTypeT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'EigenvectorFollowing'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'TrustRegionAugmentedHessian'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'LBFGS'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.OptimizationAlgorithmTypeT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="rush.exess.LBFGSLinesearchT">
+<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">LBFGSLinesearchT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'MoreThuente'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'BacktrackingArmijo'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'BacktrackingWolfe'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'BacktrackingStrongWolfe'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.LBFGSLinesearchT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="result-types">
+<h2>Result Types<a class="headerlink" href="#result-types" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResult">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="rush.mol.html#rush.mol.Topology" title="rush.mol.Topology"><span class="pre">Topology</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rush.exess.OptimizationStep" title="rush.exess._optimization.OptimizationStep"><span class="pre">OptimizationStep</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationResult" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trajectory</strong> (<em>list</em><em>[</em><a class="reference internal" href="rush.mol.html#rush.mol.Topology" title="rush.mol.Topology"><em>Topology</em></a><em>]</em>)</p></li>
+<li><p><strong>steps</strong> (<em>list</em><em>[</em><a class="reference internal" href="#rush.exess.OptimizationStep" title="rush.exess._optimization.OptimizationStep"><em>OptimizationStep</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResult.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rush.exess.OptimizationStep" title="rush.exess._optimization.OptimizationStep"><span class="pre">OptimizationStep</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.OptimizationResult.steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResult.trajectory">
+<span class="sig-name descname"><span class="pre">trajectory</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="rush.mol.html#rush.mol.Topology" title="rush.mol.Topology"><span class="pre">Topology</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.OptimizationResult.trajectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultPaths">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationResultPaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationResultPaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationResultPaths" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trajectory</strong> (<em>Path</em>)</p></li>
+<li><p><strong>steps</strong> (<em>Path</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultPaths.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.exess.OptimizationResultPaths.steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultPaths.trajectory">
+<span class="sig-name descname"><span class="pre">trajectory</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.exess.OptimizationResultPaths.trajectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultRef">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationResultRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationResultRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationResultRef" title="Link to this definition">¶</a></dt>
+<dd><p>Lightweight reference to optimization outputs in the Rush object store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trajectory</strong> (<a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a>)</p></li>
+<li><p><strong>steps</strong> (<a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultRef.from_raw_output">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_raw_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationResultRef.from_raw_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationResultRef.from_raw_output" title="Link to this definition">¶</a></dt>
+<dd><p>Parse raw <code class="docutils literal notranslate"><span class="pre">collect_run</span></code> output into an <code class="docutils literal notranslate"><span class="pre">OptimizationResultRef</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>res</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultRef.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationResultRef.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationResultRef.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Download optimization outputs and parse into Python objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.exess.OptimizationResult" title="rush.exess._optimization.OptimizationResult"><em>OptimizationResult</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultRef.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationResultRef.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationResultRef.save" title="Link to this definition">¶</a></dt>
+<dd><p>Download optimization outputs and save to the workspace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.exess.OptimizationResultPaths" title="rush.exess._optimization.OptimizationResultPaths"><em>OptimizationResultPaths</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultRef.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><span class="pre">RushObject</span></a></span><a class="headerlink" href="#rush.exess.OptimizationResultRef.steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationResultRef.trajectory">
+<span class="sig-name descname"><span class="pre">trajectory</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><span class="pre">RushObject</span></a></span><a class="headerlink" href="#rush.exess.OptimizationResultRef.trajectory" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.OptimizationStep">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">OptimizationStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gradient_component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_optimization.html#OptimizationStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.OptimizationStep" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_energy</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_gradient_component</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationStep.max_gradient_component">
+<span class="sig-name descname"><span class="pre">max_gradient_component</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.exess.OptimizationStep.max_gradient_component" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.OptimizationStep.total_energy">
+<span class="sig-name descname"><span class="pre">total_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.exess.OptimizationStep.total_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="rush.exess.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">EXESS</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="rush.exess_qmmm.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">EXESS QMMM</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+</html>
