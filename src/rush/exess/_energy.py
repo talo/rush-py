@@ -628,10 +628,7 @@ class FragKeywords:
     def _to_rex(self):
         included_fragments = None
         if self.included_fragments:
-            included_fragments = [
-                f.value if isinstance(f, FragmentRef) else f
-                for f in self.included_fragments
-            ]
+            included_fragments = list(self.included_fragments)
         return Template(
             """Some (exess_rex::FragKeywords {
             cutoffs = Some (exess_rex::FragmentCutoffs {

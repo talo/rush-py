@@ -1,34 +1,46 @@
 """
 Conversion utilities for molecular structure file formats.
 
-This module provides functions to convert between PDB, mmCIF, SDF, and QDX's TRC JSON formats.
+Format parsing and writing are backed by the native libqdx Rust library.
 """
 
-import copy
 import json as std_json
 from collections.abc import Sequence
 from pathlib import Path
 from typing import TypeGuard
 
+import libqdx
+
 from ..mol import TRC
 from .json import from_json, to_dict
-from .mmcif import from_mmcif
-from .pdb import from_pdb, to_pdb
-from .sdf import from_sdf
+
+
+def from_pdb(pdb_content: str) -> TRC | list[TRC]:
+    """Parse PDB file content into TRC structures."""
+    trcs = libqdx.from_pdb(pdb_content)
+    return trcs[0] if len(trcs) == 1 else trcs
+
+
+def to_pdb(trc: TRC) -> str:
+    """Convert TRC structure to PDB format string."""
+    return libqdx.to_pdb(trc)
+
+
+def from_mmcif(mmcif_content: str) -> TRC | list[TRC]:
+    """Parse mmCIF file contents into TRC structures."""
+    trcs = libqdx.from_mmcif(mmcif_content)
+    return trcs[0] if len(trcs) == 1 else trcs
+
+
+def from_sdf(sdf_content: str) -> TRC | list[TRC]:
+    """Parse SDF file contents into TRC structures."""
+    trcs = libqdx.from_sdf(sdf_content)
+    return trcs[0] if len(trcs) == 1 else trcs
 
 
 def load_structure(file_path: str | Path) -> TRC | list[TRC]:
-    """
-    Load structure from PDB, mmCIF, or JSON file.
-
-    Args:
-        file_path: Path to structure file
-
-    Returns:
-        TRC structure or list of TRC structures
-    """
+    """Load structure from PDB, mmCIF, SDF, or JSON file."""
     path = Path(file_path)
-    # Determine file type by extension
     suffix = path.suffix.lower()
     if suffix == ".json":
         return from_json(path)
@@ -39,8 +51,9 @@ def load_structure(file_path: str | Path) -> TRC | list[TRC]:
         return from_mmcif(content)
     elif suffix == ".pdb":
         return from_pdb(content)
+    elif suffix == ".sdf":
+        return from_sdf(content)
     else:
-        # Try to guess from content
         content_lower = content.lower()
         if content.strip().startswith("[") or content.strip().startswith("{"):
             return from_json(std_json.loads(content))
@@ -53,23 +66,18 @@ def load_structure(file_path: str | Path) -> TRC | list[TRC]:
 def save_structure(
     trcs: TRC | list[TRC], file_path: str | Path, format: str | None = None
 ):
-    """
-    Save TRC structures to file.
-
-    Args:
-        trcs: TRC structure or list of TRC structures
-        file_path: Output file path
-        format: Output format ('pdb', 'json', or None for auto-detect from extension)
-    """
+    """Save TRC structures to file."""
     path = Path(file_path)
     if format is None:
-        # Auto-detect from extension
-        if path.suffix.lower() == ".json":
+        suffix = path.suffix.lower()
+        if suffix == ".json":
             format = "json"
-        elif path.suffix.lower() == ".pdb":
+        elif suffix == ".pdb":
             format = "pdb"
         else:
-            format = "pdb"  # Default
+            raise ValueError(
+                f"Cannot infer format from extension '{suffix}'; pass format= explicitly"
+            )
 
     if format.lower() == "json":
         with path.open("w") as f:
@@ -79,7 +87,6 @@ def save_structure(
         if isinstance(trcs, TRC):
             trcs = [trcs]
         if len(trcs) > 1:
-            # Multi-model PDB
             content_parts = []
             for i, trc in enumerate(trcs, 1):
                 content_parts.append(f"MODEL     {i:>4}")
@@ -129,16 +136,13 @@ def _load_trc(trc: TrcInput) -> TRC:
     if isinstance(trc, TRC):
         return trc
     if isinstance(trc, (str, Path)):
-        path = Path(trc)
-        if not path.exists():
-            raise FileNotFoundError(f"TRC file not found: {trc}")
-        loaded: TRC | list[TRC] = from_json(path)
+        loaded = load_structure(trc)
         if _is_trc_list(loaded):
             if len(loaded) == 1:
                 return loaded[0]
-            merged = copy.deepcopy(loaded[0])
+            merged = loaded[0]
             for next_trc in loaded[1:]:
-                merged.extend(next_trc)
+                merged = merged.extend(next_trc)
             return merged
         if isinstance(loaded, list):
             raise TypeError("Expected TRC list elements to be TRC objects")
@@ -153,43 +157,15 @@ def merge_trcs(
 ) -> TRC:
     """
     Merge TRC objects into a single TRC.
-
-    A TRC (Topology-Residues-Chains) object contains:
-    - topology: atom information (symbols, geometry, bonds, charges, etc.)
-    - residues: residue information (which atoms belong to which residues)
-    - chains: chain information (which residues belong to which chains)
-
-    When merging, atom indices, residue indices, and chain indices are renumbered
-    to ensure uniqueness in the merged structure.
-
-    Args:
-        trcs: TRC objects or file paths. If a single list/tuple is provided,
-            it is treated as the full set of inputs.
-        output_file: Optional path to write the merged TRC JSON.
-        skip_validation: If True, skip validation of the merged TRC.
-
-    Returns:
-        Merged TRC object.
-
-    Raises:
-        ValueError: If no inputs are provided or validation fails.
-        FileNotFoundError: If file paths are provided but files don't exist.
     """
     trc_inputs = _normalize_trc_inputs(trcs)
 
     if not trc_inputs:
         raise ValueError("Expected at least one TRC input, found 0")
 
-    merged: TRC | None = None
-    for trc in trc_inputs:
-        trc_obj = _load_trc(trc)
-        if merged is None:
-            merged = copy.deepcopy(trc_obj)
-        else:
-            merged.extend(trc_obj)
-
-    if merged is None:
-        raise ValueError("Expected at least one TRC input, found 0")
+    merged = _load_trc(trc_inputs[0])
+    for trc in trc_inputs[1:]:
+        merged = merged.extend(_load_trc(trc))
 
     if not skip_validation:
         merged.check()

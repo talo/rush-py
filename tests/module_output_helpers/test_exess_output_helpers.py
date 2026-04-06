@@ -135,17 +135,13 @@ def test_optimization_ref_fetch(monkeypatch):
 
     assert isinstance(result, OptimizationResult)
     assert len(result.trajectory) == 1
-    assert result.trajectory[0].geometry == [
-        0.0,
-        0.0,
-        0.0,
-        0.7,
-        0.5,
-        0.0,
-        -0.7,
-        0.5,
-        0.0,
-    ]
+    import numpy as np
+
+    np.testing.assert_allclose(
+        result.trajectory[0].geometry,
+        [[0.0, 0.0, 0.0], [0.7, 0.5, 0.0], [-0.7, 0.5, 0.0]],
+        atol=1e-6,
+    )
     assert result.steps == [
         OptimizationStep(total_energy=-76.0, max_gradient_component=1e-4)
     ]

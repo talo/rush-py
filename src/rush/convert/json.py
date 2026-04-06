@@ -8,20 +8,13 @@ from os import PathLike
 from pathlib import Path
 from typing import TypeGuard, overload
 
-from ..mol import TRC, Chains, Residues, Topology
+from ..mol import TRC
 
 StrPath = PathLike[str]
 
 
 def _trcs_from_dicts(trc_dicts: list[dict]) -> list[TRC]:
-    return [
-        TRC(
-            topology=Topology.from_json(trc_dict["topology"]),
-            residues=Residues.from_json(trc_dict["residues"]),
-            chains=Chains.from_json(trc_dict["chains"]),
-        )
-        for trc_dict in trc_dicts
-    ]
+    return [TRC.from_dict(d) for d in trc_dicts]
 
 
 def _is_dict_list(value: object) -> TypeGuard[list[dict]]:
@@ -102,25 +95,11 @@ def from_json(
 
 def to_dict(
     trcs: TRC | list[TRC],
-) -> dict[str, dict[str, object]] | list[dict[str, dict[str, object]]]:
+) -> dict | list[dict]:
     """
-    Convert TRC structures to JSON.
-
-    Args:
-        trcs: TRC structure or list of TRC structures
-
-    Returns:
-        JSON-compatible dict or list of dicts
+    Convert TRC structures to JSON-serializable dicts.
     """
-
     if isinstance(trcs, TRC):
         trcs = [trcs]
-    data = [
-        {
-            "topology": trc.topology.to_dict(),
-            "residues": trc.residues.to_dict(),
-            "chains": trc.chains.to_dict(),
-        }
-        for trc in trcs
-    ]
+    data = [trc.to_dict() for trc in trcs]
     return data[0] if len(data) == 1 else data
