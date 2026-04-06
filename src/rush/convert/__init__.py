@@ -16,30 +16,70 @@ from .json import from_json, to_dict
 
 
 def from_pdb(pdb_content: str) -> TRC | list[TRC]:
-    """Parse PDB file content into TRC structures."""
+    """Parse PDB file content into TRC structures.
+
+    Args:
+        pdb_content: Raw PDB file text.
+
+    Returns:
+        A single TRC if the file contains one model, otherwise a list of TRCs.
+    """
     trcs = libqdx.from_pdb(pdb_content)
     return trcs[0] if len(trcs) == 1 else trcs
 
 
 def to_pdb(trc: TRC) -> str:
-    """Convert TRC structure to PDB format string."""
+    """Convert a TRC structure to PDB format text.
+
+    Args:
+        trc: TRC structure to serialise.
+
+    Returns:
+        PDB-formatted string (includes trailing END record).
+    """
     return libqdx.to_pdb(trc)
 
 
 def from_mmcif(mmcif_content: str) -> TRC | list[TRC]:
-    """Parse mmCIF file contents into TRC structures."""
+    """Parse mmCIF file contents into TRC structures.
+
+    Args:
+        mmcif_content: Raw mmCIF file text.
+
+    Returns:
+        A single TRC if the file contains one model, otherwise a list of TRCs.
+    """
     trcs = libqdx.from_mmcif(mmcif_content)
     return trcs[0] if len(trcs) == 1 else trcs
 
 
 def from_sdf(sdf_content: str) -> TRC | list[TRC]:
-    """Parse SDF file contents into TRC structures."""
+    """Parse SDF file contents into TRC structures.
+
+    Args:
+        sdf_content: Raw SDF / MOL file text.
+
+    Returns:
+        A single TRC if the file contains one molecule, otherwise a list of TRCs.
+    """
     trcs = libqdx.from_sdf(sdf_content)
     return trcs[0] if len(trcs) == 1 else trcs
 
 
 def load_structure(file_path: str | Path) -> TRC | list[TRC]:
-    """Load structure from PDB, mmCIF, SDF, or JSON file."""
+    """Load a molecular structure from a file.
+
+    Supported formats: PDB, mmCIF (.cif / .mmcif), SDF, and TRC JSON.
+    The format is determined by extension; when the extension is
+    unrecognised the content is inspected heuristically.
+
+    Args:
+        file_path: Path to the structure file.
+
+    Returns:
+        A single TRC when the file contains one model/molecule, otherwise
+        a list of TRCs.
+    """
     path = Path(file_path)
     suffix = path.suffix.lower()
     if suffix == ".json":
@@ -66,7 +106,17 @@ def load_structure(file_path: str | Path) -> TRC | list[TRC]:
 def save_structure(
     trcs: TRC | list[TRC], file_path: str | Path, format: str | None = None
 ):
-    """Save TRC structures to file."""
+    """Save TRC structures to a file.
+
+    Args:
+        trcs: TRC structure or list of TRC structures to write.
+        file_path: Output file path.
+        format: Output format (``'pdb'`` or ``'json'``).  When *None* the
+            format is inferred from the file extension.
+
+    Raises:
+        ValueError: If the format cannot be inferred or is unsupported.
+    """
     path = Path(file_path)
     if format is None:
         suffix = path.suffix.lower()
@@ -156,7 +206,23 @@ def merge_trcs(
     skip_validation: bool = False,
 ) -> TRC:
     """
-    Merge TRC objects into a single TRC.
+    Merge one or more TRC objects (or file paths) into a single TRC.
+
+    Atom, residue, and chain indices are renumbered so that the merged
+    structure has unique indices throughout.
+
+    Args:
+        trcs: TRC objects or file paths.  A single list/tuple is treated
+            as the full set of inputs.
+        output_file: Optional path to write the merged TRC as JSON.
+        skip_validation: If *True*, skip ``trc.check()`` on the result.
+
+    Returns:
+        The merged TRC object.
+
+    Raises:
+        ValueError: If no inputs are provided or validation fails.
+        FileNotFoundError: If a file path does not exist.
     """
     trc_inputs = _normalize_trc_inputs(trcs)
 

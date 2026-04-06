@@ -98,6 +98,13 @@ def to_dict(
 ) -> dict | list[dict]:
     """
     Convert TRC structures to JSON-serializable dicts.
+
+    Args:
+        trcs: A single TRC or a list of TRC structures.
+
+    Returns:
+        A dict (if a single TRC was given) or a list of dicts, each
+        containing ``topology``, ``residues``, and ``chains`` keys.
     """
     if isinstance(trcs, TRC):
         trcs = [trcs]
