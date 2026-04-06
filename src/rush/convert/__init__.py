@@ -94,6 +94,7 @@ def load_structure(file_path: str | Path) -> TRC | list[TRC]:
     elif suffix == ".sdf":
         return from_sdf(content)
     else:
+        # Unrecognised extension — try to guess from content
         content_lower = content.lower()
         if content.strip().startswith("[") or content.strip().startswith("{"):
             return from_json(std_json.loads(content))
@@ -137,6 +138,7 @@ def save_structure(
         if isinstance(trcs, TRC):
             trcs = [trcs]
         if len(trcs) > 1:
+            # Multi-model PDB: wrap each TRC in MODEL/ENDMDL records
             content_parts = []
             for i, trc in enumerate(trcs, 1):
                 content_parts.append(f"MODEL     {i:>4}")
