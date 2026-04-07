@@ -23,7 +23,7 @@ from pathlib import Path
 
 import numpy as np
 
-from rush import RunOpts, TRC, Topology, exess
+from rush import TRC, RunOpts, Topology, exess
 from rush.exess import Trajectory
 from rush.mol import Element
 
