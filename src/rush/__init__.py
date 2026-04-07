@@ -34,6 +34,7 @@ from .mol import (
     Stereochemistry,
     StrandSense,
     AtomCheckStrictness,
+    get_fragments_near_fragment,
 )
 from .objects import (
     ObjectID,
@@ -105,4 +106,5 @@ __all__ = [
     "ResidueRef",
     "ChainRef",
     "FragmentRef",
+    "get_fragments_near_fragment",
 ]

@@ -97,6 +97,7 @@ Validation::
     trc.check()                # raises on inconsistent data
 """
 
+import sys
 from enum import Enum
 from typing import NewType
 
@@ -213,3 +214,93 @@ class AminoAcidSeq(Enum):
     def to_single_letter(self) -> str:
         """Convert to single letter code."""
         return self._SINGLE_LETTER.get(self.value, "X")
+
+
+def distance_between_atoms(topology: Topology, atom1: AtomRef, atom2: AtomRef) -> float:
+    """Calculate distance between two atoms."""
+    if atom1 >= len(topology.symbols) or atom2 >= len(topology.symbols):
+        raise ValueError("Invalid atom indices")
+
+    i1, i2 = atom1 * 3, atom2 * 3
+    dx = topology.geometry[i1] - topology.geometry[i2]
+    dy = topology.geometry[i1 + 1] - topology.geometry[i2 + 1]
+    dz = topology.geometry[i1 + 2] - topology.geometry[i2 + 2]
+
+    return (dx * dx + dy * dy + dz * dz) ** 0.5
+
+
+def distance_to_point(
+    topology: Topology, atom: AtomRef, point: tuple[float, float, float]
+) -> float:
+    """Calculate distance from atom to a point."""
+    if atom >= len(topology.symbols):
+        raise ValueError("Invalid atom index")
+
+    i = atom * 3
+    dx = topology.geometry[i] - point[0]
+    dy = topology.geometry[i + 1] - point[1]
+    dz = topology.geometry[i + 2] - point[2]
+
+    return (dx * dx + dy * dy + dz * dz) ** 0.5
+
+
+def get_atoms_near_point(
+    topology: Topology,
+    point: tuple[float, float, float],
+    threshold: float,
+    atom_indices: list[int] | None = None,
+) -> list[int]:
+    """Get atom indices within threshold distance of a point."""
+    if atom_indices is None:
+        atom_indices = list(range(len(topology.symbols)))
+
+    near_atoms = []
+    for atom_idx in atom_indices:
+        if atom_idx >= len(topology.symbols):
+            continue
+
+        distance = distance_to_point(topology, AtomRef(atom_idx), point)
+        if distance <= threshold:
+            near_atoms.append(atom_idx)
+
+    return near_atoms
+
+
+def get_fragments_near_fragment(
+    topology: Topology,
+    frag_idx: int,
+    threshold: float,
+    atom_indices: list[int] | None = None,
+) -> list[FragmentRef]:
+    """Get fragment indices within threshold distance of another fragment."""
+    if not topology.fragments:
+        return []
+
+    if atom_indices is None:
+        atom_indices = list(range(len(topology.symbols)))
+
+    near_atoms = set()
+    for atom_idx in topology.fragments[frag_idx]:
+        atom_idx = int(atom_idx)
+        if atom_idx >= len(topology.symbols):
+            print("Warning: bad atom index {atom_index}", file=sys.stderr)
+            continue
+
+        near_atoms |= {
+            AtomRef(a)
+            for a in get_atoms_near_point(
+                topology,
+                (
+                    topology.geometry[atom_idx * 3],
+                    topology.geometry[atom_idx * 3 + 1],
+                    topology.geometry[atom_idx * 3 + 2],
+                ),
+                threshold,
+            )
+        }
+
+    return [
+        FragmentRef(i)
+        for (i, f) in enumerate(topology.fragments)
+        if (i != frag_idx and not near_atoms.isdisjoint(f))
+    ]
