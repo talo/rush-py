@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.1.0
+
+### Added
+- Use libdx for TRC and file conversion capabilities; conversion to/from SDF, to/from XYZ, and
+  `perceive_bonds` and `perceive_formal_charges` member functions on TRCS are now available
+
 ## 7.0.0
 
 No new changes since 7.0.0rc3.
