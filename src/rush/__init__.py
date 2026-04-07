@@ -21,7 +21,6 @@ from .mol import (
     Residues,
     Chains,
     AlphaHelices,
-    AminoAcidSeq,
     AtomRef,
     BetaSheets,
     Bond,
@@ -34,7 +33,6 @@ from .mol import (
     Stereochemistry,
     StrandSense,
     AtomCheckStrictness,
-    get_fragments_near_fragment,
 )
 from .objects import (
     ObjectID,
