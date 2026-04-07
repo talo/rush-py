@@ -142,6 +142,10 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#reference-index-types">Reference / index types</a></li>
 <li><a class="reference internal" href="#quick-examples">Quick examples</a></li>
 <li><a class="reference internal" href="#rush.mol.AminoAcidSeq"><code class="docutils literal notranslate"><span class="pre">AminoAcidSeq</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.distance_between_atoms"><code class="docutils literal notranslate"><span class="pre">distance_between_atoms()</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.distance_to_point"><code class="docutils literal notranslate"><span class="pre">distance_to_point()</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.get_atoms_near_point"><code class="docutils literal notranslate"><span class="pre">get_atoms_near_point()</span></code></a></li>
+<li><a class="reference internal" href="#rush.mol.get_fragments_near_fragment"><code class="docutils literal notranslate"><span class="pre">get_fragments_near_fragment()</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -299,6 +303,80 @@ where a <code class="docutils literal notranslate"><span class="pre">ResidueRef<
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.mol.distance_between_atoms">
+<span class="sig-prename descclassname"><span class="pre">rush.mol.</span></span><span class="sig-name descname"><span class="pre">distance_between_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#distance_between_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.distance_between_atoms" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate distance between two atoms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<em>PyTopology</em>)</p></li>
+<li><p><strong>atom1</strong> (<em>AtomRef</em>)</p></li>
+<li><p><strong>atom2</strong> (<em>AtomRef</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>float</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.mol.distance_to_point">
+<span class="sig-prename descclassname"><span class="pre">rush.mol.</span></span><span class="sig-name descname"><span class="pre">distance_to_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#distance_to_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.distance_to_point" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate distance from atom to a point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<em>PyTopology</em>)</p></li>
+<li><p><strong>atom</strong> (<em>AtomRef</em>)</p></li>
+<li><p><strong>point</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>float</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.mol.get_atoms_near_point">
+<span class="sig-prename descclassname"><span class="pre">rush.mol.</span></span><span class="sig-name descname"><span class="pre">get_atoms_near_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#get_atoms_near_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.get_atoms_near_point" title="Link to this definition">¶</a></dt>
+<dd><p>Get atom indices within threshold distance of a point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<em>PyTopology</em>)</p></li>
+<li><p><strong>point</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>]</em>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>)</p></li>
+<li><p><strong>atom_indices</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list</em>[<em>int</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.mol.get_fragments_near_fragment">
+<span class="sig-prename descclassname"><span class="pre">rush.mol.</span></span><span class="sig-name descname"><span class="pre">get_fragments_near_fragment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frag_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/mol.html#get_fragments_near_fragment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.mol.get_fragments_near_fragment" title="Link to this definition">¶</a></dt>
+<dd><p>Get fragment indices within threshold distance of another fragment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<em>PyTopology</em>)</p></li>
+<li><p><strong>frag_idx</strong> (<em>int</em>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>)</p></li>
+<li><p><strong>atom_indices</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list</em>[<em>FragmentRef</em>]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

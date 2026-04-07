@@ -268,130 +268,233 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="97"><span class="sd">    trc.check()                # raises on inconsistent data</span>
 </span><span data-line="98"><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="99">
-</span><span data-line="100"><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
-</span><span data-line="101"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NewType</span>
-</span><span data-line="102">
-</span><span data-line="103"><span class="kn">import</span><span class="w"> </span><span class="nn">libqdx</span>
-</span><span data-line="104">
-</span><span data-line="105"><span class="c1"># Ref types — distinct for type checking, plain int at runtime</span>
-</span><span data-line="106"><span class="n">AtomRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;AtomRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-</span><span data-line="107"><span class="n">ResidueRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ResidueRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-</span><span data-line="108"><span class="n">ChainRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ChainRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-</span><span data-line="109"><span class="n">FragmentRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;FragmentRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-</span><span data-line="110">
-</span><span data-line="111"><span class="c1"># Re-export native types</span>
-</span><span data-line="112"><span class="n">TRC</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyTRC</span>
-</span><span data-line="113"><span class="n">Topology</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyTopology</span>
-</span><span data-line="114"><span class="n">Residues</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyResidues</span>
-</span><span data-line="115"><span class="n">Chains</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyChains</span>
-</span><span data-line="116"><span class="n">Element</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">Element</span>
-</span><span data-line="117"><span class="n">Bond</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">Bond</span>
-</span><span data-line="118"><span class="n">BondOrder</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">BondOrder</span>
-</span><span data-line="119"><span class="n">Stereochemistry</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">Stereochemistry</span>
-</span><span data-line="120"><span class="n">HelixClass</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">HelixClass</span>
-</span><span data-line="121"><span class="n">StrandSense</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">StrandSense</span>
-</span><span data-line="122"><span class="n">AlphaHelices</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">AlphaHelices</span>
-</span><span data-line="123"><span class="n">BetaSheets</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">BetaSheets</span>
-</span><span data-line="124"><span class="n">AtomCheckStrictness</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">AtomCheckStrictness</span>
-</span><span data-line="125">
+</span><span data-line="100"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="101"><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+</span><span data-line="102"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NewType</span>
+</span><span data-line="103">
+</span><span data-line="104"><span class="kn">import</span><span class="w"> </span><span class="nn">libqdx</span>
+</span><span data-line="105">
+</span><span data-line="106"><span class="c1"># Ref types — distinct for type checking, plain int at runtime</span>
+</span><span data-line="107"><span class="n">AtomRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;AtomRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+</span><span data-line="108"><span class="n">ResidueRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ResidueRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+</span><span data-line="109"><span class="n">ChainRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;ChainRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+</span><span data-line="110"><span class="n">FragmentRef</span> <span class="o">=</span> <span class="n">NewType</span><span class="p">(</span><span class="s2">&quot;FragmentRef&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+</span><span data-line="111">
+</span><span data-line="112"><span class="c1"># Re-export native types</span>
+</span><span data-line="113"><span class="n">TRC</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyTRC</span>
+</span><span data-line="114"><span class="n">Topology</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyTopology</span>
+</span><span data-line="115"><span class="n">Residues</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyResidues</span>
+</span><span data-line="116"><span class="n">Chains</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">PyChains</span>
+</span><span data-line="117"><span class="n">Element</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">Element</span>
+</span><span data-line="118"><span class="n">Bond</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">Bond</span>
+</span><span data-line="119"><span class="n">BondOrder</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">BondOrder</span>
+</span><span data-line="120"><span class="n">Stereochemistry</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">Stereochemistry</span>
+</span><span data-line="121"><span class="n">HelixClass</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">HelixClass</span>
+</span><span data-line="122"><span class="n">StrandSense</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">StrandSense</span>
+</span><span data-line="123"><span class="n">AlphaHelices</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">AlphaHelices</span>
+</span><span data-line="124"><span class="n">BetaSheets</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">BetaSheets</span>
+</span><span data-line="125"><span class="n">AtomCheckStrictness</span> <span class="o">=</span> <span class="n">libqdx</span><span class="o">.</span><span class="n">AtomCheckStrictness</span>
 </span><span data-line="126">
+</span><span data-line="127">
 <div class="viewcode-block" id="AminoAcidSeq">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.AminoAcidSeq">[docs]</a>
-</span><span data-line="127"><span class="k">class</span><span class="w"> </span><span class="nc">AminoAcidSeq</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-</span><span data-line="128"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Amino acid sequence names.&quot;&quot;&quot;</span>
-</span><span data-line="129">
-</span><span data-line="130">    <span class="n">GLY</span> <span class="o">=</span> <span class="s2">&quot;GLY&quot;</span>
-</span><span data-line="131">    <span class="n">ALA</span> <span class="o">=</span> <span class="s2">&quot;ALA&quot;</span>
-</span><span data-line="132">    <span class="n">VAL</span> <span class="o">=</span> <span class="s2">&quot;VAL&quot;</span>
-</span><span data-line="133">    <span class="n">LEU</span> <span class="o">=</span> <span class="s2">&quot;LEU&quot;</span>
-</span><span data-line="134">    <span class="n">ILE</span> <span class="o">=</span> <span class="s2">&quot;ILE&quot;</span>
-</span><span data-line="135">    <span class="n">PRO</span> <span class="o">=</span> <span class="s2">&quot;PRO&quot;</span>
-</span><span data-line="136">    <span class="n">SER</span> <span class="o">=</span> <span class="s2">&quot;SER&quot;</span>
-</span><span data-line="137">    <span class="n">THR</span> <span class="o">=</span> <span class="s2">&quot;THR&quot;</span>
-</span><span data-line="138">    <span class="n">ASN</span> <span class="o">=</span> <span class="s2">&quot;ASN&quot;</span>
-</span><span data-line="139">    <span class="n">GLN</span> <span class="o">=</span> <span class="s2">&quot;GLN&quot;</span>
-</span><span data-line="140">    <span class="n">CYS</span> <span class="o">=</span> <span class="s2">&quot;CYS&quot;</span>
-</span><span data-line="141">    <span class="n">CYD</span> <span class="o">=</span> <span class="s2">&quot;CYD&quot;</span>
-</span><span data-line="142">    <span class="n">CYX</span> <span class="o">=</span> <span class="s2">&quot;CYX&quot;</span>
-</span><span data-line="143">    <span class="n">MET</span> <span class="o">=</span> <span class="s2">&quot;MET&quot;</span>
-</span><span data-line="144">    <span class="n">PHE</span> <span class="o">=</span> <span class="s2">&quot;PHE&quot;</span>
-</span><span data-line="145">    <span class="n">TYR</span> <span class="o">=</span> <span class="s2">&quot;TYR&quot;</span>
-</span><span data-line="146">    <span class="n">TYD</span> <span class="o">=</span> <span class="s2">&quot;TYD&quot;</span>
-</span><span data-line="147">    <span class="n">TRP</span> <span class="o">=</span> <span class="s2">&quot;TRP&quot;</span>
-</span><span data-line="148">    <span class="n">ASP</span> <span class="o">=</span> <span class="s2">&quot;ASP&quot;</span>
-</span><span data-line="149">    <span class="n">ASH</span> <span class="o">=</span> <span class="s2">&quot;ASH&quot;</span>
-</span><span data-line="150">    <span class="n">GLU</span> <span class="o">=</span> <span class="s2">&quot;GLU&quot;</span>
-</span><span data-line="151">    <span class="n">GLH</span> <span class="o">=</span> <span class="s2">&quot;GLH&quot;</span>
-</span><span data-line="152">    <span class="n">HIS</span> <span class="o">=</span> <span class="s2">&quot;HIS&quot;</span>
-</span><span data-line="153">    <span class="n">HIN</span> <span class="o">=</span> <span class="s2">&quot;HIN&quot;</span>
-</span><span data-line="154">    <span class="n">HID</span> <span class="o">=</span> <span class="s2">&quot;HID&quot;</span>
-</span><span data-line="155">    <span class="n">HIE</span> <span class="o">=</span> <span class="s2">&quot;HIE&quot;</span>
-</span><span data-line="156">    <span class="n">HIP</span> <span class="o">=</span> <span class="s2">&quot;HIP&quot;</span>
-</span><span data-line="157">    <span class="n">LYS</span> <span class="o">=</span> <span class="s2">&quot;LYS&quot;</span>
-</span><span data-line="158">    <span class="n">LYD</span> <span class="o">=</span> <span class="s2">&quot;LYD&quot;</span>
-</span><span data-line="159">    <span class="n">LYN</span> <span class="o">=</span> <span class="s2">&quot;LYN&quot;</span>
-</span><span data-line="160">    <span class="n">ARG</span> <span class="o">=</span> <span class="s2">&quot;ARG&quot;</span>
-</span><span data-line="161">    <span class="n">HYP</span> <span class="o">=</span> <span class="s2">&quot;HYP&quot;</span>
-</span><span data-line="162">    <span class="n">ACE</span> <span class="o">=</span> <span class="s2">&quot;ACE&quot;</span>
-</span><span data-line="163">    <span class="n">BNC</span> <span class="o">=</span> <span class="s2">&quot;BNC&quot;</span>
-</span><span data-line="164">    <span class="n">NME</span> <span class="o">=</span> <span class="s2">&quot;NME&quot;</span>
-</span><span data-line="165">    <span class="n">NMA</span> <span class="o">=</span> <span class="s2">&quot;NMA&quot;</span>
-</span><span data-line="166">    <span class="n">NHH</span> <span class="o">=</span> <span class="s2">&quot;NHH&quot;</span>
-</span><span data-line="167">    <span class="n">UNK</span> <span class="o">=</span> <span class="s2">&quot;UNK&quot;</span>
-</span><span data-line="168">
+</span><span data-line="128"><span class="k">class</span><span class="w"> </span><span class="nc">AminoAcidSeq</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+</span><span data-line="129"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Amino acid sequence names.&quot;&quot;&quot;</span>
+</span><span data-line="130">
+</span><span data-line="131">    <span class="n">GLY</span> <span class="o">=</span> <span class="s2">&quot;GLY&quot;</span>
+</span><span data-line="132">    <span class="n">ALA</span> <span class="o">=</span> <span class="s2">&quot;ALA&quot;</span>
+</span><span data-line="133">    <span class="n">VAL</span> <span class="o">=</span> <span class="s2">&quot;VAL&quot;</span>
+</span><span data-line="134">    <span class="n">LEU</span> <span class="o">=</span> <span class="s2">&quot;LEU&quot;</span>
+</span><span data-line="135">    <span class="n">ILE</span> <span class="o">=</span> <span class="s2">&quot;ILE&quot;</span>
+</span><span data-line="136">    <span class="n">PRO</span> <span class="o">=</span> <span class="s2">&quot;PRO&quot;</span>
+</span><span data-line="137">    <span class="n">SER</span> <span class="o">=</span> <span class="s2">&quot;SER&quot;</span>
+</span><span data-line="138">    <span class="n">THR</span> <span class="o">=</span> <span class="s2">&quot;THR&quot;</span>
+</span><span data-line="139">    <span class="n">ASN</span> <span class="o">=</span> <span class="s2">&quot;ASN&quot;</span>
+</span><span data-line="140">    <span class="n">GLN</span> <span class="o">=</span> <span class="s2">&quot;GLN&quot;</span>
+</span><span data-line="141">    <span class="n">CYS</span> <span class="o">=</span> <span class="s2">&quot;CYS&quot;</span>
+</span><span data-line="142">    <span class="n">CYD</span> <span class="o">=</span> <span class="s2">&quot;CYD&quot;</span>
+</span><span data-line="143">    <span class="n">CYX</span> <span class="o">=</span> <span class="s2">&quot;CYX&quot;</span>
+</span><span data-line="144">    <span class="n">MET</span> <span class="o">=</span> <span class="s2">&quot;MET&quot;</span>
+</span><span data-line="145">    <span class="n">PHE</span> <span class="o">=</span> <span class="s2">&quot;PHE&quot;</span>
+</span><span data-line="146">    <span class="n">TYR</span> <span class="o">=</span> <span class="s2">&quot;TYR&quot;</span>
+</span><span data-line="147">    <span class="n">TYD</span> <span class="o">=</span> <span class="s2">&quot;TYD&quot;</span>
+</span><span data-line="148">    <span class="n">TRP</span> <span class="o">=</span> <span class="s2">&quot;TRP&quot;</span>
+</span><span data-line="149">    <span class="n">ASP</span> <span class="o">=</span> <span class="s2">&quot;ASP&quot;</span>
+</span><span data-line="150">    <span class="n">ASH</span> <span class="o">=</span> <span class="s2">&quot;ASH&quot;</span>
+</span><span data-line="151">    <span class="n">GLU</span> <span class="o">=</span> <span class="s2">&quot;GLU&quot;</span>
+</span><span data-line="152">    <span class="n">GLH</span> <span class="o">=</span> <span class="s2">&quot;GLH&quot;</span>
+</span><span data-line="153">    <span class="n">HIS</span> <span class="o">=</span> <span class="s2">&quot;HIS&quot;</span>
+</span><span data-line="154">    <span class="n">HIN</span> <span class="o">=</span> <span class="s2">&quot;HIN&quot;</span>
+</span><span data-line="155">    <span class="n">HID</span> <span class="o">=</span> <span class="s2">&quot;HID&quot;</span>
+</span><span data-line="156">    <span class="n">HIE</span> <span class="o">=</span> <span class="s2">&quot;HIE&quot;</span>
+</span><span data-line="157">    <span class="n">HIP</span> <span class="o">=</span> <span class="s2">&quot;HIP&quot;</span>
+</span><span data-line="158">    <span class="n">LYS</span> <span class="o">=</span> <span class="s2">&quot;LYS&quot;</span>
+</span><span data-line="159">    <span class="n">LYD</span> <span class="o">=</span> <span class="s2">&quot;LYD&quot;</span>
+</span><span data-line="160">    <span class="n">LYN</span> <span class="o">=</span> <span class="s2">&quot;LYN&quot;</span>
+</span><span data-line="161">    <span class="n">ARG</span> <span class="o">=</span> <span class="s2">&quot;ARG&quot;</span>
+</span><span data-line="162">    <span class="n">HYP</span> <span class="o">=</span> <span class="s2">&quot;HYP&quot;</span>
+</span><span data-line="163">    <span class="n">ACE</span> <span class="o">=</span> <span class="s2">&quot;ACE&quot;</span>
+</span><span data-line="164">    <span class="n">BNC</span> <span class="o">=</span> <span class="s2">&quot;BNC&quot;</span>
+</span><span data-line="165">    <span class="n">NME</span> <span class="o">=</span> <span class="s2">&quot;NME&quot;</span>
+</span><span data-line="166">    <span class="n">NMA</span> <span class="o">=</span> <span class="s2">&quot;NMA&quot;</span>
+</span><span data-line="167">    <span class="n">NHH</span> <span class="o">=</span> <span class="s2">&quot;NHH&quot;</span>
+</span><span data-line="168">    <span class="n">UNK</span> <span class="o">=</span> <span class="s2">&quot;UNK&quot;</span>
+</span><span data-line="169">
 <div class="viewcode-block" id="AminoAcidSeq.is_amino_acid">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.AminoAcidSeq.is_amino_acid">[docs]</a>
-</span><span data-line="169">    <span class="nd">@classmethod</span>
-</span><span data-line="170">    <span class="k">def</span><span class="w"> </span><span class="nf">is_amino_acid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">residue_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="171"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a residue name is a known amino acid.&quot;&quot;&quot;</span>
-</span><span data-line="172">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="173">            <span class="bp">cls</span><span class="p">(</span><span class="n">residue_name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
-</span><span data-line="174">            <span class="k">return</span> <span class="kc">True</span>
-</span><span data-line="175">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="176">            <span class="k">return</span> <span class="kc">False</span></div>
+</span><span data-line="170">    <span class="nd">@classmethod</span>
+</span><span data-line="171">    <span class="k">def</span><span class="w"> </span><span class="nf">is_amino_acid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">residue_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="172"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a residue name is a known amino acid.&quot;&quot;&quot;</span>
+</span><span data-line="173">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="174">            <span class="bp">cls</span><span class="p">(</span><span class="n">residue_name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+</span><span data-line="175">            <span class="k">return</span> <span class="kc">True</span>
+</span><span data-line="176">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="177">            <span class="k">return</span> <span class="kc">False</span></div>
 
-</span><span data-line="177">
-</span><span data-line="178">    <span class="n">_SINGLE_LETTER</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="179">        <span class="s2">&quot;GLY&quot;</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
-</span><span data-line="180">        <span class="s2">&quot;ALA&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
-</span><span data-line="181">        <span class="s2">&quot;VAL&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>
-</span><span data-line="182">        <span class="s2">&quot;LEU&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
-</span><span data-line="183">        <span class="s2">&quot;ILE&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
-</span><span data-line="184">        <span class="s2">&quot;PRO&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>
-</span><span data-line="185">        <span class="s2">&quot;SER&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
-</span><span data-line="186">        <span class="s2">&quot;THR&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
-</span><span data-line="187">        <span class="s2">&quot;ASN&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
-</span><span data-line="188">        <span class="s2">&quot;GLN&quot;</span><span class="p">:</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span>
-</span><span data-line="189">        <span class="s2">&quot;CYS&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
-</span><span data-line="190">        <span class="s2">&quot;CYD&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
-</span><span data-line="191">        <span class="s2">&quot;CYX&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
-</span><span data-line="192">        <span class="s2">&quot;MET&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span>
-</span><span data-line="193">        <span class="s2">&quot;PHE&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span>
-</span><span data-line="194">        <span class="s2">&quot;TYR&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
-</span><span data-line="195">        <span class="s2">&quot;TYD&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
-</span><span data-line="196">        <span class="s2">&quot;TRP&quot;</span><span class="p">:</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span>
-</span><span data-line="197">        <span class="s2">&quot;ASP&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
-</span><span data-line="198">        <span class="s2">&quot;ASH&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
-</span><span data-line="199">        <span class="s2">&quot;GLU&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
-</span><span data-line="200">        <span class="s2">&quot;GLH&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
-</span><span data-line="201">        <span class="s2">&quot;HIS&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-</span><span data-line="202">        <span class="s2">&quot;HIN&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-</span><span data-line="203">        <span class="s2">&quot;HID&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-</span><span data-line="204">        <span class="s2">&quot;HIE&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-</span><span data-line="205">        <span class="s2">&quot;HIP&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-</span><span data-line="206">        <span class="s2">&quot;LYS&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-</span><span data-line="207">        <span class="s2">&quot;LYD&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-</span><span data-line="208">        <span class="s2">&quot;LYN&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-</span><span data-line="209">        <span class="s2">&quot;ARG&quot;</span><span class="p">:</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span>
-</span><span data-line="210">        <span class="s2">&quot;HYP&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
-</span><span data-line="211">    <span class="p">}</span>
-</span><span data-line="212">
+</span><span data-line="178">
+</span><span data-line="179">    <span class="n">_SINGLE_LETTER</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="180">        <span class="s2">&quot;GLY&quot;</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+</span><span data-line="181">        <span class="s2">&quot;ALA&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+</span><span data-line="182">        <span class="s2">&quot;VAL&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>
+</span><span data-line="183">        <span class="s2">&quot;LEU&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
+</span><span data-line="184">        <span class="s2">&quot;ILE&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
+</span><span data-line="185">        <span class="s2">&quot;PRO&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>
+</span><span data-line="186">        <span class="s2">&quot;SER&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
+</span><span data-line="187">        <span class="s2">&quot;THR&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
+</span><span data-line="188">        <span class="s2">&quot;ASN&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
+</span><span data-line="189">        <span class="s2">&quot;GLN&quot;</span><span class="p">:</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span>
+</span><span data-line="190">        <span class="s2">&quot;CYS&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+</span><span data-line="191">        <span class="s2">&quot;CYD&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+</span><span data-line="192">        <span class="s2">&quot;CYX&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+</span><span data-line="193">        <span class="s2">&quot;MET&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span>
+</span><span data-line="194">        <span class="s2">&quot;PHE&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span>
+</span><span data-line="195">        <span class="s2">&quot;TYR&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+</span><span data-line="196">        <span class="s2">&quot;TYD&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+</span><span data-line="197">        <span class="s2">&quot;TRP&quot;</span><span class="p">:</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span>
+</span><span data-line="198">        <span class="s2">&quot;ASP&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+</span><span data-line="199">        <span class="s2">&quot;ASH&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+</span><span data-line="200">        <span class="s2">&quot;GLU&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+</span><span data-line="201">        <span class="s2">&quot;GLH&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+</span><span data-line="202">        <span class="s2">&quot;HIS&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="203">        <span class="s2">&quot;HIN&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="204">        <span class="s2">&quot;HID&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="205">        <span class="s2">&quot;HIE&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="206">        <span class="s2">&quot;HIP&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+</span><span data-line="207">        <span class="s2">&quot;LYS&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
+</span><span data-line="208">        <span class="s2">&quot;LYD&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
+</span><span data-line="209">        <span class="s2">&quot;LYN&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
+</span><span data-line="210">        <span class="s2">&quot;ARG&quot;</span><span class="p">:</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span>
+</span><span data-line="211">        <span class="s2">&quot;HYP&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
+</span><span data-line="212">    <span class="p">}</span>
+</span><span data-line="213">
 <div class="viewcode-block" id="AminoAcidSeq.to_single_letter">
 <a class="viewcode-back" href="../../rush.mol.html#rush.mol.AminoAcidSeq.to_single_letter">[docs]</a>
-</span><span data-line="213">    <span class="k">def</span><span class="w"> </span><span class="nf">to_single_letter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="214"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to single letter code.&quot;&quot;&quot;</span>
-</span><span data-line="215">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SINGLE_LETTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span></div>
+</span><span data-line="214">    <span class="k">def</span><span class="w"> </span><span class="nf">to_single_letter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="215"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to single letter code.&quot;&quot;&quot;</span>
+</span><span data-line="216">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SINGLE_LETTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span></div>
 </div>
+
+</span><span data-line="217">
+</span><span data-line="218">
+<div class="viewcode-block" id="distance_between_atoms">
+<a class="viewcode-back" href="../../rush.mol.html#rush.mol.distance_between_atoms">[docs]</a>
+</span><span data-line="219"><span class="k">def</span><span class="w"> </span><span class="nf">distance_between_atoms</span><span class="p">(</span><span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span><span class="p">,</span> <span class="n">atom1</span><span class="p">:</span> <span class="n">AtomRef</span><span class="p">,</span> <span class="n">atom2</span><span class="p">:</span> <span class="n">AtomRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="220"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate distance between two atoms.&quot;&quot;&quot;</span>
+</span><span data-line="221">    <span class="k">if</span> <span class="n">atom1</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span> <span class="ow">or</span> <span class="n">atom2</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+</span><span data-line="222">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid atom indices&quot;</span><span class="p">)</span>
+</span><span data-line="223">
+</span><span data-line="224">    <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span> <span class="o">=</span> <span class="n">atom1</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">atom2</span> <span class="o">*</span> <span class="mi">3</span>
+</span><span data-line="225">    <span class="n">dx</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span> <span class="o">-</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i2</span><span class="p">]</span>
+</span><span data-line="226">    <span class="n">dy</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="227">    <span class="n">dz</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i1</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+</span><span data-line="228">
+</span><span data-line="229">    <span class="k">return</span> <span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">+</span> <span class="n">dz</span> <span class="o">*</span> <span class="n">dz</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span></div>
+
+</span><span data-line="230">
+</span><span data-line="231">
+<div class="viewcode-block" id="distance_to_point">
+<a class="viewcode-back" href="../../rush.mol.html#rush.mol.distance_to_point">[docs]</a>
+</span><span data-line="232"><span class="k">def</span><span class="w"> </span><span class="nf">distance_to_point</span><span class="p">(</span>
+</span><span data-line="233">    <span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="n">AtomRef</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span><span data-line="234"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="235"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate distance from atom to a point.&quot;&quot;&quot;</span>
+</span><span data-line="236">    <span class="k">if</span> <span class="n">atom</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+</span><span data-line="237">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid atom index&quot;</span><span class="p">)</span>
+</span><span data-line="238">
+</span><span data-line="239">    <span class="n">i</span> <span class="o">=</span> <span class="n">atom</span> <span class="o">*</span> <span class="mi">3</span>
+</span><span data-line="240">    <span class="n">dx</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="241">    <span class="n">dy</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="242">    <span class="n">dz</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</span><span data-line="243">
+</span><span data-line="244">    <span class="k">return</span> <span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">+</span> <span class="n">dz</span> <span class="o">*</span> <span class="n">dz</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span></div>
+
+</span><span data-line="245">
+</span><span data-line="246">
+<div class="viewcode-block" id="get_atoms_near_point">
+<a class="viewcode-back" href="../../rush.mol.html#rush.mol.get_atoms_near_point">[docs]</a>
+</span><span data-line="247"><span class="k">def</span><span class="w"> </span><span class="nf">get_atoms_near_point</span><span class="p">(</span>
+</span><span data-line="248">    <span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span><span class="p">,</span>
+</span><span data-line="249">    <span class="n">point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span data-line="250">    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+</span><span data-line="251">    <span class="n">atom_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="252"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+</span><span data-line="253"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get atom indices within threshold distance of a point.&quot;&quot;&quot;</span>
+</span><span data-line="254">    <span class="k">if</span> <span class="n">atom_indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="255">        <span class="n">atom_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">)))</span>
+</span><span data-line="256">
+</span><span data-line="257">    <span class="n">near_atoms</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="258">    <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">atom_indices</span><span class="p">:</span>
+</span><span data-line="259">        <span class="k">if</span> <span class="n">atom_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+</span><span data-line="260">            <span class="k">continue</span>
+</span><span data-line="261">
+</span><span data-line="262">        <span class="n">distance</span> <span class="o">=</span> <span class="n">distance_to_point</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">AtomRef</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">),</span> <span class="n">point</span><span class="p">)</span>
+</span><span data-line="263">        <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+</span><span data-line="264">            <span class="n">near_atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">)</span>
+</span><span data-line="265">
+</span><span data-line="266">    <span class="k">return</span> <span class="n">near_atoms</span></div>
+
+</span><span data-line="267">
+</span><span data-line="268">
+<div class="viewcode-block" id="get_fragments_near_fragment">
+<a class="viewcode-back" href="../../rush.mol.html#rush.mol.get_fragments_near_fragment">[docs]</a>
+</span><span data-line="269"><span class="k">def</span><span class="w"> </span><span class="nf">get_fragments_near_fragment</span><span class="p">(</span>
+</span><span data-line="270">    <span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span><span class="p">,</span>
+</span><span data-line="271">    <span class="n">frag_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span data-line="272">    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+</span><span data-line="273">    <span class="n">atom_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="274"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FragmentRef</span><span class="p">]:</span>
+</span><span data-line="275"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get fragment indices within threshold distance of another fragment.&quot;&quot;&quot;</span>
+</span><span data-line="276">    <span class="k">if</span> <span class="ow">not</span> <span class="n">topology</span><span class="o">.</span><span class="n">fragments</span><span class="p">:</span>
+</span><span data-line="277">        <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="278">
+</span><span data-line="279">    <span class="k">if</span> <span class="n">atom_indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="280">        <span class="n">atom_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">)))</span>
+</span><span data-line="281">
+</span><span data-line="282">    <span class="n">near_atoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span data-line="283">    <span class="k">for</span> <span class="n">atom_idx</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">fragments</span><span class="p">[</span><span class="n">frag_idx</span><span class="p">]:</span>
+</span><span data-line="284">        <span class="n">atom_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">atom_idx</span><span class="p">)</span>
+</span><span data-line="285">        <span class="k">if</span> <span class="n">atom_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">):</span>
+</span><span data-line="286">            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: bad atom index </span><span class="si">{atom_index}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="287">            <span class="k">continue</span>
+</span><span data-line="288">
+</span><span data-line="289">        <span class="n">near_atoms</span> <span class="o">|=</span> <span class="p">{</span>
+</span><span data-line="290">            <span class="n">AtomRef</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</span><span data-line="291">            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">get_atoms_near_point</span><span class="p">(</span>
+</span><span data-line="292">                <span class="n">topology</span><span class="p">,</span>
+</span><span data-line="293">                <span class="p">(</span>
+</span><span data-line="294">                    <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
+</span><span data-line="295">                    <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+</span><span data-line="296">                    <span class="n">topology</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">atom_idx</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="p">],</span>
+</span><span data-line="297">                <span class="p">),</span>
+</span><span data-line="298">                <span class="n">threshold</span><span class="p">,</span>
+</span><span data-line="299">            <span class="p">)</span>
+</span><span data-line="300">        <span class="p">}</span>
+</span><span data-line="301">
+</span><span data-line="302">    <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="303">        <span class="n">FragmentRef</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</span><span data-line="304">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">fragments</span><span class="p">)</span>
+</span><span data-line="305">        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="n">frag_idx</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">near_atoms</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+</span><span data-line="306">    <span class="p">]</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
