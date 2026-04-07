@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Topologies and residues - QDX Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Keyword reference" href="keywords.html" /><link rel="prev" title="Input format" href="input.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Topologies and residues"/>
+    <meta name="twitter:card" content="summary"/>
+  <link rel="stylesheet" href="../_static/exess-params.css" /></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input format</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#topologies">topologies</a><ul>
+<li><a class="reference internal" href="#topology-fields">topology fields</a><ul>
+<li><a class="reference internal" href="#geometry">geometry</a></li>
+<li><a class="reference internal" href="#symbols">symbols</a></li>
+<li><a class="reference internal" href="#xyz">xyz</a></li>
+<li><a class="reference internal" href="#connectivity">connectivity</a></li>
+<li><a class="reference internal" href="#stereochemistry">stereochemistry</a></li>
+<li><a class="reference internal" href="#fragments">fragments</a></li>
+<li><a class="reference internal" href="#fragment-formal-charges-fragment-multiplicities">fragment_formal_charges / fragment_multiplicities</a></li>
+<li><a class="reference internal" href="#topology-validation-checks">topology validation checks</a></li>
+<li><a class="reference internal" href="#waters">waters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#residues">residues</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Topologies and residues</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="topologies-and-residues">
+<h1>Topologies and residues<a class="headerlink" href="#topologies-and-residues" title="Link to this heading">¶</a></h1>
+<p>This page contains the full reference for <code class="docutils literal notranslate"><span class="pre">topologies</span></code> and <code class="docutils literal notranslate"><span class="pre">residues</span></code>. The
+<a class="reference internal" href="input.html"><span class="doc std std-doc">input format page</span></a> provides a high-level summary with minimal examples.</p>
+<section id="topologies">
+<span id="id1"></span><h2>topologies<a class="headerlink" href="#topologies" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">topologies</span></code> is an array of <code class="docutils literal notranslate"><span class="pre">topology</span></code> objects. Each <code class="docutils literal notranslate"><span class="pre">topology</span></code> contains the molecular data, fragmentation, and connectivity for a single system. Batched mode is achieved by listing multiple topologies with a shared driver/model/keywords configuration.</p>
+<section id="topology-fields">
+<h3>topology fields<a class="headerlink" href="#topology-fields" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">schema_version</span></code></p></td>
+<td><p>string</p></td>
+<td><p>No</p></td>
+<td><p>Defaults to <code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">symbols</span></code></p></td>
+<td><p>array of string</p></td>
+<td><p>Yes*</p></td>
+<td><p>Atomic symbols (“H”, “C”, etc). Required if <code class="docutils literal notranslate"><span class="pre">xyz</span></code> is not provided.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code></p></td>
+<td><p>array of float</p></td>
+<td><p>Yes*</p></td>
+<td><p>Flat XYZ array (length = 3 * atoms). Required if <code class="docutils literal notranslate"><span class="pre">xyz</span></code> is not provided.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">xyz</span></code></p></td>
+<td><p>string</p></td>
+<td><p>Yes*</p></td>
+<td><p>Path to XYZ file; EXESS will read it instead of <code class="docutils literal notranslate"><span class="pre">symbols</span></code> + <code class="docutils literal notranslate"><span class="pre">geometry</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code></p></td>
+<td><p>array of float</p></td>
+<td><p>No</p></td>
+<td><p>Flat XYZ velocity array (Angstrom/ps).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">labels</span></code></p></td>
+<td><p>array of string</p></td>
+<td><p>No</p></td>
+<td><p>Atom labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">partial_charges</span></code></p></td>
+<td><p>array of float</p></td>
+<td><p>No</p></td>
+<td><p>Per-atom partial charges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">formal_charges</span></code></p></td>
+<td><p>array of int</p></td>
+<td><p>No</p></td>
+<td><p>Per-atom formal charges. Defaults to 0 for all atoms.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code></p></td>
+<td><p>array of bonds</p></td>
+<td><p>No</p></td>
+<td><p>Bond list for covalent fragmentation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code></p></td>
+<td><p>array of int</p></td>
+<td><p>No</p></td>
+<td><p>One entry per bond.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code></p></td>
+<td><p>array of arrays</p></td>
+<td><p>No</p></td>
+<td><p>Zero-indexed atom indices per fragment. If omitted, EXESS assumes a single fragment containing all atoms.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code></p></td>
+<td><p>array of int</p></td>
+<td><p>No</p></td>
+<td><p>Per-fragment formal charges. Defaults to 0 per fragment if omitted.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fragment_partial_charges</span></code></p></td>
+<td><p>array of float</p></td>
+<td><p>No</p></td>
+<td><p>Per-fragment partial charges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code></p></td>
+<td><p>array of int</p></td>
+<td><p>No</p></td>
+<td><p>Per-fragment multiplicities (open-shell systems). Defaults to 1 per fragment if omitted.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">waters</span></code></p></td>
+<td><p>array of two ints</p></td>
+<td><p>No</p></td>
+<td><p>First/last water molecule treated classically.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Inputs require either <code class="docutils literal notranslate"><span class="pre">symbols</span></code> + <code class="docutils literal notranslate"><span class="pre">geometry</span></code> or <code class="docutils literal notranslate"><span class="pre">xyz</span></code>, but not both.</p>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> can be used to annotate specific atoms (e.g., alpha carbons in residues).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">labels</span></code> must match the length of <code class="docutils literal notranslate"><span class="pre">symbols</span></code> if provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is a perceived bond list and should not be treated as a definitive source of bond information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> is only valid if <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is present and must match its length.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> are used for dynamics; they are present only in v1 inputs but are supported.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code> must include each atom exactly once when provided.</p></li>
+<li><p>rush-py expects topology JSON inputs (symbols + geometry). It does not accept <code class="docutils literal notranslate"><span class="pre">xyz</span></code> paths.</p></li>
+</ul>
+<section id="geometry">
+<h4>geometry<a class="headerlink" href="#geometry" title="Link to this heading">¶</a></h4>
+<p>Example layout:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="2"><span class="w">  </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
+</span><span data-line="3"><span class="w">  </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
+</span><span data-line="4"><span class="w">  </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
+</span><span data-line="5"><span class="p">]</span>
+</span></pre></div>
+</div>
+</section>
+<section id="symbols">
+<h4>symbols<a class="headerlink" href="#symbols" title="Link to this heading">¶</a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">]</span>
+</span></pre></div>
+</div>
+</section>
+<section id="xyz">
+<h4>xyz<a class="headerlink" href="#xyz" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">xyz</span></code> can be used instead of <code class="docutils literal notranslate"><span class="pre">geometry</span></code> and <code class="docutils literal notranslate"><span class="pre">symbols</span></code>, including for fragmented systems (it is compatible with fragmentation keywords). Standard XYZ files begin with the atom count, followed by a comment line and then element + XYZ positions:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">3
+</span><span data-line="2">
+</span><span data-line="3">O -1.1570 0.0630 -0.4817
+</span><span data-line="4">H -1.1570 0.8180 -1.0766
+</span><span data-line="5">H -1.1570 -0.6920 -1.0766
+</span></pre></div>
+</div>
+<p>Example usage in EXESS:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;xyz&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/water.xyz&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span data-line="4"><span class="w">  </span><span class="p">]</span>
+</span><span data-line="5"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="connectivity">
+<h4>connectivity<a class="headerlink" href="#connectivity" title="Link to this heading">¶</a></h4>
+<p>Connectivity is required when a covalent bond is broken across fragments. EXESS will add hydrogen caps to satisfy valences and remove them after the calculation.</p>
+<p>A bond entry is <code class="docutils literal notranslate"><span class="pre">[atom_index_1,</span> <span class="pre">atom_index_2,</span> <span class="pre">bond_order]</span></code>.</p>
+<p>EXESS defines the following bond order values (single/double/triple bonds are the most common values):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: Unspecified</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Single</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Double</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: Triple</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code>: Quadruple</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">5</span></code>: Quintuple</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">6</span></code>: Sextuple</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">250</span></code>: FiveAndAHalf</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">251</span></code>: FourAndAHalf</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">252</span></code>: ThreeAndAHalf</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">253</span></code>: TwoAndAHalf</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">254</span></code>: OneAndAHalf</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">255</span></code>: Ring</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;connectivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="2"><span class="w">  </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+</span><span data-line="3"><span class="w">  </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="4"><span class="p">]</span>
+</span></pre></div>
+</div>
+<p>A covalent fragmentation example with two ethane fragments connected across a C-C bond uses <code class="docutils literal notranslate"><span class="pre">connectivity:</span> <span class="pre">[[1,</span> <span class="pre">4,</span> <span class="pre">1]]</span></code> to signal a single bond between atom indices 1 and 4. EXESS uses this information to apply hydrogen caps on broken valences during fragmentation and removes them after the calculation.</p>
+</section>
+<section id="stereochemistry">
+<h4>stereochemistry<a class="headerlink" href="#stereochemistry" title="Link to this heading">¶</a></h4>
+<p>EXESS accepts a list of integers aligned with the <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> list:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: None</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Up</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-1</span></code>: Down</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Either</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: CisOrTrans</p></li>
+</ul>
+</section>
+<section id="fragments">
+<h4>fragments<a class="headerlink" href="#fragments" title="Link to this heading">¶</a></h4>
+<p>Fragment indices are zero-indexed. Example for five water fragments:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">&quot;fragments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="2"><span class="w">  </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+</span><span data-line="3"><span class="w">  </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">],</span>
+</span><span data-line="4"><span class="w">  </span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">],</span>
+</span><span data-line="5"><span class="w">  </span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">],</span>
+</span><span data-line="6"><span class="w">  </span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">]</span>
+</span><span data-line="7"><span class="p">]</span>
+</span></pre></div>
+</div>
+</section>
+<section id="fragment-formal-charges-fragment-multiplicities">
+<h4>fragment_formal_charges / fragment_multiplicities<a class="headerlink" href="#fragment-formal-charges-fragment-multiplicities" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code> is omitted, EXESS sets fragment charges to the sum of per-atom <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code> when provided, otherwise 0.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code> is omitted, EXESS sets multiplicity to 1 for every fragment.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">fragments</span></code> is omitted, EXESS assumes a single fragment containing all atoms and derives defaults accordingly.</p></li>
+</ul>
+<p>Example for a single, unfragmented system:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">{</span>
+</span><span data-line="2"><span class="w">  </span><span class="nt">&quot;topologies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="3"><span class="w">    </span><span class="p">{</span>
+</span><span data-line="4"><span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span data-line="5"><span class="w">        </span><span class="mf">-4.3997</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0764</span><span class="p">,</span><span class="w"> </span><span class="mf">7.7009</span><span class="p">,</span>
+</span><span data-line="6"><span class="w">        </span><span class="mf">-3.9597</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2664</span><span class="p">,</span><span class="w"> </span><span class="mf">7.3109</span><span class="p">,</span>
+</span><span data-line="7"><span class="w">        </span><span class="mf">-4.4297</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9964</span><span class="p">,</span><span class="w"> </span><span class="mf">8.7009</span>
+</span><span data-line="8"><span class="w">      </span><span class="p">],</span>
+</span><span data-line="9"><span class="w">      </span><span class="nt">&quot;symbols&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;H&quot;</span><span class="p">],</span>
+</span><span data-line="10"><span class="w">      </span><span class="nt">&quot;fragment_formal_charges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+</span><span data-line="11"><span class="w">      </span><span class="nt">&quot;fragment_multiplicities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="12"><span class="w">    </span><span class="p">}</span>
+</span><span data-line="13"><span class="w">  </span><span class="p">]</span>
+</span><span data-line="14"><span class="p">}</span>
+</span></pre></div>
+</div>
+</section>
+<section id="topology-validation-checks">
+<h4>topology validation checks<a class="headerlink" href="#topology-validation-checks" title="Link to this heading">¶</a></h4>
+<p>Validation checks when constructing inputs:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code> must match <code class="docutils literal notranslate"><span class="pre">symbols</span></code> length if present.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code> atom indices must be valid and may not reference the same atom twice.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> is only valid when <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is present and must be the same length.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code> if present.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code> must not duplicate atoms; each atom should appear in exactly one fragment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">fragment_partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code> must match <code class="docutils literal notranslate"><span class="pre">fragments</span></code> length when provided.</p></li>
+</ul>
+</section>
+<section id="waters">
+<h4>waters<a class="headerlink" href="#waters" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">waters</span></code> is a two-element array identifying the first and last water molecule to be treated classically (used by some QMMM workflows).</p>
+</section>
+</section>
+</section>
+<section id="residues">
+<span id="id2"></span><h2>residues<a class="headerlink" href="#residues" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is an optional array of residue definitions used for TRC-based workflows and QMMM. Each element is a <code class="docutils literal notranslate"><span class="pre">Residues</span></code> object:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">labeled</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>Optional list of residue indices with labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">labels</span></code></p></td>
+<td><p>array of array[string]</p></td>
+<td><p>Optional labels per residue.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">residues</span></code></p></td>
+<td><p>array of array[int]</p></td>
+<td><p>Atom indices per residue.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seqs</span></code></p></td>
+<td><p>array[string]</p></td>
+<td><p>Residue names.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seq_ns</span></code></p></td>
+<td><p>array[int]</p></td>
+<td><p>Residue numbers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">insertion_codes</span></code></p></td>
+<td><p>array[string]</p></td>
+<td><p>Required PDB-style insertion codes (use empty strings when not applicable).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">residues</span></code> is typically aligned one-to-one with <code class="docutils literal notranslate"><span class="pre">topologies</span></code> (same index). It is required for QMMM and other workflows that rely on residues, and it is often generated by converting PDB/TRC inputs. <code class="docutils literal notranslate"><span class="pre">insertion_codes</span></code> is required; use empty strings when there are no insertion codes.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="input.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Input format</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="keywords.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Keyword reference</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

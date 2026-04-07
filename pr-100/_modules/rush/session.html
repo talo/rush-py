@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="iris" data-content_root="../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rush.session - QDX Documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"dark");
+  </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=67757470" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="rush.session"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="https://qdx.co">
+      <img class="light-logo" src="../../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <img class="dark-logo" src="../../_static/logo.svg" alt="QDX" height="28" loading="lazy" />
+      <strong>QDX</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link">
+          <a href="https://exess.qdx.co">
+            <span>Use EXESS</span></a>
+        </li><li class="link">
+          <a href="https://qdx.co/rush">
+            <span>Use Rush</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6"><div style="margin-bottom: 0.75rem;">
+  <a href="../../index.html" style="font-weight: 600; text-decoration: none;">Home</a>
+</div>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Rush Python SDK</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guides.html">Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/01-getting-started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/02-first-run.html">Your First rush-py Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/03-objects-and-trc-files.html">Objects &amp; TRC Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/04-general-info.html">General Info and Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/05-hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../guides/06-performance.html">Estimating Cost &amp; Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/01-exess-chelpg.html">Tutorial 1: EXESS CHELPG Charge Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/02-exess-spe.html">Tutorial 2: EXESS Single Point Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/03-exess-exports.html">Tutorial 3: EXESS Exporting Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/04-exess-optimization.html">Tutorial 4: EXESS Geometry Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/05-exess-interaction-energy.html">Tutorial 5: EXESS Interaction Energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/06-exess-qmmm.html">Tutorial 6: EXESS QM/MM Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/07-nnxtb-energy.html">Tutorial 7: NN-xTB Energy and Forces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Rush Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.exess.html">EXESS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.exess_optimization.html">EXESS Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.exess_qmmm.html">EXESS QMMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.nnxtb.html">NN-xTB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.prepare.html">Prepare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.auto3d.html">Auto3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.mmseqs2.html">MMseqs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.boltz.html">Boltz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.pbsa.html">PBSA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Core API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.session.html">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.runs.html">Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.objects.html">Object Store Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.mol.html">Molecular Systems &amp; TRCs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rush.convert.html">Molecule I/O &amp; Converters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">EXESS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/electronic-structure-methods.html">Electronic Structure Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/running.html">Running EXESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/input.html">Input format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/topologies.html">Topologies and residues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/keywords.html">Keyword reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/outputs.html">Outputs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exess/citations.html">Citations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">NN-xTB</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../nnxtb/overview.html">Overview | Use NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nnxtb/running.html">Running NN-xTB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nnxtb/citations.html">Citations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">QDX</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Module code</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">rush.session</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <h1>Source code for rush.session</h1><div class="highlight"><pre>
+<span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span>
+</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">pkg_version</span>
+</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="kn">import</span> <span class="n">getenv</span>
+</span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="10"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="kn">from</span><span class="w"> </span><span class="nn">gql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">gql</span>
+</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">gql.transport.requests</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestsHTTPTransport</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+</span><span data-line="16">    <span class="kn">from</span><span class="w"> </span><span class="nn">.runs</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunID</span><span class="p">,</span> <span class="n">RunOpts</span>
+</span><span data-line="17">
+</span><span data-line="18">
+</span><span data-line="19"><span class="n">_dotenv_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="20">
+</span><span data-line="21">
+</span><span data-line="22"><span class="k">def</span><span class="w"> </span><span class="nf">_load_dotenv</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="23">    <span class="k">global</span> <span class="n">_dotenv_cache</span>
+</span><span data-line="24">    <span class="k">if</span> <span class="n">_dotenv_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="25">        <span class="k">return</span> <span class="n">_dotenv_cache</span>
+</span><span data-line="26">
+</span><span data-line="27">    <span class="n">_dotenv_cache</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="28">
+</span><span data-line="29">    <span class="c1"># Walk up from cwd to find the nearest .env, then fall back to ~/.rush/.env</span>
+</span><span data-line="30">    <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="31">    <span class="n">cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="32">    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cwd</span><span class="p">,</span> <span class="o">*</span><span class="n">cwd</span><span class="o">.</span><span class="n">parents</span><span class="p">]:</span>
+</span><span data-line="33">        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
+</span><span data-line="34">    <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.rush&quot;</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
+</span><span data-line="35">
+</span><span data-line="36">    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+</span><span data-line="37">        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span data-line="38">            <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="39">                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="40">                    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="41">                    <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;=&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+</span><span data-line="42">                        <span class="k">continue</span>
+</span><span data-line="43">                    <span class="n">key</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+</span><span data-line="44">                    <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="45">                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="46">                    <span class="k">if</span> <span class="p">(</span>
+</span><span data-line="47">                        <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+</span><span data-line="48">                        <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+</span><span data-line="49">                        <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="50">                    <span class="p">):</span>
+</span><span data-line="51">                        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="52">                    <span class="n">_dotenv_cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span data-line="53">            <span class="k">break</span>
+</span><span data-line="54">    <span class="k">return</span> <span class="n">_dotenv_cache</span>
+</span><span data-line="55">
+</span><span data-line="56">
+</span><span data-line="57"><span class="k">def</span><span class="w"> </span><span class="nf">_get_env</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="58">    <span class="n">value</span> <span class="o">=</span> <span class="n">getenv</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span data-line="59">    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="60">        <span class="k">return</span> <span class="n">value</span>
+</span><span data-line="61">    <span class="k">return</span> <span class="n">_load_dotenv</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span data-line="62">
+</span><span data-line="63">
+</span><span data-line="64"><span class="n">GRAPHQL_ENDPOINT</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="65">    <span class="n">_get_env</span><span class="p">(</span><span class="s2">&quot;RUSH_ENDPOINT&quot;</span><span class="p">)</span>
+</span><span data-line="66">    <span class="ow">or</span> <span class="s2">&quot;https://tengu-server-prod-api-519406798674.asia-southeast1.run.app&quot;</span>
+</span><span data-line="67"><span class="p">)</span>
+</span><span data-line="68">
+</span><span data-line="69"><span class="n">DEFAULT_TARGETS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="70">    <span class="p">(</span><span class="s2">&quot;Bullet&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet2&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet3&quot;</span><span class="p">)</span>
+</span><span data-line="71">    <span class="k">if</span> <span class="s2">&quot;staging&quot;</span> <span class="ow">in</span> <span class="n">GRAPHQL_ENDPOINT</span>
+</span><span data-line="72">    <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;Bullet&quot;</span><span class="p">,</span> <span class="s2">&quot;Bullet3&quot;</span><span class="p">)</span>
+</span><span data-line="73"><span class="p">)</span>
+</span><span data-line="74">
+</span><span data-line="75">
+</span><span data-line="76"><span class="k">def</span><span class="w"> </span><span class="nf">_get_api_key</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="77">    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_env</span><span class="p">(</span><span class="s2">&quot;RUSH_TOKEN&quot;</span><span class="p">)</span>
+</span><span data-line="78">    <span class="k">if</span> <span class="ow">not</span> <span class="n">api_key</span><span class="p">:</span>
+</span><span data-line="79">        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;RUSH_TOKEN must be set&quot;</span><span class="p">)</span>
+</span><span data-line="80">    <span class="k">return</span> <span class="n">api_key</span>
+</span><span data-line="81">
+</span><span data-line="82">
+</span><span data-line="83"><span class="k">def</span><span class="w"> </span><span class="nf">_get_project_id</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="84">    <span class="n">project_id</span> <span class="o">=</span> <span class="n">_get_env</span><span class="p">(</span><span class="s2">&quot;RUSH_PROJECT&quot;</span><span class="p">)</span>
+</span><span data-line="85">    <span class="k">if</span> <span class="ow">not</span> <span class="n">project_id</span><span class="p">:</span>
+</span><span data-line="86">        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;RUSH_PROJECT must be set&quot;</span><span class="p">)</span>
+</span><span data-line="87">    <span class="k">return</span> <span class="n">project_id</span>
+</span><span data-line="88">
+</span><span data-line="89">
+</span><span data-line="90"><span class="n">MODULE_OVERRIDES</span> <span class="o">=</span> <span class="n">_get_env</span><span class="p">(</span><span class="s2">&quot;RUSH_MODULE_LOCK&quot;</span><span class="p">)</span>
+</span><span data-line="91"><span class="n">MODULE_OVERRIDES</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">MODULE_OVERRIDES</span><span class="p">)</span> <span class="k">if</span> <span class="n">MODULE_OVERRIDES</span> <span class="k">else</span> <span class="p">{}</span>
+</span><span data-line="92">
+</span><span data-line="93"><span class="n">MODULE_LOCK</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="94">    <span class="p">{</span>
+</span><span data-line="95">        <span class="c1"># staging</span>
+</span><span data-line="96">        <span class="s2">&quot;auto3d_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex&quot;</span><span class="p">,</span>
+</span><span data-line="97">        <span class="s2">&quot;boltz2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex&quot;</span><span class="p">,</span>
+</span><span data-line="98">        <span class="s2">&quot;exess_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex&quot;</span><span class="p">,</span>
+</span><span data-line="99">        <span class="s2">&quot;exess_geo_opt_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex&quot;</span><span class="p">,</span>
+</span><span data-line="100">        <span class="s2">&quot;exess_qmmm_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex&quot;</span><span class="p">,</span>
+</span><span data-line="101">        <span class="s2">&quot;mmseqs2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-colabfold/749a096d082efdac3ac13de4aaa98aee3347d79d#mmseqs2_rex&quot;</span><span class="p">,</span>
+</span><span data-line="102">        <span class="s2">&quot;nnxtb_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex&quot;</span><span class="p">,</span>
+</span><span data-line="103">        <span class="s2">&quot;pbsa_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex&quot;</span><span class="p">,</span>
+</span><span data-line="104">        <span class="s2">&quot;prepare_protein_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-prepare-protein/64dc3a9f37384508498c087f4c919673616302cc#prepare_protein_rex&quot;</span><span class="p">,</span>
+</span><span data-line="105">    <span class="p">}</span>
+</span><span data-line="106">    <span class="k">if</span> <span class="s2">&quot;staging&quot;</span> <span class="ow">in</span> <span class="n">GRAPHQL_ENDPOINT</span>
+</span><span data-line="107">    <span class="k">else</span> <span class="p">{</span>
+</span><span data-line="108">        <span class="c1"># prod</span>
+</span><span data-line="109">        <span class="s2">&quot;auto3d_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-auto3d/88c2fdc505f206463a9c60519273563b1dddabc9#auto3d_rex&quot;</span><span class="p">,</span>
+</span><span data-line="110">        <span class="s2">&quot;boltz2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-boltz2/76df0b4b4fa42e88928a430a54a28620feef8ea8#boltz2_rex&quot;</span><span class="p">,</span>
+</span><span data-line="111">        <span class="s2">&quot;exess_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_rex&quot;</span><span class="p">,</span>
+</span><span data-line="112">        <span class="s2">&quot;exess_geo_opt_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_geo_opt_rex&quot;</span><span class="p">,</span>
+</span><span data-line="113">        <span class="s2">&quot;exess_qmmm_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-exess/133781d71c493900a82121729c18994b4a184197#exess_qmmm_rex&quot;</span><span class="p">,</span>
+</span><span data-line="114">        <span class="s2">&quot;mmseqs2_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-colabfold/0b6ca8b9dc97fc6380d334169a6faae51d85fac7#mmseqs2_rex&quot;</span><span class="p">,</span>
+</span><span data-line="115">        <span class="s2">&quot;nnxtb_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-nnxtb/4e733660264d38faab5d23eadc41ca86fd6ff97a#nnxtb_rex&quot;</span><span class="p">,</span>
+</span><span data-line="116">        <span class="s2">&quot;pbsa_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/pbsa-cuda/f8b1c357fddfebf7e0c51a84f8d4e70958440c00#pbsa_rex&quot;</span><span class="p">,</span>
+</span><span data-line="117">        <span class="s2">&quot;prepare_protein_rex&quot;</span><span class="p">:</span> <span class="s2">&quot;github:talo/tengu-prepare-protein/64dc3a9f37384508498c087f4c919673616302cc#prepare_protein_rex&quot;</span><span class="p">,</span>
+</span><span data-line="118">    <span class="p">}</span>
+</span><span data-line="119"><span class="p">)</span> <span class="o">|</span> <span class="n">MODULE_OVERRIDES</span>
+</span><span data-line="120">
+</span><span data-line="121">
+</span><span data-line="122"><span class="n">_SDK_SESSION_ID</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+</span><span data-line="123">
+</span><span data-line="124">
+</span><span data-line="125"><span class="k">def</span><span class="w"> </span><span class="nf">_infer_sdk_function</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="126"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Infer which SDK function called _submit_rex() by walking the stack.&quot;&quot;&quot;</span>
+</span><span data-line="127">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="128">        <span class="k">for</span> <span class="n">frame_info</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">():</span>
+</span><span data-line="129">            <span class="n">module_path</span> <span class="o">=</span> <span class="n">frame_info</span><span class="o">.</span><span class="n">filename</span>
+</span><span data-line="130">            <span class="c1"># Look for files in the rush package (but not session.py itself)</span>
+</span><span data-line="131">            <span class="k">if</span> <span class="s2">&quot;/rush/&quot;</span> <span class="ow">in</span> <span class="n">module_path</span> <span class="ow">and</span> <span class="s2">&quot;session.py&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">module_path</span><span class="p">:</span>
+</span><span data-line="132">                <span class="n">module_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">module_path</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+</span><span data-line="133">                <span class="n">func_name</span> <span class="o">=</span> <span class="n">frame_info</span><span class="o">.</span><span class="n">function</span>
+</span><span data-line="134">                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="135">    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span data-line="136">        <span class="k">pass</span>
+</span><span data-line="137">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="138">
+</span><span data-line="139">
+</span><span data-line="140"><span class="k">def</span><span class="w"> </span><span class="nf">_get_sdk_tags</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="141"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate SDK metadata tags for run submission.&quot;&quot;&quot;</span>
+</span><span data-line="142">    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;source=rushpy&quot;</span><span class="p">]</span>
+</span><span data-line="143">
+</span><span data-line="144">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="145">        <span class="n">version</span> <span class="o">=</span> <span class="n">pkg_version</span><span class="p">(</span><span class="s2">&quot;rush-py&quot;</span><span class="p">)</span>
+</span><span data-line="146">        <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sdk_version=</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="147">    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span data-line="148">        <span class="k">pass</span>
+</span><span data-line="149">
+</span><span data-line="150">    <span class="c1"># Unique per-process ID</span>
+</span><span data-line="151">    <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sdk_session_id=</span><span class="si">{</span><span class="n">_SDK_SESSION_ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="152">
+</span><span data-line="153">    <span class="c1"># Python version</span>
+</span><span data-line="154">    <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sdk_python=</span><span class="si">{</span><span class="n">platform</span><span class="o">.</span><span class="n">python_version</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="155">
+</span><span data-line="156">    <span class="c1"># Platform (OS/arch)</span>
+</span><span data-line="157">    <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sdk_platform=</span><span class="si">{</span><span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">platform</span><span class="o">.</span><span class="n">machine</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="158">
+</span><span data-line="159">    <span class="c1"># Infer which SDK function submitted this run</span>
+</span><span data-line="160">    <span class="n">sdk_function</span> <span class="o">=</span> <span class="n">_infer_sdk_function</span><span class="p">()</span>
+</span><span data-line="161">    <span class="k">if</span> <span class="n">sdk_function</span><span class="p">:</span>
+</span><span data-line="162">        <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sdk_function=</span><span class="si">{</span><span class="n">sdk_function</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="163">
+</span><span data-line="164">    <span class="k">return</span> <span class="n">tags</span>
+</span><span data-line="165">
+</span><span data-line="166">
+</span><span data-line="167"><span class="nd">@dataclass</span>
+</span><span data-line="168"><span class="k">class</span><span class="w"> </span><span class="nc">_SessionConfig</span><span class="p">:</span>
+</span><span data-line="169"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="170"><span class="sd">    Settings to configure rush-py. Can be set through the `configure` function.</span>
+</span><span data-line="171"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="172">
+</span><span data-line="173">    <span class="c1">#: The directory where the workspace resides. (Default: current working directory)</span>
+</span><span data-line="174">    <span class="c1">#: The history JSON file will be written here and the</span>
+</span><span data-line="175">    <span class="c1">#: run outputs will be downloaded here (nested under a project folder).</span>
+</span><span data-line="176">    <span class="n">workspace_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+</span><span data-line="177">
+</span><span data-line="178">
+</span><span data-line="179"><span class="n">_config</span><span class="p">:</span> <span class="n">_SessionConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="180">
+</span><span data-line="181">
+</span><span data-line="182"><span class="k">def</span><span class="w"> </span><span class="nf">_get_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">_SessionConfig</span><span class="p">:</span>
+</span><span data-line="183">    <span class="k">global</span> <span class="n">_config</span>
+</span><span data-line="184">
+</span><span data-line="185">    <span class="k">if</span> <span class="n">_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="186">        <span class="n">_config</span> <span class="o">=</span> <span class="n">_SessionConfig</span><span class="p">()</span>
+</span><span data-line="187">
+</span><span data-line="188">    <span class="k">return</span> <span class="n">_config</span>
+</span><span data-line="189">
+</span><span data-line="190">
+<div class="viewcode-block" id="configure">
+<a class="viewcode-back" href="../../rush.session.html#rush.session.configure">[docs]</a>
+</span><span data-line="191"><span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">workspace_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="192"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="193"><span class="sd">    Configure process-wide Rush session settings.</span>
+</span><span data-line="194">
+</span><span data-line="195"><span class="sd">    Currently, only allows setting the workspace directory.</span>
+</span><span data-line="196"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="197">    <span class="n">config</span> <span class="o">=</span> <span class="n">_get_config</span><span class="p">()</span>
+</span><span data-line="198">    <span class="k">if</span> <span class="n">workspace_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="199">        <span class="n">config</span><span class="o">.</span><span class="n">workspace_dir</span> <span class="o">=</span> <span class="n">workspace_dir</span></div>
+
+</span><span data-line="200">
+</span><span data-line="201">
+</span><span data-line="202"><span class="n">_client</span><span class="p">:</span> <span class="n">Client</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="203">
+</span><span data-line="204">
+</span><span data-line="205"><span class="k">def</span><span class="w"> </span><span class="nf">_get_client</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Client</span><span class="p">:</span>
+</span><span data-line="206">    <span class="k">global</span> <span class="n">_client</span>
+</span><span data-line="207">
+</span><span data-line="208">    <span class="k">if</span> <span class="n">_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="209">        <span class="n">_client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span>
+</span><span data-line="210">            <span class="n">transport</span><span class="o">=</span><span class="n">RequestsHTTPTransport</span><span class="p">(</span>
+</span><span data-line="211">                <span class="n">url</span><span class="o">=</span><span class="n">GRAPHQL_ENDPOINT</span><span class="p">,</span>
+</span><span data-line="212">                <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">_get_api_key</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">},</span>
+</span><span data-line="213">            <span class="p">)</span>
+</span><span data-line="214">        <span class="p">)</span>
+</span><span data-line="215">
+</span><span data-line="216">    <span class="k">return</span> <span class="n">_client</span>
+</span><span data-line="217">
+</span><span data-line="218">
+</span><span data-line="219"><span class="k">def</span><span class="w"> </span><span class="nf">_submit_rex</span><span class="p">(</span><span class="n">rex</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run_opts</span><span class="p">:</span> <span class="s2">&quot;RunOpts | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;RunID&quot;</span><span class="p">:</span>
+</span><span data-line="220">    <span class="kn">from</span><span class="w"> </span><span class="nn">.runs</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunID</span><span class="p">,</span> <span class="n">RunOpts</span>
+</span><span data-line="221">
+</span><span data-line="222">    <span class="k">if</span> <span class="n">run_opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="223">        <span class="n">run_opts</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">()</span>
+</span><span data-line="224">
+</span><span data-line="225">    <span class="c1"># Auto-generate SDK metadata tags</span>
+</span><span data-line="226">    <span class="n">merged_tags</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_opts</span><span class="o">.</span><span class="n">tags</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="n">_get_sdk_tags</span><span class="p">()</span>
+</span><span data-line="227">
+</span><span data-line="228">    <span class="c1"># Create a new RunOpts with merged tags</span>
+</span><span data-line="229">    <span class="n">run_opts_with_tags</span> <span class="o">=</span> <span class="n">RunOpts</span><span class="p">(</span>
+</span><span data-line="230">        <span class="n">name</span><span class="o">=</span><span class="n">run_opts</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span data-line="231">        <span class="n">description</span><span class="o">=</span><span class="n">run_opts</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+</span><span data-line="232">        <span class="n">tags</span><span class="o">=</span><span class="n">merged_tags</span><span class="p">,</span>
+</span><span data-line="233">        <span class="n">email</span><span class="o">=</span><span class="n">run_opts</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+</span><span data-line="234">    <span class="p">)</span>
+</span><span data-line="235">
+</span><span data-line="236">    <span class="n">mutation</span> <span class="o">=</span> <span class="n">gql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="237"><span class="s2">        mutation EvalRex($input: CreateRun!) {</span>
+</span><span data-line="238"><span class="s2">            eval(input: $input) {</span>
+</span><span data-line="239"><span class="s2">                id</span>
+</span><span data-line="240"><span class="s2">                status</span>
+</span><span data-line="241"><span class="s2">                created_at</span>
+</span><span data-line="242"><span class="s2">            }</span>
+</span><span data-line="243"><span class="s2">        }</span>
+</span><span data-line="244"><span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="245">    <span class="n">mutation</span><span class="o">.</span><span class="n">variable_values</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="246">        <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span data-line="247">            <span class="s2">&quot;rex&quot;</span><span class="p">:</span> <span class="n">rex</span><span class="p">,</span>
+</span><span data-line="248">            <span class="s2">&quot;module_lock&quot;</span><span class="p">:</span> <span class="n">MODULE_LOCK</span><span class="p">,</span>
+</span><span data-line="249">            <span class="s2">&quot;draft&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="250">            <span class="s2">&quot;project_id&quot;</span><span class="p">:</span> <span class="n">_get_project_id</span><span class="p">(),</span>
+</span><span data-line="251">        <span class="p">},</span>
+</span><span data-line="252">    <span class="p">}</span>
+</span><span data-line="253">    <span class="n">mutation</span><span class="o">.</span><span class="n">variable_values</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">|=</span> <span class="p">{</span>
+</span><span data-line="254">        <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">asdict</span><span class="p">(</span><span class="n">run_opts_with_tags</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="255">    <span class="p">}</span>
+</span><span data-line="256">
+</span><span data-line="257">    <span class="n">result</span> <span class="o">=</span> <span class="n">_get_client</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mutation</span><span class="p">)</span>
+</span><span data-line="258">    <span class="n">run_id</span> <span class="o">=</span> <span class="n">RunID</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;eval&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+</span><span data-line="259">    <span class="n">created_at</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;eval&quot;</span><span class="p">][</span><span class="s2">&quot;created_at&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="260">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run submitted @ </span><span class="si">{</span><span class="n">created_at</span><span class="si">}</span><span class="s2"> with ID: </span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="261">
+</span><span data-line="262">    <span class="n">history_filepath</span> <span class="o">=</span> <span class="n">_get_config</span><span class="p">()</span><span class="o">.</span><span class="n">workspace_dir</span> <span class="o">/</span> <span class="s2">&quot;history.json&quot;</span>
+</span><span data-line="263">    <span class="n">history_filepath</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="264">
+</span><span data-line="265">    <span class="n">matching_modules</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="266">        <span class="n">module</span>
+</span><span data-line="267">        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">MODULE_LOCK</span>
+</span><span data-line="268">        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">_s&quot;</span> <span class="ow">in</span> <span class="n">rex</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;try_</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">rex</span>
+</span><span data-line="269">    <span class="p">]</span>
+</span><span data-line="270">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_modules</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="271">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="272">            <span class="s2">&quot;Error: could not uniquely match submitted module, not adding to history&quot;</span><span class="p">,</span>
+</span><span data-line="273">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="274">        <span class="p">)</span>
+</span><span data-line="275">        <span class="k">return</span> <span class="n">run_id</span>
+</span><span data-line="276">
+</span><span data-line="277">    <span class="k">if</span> <span class="n">history_filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="278">        <span class="k">with</span> <span class="n">history_filepath</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="279">            <span class="n">history</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="280">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="281">        <span class="n">history</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instances&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+</span><span data-line="282">
+</span><span data-line="283">    <span class="n">module</span> <span class="o">=</span> <span class="n">matching_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="284">    <span class="n">history</span><span class="p">[</span><span class="s2">&quot;instances&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="285">        <span class="p">{</span>
+</span><span data-line="286">            <span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">,</span>
+</span><span data-line="287">            <span class="s2">&quot;run_created_at&quot;</span><span class="p">:</span> <span class="n">created_at</span><span class="p">,</span>
+</span><span data-line="288">            <span class="s2">&quot;module_path&quot;</span><span class="p">:</span> <span class="n">MODULE_LOCK</span><span class="p">[</span><span class="n">module</span><span class="p">],</span>
+</span><span data-line="289">        <span class="p">}</span>
+</span><span data-line="290">    <span class="p">)</span>
+</span><span data-line="291">
+</span><span data-line="292">    <span class="k">with</span> <span class="n">history_filepath</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="293">        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="294">
+</span><span data-line="295">    <span class="k">return</span> <span class="n">run_id</span>
+</span></pre></div>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, QDX</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/shibuya.js?v=cac61aee"></script></body>
+</html>
