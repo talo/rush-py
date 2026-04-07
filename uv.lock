@@ -451,6 +451,23 @@ wheels = [
 ]
 
 [[package]]
+name = "libqdx"
+version = "0.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e5/be/83c65426511a9005fce5a920698b3b62836c75ed4daaed917c5e456d4d57/libqdx-0.8.0.tar.gz", hash = "sha256:d3cb57865933d8323c8337181b71bf999024dcf852277702699e3bd6cf5d4ff5", size = 4072101, upload-time = "2026-04-07T03:28:36.178Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e2/c5/ef8af3b0305401581cf34d988408ba59422354d310a28988f536321681b0/libqdx-0.8.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:bd2cfec5a4dd7791dcedac0ffa59bcea64409303fd635f3a3253bdfdb66541b3", size = 792621, upload-time = "2026-04-07T03:28:25.689Z" },
+    { url = "https://files.pythonhosted.org/packages/be/6a/5a8d0ee4a75ba512d921c69a2dc2efecc9d7e5d10d00afae3557310e6048/libqdx-0.8.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3e8f39f47befb955b2ce04c9201a2f8587b8d73b14c691f84546edf1fbed5594", size = 905390, upload-time = "2026-04-07T03:28:27.524Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/5f/99615ba8c73eee3882c9a24802a20ae147351c62101ee53cb1cf6765ffb8/libqdx-0.8.0-cp312-cp312-win_amd64.whl", hash = "sha256:90bbfac41ad414b3f7b11fe60a6e0cfce078f36114a263d6e0bf192e61494ed4", size = 673340, upload-time = "2026-04-07T03:28:29.421Z" },
+    { url = "https://files.pythonhosted.org/packages/88/f8/185bb34c0c36221daa76a8f068011a0ed96960f49aed43ac87339c8c8cb8/libqdx-0.8.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:519d9b4016f769027bbee743f1bb9545cb3658ad43892dfc51eced21396f6895", size = 792731, upload-time = "2026-04-07T03:28:31.173Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/76/1dca69d2fa5e37ea55e16b32a9b5306339f5e5e12d3ccbacf7cec3964c83/libqdx-0.8.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5a3540719026a5f30db8faf8873b17d32bc0251b64595db3054573f985627907", size = 904814, upload-time = "2026-04-07T03:28:32.888Z" },
+    { url = "https://files.pythonhosted.org/packages/30/76/aa8940fa3b99ff6c05fb20bbafda25aa324b4de8e15d9abcd476e09327dc/libqdx-0.8.0-cp313-cp313-win_amd64.whl", hash = "sha256:56b7954a3da234a0fec5e9a1eeacc0b925d30b9dcb2719934c8de2985010caaf", size = 673353, upload-time = "2026-04-07T03:28:34.525Z" },
+]
+
+[[package]]
 name = "markdown-it-py"
 version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1173,6 +1190,7 @@ source = { editable = "." }
 dependencies = [
     { name = "gql" },
     { name = "h5py" },
+    { name = "libqdx" },
     { name = "matplotlib" },
     { name = "networkx" },
     { name = "numpy" },
@@ -1201,6 +1219,7 @@ dev = [
 requires-dist = [
     { name = "gql", specifier = "~=4.0" },
     { name = "h5py", specifier = "~=3.14" },
+    { name = "libqdx", specifier = "~=0.8.0" },
     { name = "matplotlib", specifier = "~=3.10" },
     { name = "networkx", specifier = "~=3.6" },
     { name = "numpy", specifier = ">=1.26,<3" },
