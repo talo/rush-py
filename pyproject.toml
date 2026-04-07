@@ -1,6 +1,6 @@
 [project]
 name = "rush-py"
-version = "7.0.0"
+version = "7.1.0"
 description = "Python client for QDX's Rush platform"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -11,6 +11,7 @@ authors = [
 dependencies = [
   "gql~=4.0",
   "h5py~=3.14",
+  "libqdx~=0.8.0",
   "numpy>=1.26,<3",
   "rdkit~=2025.9.2",
   "matplotlib~=3.10",

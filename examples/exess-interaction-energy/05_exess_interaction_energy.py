@@ -14,7 +14,7 @@ Prerequisites:
 
 from pathlib import Path
 
-from rush import RunOpts, exess, prepare
+from rush import RunOpts, exess, get_fragments_near_fragment, prepare
 
 # ===== Example 1: Fragment-based interaction energy =====
 print("=" * 60)
@@ -80,7 +80,7 @@ for i, (res_name, formal_charge) in enumerate(
 
 # Step 2: Find ligand fragment index + nearby pocket
 lig_idx = trc.residues.seqs.index("MK1")
-frag_idcs = trc.topology.get_fragments_near_fragment(lig_idx, 5.0) + [lig_idx]
+frag_idcs = get_fragments_near_fragment(trc.topology, lig_idx, 5.0) + [lig_idx]
 
 # Step 3: Run interaction energy
 

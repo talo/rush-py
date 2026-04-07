@@ -140,10 +140,11 @@ class TRCRef:
 
     @classmethod
     def upload(cls, trc: TRC) -> Self:
+        d = trc.to_dict()
         return cls(
-            RushObject.from_dict(upload_object(trc.topology.to_dict())),
-            RushObject.from_dict(upload_object(trc.residues.to_dict())),
-            RushObject.from_dict(upload_object(trc.chains.to_dict())),
+            RushObject.from_dict(upload_object(d["topology"])),
+            RushObject.from_dict(upload_object(d["residues"])),
+            RushObject.from_dict(upload_object(d["chains"])),
         )
 
     def fetch(self) -> TRC:

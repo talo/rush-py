@@ -19,12 +19,13 @@ Output files (saved to qmmm-outputs/):
 """
 
 import json
-from itertools import batched
 from pathlib import Path
 
-from rush import RunOpts, Topology, exess
+import numpy as np
+
+from rush import TRC, RunOpts, Topology, exess
 from rush.exess import Trajectory
-from rush.mol import Element, Fragment, Residue, Residues
+from rush.mol import Element
 
 DATA_DIR = Path(__file__).parent / "data"
 OUTPUT_DIR = Path(__file__).parent / "qmmm-outputs"
@@ -72,7 +73,8 @@ res = run.fetch()
 out_traj = res.geometries
 
 # Load topology for atom info
-topology = Topology.from_json(topology_path)
+with open(topology_path) as f:
+    topology = Topology.from_dict(json.load(f))
 assert topology.fragments, "Topology lost its fragments!"
 
 n_atoms = len(topology.symbols)
@@ -117,6 +119,10 @@ def geometry_to_xyz(syms, geom, frame_label=""):
         x, y, z = geom[3 * i], geom[3 * i + 1], geom[3 * i + 2]
         lines.append(f"{syms[i]}  {x:.6f}  {y:.6f}  {z:.6f}")
     return "\n".join(lines)
+
+
+# NOTE: topology.geometry is an (N,3) numpy array, but out_traj geometries
+# from the server are flat lists. geometry_to_xyz handles the flat format.
 
 
 # Build all frames as XYZ strings
@@ -337,38 +343,23 @@ print("=" * 60)
 print("Example 2: Minimal QM/MM (two water molecules)")
 print("=" * 60)
 
-topology = Topology(
+trc = TRC(
     symbols=[Element.O, Element.H, Element.H, Element.O, Element.H, Element.H],
     geometry=[
-        0.0000,
-        0.0000,
-        0.0000,
-        0.7570,
-        0.5860,
-        0.0000,
-        -0.7570,
-        0.5860,
-        0.0000,
-        2.8000,
-        0.0000,
-        0.0000,
-        3.5570,
-        0.5860,
-        0.0000,
-        2.0430,
-        0.5860,
-        0.0000,
+        [0.0000, 0.0000, 0.0000],
+        [0.7570, 0.5860, 0.0000],
+        [-0.7570, 0.5860, 0.0000],
+        [2.8000, 0.0000, 0.0000],
+        [3.5570, 0.5860, 0.0000],
+        [2.0430, 0.5860, 0.0000],
     ],
-    fragments=[Fragment([0, 1, 2]), Fragment([3, 4, 5])],
-)
-
-residues = Residues(
-    residues=[Residue([0, 1, 2]), Residue([3, 4, 5])],
-    seqs=["HOH", "HOH"],
+    fragments=[[0, 1, 2], [3, 4, 5]],
+    residues=[[0, 1, 2], [3, 4, 5]],
+    residue_seqs=["HOH", "HOH"],
 )
 
 run2 = exess.qmmm(
-    (topology, residues),
+    trc,
     n_timesteps=100,
     trajectory=Trajectory(include_waters=True),
     mm_fragments=[],
@@ -386,10 +377,11 @@ res2 = run2.fetch()
 out_traj = res2.geometries
 
 print("Atoms at First Step")
-for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
-    print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")
+for x, y, z in trc.topology.geometry:
+    print(f"  x: {x:>7.4f}, y: {y:>7.4f}, z: {z:>7.4f}")
 
-topology.geometry = out_traj[-1]
+final_geom = np.array(out_traj[-1], dtype=np.float32).reshape(-1, 3)
+final_trc = TRC(symbols=list(trc.topology.symbols), geometry=final_geom.tolist())
 print("Atoms at Final Step")
-for atom_x, atom_y, atom_z in batched(topology.geometry, 3):
-    print(f"  x: {atom_x:>7.4f}, y: {atom_y:>7.4f}, z: {atom_z:>7.4f}")
+for x, y, z in final_trc.topology.geometry:
+    print(f"  x: {x:>7.4f}, y: {y:>7.4f}, z: {z:>7.4f}")

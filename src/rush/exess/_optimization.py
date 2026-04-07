@@ -275,7 +275,7 @@ class OptimizationResultRef:
         trajectory_raw = self.trajectory.fetch_list()
         steps_raw = self.steps.fetch_list()
 
-        trajectory = [Topology.from_json(t) for t in trajectory_raw]
+        trajectory = [Topology.from_dict(t) for t in trajectory_raw]
         steps = [OptimizationStep(**step) for step in steps_raw]
         return OptimizationResult(trajectory=trajectory, steps=steps)
 
