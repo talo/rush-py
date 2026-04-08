@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.2.0",
+  "calculation_time": 0.636931066,
+  "qmmbe": {
+    "schema_version": "0.2.0",
+    "method": "RestrictedHF",
+    "nmers": [
+      [
+        {
+          "schema_version": "0.2.0",
+          "fragments": [
+            0
+          ],
+          "hf_energy": -227.8901225505692,
+          "mp2_ss_correction": 0.0,
+          "mp2_os_correction": 0.0,
+          "num_iters": 4,
+          "num_basis_fns": 36
+        }
+      ]
+    ],
+    "expanded_hf_energy": -227.8901225505692,
+    "expanded_mp2_ss_correction": 0.0,
+    "expanded_mp2_os_correction": 0.0,
+    "num_iters": 4
+  }
+}

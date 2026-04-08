@@ -45,6 +45,8 @@ topology_path.write_text(json.dumps(topology_json, indent=2))
 # 3. Run energy calculation with CHELPG export (returns charges in ~30 seconds)
 result = exess.energy(
     topology_path=topology_path,
+    method="RestrictedHF",
+    basis="STO-3G",  # Minimal basis set for tutorials only – use cc-pVDZ or larger for production
     frag_keywords=None,  # disable fragmentation for CHELPG
     export_keywords=exess.ExportKeywords(export_chelpg_charges=True),
 ).fetch()
@@ -94,7 +96,7 @@ For drug discovery, CHELPG charges tell you:
 
 ## Notes
 
-- **Default parameters** — Uses RestrictedKSDFT with a cc-pVDZ basis set unless you override them
+- **Default parameters** — The tutorial uses `RestrictedHF` with `STO-3G` for speed. For production, use at least `cc-pVDZ` or larger. See the electronic structure methods reference for available basis sets
 
 ---
 
