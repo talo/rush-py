@@ -1,5 +1,7 @@
 # Overview | [Use NN-xTB](https://nnxtb.qdx.co)
 
+> ⚠️ **Experimental Integration** — The NN-xTB integration with RushPy is currently experimental. You will likely encounter errors or unexpected behaviour.
+
 NN-xTB (Neural Network extended Tight Binding) is a GPU-accelerated semi-empirical quantum chemistry method built by QDX. It reparameterizes the GFN2-xTB Hamiltonian with a neural network to approach DFT-level accuracy while retaining the interpretability and speed of tight-binding methods.
 
 NN-xTB fills the gap between fast but approximate classical force fields and accurate but expensive *ab initio* quantum chemistry. It is designed for workflows where you need quantum-level electronic structure information — energies, forces, vibrational frequencies — but cannot afford the cost of full DFT or wavefunction methods across large numbers of structures.

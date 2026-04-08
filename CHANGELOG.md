@@ -77,6 +77,7 @@ No new changes since 7.0.0rc3.
 - Rewrite wordy intro sentence in docs landing page for clarity
 - Don't print message about run being restored if the run is canceled or failed: this usually means that the module instance couldn't be started at all because the account tier doesn't support running that module instance. The other potential cause is if a module isn't available for a particular target and the user tries to use that combination.
 - Print and store `trace` field from a run properly when it's either canceled or failed
+- Add warning about nnxtb integration being experimental to docs
 - Remove AI-generated mismatches page from docs
 
 ### Added
