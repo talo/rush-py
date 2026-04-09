@@ -3,6 +3,7 @@ import tarfile
 from io import BytesIO
 from pathlib import Path
 
+import numpy as np
 import pytest
 import zstandard as zstd
 
@@ -135,8 +136,6 @@ def test_optimization_ref_fetch(monkeypatch):
 
     assert isinstance(result, OptimizationResult)
     assert len(result.trajectory) == 1
-    import numpy as np
-
     np.testing.assert_allclose(
         result.trajectory[0].geometry,
         [[0.0, 0.0, 0.0], [0.7, 0.5, 0.0], [-0.7, 0.5, 0.0]],
@@ -179,7 +178,9 @@ def test_qmmm_ref_fetch(monkeypatch):
     result = ref.fetch()
 
     assert isinstance(result, QMMMResult)
-    assert result.geometries == [[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]]
+    assert len(result.geometries) == 2
+    np.testing.assert_allclose(result.geometries[0], [[0.0, 1.0, 2.0]], atol=1e-6)
+    np.testing.assert_allclose(result.geometries[1], [[3.0, 4.0, 5.0]], atol=1e-6)
 
 
 def test_qmmm_ref_save(monkeypatch):

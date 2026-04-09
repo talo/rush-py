@@ -1,4 +1,3 @@
-import itertools
 import sys
 
 from rush import RunOpts, auto3d
@@ -31,7 +30,7 @@ def test_auto3d():
         print(f"Conformer {i}:", file=sys.stderr)
         for atom, coords in zip(
             result.conformer.topology.symbols,
-            itertools.batched(result.conformer.topology.geometry, 3),
+            result.conformer.topology.geometry,
         ):
             print(f"  {atom} {coords}", file=sys.stderr)
         print(f"  {result.stats}", file=sys.stderr)

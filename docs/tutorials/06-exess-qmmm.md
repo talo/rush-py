@@ -101,10 +101,9 @@ EXESS requires that every fragment is assigned to either QM or MM. Setting `mm_f
 
 ## Working with the Trajectory
 
-The output is a JSON object containing `geometries` — a list of coordinate arrays, one per timestep. Each geometry is a flat list of floats (`[x1, y1, z1, x2, y2, z2, ...]`), matching the order of atoms in your Topology.
+The output contains `geometries` — a list of `(N, 3)` numpy arrays (one per timestep), matching the order of atoms in your Topology.
 
 ```python
-from itertools import batched
 from pathlib import Path
 from rush import Topology
 
@@ -117,12 +116,12 @@ print(f"Trajectory has {len(geometries)} frames")
 topology = Topology.from_json(Path("molecule_t.json"))
 
 print("\nAtoms at First Step:")
-for x, y, z in batched(topology.geometry, 3):
+for x, y, z in topology.geometry:
     print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
 
-topology.geometry = geometries[-1]
+final_trc = trc.with_geometry(geometries[-1].tolist())
 print("\nAtoms at Final Step:")
-for x, y, z in batched(topology.geometry, 3):
+for x, y, z in final_trc.topology.geometry:
     print(f"  ({x:>7.4f}, {y:>7.4f}, {z:>7.4f})")
 ```
 

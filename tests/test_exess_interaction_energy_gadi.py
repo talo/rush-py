@@ -4,15 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from rush import (
-    FragmentRef,
-    RunOpts,
-    RunSpec,
-    Topology,
-    exess,
-    fetch_run_info,
-    get_fragments_near_fragment,
-)
+from rush import FragmentRef, RunOpts, RunSpec, Topology, exess, fetch_run_info
 from tests._module_test_utils import assert_run_collects_and_caches
 
 
@@ -21,7 +13,7 @@ def test_exess_interaction_energy_gadi(test_data_dir: Path):
     with (test_data_dir / "tyk2_ejm_31_t.json").open() as f:
         topology = Topology.from_dict(json.load(f))
     lig_idx = 93
-    frag_idcs = get_fragments_near_fragment(topology, lig_idx, 6.0) + [lig_idx]
+    frag_idcs = topology.get_fragments_near_fragment(lig_idx, 6.0) + [lig_idx]
     run = exess.interaction_energy(
         test_data_dir / "tyk2_ejm_31_t.json",
         lig_idx,

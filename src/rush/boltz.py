@@ -160,7 +160,8 @@ class ResultPaths:
 def _decode_float_array(output: dict[str, Any]) -> npt.NDArray[np.float32]:
     raw = base64.b64decode(output["data"])
     shape = tuple(int(dim) for dim in output["shape"])
-    return np.frombuffer(raw, dtype=np.dtype("<f4")).reshape(shape)
+    arr = np.frombuffer(raw, dtype=np.float32).reshape(shape)
+    return arr
 
 
 @dataclass(frozen=True)

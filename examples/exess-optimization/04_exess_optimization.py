@@ -66,8 +66,8 @@ out_info = res.steps
 
 print("Num steps to convergence:", len(out_traj))
 print("First Atom's Coords")
-print(f"  First step: {out_traj[0].geometry[:3]}")
-print(f"  Final step: {out_traj[-1].geometry[:3]}")
+print(f"  First step: {out_traj[0].geometry[0]}")
+print(f"  Final step: {out_traj[-1].geometry[0]}")
 
 # The below are only provided for QM regions
 print("Final Step Info")
@@ -95,7 +95,7 @@ def topology_to_xyz(topo):
     n_atoms = len(symbols)
     lines = [str(n_atoms), ""]
     for i in range(n_atoms):
-        x, y, z = geom[3 * i], geom[3 * i + 1], geom[3 * i + 2]
+        x, y, z = geom[i]
         lines.append(f"{symbols[i]}  {x:.6f}  {y:.6f}  {z:.6f}")
     return "\n".join(lines)
 

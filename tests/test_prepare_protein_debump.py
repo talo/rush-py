@@ -38,11 +38,9 @@ def _rmsd_for_matching_atoms(trc_ref, trc_cmp):
         assert not missing, f"Missing atoms in residue {residue_idx}: {sorted(missing)}"
         for label, ref_idx in ref_map.items():
             cmp_idx = cmp_map[label]
-            ref_base = ref_idx * 3
-            cmp_base = cmp_idx * 3
-            dx = ref_geom[ref_base] - cmp_geom[cmp_base]
-            dy = ref_geom[ref_base + 1] - cmp_geom[cmp_base + 1]
-            dz = ref_geom[ref_base + 2] - cmp_geom[cmp_base + 2]
+            dx = ref_geom[ref_idx][0] - cmp_geom[cmp_idx][0]
+            dy = ref_geom[ref_idx][1] - cmp_geom[cmp_idx][1]
+            dz = ref_geom[ref_idx][2] - cmp_geom[cmp_idx][2]
             total_sq += dx * dx + dy * dy + dz * dz
             atom_count += 1
     if atom_count == 0:
@@ -67,11 +65,9 @@ def _residue_rmsd(trc_ref, trc_cmp, residue_idx):
     total_sq = 0.0
     for label, ref_idx in ref_map.items():
         cmp_idx = cmp_map[label]
-        ref_base = ref_idx * 3
-        cmp_base = cmp_idx * 3
-        dx = ref_geom[ref_base] - cmp_geom[cmp_base]
-        dy = ref_geom[ref_base + 1] - cmp_geom[cmp_base + 1]
-        dz = ref_geom[ref_base + 2] - cmp_geom[cmp_base + 2]
+        dx = ref_geom[ref_idx][0] - cmp_geom[cmp_idx][0]
+        dy = ref_geom[ref_idx][1] - cmp_geom[cmp_idx][1]
+        dz = ref_geom[ref_idx][2] - cmp_geom[cmp_idx][2]
         total_sq += dx * dx + dy * dy + dz * dz
     return math.sqrt(total_sq / len(ref_map))
 
