@@ -135,7 +135,18 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.prepare.ResultRef"><code class="docutils literal notranslate"><span class="pre">ResultRef</span></code></a><ul>
+<li><a class="reference internal" href="#rush.prepare.ResultRef.from_raw_output"><code class="docutils literal notranslate">from_raw_output()</span></code></a></li>
+<li><a class="reference internal" href="#rush.prepare.ResultRef.fetch"><code class="docutils literal notranslate">fetch()</span></code></a></li>
+<li><a class="reference internal" href="#rush.prepare.ResultRef.save"><code class="docutils literal notranslate">save()</span></code></a></li>
+<li><a class="reference internal" href="#rush.prepare.ResultRef.models"><code class="docutils literal notranslate">models</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.prepare.protein"><code class="docutils literal notranslate"><span class="pre">protein()</span></code></a></li>
+<li><a class="reference internal" href="#rush.prepare.protein_ligand"><code class="docutils literal notranslate"><span class="pre">protein_ligand()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -168,8 +179,136 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="prepare">
-<h1>Prepare<a class="headerlink" href="#prepare" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.prepare">
+<span id="prepare"></span><h1>Prepare<a class="headerlink" href="#module-rush.prepare" title="Link to this heading">¶</a></h1>
+<p>Structure preparation module for the Rush Python client.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># Protein only</span>
+</span><span data-line="4"><span class="n">result</span> <span class="o">=</span> <span class="n">prepare</span><span class="o">.</span><span class="n">protein</span><span class="p">(</span><span class="s2">&quot;protein.pdb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="c1"># Protein-ligand complex</span>
+</span><span data-line="7"><span class="n">result</span> <span class="o">=</span> <span class="n">prepare</span><span class="o">.</span><span class="n">protein_ligand</span><span class="p">(</span><span class="s2">&quot;complex.pdb&quot;</span><span class="p">,</span> <span class="n">ligand_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;LIG&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.prepare.ResultRef">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.prepare.</span></span><span class="sig-name descname"><span class="pre">ResultRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare/_protein.html#ResultRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare.ResultRef" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Lightweight reference to prepare-protein output in the Rush object store.</p>
+<p>May contain multiple TRC triplets if the input PDB has multiple models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>models</strong> (<em>list</em><em>[</em><a class="reference internal" href="rush.objects.html#rush.objects.TRCRef" title="rush.objects.TRCRef"><em>TRCRef</em></a><em>]</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.prepare.ResultRef.from_raw_output">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_raw_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare/_protein.html#ResultRef.from_raw_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare.ResultRef.from_raw_output" title="Link to this definition">¶</a></dt>
+<dd><p>Parse raw <code class="docutils literal notranslate"><span class="pre">collect_run</span></code> output into a <code class="docutils literal notranslate"><span class="pre">ResultRef</span></code>.</p>
+<p>The raw output is a list of groups, where each group is a list of
+3 dicts (topology, residues, chains objects).  Multi-model PDBs
+produce multiple groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>res</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.prepare.ResultRef.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare/_protein.html#ResultRef.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare.ResultRef.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Download prepare-protein output and parse into TRCs.</p>
+<p>Returns one TRC per model in the input PDB.  Most PDBs contain a
+single model, so <code class="docutils literal notranslate"><span class="pre">result[0]</span></code> is the common pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[TRC]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.prepare.ResultRef.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare/_protein.html#ResultRef.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare.ResultRef.save" title="Link to this definition">¶</a></dt>
+<dd><p>Download prepare-protein output and save to the workspace.</p>
+<p>Returns one TRCPaths per model in the input PDB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<a class="reference internal" href="rush.objects.html#rush.objects.TRCPaths" title="rush.objects.TRCPaths"><em>TRCPaths</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.prepare.ResultRef.models">
+<span class="sig-name descname"><span class="pre">models</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="rush.objects.html#rush.objects.TRCRef" title="rush.objects.TRCRef"><span class="pre">TRCRef</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.prepare.ResultRef.models" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.prepare.protein">
+<span class="sig-prename descclassname"><span class="pre">rush.prepare.</span></span><span class="sig-name descname"><span class="pre">protein</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare/_protein.html#protein"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare.protein" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a prepare-protein job for a PDB or TRC file.</p>
+<p>Returns a <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> handle. Call <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> to get the
+parsed TRC, or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> to write the output files to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<em>TRC</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.TRCRef" title="rush.objects.TRCRef"><em>TRCRef</em></a><em> | </em><em>tuple</em><em>[</em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Topology</em><em>, </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Residues</em><em>, </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Chains</em><em>] </em><em>| </em><em>Path</em><em> | </em><em>str</em>)</p></li>
+<li><p><strong>ph</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>naming_scheme</strong> (<em>Literal</em><em>[</em><em>'AMBER'</em><em>, </em><em>'CHARMM'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>capping_style</strong> (<em>Literal</em><em>[</em><em>'never'</em><em>, </em><em>'truncated'</em><em>, </em><em>'always'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>truncation_threshold</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>opt</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>debump</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunSpec" title="rush.runs.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunOpts" title="rush.runs.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><em>Run</em></a>[<a class="reference internal" href="#rush.prepare.ResultRef" title="rush.prepare._protein.ResultRef"><em>ResultRef</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.prepare.protein_ligand">
+<span class="sig-prename descclassname"><span class="pre">rush.prepare.</span></span><span class="sig-name descname"><span class="pre">protein_ligand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ligand_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capping_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/prepare/_protein_ligand.html#protein_ligand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.prepare.protein_ligand" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a complex preparation job for a PDB or TRC file.</p>
+<p>Internally runs prepare-protein, extracts ligands, merges, and uploads
+the combined TRC.  The returned <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> wraps the
+prepare-protein job.  Calling <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> blocks until
+the protein preparation completes, then performs the merge locally.</p>
+<p>Returns a <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> handle. Call <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> to get the
+parsed TRC, or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> to write the output files to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<em>TRC</em><em> | </em><em>Path</em><em> | </em><em>str</em>)</p></li>
+<li><p><strong>ligand_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>ph</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>naming_scheme</strong> (<em>Literal</em><em>[</em><em>'AMBER'</em><em>, </em><em>'CHARMM'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>capping_style</strong> (<em>Literal</em><em>[</em><em>'never'</em><em>, </em><em>'truncated'</em><em>, </em><em>'always'</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>truncation_threshold</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>opt</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>debump</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunSpec" title="rush.runs.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunOpts" title="rush.runs.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><em>Run</em></a>[<a class="reference internal" href="#rush.prepare.ResultRef" title="rush.prepare._protein.ResultRef"><em>ResultRef</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">

@@ -136,9 +136,22 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#run-submission">Run Submission</a></li>
-<li><a class="reference internal" href="#input-types">Input Types</a></li>
-<li><a class="reference internal" href="#result-types">Result Types</a></li>
+<li><a class="reference internal" href="#quick-links">Quick Links</a></li>
+<li><a class="reference internal" href="#run-submission">Run Submission</a><ul>
+<li><a class="reference internal" href="#rush.exess.qmmm"><code class="docutils literal notranslate"><span class="pre">qmmm()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#input-types">Input Types</a><ul>
+<li><a class="reference internal" href="#rush.exess.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.Restraints"><code class="docutils literal notranslate"><span class="pre">Restraints</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#result-types">Result Types</a><ul>
+<li><a class="reference internal" href="#rush.exess.QMMMResult"><code class="docutils literal notranslate"><span class="pre">QMMMResult</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.QMMMResultPaths"><code class="docutils literal notranslate"><span class="pre">QMMMResultPaths</span></code></a></li>
+<li><a class="reference internal" href="#rush.exess.QMMMResultRef"><code class="docutils literal notranslate"><span class="pre">QMMMResultRef</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -173,16 +186,240 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="exess-qmmm">
-<h1>EXESS QMMM<a class="headerlink" href="#exess-qmmm" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.exess._qmmm">
+<span id="exess-qmmm"></span><h1>EXESS QMMM<a class="headerlink" href="#module-rush.exess._qmmm" title="Link to this heading">¶</a></h1>
+<p>EXESS QM/MM simulations for the Rush Python client.</p>
+<section id="quick-links">
+<h2>Quick Links<a class="headerlink" href="#quick-links" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#rush.exess.qmmm" title="rush.exess.qmmm"><code class="xref py py-func docutils literal notranslate"><span class="pre">rush.exess.qmmm()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#rush.exess.QMMMResult" title="rush.exess.QMMMResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">rush.exess.QMMMResult</span></code></a></p></li>
+</ul>
+</section>
 <section id="run-submission">
 <h2>Run Submission<a class="headerlink" href="#run-submission" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.exess.qmmm">
+<span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">qmmm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2e-3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_kelvin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">290.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure_atm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Trajectory()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradient_finite_difference_step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RestrictedKSDFT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cc-pVDZ'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_cartesian_basis_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scf_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frag_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">FragKeywords()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ksdft_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">_KSDFTDefault.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qm_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mm_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#qmmm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.qmmm" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a QM/MM simulation for the topology at <em>topology_path</em>.</p>
+<p>Returns a <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> handle. Call <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> to get the
+parsed trajectory, or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> to write it to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<em>TRC</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.TRCRef" title="rush.objects.TRCRef"><em>TRCRef</em></a><em> | </em><em>tuple</em><em>[</em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Topology</em><em>, </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Residues</em><em>] </em><em>| </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Topology</em>)</p></li>
+<li><p><strong>n_timesteps</strong> (<em>int</em>)</p></li>
+<li><p><strong>dt_ps</strong> (<em>float</em>)</p></li>
+<li><p><strong>temperature_kelvin</strong> (<em>float</em>)</p></li>
+<li><p><strong>pressure_atm</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>restraints</strong> (<a class="reference internal" href="#rush.exess.Restraints" title="rush.exess._qmmm.Restraints"><em>Restraints</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>trajectory</strong> (<a class="reference internal" href="#rush.exess.Trajectory" title="rush.exess._qmmm.Trajectory"><em>Trajectory</em></a>)</p></li>
+<li><p><strong>gradient_finite_difference_step_size</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>method</strong> (<em>MethodT</em>)</p></li>
+<li><p><strong>basis</strong> (<em>BasisT</em>)</p></li>
+<li><p><strong>aux_basis</strong> (<em>AuxBasisT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>standard_orientation</strong> (<em>StandardOrientationT</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>force_cartesian_basis_sets</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>scf_keywords</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.SCFKeywords" title="rush.exess._energy.SCFKeywords"><em>SCFKeywords</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>frag_keywords</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.FragKeywords" title="rush.exess._energy.FragKeywords"><em>FragKeywords</em></a>)</p></li>
+<li><p><strong>ksdft_keywords</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.KSDFTKeywords" title="rush.exess._energy.KSDFTKeywords"><em>KSDFTKeywords</em></a><em> | </em><em>_KSDFTDefault</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>qm_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>mm_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>system</strong> (<a class="reference internal" href="rush.exess.html#rush.exess.System" title="rush.exess._energy.System"><em>System</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunSpec" title="rush.runs.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunOpts" title="rush.runs.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><em>Run</em></a>[<a class="reference internal" href="#rush.exess.QMMMResultRef" title="rush.exess._qmmm.QMMMResultRef"><em>QMMMResultRef</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="input-types">
 <h2>Input Types<a class="headerlink" href="#input-types" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.Trajectory">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_waters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.Trajectory" title="Link to this definition">¶</a></dt>
+<dd><p>Configure the output of QMMM runs. By default, will provide all atoms at every frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interval</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>start</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>end</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>include_waters</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Trajectory.end">
+<span class="sig-name descname"><span class="pre">end</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Trajectory.end" title="Link to this definition">¶</a></dt>
+<dd><p>The frame at which to end the trajectory.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Trajectory.include_waters">
+<span class="sig-name descname"><span class="pre">include_waters</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Trajectory.include_waters" title="Link to this definition">¶</a></dt>
+<dd><p>Whether to include waters in the trajectory. Convenient for reducing output size.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Trajectory.interval">
+<span class="sig-name descname"><span class="pre">interval</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Trajectory.interval" title="Link to this definition">¶</a></dt>
+<dd><p>Save every n frames to the trajectory, where n is the interval specified.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Trajectory.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Trajectory.start" title="Link to this definition">¶</a></dt>
+<dd><p>The frame at which to start the trajectory.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.Restraints">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">Restraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_fragments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_heavy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#Restraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.Restraints" title="Link to this definition">¶</a></dt>
+<dd><p>Restrain atoms using an external force proportional to its distance from its original position,
+scaled by <cite>k</cite> (larger values mean a stronger restraint).</p>
+<p>All atoms can be fixed by specifying <cite>free_atoms = []</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> (<em>float</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>fixed_atoms</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>free_atoms</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>fixed_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>free_fragments</strong> (<em>list</em><em>[</em><em>int</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>fix_heavy</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Restraints.fix_heavy">
+<span class="sig-name descname"><span class="pre">fix_heavy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Restraints.fix_heavy" title="Link to this definition">¶</a></dt>
+<dd><p>Flag to easily enable fixing all heavy atoms only. Mutually exclusive with fixed/free parameters.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Restraints.fixed_atoms">
+<span class="sig-name descname"><span class="pre">fixed_atoms</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Restraints.fixed_atoms" title="Link to this definition">¶</a></dt>
+<dd><p>Which atoms to hold fixed. All fixed/free parameters are mutually exclusive.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Restraints.fixed_fragments">
+<span class="sig-name descname"><span class="pre">fixed_fragments</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Restraints.fixed_fragments" title="Link to this definition">¶</a></dt>
+<dd><p>Which fragments to hold fixed. All fixed/free parameters are mutually exclusive.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Restraints.free_atoms">
+<span class="sig-name descname"><span class="pre">free_atoms</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Restraints.free_atoms" title="Link to this definition">¶</a></dt>
+<dd><p>Which atoms to keep unfixed. All fixed/free parameters are mutually exclusive.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Restraints.free_fragments">
+<span class="sig-name descname"><span class="pre">free_fragments</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Restraints.free_fragments" title="Link to this definition">¶</a></dt>
+<dd><p>Which fragments to keep unfixed. All fixed/free parameters are mutually exclusive.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.Restraints.k">
+<span class="sig-name descname"><span class="pre">k</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rush.exess.Restraints.k" title="Link to this definition">¶</a></dt>
+<dd><p>Scaling factor for restraints (larger values mean a stronger restraint).</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="result-types">
 <h2>Result Types<a class="headerlink" href="#result-types" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.QMMMResult">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">QMMMResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#QMMMResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.QMMMResult" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometries</strong> (<em>list</em><em>[</em><em>ndarray</em><em>[</em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>...</em><em>]</em><em>, </em><em>dtype</em><em>[</em><em>float32</em><em>]</em><em>]</em><em>]</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.QMMMResult.geometries">
+<span class="sig-name descname"><span class="pre">geometries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#rush.exess.QMMMResult.geometries" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultPaths">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">QMMMResultPaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#QMMMResultPaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.QMMMResultPaths" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output</strong> (<em>Path</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultPaths.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.exess.QMMMResultPaths.output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultRef">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.exess.</span></span><span class="sig-name descname"><span class="pre">QMMMResultRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#QMMMResultRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.QMMMResultRef" title="Link to this definition">¶</a></dt>
+<dd><p>Lightweight reference to QM/MM outputs in the Rush object store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output</strong> (<a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultRef.from_raw_output">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_raw_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#QMMMResultRef.from_raw_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.QMMMResultRef.from_raw_output" title="Link to this definition">¶</a></dt>
+<dd><p>Parse raw <code class="docutils literal notranslate"><span class="pre">collect_run</span></code> output into a <code class="docutils literal notranslate"><span class="pre">QMMMResultRef</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>res</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultRef.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#QMMMResultRef.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.QMMMResultRef.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Download QM/MM outputs and parse into Python objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.exess.QMMMResult" title="rush.exess._qmmm.QMMMResult"><em>QMMMResult</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultRef.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/exess/_qmmm.html#QMMMResultRef.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.exess.QMMMResultRef.save" title="Link to this definition">¶</a></dt>
+<dd><p>Download QM/MM outputs and save to the workspace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.exess.QMMMResultPaths" title="rush.exess._qmmm.QMMMResultPaths"><em>QMMMResultPaths</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.exess.QMMMResultRef.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><span class="pre">RushObject</span></a></span><a class="headerlink" href="#rush.exess.QMMMResultRef.output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 

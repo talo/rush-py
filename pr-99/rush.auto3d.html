@@ -135,7 +135,33 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.auto3d.Result"><code class="docutils literal notranslate"><span class="pre">Result</span></code></a><ul>
+<li><a class="reference internal" href="#rush.auto3d.Result.conformer"><code class="docutils literal notranslate">conformer</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.Result.stats"><code class="docutils literal notranslate">stats</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.auto3d.ResultPaths"><code class="docutils literal notranslate"><span class="pre">ResultPaths</span></code></a><ul>
+<li><a class="reference internal" href="#rush.auto3d.ResultPaths.conformer"><code class="docutils literal notranslate">conformer</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.ResultPaths.stats"><code class="docutils literal notranslate">stats</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.auto3d.ResultRef"><code class="docutils literal notranslate"><span class="pre">ResultRef</span></code></a><ul>
+<li><a class="reference internal" href="#rush.auto3d.ResultRef.from_raw_output"><code class="docutils literal notranslate">from_raw_output()</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.ResultRef.fetch"><code class="docutils literal notranslate">fetch()</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.ResultRef.save"><code class="docutils literal notranslate">save()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.auto3d.Stats"><code class="docutils literal notranslate"><span class="pre">Stats</span></code></a><ul>
+<li><a class="reference internal" href="#rush.auto3d.Stats.converged"><code class="docutils literal notranslate">converged</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.Stats.e_rel_kcal_mol"><code class="docutils literal notranslate">e_rel_kcal_mol</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.Stats.e_tot_hartrees"><code class="docutils literal notranslate">e_tot_hartrees</span></code></a></li>
+<li><a class="reference internal" href="#rush.auto3d.Stats.f_max"><code class="docutils literal notranslate">f_max</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.auto3d.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -168,8 +194,206 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="auto3d">
-<h1>Auto3D<a class="headerlink" href="#auto3d" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.auto3d">
+<span id="auto3d"></span><h1>Auto3D<a class="headerlink" href="#module-rush.auto3d" title="Link to this heading">¶</a></h1>
+<p>Auto3D module for the Rush Python client.</p>
+<p>Auto3D generates 3D conformers from SMILES strings using the AIMNET
+optimizing engine.  It supports configurable conformer counts, convergence
+thresholds, and isomer/tautomer enumeration.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto3d</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">result</span> <span class="o">=</span> <span class="n">auto3d</span><span class="o">.</span><span class="n">generate</span><span class="p">([</span><span class="s2">&quot;CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O&quot;</span><span class="p">],</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">e_tot_hartrees</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.auto3d.Result">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">Result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conformer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TRC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rush.auto3d.Stats" title="rush.auto3d.Stats"><span class="pre">Stats</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#Result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.Result" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conformer</strong> (<em>TRC</em>)</p></li>
+<li><p><strong>stats</strong> (<a class="reference internal" href="#rush.auto3d.Stats" title="rush.auto3d.Stats"><em>Stats</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.Result.conformer">
+<span class="sig-name descname"><span class="pre">conformer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TRC</span></span><a class="headerlink" href="#rush.auto3d.Result.conformer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.Result.stats">
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rush.auto3d.Stats" title="rush.auto3d.Stats"><span class="pre">Stats</span></a></span><a class="headerlink" href="#rush.auto3d.Result.stats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.auto3d.ResultPaths">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">ResultPaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conformer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="rush.objects.html#rush.objects.TRCPaths" title="rush.objects.TRCPaths"><span class="pre">TRCPaths</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#ResultPaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.ResultPaths" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conformer</strong> (<a class="reference internal" href="rush.objects.html#rush.objects.TRCPaths" title="rush.objects.TRCPaths"><em>TRCPaths</em></a>)</p></li>
+<li><p><strong>stats</strong> (<em>Path</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.ResultPaths.conformer">
+<span class="sig-name descname"><span class="pre">conformer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="rush.objects.html#rush.objects.TRCPaths" title="rush.objects.TRCPaths"><span class="pre">TRCPaths</span></a></span><a class="headerlink" href="#rush.auto3d.ResultPaths.conformer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.ResultPaths.stats">
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.auto3d.ResultPaths.stats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.auto3d.ResultRef">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">ResultRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#ResultRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.ResultRef" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Lightweight reference to Auto3D outputs in the Rush object store.</p>
+<p>Supports indexing and iteration over per-input results:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">ref</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</span><span data-line="2"><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># first input&#39;s conformers (list[_ConformerRef]) or Error</span>
+</span><span data-line="3"><span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>  <span class="c1"># number of inputs</span>
+</span></pre></div>
+</div>
+<p>Call <a class="reference internal" href="#rush.auto3d.ResultRef.fetch" title="rush.auto3d.ResultRef.fetch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fetch()</span></code></a> to download and parse into Python dataclasses, or
+<a class="reference internal" href="#rush.auto3d.ResultRef.save" title="rush.auto3d.ResultRef.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> to download to local files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_inputs</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><em>_ConformerRef</em><em>] </em><em>| </em><em>Error</em><em>]</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.auto3d.ResultRef.from_raw_output">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_raw_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#ResultRef.from_raw_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.ResultRef.from_raw_output" title="Link to this definition">¶</a></dt>
+<dd><p>Parse raw <code class="docutils literal notranslate"><span class="pre">collect_run</span></code> output into a <code class="docutils literal notranslate"><span class="pre">ResultRef</span></code>.</p>
+<p>The raw output from <code class="docutils literal notranslate"><span class="pre">collect_run</span></code> is a <code class="docutils literal notranslate"><span class="pre">list[Any]</span></code> where each
+element is EITHER a string (error) OR a list of
+<code class="docutils literal notranslate"><span class="pre">(trc_objs,</span> <span class="pre">stats)</span></code> tuples (conformers), possibly wrapped in
+<code class="docutils literal notranslate"><span class="pre">Ok</span></code>/<code class="docutils literal notranslate"><span class="pre">Err</span></code>.  We unwrap and parse into typed refs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.auto3d.ResultRef.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#ResultRef.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.ResultRef.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Download output files and parse into <a class="reference internal" href="#rush.auto3d.Result" title="rush.auto3d.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code></a> objects.</p>
+<p>Each input SMILES either succeeds (returning an iterator of conformer
+<a class="reference internal" href="#rush.auto3d.Result" title="rush.auto3d.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code></a> objects) or fails (returning an <code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>either an iterator over fetched conformers or
+an Error for that input.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>One item per input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.auto3d.ResultRef.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#ResultRef.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.ResultRef.save" title="Link to this definition">¶</a></dt>
+<dd><p>Save Auto3D outputs into the workspace.</p>
+<p>Each successful input yields an iterator of conformers.  Every
+conformer is saved as three TRC component files <code class="docutils literal notranslate"><span class="pre">(topology,</span>
+<span class="pre">residues,</span> <span class="pre">chains)</span></code> plus a JSON file containing the associated stats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>either an iterator over saved conformers or
+an Error for that input.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>One item per input</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.auto3d.Stats">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">Stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converged</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_rel_kcal_mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_tot_hartrees</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#Stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.Stats" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_max</strong> (<em>float</em>)</p></li>
+<li><p><strong>converged</strong> (<em>bool</em>)</p></li>
+<li><p><strong>e_rel_kcal_mol</strong> (<em>float</em>)</p></li>
+<li><p><strong>e_tot_hartrees</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.Stats.converged">
+<span class="sig-name descname"><span class="pre">converged</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#rush.auto3d.Stats.converged" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.Stats.e_rel_kcal_mol">
+<span class="sig-name descname"><span class="pre">e_rel_kcal_mol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.auto3d.Stats.e_rel_kcal_mol" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.Stats.e_tot_hartrees">
+<span class="sig-name descname"><span class="pre">e_tot_hartrees</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.auto3d.Stats.e_tot_hartrees" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.auto3d.Stats.f_max">
+<span class="sig-name descname"><span class="pre">f_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.auto3d.Stats.f_max" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.auto3d.generate">
+<span class="sig-prename descclassname"><span class="pre">rush.auto3d.</span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batchsize_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convergence_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.003</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enumerate_isomer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enumerate_tautomer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_confs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/auto3d.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.auto3d.generate" title="Link to this definition">¶</a></dt>
+<dd><p>Submit an Auto3D conformer generation job for a list of SMILES strings.</p>
+<p>Returns a <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> handle.  Call <code class="docutils literal notranslate"><span class="pre">.collect()</span></code> to wait
+for the result ref, then <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> to retrieve outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smis</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>k</strong> (<em>int</em>)</p></li>
+<li><p><strong>batchsize_atoms</strong> (<em>int</em>)</p></li>
+<li><p><strong>capacity</strong> (<em>int</em>)</p></li>
+<li><p><strong>convergence_threshold</strong> (<em>float</em>)</p></li>
+<li><p><strong>enumerate_isomer</strong> (<em>bool</em>)</p></li>
+<li><p><strong>enumerate_tautomer</strong> (<em>bool</em>)</p></li>
+<li><p><strong>max_confs</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>opt_steps</strong> (<em>int</em>)</p></li>
+<li><p><strong>patience</strong> (<em>int</em>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunSpec" title="rush.runs.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunOpts" title="rush.runs.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><em>Run</em></a>[<a class="reference internal" href="#rush.auto3d.ResultRef" title="rush.auto3d.ResultRef"><em>ResultRef</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">

@@ -135,7 +135,14 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#primary-types">Primary types</a></li>
+<li><a class="reference internal" href="#element-bond-types">Element &amp; bond types</a></li>
+<li><a class="reference internal" href="#secondary-structure">Secondary structure</a></li>
+<li><a class="reference internal" href="#reference-index-types">Reference / index types</a></li>
+<li><a class="reference internal" href="#quick-examples">Quick examples</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -168,8 +175,99 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="molecular-systems-trcs">
-<h1>Molecular Systems &amp; TRCs<a class="headerlink" href="#molecular-systems-trcs" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.mol">
+<span id="molecular-systems-trcs"></span><h1>Molecular Systems &amp; TRCs<a class="headerlink" href="#module-rush.mol" title="Link to this heading">¶</a></h1>
+<p>Molecular structure types for Rush.</p>
+<p>Core types are provided by the native <code class="docutils literal notranslate"><span class="pre">libqdx</span></code> extension and re-exported
+here for convenience.  This module used to contain pure-Python dataclass
+implementations; those have been replaced by opaque Rust-backed objects
+from <code class="docutils literal notranslate"><span class="pre">libqdx</span></code> for performance and correctness.</p>
+<section id="primary-types">
+<h2>Primary types<a class="headerlink" href="#primary-types" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>TRC</dt><dd><p>Combined <strong>Topology + Residues + Chains</strong> structure – the main
+representation for molecular systems on the Rush platform.  Construct
+via <code class="docutils literal notranslate"><span class="pre">TRC.from_dict(d)</span></code> or by loading a file through
+<code class="docutils literal notranslate"><span class="pre">rush.convert.load_structure</span></code>.</p>
+</dd>
+<dt>Topology</dt><dd><p>Per-atom information: element symbols, XYZ geometry (2D n_atoms
+by 3), optional atom labels, formal/partial charges, bond
+connectivity, velocities, and fragment assignments.</p>
+</dd>
+<dt>Residues</dt><dd><p>Residue groupings over atoms – sequence names (e.g. amino-acid
+three-letter codes), sequence numbers, insertion codes, and the
+mapping of which atoms belong to which residue.</p>
+</dd>
+<dt>Chains</dt><dd><p>Chain groupings over residues, plus optional secondary-structure
+annotations (alpha helices and beta sheets).</p>
+</dd>
+</dl>
+</section>
+<section id="element-bond-types">
+<h2>Element &amp; bond types<a class="headerlink" href="#element-bond-types" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>Element</dt><dd><p>Chemical element enum (H, He, Li, …, Kr).  Integer-valued,
+matching atomic number.</p>
+</dd>
+<dt>Bond</dt><dd><p>A bond between two atoms (atom indices + bond order).</p>
+</dd>
+<dt>BondOrder</dt><dd><p>Bond order enum: Single, Double, Triple, OneAndAHalf (partial /
+amide), Ring (aromatic).</p>
+</dd>
+<dt>Stereochemistry</dt><dd><p>Atom stereochemistry descriptor (R/S chirality, E/Z geometry, etc.).</p>
+</dd>
+</dl>
+</section>
+<section id="secondary-structure">
+<h2>Secondary structure<a class="headerlink" href="#secondary-structure" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>HelixClass</dt><dd><p>PDB helix classification (right-handed alpha, 3-10, pi, etc.).</p>
+</dd>
+<dt>StrandSense</dt><dd><p>Parallel vs. anti-parallel strand orientation in a beta sheet.</p>
+</dd>
+<dt>AlphaHelices</dt><dd><p>Collection of alpha-helix annotations for a structure.</p>
+</dd>
+<dt>BetaSheets</dt><dd><p>Collection of beta-sheet annotations for a structure.</p>
+</dd>
+</dl>
+</section>
+<section id="reference-index-types">
+<h2>Reference / index types<a class="headerlink" href="#reference-index-types" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>AtomRef</dt><dd><p><code class="docutils literal notranslate"><span class="pre">NewType</span></code> over <code class="docutils literal notranslate"><span class="pre">int</span></code> – a zero-based atom index.</p>
+</dd>
+<dt>ResidueRef</dt><dd><p><code class="docutils literal notranslate"><span class="pre">NewType</span></code> over <code class="docutils literal notranslate"><span class="pre">int</span></code> – a zero-based residue index.</p>
+</dd>
+<dt>ChainRef</dt><dd><p><code class="docutils literal notranslate"><span class="pre">NewType</span></code> over <code class="docutils literal notranslate"><span class="pre">int</span></code> – a zero-based chain index.</p>
+</dd>
+<dt>FragmentRef</dt><dd><p><code class="docutils literal notranslate"><span class="pre">NewType</span></code> over <code class="docutils literal notranslate"><span class="pre">int</span></code> – a zero-based fragment index.</p>
+</dd>
+</dl>
+<p>These are plain <code class="docutils literal notranslate"><span class="pre">int</span></code> at runtime but provide static-analysis
+distinctness so that, e.g., an <code class="docutils literal notranslate"><span class="pre">AtomRef</span></code> is not accidentally used
+where a <code class="docutils literal notranslate"><span class="pre">ResidueRef</span></code> is expected.</p>
+</section>
+<section id="quick-examples">
+<h2>Quick examples<a class="headerlink" href="#quick-examples" title="Link to this heading">¶</a></h2>
+<p>Loading a structure and inspecting it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush.convert</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_structure</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">trc</span> <span class="o">=</span> <span class="n">load_structure</span><span class="p">(</span><span class="s2">&quot;1crn.pdb&quot;</span><span class="p">)</span>
+</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">symbols</span><span class="p">))</span>  <span class="c1"># number of atoms</span>
+</span><span data-line="5"><span class="nb">print</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">residues</span><span class="o">.</span><span class="n">seqs</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>      <span class="c1"># first five residue names</span>
+</span><span data-line="6"><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trc</span><span class="o">.</span><span class="n">chains</span><span class="o">.</span><span class="n">chains</span><span class="p">))</span>     <span class="c1"># number of chains</span>
+</span></pre></div>
+</div>
+<p>Converting to/from JSON dicts:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">d</span> <span class="o">=</span> <span class="n">trc</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>          <span class="c1"># -&gt; dict with topology/residues/chains</span>
+</span><span data-line="2"><span class="n">trc2</span> <span class="o">=</span> <span class="n">TRC</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>    <span class="c1"># round-trip back to TRC</span>
+</span></pre></div>
+</div>
+<p>Validation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">trc</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>                <span class="c1"># raises on inconsistent data</span>
+</span></pre></div>
+</div>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">

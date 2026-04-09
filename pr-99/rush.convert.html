@@ -135,7 +135,18 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.convert.from_json"><code class="docutils literal notranslate"><span class="pre">from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.from_mmcif"><code class="docutils literal notranslate"><span class="pre">from_mmcif()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.from_pdb"><code class="docutils literal notranslate"><span class="pre">from_pdb()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.from_sdf"><code class="docutils literal notranslate"><span class="pre">from_sdf()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.load_structure"><code class="docutils literal notranslate"><span class="pre">load_structure()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.merge_trcs"><code class="docutils literal notranslate"><span class="pre">merge_trcs()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.save_structure"><code class="docutils literal notranslate"><span class="pre">save_structure()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.to_dict"><code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#rush.convert.to_pdb"><code class="docutils literal notranslate"><span class="pre">to_pdb()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -168,8 +179,185 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="molecule-i-o-converters">
-<h1>Molecule I/O &amp; Converters<a class="headerlink" href="#molecule-i-o-converters" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.convert">
+<span id="molecule-i-o-converters"></span><h1>Molecule I/O &amp; Converters<a class="headerlink" href="#module-rush.convert" title="Link to this heading">¶</a></h1>
+<p>Conversion utilities for molecular structure file formats.</p>
+<p>Format parsing and writing are backed by the native libqdx Rust library.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_json">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TRC</span></span></span><a class="reference internal" href="_modules/rush/convert/json.html#from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_json" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">TRC</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Load TRC structures from JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_content</strong> (<em>Sequence</em><em>[</em><em>PathLike</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>dict</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>list</em><em>[</em><em>dict</em><em>]</em>) – JSON file path, dict, list of dicts, or (topology, residues, chains) paths</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRC structure or list of TRC structures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRC | <em>list</em>[TRC]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_mmcif">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_mmcif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmcif_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#from_mmcif"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_mmcif" title="Link to this definition">¶</a></dt>
+<dd><p>Parse mmCIF file contents into TRC structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mmcif_content</strong> (<em>str</em>) – Raw mmCIF file text.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A single TRC if the file contains one model, otherwise a list of TRCs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRC | <em>list</em>[TRC]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_pdb">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdb_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#from_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_pdb" title="Link to this definition">¶</a></dt>
+<dd><p>Parse PDB file content into TRC structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pdb_content</strong> (<em>str</em>) – Raw PDB file text.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A single TRC if the file contains one model, otherwise a list of TRCs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRC | <em>list</em>[TRC]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.from_sdf">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">from_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#from_sdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.from_sdf" title="Link to this definition">¶</a></dt>
+<dd><p>Parse SDF file contents into TRC structures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf_content</strong> (<em>str</em>) – Raw SDF / MOL file text.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A single TRC if the file contains one molecule, otherwise a list of TRCs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRC | <em>list</em>[TRC]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.load_structure">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">load_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#load_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.load_structure" title="Link to this definition">¶</a></dt>
+<dd><p>Load a molecular structure from a file.</p>
+<p>Supported formats: PDB, mmCIF (.cif / .mmcif), SDF, and TRC JSON.
+The format is determined by extension; when the extension is
+unrecognised the content is inspected heuristically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the structure file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A single TRC when the file contains one model/molecule, otherwise
+a list of TRCs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TRC | <em>list</em>[TRC]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.merge_trcs">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">merge_trcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">trcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_validation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#merge_trcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.merge_trcs" title="Link to this definition">¶</a></dt>
+<dd><p>Merge one or more TRC objects (or file paths) into a single TRC.</p>
+<p>Atom, residue, and chain indices are renumbered so that the merged
+structure has unique indices throughout.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trcs</strong> (<em>TRC</em><em> | </em><em>str</em><em> | </em><em>Path</em><em> | </em><em>Sequence</em><em>[</em><em>TRC</em><em> | </em><em>str</em><em> | </em><em>Path</em><em>]</em>) – TRC objects or file paths.  A single list/tuple is treated
+as the full set of inputs.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Optional path to write the merged TRC as JSON.</p></li>
+<li><p><strong>skip_validation</strong> (<em>bool</em>) – If <em>True</em>, skip <code class="docutils literal notranslate"><span class="pre">trc.check()</span></code> on the result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The merged TRC object.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If no inputs are provided or validation fails.</p></li>
+<li><p><strong>FileNotFoundError</strong> – If a file path does not exist.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>TRC</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.save_structure">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">save_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#save_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.save_structure" title="Link to this definition">¶</a></dt>
+<dd><p>Save TRC structures to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trcs</strong> (<em>TRC</em><em> | </em><em>list</em><em>[</em><em>TRC</em><em>]</em>) – TRC structure or list of TRC structures to write.</p></li>
+<li><p><strong>file_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Output file path.</p></li>
+<li><p><strong>format</strong> (<em>str</em><em> | </em><em>None</em>) – Output format (<code class="docutils literal notranslate"><span class="pre">'pdb'</span></code> or <code class="docutils literal notranslate"><span class="pre">'json'</span></code>).  When <em>None</em> the
+format is inferred from the file extension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the format cannot be inferred or is unsupported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.to_dict">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trcs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert/json.html#to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Convert TRC structures to JSON-serializable dicts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trcs</strong> (<em>TRC</em><em> | </em><em>list</em><em>[</em><em>TRC</em><em>]</em>) – A single TRC or a list of TRC structures.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dict (if a single TRC was given) or a list of dicts, each
+containing <code class="docutils literal notranslate"><span class="pre">topology</span></code>, <code class="docutils literal notranslate"><span class="pre">residues</span></code>, and <code class="docutils literal notranslate"><span class="pre">chains</span></code> keys.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>dict</em> | <em>list</em>[<em>dict</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.convert.to_pdb">
+<span class="sig-prename descclassname"><span class="pre">rush.convert.</span></span><span class="sig-name descname"><span class="pre">to_pdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/convert.html#to_pdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.convert.to_pdb" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a TRC structure to PDB format text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trc</strong> (<em>TRC</em>) – TRC structure to serialise.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PDB-formatted string (includes trailing END record).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">

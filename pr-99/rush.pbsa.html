@@ -135,7 +135,29 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#rush.pbsa.Result"><code class="docutils literal notranslate"><span class="pre">Result</span></code></a><ul>
+<li><a class="reference internal" href="#rush.pbsa.Result.nonpolar_solvation_energy"><code class="docutils literal notranslate">nonpolar_solvation_energy</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.Result.polar_solvation_energy"><code class="docutils literal notranslate">polar_solvation_energy</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.Result.solvation_energy"><code class="docutils literal notranslate">solvation_energy</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.pbsa.ResultPaths"><code class="docutils literal notranslate"><span class="pre">ResultPaths</span></code></a><ul>
+<li><a class="reference internal" href="#rush.pbsa.ResultPaths.output"><code class="docutils literal notranslate">output</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef"><code class="docutils literal notranslate"><span class="pre">ResultRef</span></code></a><ul>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef.from_raw_output"><code class="docutils literal notranslate">from_raw_output()</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef.fetch"><code class="docutils literal notranslate">fetch()</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef.save"><code class="docutils literal notranslate">save()</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef.nonpolar_solvation_energy"><code class="docutils literal notranslate">nonpolar_solvation_energy</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef.polar_solvation_energy"><code class="docutils literal notranslate">polar_solvation_energy</span></code></a></li>
+<li><a class="reference internal" href="#rush.pbsa.ResultRef.solvation_energy"><code class="docutils literal notranslate">solvation_energy</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rush.pbsa.solvation_energy"><code class="docutils literal notranslate"><span class="pre">solvation_energy()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -168,8 +190,165 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="pbsa">
-<h1>PBSA<a class="headerlink" href="#pbsa" title="Link to this heading">¶</a></h1>
+          <section id="module-rush.pbsa">
+<span id="pbsa"></span><h1>PBSA<a class="headerlink" href="#module-rush.pbsa" title="Link to this heading">¶</a></h1>
+<p>PBSA module for the Rush Python client.</p>
+<p>Computes solvation energies using the Poisson-Boltzmann Surface Area method.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rush</span><span class="w"> </span><span class="kn">import</span> <span class="n">pbsa</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">result</span> <span class="o">=</span> <span class="n">pbsa</span><span class="o">.</span><span class="n">solvation_energy</span><span class="p">(</span><span class="s2">&quot;mol.json&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
+</span><span data-line="4"><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">solvation_energy</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.pbsa.Result">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.pbsa.</span></span><span class="sig-name descname"><span class="pre">Result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solvation_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polar_solvation_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonpolar_solvation_energy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#Result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.Result" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Parsed PBSA solvation energy results (all values in Hartrees).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solvation_energy</strong> (<em>float</em>)</p></li>
+<li><p><strong>polar_solvation_energy</strong> (<em>float</em>)</p></li>
+<li><p><strong>nonpolar_solvation_energy</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.Result.nonpolar_solvation_energy">
+<span class="sig-name descname"><span class="pre">nonpolar_solvation_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.pbsa.Result.nonpolar_solvation_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.Result.polar_solvation_energy">
+<span class="sig-name descname"><span class="pre">polar_solvation_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.pbsa.Result.polar_solvation_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.Result.solvation_energy">
+<span class="sig-name descname"><span class="pre">solvation_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.pbsa.Result.solvation_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.pbsa.ResultPaths">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.pbsa.</span></span><span class="sig-name descname"><span class="pre">ResultPaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#ResultPaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.ResultPaths" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Workspace path for saved PBSA output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output</strong> (<em>Path</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.ResultPaths.output">
+<span class="sig-name descname"><span class="pre">output</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></span><a class="headerlink" href="#rush.pbsa.ResultPaths.output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rush.pbsa.</span></span><span class="sig-name descname"><span class="pre">ResultRef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solvation_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polar_solvation_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonpolar_solvation_energy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#ResultRef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.ResultRef" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Lightweight reference to PBSA output.</p>
+<p>PBSA results are small enough to be returned inline (three floats),
+so no object store download is needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solvation_energy</strong> (<em>float</em>)</p></li>
+<li><p><strong>polar_solvation_energy</strong> (<em>float</em>)</p></li>
+<li><p><strong>nonpolar_solvation_energy</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef.from_raw_output">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_raw_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#ResultRef.from_raw_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.ResultRef.from_raw_output" title="Link to this definition">¶</a></dt>
+<dd><p>Parse raw <code class="docutils literal notranslate"><span class="pre">collect_run</span></code> output into a <code class="docutils literal notranslate"><span class="pre">ResultRef</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>res</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Self</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef.fetch">
+<span class="sig-name descname"><span class="pre">fetch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#ResultRef.fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.ResultRef.fetch" title="Link to this definition">¶</a></dt>
+<dd><p>Return parsed PBSA results (no download needed — data is inline).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.pbsa.Result" title="rush.pbsa.Result"><em>Result</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#ResultRef.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.ResultRef.save" title="Link to this definition">¶</a></dt>
+<dd><p>Save PBSA results as JSON to the workspace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rush.pbsa.ResultPaths" title="rush.pbsa.ResultPaths"><em>ResultPaths</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef.nonpolar_solvation_energy">
+<span class="sig-name descname"><span class="pre">nonpolar_solvation_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.pbsa.ResultRef.nonpolar_solvation_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef.polar_solvation_energy">
+<span class="sig-name descname"><span class="pre">polar_solvation_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.pbsa.ResultRef.polar_solvation_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rush.pbsa.ResultRef.solvation_energy">
+<span class="sig-name descname"><span class="pre">solvation_energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#rush.pbsa.ResultRef.solvation_energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rush.pbsa.solvation_energy">
+<span class="sig-prename descclassname"><span class="pre">rush.pbsa.</span></span><span class="sig-name descname"><span class="pre">solvation_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solute_dielectric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solvent_dielectric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solvent_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ion_concentration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sasa_gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sasa_beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sasa_n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convergence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunSpec(gpus=1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">RunOpts()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rush/pbsa.html#solvation_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rush.pbsa.solvation_energy" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a PBSA solvation energy calculation for the topology at <em>topology_path</em>.</p>
+<p>Returns a <a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><code class="xref py py-class docutils literal notranslate"><span class="pre">Run</span></code></a> handle. Call <code class="docutils literal notranslate"><span class="pre">.fetch()</span></code> to get the
+parsed result, or <code class="docutils literal notranslate"><span class="pre">.save()</span></code> to write it to disk as JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<em>TRC</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.TRCRef" title="rush.objects.TRCRef"><em>TRCRef</em></a><em> | </em><em>Path</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="rush.objects.html#rush.objects.RushObject" title="rush.objects.RushObject"><em>RushObject</em></a><em> | </em><em>Topology</em>)</p></li>
+<li><p><strong>solute_dielectric</strong> (<em>float</em>)</p></li>
+<li><p><strong>solvent_dielectric</strong> (<em>float</em>)</p></li>
+<li><p><strong>solvent_radius</strong> (<em>float</em>)</p></li>
+<li><p><strong>ion_concentration</strong> (<em>float</em>)</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>)</p></li>
+<li><p><strong>spacing</strong> (<em>float</em>)</p></li>
+<li><p><strong>sasa_gamma</strong> (<em>float</em>)</p></li>
+<li><p><strong>sasa_beta</strong> (<em>float</em>)</p></li>
+<li><p><strong>sasa_n_samples</strong> (<em>int</em>)</p></li>
+<li><p><strong>convergence</strong> (<em>float</em>)</p></li>
+<li><p><strong>box_size_factor</strong> (<em>float</em>)</p></li>
+<li><p><strong>run_spec</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunSpec" title="rush.runs.RunSpec"><em>RunSpec</em></a>)</p></li>
+<li><p><strong>run_opts</strong> (<a class="reference internal" href="rush.runs.html#rush.runs.RunOpts" title="rush.runs.RunOpts"><em>RunOpts</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="rush.runs.html#rush.runs.Run" title="rush.runs.Run"><em>Run</em></a>[<a class="reference internal" href="#rush.pbsa.ResultRef" title="rush.pbsa.ResultRef"><em>ResultRef</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article><button class="back-to-top" type="button">

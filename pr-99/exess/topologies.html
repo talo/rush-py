@@ -214,7 +214,7 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code></p></td>
 <td><p>array of float</p></td>
 <td><p>Yes*</p></td>
-<td><p>Flat XYZ array (length = 3 * atoms). Required if <code class="docutils literal notranslate"><span class="pre">xyz</span></code> is not provided.</p></td>
+<td><p>XYZ coordinates. In JSON: flat array (length = 3 × atoms). In Python: <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">3)</span></code> numpy array. Required if <code class="docutils literal notranslate"><span class="pre">xyz</span></code> is not provided.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">xyz</span></code></p></td>
 <td><p>string</p></td>
@@ -224,7 +224,7 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code></p></td>
 <td><p>array of float</p></td>
 <td><p>No</p></td>
-<td><p>Flat XYZ velocity array (Angstrom/ps).</p></td>
+<td><p>XYZ velocity array (Angstrom/ps). Same layout as <code class="docutils literal notranslate"><span class="pre">geometry</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">labels</span></code></p></td>
 <td><p>array of string</p></td>
@@ -408,11 +408,11 @@ data-aria-dark="Switch to auto color mode">
 <h4>topology validation checks<a class="headerlink" href="#topology-validation-checks" title="Link to this heading">¶</a></h4>
 <p>Validation checks when constructing inputs:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> must have shape <code class="docutils literal notranslate"><span class="pre">(len(symbols),</span> <span class="pre">3)</span></code> in Python, or length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code> in JSON.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">formal_charges</span></code> must match <code class="docutils literal notranslate"><span class="pre">symbols</span></code> length if present.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">connectivity</span></code> atom indices must be valid and may not reference the same atom twice.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">stereochemistry</span></code> is only valid when <code class="docutils literal notranslate"><span class="pre">connectivity</span></code> is present and must be the same length.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> must be length <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">len(symbols)</span></code> if present.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">velocities</span></code> must have the same shape as <code class="docutils literal notranslate"><span class="pre">geometry</span></code> if present.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">fragments</span></code> must not duplicate atoms; each atom should appear in exactly one fragment.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">fragment_formal_charges</span></code>, <code class="docutils literal notranslate"><span class="pre">fragment_partial_charges</span></code>, and <code class="docutils literal notranslate"><span class="pre">fragment_multiplicities</span></code> must match <code class="docutils literal notranslate"><span class="pre">fragments</span></code> length when provided.</p></li>
 </ul>
