@@ -14,6 +14,8 @@ from pathlib import Path
 from string import Template
 from typing import Any, Self
 
+import numpy as np
+import numpy.typing as npt
 from gql.transport.exceptions import TransportQueryError
 
 from .._rex import optional_str
@@ -124,7 +126,7 @@ class Restraints:
 
 @dataclass
 class QMMMResult:
-    geometries: list[list[float]]
+    geometries: list[npt.NDArray[np.float32]]
 
 
 @dataclass(frozen=True)
@@ -150,7 +152,11 @@ class QMMMResultRef:
     def fetch(self) -> QMMMResult:
         """Download QM/MM outputs and parse into Python objects."""
         output = self.output.fetch_dict()
-        return QMMMResult(**output)
+        geometries = [
+            np.array(g, dtype=np.float32).reshape(-1, 3)
+            for g in output["geometries"]
+        ]
+        return QMMMResult(geometries=geometries)
 
     def save(self) -> QMMMResultPaths:
         """Download QM/MM outputs and save to the workspace."""

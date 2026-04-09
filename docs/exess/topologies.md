@@ -14,9 +14,9 @@ This page contains the full reference for `topologies` and `residues`. The
 | --- | --- | --- | --- |
 | `schema_version` | string | No | Defaults to `0.2.0`. |
 | `symbols` | array of string | Yes* | Atomic symbols ("H", "C", etc). Required if `xyz` is not provided. |
-| `geometry` | array of float | Yes* | Flat XYZ array (length = 3 * atoms). Required if `xyz` is not provided. |
+| `geometry` | array of float | Yes* | XYZ coordinates. In JSON: flat array (length = 3 × atoms). In Python: `(N, 3)` numpy array. Required if `xyz` is not provided. |
 | `xyz` | string | Yes* | Path to XYZ file; EXESS will read it instead of `symbols` + `geometry`. |
-| `velocities` | array of float | No | Flat XYZ velocity array (Angstrom/ps). |
+| `velocities` | array of float | No | XYZ velocity array (Angstrom/ps). Same layout as `geometry`. |
 | `labels` | array of string | No | Atom labels. |
 | `partial_charges` | array of float | No | Per-atom partial charges. |
 | `formal_charges` | array of int | No | Per-atom formal charges. Defaults to 0 for all atoms. |
@@ -167,11 +167,11 @@ Example for a single, unfragmented system:
 
 Validation checks when constructing inputs:
 
-- `geometry` must be length `3 * len(symbols)`.
+- `geometry` must have shape `(len(symbols), 3)` in Python, or length `3 * len(symbols)` in JSON.
 - `labels`, `partial_charges`, and `formal_charges` must match `symbols` length if present.
 - `connectivity` atom indices must be valid and may not reference the same atom twice.
 - `stereochemistry` is only valid when `connectivity` is present and must be the same length.
-- `velocities` must be length `3 * len(symbols)` if present.
+- `velocities` must have the same shape as `geometry` if present.
 - `fragments` must not duplicate atoms; each atom should appear in exactly one fragment.
 - `fragment_formal_charges`, `fragment_partial_charges`, and `fragment_multiplicities` must match `fragments` length when provided.
 

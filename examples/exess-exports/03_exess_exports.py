@@ -24,7 +24,7 @@ import h5py
 import numpy as np
 from scipy.interpolate import griddata
 
-from rush import RunOpts, RunSpec, exess
+from rush import RunOpts, RunSpec, Topology, exess
 
 DATA_DIR = Path(__file__).parent / "data"
 TOPOLOGY_FILE = DATA_DIR / "input_topology.json"
@@ -33,7 +33,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Load topology for later use
 with open(TOPOLOGY_FILE, encoding="utf-8") as f:
-    topology = json.load(f)
+    topology = Topology.from_dict(json.load(f))
 
 METHOD = "RestrictedHF"
 BASIS = "STO-3G"
@@ -276,30 +276,8 @@ GRID_SPACING = [dx / ANG_TO_BOHR, dy / ANG_TO_BOHR, dz / ANG_TO_BOHR]
 # Angstrom to Bohr conversion
 ANG_TO_BOHR = 1.8897259886
 
-# Atomic numbers lookup
-ATOMIC_NUMBERS = {
-    "H": 1,
-    "He": 2,
-    "Li": 3,
-    "Be": 4,
-    "B": 5,
-    "C": 6,
-    "N": 7,
-    "O": 8,
-    "F": 9,
-    "Ne": 10,
-    "Na": 11,
-    "Mg": 12,
-    "Al": 13,
-    "Si": 14,
-    "P": 15,
-    "S": 16,
-    "Cl": 17,
-    "Ar": 18,
-}
-
-symbols = topology["symbols"]
-geometry = topology["geometry"]  # flat list: [x0,y0,z0, x1,y1,z1, ...]
+symbols = topology.symbols
+geometry = topology.geometry
 n_atoms = len(symbols)
 
 expected_points = nx * ny * nz
@@ -322,10 +300,8 @@ cube_lines.append(f"{ny:5d} {0.0:12.6f} {spacing_bohr[1]:12.6f} {0.0:12.6f}")
 cube_lines.append(f"{nz:5d} {0.0:12.6f} {0.0:12.6f} {spacing_bohr[2]:12.6f}")
 # Atom lines
 for i in range(n_atoms):
-    at_num = ATOMIC_NUMBERS.get(symbols[i], 0)
-    x_b = geometry[3 * i] * ANG_TO_BOHR
-    y_b = geometry[3 * i + 1] * ANG_TO_BOHR
-    z_b = geometry[3 * i + 2] * ANG_TO_BOHR
+    at_num = int(symbols[i])
+    x_b, y_b, z_b = geometry[i] * ANG_TO_BOHR
     cube_lines.append(
         f"{at_num:5d} {float(at_num):12.6f} {x_b:12.6f} {y_b:12.6f} {z_b:12.6f}"
     )
@@ -377,7 +353,7 @@ if esp_cube_str:
 xyz_lines = [str(n_atoms), f"{METHOD}/{BASIS} benzene"]
 for i in range(n_atoms):
     xyz_lines.append(
-        f"{symbols[i]}  {geometry[3 * i]:.6f}  {geometry[3 * i + 1]:.6f}  {geometry[3 * i + 2]:.6f}"
+        f"{symbols[i]}  {geometry[i][0]:.6f}  {geometry[i][1]:.6f}  {geometry[i][2]:.6f}"
     )
 xyz_str = "\n".join(xyz_lines)
 

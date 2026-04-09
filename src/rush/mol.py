@@ -15,8 +15,8 @@ TRC
     ``rush.convert.load_structure``.
 
 Topology
-    Per-atom information: element symbols, XYZ geometry (flat list,
-    3 * n_atoms), optional atom labels, formal/partial charges, bond
+    Per-atom information: element symbols, XYZ geometry (2D n_atoms
+    by 3), optional atom labels, formal/partial charges, bond
     connectivity, velocities, and fragment assignments.
 
 Residues

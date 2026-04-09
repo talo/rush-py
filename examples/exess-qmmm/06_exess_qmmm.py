@@ -21,8 +21,6 @@ Output files (saved to qmmm-outputs/):
 import json
 from pathlib import Path
 
-import numpy as np
-
 from rush import TRC, RunOpts, Topology, exess
 from rush.exess import Trajectory
 from rush.mol import Element
@@ -99,9 +97,9 @@ final_geom = out_traj[-1]
 
 print("First atom position:")
 print(
-    f"  Initial: ({initial_geom[0]:.4f}, {initial_geom[1]:.4f}, {initial_geom[2]:.4f})"
+    f"  Initial: ({initial_geom[0][0]:.4f}, {initial_geom[0][1]:.4f}, {initial_geom[0][2]:.4f})"
 )
-print(f"  Final:   ({final_geom[0]:.4f}, {final_geom[1]:.4f}, {final_geom[2]:.4f})")
+print(f"  Final:   ({final_geom[0][0]:.4f}, {final_geom[0][1]:.4f}, {final_geom[0][2]:.4f})")
 
 
 # ===== Generate HTML Visualization =====
@@ -112,17 +110,16 @@ print("=" * 60)
 
 
 def geometry_to_xyz(syms, geom, frame_label=""):
-    """Convert symbols + flat geometry list to XYZ format string."""
+    """Convert symbols + (N,3) geometry array to XYZ format string."""
     n = len(syms)
     lines = [str(n), frame_label]
     for i in range(n):
-        x, y, z = geom[3 * i], geom[3 * i + 1], geom[3 * i + 2]
+        x, y, z = geom[i]
         lines.append(f"{syms[i]}  {x:.6f}  {y:.6f}  {z:.6f}")
     return "\n".join(lines)
 
 
-# NOTE: topology.geometry is an (N,3) numpy array, but out_traj geometries
-# from the server are flat lists. geometry_to_xyz handles the flat format.
+# NOTE: both topology.geometry and out_traj geometries are (N,3) arrays.
 
 
 # Build all frames as XYZ strings
@@ -380,8 +377,7 @@ print("Atoms at First Step")
 for x, y, z in trc.topology.geometry:
     print(f"  x: {x:>7.4f}, y: {y:>7.4f}, z: {z:>7.4f}")
 
-final_geom = np.array(out_traj[-1], dtype=np.float32).reshape(-1, 3)
-final_trc = TRC(symbols=list(trc.topology.symbols), geometry=final_geom.tolist())
+final_trc = trc.with_geometry(out_traj[-1].tolist())
 print("Atoms at Final Step")
 for x, y, z in final_trc.topology.geometry:
     print(f"  x: {x:>7.4f}, y: {y:>7.4f}, z: {z:>7.4f}")
